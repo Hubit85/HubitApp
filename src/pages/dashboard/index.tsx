@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
@@ -90,12 +89,6 @@ export default function Dashboard() {
             </Card>
           </div>
           
-          {/* Additional luxury apartment images carousel */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-lg overflow-hidden h-48 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')" }}></div>
-            <div className="rounded-lg overflow-hidden h-48 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')" }}></div>
-            <div className="rounded-lg overflow-hidden h-48 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1560185008-a33f5c7b1844?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')" }}></div>
-          </div>
         </main>
         
         {/* Sidebar hover trigger area */}
