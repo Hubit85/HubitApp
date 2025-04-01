@@ -21,8 +21,8 @@ export function Header() {
         </div>
         
         <div className='flex items-center gap-4'>
-          {/* Asegurarse de que el LanguageSwitcher esté visible */}
-          <div className="mr-2">
+          {/* Selector de idioma con banderas */}
+          <div className="flex items-center">
             <LanguageSwitcher />
           </div>
           
