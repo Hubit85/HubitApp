@@ -137,7 +137,7 @@ export default function Dashboard() {
             style={{ 
               backgroundImage: 'url("https://images.unsplash.com/photo-1600486913747-55e5470d6f40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80")'
             }}
-            onClick={() => router.push('/service-provider/dashboard')}
+            onClick={() => router.push('/service-provider')}
           >
             <div className='absolute inset-0 bg-green-900/70 hover:bg-green-900/60 transition-colors flex items-center justify-center'>
               <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>Service Provider</h2>
