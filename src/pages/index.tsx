@@ -3,13 +3,16 @@ import React from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Home() {
+  const { t } = useLanguage();
+  
   return (
     <>
       <Head>
-        <title>Handyman - Professional Home Services</title>
-        <meta name="description" content="Professional handyman services for your home" />
+        <title>{t("handyman")} - {t("professionalServices")}</title>
+        <meta name="description" content={t("professionalServices")} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
@@ -27,16 +30,16 @@ export default function Home() {
         {/* Content */}
         <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
           <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
-            Handyman
+            {t("handyman")}
           </h1>
           <p className="text-xl md:text-2xl text-white drop-shadow-md">
-            Professional services for your home
+            {t("professionalServices")}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <Link href="/auth/register" passHref>
               <Button size="lg" className="text-lg px-8 py-6">
-                Register
+                {t("register")}
               </Button>
             </Link>
             <Link href="/auth/login" passHref>
@@ -45,7 +48,7 @@ export default function Home() {
                 variant="outline" 
                 className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20"
               >
-                Log In
+                {t("login")}
               </Button>
             </Link>
           </div>
