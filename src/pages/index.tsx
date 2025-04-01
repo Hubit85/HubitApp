@@ -54,14 +54,15 @@ export default function Home() {
                 Log In
               </Button>
             </Link>
-            <Button 
-              size='lg' 
-              variant='secondary'
-              className='text-lg px-8 py-6'
-              onClick={handleServiceProviderClick}
-            >
-              Service Provider
-            </Button>
+            <Link href='/service-provider' passHref>
+              <Button 
+                size='lg' 
+                variant='secondary'
+                className='text-lg px-8 py-6'
+              >
+                Service Provider
+              </Button>
+            </Link>
           </div>
         </div>
       </main>

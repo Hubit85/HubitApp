@@ -1,10 +1,10 @@
-
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wrench, ArrowRight, Zap, Paintbrush, Grid, Droplet, Thermometer } from "lucide-react";
+import Link from 'next/link';
 
 export default function ServiceProviderHome() {
   const router = useRouter();
@@ -44,12 +44,13 @@ export default function ServiceProviderHome() {
                 </p>
               </CardContent>
               <CardFooter>
-                <Button 
-                  className="w-full flex items-center justify-center gap-2"
-                  onClick={handleDashboardClick}
-                >
-                  Open Dashboard <ArrowRight className="h-4 w-4" />
-                </Button>
+                <Link href='/service-provider/dashboard' passHref>
+                  <Button 
+                    className="w-full flex items-center justify-center gap-2"
+                  >
+                    Open Dashboard <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
             
