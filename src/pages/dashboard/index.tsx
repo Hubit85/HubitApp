@@ -30,8 +30,6 @@ export default function Dashboard() {
           }}
         />
         
-        <Header />
-        
         <main className='flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8 z-10'>
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto'>
             {/* Who We Are Card - More transparent and smaller */}
