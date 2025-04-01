@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
@@ -15,11 +16,11 @@ export default function Dashboard() {
       </Head>
       
       <div className="min-h-screen flex flex-col relative overflow-hidden">
-        {/* Background Image */}
+        {/* Background Image - Luxury Apartment */}
         <div 
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
+            backgroundImage: "url('https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')",
             backgroundSize: "cover",
             filter: "brightness(0.9)",
             opacity: 0.2
@@ -29,10 +30,10 @@ export default function Dashboard() {
         <Header />
         
         <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8 z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            {/* Who We Are Card */}
-            <Card className="w-full shadow-lg bg-white/90 backdrop-blur-sm border-blue-200 border-2">
-              <CardHeader className="bg-blue-50">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto">
+            {/* Who We Are Card - More transparent and smaller */}
+            <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-blue-200 border-2">
+              <CardHeader className="bg-blue-50/80">
                 <CardTitle className="text-2xl font-serif text-blue-800">Who We Are</CardTitle>
               </CardHeader>
               <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
@@ -49,9 +50,9 @@ export default function Dashboard() {
               </CardContent>
             </Card>
             
-            {/* How It Works Card */}
-            <Card className="w-full shadow-lg bg-white/90 backdrop-blur-sm border-green-200 border-2">
-              <CardHeader className="bg-green-50">
+            {/* How It Works Card - More transparent and smaller */}
+            <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-green-200 border-2">
+              <CardHeader className="bg-green-50/80">
                 <CardTitle className="text-2xl font-serif text-green-800">How It Works</CardTitle>
               </CardHeader>
               <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
@@ -69,9 +70,9 @@ export default function Dashboard() {
               </CardContent>
             </Card>
             
-            {/* Our Greatest Achievements Card */}
-            <Card className="w-full shadow-lg bg-white/90 backdrop-blur-sm border-amber-200 border-2">
-              <CardHeader className="bg-amber-50">
+            {/* Our Greatest Achievements Card - More transparent and smaller */}
+            <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-amber-200 border-2">
+              <CardHeader className="bg-amber-50/80">
                 <CardTitle className="text-2xl font-serif text-amber-800">Our Greatest Achievements</CardTitle>
               </CardHeader>
               <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
@@ -88,7 +89,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
-          
         </main>
         
         {/* Sidebar hover trigger area */}
@@ -138,15 +138,27 @@ export default function Dashboard() {
             }}
           >
             <div className="absolute inset-0 bg-green-900/70 hover:bg-green-900/60 transition-colors flex items-center justify-center">
-              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">Service Provider?</h2>
+              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">Service Provider</h2>
             </div>
           </div>
           
-          {/* What Do You Need Box */}
+          {/* Estate Administrator Box - NEW */}
           <div 
             className="flex-1 bg-cover bg-center relative"
             style={{ 
-              backgroundImage: "url('https://images.unsplash.com/photo-1580810734832-91a73e4cc62f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')"
+              backgroundImage: "url('https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')"
+            }}
+          >
+            <div className="absolute inset-0 bg-purple-900/70 hover:bg-purple-900/60 transition-colors flex items-center justify-center">
+              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">Estate Administrator</h2>
+            </div>
+          </div>
+          
+          {/* What Do You Need Box - Updated with woman on phone */}
+          <div 
+            className="flex-1 bg-cover bg-center relative"
+            style={{ 
+              backgroundImage: "url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80')"
             }}
           >
             <div className="absolute inset-0 bg-amber-900/70 hover:bg-amber-900/60 transition-colors flex items-center justify-center">
