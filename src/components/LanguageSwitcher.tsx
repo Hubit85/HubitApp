@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -6,7 +5,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function LanguageSwitcher() {
-  const { setLanguage } = useLanguage();
+  const { language, setLanguage } = useLanguage();
 
   const languages = [
     { code: "en", flag: "🇬🇧", name: "English" },
