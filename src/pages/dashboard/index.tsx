@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
@@ -15,51 +14,51 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>{t("dashboard")} - {t("handyman")}</title>
-        <meta name="description" content={`${t("handyman")} ${t("dashboard")} - ${t("professionalServices")}`} />
+        <title>{t('dashboard')} - {t('handyman')}</title>
+        <meta name='description' content={t('professionalServices')} />
       </Head>
       
-      <div className="min-h-screen flex flex-col relative overflow-hidden">
+      <div className='min-h-screen flex flex-col relative overflow-hidden'>
         {/* Background Image - Luxury Apartment */}
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          className='absolute inset-0 z-0 bg-cover bg-center bg-no-repeat'
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')",
-            backgroundSize: "cover",
-            filter: "brightness(0.9)",
+            backgroundImage: 'url(\'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80\')',
+            backgroundSize: 'cover',
+            filter: 'brightness(0.9)',
             opacity: 0.2
           }}
         />
         
         <Header />
         
-        <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8 z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto">
+        <main className='flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8 z-10'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto'>
             {/* Who We Are Card - More transparent and smaller */}
-            <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-blue-200 border-2">
-              <CardHeader className="bg-blue-50/80">
-                <CardTitle className="text-2xl font-serif text-blue-800">{t("whoWeAre")}</CardTitle>
+            <Card className='w-full shadow-lg bg-white/70 backdrop-blur-sm border-blue-200 border-2'>
+              <CardHeader className='bg-blue-50/80'>
+                <CardTitle className='text-2xl font-serif text-blue-800'>{t('whoWeAre')}</CardTitle>
               </CardHeader>
-              <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
+              <CardContent className='text-gray-700 space-y-4 p-6 font-sans'>
                 <p>
-                  {t("whoWeAreDesc1")}
+                  {t('whoWeAreDesc1')}
                 </p>
                 <p>
-                  {t("whoWeAreDesc2")}
+                  {t('whoWeAreDesc2')}
                 </p>
               </CardContent>
             </Card>
             
             {/* How It Works Card - More transparent and smaller */}
-            <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-green-200 border-2">
-              <CardHeader className="bg-green-50/80">
-                <CardTitle className="text-2xl font-serif text-green-800">{t("howItWorks")}</CardTitle>
+            <Card className='w-full shadow-lg bg-white/70 backdrop-blur-sm border-green-200 border-2'>
+              <CardHeader className='bg-green-50/80'>
+                <CardTitle className='text-2xl font-serif text-green-800'>{t("howItWorks")}</CardTitle>
               </CardHeader>
-              <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
+              <CardContent className='text-gray-700 space-y-4 p-6 font-sans'>
                 <p>
                   {t("howItWorksDesc")}
                 </p>
-                <ol className="list-decimal pl-5 space-y-2">
+                <ol className='list-decimal pl-5 space-y-2'>
                   <li>{t("step1")}</li>
                   <li>{t("step2")}</li>
                   <li>{t("step3")}</li>
@@ -70,15 +69,15 @@ export default function Dashboard() {
             </Card>
             
             {/* Our Greatest Achievements Card - More transparent and smaller */}
-            <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-amber-200 border-2">
-              <CardHeader className="bg-amber-50/80">
-                <CardTitle className="text-2xl font-serif text-amber-800">{t("achievements")}</CardTitle>
+            <Card className='w-full shadow-lg bg-white/70 backdrop-blur-sm border-amber-200 border-2'>
+              <CardHeader className='bg-amber-50/80'>
+                <CardTitle className='text-2xl font-serif text-amber-800'>{t("achievements")}</CardTitle>
               </CardHeader>
-              <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
+              <CardContent className='text-gray-700 space-y-4 p-6 font-sans'>
                 <p>
                   {t("achievementsDesc")}
                 </p>
-                <ul className="list-disc pl-5 space-y-2">
+                <ul className='list-disc pl-5 space-y-2'>
                   <li>{t("achievement1")}</li>
                   <li>{t("achievement2")}</li>
                   <li>{t("achievement3")}</li>
@@ -92,40 +91,40 @@ export default function Dashboard() {
         
         {/* Sidebar hover trigger area */}
         <div 
-          className="fixed left-0 top-0 h-full w-8 z-40"
+          className='fixed left-0 top-0 h-full w-8 z-40'
           onMouseEnter={() => setSidebarOpen(true)}
         ></div>
         
         {/* Sliding sidebar overlay */}
         <motion.div 
-          className="fixed inset-0 bg-black/50 z-40"
+          className='fixed inset-0 bg-black/50 z-40'
           initial={{ opacity: 0 }}
           animate={{ opacity: sidebarOpen ? 1 : 0 }}
           transition={{ duration: 0.3 }}
-          style={{ pointerEvents: sidebarOpen ? "auto" : "none" }}
+          style={{ pointerEvents: sidebarOpen ? 'auto' : 'none' }}
         >
           <div 
-            className="absolute inset-0"
+            className='absolute inset-0'
             onClick={() => setSidebarOpen(false)}
           ></div>
         </motion.div>
         
         <motion.div 
-          className="fixed top-0 left-0 h-full w-full z-50 flex flex-col md:flex-row"
-          initial={{ x: "-100%" }}
-          animate={{ x: sidebarOpen ? 0 : "-100%" }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          className='fixed top-0 left-0 h-full w-full z-50 flex flex-col md:flex-row'
+          initial={{ x: '-100%' }}
+          animate={{ x: sidebarOpen ? 0 : '-100%' }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
           onMouseLeave={() => setSidebarOpen(false)}
         >
           {/* Community Member Box */}
           <div 
-            className="flex-1 bg-cover bg-center relative"
+            className='flex-1 bg-cover bg-center relative'
             style={{ 
               backgroundImage: "url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')"
             }}
           >
-            <div className="absolute inset-0 bg-blue-900/70 hover:bg-blue-900/60 transition-colors flex items-center justify-center">
-              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">{t("communityMember")}</h2>
+            <div className='absolute inset-0 bg-blue-900/70 hover:bg-blue-900/60 transition-colors flex items-center justify-center'>
+              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>{t("communityMember")}</h2>
             </div>
           </div>
           
@@ -144,13 +143,13 @@ export default function Dashboard() {
           
           {/* Estate Administrator Box - NEW */}
           <div 
-            className="flex-1 bg-cover bg-center relative"
+            className='flex-1 bg-cover bg-center relative'
             style={{ 
               backgroundImage: "url('https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')"
             }}
           >
-            <div className="absolute inset-0 bg-purple-900/70 hover:bg-purple-900/60 transition-colors flex items-center justify-center">
-              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">{t("estateAdministrator")}</h2>
+            <div className='absolute inset-0 bg-purple-900/70 hover:bg-purple-900/60 transition-colors flex items-center justify-center'>
+              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>{t("estateAdministrator")}</h2>
             </div>
           </div>
           
