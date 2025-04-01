@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 type Language = "en" | "es" | "fr" | "ru" | "zh";
@@ -607,7 +606,86 @@ const translations: Translations = {
     fr: "Réseau domestique",
     ru: "Домашние сети",
     zh: "家庭网络"
-  }
+  },
+  
+  // Frontpage translations
+  "frontpage": {
+    en: "Home Page",
+    es: "Página de Inicio",
+    fr: "Page d'Accueil",
+    ru: "Главная Страница",
+    zh: "主页"
+  },
+  "professionalServicesDescription": {
+    en: "Find the best professionals for your home maintenance and repair needs",
+    es: "Encuentra los mejores profesionales para el mantenimiento y reparación de tu hogar",
+    fr: "Trouvez les meilleurs professionnels pour l'entretien et la réparation de votre maison",
+    ru: "Найдите лучших профессионалов для обслуживания и ремонта вашего дома",
+    zh: "为您的家庭维护和维修需求找到最好的专业人士"
+  },
+  "welcomeToHandyman": {
+    en: "Welcome to Handyman",
+    es: "Bienvenido a Manitas",
+    fr: "Bienvenue chez Bricoleur",
+    ru: "Добро пожаловать в Мастер",
+    zh: "欢迎来到修理工"
+  },
+  "findTheBestProfessionals": {
+    en: "Find the best professionals for your home",
+    es: "Encuentra los mejores profesionales para tu hogar",
+    fr: "Trouvez les meilleurs professionnels pour votre maison",
+    ru: "Найдите лучших профессионалов для вашего дома",
+    zh: "为您的家找到最好的专业人士"
+  },
+  "findServices": {
+    en: "Find Services",
+    es: "Buscar Servicios",
+    fr: "Trouver des Services",
+    ru: "Найти Услуги",
+    zh: "查找服务"
+  },
+  "qualifiedProfessionals": {
+    en: "Qualified Professionals",
+    es: "Profesionales Cualificados",
+    fr: "Professionnels Qualifiés",
+    ru: "Квалифицированные Специалисты",
+    zh: "合格的专业人士"
+  },
+  "qualifiedProfessionalsDescription": {
+    en: "All our service providers are vetted and qualified to ensure high-quality work",
+    es: "Todos nuestros proveedores de servicios son verificados y cualificados para garantizar un trabajo de alta calidad",
+    fr: "Tous nos prestataires de services sont vérifiés et qualifiés pour garantir un travail de haute qualité",
+    ru: "Все наши поставщики услуг проверены и квалифицированы, чтобы обеспечить высокое качество работы",
+    zh: "我们所有的服务提供商都经过审核和认证，以确保高质量的工作"
+  },
+  "guaranteedService": {
+    en: "Guaranteed Service",
+    es: "Servicio Garantizado",
+    fr: "Service Garanti",
+    ru: "Гарантированное Обслуживание",
+    zh: "服务保证"
+  },
+  "guaranteedServiceDescription": {
+    en: "We stand behind every service with our satisfaction guarantee",
+    es: "Respaldamos cada servicio con nuestra garantía de satisfacción",
+    fr: "Nous soutenons chaque service avec notre garantie de satisfaction",
+    ru: "Мы поддерживаем каждую услугу нашей гарантией удовлетворенности",
+    zh: "我们用满意度保证支持每一项服务"
+  },
+  "easyBooking": {
+    en: "Easy Booking",
+    es: "Reserva Fácil",
+    fr: "Réservation Facile",
+    ru: "Простое Бронирование",
+    zh: "轻松预订"
+  },
+  "easyBookingDescription": {
+    en: "Book services with just a few clicks and get instant confirmations",
+    es: "Reserva servicios con solo unos clics y obtén confirmaciones instantáneas",
+    fr: "Réservez des services en quelques clics et obtenez des confirmations instantanées",
+    ru: "Бронируйте услуги всего в несколько кликов и получайте мгновенные подтверждения",
+    zh: "只需点击几下即可预订服务并获得即时确认"
+  },
 };
 
 interface LanguageContextType {
