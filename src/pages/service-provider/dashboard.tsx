@@ -2,13 +2,35 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Tree, Truck, Wifi } from "lucide-react";
+import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi } from "lucide-react";
+
+// Define repair category type
+interface RepairCategory {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+}
+
+// Define bid type
+interface Bid {
+  id: string;
+  amount: string;
+  scope: string;
+  company: string;
+}
+
+// Define community request type
+interface CommunityRequest {
+  id: string;
+  budget: string;
+  description: string;
+  category: string;
+}
 
 // Define repair categories with icons
-const repairCategories = [
+const repairCategories: RepairCategory[] = [
   { id: "plumbing", name: "Plumbing", icon: <Droplet className="mr-2 h-5 w-5" /> },
   { id: "electrical", name: "Electrical", icon: <Zap className="mr-2 h-5 w-5" /> },
   { id: "painting", name: "Painting", icon: <Paintbrush className="mr-2 h-5 w-5" /> },
@@ -18,13 +40,13 @@ const repairCategories = [
   { id: "carpentry", name: "Carpentry", icon: <Hammer className="mr-2 h-5 w-5" /> },
   { id: "locksmith", name: "Locksmith", icon: <Lock className="mr-2 h-5 w-5" /> },
   { id: "appliance", name: "Appliance Repair", icon: <Wrench className="mr-2 h-5 w-5" /> },
-  { id: "landscaping", name: "Landscaping", icon: <Tree className="mr-2 h-5 w-5" /> },
+  { id: "landscaping", name: "Landscaping", icon: <Trees className="mr-2 h-5 w-5" /> },
   { id: "moving", name: "Moving Services", icon: <Truck className="mr-2 h-5 w-5" /> },
   { id: "networking", name: "Home Networking", icon: <Wifi className="mr-2 h-5 w-5" /> },
 ];
 
 // Sample bids data for each category
-const generateBids = (category) => [
+const generateBids = (category: string): Bid[] => [
   { 
     id: `${category}-1`, 
     amount: "$450", 
@@ -58,7 +80,7 @@ const generateBids = (category) => [
 ];
 
 // Sample community requests data
-const communityRequests = [
+const communityRequests: CommunityRequest[] = [
   { id: "req-1", budget: "$300", description: "Need bathroom sink installation", category: "plumbing" },
   { id: "req-2", budget: "$250", description: "Looking for electrical outlet installation", category: "electrical" },
   { id: "req-3", budget: "$500", description: "Require complete living room painting", category: "painting" },
