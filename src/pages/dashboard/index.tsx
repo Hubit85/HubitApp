@@ -1,19 +1,22 @@
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useRouter } from 'next/router';
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
+  const { t } = useLanguage();
 
   return (
     <>
       <Head>
-        <title>Dashboard - Handyman</title>
-        <meta name="description" content="Handyman dashboard - Professional services for your home" />
+        <title>{t("dashboard")} - {t("handyman")}</title>
+        <meta name="description" content={`${t("handyman")} ${t("dashboard")} - ${t("professionalServices")}`} />
       </Head>
       
       <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -35,18 +38,14 @@ export default function Dashboard() {
             {/* Who We Are Card - More transparent and smaller */}
             <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-blue-200 border-2">
               <CardHeader className="bg-blue-50/80">
-                <CardTitle className="text-2xl font-serif text-blue-800">Who We Are</CardTitle>
+                <CardTitle className="text-2xl font-serif text-blue-800">{t("whoWeAre")}</CardTitle>
               </CardHeader>
               <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
                 <p>
-                  Handyman is an innovative platform designed to empower residential communities 
-                  by connecting them directly with trusted local service providers.
+                  {t("whoWeAreDesc1")}
                 </p>
                 <p>
-                  Our model eliminates intermediaries, ensuring competitive pricing for shared 
-                  expenses, maintenance, and home services—while fostering small businesses in 
-                  your area. By streamlining transactions and promoting transparency, we help 
-                  neighborhoods save costs and build stronger local economies.
+                  {t("whoWeAreDesc2")}
                 </p>
               </CardContent>
             </Card>
@@ -54,19 +53,18 @@ export default function Dashboard() {
             {/* How It Works Card - More transparent and smaller */}
             <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-green-200 border-2">
               <CardHeader className="bg-green-50/80">
-                <CardTitle className="text-2xl font-serif text-green-800">How It Works</CardTitle>
+                <CardTitle className="text-2xl font-serif text-green-800">{t("howItWorks")}</CardTitle>
               </CardHeader>
               <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
                 <p>
-                  Our platform connects community members with trusted service providers through a simple, 
-                  transparent process:
+                  {t("howItWorksDesc")}
                 </p>
                 <ol className="list-decimal pl-5 space-y-2">
-                  <li>Community members post their service needs</li>
-                  <li>Local providers submit competitive quotes</li>
-                  <li>Members select providers based on ratings and price</li>
-                  <li>Services are delivered with quality assurance</li>
-                  <li>Both parties rate the experience</li>
+                  <li>{t("step1")}</li>
+                  <li>{t("step2")}</li>
+                  <li>{t("step3")}</li>
+                  <li>{t("step4")}</li>
+                  <li>{t("step5")}</li>
                 </ol>
               </CardContent>
             </Card>
@@ -74,18 +72,18 @@ export default function Dashboard() {
             {/* Our Greatest Achievements Card - More transparent and smaller */}
             <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-amber-200 border-2">
               <CardHeader className="bg-amber-50/80">
-                <CardTitle className="text-2xl font-serif text-amber-800">Our Greatest Achievements</CardTitle>
+                <CardTitle className="text-2xl font-serif text-amber-800">{t("achievements")}</CardTitle>
               </CardHeader>
               <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
                 <p>
-                  Since our launch, we've achieved remarkable milestones:
+                  {t("achievementsDesc")}
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li>Connected over 10,000 communities with local service providers</li>
-                  <li>Helped communities save 30% on average for maintenance services</li>
-                  <li>Supported 5,000+ small businesses in growing their client base</li>
-                  <li>Maintained a 4.8/5 satisfaction rating across all services</li>
-                  <li>Expanded to 50+ cities nationwide</li>
+                  <li>{t("achievement1")}</li>
+                  <li>{t("achievement2")}</li>
+                  <li>{t("achievement3")}</li>
+                  <li>{t("achievement4")}</li>
+                  <li>{t("achievement5")}</li>
                 </ul>
               </CardContent>
             </Card>
@@ -127,7 +125,7 @@ export default function Dashboard() {
             }}
           >
             <div className="absolute inset-0 bg-blue-900/70 hover:bg-blue-900/60 transition-colors flex items-center justify-center">
-              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">Community Member</h2>
+              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">{t("communityMember")}</h2>
             </div>
           </div>
           
@@ -140,7 +138,7 @@ export default function Dashboard() {
             onClick={() => router.push('/service-provider')}
           >
             <div className='absolute inset-0 bg-green-900/70 hover:bg-green-900/60 transition-colors flex items-center justify-center'>
-              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>Service Provider</h2>
+              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>{t("serviceProvider")}</h2>
             </div>
           </div>
           
@@ -152,7 +150,7 @@ export default function Dashboard() {
             }}
           >
             <div className="absolute inset-0 bg-purple-900/70 hover:bg-purple-900/60 transition-colors flex items-center justify-center">
-              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">Estate Administrator</h2>
+              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">{t("estateAdministrator")}</h2>
             </div>
           </div>
           
@@ -164,7 +162,7 @@ export default function Dashboard() {
             }}
           >
             <div className='absolute inset-0 bg-amber-900/70 hover:bg-amber-900/60 transition-colors flex items-center justify-center'>
-              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>What Do You Need?</h2>
+              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>{t("whatDoYouNeed")}</h2>
             </div>
           </div>
         </motion.div>

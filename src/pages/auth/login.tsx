@@ -1,3 +1,4 @@
+
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -6,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const { t } = useLanguage();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,37 +25,37 @@ export default function Login() {
   return (
     <>
       <Head>
-        <title>Log In - Handyman</title>
-        <meta name="description" content="Log in to your Handyman account" />
+        <title>{t("login")} - {t("handyman")}</title>
+        <meta name="description" content={t("loginToAccess")} />
       </Head>
       
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl">{t("welcomeBack")}</CardTitle>
             <CardDescription>
-              Log in to access Handyman services
+              {t("loginToAccess")}
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("email")}</Label>
                 <Input 
                   id="email" 
                   type="email" 
-                  placeholder="Enter your email" 
+                  placeholder={t("enterEmail")} 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("password")}</Label>
                 <Input 
                   id="password" 
                   type="password" 
-                  placeholder="Enter your password" 
+                  placeholder={t("enterPassword")} 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -60,16 +63,16 @@ export default function Login() {
               </div>
               <div className="text-right">
                 <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
-                  Forgot password?
+                  {t("forgotPassword")}
                 </Link>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full">Log In</Button>
+              <Button type="submit" className="w-full">{t("login")}</Button>
               <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
+                {t("dontHaveAccount")}{" "}
                 <Link href="/auth/register" className="text-blue-600 hover:underline">
-                  Register
+                  {t("register")}
                 </Link>
               </div>
             </CardFooter>

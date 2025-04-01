@@ -1,9 +1,11 @@
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Define repair category type
 interface RepairCategory {
@@ -28,70 +30,71 @@ interface CommunityRequest {
   category: string;
 }
 
-// Define repair categories with icons
-const repairCategories: RepairCategory[] = [
-  { id: "plumbing", name: "Plumbing", icon: <Droplet className="mr-2 h-5 w-5" /> },
-  { id: "electrical", name: "Electrical", icon: <Zap className="mr-2 h-5 w-5" /> },
-  { id: "painting", name: "Painting", icon: <Paintbrush className="mr-2 h-5 w-5" /> },
-  { id: "flooring", name: "Flooring", icon: <Grid className="mr-2 h-5 w-5" /> },
-  { id: "roofing", name: "Roofing", icon: <Home className="mr-2 h-5 w-5" /> },
-  { id: "hvac", name: "HVAC", icon: <Thermometer className="mr-2 h-5 w-5" /> },
-  { id: "carpentry", name: "Carpentry", icon: <Hammer className="mr-2 h-5 w-5" /> },
-  { id: "locksmith", name: "Locksmith", icon: <Lock className="mr-2 h-5 w-5" /> },
-  { id: "appliance", name: "Appliance Repair", icon: <Wrench className="mr-2 h-5 w-5" /> },
-  { id: "landscaping", name: "Landscaping", icon: <Trees className="mr-2 h-5 w-5" /> },
-  { id: "moving", name: "Moving Services", icon: <Truck className="mr-2 h-5 w-5" /> },
-  { id: "networking", name: "Home Networking", icon: <Wifi className="mr-2 h-5 w-5" /> },
-];
-
-// Sample bids data for each category
-const generateBids = (category: string): Bid[] => [
-  { 
-    id: `${category}-1`, 
-    amount: "$450", 
-    scope: "Complete bathroom plumbing overhaul", 
-    company: "Elite Plumbing Solutions" 
-  },
-  { 
-    id: `${category}-2`, 
-    amount: "$280", 
-    scope: "Kitchen sink and dishwasher installation", 
-    company: "Waterworks Pro" 
-  },
-  { 
-    id: `${category}-3`, 
-    amount: "$175", 
-    scope: "Toilet repair and replacement", 
-    company: "Reliable Home Services" 
-  },
-  { 
-    id: `${category}-4`, 
-    amount: "$320", 
-    scope: "Leak detection and pipe repair", 
-    company: "Precision Plumbers" 
-  },
-  { 
-    id: `${category}-5`, 
-    amount: "$550", 
-    scope: "Full house plumbing inspection and maintenance", 
-    company: "Master Plumbing Co." 
-  },
-];
-
-// Sample community requests data
-const communityRequests: CommunityRequest[] = [
-  { id: "req-1", budget: "$300", description: "Need bathroom sink installation", category: "plumbing" },
-  { id: "req-2", budget: "$250", description: "Looking for electrical outlet installation", category: "electrical" },
-  { id: "req-3", budget: "$500", description: "Require complete living room painting", category: "painting" },
-  { id: "req-4", budget: "$400", description: "Need hardwood floor repair in dining room", category: "flooring" },
-  { id: "req-5", budget: "$800", description: "Looking for roof leak repair", category: "roofing" },
-  { id: "req-6", budget: "$350", description: "AC maintenance and filter replacement", category: "hvac" },
-  { id: "req-7", budget: "$275", description: "Custom shelving installation", category: "carpentry" },
-  { id: "req-8", budget: "$150", description: "Lock replacement for front door", category: "locksmith" },
-];
-
 export default function ServiceProviderDashboard() {
   const [activeCategory, setActiveCategory] = useState("plumbing");
+  const { t } = useLanguage();
+  
+  // Define repair categories with icons
+  const repairCategories: RepairCategory[] = [
+    { id: "plumbing", name: t("plumbing"), icon: <Droplet className="mr-2 h-5 w-5" /> },
+    { id: "electrical", name: t("electrical"), icon: <Zap className="mr-2 h-5 w-5" /> },
+    { id: "painting", name: t("painting"), icon: <Paintbrush className="mr-2 h-5 w-5" /> },
+    { id: "flooring", name: t("flooring"), icon: <Grid className="mr-2 h-5 w-5" /> },
+    { id: "roofing", name: t("roofing"), icon: <Home className="mr-2 h-5 w-5" /> },
+    { id: "hvac", name: t("hvac"), icon: <Thermometer className="mr-2 h-5 w-5" /> },
+    { id: "carpentry", name: t("carpentry"), icon: <Hammer className="mr-2 h-5 w-5" /> },
+    { id: "locksmith", name: t("locksmith"), icon: <Lock className="mr-2 h-5 w-5" /> },
+    { id: "appliance", name: t("applianceRepair"), icon: <Wrench className="mr-2 h-5 w-5" /> },
+    { id: "landscaping", name: t("landscaping"), icon: <Trees className="mr-2 h-5 w-5" /> },
+    { id: "moving", name: t("movingServices"), icon: <Truck className="mr-2 h-5 w-5" /> },
+    { id: "networking", name: t("homeNetworking"), icon: <Wifi className="mr-2 h-5 w-5" /> },
+  ];
+
+  // Sample bids data for each category
+  const generateBids = (category: string): Bid[] => [
+    { 
+      id: `${category}-1`, 
+      amount: "$450", 
+      scope: "Complete bathroom plumbing overhaul", 
+      company: "Elite Plumbing Solutions" 
+    },
+    { 
+      id: `${category}-2`, 
+      amount: "$280", 
+      scope: "Kitchen sink and dishwasher installation", 
+      company: "Waterworks Pro" 
+    },
+    { 
+      id: `${category}-3`, 
+      amount: "$175", 
+      scope: "Toilet repair and replacement", 
+      company: "Reliable Home Services" 
+    },
+    { 
+      id: `${category}-4`, 
+      amount: "$320", 
+      scope: "Leak detection and pipe repair", 
+      company: "Precision Plumbers" 
+    },
+    { 
+      id: `${category}-5`, 
+      amount: "$550", 
+      scope: "Full house plumbing inspection and maintenance", 
+      company: "Master Plumbing Co." 
+    },
+  ];
+
+  // Sample community requests data
+  const communityRequests: CommunityRequest[] = [
+    { id: "req-1", budget: "$300", description: "Need bathroom sink installation", category: "plumbing" },
+    { id: "req-2", budget: "$250", description: "Looking for electrical outlet installation", category: "electrical" },
+    { id: "req-3", budget: "$500", description: "Require complete living room painting", category: "painting" },
+    { id: "req-4", budget: "$400", description: "Need hardwood floor repair in dining room", category: "flooring" },
+    { id: "req-5", budget: "$800", description: "Looking for roof leak repair", category: "roofing" },
+    { id: "req-6", budget: "$350", description: "AC maintenance and filter replacement", category: "hvac" },
+    { id: "req-7", budget: "$275", description: "Custom shelving installation", category: "carpentry" },
+    { id: "req-8", budget: "$150", description: "Lock replacement for front door", category: "locksmith" },
+  ];
   
   // Get bids for the active category
   const categoryBids = generateBids(activeCategory);
@@ -104,20 +107,20 @@ export default function ServiceProviderDashboard() {
   return (
     <>
       <Head>
-        <title>Service Provider Dashboard | Handyman</title>
-        <meta name="description" content="Service provider dashboard for Handyman services" />
+        <title>{t("serviceProviderDashboard")} | {t("handyman")}</title>
+        <meta name="description" content={t("serviceProviderDesc")} />
       </Head>
       
       <div className="flex h-screen bg-gray-50">
         {/* Sidebar */}
         <div className="w-64 bg-gradient-to-b from-blue-900 to-blue-700 text-white p-4 shadow-lg">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-6">Handyman Pro</h2>
-            <p className="text-blue-200 text-sm mb-6">Service Provider Dashboard</p>
+            <h2 className="text-2xl font-bold mb-6">{t("handymanPro")}</h2>
+            <p className="text-blue-200 text-sm mb-6">{t("serviceProviderDashboard")}</p>
           </div>
           
           <nav>
-            <h3 className="text-xs uppercase tracking-wider text-blue-300 mb-4">Repair Categories</h3>
+            <h3 className="text-xs uppercase tracking-wider text-blue-300 mb-4">{t("repairCategories")}</h3>
             <ul className="space-y-2">
               {repairCategories.map((category) => (
                 <li key={category.id}>
@@ -143,10 +146,10 @@ export default function ServiceProviderDashboard() {
           <div className="max-w-7xl mx-auto">
             <header className="mb-8">
               <h1 className="text-3xl font-bold text-gray-800">
-                {repairCategories.find(c => c.id === activeCategory)?.name} Services
+                {repairCategories.find(c => c.id === activeCategory)?.name} {t("services")}
               </h1>
               <p className="text-gray-600">
-                Manage your bids and view community service requests
+                {t("manageBids")}
               </p>
             </header>
             
@@ -155,9 +158,9 @@ export default function ServiceProviderDashboard() {
               <Card className="shadow-md">
                 <CardHeader className="bg-gray-50 border-b">
                   <CardTitle className="text-xl flex items-center justify-between">
-                    <span>Active Bids</span>
+                    <span>{t("activeBids")}</span>
                     <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                      {categoryBids.length} bids
+                      {categoryBids.length} {t("bids")}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
@@ -171,8 +174,8 @@ export default function ServiceProviderDashboard() {
                         </div>
                         <p className="text-gray-600 mb-3">{bid.scope}</p>
                         <div className="flex justify-end">
-                          <Button variant="outline" size="sm" className="mr-2">Edit Bid</Button>
-                          <Button size="sm">Contact Client</Button>
+                          <Button variant="outline" size="sm" className="mr-2">{t("editBid")}</Button>
+                          <Button size="sm">{t("contactClient")}</Button>
                         </div>
                       </div>
                     ))}
@@ -184,9 +187,9 @@ export default function ServiceProviderDashboard() {
               <Card className="shadow-md">
                 <CardHeader className="bg-gray-50 border-b">
                   <CardTitle className="text-xl flex items-center justify-between">
-                    <span>Community Service Requests</span>
+                    <span>{t("communityRequests")}</span>
                     <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                      {filteredRequests.length} requests
+                      {filteredRequests.length} {t("requests")}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
@@ -200,16 +203,16 @@ export default function ServiceProviderDashboard() {
                             <span className="font-bold text-purple-600">{request.budget}</span>
                           </div>
                           <div className="flex justify-end">
-                            <Button variant="outline" size="sm" className="mr-2">View Details</Button>
-                            <Button size="sm">Submit Bid</Button>
+                            <Button variant="outline" size="sm" className="mr-2">{t("viewDetails")}</Button>
+                            <Button size="sm">{t("submitBid")}</Button>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="p-8 text-center text-gray-500">
-                      <p>No community requests for this category yet.</p>
-                      <Button variant="outline" className="mt-4">Browse All Requests</Button>
+                      <p>{t("noRequests")}</p>
+                      <Button variant="outline" className="mt-4">{t("browseAllRequests")}</Button>
                     </div>
                   )}
                 </CardContent>
