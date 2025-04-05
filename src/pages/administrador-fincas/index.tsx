@@ -115,7 +115,7 @@ export default function AdministradorFincas() {
               <Button 
                 variant={activeTab === "servicios" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("servicios")}
+                onClick={() => handleServicesDashboardClick()}
               >
                 <Wrench className="mr-2 h-5 w-5" />
                 {t("currentServices")}
