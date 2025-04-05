@@ -110,9 +110,9 @@ export default function ServiceProviderDashboard() {
         <meta name='description' content={t('serviceProviderDesc')} />
       </Head>
       
-      <div className='flex h-screen bg-gray-100'>
+      <div className='flex h-screen bg-background'>
         {/* Sidebar */}
-        <div className='w-64 bg-gray-800 text-white shadow-lg'>
+        <div className='w-64 bg-[hsl(0,0%,20%)] text-white shadow-lg'>
           <div className='p-4'>
             <h2 className='text-2xl font-bold mb-6'>{t('dashboard')}</h2>
             <nav className='space-y-2'>
@@ -134,17 +134,17 @@ export default function ServiceProviderDashboard() {
         {/* Main Content */}
         <div className='flex-1 overflow-auto'>
           <div className='p-6'>
-            <h1 className='text-3xl font-bold mb-6'>
+            <h1 className='text-3xl font-bold mb-6 text-foreground'>
               {repairCategories.find(c => c.id === activeCategory)?.name} {t('services')}
             </h1>
             
             <div className='grid grid-cols-1 gap-8'>
               {/* Bids Section */}
               <Card className='shadow-md'>
-                <CardHeader className='bg-gray-50 border-b'>
-                  <CardTitle className='text-xl flex items-center justify-between'>
+                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
+                  <CardTitle className='text-xl flex items-center justify-between text-foreground'>
                     <span>{t('activeBids')}</span>
-                    <Badge variant='outline' className='bg-blue-50 text-blue-700 border-blue-200'>
+                    <Badge variant='outline' className='bg-[hsl(25,30%,35%)/10] text-[hsl(25,30%,35%)] border-[hsl(25,30%,35%)/30]'>
                       {categoryBids.length} {t('bids')}
                     </Badge>
                   </CardTitle>
@@ -152,15 +152,15 @@ export default function ServiceProviderDashboard() {
                 <CardContent className='p-0'>
                   <div className='divide-y'>
                     {categoryBids.map((bid) => (
-                      <div key={bid.id} className='p-4 hover:bg-gray-50 transition-colors'>
+                      <div key={bid.id} className='p-4 hover:bg-secondary transition-colors'>
                         <div className='flex justify-between items-start mb-2'>
-                          <h3 className='font-medium text-gray-900'>{bid.company}</h3>
-                          <span className='text-lg font-bold text-green-600'>{bid.amount}</span>
+                          <h3 className='font-medium text-foreground'>{bid.company}</h3>
+                          <span className='text-lg font-bold text-[hsl(25,30%,35%)]'>{bid.amount}</span>
                         </div>
-                        <p className='text-gray-600 mb-3'>{bid.scope}</p>
+                        <p className='text-muted-foreground mb-3'>{bid.scope}</p>
                         <div className='flex justify-end'>
                           <Button variant='outline' size='sm' className='mr-2'>{t('editBid')}</Button>
-                          <Button size='sm'>{t('contactClient')}</Button>
+                          <Button size='sm' className='bg-[hsl(25,30%,35%)] hover:bg-[hsl(25,30%,30%)]'>{t('contactClient')}</Button>
                         </div>
                       </div>
                     ))}
@@ -170,10 +170,10 @@ export default function ServiceProviderDashboard() {
               
               {/* Community Requests Section */}
               <Card className='shadow-md'>
-                <CardHeader className='bg-gray-50 border-b'>
-                  <CardTitle className='text-xl flex items-center justify-between'>
+                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
+                  <CardTitle className='text-xl flex items-center justify-between text-foreground'>
                     <span>{t('communityRequests')}</span>
-                    <Badge variant='outline' className='bg-purple-50 text-purple-700 border-purple-200'>
+                    <Badge variant='outline' className='bg-[hsl(25,30%,35%)/10] text-[hsl(25,30%,35%)] border-[hsl(25,30%,35%)/30]'>
                       {filteredRequests.length} {t('requests')}
                     </Badge>
                   </CardTitle>
@@ -182,20 +182,20 @@ export default function ServiceProviderDashboard() {
                   {filteredRequests.length > 0 ? (
                     <div className='divide-y'>
                       {filteredRequests.map((request) => (
-                        <div key={request.id} className='p-4 hover:bg-gray-50 transition-colors'>
+                        <div key={request.id} className='p-4 hover:bg-secondary transition-colors'>
                           <div className='flex justify-between items-start mb-2'>
-                            <p className='text-gray-600'>{request.description}</p>
-                            <span className='font-bold text-purple-600'>{request.budget}</span>
+                            <p className='text-muted-foreground'>{request.description}</p>
+                            <span className='font-bold text-[hsl(25,30%,35%)]'>{request.budget}</span>
                           </div>
                           <div className='flex justify-end'>
                             <Button variant='outline' size='sm' className='mr-2'>{t('viewDetails')}</Button>
-                            <Button size='sm'>{t('submitBid')}</Button>
+                            <Button size='sm' className='bg-[hsl(25,30%,35%)] hover:bg-[hsl(25,30%,30%)]'>{t('submitBid')}</Button>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className='p-8 text-center text-gray-500'>
+                    <div className='p-8 text-center text-muted-foreground'>
                       <p>{t('noRequests')}</p>
                       <Button variant='outline' className='mt-4'>{t('browseAllRequests')}</Button>
                     </div>

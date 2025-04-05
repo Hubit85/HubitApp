@@ -19,15 +19,15 @@ export default function Dashboard() {
         <meta name="description" content={t("professionalServices")} />
       </Head>
       
-      <div className='min-h-screen flex flex-col relative overflow-hidden bg-gray-100'>
-        {/* Background Image - Luxury Apartment */}
+      <div className='min-h-screen flex flex-col relative overflow-hidden bg-background'>
+        {/* Background Image - Luxury Apartment with overlay */}
         <div 
           className='absolute inset-0 z-0 bg-cover bg-center bg-no-repeat'
           style={{
-            backgroundImage: 'url(\'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80\')',
+            backgroundImage: 'url(\\'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80\\')',
             backgroundSize: 'cover',
             filter: 'brightness(0.9)',
-            opacity: 0.2
+            opacity: 0.1
           }}
         />
         
@@ -41,9 +41,9 @@ export default function Dashboard() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className='relative'
             >
-              <Card className='w-full shadow-lg bg-white rounded-lg overflow-hidden'>
-                <CardHeader className='bg-gray-50'>
-                  <CardTitle className='text-2xl font-bold text-gray-800'>{t('whoWeAre')}</CardTitle>
+              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
+                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
+                  <CardTitle className='text-2xl font-bold text-foreground'>{t('whoWeAre')}</CardTitle>
                 </CardHeader>
                 <motion.div
                   initial={{ height: '150px' }}
@@ -53,7 +53,7 @@ export default function Dashboard() {
                   }}
                   transition={{ duration: 0.3 }}
                 >
-                  <CardContent className='text-gray-700 space-y-4 p-6'>
+                  <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
                       {t('whoWeAreDesc1')}
                     </p>
@@ -63,7 +63,7 @@ export default function Dashboard() {
                   </CardContent>
                 </motion.div>
                 {expandedCard !== 'whoWeAre' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none' />
+                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
                 )}
               </Card>
             </motion.div>
@@ -76,9 +76,9 @@ export default function Dashboard() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className='relative'
             >
-              <Card className='w-full shadow-lg bg-white rounded-lg overflow-hidden'>
-                <CardHeader className='bg-gray-50'>
-                  <CardTitle className='text-2xl font-bold text-gray-800'>{t('howItWorks')}</CardTitle>
+              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
+                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
+                  <CardTitle className='text-2xl font-bold text-foreground'>{t('howItWorks')}</CardTitle>
                 </CardHeader>
                 <motion.div
                   initial={{ height: '150px' }}
@@ -88,7 +88,7 @@ export default function Dashboard() {
                   }}
                   transition={{ duration: 0.3 }}
                 >
-                  <CardContent className='text-gray-700 space-y-4 p-6'>
+                  <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
                       {t('howItWorksDesc')}
                     </p>
@@ -102,7 +102,7 @@ export default function Dashboard() {
                   </CardContent>
                 </motion.div>
                 {expandedCard !== 'howItWorks' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none' />
+                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
                 )}
               </Card>
             </motion.div>
@@ -115,9 +115,9 @@ export default function Dashboard() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className='relative'
             >
-              <Card className='w-full shadow-lg bg-white rounded-lg overflow-hidden'>
-                <CardHeader className='bg-gray-50'>
-                  <CardTitle className='text-2xl font-bold text-gray-800'>{t('achievements')}</CardTitle>
+              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
+                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
+                  <CardTitle className='text-2xl font-bold text-foreground'>{t('achievements')}</CardTitle>
                 </CardHeader>
                 <motion.div
                   initial={{ height: '150px' }}
@@ -127,7 +127,7 @@ export default function Dashboard() {
                   }}
                   transition={{ duration: 0.3 }}
                 >
-                  <CardContent className='text-gray-700 space-y-4 p-6'>
+                  <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
                       {t('achievementsDesc')}
                     </p>
@@ -141,7 +141,7 @@ export default function Dashboard() {
                   </CardContent>
                 </motion.div>
                 {expandedCard !== 'achievements' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none' />
+                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
                 )}
               </Card>
             </motion.div>
@@ -182,7 +182,7 @@ export default function Dashboard() {
               backgroundImage: "url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')"
             }}
           >
-            <div className="absolute inset-0 bg-blue-900/70 hover:bg-blue-900/60 transition-colors flex items-center justify-center">
+            <div className="absolute inset-0 bg-[hsl(0,0%,0%)]/70 hover:bg-[hsl(0,0%,0%)]/60 transition-colors flex items-center justify-center">
               <h2 className="text-4xl font-serif text-white font-bold text-center px-6">{t("communityMember")}</h2>
             </div>
           </div>
