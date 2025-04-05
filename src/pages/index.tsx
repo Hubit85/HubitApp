@@ -31,7 +31,7 @@ export default function Home() {
         
         {/* Content */}
         <div className='z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl'>
-          <h1 className='text-6xl md:text-7xl font-bold text-black drop-shadow-lg'>
+          <h1 className='text-6xl md:text-7xl font-bold text-white drop-shadow-lg'>
             {t('handyman')}
           </h1>
           <p className='text-xl md:text-2xl text-white drop-shadow-md'>
