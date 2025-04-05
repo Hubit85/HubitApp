@@ -61,7 +61,7 @@ const containerStyle = {
 };
 
 export default function AdministradorFincas() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [activeTab, setActiveTab] = useState("mapa");

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Header } from "@/components/layout/Header";
 
 // Define repair category type
 interface RepairCategory {
@@ -109,6 +110,8 @@ export default function ServiceProviderDashboard() {
         <title>{t('serviceProviderDashboard')} | {t('handyman')}</title>
         <meta name='description' content={t('serviceProviderDesc')} />
       </Head>
+      
+      <Header />
       
       <div className='flex h-screen bg-background'>
         {/* Sidebar */}

@@ -3,6 +3,7 @@ import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -14,6 +15,10 @@ export default function Home() {
         <meta name="description" content={t("professionalServices")} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      
+      <header className="w-full py-4 px-4 sm:px-6 lg:px-8 bg-white/80 backdrop-blur-sm shadow-sm absolute top-0 left-0 right-0 z-10">
+        <LanguageSwitcher />
+      </header>
       
       <main className="min-h-screen flex flex-col items-center justify-center relative">
         {/* Background Image */}
