@@ -145,36 +145,36 @@ export default function AdministradorFincas() {
 
             {/* Mapa */}
             {activeTab === "mapa" && (
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <LoadScript googleMapsApiKey="YOUR_API_KEY">
-                  <GoogleMap
-                    mapContainerStyle={containerStyle}
-                    center={center}
-                    zoom={10}
-                  >
-                    {comunidades.map((comunidad) => (
-                      <Marker
-                        key={comunidad.id}
-                        position={{ lat: comunidad.lat, lng: comunidad.lng }}
-                        onClick={() => handleMarkerClick(comunidad.id)}
-                      />
-                    ))}
-                    {selectedMarker && (
-                      <InfoWindow
-                        position={{
-                          lat: comunidades.find(c => c.id === selectedMarker)?.lat || 0,
-                          lng: comunidades.find(c => c.id === selectedMarker)?.lng || 0
-                        }}
-                        onCloseClick={closeInfoWindow}
-                      >
-                        <div className="p-2">
-                          <h3 className="font-bold">{comunidades.find(c => c.id === selectedMarker)?.nombre}</h3>
-                          <p>{comunidades.find(c => c.id === selectedMarker)?.direccion}</p>
-                        </div>
-                      </InfoWindow>
-                    )}
-                  </GoogleMap>
-                </LoadScript>
+              <div className='bg-white rounded-lg shadow-md overflow-hidden'>
+                <div className='p-6'>
+                  <h2 className='text-xl font-semibold mb-4'>Mapa de Comunidades</h2>
+                  <div className='bg-gray-100 rounded-lg p-4 text-center'>
+                    <p className='text-gray-600 mb-4'>Visualización del mapa de comunidades</p>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                      {comunidades.map((comunidad) => (
+                        <Card key={comunidad.id} className='hover:bg-gray-50 transition-colors'>
+                          <CardContent className='p-4'>
+                            <div>
+                              <h3 className='font-bold text-lg'>{comunidad.nombre}</h3>
+                              <p className='text-gray-600'>{comunidad.direccion}</p>
+                              <p className='text-sm text-gray-500 mt-2'>
+                                Coordenadas: {comunidad.lat.toFixed(4)}, {comunidad.lng.toFixed(4)}
+                              </p>
+                            </div>
+                            <Button variant='outline' size='sm' className='mt-2'>
+                              Ver en mapa
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    <div className='mt-6'>
+                      <p className='text-sm text-gray-500'>
+                        Nota: Para visualizar el mapa interactivo, es necesario configurar una clave de API de Google Maps válida.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
