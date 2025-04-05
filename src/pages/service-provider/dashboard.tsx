@@ -30,69 +30,69 @@ interface CommunityRequest {
 }
 
 export default function ServiceProviderDashboard() {
-  const [activeCategory, setActiveCategory] = useState("plumbing");
+  const [activeCategory, setActiveCategory] = useState('plumbing');
   const { t } = useLanguage();
   
   // Define repair categories with icons
   const repairCategories: RepairCategory[] = [
-    { id: "plumbing", name: t("plumbing"), icon: <Droplet className="mr-2 h-5 w-5" /> },
-    { id: "electrical", name: t("electrical"), icon: <Zap className="mr-2 h-5 w-5" /> },
-    { id: "painting", name: t("painting"), icon: <Paintbrush className="mr-2 h-5 w-5" /> },
-    { id: "flooring", name: t("flooring"), icon: <Grid className="mr-2 h-5 w-5" /> },
-    { id: "roofing", name: t("roofing"), icon: <Home className="mr-2 h-5 w-5" /> },
-    { id: "hvac", name: t("hvac"), icon: <Thermometer className="mr-2 h-5 w-5" /> },
-    { id: "carpentry", name: t("carpentry"), icon: <Hammer className="mr-2 h-5 w-5" /> },
-    { id: "locksmith", name: t("locksmith"), icon: <Lock className="mr-2 h-5 w-5" /> },
-    { id: "appliance", name: t("applianceRepair"), icon: <Wrench className="mr-2 h-5 w-5" /> },
-    { id: "landscaping", name: t("landscaping"), icon: <Trees className="mr-2 h-5 w-5" /> },
-    { id: "moving", name: t("movingServices"), icon: <Truck className="mr-2 h-5 w-5" /> },
-    { id: "networking", name: t("homeNetworking"), icon: <Wifi className="mr-2 h-5 w-5" /> },
+    { id: 'plumbing', name: t('plumbing'), icon: <Droplet className='mr-2 h-5 w-5' /> },
+    { id: 'electrical', name: t('electrical'), icon: <Zap className='mr-2 h-5 w-5' /> },
+    { id: 'painting', name: t('painting'), icon: <Paintbrush className='mr-2 h-5 w-5' /> },
+    { id: 'flooring', name: t('flooring'), icon: <Grid className='mr-2 h-5 w-5' /> },
+    { id: 'roofing', name: t('roofing'), icon: <Home className='mr-2 h-5 w-5' /> },
+    { id: 'hvac', name: t('hvac'), icon: <Thermometer className='mr-2 h-5 w-5' /> },
+    { id: 'carpentry', name: t('carpentry'), icon: <Hammer className='mr-2 h-5 w-5' /> },
+    { id: 'locksmith', name: t('locksmith'), icon: <Lock className='mr-2 h-5 w-5' /> },
+    { id: 'appliance', name: t('applianceRepair'), icon: <Wrench className='mr-2 h-5 w-5' /> },
+    { id: 'landscaping', name: t('landscaping'), icon: <Trees className='mr-2 h-5 w-5' /> },
+    { id: 'moving', name: t('movingServices'), icon: <Truck className='mr-2 h-5 w-5' /> },
+    { id: 'networking', name: t('homeNetworking'), icon: <Wifi className='mr-2 h-5 w-5' /> },
   ];
 
   // Sample bids data for each category
   const generateBids = (category: string): Bid[] => [
     { 
       id: `${category}-1`, 
-      amount: "$450", 
-      scope: "Complete bathroom plumbing overhaul", 
-      company: "Elite Plumbing Solutions" 
+      amount: '$450', 
+      scope: t('bathroomPlumbingOverhaul'), 
+      company: t('elitePlumbingSolutions') 
     },
     { 
       id: `${category}-2`, 
-      amount: "$280", 
-      scope: "Kitchen sink and dishwasher installation", 
-      company: "Waterworks Pro" 
+      amount: '$280', 
+      scope: t('kitchenSinkInstallation'), 
+      company: t('waterworksPro') 
     },
     { 
       id: `${category}-3`, 
-      amount: "$175", 
-      scope: "Toilet repair and replacement", 
-      company: "Reliable Home Services" 
+      amount: '$175', 
+      scope: t('toiletRepair'), 
+      company: t('reliableHomeServices') 
     },
     { 
       id: `${category}-4`, 
-      amount: "$320", 
-      scope: "Leak detection and pipe repair", 
-      company: "Precision Plumbers" 
+      amount: '$320', 
+      scope: t('leakDetection'), 
+      company: t('precisionPlumbers') 
     },
     { 
       id: `${category}-5`, 
-      amount: "$550", 
-      scope: "Full house plumbing inspection and maintenance", 
-      company: "Master Plumbing Co." 
+      amount: '$550', 
+      scope: t('fullHousePlumbing'), 
+      company: t('masterPlumbingCo') 
     },
   ];
 
   // Sample community requests data
   const communityRequests: CommunityRequest[] = [
-    { id: "req-1", budget: "$300", description: "Need bathroom sink installation", category: "plumbing" },
-    { id: "req-2", budget: "$250", description: "Looking for electrical outlet installation", category: "electrical" },
-    { id: "req-3", budget: "$500", description: "Require complete living room painting", category: "painting" },
-    { id: "req-4", budget: "$400", description: "Need hardwood floor repair in dining room", category: "flooring" },
-    { id: "req-5", budget: "$800", description: "Looking for roof leak repair", category: "roofing" },
-    { id: "req-6", budget: "$350", description: "AC maintenance and filter replacement", category: "hvac" },
-    { id: "req-7", budget: "$275", description: "Custom shelving installation", category: "carpentry" },
-    { id: "req-8", budget: "$150", description: "Lock replacement for front door", category: "locksmith" },
+    { id: 'req-1', budget: '$300', description: t('bathroomSinkInstallation'), category: 'plumbing' },
+    { id: 'req-2', budget: '$250', description: t('electricalOutletInstallation'), category: 'electrical' },
+    { id: 'req-3', budget: '$500', description: t('livingRoomPainting'), category: 'painting' },
+    { id: 'req-4', budget: '$400', description: t('hardwoodFloorRepair'), category: 'flooring' },
+    { id: 'req-5', budget: '$800', description: t('roofLeakRepair'), category: 'roofing' },
+    { id: 'req-6', budget: '$350', description: t('acMaintenance'), category: 'hvac' },
+    { id: 'req-7', budget: '$275', description: t('customShelvingInstallation'), category: 'carpentry' },
+    { id: 'req-8', budget: '$150', description: t('lockReplacement'), category: 'locksmith' },
   ];
   
   // Get bids for the active category
@@ -106,15 +106,15 @@ export default function ServiceProviderDashboard() {
   return (
     <>
       <Head>
-        <title>{t("serviceProviderDashboard")} | {t("handyman")}</title>
-        <meta name="description" content={t("serviceProviderDesc")} />
+        <title>{t('serviceProviderDashboard')} | {t('handyman')}</title>
+        <meta name='description' content={t('serviceProviderDesc')} />
       </Head>
       
       <div className='flex h-screen bg-gray-100'>
         {/* Sidebar */}
         <div className='w-64 bg-gray-800 text-white shadow-lg'>
           <div className='p-4'>
-            <h2 className='text-2xl font-bold mb-6'>Dashboard</h2>
+            <h2 className='text-2xl font-bold mb-6'>{t('dashboard')}</h2>
             <nav className='space-y-2'>
               {repairCategories.map((category) => (
                 <Button
