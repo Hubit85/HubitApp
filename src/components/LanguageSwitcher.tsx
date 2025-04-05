@@ -7,11 +7,11 @@ export function LanguageSwitcher() {
   const { language, setLanguage } = useLanguage();
 
   const languages = [
-    { code: "en", flag: "🇬🇧", name: "English" },
-    { code: "es", flag: "🇪🇸", name: "Español" },
-    { code: "fr", flag: "🇫🇷", name: "Français" },
-    { code: "ru", flag: "🇷🇺", name: "Русский" },
-    { code: "zh", flag: "🇨🇳", name: "中文" },
+    { code: "es", name: "Español", flag: "🇪🇸" },
+    { code: "en", name: "English", flag: "🇬🇧" },
+    { code: "fr", name: "Français", flag: "🇫🇷" },
+    { code: "ru", name: "Русский", flag: "🇷🇺" },
+    { code: "zh", name: "中文", flag: "🇨🇳" },
   ];
 
   return (

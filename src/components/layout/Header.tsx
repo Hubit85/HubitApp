@@ -15,9 +15,9 @@ export function Header() {
       <div className='container mx-auto flex justify-between items-center'>
         <div className='flex flex-col'>
           <Link href={isLoggedIn ? '/dashboard' : '/'} className='text-2xl font-bold text-gray-900'>
-            {t('handyman')}
+            HANDYMAN
           </Link>
-          <p className='text-sm text-gray-600'>{t('professionalServices')}</p>
+          <p className='text-sm text-gray-600'>Professional services for your home</p>
         </div>
         
         <div className='flex items-center gap-4'>
