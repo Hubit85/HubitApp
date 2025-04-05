@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Calendar as CalendarIcon, ClipboardList, Building, Wrench } from "lucide-react";
+import { Header } from "@/components/layout/Header";
 
 // Coordenadas de Vizcaya, España
 const center = {
@@ -84,9 +83,11 @@ export default function AdministradorFincas() {
   return (
     <>
       <Head>
-        <title>Administrador de Fincas - Dashboard</title>
-        <meta name="description" content="Dashboard para administradores de fincas" />
+        <title>{t("estateAdministrator")} - {t("dashboard")}</title>
+        <meta name="description" content={t("dashboardDesc")} />
       </Head>
+
+      <Header />
 
       <div className="flex h-screen bg-gray-100">
         {/* Sidebar */}

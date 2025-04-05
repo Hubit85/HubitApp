@@ -805,7 +805,177 @@ const translations: Translations = {
     fr: "Remplacement de serrure",
     ru: "Замена замка",
     zh: "锁具更换"
-  }
+  },
+  
+  // Estate Administrator Dashboard
+  "map": {
+    en: "Map",
+    es: "Mapa",
+    fr: "Carte",
+    ru: "Карта",
+    zh: "地图"
+  },
+  "assets": {
+    en: "Assets",
+    es: "Activos",
+    fr: "Actifs",
+    ru: "Активы",
+    zh: "资产"
+  },
+  "currentServices": {
+    en: "Current Services",
+    es: "Servicios Actuales",
+    fr: "Services Actuels",
+    ru: "Текущие Услуги",
+    zh: "当前服务"
+  },
+  "meetings": {
+    en: "Meetings",
+    es: "Juntas",
+    fr: "Réunions",
+    ru: "Собрания",
+    zh: "会议"
+  },
+  "pendingIssues": {
+    en: "Pending Issues",
+    es: "Temas Pendientes",
+    fr: "Questions en Suspens",
+    ru: "Нерешенные Вопросы",
+    zh: "待处理问题"
+  },
+  "communitiesMap": {
+    en: "Communities Map",
+    es: "Mapa de Comunidades",
+    fr: "Carte des Communautés",
+    ru: "Карта Сообществ",
+    zh: "社区地图"
+  },
+  "communitiesOnMap": {
+    en: "Communities on Map",
+    es: "Comunidades en el mapa",
+    fr: "Communautés sur la Carte",
+    ru: "Сообщества на Карте",
+    zh: "地图上的社区"
+  },
+  "coordinates": {
+    en: "Coordinates",
+    es: "Coordenadas",
+    fr: "Coordonnées",
+    ru: "Координаты",
+    zh: "坐标"
+  },
+  "viewOnMap": {
+    en: "View on Map",
+    es: "Ver en mapa",
+    fr: "Voir sur la Carte",
+    ru: "Посмотреть на Карте",
+    zh: "在地图上查看"
+  },
+  "managedCommunities": {
+    en: "Managed Communities",
+    es: "Comunidades Gestionadas",
+    fr: "Communautés Gérées",
+    ru: "Управляемые Сообщества",
+    zh: "管理的社区"
+  },
+  "redirectingToServicesDashboard": {
+    en: "Redirecting to service providers dashboard...",
+    es: "Redirigiendo al dashboard de proveedores de servicios...",
+    fr: "Redirection vers le tableau de bord des prestataires de services...",
+    ru: "Перенаправление на панель управления поставщиков услуг...",
+    zh: "重定向到服务提供商仪表板..."
+  },
+  "goToServicesDashboard": {
+    en: "Go to Services Dashboard",
+    es: "Ir al Dashboard de Servicios",
+    fr: "Aller au Tableau de Bord des Services",
+    ru: "Перейти к Панели Управления Услугами",
+    zh: "转到服务仪表板"
+  },
+  "communityMeetings": {
+    en: "Community Meetings",
+    es: "Juntas de Comunidades",
+    fr: "Réunions Communautaires",
+    ru: "Собрания Сообщества",
+    zh: "社区会议"
+  },
+  "scheduledMeetings": {
+    en: "Scheduled meetings",
+    es: "Juntas programadas",
+    fr: "Réunions programmées",
+    ru: "Запланированные встречи",
+    zh: "计划会议"
+  },
+  "noMeetingsScheduled": {
+    en: "No meetings scheduled for this month.",
+    es: "No hay juntas programadas para este mes.",
+    fr: "Aucune réunion programmée pour ce mois.",
+    ru: "На этот месяц не запланировано встреч.",
+    zh: "本月没有安排会议。"
+  },
+  "community": {
+    en: "Community",
+    es: "Comunidad",
+    fr: "Communauté",
+    ru: "Сообщество",
+    zh: "社区"
+  },
+  "type": {
+    en: "Type",
+    es: "Tipo",
+    fr: "Type",
+    ru: "Тип",
+    zh: "类型"
+  },
+  "description": {
+    en: "Description",
+    es: "Descripción",
+    fr: "Description",
+    ru: "Описание",
+    zh: "描述"
+  },
+  "amountStatus": {
+    en: "Amount/Status",
+    es: "Importe/Estado",
+    fr: "Montant/Statut",
+    ru: "Сумма/Статус",
+    zh: "金额/状态"
+  },
+  "date": {
+    en: "Date",
+    es: "Fecha",
+    fr: "Date",
+    ru: "Дата",
+    zh: "日期"
+  },
+  "action": {
+    en: "Action",
+    es: "Acción",
+    fr: "Action",
+    ru: "Действие",
+    zh: "操作"
+  },
+  "manage": {
+    en: "Manage",
+    es: "Gestionar",
+    fr: "Gérer",
+    ru: "Управлять",
+    zh: "管理"
+  },
+  "dashboardDesc": {
+    en: "Dashboard for estate administrators",
+    es: "Dashboard para administradores de fincas",
+    fr: "Tableau de bord pour les administrateurs immobiliers",
+    ru: "Панель управления для администраторов недвижимости",
+    zh: "物业管理员仪表板"
+  },
+  "particular": {
+    en: "What Do You Need?",
+    es: "¿Qué necesitas?",
+    fr: "De quoi avez-vous besoin?",
+    ru: "Что вам нужно?",
+    zh: "您需要什么？"
+  },
 };
 
 interface LanguageContextType {
