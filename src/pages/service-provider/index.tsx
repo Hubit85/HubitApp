@@ -3,9 +3,10 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wrench, ArrowRight, Zap, Paintbrush, Grid, Droplet, Thermometer, MapPin, Building, Calendar, ClipboardList } from "lucide-react";
+import { Wrench, ArrowRight, Zap, Paintbrush, Grid, Droplet, Thermometer } from "lucide-react";
 import Link from 'next/link';
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Header } from "@/components/layout/Header";
 
 export default function ServiceProviderHome() {
   const router = useRouter();
@@ -22,7 +23,9 @@ export default function ServiceProviderHome() {
         <meta name="description" content={t("serviceProviderDesc")} />
       </Head>
       
-      <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <Header />
+      
+      <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white pt-16">
         <div className='flex h-screen bg-gray-100'>
           {/* Sidebar */}
           <div className='w-64 bg-gray-800 text-white shadow-lg'>
