@@ -200,15 +200,16 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {/* Estate Administrator Box - NEW */}
+          {/* Estate Administrator Box - Updated */}
           <div 
-            className="flex-1 bg-cover bg-center relative"
+            className='flex-1 bg-cover bg-center relative cursor-pointer'
             style={{ 
-              backgroundImage: "url('https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')"
+              backgroundImage: 'url(\'https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80\')'
             }}
+            onClick={() => router.push('/administrador-fincas')}
           >
-            <div className="absolute inset-0 bg-purple-900/70 hover:bg-purple-900/60 transition-colors flex items-center justify-center">
-              <h2 className="text-4xl font-serif text-white font-bold text-center px-6">{t("estateAdministrator")}</h2>
+            <div className='absolute inset-0 bg-purple-900/70 hover:bg-purple-900/60 transition-colors flex items-center justify-center'>
+              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>{t('estateAdministrator')}</h2>
             </div>
           </div>
           
