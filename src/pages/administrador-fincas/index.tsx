@@ -148,8 +148,20 @@ export default function AdministradorFincas() {
               <div className='bg-white rounded-lg shadow-md overflow-hidden'>
                 <div className='p-6'>
                   <h2 className='text-xl font-semibold mb-4'>Mapa de Comunidades</h2>
-                  <div className='bg-gray-100 rounded-lg p-4 text-center'>
-                    <p className='text-gray-600 mb-4'>Visualización del mapa de comunidades</p>
+                  <div className='h-[600px] w-full rounded-lg overflow-hidden'>
+                    <iframe 
+                      src='https://www.openstreetmap.org/export/embed.html?bbox=-3.0334,43.1603,-2.8334,43.3603&layer=mapnik&marker=43.3553,-2.8469' 
+                      width='100%' 
+                      height='100%' 
+                      frameBorder='0' 
+                      style={{ border: 0 }} 
+                      allowFullScreen 
+                      aria-hidden='false' 
+                      tabIndex={0}
+                    ></iframe>
+                  </div>
+                  <div className='mt-4'>
+                    <h3 className='text-lg font-semibold mb-2'>Comunidades en el mapa</h3>
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                       {comunidades.map((comunidad) => (
                         <Card key={comunidad.id} className='hover:bg-gray-50 transition-colors'>
@@ -167,11 +179,6 @@ export default function AdministradorFincas() {
                           </CardContent>
                         </Card>
                       ))}
-                    </div>
-                    <div className='mt-6'>
-                      <p className='text-sm text-gray-500'>
-                        Nota: Para visualizar el mapa interactivo, es necesario configurar una clave de API de Google Maps válida.
-                      </p>
                     </div>
                   </div>
                 </div>

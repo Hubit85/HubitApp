@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, ClipboardList, Building, Tool, Wrench } from "lucide-react";
+import { MapPin, Calendar, ClipboardList, Building, Wrench } from "lucide-react";
 
 interface SidebarFincasProps {
   activeTab: string;
