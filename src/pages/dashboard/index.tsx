@@ -24,7 +24,7 @@ export default function Dashboard() {
         <div 
           className='absolute inset-0 z-0 bg-cover bg-center bg-no-repeat'
           style={{
-            backgroundImage: 'url(\\'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80\\')',
+            backgroundImage: "url('https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')",
             backgroundSize: 'cover',
             filter: 'brightness(0.9)',
             opacity: 0.1
