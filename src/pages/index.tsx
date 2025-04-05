@@ -1,4 +1,3 @@
-
 import React from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
@@ -49,6 +48,14 @@ export default function Home() {
                 className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20"
               >
                 {t("login")}
+              </Button>
+            </Link>
+            <Link href="/administrador-fincas" passHref>
+              <Button 
+                size="lg"
+                className="text-lg px-8 py-6"
+              >
+                Administrador de Fincas
               </Button>
             </Link>
           </div>
