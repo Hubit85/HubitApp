@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, ClipboardList, Building, Tool } from "lucide-react";
+import { MapPin, Calendar, ClipboardList, Building, Tool, Wrench } from "lucide-react";
 
 interface SidebarFincasProps {
   activeTab: string;
@@ -35,7 +34,7 @@ export function SidebarFincas({ activeTab, setActiveTab }: SidebarFincasProps) {
             className="w-full justify-start"
             onClick={() => setActiveTab("servicios")}
           >
-            <Tool className="mr-2 h-5 w-5" />
+            <Wrench className='mr-2 h-5 w-5' />
             Servicios Actuales
           </Button>
           <Button 

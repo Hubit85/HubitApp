@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Calendar as CalendarIcon, ClipboardList, Building, Tool } from "lucide-react";
+import { MapPin, Calendar as CalendarIcon, ClipboardList, Building, Wrench } from "lucide-react";
 
 // Coordenadas de Vizcaya, España
 const center = {
@@ -116,7 +115,7 @@ export default function AdministradorFincas() {
                 className="w-full justify-start"
                 onClick={() => setActiveTab("servicios")}
               >
-                <Tool className="mr-2 h-5 w-5" />
+                <Wrench className="mr-2 h-5 w-5" />
                 Servicios Actuales
               </Button>
               <Button 
