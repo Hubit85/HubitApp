@@ -18,7 +18,7 @@ export default function Home() {
       
       <Header />
       
-      <main className="min-h-screen flex flex-col items-center justify-center relative">
+      <main className='min-h-screen flex flex-col items-center justify-center relative'>
         {/* Background Image */}
         <div 
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
@@ -30,17 +30,20 @@ export default function Home() {
         />
         
         {/* Content */}
-        <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
-          <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
-            {t("handyman")}
+        <div className='z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl'>
+          <h1 className='text-6xl md:text-7xl font-bold text-black drop-shadow-lg'>
+            {t('handyman')}
           </h1>
-          <p className="text-xl md:text-2xl text-white drop-shadow-md">
-            {t("professionalServices")}
+          <p className='text-xl md:text-2xl text-white drop-shadow-md'>
+            {t('professionalServices')}
           </p>
           
           <div className='flex flex-col sm:flex-row gap-4 justify-center mt-8'>
             <Link href='/auth/register' passHref>
-              <Button size='lg' className='text-lg px-8 py-6'>
+              <Button 
+                size='lg' 
+                className='text-lg px-8 py-6 bg-black text-white hover:bg-black/80'
+              >
                 {t('register')}
               </Button>
             </Link>
@@ -48,7 +51,7 @@ export default function Home() {
               <Button 
                 size='lg' 
                 variant='outline' 
-                className='text-lg px-8 py-6 bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20'
+                className='text-lg px-8 py-6 bg-white text-black border-black hover:bg-white/90'
               >
                 {t('login')}
               </Button>
