@@ -220,7 +220,7 @@ export default function Dashboard() {
             }}
           >
             <div className='absolute inset-0 bg-amber-900/70 hover:bg-amber-900/60 transition-colors flex items-center justify-center'>
-              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>{t('particularService')}</h2>
+              <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>{t('particular')}</h2>
             </div>
           </div>
         </motion.div>
