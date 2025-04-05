@@ -474,13 +474,6 @@ const translations: Translations = {
     ru: "Категории ремонта",
     zh: "维修类别"
   },
-  "services": {
-    en: "Services",
-    es: "Servicios",
-    fr: "Services",
-    ru: "Услуги",
-    zh: "服务"
-  },
   "manageBids": {
     en: "Manage your bids and view community service requests",
     es: "Gestiona tus ofertas y ve las solicitudes de servicio de la comunidad",
@@ -686,6 +679,133 @@ const translations: Translations = {
     ru: "Бронируйте услуги всего в несколько кликов и получайте мгновенные подтверждения",
     zh: "只需点击几下即可预订服务并获得即时确认"
   },
+  // Bid and service request translations
+  "bathroomPlumbingOverhaul": {
+    en: "Bathroom Plumbing Overhaul",
+    es: "Renovación de fontanería del baño",
+    fr: "Révision complète de la plomberie de salle de bain",
+    ru: "Капитальный ремонт сантехники в ванной",
+    zh: "浴室水暖全面检修"
+  },
+  "kitchenSinkInstallation": {
+    en: "Kitchen Sink Installation",
+    es: "Instalación de fregadero de cocina",
+    fr: "Installation d'évier de cuisine",
+    ru: "Установка кухонной раковины",
+    zh: "厨房水槽安装"
+  },
+  "toiletRepair": {
+    en: "Toilet Repair",
+    es: "Reparación de inodoro",
+    fr: "Réparation de toilette",
+    ru: "Ремонт унитаза",
+    zh: "马桶修理"
+  },
+  "leakDetection": {
+    en: "Leak Detection",
+    es: "Detección de fugas",
+    fr: "Détection de fuites",
+    ru: "Обнаружение утечек",
+    zh: "漏水检测"
+  },
+  "fullHousePlumbing": {
+    en: "Full House Plumbing",
+    es: "Fontanería completa de la casa",
+    fr: "Plomberie complète de la maison",
+    ru: "Полная сантехника дома",
+    zh: "全屋水暖"
+  },
+  "elitePlumbingSolutions": {
+    en: "Elite Plumbing Solutions",
+    es: "Soluciones Elite de Fontanería",
+    fr: "Solutions de Plomberie Elite",
+    ru: "Элитные сантехнические решения",
+    zh: "精英水暖解决方案"
+  },
+  "waterworksPro": {
+    en: "Waterworks Pro",
+    es: "Fontanería Profesional",
+    fr: "Pro des Travaux Hydrauliques",
+    ru: "Профессиональные водопроводные работы",
+    zh: "专业水务工程"
+  },
+  "reliableHomeServices": {
+    en: "Reliable Home Services",
+    es: "Servicios Confiables para el Hogar",
+    fr: "Services Domiciliaires Fiables",
+    ru: "Надежные домашние услуги",
+    zh: "可靠家居服务"
+  },
+  "precisionPlumbers": {
+    en: "Precision Plumbers",
+    es: "Fontaneros de Precisión",
+    fr: "Plombiers de Précision",
+    ru: "Точные сантехники",
+    zh: "精准水暖工"
+  },
+  "masterPlumbingCo": {
+    en: "Master Plumbing Co",
+    es: "Compañía Maestra de Fontanería",
+    fr: "Société Maître Plombier",
+    ru: "Мастер-сантехника Ко",
+    zh: "大师水暖公司"
+  },
+  "bathroomSinkInstallation": {
+    en: "Bathroom Sink Installation",
+    es: "Instalación de lavabo de baño",
+    fr: "Installation de lavabo de salle de bain",
+    ru: "Установка раковины в ванной",
+    zh: "浴室水槽安装"
+  },
+  "electricalOutletInstallation": {
+    en: "Electrical Outlet Installation",
+    es: "Instalación de toma eléctrica",
+    fr: "Installation de prise électrique",
+    ru: "Установка электрической розетки",
+    zh: "电源插座安装"
+  },
+  "livingRoomPainting": {
+    en: "Living Room Painting",
+    es: "Pintura de sala de estar",
+    fr: "Peinture de salon",
+    ru: "Покраска гостиной",
+    zh: "客厅绘画"
+  },
+  "hardwoodFloorRepair": {
+    en: "Hardwood Floor Repair",
+    es: "Reparación de suelo de madera",
+    fr: "Réparation de plancher en bois dur",
+    ru: "Ремонт деревянного пола",
+    zh: "硬木地板修复"
+  },
+  "roofLeakRepair": {
+    en: "Roof Leak Repair",
+    es: "Reparación de goteras en el techo",
+    fr: "Réparation de fuite de toit",
+    ru: "Ремонт протечки крыши",
+    zh: "屋顶漏水修复"
+  },
+  "acMaintenance": {
+    en: "AC Maintenance",
+    es: "Mantenimiento de aire acondicionado",
+    fr: "Entretien de climatisation",
+    ru: "Обслуживание кондиционера",
+    zh: "空调维护"
+  },
+  "customShelvingInstallation": {
+    en: "Custom Shelving Installation",
+    es: "Instalación de estanterías personalizadas",
+    fr: "Installation d'étagères sur mesure",
+    ru: "Установка индивидуальных полок",
+    zh: "定制搁架安装"
+  },
+  "lockReplacement": {
+    en: "Lock Replacement",
+    es: "Reemplazo de cerradura",
+    fr: "Remplacement de serrure",
+    ru: "Замена замка",
+    zh: "锁具更换"
+  }
 };
 
 interface LanguageContextType {
