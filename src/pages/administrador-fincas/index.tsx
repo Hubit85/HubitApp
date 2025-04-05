@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -55,11 +56,6 @@ const temasPendientes = [
   { id: 8, comunidad: "Comunidad Rekalde", tipo: "Derrama", descripcion: "Derrama para instalación de placas solares", importe: "15.000€", fecha: "01/07/2025" }
 ];
 
-const containerStyle = {
-  width: "100%",
-  height: "calc(100vh - 80px)"
-};
-
 export default function AdministradorFincas() {
   const { t, language } = useLanguage();
   const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
@@ -93,7 +89,7 @@ export default function AdministradorFincas() {
         {/* Sidebar */}
         <div className="w-64 bg-gray-800 text-white shadow-lg">
           <div className="p-4">
-            <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
+            <h2 className="text-2xl font-bold mb-6">{t("dashboard")}</h2>
             <nav className="space-y-2">
               <Button 
                 variant={activeTab === "mapa" ? "default" : "ghost"} 
@@ -101,7 +97,7 @@ export default function AdministradorFincas() {
                 onClick={() => setActiveTab("mapa")}
               >
                 <MapPin className="mr-2 h-5 w-5" />
-                Mapa
+                {t("map")}
               </Button>
               <Button 
                 variant={activeTab === "activos" ? "default" : "ghost"} 
@@ -109,7 +105,7 @@ export default function AdministradorFincas() {
                 onClick={() => setActiveTab("activos")}
               >
                 <Building className="mr-2 h-5 w-5" />
-                Activos
+                {t("assets")}
               </Button>
               <Button 
                 variant={activeTab === "servicios" ? "default" : "ghost"} 
@@ -117,7 +113,7 @@ export default function AdministradorFincas() {
                 onClick={() => setActiveTab("servicios")}
               >
                 <Wrench className="mr-2 h-5 w-5" />
-                Servicios Actuales
+                {t("currentServices")}
               </Button>
               <Button 
                 variant={activeTab === "juntas" ? "default" : "ghost"} 
@@ -125,7 +121,7 @@ export default function AdministradorFincas() {
                 onClick={() => setActiveTab("juntas")}
               >
                 <CalendarIcon className="mr-2 h-5 w-5" />
-                Juntas
+                {t("meetings")}
               </Button>
               <Button 
                 variant={activeTab === "pendientes" ? "default" : "ghost"} 
@@ -133,7 +129,7 @@ export default function AdministradorFincas() {
                 onClick={() => setActiveTab("pendientes")}
               >
                 <ClipboardList className="mr-2 h-5 w-5" />
-                Temas Pendientes
+                {t("pendingIssues")}
               </Button>
             </nav>
           </div>
@@ -142,13 +138,13 @@ export default function AdministradorFincas() {
         {/* Main Content */}
         <div className="flex-1 overflow-auto">
           <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">Administrador de Fincas</h1>
+            <h1 className="text-3xl font-bold mb-6">{t("estateAdministrator")}</h1>
 
             {/* Mapa */}
             {activeTab === "mapa" && (
               <div className='bg-white rounded-lg shadow-md overflow-hidden'>
                 <div className='p-6'>
-                  <h2 className='text-xl font-semibold mb-4'>Mapa de Comunidades</h2>
+                  <h2 className='text-xl font-semibold mb-4'>{t("communityMap")}</h2>
                   <div className='h-[600px] w-full rounded-lg overflow-hidden'>
                     <iframe 
                       src='https://www.openstreetmap.org/export/embed.html?bbox=-3.0334,43.1603,-2.8334,43.3603&layer=mapnik&marker=43.3553,-2.8469' 
@@ -162,7 +158,7 @@ export default function AdministradorFincas() {
                     ></iframe>
                   </div>
                   <div className='mt-4'>
-                    <h3 className='text-lg font-semibold mb-2'>Comunidades en el mapa</h3>
+                    <h3 className='text-lg font-semibold mb-2'>{t("communitiesOnMap")}</h3>
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                       {comunidades.map((comunidad) => (
                         <Card key={comunidad.id} className='hover:bg-gray-50 transition-colors'>
@@ -171,11 +167,11 @@ export default function AdministradorFincas() {
                               <h3 className='font-bold text-lg'>{comunidad.nombre}</h3>
                               <p className='text-gray-600'>{comunidad.direccion}</p>
                               <p className='text-sm text-gray-500 mt-2'>
-                                Coordenadas: {comunidad.lat.toFixed(4)}, {comunidad.lng.toFixed(4)}
+                                {t("coordinates")}: {comunidad.lat.toFixed(4)}, {comunidad.lng.toFixed(4)}
                               </p>
                             </div>
                             <Button variant='outline' size='sm' className='mt-2'>
-                              Ver en mapa
+                              {t("viewOnMap")}
                             </Button>
                           </CardContent>
                         </Card>
@@ -189,7 +185,7 @@ export default function AdministradorFincas() {
             {/* Activos */}
             {activeTab === "activos" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Comunidades Gestionadas</h2>
+                <h2 className="text-2xl font-bold mb-4">{t("managedCommunities")}</h2>
                 <div className="grid gap-4">
                   {comunidades.map((comunidad) => (
                     <Card key={comunidad.id} className="hover:bg-gray-50 transition-colors">
@@ -199,7 +195,7 @@ export default function AdministradorFincas() {
                             <h3 className="font-bold text-lg">{comunidad.nombre}</h3>
                             <p className="text-gray-600">{comunidad.direccion}</p>
                           </div>
-                          <Button variant="outline" size="sm">Ver detalles</Button>
+                          <Button variant="outline" size="sm">{t("viewDetails")}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -211,16 +207,16 @@ export default function AdministradorFincas() {
             {/* Servicios Actuales */}
             {activeTab === "servicios" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Servicios Actuales</h2>
-                <p className="text-gray-600 mb-4">Redirigiendo al dashboard de proveedores de servicios...</p>
-                <Button>Ir al Dashboard de Servicios</Button>
+                <h2 className="text-2xl font-bold mb-4">{t("currentServices")}</h2>
+                <p className="text-gray-600 mb-4">{t("redirectingToServiceDashboard")}</p>
+                <Button>{t("goToServiceDashboard")}</Button>
               </div>
             )}
 
             {/* Juntas */}
             {activeTab === "juntas" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Juntas de Comunidades</h2>
+                <h2 className="text-2xl font-bold mb-4">{t("communityMeetings")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Calendar
@@ -232,7 +228,7 @@ export default function AdministradorFincas() {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-3">
-                      Juntas programadas: {date?.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                      {t("scheduledMeetings")}: {date?.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { month: 'long', year: 'numeric' })}
                     </h3>
                     {filteredJuntas.length > 0 ? (
                       <div className="space-y-3">
@@ -241,7 +237,7 @@ export default function AdministradorFincas() {
                             <CardContent className="p-4">
                               <p className="font-bold">{junta.comunidad}</p>
                               <p className="text-sm text-gray-600">
-                                {junta.fecha.toLocaleDateString('es-ES')} - {junta.hora}
+                                {junta.fecha.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')} - {junta.hora}
                               </p>
                               <p>{junta.asunto}</p>
                             </CardContent>
@@ -249,7 +245,7 @@ export default function AdministradorFincas() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500">No hay juntas programadas para este mes.</p>
+                      <p className="text-gray-500">{t("noMeetingsThisMonth")}</p>
                     )}
                   </div>
                 </div>
@@ -259,17 +255,17 @@ export default function AdministradorFincas() {
             {/* Temas Pendientes */}
             {activeTab === "pendientes" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Temas Pendientes</h2>
+                <h2 className="text-2xl font-bold mb-4">{t("pendingIssues")}</h2>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comunidad</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Importe/Estado</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("community")}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("type")}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("description")}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("amountStatus")}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("date")}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("action")}</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -292,7 +288,7 @@ export default function AdministradorFincas() {
                           <td className="px-6 py-4 whitespace-nowrap">{tema.importe || tema.estado}</td>
                           <td className="px-6 py-4 whitespace-nowrap">{tema.fecha}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Button variant="outline" size="sm">Gestionar</Button>
+                            <Button variant="outline" size="sm">{t("manage")}</Button>
                           </td>
                         </tr>
                       ))}
