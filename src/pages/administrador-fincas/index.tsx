@@ -89,7 +89,7 @@ export default function AdministradorFincas() {
 
       <Header />
 
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-gray-100 pt-16">
         {/* Sidebar */}
         <div className="w-64 bg-gray-800 text-white shadow-lg">
           <div className="p-4">

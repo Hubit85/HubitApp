@@ -21,7 +21,7 @@ export default function Dashboard() {
       
       <Header />
       
-      <div className='min-h-screen flex flex-col relative overflow-hidden bg-background'>
+      <div className='min-h-screen flex flex-col relative overflow-hidden bg-background pt-16'>
         {/* Background Image - Luxury Apartment with overlay */}
         <div 
           className='absolute inset-0 z-0 bg-cover bg-center bg-no-repeat'

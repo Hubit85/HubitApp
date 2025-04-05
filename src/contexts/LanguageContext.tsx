@@ -807,7 +807,7 @@ const translations: Translations = {
     zh: "锁具更换"
   },
   
-  // Estate Administrator Dashboard
+  // Estate Administrator Dashboard - Specific translations for administrador-fincas
   "map": {
     en: "Map",
     es: "Mapa",
@@ -961,20 +961,6 @@ const translations: Translations = {
     fr: "Gérer",
     ru: "Управлять",
     zh: "管理"
-  },
-  "dashboardDesc": {
-    en: "Dashboard for estate administrators",
-    es: "Dashboard para administradores de fincas",
-    fr: "Tableau de bord pour les administrateurs immobiliers",
-    ru: "Панель управления для администраторов недвижимости",
-    zh: "物业管理员仪表板"
-  },
-  "particular": {
-    en: "What Do You Need?",
-    es: "¿Qué necesitas?",
-    fr: "De quoi avez-vous besoin?",
-    ru: "Что вам нужно?",
-    zh: "您需要什么？"
   },
 };
 

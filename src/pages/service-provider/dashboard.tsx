@@ -113,7 +113,7 @@ export default function ServiceProviderDashboard() {
       
       <Header />
       
-      <div className='flex h-screen bg-background'>
+      <div className='flex h-screen bg-background pt-16'>
         {/* Sidebar */}
         <div className='w-64 bg-[hsl(0,0%,20%)] text-white shadow-lg'>
           <div className='p-4'>
