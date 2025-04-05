@@ -35,30 +35,30 @@ export default function Home() {
             {t("professionalServices")}
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Link href="/auth/register" passHref>
-              <Button size="lg" className="text-lg px-8 py-6">
-                {t("register")}
+          <div className='flex flex-col sm:flex-row gap-4 justify-center mt-8'>
+            <Link href='/auth/register' passHref>
+              <Button size='lg' className='text-lg px-8 py-6'>
+                {t('register')}
               </Button>
             </Link>
-            <Link href="/auth/login" passHref>
+            <Link href='/auth/login' passHref>
               <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20"
+                size='lg' 
+                variant='outline' 
+                className='text-lg px-8 py-6 bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20'
               >
-                {t("login")}
-              </Button>
-            </Link>
-            <Link href="/administrador-fincas" passHref>
-              <Button 
-                size="lg"
-                className="text-lg px-8 py-6"
-              >
-                Administrador de Fincas
+                {t('login')}
               </Button>
             </Link>
           </div>
+          <Link href="/administrador-fincas" passHref>
+            <Button 
+              size="lg"
+              className="text-lg px-8 py-6"
+            >
+              Administrador de Fincas
+            </Button>
+          </Link>
         </div>
       </main>
     </>

@@ -19,129 +19,129 @@ export default function Dashboard() {
         <meta name="description" content={t("professionalServices")} />
       </Head>
       
-      <div className="min-h-screen flex flex-col relative overflow-hidden">
+      <div className='min-h-screen flex flex-col relative overflow-hidden bg-gray-100'>
         {/* Background Image - Luxury Apartment */}
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          className='absolute inset-0 z-0 bg-cover bg-center bg-no-repeat'
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')",
-            backgroundSize: "cover",
-            filter: "brightness(0.9)",
+            backgroundImage: 'url(\'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80\')',
+            backgroundSize: 'cover',
+            filter: 'brightness(0.9)',
             opacity: 0.2
           }}
         />
         
-        <main className="flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8 z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto">
+        <main className='flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8 z-10'>
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto'>
             {/* Who We Are Card - Expandable on hover */}
             <motion.div
-              onMouseEnter={() => setExpandedCard("whoWeAre")}
+              onMouseEnter={() => setExpandedCard('whoWeAre')}
               onMouseLeave={() => setExpandedCard(null)}
               layout
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="relative"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className='relative'
             >
-              <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-blue-200 border-2 overflow-hidden">
-                <CardHeader className="bg-blue-50/80">
-                  <CardTitle className="text-2xl font-serif text-blue-800">{t("whoWeAre")}</CardTitle>
+              <Card className='w-full shadow-lg bg-white rounded-lg overflow-hidden'>
+                <CardHeader className='bg-gray-50'>
+                  <CardTitle className='text-2xl font-bold text-gray-800'>{t('whoWeAre')}</CardTitle>
                 </CardHeader>
                 <motion.div
-                  initial={{ height: "150px" }}
+                  initial={{ height: '150px' }}
                   animate={{ 
-                    height: expandedCard === "whoWeAre" ? "auto" : "150px",
-                    overflow: expandedCard === "whoWeAre" ? "visible" : "hidden"
+                    height: expandedCard === 'whoWeAre' ? 'auto' : '150px',
+                    overflow: expandedCard === 'whoWeAre' ? 'visible' : 'hidden'
                   }}
                   transition={{ duration: 0.3 }}
                 >
-                  <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
+                  <CardContent className='text-gray-700 space-y-4 p-6'>
                     <p>
-                      {t("whoWeAreDesc1")}
+                      {t('whoWeAreDesc1')}
                     </p>
                     <p>
-                      {t("whoWeAreDesc2")}
+                      {t('whoWeAreDesc2')}
                     </p>
                   </CardContent>
                 </motion.div>
-                {expandedCard !== "whoWeAre" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none" />
+                {expandedCard !== 'whoWeAre' && (
+                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none' />
                 )}
               </Card>
             </motion.div>
             
             {/* How It Works Card - Expandable on hover */}
             <motion.div
-              onMouseEnter={() => setExpandedCard("howItWorks")}
+              onMouseEnter={() => setExpandedCard('howItWorks')}
               onMouseLeave={() => setExpandedCard(null)}
               layout
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="relative"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className='relative'
             >
-              <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-green-200 border-2 overflow-hidden">
-                <CardHeader className="bg-green-50/80">
-                  <CardTitle className="text-2xl font-serif text-green-800">{t("howItWorks")}</CardTitle>
+              <Card className='w-full shadow-lg bg-white rounded-lg overflow-hidden'>
+                <CardHeader className='bg-gray-50'>
+                  <CardTitle className='text-2xl font-bold text-gray-800'>{t('howItWorks')}</CardTitle>
                 </CardHeader>
                 <motion.div
-                  initial={{ height: "150px" }}
+                  initial={{ height: '150px' }}
                   animate={{ 
-                    height: expandedCard === "howItWorks" ? "auto" : "150px",
-                    overflow: expandedCard === "howItWorks" ? "visible" : "hidden"
+                    height: expandedCard === 'howItWorks' ? 'auto' : '150px',
+                    overflow: expandedCard === 'howItWorks' ? 'visible' : 'hidden'
                   }}
                   transition={{ duration: 0.3 }}
                 >
-                  <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
+                  <CardContent className='text-gray-700 space-y-4 p-6'>
                     <p>
-                      {t("howItWorksDesc")}
+                      {t('howItWorksDesc')}
                     </p>
-                    <ol className="list-decimal pl-5 space-y-2">
-                      <li>{t("step1")}</li>
-                      <li>{t("step2")}</li>
-                      <li>{t("step3")}</li>
-                      <li>{t("step4")}</li>
-                      <li>{t("step5")}</li>
+                    <ol className='list-decimal pl-5 space-y-2'>
+                      <li>{t('step1')}</li>
+                      <li>{t('step2')}</li>
+                      <li>{t('step3')}</li>
+                      <li>{t('step4')}</li>
+                      <li>{t('step5')}</li>
                     </ol>
                   </CardContent>
                 </motion.div>
-                {expandedCard !== "howItWorks" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none" />
+                {expandedCard !== 'howItWorks' && (
+                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none' />
                 )}
               </Card>
             </motion.div>
             
             {/* Our Greatest Achievements Card - Expandable on hover */}
             <motion.div
-              onMouseEnter={() => setExpandedCard("achievements")}
+              onMouseEnter={() => setExpandedCard('achievements')}
               onMouseLeave={() => setExpandedCard(null)}
               layout
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="relative"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className='relative'
             >
-              <Card className="w-full shadow-lg bg-white/70 backdrop-blur-sm border-amber-200 border-2 overflow-hidden">
-                <CardHeader className="bg-amber-50/80">
-                  <CardTitle className="text-2xl font-serif text-amber-800">{t("achievements")}</CardTitle>
+              <Card className='w-full shadow-lg bg-white rounded-lg overflow-hidden'>
+                <CardHeader className='bg-gray-50'>
+                  <CardTitle className='text-2xl font-bold text-gray-800'>{t('achievements')}</CardTitle>
                 </CardHeader>
                 <motion.div
-                  initial={{ height: "150px" }}
+                  initial={{ height: '150px' }}
                   animate={{ 
-                    height: expandedCard === "achievements" ? "auto" : "150px",
-                    overflow: expandedCard === "achievements" ? "visible" : "hidden"
+                    height: expandedCard === 'achievements' ? 'auto' : '150px',
+                    overflow: expandedCard === 'achievements' ? 'visible' : 'hidden'
                   }}
                   transition={{ duration: 0.3 }}
                 >
-                  <CardContent className="text-gray-700 space-y-4 p-6 font-sans">
+                  <CardContent className='text-gray-700 space-y-4 p-6'>
                     <p>
-                      {t("achievementsDesc")}
+                      {t('achievementsDesc')}
                     </p>
-                    <ul className="list-disc pl-5 space-y-2">
-                      <li>{t("achievement1")}</li>
-                      <li>{t("achievement2")}</li>
-                      <li>{t("achievement3")}</li>
-                      <li>{t("achievement4")}</li>
-                      <li>{t("achievement5")}</li>
+                    <ul className='list-disc pl-5 space-y-2'>
+                      <li>{t('achievement1')}</li>
+                      <li>{t('achievement2')}</li>
+                      <li>{t('achievement3')}</li>
+                      <li>{t('achievement4')}</li>
+                      <li>{t('achievement5')}</li>
                     </ul>
                   </CardContent>
                 </motion.div>
-                {expandedCard !== "achievements" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none" />
+                {expandedCard !== 'achievements' && (
+                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white/80 to-transparent pointer-events-none' />
                 )}
               </Card>
             </motion.div>
