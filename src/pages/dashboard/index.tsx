@@ -19,8 +19,6 @@ export default function Dashboard() {
         <meta name="description" content={t("professionalServices")} />
       </Head>
       
-      <Header />
-      
       <div className='min-h-screen flex flex-col relative overflow-hidden bg-background pt-16'>
         {/* Background Image - Luxury Apartment with overlay */}
         <div 
