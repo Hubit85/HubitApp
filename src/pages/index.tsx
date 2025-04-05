@@ -1,3 +1,4 @@
+
 import React from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
@@ -51,14 +52,6 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          <Link href="/administrador-fincas" passHref>
-            <Button 
-              size="lg"
-              className="text-lg px-8 py-6"
-            >
-              Administrador de Fincas
-            </Button>
-          </Link>
         </div>
       </main>
     </>
