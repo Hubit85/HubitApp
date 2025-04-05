@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Calendar as CalendarIcon, ClipboardList, Building, Wrench } from "lucide-react";
 import { Header } from "@/components/layout/Header";
+import { useRouter } from "next/router";
 
 // Coordenadas de Vizcaya, España
 const center = {
@@ -58,6 +58,7 @@ const temasPendientes = [
 
 export default function AdministradorFincas() {
   const { t, language } = useLanguage();
+  const router = useRouter();
   const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [activeTab, setActiveTab] = useState("mapa");
@@ -68,6 +69,10 @@ export default function AdministradorFincas() {
 
   const closeInfoWindow = () => {
     setSelectedMarker(null);
+  };
+
+  const handleServicesDashboardClick = () => {
+    router.push("/service-provider/dashboard");
   };
 
   const filteredJuntas = juntas.filter(junta => {
@@ -209,7 +214,7 @@ export default function AdministradorFincas() {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold mb-4">{t("currentServices")}</h2>
                 <p className="text-gray-600 mb-4">{t("redirectingToServiceDashboard")}</p>
-                <Button>{t("goToServiceDashboard")}</Button>
+                <Button onClick={handleServicesDashboardClick}>{t("goToServiceDashboard")}</Button>
               </div>
             )}
 
