@@ -450,7 +450,7 @@ export default function ServiceProviderDashboard() {
 
   // Function to handle navigation to administrator dashboard
   const handleAdminDashboardClick = () => {
-    router.push("/administrador-fincas");
+    router.push('/administrador-fincas');
   };
 
   return (
@@ -549,12 +549,28 @@ export default function ServiceProviderDashboard() {
                 {t('cableTV')}
               </Button>
               <Button 
-                variant={activeTab === 'admin' ? 'default' : 'ghost'} 
+                variant={activeTab === 'packageDelivery' ? 'default' : 'ghost'} 
                 className='w-full justify-start'
-                onClick={() => handleAdminDashboardClick()}
+                onClick={() => setActiveTab('packageDelivery')}
               >
-                <Building className='mr-2 h-5 w-5' />
-                {t("estateAdministrator")}
+                <Package className='mr-2 h-5 w-5' />
+                {t('packageDelivery')}
+              </Button>
+              <Button 
+                variant={activeTab === 'hairdressing' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('hairdressing')}
+              >
+                <Scissors className='mr-2 h-5 w-5' />
+                {t('hairdressing')}
+              </Button>
+              <Button 
+                variant={activeTab === 'catering' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('catering')}
+              >
+                <Utensils className='mr-2 h-5 w-5' />
+                {t('catering')}
               </Button>
             </nav>
           </div>
@@ -601,7 +617,7 @@ export default function ServiceProviderDashboard() {
             )}
             
             {/* Service Category Tabs */}
-            {activeTab !== "overview" && activeTab !== "admin" && (
+            {activeTab !== "overview" && (
               <div className="grid grid-cols-1 gap-8">
                 {/* Bids Section */}
                 <Card className="shadow-md">
@@ -666,15 +682,6 @@ export default function ServiceProviderDashboard() {
                     )}
                   </CardContent>
                 </Card>
-              </div>
-            )}
-            
-            {/* Admin Redirect Tab */}
-            {activeTab === "admin" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("estateAdministrator")}</h2>
-                <p className="text-gray-600 mb-4">{t("redirectingToAdminDashboard")}</p>
-                <Button onClick={handleAdminDashboardClick}>{t("goToAdminDashboard")}</Button>
               </div>
             )}
           </div>
