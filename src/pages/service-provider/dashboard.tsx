@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin, Shovel, Construction, Brush, Sparkles, Palette, Leaf, Gem } from 'lucide-react';
+import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin, Shovel, Construction, Brush, Sparkles, Palette, Leaf, Gem, Tv, Key, Package, Scissors, Utensils } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
@@ -45,7 +45,7 @@ export default function ServiceProviderDashboard() {
     { id: 'roofing', name: t('roofing'), icon: <Home className='mr-2 h-5 w-5' /> },
     { id: 'hvac', name: t('hvac'), icon: <Thermometer className='mr-2 h-5 w-5' /> },
     { id: 'carpentry', name: t('carpentry'), icon: <Hammer className='mr-2 h-5 w-5' /> },
-    { id: 'locksmith', name: t('locksmith'), icon: <Lock className='mr-2 h-5 w-5' /> },
+    { id: 'locksmith', name: t('locksmith'), icon: <Key className='mr-2 h-5 w-5' /> },
     { id: 'appliance', name: t('applianceRepair'), icon: <Wrench className='mr-2 h-5 w-5' /> },
     { id: 'landscaping', name: t('landscaping'), icon: <Trees className='mr-2 h-5 w-5' /> },
     { id: 'moving', name: t('movingServices'), icon: <Truck className='mr-2 h-5 w-5' /> },
@@ -57,6 +57,10 @@ export default function ServiceProviderDashboard() {
     { id: 'decoration', name: t('interiorDecoration'), icon: <Palette className='mr-2 h-5 w-5' /> },
     { id: 'gardening', name: t('gardening'), icon: <Leaf className='mr-2 h-5 w-5' /> },
     { id: 'renovation', name: t('completeRenovation'), icon: <Gem className='mr-2 h-5 w-5' /> },
+    { id: 'cableTV', name: t('cableTV'), icon: <Tv className='mr-2 h-5 w-5' /> },
+    { id: 'packageDelivery', name: t('packageDelivery'), icon: <Package className='mr-2 h-5 w-5' /> },
+    { id: 'hairdressing', name: t('hairdressing'), icon: <Scissors className='mr-2 h-5 w-5' /> },
+    { id: 'catering', name: t('catering'), icon: <Utensils className='mr-2 h-5 w-5' /> },
   ];
 
   // Sample bids data for each category - 10 bids per category
@@ -288,6 +292,54 @@ export default function ServiceProviderDashboard() {
       { id: 'renovation-8', amount: '$5500', scope: t('outdoorLivingSpace'), company: t('outdoorCreators') },
       { id: 'renovation-9', amount: '$11000', scope: t('masterSuiteRenovation'), company: t('luxurySuites') },
       { id: 'renovation-10', amount: '$25000', scope: t('historicHomeModernization'), company: t('modernHeritage') }
+    ],
+    cableTV: [
+      { id: 'cableTV-1', amount: '$350', scope: t('basicCableInstallation'), company: t('cableConnectors') },
+      { id: 'cableTV-2', amount: '$550', scope: t('premiumChannelPackage'), company: t('eliteEntertainment') },
+      { id: 'cableTV-3', amount: '$250', scope: t('tvMounting'), company: t('screenSetup') },
+      { id: 'cableTV-4', amount: '$450', scope: t('homeTheaterSetup'), company: t('cinemaAtHome') },
+      { id: 'cableTV-5', amount: '$150', scope: t('routerConfiguration'), company: t('wifiWizards') },
+      { id: 'cableTV-6', amount: '$650', scope: t('fullHomeEntertainment'), company: t('entertainmentExperts') },
+      { id: 'cableTV-7', amount: '$200', scope: t('cableTroubleshooting'), company: t('signalFixers') },
+      { id: 'cableTV-8', amount: '$300', scope: t('satelliteInstallation'), company: t('skySignal') },
+      { id: 'cableTV-9', amount: '$400', scope: t('streamingDeviceSetup'), company: t('streamTeam') },
+      { id: 'cableTV-10', amount: '$750', scope: t('smartTVIntegration'), company: t('smartHomeMedia') }
+    ],
+    packageDelivery: [
+      { id: 'packageDelivery-1', amount: '$50', scope: t('sameDay'), company: t('rapidDelivery') },
+      { id: 'packageDelivery-2', amount: '$30', scope: t('nextDay'), company: t('reliableShipping') },
+      { id: 'packageDelivery-3', amount: '$75', scope: t('fragileItems'), company: t('carefulCarriers') },
+      { id: 'packageDelivery-4', amount: '$100', scope: t('bulkyItems'), company: t('heavyLifters') },
+      { id: 'packageDelivery-5', amount: '$45', scope: t('documentDelivery'), company: t('docuRun') },
+      { id: 'packageDelivery-6', amount: '$60', scope: t('groceryDelivery'), company: t('foodFast') },
+      { id: 'packageDelivery-7', amount: '$40', scope: t('medicineDelivery'), company: t('medExpress') },
+      { id: 'packageDelivery-8', amount: '$80', scope: t('furnitureDelivery'), company: t('furnishingFleet') },
+      { id: 'packageDelivery-9', amount: '$35', scope: t('localDelivery'), company: t('neighborhoodCouriers') },
+      { id: 'packageDelivery-10', amount: '$120', scope: t('internationalShipping'), company: t('globalSend') }
+    ],
+    hairdressing: [
+      { id: 'hairdressing-1', amount: '$45', scope: t('basicHaircut'), company: t('styleStudio') },
+      { id: 'hairdressing-2', amount: '$75', scope: t('colorTreatment'), company: t('colorMasters') },
+      { id: 'hairdressing-3', amount: '$120', scope: t('weddingHairstyle'), company: t('brideBeauty') },
+      { id: 'hairdressing-4', amount: '$60', scope: t('blowDry'), company: t('blowoutBar') },
+      { id: 'hairdressing-5', amount: '$150', scope: t('hairExtensions'), company: t('lengthLuxury') },
+      { id: 'hairdressing-6', amount: '$90', scope: t('highlights'), company: t('dimensionDesigners') },
+      { id: 'hairdressing-7', amount: '$40', scope: t('trimAndStyle'), company: t('quickCuts') },
+      { id: 'hairdressing-8', amount: '$180', scope: t('keratin'), company: t('smoothSolutions') },
+      { id: 'hairdressing-9', amount: '$65', scope: t('menGrooming'), company: t('gentlemenCuts') },
+      { id: 'hairdressing-10', amount: '$110', scope: t('specialOccasion'), company: t('eventElegance') }
+    ],
+    catering: [
+      { id: 'catering-1', amount: '$350', scope: t('smallGathering'), company: t('intimateEats') },
+      { id: 'catering-2', amount: '$750', scope: t('corporateEvent'), company: t('businessBites') },
+      { id: 'catering-3', amount: '$1200', scope: t('wedding'), company: t('weddingFeasts') },
+      { id: 'catering-4', amount: '$500', scope: t('birthdayParty'), company: t('celebrationChefs') },
+      { id: 'catering-5', amount: '$250', scope: t('deliveryMeal'), company: t('homeGourmet') },
+      { id: 'catering-6', amount: '$450', scope: t('cocktailParty'), company: t('mixAndMingle') },
+      { id: 'catering-7', amount: '$650', scope: t('holidayDinner'), company: t('festiveFeasts') },
+      { id: 'catering-8', amount: '$300', scope: t('brunch'), company: t('morningDelights') },
+      { id: 'catering-9', amount: '$850', scope: t('fullServiceEvent'), company: t('completeCreations') },
+      { id: 'catering-10', amount: '$400', scope: t('dessertBar'), company: t('sweetTreats') }
     ]
   };
 
@@ -471,6 +523,30 @@ export default function ServiceProviderDashboard() {
               >
                 <Home className='mr-2 h-5 w-5' />
                 {t('roofTiles')}
+              </Button>
+              <Button 
+                variant={activeTab === 'moving' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('moving')}
+              >
+                <Truck className='mr-2 h-5 w-5' />
+                {t('movingServices')}
+              </Button>
+              <Button 
+                variant={activeTab === 'locksmith' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('locksmith')}
+              >
+                <Key className='mr-2 h-5 w-5' />
+                {t('locksmith')}
+              </Button>
+              <Button 
+                variant={activeTab === 'cableTV' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('cableTV')}
+              >
+                <Tv className='mr-2 h-5 w-5' />
+                {t('cableTV')}
               </Button>
               <Button 
                 variant={activeTab === 'admin' ? 'default' : 'ghost'} 
