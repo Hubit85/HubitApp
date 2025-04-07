@@ -14,7 +14,7 @@ export function Header() {
     <header className='w-full py-4 px-4 sm:px-6 lg:px-8 bg-white shadow-sm'>
       <div className='container mx-auto flex justify-between items-center'>
         <div className='flex flex-col'>
-          <Link href={isLoggedIn ? '/dashboard' : '/'} className='text-2xl font-bold text-white'>
+          <Link href={isLoggedIn ? '/dashboard' : '/'} className='text-2xl font-bold text-black tracking-wide'>
             HANDYMAN
           </Link>
           <p className='text-sm text-gray-600'>Professional services for your home</p>
