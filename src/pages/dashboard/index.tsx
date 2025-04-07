@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -15,9 +17,52 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>{t("dashboard")} - {t("handyman")}</title>
-        <meta name="description" content={t("professionalServices")} />
+        <title>{t('dashboard')} | {t('handyman')}</title>
+        <meta name='description' content={t('dashboardDesc')} />
       </Head>
+      
+      <Header />
+      
+      <main className='min-h-screen bg-gray-100 pt-16'>
+        <div className='container mx-auto px-4 py-8'>
+          <h1 className='text-3xl font-bold mb-8'>{t('dashboard')}</h1>
+          
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            {/* Service Provider Card */}
+            <div className='bg-white rounded-lg shadow-md overflow-hidden'>
+              <div className='p-6'>
+                <h2 className='text-xl font-semibold mb-2'>{t('serviceProvider')}</h2>
+                <p className='text-gray-600 mb-4'>{t('serviceProviderDesc')}</p>
+                <Link href='/service-provider/dashboard' passHref>
+                  <Button className='w-full'>{t('accessServiceDashboard')}</Button>
+                </Link>
+              </div>
+            </div>
+            
+            {/* Estate Administrator Card */}
+            <div className='bg-white rounded-lg shadow-md overflow-hidden'>
+              <div className='p-6'>
+                <h2 className='text-xl font-semibold mb-2'>{t('estateAdministrator')}</h2>
+                <p className='text-gray-600 mb-4'>{t('estateAdministratorDesc')}</p>
+                <Link href='/administrador-fincas' passHref>
+                  <Button className='w-full'>{t('accessAdminDashboard')}</Button>
+                </Link>
+              </div>
+            </div>
+            
+            {/* Community Member Card */}
+            <div className='bg-white rounded-lg shadow-md overflow-hidden'>
+              <div className='p-6'>
+                <h2 className='text-xl font-semibold mb-2'>{t('communityMember')}</h2>
+                <p className='text-gray-600 mb-4'>{t('communityMemberDesc')}</p>
+                <Link href='/community-member' passHref>
+                  <Button className='w-full'>{t('accessCommunityDashboard')}</Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
       
       <div className='min-h-screen flex flex-col relative overflow-hidden bg-background pt-16'>
         {/* Background Image - Luxury Apartment with overlay */}
