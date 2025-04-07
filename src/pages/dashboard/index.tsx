@@ -222,10 +222,11 @@ export default function Dashboard() {
         >
           {/* Community Member Box */}
           <div 
-            className="flex-1 bg-cover bg-center relative"
+            className="flex-1 bg-cover bg-center relative cursor-pointer"
             style={{ 
               backgroundImage: "url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')"
             }}
+            onClick={() => router.push("/community-member")}
           >
             <div className="absolute inset-0 bg-[hsl(0,0%,0%)]/70 hover:bg-[hsl(0,0%,0%)]/60 transition-colors flex items-center justify-center">
               <h2 className="text-4xl font-serif text-white font-bold text-center px-6">{t("communityMember")}</h2>
