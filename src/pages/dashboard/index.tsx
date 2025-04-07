@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
@@ -8,57 +7,57 @@ import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// Luxury home images
+// Luxury home images - Pisos de lujo comunitarios
 const luxuryHomes = [
   {
-    url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
-    title: "Modern Beachfront Villa",
-    location: "Malibu, California"
-  },
-  {
-    url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1475&q=80",
-    title: "Contemporary Suburban Estate",
-    location: "Hamptons, New York"
-  },
-  {
     url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1453&q=80",
-    title: "Elegant Country Mansion",
-    location: "Tuscany, Italy"
+    title: "Residencial Élite Panorama",
+    location: "Comunidad de lujo en Madrid"
   },
   {
     url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    title: "Luxury Lakeside Retreat",
-    location: "Lake Como, Italy"
+    title: "Complejo Residencial Altavista",
+    location: "Urbanización exclusiva en Barcelona"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1475&q=80",
+    title: "Residencial Parque Dorado",
+    location: "Comunidad premium en Valencia"
   },
   {
     url: "https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    title: "Modern Architectural Marvel",
-    location: "Beverly Hills, California"
+    title: "Residencial Mirador del Mar",
+    location: "Comunidad de lujo en Marbella"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    title: "Complejo Platinum Towers",
+    location: "Pisos exclusivos en Bilbao"
   },
   {
     url: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1484&q=80",
-    title: "Mediterranean Coastal Villa",
-    location: "Santorini, Greece"
+    title: "Residencial Costa Esmeralda",
+    location: "Comunidad premium en Málaga"
   },
   {
     url: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    title: "Exclusive Hillside Estate",
-    location: "Aspen, Colorado"
+    title: "Residencial Jardines del Prado",
+    location: "Urbanización de lujo en Sevilla"
   },
   {
     url: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    title: "Sophisticated Urban Penthouse",
-    location: "Manhattan, New York"
+    title: "Residencial Montecarlo",
+    location: "Comunidad exclusiva en San Sebastián"
   },
   {
-    url: "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    title: "Luxury Mountain Chalet",
-    location: "Swiss Alps, Switzerland"
+    url: "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    title: "Complejo Élite Skyline",
+    location: "Pisos de lujo en Zaragoza"
   },
   {
     url: "https://images.unsplash.com/photo-1600047508788-26df7b3d6b93?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-    title: "Waterfront Modern Masterpiece",
-    location: "Miami Beach, Florida"
+    title: "Residencial Bahía Exclusiva",
+    location: "Comunidad premium en Alicante"
   }
 ];
 
@@ -89,16 +88,14 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>{t('dashboard')} | {t('handyman')}</title>
-        <meta name='description' content={t('dashboardDesc')} />
+        <title>{t('handyman')} | {t('luxuryResidences')}</title>
+        <meta name='description' content={t('luxuryResidencesDesc')} />
       </Head>
       
       <Header />
       
       <main className='min-h-screen bg-gray-100 pt-16'>
         <div className='container mx-auto px-4 py-8'>
-          <h1 className='text-3xl font-bold mb-8'>{t('dashboard')}</h1>
-          
           {/* Luxury Homes Carousel */}
           <div className='relative w-full h-[600px] rounded-xl overflow-hidden shadow-xl mb-12'>
             {/* Image */}
@@ -186,10 +183,16 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
-                      {t('whoWeAreDesc1')}
+                      Somos una empresa líder en la gestión de comunidades residenciales de lujo, con más de 20 años de experiencia transformando la vida comunitaria en una experiencia exclusiva y sofisticada.
                     </p>
                     <p>
-                      {t('whoWeAreDesc2')}
+                      Nuestro equipo de profesionales altamente cualificados se dedica a proporcionar servicios de administración de fincas de élite, garantizando que cada comunidad que gestionamos mantenga los más altos estándares de calidad, confort y seguridad.
+                    </p>
+                    <p>
+                      Nos especializamos en comunidades residenciales premium, donde cada detalle importa. Desde la gestión de instalaciones de vanguardia como piscinas climatizadas, gimnasios equipados con tecnología de última generación y zonas comunes diseñadas por arquitectos de renombre, hasta la coordinación de servicios de conserjería 24/7 y seguridad privada.
+                    </p>
+                    <p>
+                      Nuestra filosofía se basa en la excelencia, la discreción y la atención personalizada, creando entornos residenciales donde el lujo se vive día a día.
                     </p>
                   </CardContent>
                 </motion.div>
@@ -221,14 +224,15 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
-                      {t('howItWorksDesc')}
+                      Nuestro sistema de gestión integral revoluciona la administración de comunidades de lujo, combinando tecnología avanzada con un servicio personalizado excepcional.
                     </p>
-                    <ol className='list-decimal pl-5 space-y-2'>
-                      <li>{t('step1')}</li>
-                      <li>{t('step2')}</li>
-                      <li>{t('step3')}</li>
-                      <li>{t('step4')}</li>
-                      <li>{t('step5')}</li>
+                    <ol className='list-decimal pl-5 space-y-3'>
+                      <li><strong>Evaluación Premium:</strong> Realizamos un análisis exhaustivo de su comunidad para identificar oportunidades de mejora y optimización, diseñando un plan de gestión a medida que refleje la exclusividad de su residencial.</li>
+                      <li><strong>Plataforma Digital Exclusiva:</strong> Proporcionamos acceso a nuestra aplicación propietaria donde residentes y administradores pueden comunicarse, gestionar incidencias y acceder a servicios premium con total comodidad.</li>
+                      <li><strong>Gestión Financiera Transparente:</strong> Implementamos sistemas de contabilidad avanzados con informes detallados y accesibles en tiempo real, garantizando una gestión impecable de los recursos comunitarios.</li>
+                      <li><strong>Mantenimiento Preventivo Elite:</strong> Nuestro equipo de mantenimiento especializado se anticipa a cualquier necesidad, preservando el valor y la estética de su comunidad con los más altos estándares.</li>
+                      <li><strong>Servicios Concierge:</strong> Ofrecemos un servicio de conserjería personalizado que atiende las necesidades individuales de cada residente, desde la organización de eventos privados hasta la coordinación de reformas exclusivas.</li>
+                      <li><strong>Asesoramiento Jurídico Especializado:</strong> Contamos con un equipo legal dedicado exclusivamente a comunidades de alto standing, garantizando el cumplimiento normativo y la protección de los intereses comunitarios.</li>
                     </ol>
                   </CardContent>
                 </motion.div>
@@ -260,14 +264,15 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
-                      {t('achievementsDesc')}
+                      A lo largo de nuestra trayectoria, hemos alcanzado hitos significativos que nos posicionan como líderes indiscutibles en la gestión de comunidades residenciales de élite:
                     </p>
-                    <ul className='list-disc pl-5 space-y-2'>
-                      <li>{t('achievement1')}</li>
-                      <li>{t('achievement2')}</li>
-                      <li>{t('achievement3')}</li>
-                      <li>{t('achievement4')}</li>
-                      <li>{t('achievement5')}</li>
+                    <ul className='list-disc pl-5 space-y-3'>
+                      <li><strong>Premio a la Excelencia en Gestión Residencial 2023:</strong> Reconocimiento otorgado por la Asociación de Administradores de Fincas por nuestro modelo innovador de gestión en comunidades de lujo.</li>
+                      <li><strong>Certificación ISO 9001 en Gestión de Calidad:</strong> Somos la primera empresa del sector en obtener esta certificación específica para administración de comunidades premium, garantizando procesos de máxima calidad.</li>
+                      <li><strong>Reducción Media del 30% en Costes Energéticos:</strong> Hemos implementado soluciones sostenibles de última generación en nuestras comunidades, logrando importantes ahorros sin comprometer el confort y la exclusividad.</li>
+                      <li><strong>Gestión de más de 100 Comunidades de Lujo:</strong> Nuestra cartera incluye algunos de los residenciales más prestigiosos del país, con un índice de satisfacción del cliente superior al 98%.</li>
+                      <li><strong>Desarrollo de Tecnología Propietaria:</strong> Nuestra plataforma digital de gestión comunitaria ha sido reconocida internacionalmente como una de las más avanzadas del sector inmobiliario de lujo.</li>
+                      <li><strong>Alianzas Estratégicas con Proveedores Premium:</strong> Hemos establecido colaboraciones exclusivas con las marcas más prestigiosas del sector, ofreciendo a nuestros residentes acceso a servicios y productos de élite con condiciones preferentes.</li>
                     </ul>
                   </CardContent>
                 </motion.div>
