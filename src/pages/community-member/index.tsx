@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +16,13 @@ import {
   Upload,
   Clock,
   FileSpreadsheet,
-  Building
+  Building,
+  Droplet,
+  Zap,
+  Paintbrush,
+  Hammer,
+  Construction,
+  Home
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
