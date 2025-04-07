@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin } from "lucide-react";
+import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin, Shovel, Construction, Brush, Sparkles, Palette, Leaf, Gem } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
@@ -39,18 +38,25 @@ export default function ServiceProviderDashboard() {
   
   // Define repair categories with icons
   const repairCategories: RepairCategory[] = [
-    { id: "plumbing", name: t("plumbing"), icon: <Droplet className="mr-2 h-5 w-5" /> },
-    { id: "electrical", name: t("electrical"), icon: <Zap className="mr-2 h-5 w-5" /> },
-    { id: "painting", name: t("painting"), icon: <Paintbrush className="mr-2 h-5 w-5" /> },
-    { id: "flooring", name: t("flooring"), icon: <Grid className="mr-2 h-5 w-5" /> },
-    { id: "roofing", name: t("roofing"), icon: <Home className="mr-2 h-5 w-5" /> },
-    { id: "hvac", name: t("hvac"), icon: <Thermometer className="mr-2 h-5 w-5" /> },
-    { id: "carpentry", name: t("carpentry"), icon: <Hammer className="mr-2 h-5 w-5" /> },
-    { id: "locksmith", name: t("locksmith"), icon: <Lock className="mr-2 h-5 w-5" /> },
-    { id: "appliance", name: t("applianceRepair"), icon: <Wrench className="mr-2 h-5 w-5" /> },
-    { id: "landscaping", name: t("landscaping"), icon: <Trees className="mr-2 h-5 w-5" /> },
-    { id: "moving", name: t("movingServices"), icon: <Truck className="mr-2 h-5 w-5" /> },
-    { id: "networking", name: t("homeNetworking"), icon: <Wifi className="mr-2 h-5 w-5" /> },
+    { id: 'plumbing', name: t('plumbing'), icon: <Droplet className='mr-2 h-5 w-5' /> },
+    { id: 'electrical', name: t('electrical'), icon: <Zap className='mr-2 h-5 w-5' /> },
+    { id: 'painting', name: t('painting'), icon: <Paintbrush className='mr-2 h-5 w-5' /> },
+    { id: 'flooring', name: t('flooring'), icon: <Grid className='mr-2 h-5 w-5' /> },
+    { id: 'roofing', name: t('roofing'), icon: <Home className='mr-2 h-5 w-5' /> },
+    { id: 'hvac', name: t('hvac'), icon: <Thermometer className='mr-2 h-5 w-5' /> },
+    { id: 'carpentry', name: t('carpentry'), icon: <Hammer className='mr-2 h-5 w-5' /> },
+    { id: 'locksmith', name: t('locksmith'), icon: <Lock className='mr-2 h-5 w-5' /> },
+    { id: 'appliance', name: t('applianceRepair'), icon: <Wrench className='mr-2 h-5 w-5' /> },
+    { id: 'landscaping', name: t('landscaping'), icon: <Trees className='mr-2 h-5 w-5' /> },
+    { id: 'moving', name: t('movingServices'), icon: <Truck className='mr-2 h-5 w-5' /> },
+    { id: 'networking', name: t('homeNetworking'), icon: <Wifi className='mr-2 h-5 w-5' /> },
+    { id: 'masonry', name: t('masonry'), icon: <Construction className='mr-2 h-5 w-5' /> },
+    { id: 'rooftiles', name: t('roofTiles'), icon: <Home className='mr-2 h-5 w-5' /> },
+    { id: 'restoration', name: t('restoration'), icon: <Brush className='mr-2 h-5 w-5' /> },
+    { id: 'cleaning', name: t('deepCleaning'), icon: <Sparkles className='mr-2 h-5 w-5' /> },
+    { id: 'decoration', name: t('interiorDecoration'), icon: <Palette className='mr-2 h-5 w-5' /> },
+    { id: 'gardening', name: t('gardening'), icon: <Leaf className='mr-2 h-5 w-5' /> },
+    { id: 'renovation', name: t('completeRenovation'), icon: <Gem className='mr-2 h-5 w-5' /> },
   ];
 
   // Sample bids data for each category - 10 bids per category
@@ -198,6 +204,90 @@ export default function ServiceProviderDashboard() {
       { id: "networking-8", amount: "$750", scope: t("homeTheaterSetup"), company: t("theaterTechs") },
       { id: "networking-9", amount: "$400", scope: t("gamingNetworkOptimization"), company: t("gamingGurus") },
       { id: "networking-10", amount: "$550", scope: t("officeNetworkSetup"), company: t("businessTech") }
+    ],
+    masonry: [
+      { id: 'masonry-1', amount: '$1200', scope: t('brickWallConstruction'), company: t('brickMasters') },
+      { id: 'masonry-2', amount: '$850', scope: t('stonePathway'), company: t('stoneCraftsmen') },
+      { id: 'masonry-3', amount: '$2500', scope: t('fireplaceConstruction'), company: t('fireplaceExperts') },
+      { id: 'masonry-4', amount: '$1800', scope: t('retainingWall'), company: t('solidStructures') },
+      { id: 'masonry-5', amount: '$950', scope: t('brickRepair'), company: t('brickDoctors') },
+      { id: 'masonry-6', amount: '$3500', scope: t('stoneFacade'), company: t('facadePros') },
+      { id: 'masonry-7', amount: '$750', scope: t('chimneyRepair'), company: t('chimneyMasters') },
+      { id: 'masonry-8', amount: '$1400', scope: t('outdoorKitchen'), company: t('outdoorLiving') },
+      { id: 'masonry-9', amount: '$650', scope: t('stepRepair'), company: t('stepByStep') },
+      { id: 'masonry-10', amount: '$4200', scope: t('stonePatio'), company: t('patioBuilders') }
+    ],
+    rooftiles: [
+      { id: 'rooftiles-1', amount: '$3500', scope: t('clayTileReplacement'), company: t('clayTilePros') },
+      { id: 'rooftiles-2', amount: '$2800', scope: t('concreteTileInstallation'), company: t('concreteMasters') },
+      { id: 'rooftiles-3', amount: '$1200', scope: t('tileRepair'), company: t('tileFixers') },
+      { id: 'rooftiles-4', amount: '$5500', scope: t('completeRoofTileReplacement'), company: t('completeRoofing') },
+      { id: 'rooftiles-5', amount: '$800', scope: t('ridgeTileRepair'), company: t('ridgeExperts') },
+      { id: 'rooftiles-6', amount: '$950', scope: t('valleyRepair'), company: t('valleyPros') },
+      { id: 'rooftiles-7', amount: '$4200', scope: t('slateTileInstallation'), company: t('slateSpecialists') },
+      { id: 'rooftiles-8', amount: '$650', scope: t('tileSealing'), company: t('sealTeam') },
+      { id: 'rooftiles-9', amount: '$1800', scope: t('decorativeTileWork'), company: t('decorativePros') },
+      { id: 'rooftiles-10', amount: '$3200', scope: t('historicTileRestoration'), company: t('heritageTiles') }
+    ],
+    restoration: [
+      { id: 'restoration-1', amount: '$2500', scope: t('historicHomeRestoration'), company: t('heritageMasters') },
+      { id: 'restoration-2', amount: '$1800', scope: t('woodworkRestoration'), company: t('woodCraftsmen') },
+      { id: 'restoration-3', amount: '$3500', scope: t('facadeRestoration'), company: t('facadeArtisans') },
+      { id: 'restoration-4', amount: '$950', scope: t('furnitureRestoration'), company: t('furnitureRevival') },
+      { id: 'restoration-5', amount: '$1200', scope: t('doorRestoration'), company: t('doorDoctors') },
+      { id: 'restoration-6', amount: '$4500', scope: t('completeInteriorRestoration'), company: t('interiorMasters') },
+      { id: 'restoration-7', amount: '$850', scope: t('staircaseRestoration'), company: t('stairPros') },
+      { id: 'restoration-8', amount: '$750', scope: t('windowRestoration'), company: t('windowWizards') },
+      { id: 'restoration-9', amount: '$5800', scope: t('historicKitchenRestoration'), company: t('kitchenCraftsmen') },
+      { id: 'restoration-10', amount: '$2200', scope: t('ornamentalPlasterwork'), company: t('plasterArtisans') }
+    ],
+    cleaning: [
+      { id: 'cleaning-1', amount: '$450', scope: t('deepHouseCleaning'), company: t('deepCleanPros') },
+      { id: 'cleaning-2', amount: '$350', scope: t('carpetDeepCleaning'), company: t('carpetRevival') },
+      { id: 'cleaning-3', amount: '$650', scope: t('postConstructionCleaning'), company: t('constructionCleanup') },
+      { id: 'cleaning-4', amount: '$250', scope: t('upholsteryCleaning'), company: t('upholsteryRefresh') },
+      { id: 'cleaning-5', amount: '$550', scope: t('airDuctCleaning'), company: t('freshAirSystems') },
+      { id: 'cleaning-6', amount: '$850', scope: t('exteriorPressureWashing'), company: t('pressurePros') },
+      { id: 'cleaning-7', amount: '$400', scope: t('windowDeepCleaning'), company: t('crystalClear') },
+      { id: 'cleaning-8', amount: '$750', scope: t('basementDeepCleaning'), company: t('basementRevival') },
+      { id: 'cleaning-9', amount: '$300', scope: t('kitchenDeepCleaning'), company: t('kitchenSanitizers') },
+      { id: 'cleaning-10', amount: '$950', scope: t('wholehouseDeepCleaning'), company: t('totalRefresh') }
+    ],
+    decoration: [
+      { id: 'decoration-1', amount: '$1800', scope: t('interiorStyling'), company: t('styleExperts') },
+      { id: 'decoration-2', amount: '$950', scope: t('colorConsultation'), company: t('colorWhisperers') },
+      { id: 'decoration-3', amount: '$2500', scope: t('furnitureArrangement'), company: t('spaceOptimizers') },
+      { id: 'decoration-4', amount: '$1200', scope: t('artworkSelection'), company: t('artCurators') },
+      { id: 'decoration-5', amount: '$3500', scope: t('completeRoomMakeover'), company: t('roomTransformers') },
+      { id: 'decoration-6', amount: '$750', scope: t('lightingDesign'), company: t('lightingArtists') },
+      { id: 'decoration-7', amount: '$1500', scope: t('seasonalDecoration'), company: t('seasonalExperts') },
+      { id: 'decoration-8', amount: '$850', scope: t('textileSelection'), company: t('fabricSpecialists') },
+      { id: 'decoration-9', amount: '$650', scope: t('accessoryStyling'), company: t('accentArtists') },
+      { id: 'decoration-10', amount: '$4500', scope: t('luxuryInteriorDesign'), company: t('luxuryLiving') }
+    ],
+    gardening: [
+      { id: 'gardening-1', amount: '$950', scope: t('gardenDesign'), company: t('gardenVisionaries') },
+      { id: 'gardening-2', amount: '$450', scope: t('plantSelection'), company: t('plantWhisperers') },
+      { id: 'gardening-3', amount: '$750', scope: t('vegetableGardenSetup'), company: t('edibleGardens') },
+      { id: 'gardening-4', amount: '$350', scope: t('seasonalPlanting'), company: t('seasonalGardeners') },
+      { id: 'gardening-5', amount: '$1200', scope: t('gardenRenovation'), company: t('gardenRevival') },
+      { id: 'gardening-6', amount: '$650', scope: t('herbGardenDesign'), company: t('herbSpecialists') },
+      { id: 'gardening-7', amount: '$2500', scope: t('japaneseGardenInstallation'), company: t('zenGardens') },
+      { id: 'gardening-8', amount: '$550', scope: t('gardenMaintenance'), company: t('gardenKeepers') },
+      { id: 'gardening-9', amount: '$850', scope: t('waterFeatureInstallation'), company: t('waterWizards') },
+      { id: 'gardening-10', amount: '$1800', scope: t('outdoorLightingDesign'), company: t('nightGardens') }
+    ],
+    renovation: [
+      { id: 'renovation-1', amount: '$15000', scope: t('completeHomeRenovation'), company: t('totalTransformations') },
+      { id: 'renovation-2', amount: '$8500', scope: t('kitchenRenovation'), company: t('kitchenRevival') },
+      { id: 'renovation-3', amount: '$7500', scope: t('bathroomRenovation'), company: t('bathroomRenewal') },
+      { id: 'renovation-4', amount: '$12000', scope: t('basementFinishing'), company: t('basementCreators') },
+      { id: 'renovation-5', amount: '$9500', scope: t('atticConversion'), company: t('atticTransformers') },
+      { id: 'renovation-6', amount: '$6500', scope: t('openConceptCreation'), company: t('wallBreakers') },
+      { id: 'renovation-7', amount: '$18000', scope: t('homeExtension'), company: t('spaceExpanders') },
+      { id: 'renovation-8', amount: '$5500', scope: t('outdoorLivingSpace'), company: t('outdoorCreators') },
+      { id: 'renovation-9', amount: '$11000', scope: t('masterSuiteRenovation'), company: t('luxurySuites') },
+      { id: 'renovation-10', amount: '$25000', scope: t('historicHomeModernization'), company: t('modernHeritage') }
     ]
   };
 
@@ -262,6 +352,41 @@ export default function ServiceProviderDashboard() {
       { id: "networking-req-1", budget: "$250", description: t("wifiNetworkSetup"), category: "networking" },
       { id: "networking-req-2", budget: "$400", description: t("smartHomeConfiguration"), category: "networking" },
       { id: "networking-req-3", budget: "$600", description: t("securityCameraInstallation"), category: "networking" }
+    ],
+    masonry: [
+      { id: 'masonry-req-1', budget: '$1500', description: t('brickWallRepair'), category: 'masonry' },
+      { id: 'masonry-req-2', budget: '$3000', description: t('stonePatio'), category: 'masonry' },
+      { id: 'masonry-req-3', budget: '$800', description: t('chimneyRepointing'), category: 'masonry' }
+    ],
+    rooftiles: [
+      { id: 'rooftiles-req-1', budget: '$2500', description: t('roofTileReplacement'), category: 'rooftiles' },
+      { id: 'rooftiles-req-2', budget: '$900', description: t('leakingTileRepair'), category: 'rooftiles' },
+      { id: 'rooftiles-req-3', budget: '$4000', description: t('completeRoofTileInstallation'), category: 'rooftiles' }
+    ],
+    restoration: [
+      { id: 'restoration-req-1', budget: '$1800', description: t('antiqueTableRestoration'), category: 'restoration' },
+      { id: 'restoration-req-2', budget: '$3500', description: t('historicDoorRestoration'), category: 'restoration' },
+      { id: 'restoration-req-3', budget: '$2200', description: t('woodworkRepair'), category: 'restoration' }
+    ],
+    cleaning: [
+      { id: 'cleaning-req-1', budget: '$400', description: t('moveOutDeepCleaning'), category: 'cleaning' },
+      { id: 'cleaning-req-2', budget: '$650', description: t('carpetAndUpholsteryCleaning'), category: 'cleaning' },
+      { id: 'cleaning-req-3', budget: '$800', description: t('postRenovationCleaning'), category: 'cleaning' }
+    ],
+    decoration: [
+      { id: 'decoration-req-1', budget: '$1200', description: t('livingRoomStyling'), category: 'decoration' },
+      { id: 'decoration-req-2', budget: '$750', description: t('holidayDecoration'), category: 'decoration' },
+      { id: 'decoration-req-3', budget: '$2000', description: t('officeMakeover'), category: 'decoration' }
+    ],
+    gardening: [
+      { id: 'gardening-req-1', budget: '$500', description: t('frontYardLandscaping'), category: 'gardening' },
+      { id: 'gardening-req-2', budget: '$350', description: t('herbGardenSetup'), category: 'gardening' },
+      { id: 'gardening-req-3', budget: '$1200', description: t('gardenIrrigationSystem'), category: 'gardening' }
+    ],
+    renovation: [
+      { id: 'renovation-req-1', budget: '$8000', description: t('kitchenRemodel'), category: 'renovation' },
+      { id: 'renovation-req-2', budget: '$6500', description: t('bathroomUpgrade'), category: 'renovation' },
+      { id: 'renovation-req-3', budget: '$15000', description: t('basementConversion'), category: 'renovation' }
     ]
   };
   
@@ -279,64 +404,80 @@ export default function ServiceProviderDashboard() {
   return (
     <>
       <Head>
-        <title>{t("serviceProviderDashboard")} | {t("handyman")}</title>
-        <meta name="description" content={t("serviceProviderDesc")} />
+        <title>{t('serviceProviderDashboard')} | {t('handyman')}</title>
+        <meta name='description' content={t('serviceProviderDesc')} />
       </Head>
       
       <Header />
       
-      <div className="flex h-screen bg-gray-100 pt-16">
+      <div className='flex h-screen bg-gray-100 pt-16'>
         {/* Sidebar */}
-        <div className="w-64 bg-gray-800 text-white shadow-lg">
-          <div className="p-4">
-            <h2 className="text-2xl font-bold mb-6">{t("dashboard")}</h2>
-            <nav className="space-y-2">
+        <div className='w-64 bg-gray-800 text-white shadow-lg'>
+          <div className='p-4'>
+            <h2 className='text-2xl font-bold mb-6'>{t('dashboard')}</h2>
+            <nav className='space-y-2'>
               <Button 
-                variant={activeTab === "overview" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("overview")}
+                variant={activeTab === 'overview' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('overview')}
               >
-                <MapPin className="mr-2 h-5 w-5" />
-                {t("overview")}
+                <MapPin className='mr-2 h-5 w-5' />
+                {t('overview')}
               </Button>
               <Button 
-                variant={activeTab === "plumbing" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("plumbing")}
+                variant={activeTab === 'plumbing' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('plumbing')}
               >
-                <Droplet className="mr-2 h-5 w-5" />
-                {t("plumbing")}
+                <Droplet className='mr-2 h-5 w-5' />
+                {t('plumbing')}
               </Button>
               <Button 
-                variant={activeTab === "electrical" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("electrical")}
+                variant={activeTab === 'electrical' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('electrical')}
               >
-                <Zap className="mr-2 h-5 w-5" />
-                {t("electrical")}
+                <Zap className='mr-2 h-5 w-5' />
+                {t('electrical')}
               </Button>
               <Button 
-                variant={activeTab === "painting" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("painting")}
+                variant={activeTab === 'painting' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('painting')}
               >
-                <Paintbrush className="mr-2 h-5 w-5" />
-                {t("painting")}
+                <Paintbrush className='mr-2 h-5 w-5' />
+                {t('painting')}
               </Button>
               <Button 
-                variant={activeTab === "carpentry" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("carpentry")}
+                variant={activeTab === 'carpentry' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('carpentry')}
               >
-                <Hammer className="mr-2 h-5 w-5" />
-                {t("carpentry")}
+                <Hammer className='mr-2 h-5 w-5' />
+                {t('carpentry')}
               </Button>
               <Button 
-                variant={activeTab === "admin" ? "default" : "ghost"} 
-                className="w-full justify-start"
+                variant={activeTab === 'masonry' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('masonry')}
+              >
+                <Construction className='mr-2 h-5 w-5' />
+                {t('masonry')}
+              </Button>
+              <Button 
+                variant={activeTab === 'rooftiles' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('rooftiles')}
+              >
+                <Home className='mr-2 h-5 w-5' />
+                {t('roofTiles')}
+              </Button>
+              <Button 
+                variant={activeTab === 'admin' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
                 onClick={() => handleAdminDashboardClick()}
               >
-                <Building className="mr-2 h-5 w-5" />
+                <Building className='mr-2 h-5 w-5' />
                 {t("estateAdministrator")}
               </Button>
             </nav>
