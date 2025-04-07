@@ -1,18 +1,90 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+// Luxury home images
+const luxuryHomes = [
+  {
+    url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+    title: "Modern Beachfront Villa",
+    location: "Malibu, California"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1475&q=80",
+    title: "Contemporary Suburban Estate",
+    location: "Hamptons, New York"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1453&q=80",
+    title: "Elegant Country Mansion",
+    location: "Tuscany, Italy"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    title: "Luxury Lakeside Retreat",
+    location: "Lake Como, Italy"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    title: "Modern Architectural Marvel",
+    location: "Beverly Hills, California"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1484&q=80",
+    title: "Mediterranean Coastal Villa",
+    location: "Santorini, Greece"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    title: "Exclusive Hillside Estate",
+    location: "Aspen, Colorado"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    title: "Sophisticated Urban Penthouse",
+    location: "Manhattan, New York"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    title: "Luxury Mountain Chalet",
+    location: "Swiss Alps, Switzerland"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1600047508788-26df7b3d6b93?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+    title: "Waterfront Modern Masterpiece",
+    location: "Miami Beach, Florida"
+  }
+];
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const router = useRouter();
   const { t } = useLanguage();
+
+  // Auto-advance carousel every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % luxuryHomes.length);
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const goToNextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % luxuryHomes.length);
+  };
+
+  const goToPrevImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + luxuryHomes.length) % luxuryHomes.length);
+  };
 
   return (
     <>
@@ -27,37 +99,51 @@ export default function Dashboard() {
         <div className='container mx-auto px-4 py-8'>
           <h1 className='text-3xl font-bold mb-8'>{t('dashboard')}</h1>
           
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {/* Service Provider Card */}
-            <div className='bg-white rounded-lg shadow-md overflow-hidden'>
-              <div className='p-6'>
-                <h2 className='text-xl font-semibold mb-2'>{t('serviceProvider')}</h2>
-                <p className='text-gray-600 mb-4'>{t('serviceProviderDesc')}</p>
-                <Link href='/service-provider/dashboard' passHref>
-                  <Button className='w-full'>{t('accessServiceDashboard')}</Button>
-                </Link>
-              </div>
-            </div>
+          {/* Luxury Homes Carousel */}
+          <div className='relative w-full h-[600px] rounded-xl overflow-hidden shadow-xl mb-12'>
+            {/* Image */}
+            <div 
+              className='absolute inset-0 bg-cover bg-center transition-opacity duration-1000'
+              style={{ 
+                backgroundImage: `url(${luxuryHomes[currentImageIndex].url})`,
+                opacity: 1
+              }}
+            />
             
-            {/* Estate Administrator Card */}
-            <div className='bg-white rounded-lg shadow-md overflow-hidden'>
-              <div className='p-6'>
-                <h2 className='text-xl font-semibold mb-2'>{t('estateAdministrator')}</h2>
-                <p className='text-gray-600 mb-4'>{t('estateAdministratorDesc')}</p>
-                <Link href='/administrador-fincas' passHref>
-                  <Button className='w-full'>{t('accessAdminDashboard')}</Button>
-                </Link>
-              </div>
-            </div>
+            {/* Gradient Overlay */}
+            <div className='absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30'></div>
             
-            {/* Community Member Card */}
-            <div className='bg-white rounded-lg shadow-md overflow-hidden'>
-              <div className='p-6'>
-                <h2 className='text-xl font-semibold mb-2'>{t('communityMember')}</h2>
-                <p className='text-gray-600 mb-4'>{t('communityMemberDesc')}</p>
-                <Link href='/community-member' passHref>
-                  <Button className='w-full'>{t('accessCommunityDashboard')}</Button>
-                </Link>
+            {/* Navigation Arrows */}
+            <button 
+              className='absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors'
+              onClick={goToPrevImage}
+            >
+              <ChevronLeft size={24} />
+            </button>
+            
+            <button 
+              className='absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors'
+              onClick={goToNextImage}
+            >
+              <ChevronRight size={24} />
+            </button>
+            
+            {/* Caption */}
+            <div className='absolute bottom-0 left-0 right-0 p-8 text-white'>
+              <h2 className='text-3xl font-bold mb-2'>{luxuryHomes[currentImageIndex].title}</h2>
+              <p className='text-xl'>{luxuryHomes[currentImageIndex].location}</p>
+              
+              {/* Indicators */}
+              <div className='flex mt-4 space-x-2'>
+                {luxuryHomes.map((_, index) => (
+                  <button 
+                    key={index}
+                    className={`w-3 h-3 rounded-full transition-colors ${
+                      index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                    }`}
+                    onClick={() => setCurrentImageIndex(index)}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -239,7 +325,7 @@ export default function Dashboard() {
             style={{ 
               backgroundImage: "url('https://images.unsplash.com/photo-1600486913747-55e5470d6f40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80')"
             }}
-            onClick={() => router.push("/service-provider")}
+            onClick={() => router.push("/service-provider/dashboard")}
           >
             <div className="absolute inset-0 bg-green-900/70 hover:bg-green-900/60 transition-colors flex items-center justify-center">
               <h2 className="text-4xl font-serif text-white font-bold text-center px-6">{t("serviceProvider")}</h2>
