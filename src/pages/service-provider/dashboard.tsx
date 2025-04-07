@@ -4,9 +4,10 @@ import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi } from "lucide-react";
+import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
+import { useRouter } from "next/router";
 
 // Define repair category type
 interface RepairCategory {
@@ -32,8 +33,9 @@ interface CommunityRequest {
 }
 
 export default function ServiceProviderDashboard() {
-  const [activeCategory, setActiveCategory] = useState("plumbing");
+  const [activeTab, setActiveTab] = useState("plumbing");
   const { t } = useLanguage();
+  const router = useRouter();
   
   // Define repair categories with icons
   const repairCategories: RepairCategory[] = [
@@ -264,10 +266,15 @@ export default function ServiceProviderDashboard() {
   };
   
   // Get bids for the active category
-  const categoryBids = bidData[activeCategory as keyof typeof bidData] || [];
+  const categoryBids = bidData[activeTab as keyof typeof bidData] || [];
   
   // Get community requests for the active category
-  const filteredRequests = communityRequestsData[activeCategory as keyof typeof communityRequestsData] || [];
+  const filteredRequests = communityRequestsData[activeTab as keyof typeof communityRequestsData] || [];
+
+  // Function to handle navigation to administrator dashboard
+  const handleAdminDashboardClick = () => {
+    router.push("/administrador-fincas");
+  };
 
   return (
     <>
@@ -278,23 +285,60 @@ export default function ServiceProviderDashboard() {
       
       <Header />
       
-      <div className="flex h-screen bg-background pt-16">
+      <div className="flex h-screen bg-gray-100 pt-16">
         {/* Sidebar */}
-        <div className="w-64 bg-[hsl(0,0%,20%)] text-white shadow-lg">
+        <div className="w-64 bg-gray-800 text-white shadow-lg">
           <div className="p-4">
             <h2 className="text-2xl font-bold mb-6">{t("dashboard")}</h2>
             <nav className="space-y-2">
-              {repairCategories.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={activeCategory === category.id ? "default" : "ghost"} 
-                  className="w-full justify-start"
-                  onClick={() => setActiveCategory(category.id)}
-                >
-                  {category.icon}
-                  <span>{category.name}</span>
-                </Button>
-              ))}
+              <Button 
+                variant={activeTab === "overview" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("overview")}
+              >
+                <MapPin className="mr-2 h-5 w-5" />
+                {t("overview")}
+              </Button>
+              <Button 
+                variant={activeTab === "plumbing" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("plumbing")}
+              >
+                <Droplet className="mr-2 h-5 w-5" />
+                {t("plumbing")}
+              </Button>
+              <Button 
+                variant={activeTab === "electrical" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("electrical")}
+              >
+                <Zap className="mr-2 h-5 w-5" />
+                {t("electrical")}
+              </Button>
+              <Button 
+                variant={activeTab === "painting" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("painting")}
+              >
+                <Paintbrush className="mr-2 h-5 w-5" />
+                {t("painting")}
+              </Button>
+              <Button 
+                variant={activeTab === "carpentry" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("carpentry")}
+              >
+                <Hammer className="mr-2 h-5 w-5" />
+                {t("carpentry")}
+              </Button>
+              <Button 
+                variant={activeTab === "admin" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => handleAdminDashboardClick()}
+              >
+                <Building className="mr-2 h-5 w-5" />
+                {t("estateAdministrator")}
+              </Button>
             </nav>
           </div>
         </div>
@@ -302,75 +346,120 @@ export default function ServiceProviderDashboard() {
         {/* Main Content */}
         <div className="flex-1 overflow-auto">
           <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6 text-foreground">
-              {repairCategories.find(c => c.id === activeCategory)?.name} {t("services")}
+            <h1 className="text-3xl font-bold mb-6">
+              {activeTab === "overview" ? t("serviceProviderDashboard") : 
+               repairCategories.find(c => c.id === activeTab)?.name + " " + t("services")}
             </h1>
             
-            <div className="grid grid-cols-1 gap-8">
-              {/* Bids Section */}
-              <Card className="shadow-md">
-                <CardHeader className="bg-white dark:bg-[hsl(0,0%,20%)] border-b">
-                  <CardTitle className="text-xl flex items-center justify-between text-foreground">
-                    <span>{t("activeBids")}</span>
-                    <Badge variant="outline" className="bg-[hsl(25,30%,35%)/10] text-[hsl(25,30%,35%)] border-[hsl(25,30%,35%)/30]">
-                      {categoryBids.length} {t("bids")}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="divide-y">
-                    {categoryBids.map((bid) => (
-                      <div key={bid.id} className="p-4 hover:bg-secondary transition-colors">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-medium text-foreground">{bid.company}</h3>
-                          <span className="text-lg font-bold text-[hsl(25,30%,35%)]">{bid.amount}</span>
-                        </div>
-                        <p className="text-muted-foreground mb-3">{bid.scope}</p>
-                        <div className="flex justify-end">
-                          <Button variant="outline" size="sm" className="mr-2">{t("editBid")}</Button>
-                          <Button size="sm" className="bg-[hsl(25,30%,35%)] hover:bg-[hsl(25,30%,30%)]">{t("contactClient")}</Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Community Requests Section */}
-              <Card className="shadow-md">
-                <CardHeader className="bg-white dark:bg-[hsl(0,0%,20%)] border-b">
-                  <CardTitle className="text-xl flex items-center justify-between text-foreground">
-                    <span>{t("communityRequests")}</span>
-                    <Badge variant="outline" className="bg-[hsl(25,30%,35%)/10] text-[hsl(25,30%,35%)] border-[hsl(25,30%,35%)/30]">
-                      {filteredRequests.length} {t("requests")}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {filteredRequests.length > 0 ? (
-                    <div className="divide-y">
-                      {filteredRequests.map((request) => (
-                        <div key={request.id} className="p-4 hover:bg-secondary transition-colors">
-                          <div className="flex justify-between items-start mb-2">
-                            <p className="text-muted-foreground">{request.description}</p>
-                            <span className="font-bold text-[hsl(25,30%,35%)]">{request.budget}</span>
+            {/* Overview Tab */}
+            {activeTab === "overview" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">{t("serviceOverview")}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {repairCategories.slice(0, 6).map((category) => (
+                    <Card key={category.id} className="hover:bg-gray-50 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          {category.icon}
+                          <div>
+                            <h3 className="font-bold text-lg">{category.name}</h3>
+                            <p className="text-gray-600">
+                              {bidData[category.id as keyof typeof bidData]?.length || 0} {t("activeBids")}
+                            </p>
                           </div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2 w-full"
+                          onClick={() => setActiveTab(category.id)}
+                        >
+                          {t("viewDetails")}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Service Category Tabs */}
+            {activeTab !== "overview" && activeTab !== "admin" && (
+              <div className="grid grid-cols-1 gap-8">
+                {/* Bids Section */}
+                <Card className="shadow-md">
+                  <CardHeader className="bg-white border-b">
+                    <CardTitle className="text-xl flex items-center justify-between">
+                      <span>{t("activeBids")}</span>
+                      <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+                        {categoryBids.length} {t("bids")}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {categoryBids.map((bid) => (
+                        <div key={bid.id} className="p-4 hover:bg-gray-50 transition-colors">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-medium">{bid.company}</h3>
+                            <span className="text-lg font-bold text-blue-600">{bid.amount}</span>
+                          </div>
+                          <p className="text-gray-600 mb-3">{bid.scope}</p>
                           <div className="flex justify-end">
-                            <Button variant="outline" size="sm" className="mr-2">{t("viewDetails")}</Button>
-                            <Button size="sm" className="bg-[hsl(25,30%,35%)] hover:bg-[hsl(25,30%,30%)]">{t("submitBid")}</Button>
+                            <Button variant="outline" size="sm" className="mr-2">{t("editBid")}</Button>
+                            <Button size="sm">{t("contactClient")}</Button>
                           </div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="p-8 text-center text-muted-foreground">
-                      <p>{t("noRequests")}</p>
-                      <Button variant="outline" className="mt-4">{t("browseAllRequests")}</Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Community Requests Section */}
+                <Card className="shadow-md">
+                  <CardHeader className="bg-white border-b">
+                    <CardTitle className="text-xl flex items-center justify-between">
+                      <span>{t("communityRequests")}</span>
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                        {filteredRequests.length} {t("requests")}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {filteredRequests.length > 0 ? (
+                      <div className="divide-y">
+                        {filteredRequests.map((request) => (
+                          <div key={request.id} className="p-4 hover:bg-gray-50 transition-colors">
+                            <div className="flex justify-between items-start mb-2">
+                              <p className="text-gray-600">{request.description}</p>
+                              <span className="font-bold text-green-600">{request.budget}</span>
+                            </div>
+                            <div className="flex justify-end">
+                              <Button variant="outline" size="sm" className="mr-2">{t("viewDetails")}</Button>
+                              <Button size="sm">{t("submitBid")}</Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center text-gray-500">
+                        <p>{t("noRequests")}</p>
+                        <Button variant="outline" className="mt-4">{t("browseAllRequests")}</Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+            
+            {/* Admin Redirect Tab */}
+            {activeTab === "admin" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">{t("estateAdministrator")}</h2>
+                <p className="text-gray-600 mb-4">{t("redirectingToAdminDashboard")}</p>
+                <Button onClick={handleAdminDashboardClick}>{t("goToAdminDashboard")}</Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
