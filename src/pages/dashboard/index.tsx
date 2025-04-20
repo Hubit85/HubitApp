@@ -267,16 +267,20 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
-                      A lo largo de nuestra trayectoria, hemos alcanzado hitos significativos que nos posicionan como líderes indiscutibles en la gestión de comunidades residenciales de élite:
+                      Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:
                     </p>
                     <ul className='list-disc pl-5 space-y-3'>
-                      <li><strong>Premio a la Excelencia en Gestión Residencial 2023:</strong> Reconocimiento otorgado por la Asociación de Administradores de Fincas por nuestro modelo innovador de gestión en comunidades de lujo.</li>
-                      <li><strong>Certificación ISO 9001 en Gestión de Calidad:</strong> Somos la primera empresa del sector en obtener esta certificación específica para administración de comunidades premium, garantizando procesos de máxima calidad.</li>
-                      <li><strong>Reducción Media del 30% en Costes Energéticos:</strong> Hemos implementado soluciones sostenibles de última generación en nuestras comunidades, logrando importantes ahorros sin comprometer el confort y la exclusividad.</li>
-                      <li><strong>Gestión de más de 100 Comunidades de Lujo:</strong> Nuestra cartera incluye algunos de los residenciales más prestigiosos del país, con un índice de satisfacción del cliente superior al 98%.</li>
-                      <li><strong>Desarrollo de Tecnología Propietaria:</strong> Nuestra plataforma digital de gestión comunitaria ha sido reconocida internacionalmente como una de las más avanzadas del sector inmobiliario de lujo.</li>
-                      <li><strong>Alianzas Estratégicas con Proveedores Premium:</strong> Hemos establecido colaboraciones exclusivas con las marcas más prestigiosas del sector, ofreciendo a nuestros residentes acceso a servicios y productos de élite con condiciones preferentes.</li>
+                      <li><strong>Más de 500 comunidades conectadas:</strong> Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país, mejorando la comunicación y transparencia en la gestión.</li>
+                      <li><strong>Red de 300+ empresas de servicios verificadas:</strong> Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación, garantizando profesionalidad y confianza.</li>
+                      <li><strong>Índice de satisfacción del 95%:</strong> Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios gestionados a través de ella.</li>
+                      <li><strong>Reducción del 40% en tiempos de gestión:</strong> Los administradores de fincas han reportado una significativa reducción en el tiempo dedicado a tareas administrativas gracias a nuestras herramientas digitales.</li>
+                      <li><strong>Incremento del 35% en nuevos clientes:</strong> Las empresas de servicios han experimentado un crecimiento notable en su cartera de clientes desde que se unieron a nuestra plataforma.</li>
+                      <li><strong>Más de 10.000 incidencias resueltas:</strong> Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida de los vecinos.</li>
+                      <li><strong>Reconocimiento como startup innovadora 2025:</strong> Nuestra plataforma ha sido reconocida por su contribución a la digitalización y modernización del sector inmobiliario y de servicios comunitarios.</li>
                     </ul>
+                    <p>
+                      Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.
+                    </p>
                   </CardContent>
                 </motion.div>
                 {expandedCard !== 'achievements' && (
