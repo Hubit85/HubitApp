@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, ArrowRight, Users, Building2, Star } from 'lucide-react';
 
 // Luxury home images - Pisos de lujo comunitarios
 const luxuryHomes = [
@@ -159,133 +160,191 @@ export default function Dashboard() {
           }}
         />
         
-        <main className='flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8 z-10'>
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 max-w-5xl mx-auto'>
-            {/* Who We Are Card - Expandable on hover */}
+        <main className='flex-1 container mx-auto px-4 py-12 sm:px-6 lg:px-8 z-10'>
+          <div className='grid grid-cols-1 gap-12 mb-12 max-w-7xl mx-auto'>
+            {/* Who We Are Card - Redesigned with innovative style */}
             <motion.div
-              onMouseEnter={() => setExpandedCard('whoWeAre')}
-              onMouseLeave={() => setExpandedCard(null)}
-              layout
+              whileHover={{ y: -5 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className='relative'
             >
-              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
-                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
-                  <CardTitle className='text-2xl font-bold text-foreground'>{t('whoWeAre')}</CardTitle>
+              <Card className='w-full shadow-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl overflow-hidden border-0 backdrop-blur-sm'>
+                <div className='absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16 z-0'></div>
+                <div className='absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full -ml-12 -mb-12 z-0'></div>
+                
+                <CardHeader className='relative z-10 border-b border-blue-100 dark:border-blue-800 flex flex-row items-center justify-between'>
+                  <div>
+                    <CardTitle className='text-3xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2'>
+                      {t('whoWeAre')} <Sparkles className='h-5 w-5 text-blue-500' />
+                    </CardTitle>
+                    <p className='text-blue-600 dark:text-blue-300 mt-1'>Nuestra misión y visión</p>
+                  </div>
+                  <div className='bg-blue-100 dark:bg-blue-800/50 p-3 rounded-full'>
+                    <Users className='h-6 w-6 text-blue-600 dark:text-blue-300' />
+                  </div>
                 </CardHeader>
-                <motion.div
-                  initial={{ height: '150px' }}
-                  animate={{ 
-                    height: expandedCard === 'whoWeAre' ? 'auto' : '150px',
-                    overflow: expandedCard === 'whoWeAre' ? 'visible' : 'hidden'
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <CardContent className='text-foreground space-y-4 p-6'>
-                    <p>
-                      Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.
-                    </p>
-                    <p>
-                      Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.
-                    </p>
-                    <p>
+                
+                <CardContent className='text-foreground space-y-6 p-8 relative z-10'>
+                  <p className='text-lg leading-relaxed'>
+                    Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.
+                  </p>
+                  <p className='text-lg leading-relaxed'>
+                    Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.
+                  </p>
+                  <div className='bg-white/80 dark:bg-blue-900/20 rounded-xl p-6 backdrop-blur-sm border border-blue-100 dark:border-blue-800'>
+                    <p className='text-lg leading-relaxed'>
                       Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.
                     </p>
-                    <p>
-                      La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.
-                    </p>
-                  </CardContent>
-                </motion.div>
-                {expandedCard !== 'whoWeAre' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
-                )}
+                  </div>
+                  <p className='text-lg leading-relaxed'>
+                    La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.
+                  </p>
+                  
+                  <div className='flex justify-end'>
+                    <motion.button 
+                      className='flex items-center gap-2 text-blue-600 dark:text-blue-300 font-medium'
+                      whileHover={{ x: 5 }}
+                    >
+                      Saber más <ArrowRight className='h-4 w-4' />
+                    </motion.button>
+                  </div>
+                </CardContent>
               </Card>
             </motion.div>
             
-            {/* How It Works Card - Expandable on hover */}
+            {/* How It Works Card - Redesigned with innovative style */}
             <motion.div
-              onMouseEnter={() => setExpandedCard('howItWorks')}
-              onMouseLeave={() => setExpandedCard(null)}
-              layout
+              whileHover={{ y: -5 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className='relative'
             >
-              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
-                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
-                  <CardTitle className='text-2xl font-bold text-foreground'>{t('howItWorks')}</CardTitle>
+              <Card className='w-full shadow-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl overflow-hidden border-0 backdrop-blur-sm'>
+                <div className='absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full -mr-16 -mt-16 z-0'></div>
+                <div className='absolute bottom-0 left-0 w-24 h-24 bg-emerald-500/10 rounded-full -ml-12 -mb-12 z-0'></div>
+                
+                <CardHeader className='relative z-10 border-b border-green-100 dark:border-green-800 flex flex-row items-center justify-between'>
+                  <div>
+                    <CardTitle className='text-3xl font-bold text-green-900 dark:text-green-100 flex items-center gap-2'>
+                      {t('howItWorks')} <Sparkles className='h-5 w-5 text-green-500' />
+                    </CardTitle>
+                    <p className='text-green-600 dark:text-green-300 mt-1'>Nuestro proceso integrado</p>
+                  </div>
+                  <div className='bg-green-100 dark:bg-green-800/50 p-3 rounded-full'>
+                    <Building2 className='h-6 w-6 text-green-600 dark:text-green-300' />
+                  </div>
                 </CardHeader>
-                <motion.div
-                  initial={{ height: '150px' }}
-                  animate={{ 
-                    height: expandedCard === 'howItWorks' ? 'auto' : '150px',
-                    overflow: expandedCard === 'howItWorks' ? 'visible' : 'hidden'
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <CardContent className='text-foreground space-y-4 p-6'>
-                    <p>
-                      Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:
-                    </p>
-                    <ol className='list-decimal pl-5 space-y-3'>
-                      <li><strong>Para Administradores de Fincas:</strong> Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos, coordinar servicios y mantener una comunicación fluida con vecinos y proveedores. Todo desde un único panel de control intuitivo.</li>
-                      <li><strong>Para Empresas de Servicios:</strong> Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos, gestionar proyectos y obtener valoraciones verificadas que impulsan su reputación y expansión de negocio.</li>
-                      <li><strong>Para Vecinos:</strong> Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real, valorar los servicios recibidos y participar activamente en las decisiones de la comunidad, todo con total transparencia.</li>
-                      <li><strong>Sistema de Valoraciones:</strong> Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios recibidos, generando confianza y ayudando a otras comunidades a tomar decisiones informadas.</li>
-                      <li><strong>Comunicación Centralizada:</strong> Todas las interacciones ocurren dentro de la plataforma, eliminando la fragmentación de información y garantizando que todos los participantes tengan acceso a los mismos datos en tiempo real.</li>
-                      <li><strong>Transparencia Total:</strong> Cada presupuesto, servicio y valoración queda registrado en el sistema, creando un historial verificable que fomenta la confianza entre todas las partes involucradas.</li>
-                    </ol>
-                    <p>
-                      Esta integración de servicios, comunicación y valoraciones crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.
-                    </p>
-                  </CardContent>
-                </motion.div>
-                {expandedCard !== 'howItWorks' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
-                )}
+                
+                <CardContent className='text-foreground space-y-6 p-8 relative z-10'>
+                  <p className='text-lg leading-relaxed'>
+                    Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:
+                  </p>
+                  
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                    <div className='bg-white/80 dark:bg-green-900/20 rounded-xl p-6 backdrop-blur-sm border border-green-100 dark:border-green-800'>
+                      <h3 className='font-bold text-xl mb-3 text-green-800 dark:text-green-200'>Para Administradores</h3>
+                      <p>Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.</p>
+                    </div>
+                    
+                    <div className='bg-white/80 dark:bg-green-900/20 rounded-xl p-6 backdrop-blur-sm border border-green-100 dark:border-green-800'>
+                      <h3 className='font-bold text-xl mb-3 text-green-800 dark:text-green-200'>Para Empresas de Servicios</h3>
+                      <p>Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.</p>
+                    </div>
+                    
+                    <div className='bg-white/80 dark:bg-green-900/20 rounded-xl p-6 backdrop-blur-sm border border-green-100 dark:border-green-800'>
+                      <h3 className='font-bold text-xl mb-3 text-green-800 dark:text-green-200'>Para Vecinos</h3>
+                      <p>Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.</p>
+                    </div>
+                    
+                    <div className='bg-white/80 dark:bg-green-900/20 rounded-xl p-6 backdrop-blur-sm border border-green-100 dark:border-green-800'>
+                      <h3 className='font-bold text-xl mb-3 text-green-800 dark:text-green-200'>Sistema de Valoraciones</h3>
+                      <p>Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.</p>
+                    </div>
+                  </div>
+                  
+                  <p className='text-lg leading-relaxed'>
+                    Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.
+                  </p>
+                  
+                  <div className='flex justify-end'>
+                    <motion.button 
+                      className='flex items-center gap-2 text-green-600 dark:text-green-300 font-medium'
+                      whileHover={{ x: 5 }}
+                    >
+                      Saber más <ArrowRight className='h-4 w-4' />
+                    </motion.button>
+                  </div>
+                </CardContent>
               </Card>
             </motion.div>
             
-            {/* Our Greatest Achievements Card - Expandable on hover */}
+            {/* Our Greatest Achievements Card - Redesigned with innovative style */}
             <motion.div
-              onMouseEnter={() => setExpandedCard('achievements')}
-              onMouseLeave={() => setExpandedCard(null)}
-              layout
+              whileHover={{ y: -5 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className='relative'
             >
-              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
-                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
-                  <CardTitle className='text-2xl font-bold text-foreground'>{t('achievements')}</CardTitle>
+              <Card className='w-full shadow-xl bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl overflow-hidden border-0 backdrop-blur-sm'>
+                <div className='absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full -mr-16 -mt-16 z-0'></div>
+                <div className='absolute bottom-0 left-0 w-24 h-24 bg-violet-500/10 rounded-full -ml-12 -mb-12 z-0'></div>
+                
+                <CardHeader className='relative z-10 border-b border-purple-100 dark:border-purple-800 flex flex-row items-center justify-between'>
+                  <div>
+                    <CardTitle className='text-3xl font-bold text-purple-900 dark:text-purple-100 flex items-center gap-2'>
+                      {t('achievements')} <Sparkles className='h-5 w-5 text-purple-500' />
+                    </CardTitle>
+                    <p className='text-purple-600 dark:text-purple-300 mt-1'>Nuestro impacto hasta ahora</p>
+                  </div>
+                  <div className='bg-purple-100 dark:bg-purple-800/50 p-3 rounded-full'>
+                    <Star className='h-6 w-6 text-purple-600 dark:text-purple-300' />
+                  </div>
                 </CardHeader>
-                <motion.div
-                  initial={{ height: '150px' }}
-                  animate={{ 
-                    height: expandedCard === 'achievements' ? 'auto' : '150px',
-                    overflow: expandedCard === 'achievements' ? 'visible' : 'hidden'
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <CardContent className='text-foreground space-y-4 p-6'>
-                    <p>
-                      Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:
-                    </p>
-                    <ul className='list-disc pl-5 space-y-3'>
-                      <li><strong>Más de 500 comunidades conectadas:</strong> Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país, mejorando la comunicación y transparencia en la gestión.</li>
-                      <li><strong>Red de 300+ empresas de servicios verificadas:</strong> Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación, garantizando profesionalidad y confianza.</li>
-                      <li><strong>Índice de satisfacción del 95%:</strong> Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios gestionados a través de ella.</li>
-                      <li><strong>Reducción del 40% en tiempos de gestión:</strong> Los administradores de fincas han reportado una significativa reducción en el tiempo dedicado a tareas administrativas gracias a nuestras herramientas digitales.</li>
-                      <li><strong>Incremento del 35% en nuevos clientes:</strong> Las empresas de servicios han experimentado un crecimiento notable en su cartera de clientes desde que se unieron a nuestra plataforma.</li>
-                      <li><strong>Más de 10.000 incidencias resueltas:</strong> Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida de los vecinos.</li>
-                      <li><strong>Reconocimiento como startup innovadora 2025:</strong> Nuestra plataforma ha sido reconocida por su contribución a la digitalización y modernización del sector inmobiliario y de servicios comunitarios.</li>
-                    </ul>
-                    <p>
+                
+                <CardContent className='text-foreground space-y-6 p-8 relative z-10'>
+                  <p className='text-lg leading-relaxed'>
+                    Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:
+                  </p>
+                  
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                    <div className='bg-white/80 dark:bg-purple-900/20 rounded-xl p-6 backdrop-blur-sm border border-purple-100 dark:border-purple-800 flex flex-col'>
+                      <span className='text-4xl font-bold text-purple-600 dark:text-purple-300 mb-2'>500+</span>
+                      <h3 className='font-bold text-xl mb-2 text-purple-800 dark:text-purple-200'>Comunidades conectadas</h3>
+                      <p>Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.</p>
+                    </div>
+                    
+                    <div className='bg-white/80 dark:bg-purple-900/20 rounded-xl p-6 backdrop-blur-sm border border-purple-100 dark:border-purple-800 flex flex-col'>
+                      <span className='text-4xl font-bold text-purple-600 dark:text-purple-300 mb-2'>300+</span>
+                      <h3 className='font-bold text-xl mb-2 text-purple-800 dark:text-purple-200'>Empresas verificadas</h3>
+                      <p>Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.</p>
+                    </div>
+                    
+                    <div className='bg-white/80 dark:bg-purple-900/20 rounded-xl p-6 backdrop-blur-sm border border-purple-100 dark:border-purple-800 flex flex-col'>
+                      <span className='text-4xl font-bold text-purple-600 dark:text-purple-300 mb-2'>95%</span>
+                      <h3 className='font-bold text-xl mb-2 text-purple-800 dark:text-purple-200'>Índice de satisfacción</h3>
+                      <p>Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.</p>
+                    </div>
+                    
+                    <div className='bg-white/80 dark:bg-purple-900/20 rounded-xl p-6 backdrop-blur-sm border border-purple-100 dark:border-purple-800 flex flex-col'>
+                      <span className='text-4xl font-bold text-purple-600 dark:text-purple-300 mb-2'>10,000+</span>
+                      <h3 className='font-bold text-xl mb-2 text-purple-800 dark:text-purple-200'>Incidencias resueltas</h3>
+                      <p>Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.</p>
+                    </div>
+                  </div>
+                  
+                  <div className='bg-white/80 dark:bg-purple-900/20 rounded-xl p-6 backdrop-blur-sm border border-purple-100 dark:border-purple-800'>
+                    <p className='text-lg leading-relaxed'>
                       Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.
                     </p>
-                  </CardContent>
-                </motion.div>
-                {expandedCard !== 'achievements' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
-                )}
+                  </div>
+                  
+                  <div className='flex justify-end'>
+                    <motion.button 
+                      className='flex items-center gap-2 text-purple-600 dark:text-purple-300 font-medium'
+                      whileHover={{ x: 5 }}
+                    >
+                      Saber más <ArrowRight className='h-4 w-4' />
+                    </motion.button>
+                  </div>
+                </CardContent>
               </Card>
             </motion.div>
           </div>
