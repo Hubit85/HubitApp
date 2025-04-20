@@ -224,16 +224,19 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
-                      Nuestro sistema de gestión integral revoluciona la administración de comunidades de lujo, combinando tecnología avanzada con un servicio personalizado excepcional.
+                      Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:
                     </p>
                     <ol className='list-decimal pl-5 space-y-3'>
-                      <li><strong>Evaluación Premium:</strong> Realizamos un análisis exhaustivo de su comunidad para identificar oportunidades de mejora y optimización, diseñando un plan de gestión a medida que refleje la exclusividad de su residencial.</li>
-                      <li><strong>Plataforma Digital Exclusiva:</strong> Proporcionamos acceso a nuestra aplicación propietaria donde residentes y administradores pueden comunicarse, gestionar incidencias y acceder a servicios premium con total comodidad.</li>
-                      <li><strong>Gestión Financiera Transparente:</strong> Implementamos sistemas de contabilidad avanzados con informes detallados y accesibles en tiempo real, garantizando una gestión impecable de los recursos comunitarios.</li>
-                      <li><strong>Mantenimiento Preventivo Elite:</strong> Nuestro equipo de mantenimiento especializado se anticipa a cualquier necesidad, preservando el valor y la estética de su comunidad con los más altos estándares.</li>
-                      <li><strong>Servicios Concierge:</strong> Ofrecemos un servicio de conserjería personalizado que atiende las necesidades individuales de cada residente, desde la organización de eventos privados hasta la coordinación de reformas exclusivas.</li>
-                      <li><strong>Asesoramiento Jurídico Especializado:</strong> Contamos con un equipo legal dedicado exclusivamente a comunidades de alto standing, garantizando el cumplimiento normativo y la protección de los intereses comunitarios.</li>
+                      <li><strong>Para Administradores de Fincas:</strong> Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos, coordinar servicios y mantener una comunicación fluida con vecinos y proveedores. Todo desde un único panel de control intuitivo.</li>
+                      <li><strong>Para Empresas de Servicios:</strong> Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos, gestionar proyectos y obtener valoraciones verificadas que impulsan su reputación y expansión de negocio.</li>
+                      <li><strong>Para Vecinos:</strong> Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real, valorar los servicios recibidos y participar activamente en las decisiones de la comunidad, todo con total transparencia.</li>
+                      <li><strong>Sistema de Valoraciones:</strong> Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios recibidos, generando confianza y ayudando a otras comunidades a tomar decisiones informadas.</li>
+                      <li><strong>Comunicación Centralizada:</strong> Todas las interacciones ocurren dentro de la plataforma, eliminando la fragmentación de información y garantizando que todos los participantes tengan acceso a los mismos datos en tiempo real.</li>
+                      <li><strong>Transparencia Total:</strong> Cada presupuesto, servicio y valoración queda registrado en el sistema, creando un historial verificable que fomenta la confianza entre todas las partes involucradas.</li>
                     </ol>
+                    <p>
+                      Esta integración de servicios, comunicación y valoraciones crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.
+                    </p>
                   </CardContent>
                 </motion.div>
                 {expandedCard !== 'howItWorks' && (
