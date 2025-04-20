@@ -183,16 +183,16 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p>
-                      Somos una empresa líder en la gestión de comunidades residenciales de lujo, con más de 20 años de experiencia transformando la vida comunitaria en una experiencia exclusiva y sofisticada.
+                      Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.
                     </p>
                     <p>
-                      Nuestro equipo de profesionales altamente cualificados se dedica a proporcionar servicios de administración de fincas de élite, garantizando que cada comunidad que gestionamos mantenga los más altos estándares de calidad, confort y seguridad.
+                      Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.
                     </p>
                     <p>
-                      Nos especializamos en comunidades residenciales premium, donde cada detalle importa. Desde la gestión de instalaciones de vanguardia como piscinas climatizadas, gimnasios equipados con tecnología de última generación y zonas comunes diseñadas por arquitectos de renombre, hasta la coordinación de servicios de conserjería 24/7 y seguridad privada.
+                      Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.
                     </p>
                     <p>
-                      Nuestra filosofía se basa en la excelencia, la discreción y la atención personalizada, creando entornos residenciales donde el lujo se vive día a día.
+                      La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.
                     </p>
                   </CardContent>
                 </motion.div>
