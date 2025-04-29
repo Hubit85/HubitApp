@@ -11,8 +11,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>{t("handyman")} - {t("professionalServices")}</title>
-        <meta name="description" content={t("professionalServices")} />
+        <title>HANDYMAN - Servicios profesionales</title>
+        <meta name="description" content="Servicios profesionales para tu hogar" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
@@ -33,10 +33,10 @@ export default function Home() {
           {/* Hero Content */}
           <div className='z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl'>
             <h1 className='text-6xl md:text-7xl font-bold text-white drop-shadow-lg'>
-              {t('handyman')}
+              HANDYMAN
             </h1>
             <p className='text-xl md:text-2xl text-white drop-shadow-md'>
-              {t('professionalServices')}
+              Servicios profesionales para tu hogar
             </p>
             
             <div className='flex flex-col sm:flex-row gap-4 justify-center mt-8'>
@@ -45,7 +45,7 @@ export default function Home() {
                   size='lg' 
                   className='text-lg px-8 py-6 bg-black text-white hover:bg-black/80'
                 >
-                  {t('register')}
+                  Registrarse
                 </Button>
               </Link>
               <Link href='/auth/login' passHref>
@@ -54,7 +54,7 @@ export default function Home() {
                   variant='outline' 
                   className='text-lg px-8 py-6 bg-white text-black border-black hover:bg-white/90'
                 >
-                  {t('login')}
+                  Iniciar sesión
                 </Button>
               </Link>
             </div>
@@ -65,17 +65,17 @@ export default function Home() {
         <section className='w-full py-20 bg-white'>
           <div className='container mx-auto px-4 sm:px-6 max-w-6xl'>
             <div className='text-center mb-12'>
-              <h2 className='text-4xl font-bold text-gray-900 mb-4'>{t('whoWeAre')}</h2>
+              <h2 className='text-4xl font-bold text-gray-900 mb-4'>Quiénes somos</h2>
               <div className='w-20 h-1 bg-black mx-auto'></div>
             </div>
             
             <div className='grid grid-cols-1 md:grid-cols-2 gap-12 items-center'>
               <div className='space-y-6'>
                 <p className='text-lg text-gray-700 leading-relaxed'>
-                  {t('whoWeAreDesc1')}
+                  Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.
                 </p>
                 <p className='text-lg text-gray-700 leading-relaxed'>
-                  {t('whoWeAreDesc2')}
+                  Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.
                 </p>
                 
                 <div className='pt-4 flex flex-wrap gap-4'>
