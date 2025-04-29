@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { User, FileText, Store, Star, Home, Settings, Bell } from "lucide-react";
+import { User, FileText, Store, Star, Home, Settings, Bell, CreditCard, ThumbsUp, Award } from "lucide-react";
 
 interface SidebarParticularProps {
   activeTab: string;
@@ -69,6 +68,30 @@ export function SidebarParticular({ activeTab, setActiveTab }: SidebarParticular
           >
             <Settings className="mr-2 h-5 w-5" />
             Configuración
+          </Button>
+          <Button 
+            variant={activeTab === "pagos" ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveTab("pagos")}
+          >
+            <CreditCard className="mr-2 h-5 w-5" />
+            Mis Pagos
+          </Button>
+          <Button 
+            variant={activeTab === "recomendaciones" ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveTab("recomendaciones")}
+          >
+            <ThumbsUp className="mr-2 h-5 w-5" />
+            Recomendaciones
+          </Button>
+          <Button 
+            variant={activeTab === "premios" ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveTab("premios")}
+          >
+            <Award className="mr-2 h-5 w-5" />
+            Mis Premios
           </Button>
         </nav>
       </div>

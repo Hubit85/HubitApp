@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +21,10 @@ import {
   Paintbrush,
   Hammer,
   Construction,
-  Search
+  Search,
+  CreditCard,
+  ThumbsUp,
+  Award
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";

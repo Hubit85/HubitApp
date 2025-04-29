@@ -22,7 +22,10 @@ import {
   Paintbrush,
   Hammer,
   Construction,
-  Home
+  Home,
+  ThumbsUp,
+  Award,
+  CreditCard
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
@@ -163,6 +166,30 @@ export default function CommunityMemberDashboard() {
               >
                 <ShoppingBag className='mr-2 h-5 w-5' />
                 {t('prepareBid')}
+              </Button>
+              <Button 
+                variant={activeTab === 'valoraciones' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('valoraciones')}
+              >
+                <ThumbsUp className='mr-2 h-5 w-5' />
+                {t('serviceRatings')}
+              </Button>
+              <Button 
+                variant={activeTab === 'mejores' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('mejores')}
+              >
+                <Award className='mr-2 h-5 w-5' />
+                {t('bestRated')}
+              </Button>
+              <Button 
+                variant={activeTab === 'cuenta' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('cuenta')}
+              >
+                <CreditCard className='mr-2 h-5 w-5' />
+                {t('myAccount')}
               </Button>
             </nav>
           </div>

@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin, Shovel, Construction, Brush, Sparkles, Palette, Leaf, Gem, Tv, Key, Package, Scissors, Utensils } from 'lucide-react';
+import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin, Shovel, Construction, Brush, Sparkles, Palette, Leaf, Gem, Tv, Key, Package, Scissors, Utensils, User, CreditCard } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
@@ -475,6 +475,14 @@ export default function ServiceProviderDashboard() {
               >
                 <MapPin className='mr-2 h-5 w-5' />
                 {t('overview')}
+              </Button>
+              <Button 
+                variant={activeTab === 'cuenta' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('cuenta')}
+              >
+                <User className='mr-2 h-5 w-5' />
+                {t('myAccount')}
               </Button>
               <Button 
                 variant={activeTab === 'plumbing' ? 'default' : 'ghost'} 

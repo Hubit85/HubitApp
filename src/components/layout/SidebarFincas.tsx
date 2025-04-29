@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, ClipboardList, Building, Wrench } from "lucide-react";
+import { MapPin, Calendar, ClipboardList, Building, Wrench, User, ThumbsUp, Award, CreditCard } from "lucide-react";
 
 interface SidebarFincasProps {
   activeTab: string;
@@ -52,6 +52,38 @@ export function SidebarFincas({ activeTab, setActiveTab }: SidebarFincasProps) {
           >
             <ClipboardList className="mr-2 h-5 w-5" />
             Temas Pendientes
+          </Button>
+          <Button 
+            variant={activeTab === "usuarios" ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveTab("usuarios")}
+          >
+            <User className="mr-2 h-5 w-5" />
+            Usuarios
+          </Button>
+          <Button 
+            variant={activeTab === "aprobaciones" ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveTab("aprobaciones")}
+          >
+            <ThumbsUp className="mr-2 h-5 w-5" />
+            Aprobaciones
+          </Button>
+          <Button 
+            variant={activeTab === "premios" ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveTab("premios")}
+          >
+            <Award className="mr-2 h-5 w-5" />
+            Premios
+          </Button>
+          <Button 
+            variant={activeTab === "pagos" ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveTab("pagos")}
+          >
+            <CreditCard className="mr-2 h-5 w-5" />
+            Pagos
           </Button>
         </nav>
       </div>
