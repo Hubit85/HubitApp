@@ -403,10 +403,11 @@ export default function Dashboard() {
           
           {/* What Do You Need Box - Updated with woman on phone */}
           <div 
-            className='flex-1 bg-cover bg-center relative'
+            className='flex-1 bg-cover bg-center relative cursor-pointer'
             style={{ 
               backgroundImage: 'url(\'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80\')'
             }}
+            onClick={() => router.push('/particular')}
           >
             <div className='absolute inset-0 bg-amber-900/70 hover:bg-amber-900/60 transition-colors flex items-center justify-center'>
               <h2 className='text-4xl font-serif text-white font-bold text-center px-6'>{t('particular')}</h2>
