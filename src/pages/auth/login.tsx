@@ -1,13 +1,12 @@
-
 import React from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Header } from "@/components/layout/Header";
 
 export default function Login() {
   const router = useRouter();
@@ -28,6 +27,8 @@ export default function Login() {
         <title>{t("login")} - {t("handyman")}</title>
         <meta name="description" content={t("loginToAccess")} />
       </Head>
+      
+      <Header />
       
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
         <Card className="w-full max-w-md">

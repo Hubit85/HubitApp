@@ -1,4 +1,3 @@
-
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -13,6 +12,10 @@ export default function ServiceProviderHome() {
   const router = useRouter();
   const { t } = useLanguage();
 
+  const handleDashboardClick = () => {
+    router.push('/service-provider/dashboard');
+  };
+  
   return (
     <>
       <Head>
@@ -49,6 +52,7 @@ export default function ServiceProviderHome() {
                 <Link href='/service-provider/dashboard' passHref>
                   <Button 
                     className="w-full flex items-center justify-center gap-2"
+                    onClick={handleDashboardClick}
                   >
                     {t("openDashboard")} <ArrowRight className="h-4 w-4" />
                   </Button>
