@@ -16,9 +16,9 @@ export default function Home() {
       
       <Header />
       
-      <main className='flex flex-col items-center justify-center relative'>
+      <main className="flex flex-col items-center justify-center relative">
         {/* Hero Section with Background Image */}
-        <section className='min-h-screen w-full flex flex-col items-center justify-center relative'>
+        <section className="min-h-screen w-full flex flex-col items-center justify-center relative">
           <div 
             className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
             style={{
@@ -29,32 +29,30 @@ export default function Home() {
           />
           
           {/* Hero Content */}
-          <div className='z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl'>
-            <h1 className='text-6xl md:text-7xl font-bold text-white drop-shadow-lg'>
+          <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
+            <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
               HANDYMAN
             </h1>
-            <p className='text-xl md:text-2xl text-white drop-shadow-md'>
+            <p className="text-xl md:text-2xl text-white drop-shadow-md">
               Servicios profesionales para tu hogar
             </p>
             
-            <div className='flex flex-col sm:flex-row gap-4 justify-center mt-8'>
-              <Link href='/auth/register' passHref>
-                <Button 
-                  size='lg' 
-                  className='text-lg px-8 py-6 bg-black text-white hover:bg-black/80'
-                >
-                  Registrarse
-                </Button>
-              </Link>
-              <Link href='/auth/login' passHref>
-                <Button 
-                  size='lg' 
-                  variant='outline' 
-                  className='text-lg px-8 py-6 bg-white text-black border-black hover:bg-white/90'
-                >
-                  Iniciar sesión
-                </Button>
-              </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+              <Button 
+                size="lg" 
+                className="text-lg px-8 py-6 bg-black text-white hover:bg-black/80"
+                asChild
+              >
+                <Link href="/auth/register">Registrarse</Link>
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-lg px-8 py-6 bg-white text-black border-black hover:bg-white/90"
+                asChild
+              >
+                <Link href="/auth/login">Iniciar sesión</Link>
+              </Button>
             </div>
           </div>
         </section>

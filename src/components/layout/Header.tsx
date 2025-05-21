@@ -21,24 +21,27 @@ export function Header() {
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
             <>
-              <Link href="/dashboard/services" passHref>
-                <Button variant="ghost">Servicios</Button>
-              </Link>
-              <Link href="/dashboard/profile" passHref>
-                <Button variant="ghost">Perfil</Button>
-              </Link>
-              <Button variant="outline" onClick={() => router.push('/')}>
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard/services">Servicios</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard/profile">Perfil</Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => router.push('/')}
+              >
                 Cerrar sesión
               </Button>
             </>
           ) : (
             <>
-              <Link href="/auth/login" passHref>
-                <Button variant="ghost">Iniciar sesión</Button>
-              </Link>
-              <Link href="/auth/register" passHref>
-                <Button variant="outline">Registrarse</Button>
-              </Link>
+              <Button variant="ghost" asChild>
+                <Link href="/auth/login">Iniciar sesión</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/auth/register">Registrarse</Link>
+              </Button>
             </>
           )}
         </div>
