@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -6,99 +7,98 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 
-export default function Register() {
+export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [confirmPassword, setConfirmPassword] = React.useState('');
-  const { t } = useLanguage();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, we would validate and register with Firebase here
-    // For now, we'll just redirect to the dashboard
-    router.push('/dashboard');
+    // Aquí iría la lógica de registro
+    router.push("/dashboard");
   };
 
   return (
     <>
       <Head>
-        <title>{t("register")} - {t("handyman")}</title>
-        <meta name="description" content={t("registerToStart")} />
+        <title>Registrarse | HANDYMAN</title>
+        <meta name="description" content="Crea una cuenta en HANDYMAN" />
       </Head>
-      
+
       <Header />
-      
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+
+      <main className="flex items-center justify-center min-h-screen bg-gray-50 px-4 py-12">
         <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-2xl">{t("createAccount")}</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold">Crear cuenta</CardTitle>
             <CardDescription>
-              {t("registerToStart")}
+              Regístrate para empezar a usar nuestros servicios
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleRegister}>
-            <CardContent className="space-y-4">
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">{t("fullName")}</Label>
-                <Input 
-                  id="name" 
-                  placeholder={t("enterFullName")} 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                <Label htmlFor="fullName">Nombre completo</Label>
+                <Input
+                  id="fullName"
+                  placeholder="Introduce tu nombre completo"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">{t("email")}</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder={t("enterEmail")} 
+                <Label htmlFor="email">Correo electrónico</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Introduce tu correo electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">{t("password")}</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  placeholder={t("createPassword")} 
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Crea una contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
-                <Input 
-                  id="confirmPassword" 
-                  type="password" 
-                  placeholder={t("confirmYourPassword")} 
+                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirma tu contraseña"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
               </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full">{t("register")}</Button>
-              <div className="text-center text-sm">
-                {t("alreadyHaveAccount")}{" "}
-                <Link href="/auth/login" className="text-blue-600 hover:underline">
-                  {t("login")}
-                </Link>
-              </div>
-            </CardFooter>
-          </form>
+              <Button type="submit" className="w-full">
+                Registrarse
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <div className="text-sm text-gray-500">
+              ¿Ya tienes una cuenta?{" "}
+              <Link href="/auth/login" className="text-blue-600 hover:underline">
+                Iniciar sesión
+              </Link>
+            </div>
+          </CardFooter>
         </Card>
-      </div>
+      </main>
     </>
   );
 }

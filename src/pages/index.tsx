@@ -1,13 +1,11 @@
+
 import React from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 
 export default function Home() {
-  const { t } = useLanguage();
-  
   return (
     <>
       <Head>
@@ -57,35 +55,6 @@ export default function Home() {
                   Iniciar sesión
                 </Button>
               </Link>
-            </div>
-          </div>
-        </section>
-        
-        {/* Who We Are Section */}
-        <section className='w-full py-20 bg-white'>
-          <div className='container mx-auto px-4 sm:px-6 max-w-6xl'>
-            <div className='text-center mb-12'>
-              <h2 className='text-4xl font-bold text-gray-900 mb-4'>Quiénes somos</h2>
-              <div className='w-20 h-1 bg-black mx-auto'></div>
-            </div>
-            
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-12 items-center'>
-              <div className='space-y-6'>
-                <p className='text-lg text-gray-700 leading-relaxed'>
-                  Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.
-                </p>
-                <p className='text-lg text-gray-700 leading-relaxed'>
-                  Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.
-                </p>
-                
-                <div className='pt-4 flex flex-wrap gap-4'>
-                  <div className='bg-gray-100 p-4 rounded-lg flex items-center gap-3 flex-1 min-w-[200px]'>
-                    <div className='bg-black text-white p-2 rounded-full'>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>

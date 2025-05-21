@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -6,81 +7,80 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 
-export default function Login() {
+export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const { t } = useLanguage();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, we would validate and authenticate with Firebase here
-    // For now, we'll just redirect to the dashboard
-    router.push('/dashboard');
+    // Aquí iría la lógica de autenticación
+    router.push("/dashboard");
   };
 
   return (
     <>
       <Head>
-        <title>{t("login")} - {t("handyman")}</title>
-        <meta name="description" content={t("loginToAccess")} />
+        <title>Iniciar sesión | HANDYMAN</title>
+        <meta name="description" content="Inicia sesión en tu cuenta de HANDYMAN" />
       </Head>
-      
+
       <Header />
-      
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+
+      <main className="flex items-center justify-center min-h-screen bg-gray-50 px-4 py-12">
         <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-2xl">{t("welcomeBack")}</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold">Bienvenido de nuevo</CardTitle>
             <CardDescription>
-              {t("loginToAccess")}
+              Inicia sesión para acceder a tu cuenta
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleLogin}>
-            <CardContent className="space-y-4">
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">{t("email")}</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder={t("enterEmail")} 
+                <Label htmlFor="email">Correo electrónico</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Introduce tu correo electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">{t("password")}</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  placeholder={t("enterPassword")} 
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Contraseña</Label>
+                  <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Introduce tu contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
-              <div className="text-right">
-                <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
-                  {t("forgotPassword")}
-                </Link>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full">{t("login")}</Button>
-              <div className="text-center text-sm">
-                {t("dontHaveAccount")}{" "}
-                <Link href="/auth/register" className="text-blue-600 hover:underline">
-                  {t("register")}
-                </Link>
-              </div>
-            </CardFooter>
-          </form>
+              <Button type="submit" className="w-full">
+                Iniciar sesión
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <div className="text-sm text-gray-500">
+              ¿No tienes una cuenta?{" "}
+              <Link href="/auth/register" className="text-blue-600 hover:underline">
+                Crear cuenta
+              </Link>
+            </div>
+          </CardFooter>
         </Card>
-      </div>
+      </main>
     </>
   );
 }
