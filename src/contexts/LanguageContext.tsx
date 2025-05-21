@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 // Definimos los idiomas disponibles
@@ -30,7 +31,17 @@ const translations = {
     createPassword: "Crea una contraseña",
     confirmPassword: "Confirmar contraseña",
     confirmYourPassword: "Confirma tu contraseña",
-    alreadyHaveAccount: "¿Ya tienes una cuenta?"
+    alreadyHaveAccount: "¿Ya tienes una cuenta?",
+    // Dashboard translations
+    luxuryResidences: "Residencias de Lujo",
+    luxuryResidencesDesc: "Comunidades de vecinos exclusivas",
+    whoWeAre: "Quiénes Somos",
+    howItWorks: "Cómo Funciona",
+    achievements: "Nuestros Logros",
+    communityMember: "Miembro de la Comunidad",
+    serviceProvider: "Proveedor de Servicios",
+    estateAdministrator: "Administrador de Fincas",
+    particular: "Particular"
   },
   en: {
     professionalServices: "Professional Services",
@@ -57,7 +68,17 @@ const translations = {
     createPassword: "Create a password",
     confirmPassword: "Confirm Password",
     confirmYourPassword: "Confirm your password",
-    alreadyHaveAccount: "Already have an account?"
+    alreadyHaveAccount: "Already have an account?",
+    // Dashboard translations
+    luxuryResidences: "Luxury Residences",
+    luxuryResidencesDesc: "Exclusive community properties",
+    whoWeAre: "Who We Are",
+    howItWorks: "How It Works",
+    achievements: "Our Achievements",
+    communityMember: "Community Member",
+    serviceProvider: "Service Provider",
+    estateAdministrator: "Estate Administrator",
+    particular: "Individual"
   }
 };
 
