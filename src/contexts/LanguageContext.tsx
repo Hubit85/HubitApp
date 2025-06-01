@@ -436,7 +436,52 @@ const baseTranslations = {
     joinOurCommunity: "Únete a Nuestra Comunidad",
     joinOurCommunityText: "Ya sea que seas un residente buscando servicios de calidad, un administrador de fincas gestionando propiedades, o un profesional ofreciendo tus servicios, HANDYMAN tiene un lugar para ti.",
     getStartedToday: "Comienza Hoy",
-    contactUs: "Contáctanos"
+    contactUs: "Contáctanos",
+    
+    // Additional content for How It Works and Achievements
+    howItWorksContent1: "HANDYMAN funciona como un ecosistema integral que conecta a todos los actores del sector residencial. Nuestra plataforma facilita la comunicación, gestión y contratación de servicios de manera eficiente y transparente.",
+    forAdministrators: "Para Administradores de Fincas",
+    forAdministratorsDesc: "Gestiona múltiples propiedades desde un solo panel, coordina servicios, supervisa presupuestos y mantén comunicación directa con residentes y proveedores.",
+    forServiceCompanies: "Para Empresas de Servicios",
+    forServiceCompaniesDesc: "Accede a una amplia base de clientes, gestiona tus proyectos, recibe pagos seguros y construye tu reputación a través de nuestro sistema de valoraciones.",
+    forNeighbors: "Para Vecinos y Residentes",
+    forNeighborsDesc: "Solicita servicios de manera sencilla, compara presupuestos, realiza seguimiento en tiempo real y califica tu experiencia para ayudar a otros.",
+    ratingSystem: "Sistema de Valoraciones",
+    ratingSystemDesc: "Nuestro sistema de valoraciones bidireccional asegura la calidad del servicio y fomenta la confianza entre todos los usuarios de la plataforma.",
+    howItWorksContent2: "Todo esto se integra en una experiencia fluida que ahorra tiempo, reduce costos y garantiza resultados de calidad para todas las partes involucradas.",
+    
+    achievementsContent1: "Desde nuestro lanzamiento, HANDYMAN ha logrado transformar la manera en que las comunidades residenciales gestionan sus servicios, estableciendo nuevos estándares de calidad y eficiencia en el sector.",
+    connectedCommunities: "Comunidades Conectadas",
+    connectedCommunitiesDesc: "Más de 500 comunidades residenciales confían en nuestra plataforma para gestionar sus servicios diarios.",
+    verifiedCompanies: "Empresas Verificadas",
+    verifiedCompaniesDesc: "Una red de más de 300 empresas de servicios certificadas y verificadas por nuestro equipo.",
+    satisfactionIndex: "Índice de Satisfacción",
+    satisfactionIndexDesc: "El 95% de nuestros usuarios califican positivamente su experiencia con la plataforma.",
+    resolvedIncidents: "Incidencias Resueltas",
+    resolvedIncidentsDesc: "Más de 10,000 solicitudes de servicio completadas exitosamente a través de nuestra plataforma.",
+    achievementsContent2: "Estos números reflejan nuestro compromiso continuo con la excelencia y la innovación en el sector de servicios residenciales.",
+    
+    // Luxury home carousel translations
+    residentialElitePanorama: "Residencial Elite Panorama",
+    luxuryCommunityMadrid: "Comunidad de Lujo - Madrid",
+    altavistaResidentialComplex: "Complejo Residencial Altavista",
+    exclusiveUrbanizationBarcelona: "Urbanización Exclusiva - Barcelona",
+    residentialGoldenPark: "Residencial Golden Park",
+    premiumCommunityValencia: "Comunidad Premium - Valencia",
+    residentialSeaViewpoint: "Residencial Mirador del Mar",
+    luxuryCommunityMarbella: "Comunidad de Lujo - Marbella",
+    platinumTowersComplex: "Complejo Torres Platinum",
+    exclusiveApartmentsBilbao: "Apartamentos Exclusivos - Bilbao",
+    residentialEmeraldCoast: "Residencial Costa Esmeralda",
+    premiumCommunityMalaga: "Comunidad Premium - Málaga",
+    residentialPradoGardens: "Residencial Jardines del Prado",
+    luxuryUrbanizationSeville: "Urbanización de Lujo - Sevilla",
+    residentialMontecarlo: "Residencial Montecarlo",
+    exclusiveCommunitySanSebastian: "Comunidad Exclusiva - San Sebastián",
+    eliteSkylineComplex: "Complejo Elite Skyline",
+    luxuryApartmentsZaragoza: "Apartamentos de Lujo - Zaragoza",
+    residentialExclusiveBay: "Residencial Bahía Exclusiva",
+    premiumCommunityAlicante: "Comunidad Premium - Alicante"
   },
   en: {
     // Common
@@ -870,7 +915,52 @@ const baseTranslations = {
     joinOurCommunity: "Join Our Community",
     joinOurCommunityText: "Whether you are a resident looking for quality services, a property manager managing properties, or a professional offering your services, HANDYMAN has a place for you.",
     getStartedToday: "Get Started Today",
-    contactUs: "Contact Us"
+    contactUs: "Contact Us",
+    
+    // Additional content for How It Works and Achievements
+    howItWorksContent1: "HANDYMAN works as a comprehensive ecosystem that connects all actors in the residential sector. Our platform facilitates communication, management, and service contracting efficiently and transparently.",
+    forAdministrators: "For Property Managers",
+    forAdministratorsDesc: "Manage multiple properties from a single panel, coordinate services, supervise budgets, and maintain direct communication with residents and providers.",
+    forServiceCompanies: "For Service Companies",
+    forServiceCompaniesDesc: "Access a wide customer base, manage your projects, receive secure payments, and build your reputation through our rating system.",
+    forNeighbors: "For Neighbors and Residents",
+    forNeighborsDesc: "Request services easily, compare quotes, track in real-time, and rate your experience to help others.",
+    ratingSystem: "Rating System",
+    ratingSystemDesc: "Our bidirectional rating system ensures service quality and fosters trust among all platform users.",
+    howItWorksContent2: "All of this integrates into a seamless experience that saves time, reduces costs, and guarantees quality results for all parties involved.",
+    
+    achievementsContent1: "Since our launch, HANDYMAN has managed to transform the way residential communities manage their services, establishing new standards of quality and efficiency in the sector.",
+    connectedCommunities: "Connected Communities",
+    connectedCommunitiesDesc: "More than 500 residential communities trust our platform to manage their daily services.",
+    verifiedCompanies: "Verified Companies",
+    verifiedCompaniesDesc: "A network of more than 300 service companies certified and verified by our team.",
+    satisfactionIndex: "Satisfaction Index",
+    satisfactionIndexDesc: "95% of our users rate their experience with the platform positively.",
+    resolvedIncidents: "Resolved Incidents",
+    resolvedIncidentsDesc: "More than 10,000 service requests successfully completed through our platform.",
+    achievementsContent2: "These numbers reflect our ongoing commitment to excellence and innovation in the residential services sector.",
+    
+    // Luxury home carousel translations
+    residentialElitePanorama: "Elite Panorama Residential",
+    luxuryCommunityMadrid: "Luxury Community - Madrid",
+    altavistaResidentialComplex: "Altavista Residential Complex",
+    exclusiveUrbanizationBarcelona: "Exclusive Urbanization - Barcelona",
+    residentialGoldenPark: "Golden Park Residential",
+    premiumCommunityValencia: "Premium Community - Valencia",
+    residentialSeaViewpoint: "Sea Viewpoint Residential",
+    luxuryCommunityMarbella: "Luxury Community - Marbella",
+    platinumTowersComplex: "Platinum Towers Complex",
+    exclusiveApartmentsBilbao: "Exclusive Apartments - Bilbao",
+    residentialEmeraldCoast: "Emerald Coast Residential",
+    premiumCommunityMalaga: "Premium Community - Málaga",
+    residentialPradoGardens: "Prado Gardens Residential",
+    luxuryUrbanizationSeville: "Luxury Urbanization - Seville",
+    residentialMontecarlo: "Montecarlo Residential",
+    exclusiveCommunitySanSebastian: "Exclusive Community - San Sebastián",
+    eliteSkylineComplex: "Elite Skyline Complex",
+    luxuryApartmentsZaragoza: "Luxury Apartments - Zaragoza",
+    residentialExclusiveBay: "Exclusive Bay Residential",
+    premiumCommunityAlicante: "Premium Community - Alicante"
   }
 };
 
