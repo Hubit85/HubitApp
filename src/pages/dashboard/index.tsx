@@ -184,19 +184,77 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p className='text-lg leading-relaxed'>
-                      {t('whoWeAreContent1')}
+                      {t('ourMissionText')}
                     </p>
-                    <p className='text-lg leading-relaxed'>
-                      {t('whoWeAreContent2')}
-                    </p>
+                    
                     <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                      <h3 className='font-bold text-xl mb-2'>{t('ourVision')}</h3>
                       <p className='text-lg leading-relaxed'>
-                        {t('whoWeAreContent3')}
+                        {t('ourVisionText')}
                       </p>
                     </div>
-                    <p className='text-lg leading-relaxed'>
-                      {t('whoWeAreContent4')}
-                    </p>
+                    
+                    <div className='space-y-4'>
+                      <h3 className='font-bold text-xl'>{t('ourValues')}</h3>
+                      
+                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                        <h4 className='font-bold text-lg mb-2'>{t('qualityFirst')}</h4>
+                        <p>{t('qualityFirstText')}</p>
+                      </div>
+                      
+                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                        <h4 className='font-bold text-lg mb-2'>{t('transparency')}</h4>
+                        <p>{t('transparencyText')}</p>
+                      </div>
+                      
+                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                        <h4 className='font-bold text-lg mb-2'>{t('reliability')}</h4>
+                        <p>{t('reliabilityText')}</p>
+                      </div>
+                      
+                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                        <h4 className='font-bold text-lg mb-2'>{t('innovation')}</h4>
+                        <p>{t('innovationText')}</p>
+                      </div>
+                    </div>
+                    
+                    <div className='space-y-4'>
+                      <h3 className='font-bold text-xl'>{t('whatMakesUsDifferent')}</h3>
+                      
+                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                        <h4 className='font-bold text-lg mb-2'>{t('verifiedProfessionals')}</h4>
+                        <p>{t('verifiedProfessionalsText')}</p>
+                      </div>
+                      
+                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                        <h4 className='font-bold text-lg mb-2'>{t('communityFocused')}</h4>
+                        <p>{t('communityFocusedText')}</p>
+                      </div>
+                      
+                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                        <h4 className='font-bold text-lg mb-2'>{t('digitalPlatform')}</h4>
+                        <p>{t('digitalPlatformText')}</p>
+                      </div>
+                      
+                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                        <h4 className='font-bold text-lg mb-2'>{t('support247')}</h4>
+                        <p>{t('support247Text')}</p>
+                      </div>
+                    </div>
+                    
+                    <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                      <h3 className='font-bold text-xl mb-2'>{t('ourTeam')}</h3>
+                      <p className='text-lg leading-relaxed'>
+                        {t('ourTeamText')}
+                      </p>
+                    </div>
+                    
+                    <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                      <h3 className='font-bold text-xl mb-2'>{t('joinOurCommunity')}</h3>
+                      <p className='text-lg leading-relaxed'>
+                        {t('joinOurCommunityText')}
+                      </p>
+                    </div>
                   </CardContent>
                 </motion.div>
                 {expandedCard !== 'whoWeAre' && (
