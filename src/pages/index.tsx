@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building, Wrench, Star, TrendingUp } from "lucide-react";
+import { Users, Building, Wrench, Star, TrendingUp, Heart } from "lucide-react";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -55,6 +55,56 @@ export default function Home() {
               >
                 <Link href="/auth/login">{t("login")}</Link>
               </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Quiénes Somos Section */}
+        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Quiénes Somos
+              </h2>
+            </div>
+
+            <div className="max-w-5xl mx-auto space-y-8">
+              <div className="text-center">
+                <p className="text-xl text-gray-700 leading-relaxed">
+                  Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.
+                </p>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-8">
+                <div className="text-center mb-6">
+                  <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Heart className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Nuestra Misión</h3>
+                </div>
+                <p className="text-lg text-gray-700 leading-relaxed text-center">
+                  Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.
+                </p>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Nuestro Ecosistema</h3>
+                <p className="text-lg text-gray-700 leading-relaxed text-center mb-6">
+                  Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.
+                </p>
+              </div>
+
+              <div className="bg-green-50 rounded-lg p-8">
+                <div className="text-center mb-6">
+                  <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Star className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Nuestro Valor Fundamental</h3>
+                </div>
+                <p className="text-lg text-gray-700 leading-relaxed text-center">
+                  La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.
+                </p>
+              </div>
             </div>
           </div>
         </section>
