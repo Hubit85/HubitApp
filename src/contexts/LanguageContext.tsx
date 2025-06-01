@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 type Language = "es" | "en";
 
-// Definición de traducciones básicas por idioma
 const baseTranslations = {
   es: {
     // Common
@@ -177,7 +176,7 @@ const baseTranslations = {
     selectServiceType: "Selecciona un tipo de servicio",
     serviceTitle: "Título del Servicio",
     detailedDescription: "Descripción Detallada",
-    location: "Ubicación",
+    serviceLocation: "Ubicación del Servicio",
     preferredDate: "Fecha Preferida",
     estimatedBudgetOptional: "Presupuesto Estimado (Opcional)",
     photosOptional: "Fotos (Opcional)",
@@ -247,7 +246,8 @@ const baseTranslations = {
     masonry: "Albañilería",
     roofing: "Techado",
     viewDetails: "Ver Detalles",
-    manage: "Gestionar"
+    manage: "Gestionar",
+    location: "Ubicación"
   },
   en: {
     // Common
@@ -421,7 +421,7 @@ const baseTranslations = {
     selectServiceType: "Select a service type",
     serviceTitle: "Service Title",
     detailedDescription: "Detailed Description",
-    location: "Location",
+    serviceLocation: "Service Location",
     preferredDate: "Preferred Date",
     estimatedBudgetOptional: "Estimated Budget (Optional)",
     photosOptional: "Photos (Optional)",
@@ -491,7 +491,8 @@ const baseTranslations = {
     masonry: "Masonry",
     roofing: "Roofing",
     viewDetails: "View Details",
-    manage: "Manage"
+    manage: "Manage",
+    location: "Location"
   }
 };
 
