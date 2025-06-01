@@ -184,75 +184,42 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p className='text-lg leading-relaxed'>
-                      {t('ourMissionText')}
+                      Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:
                     </p>
                     
-                    <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                      <h3 className='font-bold text-xl mb-2'>{t('ourVision')}</h3>
-                      <p className='text-lg leading-relaxed'>
-                        {t('ourVisionText')}
-                      </p>
-                    </div>
-                    
                     <div className='space-y-4'>
-                      <h3 className='font-bold text-xl'>{t('ourValues')}</h3>
-                      
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h4 className='font-bold text-lg mb-2'>{t('qualityFirst')}</h4>
-                        <p>{t('qualityFirstText')}</p>
+                        <h3 className='font-bold text-xl mb-2'>Para Administradores</h3>
+                        <p className='text-lg leading-relaxed'>
+                          Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.
+                        </p>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h4 className='font-bold text-lg mb-2'>{t('transparency')}</h4>
-                        <p>{t('transparencyText')}</p>
+                        <h3 className='font-bold text-xl mb-2'>Para Empresas de Servicios</h3>
+                        <p className='text-lg leading-relaxed'>
+                          Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.
+                        </p>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h4 className='font-bold text-lg mb-2'>{t('reliability')}</h4>
-                        <p>{t('reliabilityText')}</p>
+                        <h3 className='font-bold text-xl mb-2'>Para Vecinos</h3>
+                        <p className='text-lg leading-relaxed'>
+                          Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.
+                        </p>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h4 className='font-bold text-lg mb-2'>{t('innovation')}</h4>
-                        <p>{t('innovationText')}</p>
-                      </div>
-                    </div>
-                    
-                    <div className='space-y-4'>
-                      <h3 className='font-bold text-xl'>{t('whatMakesUsDifferent')}</h3>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h4 className='font-bold text-lg mb-2'>{t('verifiedProfessionals')}</h4>
-                        <p>{t('verifiedProfessionalsText')}</p>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h4 className='font-bold text-lg mb-2'>{t('communityFocused')}</h4>
-                        <p>{t('communityFocusedText')}</p>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h4 className='font-bold text-lg mb-2'>{t('digitalPlatform')}</h4>
-                        <p>{t('digitalPlatformText')}</p>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h4 className='font-bold text-lg mb-2'>{t('support247')}</h4>
-                        <p>{t('support247Text')}</p>
+                        <h3 className='font-bold text-xl mb-2'>Sistema de Valoraciones</h3>
+                        <p className='text-lg leading-relaxed'>
+                          Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.
+                        </p>
                       </div>
                     </div>
                     
-                    <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                      <h3 className='font-bold text-xl mb-2'>{t('ourTeam')}</h3>
-                      <p className='text-lg leading-relaxed'>
-                        {t('ourTeamText')}
-                      </p>
-                    </div>
-                    
-                    <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                      <h3 className='font-bold text-xl mb-2'>{t('joinOurCommunity')}</h3>
-                      <p className='text-lg leading-relaxed'>
-                        {t('joinOurCommunityText')}
+                    <div className='bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700'>
+                      <p className='text-lg leading-relaxed font-medium'>
+                        Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.
                       </p>
                     </div>
                   </CardContent>
