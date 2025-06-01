@@ -331,7 +331,6 @@ export default function CommunityMemberDashboard() {
                activeTab === "configuracion" ? t("configuration") :
                activeTab === "valoraciones" ? t("serviceRatings") :
                activeTab === "mejores" ? t("bestRated") :
-               activeTab === "cuenta" ? t("myAccount") :
                t("communityMemberDashboard")}
             </h1>
             
