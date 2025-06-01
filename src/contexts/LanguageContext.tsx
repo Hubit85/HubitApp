@@ -1193,428 +1193,85 @@ const baseTranslations = {
     holidayServices: "Holiday Services",
     
     // Service types and categories
-    flooring: "Suelos",
-    hvac: "Climatización",
-    applianceRepair: "Reparación de Electrodomésticos",
-    homeNetworking: "Redes Domésticas",
-    restoration: "Restauración",
-    deepCleaning: "Limpieza Profunda",
-    interiorDecoration: "Decoración Interior",
-    completeRenovation: "Renovación Completa",
-    landscaping: "Paisajismo",
+    flooring: "Flooring",
+    hvac: "HVAC",
+    applianceRepair: "Appliance Repair",
+    homeNetworking: "Home Networking",
+    restoration: "Restoration",
+    deepCleaning: "Deep Cleaning",
+    interiorDecoration: "Interior Decoration",
+    completeRenovation: "Complete Renovation",
+    landscaping: "Landscaping",
     
     // Service provider dashboard translations
-    serviceProviderDashboard: "Panel de Proveedor de Servicios",
-    serviceOverview: "Resumen de Servicios",
-    bids: "Licitaciones",
-    communityRequests: "Solicitudes de la Comunidad",
-    requests: "Solicitudes",
-    editBid: "Editar Licitación",
-    contactClient: "Contactar Cliente",
-    submitBid: "Enviar Licitación",
-    noRequests: "No hay solicitudes disponibles",
-    browseAllRequests: "Explorar Todas las Solicitudes",
-    overview: "Resumen",
+    serviceProviderDashboard: "Service Provider Dashboard",
+    serviceOverview: "Service Overview",
+    bids: "Bids",
+    communityRequests: "Community Requests",
+    requests: "Requests",
+    editBid: "Edit Bid",
+    contactClient: "Contact Client",
+    submitBid: "Submit Bid",
+    noRequests: "No requests available",
+    browseAllRequests: "Browse All Requests",
+    overview: "Overview",
     
     // Bid data translations - Plumbing
-    bathroomPlumbingOverhaul: "Renovación Completa de Fontanería de Baño",
-    kitchenSinkInstallation: "Instalación de Fregadero de Cocina",
-    toiletRepair: "Reparación de Inodoro",
-    leakDetection: "Detección de Fugas",
-    fullHousePlumbing: "Fontanería de Casa Completa",
-    showerInstallation: "Instalación de Ducha",
-    drainCleaning: "Limpieza de Desagües",
-    waterHeaterReplacement: "Reemplazo de Calentador de Agua",
-    faucetReplacement: "Reemplazo de Grifo",
-    sewerLineRepair: "Reparación de Línea de Alcantarillado",
+    bathroomPlumbingOverhaul: "Complete Bathroom Plumbing Overhaul",
+    kitchenSinkInstallation: "Kitchen Sink Installation",
+    toiletRepair: "Toilet Repair",
+    leakDetection: "Leak Detection",
+    fullHousePlumbing: "Full House Plumbing",
+    showerInstallation: "Shower Installation",
+    drainCleaning: "Drain Cleaning",
+    waterHeaterReplacement: "Water Heater Replacement",
+    faucetReplacement: "Faucet Replacement",
+    sewerLineRepair: "Sewer Line Repair",
     
     // Company names - Plumbing
-    elitePlumbingSolutions: "Soluciones de Fontanería Elite",
-    waterworksPro: "Fontanería Pro",
-    reliableHomeServices: "Servicios Domésticos Confiables",
-    precisionPlumbers: "Fontaneros de Precisión",
-    masterPlumbingCo: "Compañía Maestros de Fontanería",
-    qualityPlumbing: "Fontanería de Calidad",
-    drainMasters: "Maestros de Desagües",
-    hotWaterExperts: "Expertos en Agua Caliente",
-    fixItPlumbing: "Fontanería Arréglalo",
-    deepDrainServices: "Servicios de Desagües Profundos",
+    elitePlumbingSolutions: "Elite Plumbing Solutions",
+    waterworksPro: "Waterworks Pro",
+    reliableHomeServices: "Reliable Home Services",
+    precisionPlumbers: "Precision Plumbers",
+    masterPlumbingCo: "Master Plumbing Co",
+    qualityPlumbing: "Quality Plumbing",
+    drainMasters: "Drain Masters",
+    hotWaterExperts: "Hot Water Experts",
+    fixItPlumbing: "Fix It Plumbing",
+    deepDrainServices: "Deep Drain Services",
     
     // Electrical translations
-    homeRewiring: "Recableado de Casa",
-    outletInstallation: "Instalación de Enchufes",
-    lightingInstallation: "Instalación de Iluminación",
-    panelUpgrade: "Actualización de Panel",
-    ceilingFanInstallation: "Instalación de Ventilador de Techo",
-    electricalInspection: "Inspección Eléctrica",
-    generatorInstallation: "Instalación de Generador",
-    switchReplacement: "Reemplazo de Interruptores",
-    smartHomeWiring: "Cableado de Casa Inteligente",
-    outdoorLighting: "Iluminación Exterior",
+    homeRewiring: "Home Rewiring",
+    outletInstallation: "Outlet Installation",
+    lightingInstallation: "Lighting Installation",
+    panelUpgrade: "Panel Upgrade",
+    ceilingFanInstallation: "Ceiling Fan Installation",
+    electricalInspection: "Electrical Inspection",
+    generatorInstallation: "Generator Installation",
+    switchReplacement: "Switch Replacement",
+    smartHomeWiring: "Smart Home Wiring",
+    outdoorLighting: "Outdoor Lighting",
     
     // Electrical companies
-    powerElectrical: "Eléctrica Power",
-    voltExperts: "Expertos en Voltaje",
-    brightSolutions: "Soluciones Brillantes",
-    circuitPros: "Profesionales de Circuitos",
-    fanMasters: "Maestros de Ventiladores",
-    safetyFirst: "Seguridad Primero",
-    powerBackup: "Respaldo de Energía",
-    switchItUp: "Cambia el Interruptor",
-    smartElectric: "Eléctrica Inteligente",
-    nightLightPros: "Profesionales de Luz Nocturna",
+    powerElectrical: "Power Electrical",
+    voltExperts: "Volt Experts",
+    brightSolutions: "Bright Solutions",
+    circuitPros: "Circuit Pros",
+    fanMasters: "Fan Masters",
+    safetyFirst: "Safety First",
+    powerBackup: "Power Backup",
+    switchItUp: "Switch It Up",
+    smartElectric: "Smart Electric",
+    nightLightPros: "Night Light Pros",
     
     // Painting translations
-    interiorPainting: "Pintura Interior",
-    exteriorPainting: "Pintura Exterior",
-    accentWall: "Pared de Acento",
-    cabinetRefinishing: "Refinado de Gabinetes",
-    deckStaining: "Tinción de Terraza",
-    wallpaperRemoval: "Remoción de Papel Tapiz",
-    textureApplication: "Aplicación de Textura",
-    commercialPainting: "Pintura Comercial",
-    trimPainting: "Pintura de Molduras",
-    fenceStaining: "Tinción de Cerca",
-    
-    // Painting companies
-    colorMasters: "Maestros del Color",
-    freshCoatPros: "Profesionales de Capa Fresca",
-    accentArtistry: "Arte de Acentos",
-    cabinetRenew: "Renovación de Gabinetes",
-    deckRevival: "Renovación de Terraza",
-    smoothWalls: "Paredes Lisas",
-    textureArtists: "Artistas de Textura",
-    proPainters: "Pintores Profesionales",
-    detailPainters: "Pintores de Detalle",
-    fenceRefresh: "Renovación de Cercas",
-    
-    // Flooring translations
-    hardwoodInstallation: "Instalación de Madera Dura",
-    tileFlorInstallation: "Instalación de Suelo de Azulejos",
-    carpetInstallation: "Instalación de Alfombra",
-    vinylInstallation: "Instalación de Vinilo",
-    floorRefinishing: "Refinado de Suelos",
-    laminateInstallation: "Instalación de Laminado",
-    floorRepair: "Reparación de Suelos",
-    marbleInstallation: "Instalación de Mármol",
-    subfloorRepair: "Reparación de Subsuelo",
-    radiantFloorHeating: "Calefacción Radiante de Suelo",
-    
-    // Flooring companies
-    hardwoodHeroes: "Héroes de Madera Dura",
-    tileExperts: "Expertos en Azulejos",
-    carpetKings: "Reyes de Alfombras",
-    vinylPros: "Profesionales de Vinilo",
-    floorRevival: "Renovación de Suelos",
-    laminateLords: "Señores del Laminado",
-    repairRight: "Reparación Correcta",
-    marbleMasters: "Maestros del Mármol",
-    foundationFix: "Arreglo de Cimientos",
-    warmWalkers: "Caminantes Cálidos",
-    
-    // Roofing translations
-    completeRoofReplacement: "Reemplazo Completo de Techo",
-    roofRepair: "Reparación de Techo",
-    gutterInstallation: "Instalación de Canalones",
-    chimneyRepair: "Reparación de Chimenea",
-    ventInstallation: "Instalación de Ventilación",
-    metalRoofInstallation: "Instalación de Techo Metálico",
-    skylightInstallation: "Instalación de Tragaluz",
-    flatRoofCoating: "Recubrimiento de Techo Plano",
-    solarRoofInstallation: "Instalación de Techo Solar",
-    roofInspection: "Inspección de Techo",
-    
-    // Roofing companies
-    topRoofing: "Techado Superior",
-    leakStoppers: "Detener Fugas",
-    gutterGuards: "Guardianes de Canalones",
-    chimneyChamps: "Campeones de Chimeneas",
-    ventilationPros: "Profesionales de Ventilación",
-    metalMasters: "Maestros del Metal",
-    skyBrights: "Brillos del Cielo",
-    flatRoofExperts: "Expertos en Techos Planos",
-    solarRoofing: "Techado Solar",
-    roofInspectors: "Inspectores de Techos",
-    
-    // HVAC translations
-    acInstallation: "Instalación de Aire Acondicionado",
-    furnaceInstallation: "Instalación de Caldera",
-    hvacMaintenance: "Mantenimiento de Climatización",
-    ductCleaning: "Limpieza de Conductos",
-    heatPumpInstallation: "Instalación de Bomba de Calor",
-    thermostatInstallation: "Instalación de Termostato",
-    ventilationImprovement: "Mejora de Ventilación",
-    filterReplacement: "Reemplazo de Filtros",
-    zoneSystemInstallation: "Instalación de Sistema de Zonas",
-    refrigerantRecharge: "Recarga de Refrigerante",
-    
-    // HVAC companies
-    coolAirPros: "Profesionales de Aire Fresco",
-    heatMasters: "Maestros del Calor",
-    systemService: "Servicio de Sistemas",
-    freshAirDucts: "Conductos de Aire Fresco",
-    efficientHeat: "Calor Eficiente",
-    smartControl: "Control Inteligente",
-    airFlowExperts: "Expertos en Flujo de Aire",
-    cleanAirSystems: "Sistemas de Aire Limpio",
-    comfortZones: "Zonas de Confort",
-    coolantPros: "Profesionales de Refrigerante",
-    
-    // Carpentry translations
-    customCabinetry: "Ebanistería Personalizada",
-    deckConstruction: "Construcción de Terraza",
-    crownMolding: "Moldura de Corona",
-    customClosets: "Armarios Personalizados",
-    stairwayRenovation: "Renovación de Escalera",
-    doorInstallation: "Instalación de Puertas",
-    windowReplacement: "Reemplazo de Ventanas",
-    kitchenRemodel: "Remodelación de Cocina",
-    trimWork: "Trabajo de Molduras",
-    customShelving: "Estanterías Personalizadas",
-    
-    // Carpentry companies
-    cabinetCraftsmen: "Artesanos de Gabinetes",
-    deckBuilders: "Constructores de Terrazas",
-    crownKings: "Reyes de Coronas",
-    closetCreations: "Creaciones de Armarios",
-    stairMasters: "Maestros de Escaleras",
-    doorExperts: "Expertos en Puertas",
-    clearViewPros: "Profesionales de Vista Clara",
-    kitchenCraft: "Artesanía de Cocina",
-    trimArtisans: "Artesanos de Molduras",
-    shelfSolutions: "Soluciones de Estanterías",
-    
-    // Locksmith translations
-    lockRekeying: "Cambio de Llaves",
-    deadboltInstallation: "Instalación de Cerrojo",
-    smartLockInstallation: "Instalación de Cerradura Inteligente",
-    lockoutService: "Servicio de Apertura",
-    safeCombinationChange: "Cambio de Combinación de Caja Fuerte",
-    mailboxLockReplacement: "Reemplazo de Cerradura de Buzón",
-    highSecurityLocks: "Cerraduras de Alta Seguridad",
-    keylessSecurity: "Seguridad Sin Llaves",
-    cabinetLocks: "Cerraduras de Gabinetes",
-    completeHomeRekeying: "Cambio Completo de Llaves de Casa",
-    
-    // Locksmith companies
-    keyMasters: "Maestros de Llaves",
-    secureLocks: "Cerraduras Seguras",
-    smartSecurity: "Seguridad Inteligente",
-    quickAccess: "Acceso Rápido",
-    safeExperts: "Expertos en Cajas Fuertes",
-    mailSecure: "Correo Seguro",
-    fortressLocks: "Cerraduras Fortaleza",
-    modernLocks: "Cerraduras Modernas",
-    secureCabinets: "Gabinetes Seguros",
-    totalSecurity: "Seguridad Total",
-    
-    // Appliance repair translations
-    refrigeratorRepair: "Reparación de Refrigerador",
-    washerRepair: "Reparación de Lavadora",
-    dryerRepair: "Reparación de Secadora",
-    dishwasherRepair: "Reparación de Lavavajillas",
-    ovenRepair: "Reparación de Horno",
-    microwaveRepair: "Reparación de Microondas",
-    rangeHoodRepair: "Reparación de Campana Extractora",
-    iceMarkerRepair: "Reparación de Máquina de Hielo",
-    garbageDisposalRepair: "Reparación de Triturador de Basura",
-    wineCollerRepair: "Reparación de Vinoteca",
-    
-    // Appliance companies
-    coolFixers: "Reparadores Frescos",
-    washWizards: "Magos del Lavado",
-    dryerDocs: "Doctores de Secadoras",
-    dishDoctors: "Doctores de Lavavajillas",
-    ovenExperts: "Expertos en Hornos",
-    microTechs: "Técnicos de Microondas",
-    ventPros: "Profesionales de Ventilación",
-    iceFixers: "Reparadores de Hielo",
-    disposalDocs: "Doctores de Trituradores",
-    wineTechs: "Técnicos de Vino",
-    
-    // Landscaping translations
-    lawnDesign: "Diseño de Césped",
-    gardenInstallation: "Instalación de Jardín",
-    treeTriming: "Poda de Árboles",
-    outdoorKitchen: "Cocina Exterior",
-    irrigationSystem: "Sistema de Riego",
-    fenceInstallation: "Instalación de Cerca",
-    patioConstruction: "Construcción de Patio",
-    mulchingService: "Servicio de Acolchado",
-    retainingWall: "Muro de Contención",
-    waterFeature: "Fuente de Agua",
-    
-    // Landscaping companies
-    lawnArtists: "Artistas del Césped",
-    gardenGurus: "Gurús del Jardín",
-    treeTrimmers: "Podadores de Árboles",
-    outdoorLiving: "Vida Exterior",
-    waterWise: "Agua Inteligente",
-    boundaryPros: "Profesionales de Límites",
-    patioBuilders: "Constructores de Patios",
-    groundCovers: "Cubiertas de Suelo",
-    wallWorks: "Trabajos de Muros",
-    waterWonders: "Maravillas del Agua",
-    
-    // Moving services translations
-    localMove: "Mudanza Local",
-    longDistanceMove: "Mudanza de Larga Distancia",
-    furnitureDelivery: "Entrega de Muebles",
-    packingServices: "Servicios de Embalaje",
-    loadingServices: "Servicios de Carga",
-    officeRelocation: "Reubicación de Oficina",
-    pianoMoving: "Mudanza de Piano",
-    storageServices: "Servicios de Almacenamiento",
-    applianceMoving: "Mudanza de Electrodomésticos",
-    internationalShipping: "Envío Internacional",
-    
-    // Moving companies
-    cityMovers: "Mudanzas de Ciudad",
-    distanceMovers: "Mudanzas de Distancia",
-    furnitureShippers: "Transportistas de Muebles",
-    packPros: "Profesionales de Embalaje",
-    heavyLifters: "Levantadores Pesados",
-    businessMovers: "Mudanzas de Negocios",
-    pianoTransport: "Transporte de Pianos",
-    secureStorage: "Almacenamiento Seguro",
-    applianceShifters: "Transportistas de Electrodomésticos",
-    globalMovers: "Mudanzas Globales",
-    
-    // Networking translations
-    wifiSetup: "Configuración de WiFi",
-    homeNetworkInstallation: "Instalación de Red Doméstica",
-    routerConfiguration: "Configuración de Router",
-    smartHomeIntegration: "Integración de Casa Inteligente",
-    securityCameraInstallation: "Instalación de Cámaras de Seguridad",
-    meshNetworkSetup: "Configuración de Red Mesh",
-    tvMounting: "Montaje de TV",
-    homeTheaterSetup: "Configuración de Cine en Casa",
-    gamingNetworkOptimization: "Optimización de Red para Juegos",
-    officeNetworkSetup: "Configuración de Red de Oficina",
-    
-    // Networking companies
-    wifiWizards: "Magos del WiFi",
-    networkNinjas: "Ninjas de Redes",
-    routerPros: "Profesionales de Routers",
-    smartIntegrators: "Integradores Inteligentes",
-    securityVision: "Visión de Seguridad",
-    meshMasters: "Maestros de Mesh",
-    displayDoctors: "Doctores de Pantallas",
-    theaterTechs: "Técnicos de Cine",
-    gamingGurus: "Gurús de Juegos",
-    businessTech: "Tecnología de Negocios",
-    
-    // Additional service categories
-    brickWallConstruction: "Construcción de Muro de Ladrillo",
-    stonePathway: "Sendero de Piedra",
-    fireplaceConstruction: "Construcción de Chimenea",
-    solidStructures: "Estructuras Sólidas",
-    brickRepair: "Reparación de Ladrillos",
-    stoneFacade: "Fachada de Piedra",
-    chimneyMasters: "Maestros de Chimeneas",
-    stepRepair: "Reparación de Escalones",
-    
-    // Masonry companies
-    brickMasters: "Maestros del Ladrillo",
-    stoneCraftsmen: "Artesanos de Piedra",
-    fireplaceExperts: "Expertos en Chimeneas",
-    brickDoctors: "Doctores del Ladrillo",
-    facadePros: "Profesionales de Fachadas",
-    stepByStep: "Paso a Paso",
-    
-    // Roof tiles translations
-    clayTileReplacement: "Reemplazo de Tejas de Arcilla",
-    concreteTileInstallation: "Instalación de Tejas de Concreto",
-    tileRepair: "Reparación de Tejas",
-    completeRoofTileReplacement: "Reemplazo Completo de Tejas",
-    ridgeTileRepair: "Reparación de Tejas de Cumbrera",
-    valleyRepair: "Reparación de Limatesas",
-    slateTileInstallation: "Instalación de Tejas de Pizarra",
-    tileSealing: "Sellado de Tejas",
-    decorativeTileWork: "Trabajo de Tejas Decorativas",
-    historicTileRestoration: "Restauración de Tejas Históricas",
-    
-    // Roof tile companies
-    clayTilePros: "Profesionales de Tejas de Arcilla",
-    concreteMasters: "Maestros del Concreto",
-    tileFixers: "Reparadores de Tejas",
-    completeRoofing: "Techado Completo",
-    ridgeExperts: "Expertos en Cumbreras",
-    valleyPros: "Profesionales de Limatesas",
-    slateSpecialists: "Especialistas en Pizarra",
-    sealTeam: "Equipo de Sellado",
-    decorativePros: "Profesionales Decorativos",
-    heritageTiles: "Tejas Patrimoniales",
-    
-    // Community requests translations
-    bathroomSinkInstallation: "Instalación de Lavabo de Baño",
-    showerLeakRepair: "Reparación de Fuga de Ducha",
-    waterHeaterInstallation: "Instalación de Calentador de Agua",
-    electricalOutletInstallation: "Instalación de Enchufe Eléctrico",
-    ceilingFanWiring: "Cableado de Ventilador de Techo",
-    livingRoomPainting: "Pintura de Sala de Estar",
-    exteriorHousePainting: "Pintura Exterior de Casa",
-    kitchenCabinetPainting: "Pintura de Gabinetes de Cocina",
-    hardwoodFloorRepair: "Reparación de Suelo de Madera",
-    kitchenTileInstallation: "Instalación de Azulejos de Cocina",
-    basementCarpetInstallation: "Instalación de Alfombra de Sótano",
-    roofLeakRepair: "Reparación de Fuga de Techo",
-    gutterCleaning: "Limpieza de Canalones",
-    acMaintenance: "Mantenimiento de Aire Acondicionado",
-    furnaceReplacement: "Reemplazo de Caldera",
-    customShelvingInstallation: "Instalación de Estanterías Personalizadas",
-    deckBuilding: "Construcción de Terraza",
-    kitchenCabinetInstallation: "Instalación de Gabinetes de Cocina",
-    lockReplacement: "Reemplazo de Cerradura",
-    safeUnlocking: "Apertura de Caja Fuerte",
-    dishwasherInstallation: "Instalación de Lavavajillas",
-    gardenDesign: "Diseño de Jardín",
-    lawnCare: "Cuidado del Césped",
-    sprinklerSystemInstallation: "Instalación de Sistema de Aspersores",
-    apartmentMove: "Mudanza de Apartamento",
-    furnitureRearrangement: "Reorganización de Muebles",
-    crossCountryMove: "Mudanza Interestatal",
-    wifiNetworkSetup: "Configuración de Red WiFi",
-    smartHomeConfiguration: "Configuración de Casa Inteligente"
-  }
-};
-
-interface LanguageContextType {
-  language: Language;
-  setLanguage: (language: Language) => void;
-  t: (key: string) => string;
-}
-
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
-export function useLanguage() {
-  const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
-  return context;
-}
-
-interface LanguageProviderProps {
-  children: ReactNode;
-}
-
-export function LanguageProvider({ children }: LanguageProviderProps) {
-  const [language, setLanguage] = useState<Language>("es");
-
-  const t = (key: string): string => {
-    return baseTranslations[language][key as keyof typeof baseTranslations[typeof language]] || key;
-  };
-
-  const value = {
-    language,
-    setLanguage,
-    t
-  };
-
-  return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
-  );
-}
+    interiorPainting: "Interior Painting",
+    exteriorPainting: "Exterior Painting",
+    accentWall: "Accent Wall",
+    cabinetRefinishing: "Cabinet Refinishing",
+    deckStaining: "Deck Staining",
+    wallpaperRemoval: "Wallpaper Removal",
+    textureApplication: "Texture Application",
+    commercialPainting: "Commercial Painting",
+    trimPainting: "Trim Painting",
+    fenceSt
