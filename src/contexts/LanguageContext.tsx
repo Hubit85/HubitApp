@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 type Language = "es" | "en";
 
-const translations = {
+// Definición de traducciones básicas por idioma
+const baseTranslations = {
   es: {
     // Common
     professionalServices: "Servicios profesionales",
@@ -90,7 +91,6 @@ const translations = {
     residents: "Residentes",
     serviceProviders: "Proveedores de Servicios",
     financialReports: "Informes Financieros",
-    maintenance: "Mantenimiento",
     communications: "Comunicaciones",
     addProperty: "Añadir Propiedad",
     manageResidents: "Gestionar Residentes",
@@ -154,7 +154,206 @@ const translations = {
     info: "Información",
     loading: "Cargando...",
     noData: "No hay datos disponibles",
-    noResults: "No se encontraron resultados"
+    noResults: "No se encontraron resultados",
+    
+    // Dashboard content
+    whoWeAreContent1: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
+    whoWeAreContent2: "Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.",
+    whoWeAreContent3: "Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.",
+    whoWeAreContent4: "La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.",
+    howItWorksContent1: "Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:",
+    forAdministrators: "Para Administradores",
+    forAdministratorsDesc: "Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.",
+    forServiceCompanies: "Para Empresas de Servicios",
+    forServiceCompaniesDesc: "Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.",
+    forNeighbors: "Para Vecinos",
+    forNeighborsDesc: "Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.",
+    ratingSystem: "Sistema de Valoraciones",
+    ratingSystemDesc: "Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.",
+    howItWorksContent2: "Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.",
+    achievementsContent1: "Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:",
+    connectedCommunities: "Comunidades conectadas",
+    connectedCommunitiesDesc: "Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.",
+    verifiedCompanies: "Empresas verificadas",
+    verifiedCompaniesDesc: "Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.",
+    satisfactionIndex: "Índice de satisfacción",
+    satisfactionIndexDesc: "Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.",
+    resolvedIncidents: "Incidencias resueltas",
+    resolvedIncidentsDesc: "Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.",
+    achievementsContent2: "Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.",
+    
+    // Luxury homes
+    residentialElitePanorama: "Residencial Élite Panorama",
+    luxuryCommunityMadrid: "Comunidad de lujo en Madrid",
+    altavistaResidentialComplex: "Complejo Residencial Altavista",
+    exclusiveUrbanizationBarcelona: "Urbanización exclusiva en Barcelona",
+    residentialGoldenPark: "Residencial Parque Dorado",
+    premiumCommunityValencia: "Comunidad premium en Valencia",
+    residentialSeaViewpoint: "Residencial Mirador del Mar",
+    luxuryCommunityMarbella: "Comunidad de lujo en Marbella",
+    platinumTowersComplex: "Complejo Platinum Towers",
+    exclusiveApartmentsBilbao: "Pisos exclusivos en Bilbao",
+    residentialEmeraldCoast: "Residencial Costa Esmeralda",
+    premiumCommunityMalaga: "Comunidad premium en Málaga",
+    residentialPradoGardens: "Residencial Jardines del Prado",
+    luxuryUrbanizationSeville: "Urbanización de lujo en Sevilla",
+    residentialMontecarlo: "Residencial Montecarlo",
+    exclusiveCommunitySanSebastian: "Comunidad exclusiva en San Sebastián",
+    eliteSkylineComplex: "Complejo Élite Skyline",
+    luxuryApartmentsZaragoza: "Pisos de lujo en Zaragoza",
+    residentialExclusiveBay: "Residencial Bahía Exclusiva",
+    premiumCommunityAlicante: "Comunidad premium en Alicante",
+    
+    // Community Member specific translations
+    communityChat: "Chat de la Comunidad",
+    scheduleVideoConference: "Programar Videoconferencia",
+    informIssue: "Informar Incidencia",
+    communityContracts: "Contratos de la Comunidad",
+    communityBudget: "Presupuesto de la Comunidad",
+    contactAdministrator: "Contactar Administrador",
+    prepareBid: "Preparar Presupuesto",
+    serviceRatings: "Valoraciones de Servicios",
+    bestRated: "Mejor Valorados",
+    myAccount: "Mi Cuenta",
+    
+    // Community roles and contacts
+    communityPresident: "Presidente de la Comunidad",
+    treasurer: "Tesorero",
+    secretary: "Secretario",
+    neighbor: "Vecino",
+    maintenanceManager: "Responsable de Mantenimiento",
+    securityGuard: "Guardia de Seguridad",
+    maintenanceStaff: "Personal de Mantenimiento",
+    
+    // Sample messages
+    goodMorningNeighbors: "Buenos días vecinos",
+    monthlyFeesReminder: "Recordatorio cuotas mensuales",
+    meetingMinutesAvailable: "Actas de reunión disponibles",
+    parkingIssueResolved: "Problema de aparcamiento resuelto",
+    gardenMaintenanceSchedule: "Horario mantenimiento jardín",
+    elevatorRepairUpdate: "Actualización reparación ascensor",
+    noiseComplaintResolution: "Resolución queja ruido",
+    holidayDecorationIdeas: "Ideas decoración navideña",
+    communityGardenProposal: "Propuesta jardín comunitario",
+    securityUpdateReport: "Informe actualización seguridad",
+    childrenPlaygroundIdea: "Idea parque infantil",
+    parkingSpotQuestion: "Pregunta plaza aparcamiento",
+    recyclingBinRequest: "Solicitud contenedor reciclaje",
+    plumbingFixSchedule: "Horario reparación fontanería",
+    communityEventIdea: "Idea evento comunitario",
+    petPolicyQuestion: "Pregunta política mascotas",
+    noiseConcernRaised: "Preocupación ruido planteada",
+    internetProviderSuggestion: "Sugerencia proveedor internet",
+    balconyPlantCare: "Cuidado plantas balcón",
+    budgetApprovalNeeded: "Aprobación presupuesto necesaria",
+    
+    // Meeting and video conference
+    scheduleNewMeeting: "Programar Nueva Reunión",
+    meetingTitle: "Título de la Reunión",
+    enterMeetingTitle: "Introduce el título de la reunión",
+    date: "Fecha",
+    time: "Hora",
+    participants: "Participantes",
+    enterParticipantsEmails: "Introduce emails de participantes",
+    agenda: "Agenda",
+    enterMeetingAgenda: "Introduce la agenda de la reunión",
+    scheduleMeeting: "Programar Reunión",
+    upcomingMeetings: "Próximas Reuniones",
+    communityBudgetDiscussion: "Discusión Presupuesto Comunitario",
+    scheduled: "Programado",
+    joinMeeting: "Unirse a Reunión",
+    maintenanceCoordinationMeeting: "Reunión Coordinación Mantenimiento",
+    communityEventPlanning: "Planificación Evento Comunitario",
+    
+    // Issue reporting
+    whatHappened: "¿Qué pasó?",
+    briefDescriptionOfIssue: "Breve descripción de la incidencia",
+    when: "¿Cuándo?",
+    where: "¿Dónde?",
+    locationOfIssue: "Ubicación de la incidencia",
+    howItHappened: "¿Cómo pasó?",
+    detailedDescriptionOfIssue: "Descripción detallada de la incidencia",
+    uploadPictures: "Subir Fotos",
+    dragAndDropOrClick: "Arrastra y suelta o haz clic",
+    browseFiles: "Explorar Archivos",
+    urgencyLevel: "Nivel de Urgencia",
+    low: "Bajo",
+    medium: "Medio",
+    high: "Alto",
+    critical: "Crítico",
+    submitIssue: "Enviar Incidencia",
+    
+    // Contracts
+    title: "Título",
+    type: "Tipo",
+    format: "Formato",
+    actions: "Acciones",
+    download: "Descargar",
+    communityBylaws: "Estatutos de la Comunidad",
+    legalDocument: "Documento Legal",
+    maintenanceContract: "Contrato de Mantenimiento",
+    serviceContract: "Contrato de Servicio",
+    cleaningServices: "Servicios de Limpieza",
+    insurancePolicy: "Póliza de Seguro",
+    insurance: "Seguro",
+    elevatorMaintenance: "Mantenimiento Ascensor",
+    securityServices: "Servicios de Seguridad",
+    gardeningContract: "Contrato de Jardinería",
+    communityRules: "Normas de la Comunidad",
+    parkingRegulations: "Reglamento de Aparcamiento",
+    swimmingPoolMaintenance: "Mantenimiento Piscina",
+    
+    // Budget
+    totalIncome: "Ingresos Totales",
+    annualCommunityFees: "Cuotas anuales comunidad",
+    totalExpenses: "Gastos Totales",
+    maintenanceAndServices: "Mantenimiento y servicios",
+    balance: "Balance",
+    reserveFund: "Fondo de reserva",
+    budgetBreakdown: "Desglose del Presupuesto",
+    expenses: "Gastos",
+    utilities: "Servicios públicos",
+    administration: "Administración",
+    income: "Ingresos",
+    regularFees: "Cuotas regulares",
+    extraordianryFees: "Cuotas extraordinarias",
+    interestEarned: "Intereses ganados",
+    downloadExcelFile: "Descargar archivo Excel",
+    viewDetailedBudget: "Ver presupuesto detallado",
+    
+    // Contact administrator
+    yourEstateAdministrator: "Tu Administrador de Fincas",
+    officeHours: "Horario de oficina",
+    subject: "Asunto",
+    enterEmailSubject: "Introduce el asunto del email",
+    message: "Mensaje",
+    enterYourMessage: "Introduce tu mensaje",
+    attachFiles: "Adjuntar Archivos",
+    saveAsDraft: "Guardar como Borrador",
+    sendEmail: "Enviar Email",
+    
+    // Bid preparation
+    selectServiceCategory: "Seleccionar Categoría de Servicio",
+    masonry: "Albañilería",
+    roofing: "Techado",
+    viewAllCategories: "Ver Todas las Categorías",
+    bidDetails: "Detalles del Presupuesto",
+    projectTitle: "Título del Proyecto",
+    enterProjectTitle: "Introduce el título del proyecto",
+    description: "Descripción",
+    describeYourProject: "Describe tu proyecto",
+    estimatedBudget: "Presupuesto Estimado",
+    projectDeadline: "Fecha límite del proyecto",
+    submitBidRequest: "Enviar Solicitud de Presupuesto",
+    recentCommunityBids: "Presupuestos Recientes de la Comunidad",
+    bathroomRenovation: "Renovación de Baño",
+    communityBathroomUpgrade: "Mejora baño comunitario",
+    deadline: "Fecha límite",
+    viewDetails: "Ver Detalles",
+    hallwayPainting: "Pintura de Pasillo",
+    communityHallwayRefresh: "Renovación pasillo comunitario",
+    lightingUpgrade: "Mejora de Iluminación",
+    energyEfficientLighting: "Iluminación eficiente energéticamente"
   },
   en: {
     // Common
@@ -242,7 +441,6 @@ const translations = {
     residents: "Residents",
     serviceProviders: "Service Providers",
     financialReports: "Financial Reports",
-    maintenance: "Maintenance",
     communications: "Communications",
     addProperty: "Add Property",
     manageResidents: "Manage Residents",
@@ -306,185 +504,206 @@ const translations = {
     info: "Information",
     loading: "Loading...",
     noData: "No data available",
-    noResults: "No results found"
-  },
-  // Dashboard content translations
-  "whoWeAreContent1": {
-    es: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
-    en: "We are a comprehensive platform that connects property administrators, service companies and neighbors to provide transparency in the needs of neighborhood communities."
-  },
-  "whoWeAreContent2": {
-    es: "Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.",
-    en: "Our mission is to facilitate communication, evaluation and service management, helping companies expand their business while offering total transparency to communities."
-  },
-  "whoWeAreContent3": {
-    es: "Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.",
-    en: "We create an ecosystem where all participants benefit: administrators can efficiently manage their communities' needs, service companies can showcase their professionalism and gain new clients, and neighbors can rate received services and have a voice in community decisions."
-  },
-  "whoWeAreContent4": {
-    es: "La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.",
-    en: "Transparency is our fundamental value, allowing all involved parties to have access to relevant information, facilitating decision-making and improving quality of life in neighborhood communities."
-  },
-  "howItWorksContent1": {
-    es: "Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:",
-    en: "Our platform works as an integrated ecosystem that connects the three fundamental pillars of neighborhood communities:"
-  },
-  "forAdministrators": {
-    es: "Para Administradores",
-    en: "For Administrators"
-  },
-  "forAdministratorsDesc": {
-    es: "Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.",
-    en: "We offer digital tools that simplify daily management, allowing you to identify needs, request quotes and coordinate services from a single intuitive control panel."
-  },
-  "forServiceCompanies": {
-    es: "Para Empresas de Servicios",
-    en: "For Service Companies"
-  },
-  "forServiceCompaniesDesc": {
-    es: "Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.",
-    en: "We provide a digital showcase where you can display your professionalism, receive quote requests and obtain verified ratings that boost your reputation."
-  },
-  "forNeighbors": {
-    es: "Para Vecinos",
-    en: "For Neighbors"
-  },
-  "forNeighborsDesc": {
-    es: "Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.",
-    en: "We provide a platform where they can report incidents, track their resolution in real time and rate received services with complete transparency."
-  },
-  "ratingSystem": {
-    es: "Sistema de Valoraciones",
-    en: "Rating System"
-  },
-  "ratingSystemDesc": {
-    es: "Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.",
-    en: "We implement an evaluation system that allows neighbors to rate services, generating trust and helping make informed decisions."
-  },
-  "howItWorksContent2": {
-    es: "Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.",
-    en: "This integration creates a virtuous circle where all participants benefit: better services for communities, more business opportunities for providers and more efficient management for administrators."
-  },
-  "achievementsContent1": {
-    es: "Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:",
-    en: "Since launching our platform, we have achieved important advances that demonstrate the positive impact of our approach to community management:"
-  },
-  "connectedCommunities": {
-    es: "Comunidades conectadas",
-    en: "Connected Communities"
-  },
-  "connectedCommunitiesDesc": {
-    es: "Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.",
-    en: "Our platform is already being used by hundreds of neighborhood communities throughout the country."
-  },
-  "verifiedCompanies": {
-    es: "Empresas verificadas",
-    en: "Verified Companies"
-  },
-  "verifiedCompaniesDesc": {
-    es: "Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.",
-    en: "We have an extensive network of quality service providers who have passed through our verification process."
-  },
-  "satisfactionIndex": {
-    es: "Índice de satisfacción",
-    en: "Satisfaction Index"
-  },
-  "satisfactionIndexDesc": {
-    es: "Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.",
-    en: "User ratings show a high level of satisfaction with the platform and services."
-  },
-  "resolvedIncidents": {
-    es: "Incidencias resueltas",
-    en: "Resolved Incidents"
-  },
-  "resolvedIncidentsDesc": {
-    es: "Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.",
-    en: "We have facilitated the efficient resolution of thousands of incidents in communities, improving quality of life."
-  },
-  "achievementsContent2": {
-    es: "Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.",
-    en: "These achievements reflect our commitment to creating a transparent and efficient ecosystem that benefits all participants: administrators, service companies and neighbors."
-  },
-  // Luxury homes translations
-  "residentialElitePanorama": {
-    es: "Residencial Élite Panorama",
-    en: "Elite Panorama Residential"
-  },
-  "luxuryCommunityMadrid": {
-    es: "Comunidad de lujo en Madrid",
-    en: "Luxury community in Madrid"
-  },
-  "altavistaResidentialComplex": {
-    es: "Complejo Residencial Altavista",
-    en: "Altavista Residential Complex"
-  },
-  "exclusiveUrbanizationBarcelona": {
-    es: "Urbanización exclusiva en Barcelona",
-    en: "Exclusive urbanization in Barcelona"
-  },
-  "residentialGoldenPark": {
-    es: "Residencial Parque Dorado",
-    en: "Golden Park Residential"
-  },
-  "premiumCommunityValencia": {
-    es: "Comunidad premium en Valencia",
-    en: "Premium community in Valencia"
-  },
-  "residentialSeaViewpoint": {
-    es: "Residencial Mirador del Mar",
-    en: "Sea Viewpoint Residential"
-  },
-  "luxuryCommunityMarbella": {
-    es: "Comunidad de lujo en Marbella",
-    en: "Luxury community in Marbella"
-  },
-  "platinumTowersComplex": {
-    es: "Complejo Platinum Towers",
-    en: "Platinum Towers Complex"
-  },
-  "exclusiveApartmentsBilbao": {
-    es: "Pisos exclusivos en Bilbao",
-    en: "Exclusive apartments in Bilbao"
-  },
-  "residentialEmeraldCoast": {
-    es: "Residencial Costa Esmeralda",
-    en: "Emerald Coast Residential"
-  },
-  "premiumCommunityMalaga": {
-    es: "Comunidad premium en Málaga",
-    en: "Premium community in Málaga"
-  },
-  "residentialPradoGardens": {
-    es: "Residencial Jardines del Prado",
-    en: "Prado Gardens Residential"
-  },
-  "luxuryUrbanizationSeville": {
-    es: "Urbanización de lujo en Sevilla",
-    en: "Luxury urbanization in Seville"
-  },
-  "residentialMontecarlo": {
-    es: "Residencial Montecarlo",
-    en: "Montecarlo Residential"
-  },
-  "exclusiveCommunitySanSebastian": {
-    es: "Comunidad exclusiva en San Sebastián",
-    en: "Exclusive community in San Sebastián"
-  },
-  "eliteSkylineComplex": {
-    es: "Complejo Élite Skyline",
-    en: "Elite Skyline Complex"
-  },
-  "luxuryApartmentsZaragoza": {
-    es: "Pisos de lujo en Zaragoza",
-    en: "Luxury apartments in Zaragoza"
-  },
-  "residentialExclusiveBay": {
-    es: "Residencial Bahía Exclusiva",
-    en: "Exclusive Bay Residential"
-  },
-  "premiumCommunityAlicante": {
-    es: "Comunidad premium en Alicante",
-    en: "Premium community in Alicante"
+    noResults: "No results found",
+    
+    // Dashboard content
+    whoWeAreContent1: "We are a comprehensive platform that connects property administrators, service companies and neighbors to provide transparency in the needs of neighborhood communities.",
+    whoWeAreContent2: "Our mission is to facilitate communication, evaluation and service management, helping companies expand their business while offering total transparency to communities.",
+    whoWeAreContent3: "We create an ecosystem where all participants benefit: administrators can efficiently manage their communities' needs, service companies can showcase their professionalism and gain new clients, and neighbors can rate received services and have a voice in community decisions.",
+    whoWeAreContent4: "Transparency is our fundamental value, allowing all involved parties to have access to relevant information, facilitating decision-making and improving quality of life in neighborhood communities.",
+    howItWorksContent1: "Our platform works as an integrated ecosystem that connects the three fundamental pillars of neighborhood communities:",
+    forAdministrators: "For Administrators",
+    forAdministratorsDesc: "We offer digital tools that simplify daily management, allowing you to identify needs, request quotes and coordinate services from a single intuitive control panel.",
+    forServiceCompanies: "For Service Companies",
+    forServiceCompaniesDesc: "We provide a digital showcase where you can display your professionalism, receive quote requests and obtain verified ratings that boost your reputation.",
+    forNeighbors: "For Neighbors",
+    forNeighborsDesc: "We provide a platform where they can report incidents, track their resolution in real time and rate received services with complete transparency.",
+    ratingSystem: "Rating System",
+    ratingSystemDesc: "We implement an evaluation system that allows neighbors to rate services, generating trust and helping make informed decisions.",
+    howItWorksContent2: "This integration creates a virtuous circle where all participants benefit: better services for communities, more business opportunities for providers and more efficient management for administrators.",
+    achievementsContent1: "Since launching our platform, we have achieved important advances that demonstrate the positive impact of our approach to community management:",
+    connectedCommunities: "Connected Communities",
+    connectedCommunitiesDesc: "Our platform is already being used by hundreds of neighborhood communities throughout the country.",
+    verifiedCompanies: "Verified Companies",
+    verifiedCompaniesDesc: "We have an extensive network of quality service providers who have passed through our verification process.",
+    satisfactionIndex: "Satisfaction Index",
+    satisfactionIndexDesc: "User ratings show a high level of satisfaction with the platform and services.",
+    resolvedIncidents: "Resolved Incidents",
+    resolvedIncidentsDesc: "We have facilitated the efficient resolution of thousands of incidents in communities, improving quality of life.",
+    achievementsContent2: "These achievements reflect our commitment to creating a transparent and efficient ecosystem that benefits all participants: administrators, service companies and neighbors.",
+    
+    // Luxury homes
+    residentialElitePanorama: "Elite Panorama Residential",
+    luxuryCommunityMadrid: "Luxury community in Madrid",
+    altavistaResidentialComplex: "Altavista Residential Complex",
+    exclusiveUrbanizationBarcelona: "Exclusive urbanization in Barcelona",
+    residentialGoldenPark: "Golden Park Residential",
+    premiumCommunityValencia: "Premium community in Valencia",
+    residentialSeaViewpoint: "Sea Viewpoint Residential",
+    luxuryCommunityMarbella: "Luxury community in Marbella",
+    platinumTowersComplex: "Platinum Towers Complex",
+    exclusiveApartmentsBilbao: "Exclusive apartments in Bilbao",
+    residentialEmeraldCoast: "Emerald Coast Residential",
+    premiumCommunityMalaga: "Premium community in Málaga",
+    residentialPradoGardens: "Prado Gardens Residential",
+    luxuryUrbanizationSeville: "Luxury urbanization in Seville",
+    residentialMontecarlo: "Montecarlo Residential",
+    exclusiveCommunitySanSebastian: "Exclusive community in San Sebastián",
+    eliteSkylineComplex: "Elite Skyline Complex",
+    luxuryApartmentsZaragoza: "Luxury apartments in Zaragoza",
+    residentialExclusiveBay: "Exclusive Bay Residential",
+    premiumCommunityAlicante: "Premium community in Alicante",
+    
+    // Community Member specific translations
+    communityChat: "Community Chat",
+    scheduleVideoConference: "Schedule Video Conference",
+    informIssue: "Report Issue",
+    communityContracts: "Community Contracts",
+    communityBudget: "Community Budget",
+    contactAdministrator: "Contact Administrator",
+    prepareBid: "Prepare Bid",
+    serviceRatings: "Service Ratings",
+    bestRated: "Best Rated",
+    myAccount: "My Account",
+    
+    // Community roles and contacts
+    communityPresident: "Community President",
+    treasurer: "Treasurer",
+    secretary: "Secretary",
+    neighbor: "Neighbor",
+    maintenanceManager: "Maintenance Manager",
+    securityGuard: "Security Guard",
+    maintenanceStaff: "Maintenance Staff",
+    
+    // Sample messages
+    goodMorningNeighbors: "Good morning neighbors",
+    monthlyFeesReminder: "Monthly fees reminder",
+    meetingMinutesAvailable: "Meeting minutes available",
+    parkingIssueResolved: "Parking issue resolved",
+    gardenMaintenanceSchedule: "Garden maintenance schedule",
+    elevatorRepairUpdate: "Elevator repair update",
+    noiseComplaintResolution: "Noise complaint resolution",
+    holidayDecorationIdeas: "Holiday decoration ideas",
+    communityGardenProposal: "Community garden proposal",
+    securityUpdateReport: "Security update report",
+    childrenPlaygroundIdea: "Children playground idea",
+    parkingSpotQuestion: "Parking spot question",
+    recyclingBinRequest: "Recycling bin request",
+    plumbingFixSchedule: "Plumbing fix schedule",
+    communityEventIdea: "Community event idea",
+    petPolicyQuestion: "Pet policy question",
+    noiseConcernRaised: "Noise concern raised",
+    internetProviderSuggestion: "Internet provider suggestion",
+    balconyPlantCare: "Balcony plant care",
+    budgetApprovalNeeded: "Budget approval needed",
+    
+    // Meeting and video conference
+    scheduleNewMeeting: "Schedule New Meeting",
+    meetingTitle: "Meeting Title",
+    enterMeetingTitle: "Enter meeting title",
+    date: "Date",
+    time: "Time",
+    participants: "Participants",
+    enterParticipantsEmails: "Enter participants emails",
+    agenda: "Agenda",
+    enterMeetingAgenda: "Enter meeting agenda",
+    scheduleMeeting: "Schedule Meeting",
+    upcomingMeetings: "Upcoming Meetings",
+    communityBudgetDiscussion: "Community Budget Discussion",
+    scheduled: "Scheduled",
+    joinMeeting: "Join Meeting",
+    maintenanceCoordinationMeeting: "Maintenance Coordination Meeting",
+    communityEventPlanning: "Community Event Planning",
+    
+    // Issue reporting
+    whatHappened: "What happened?",
+    briefDescriptionOfIssue: "Brief description of the issue",
+    when: "When?",
+    where: "Where?",
+    locationOfIssue: "Location of the issue",
+    howItHappened: "How did it happen?",
+    detailedDescriptionOfIssue: "Detailed description of the issue",
+    uploadPictures: "Upload Pictures",
+    dragAndDropOrClick: "Drag and drop or click",
+    browseFiles: "Browse Files",
+    urgencyLevel: "Urgency Level",
+    low: "Low",
+    medium: "Medium",
+    high: "High",
+    critical: "Critical",
+    submitIssue: "Submit Issue",
+    
+    // Contracts
+    title: "Title",
+    type: "Type",
+    format: "Format",
+    actions: "Actions",
+    download: "Download",
+    communityBylaws: "Community Bylaws",
+    legalDocument: "Legal Document",
+    maintenanceContract: "Maintenance Contract",
+    serviceContract: "Service Contract",
+    cleaningServices: "Cleaning Services",
+    insurancePolicy: "Insurance Policy",
+    insurance: "Insurance",
+    elevatorMaintenance: "Elevator Maintenance",
+    securityServices: "Security Services",
+    gardeningContract: "Gardening Contract",
+    communityRules: "Community Rules",
+    parkingRegulations: "Parking Regulations",
+    swimmingPoolMaintenance: "Swimming Pool Maintenance",
+    
+    // Budget
+    totalIncome: "Total Income",
+    annualCommunityFees: "Annual community fees",
+    totalExpenses: "Total Expenses",
+    maintenanceAndServices: "Maintenance and services",
+    balance: "Balance",
+    reserveFund: "Reserve fund",
+    budgetBreakdown: "Budget Breakdown",
+    expenses: "Expenses",
+    utilities: "Utilities",
+    administration: "Administration",
+    income: "Income",
+    regularFees: "Regular fees",
+    extraordianryFees: "Extraordinary fees",
+    interestEarned: "Interest earned",
+    downloadExcelFile: "Download Excel file",
+    viewDetailedBudget: "View detailed budget",
+    
+    // Contact administrator
+    yourEstateAdministrator: "Your Estate Administrator",
+    officeHours: "Office hours",
+    subject: "Subject",
+    enterEmailSubject: "Enter email subject",
+    message: "Message",
+    enterYourMessage: "Enter your message",
+    attachFiles: "Attach Files",
+    saveAsDraft: "Save as Draft",
+    sendEmail: "Send Email",
+    
+    // Bid preparation
+    selectServiceCategory: "Select Service Category",
+    masonry: "Masonry",
+    roofing: "Roofing",
+    viewAllCategories: "View All Categories",
+    bidDetails: "Bid Details",
+    projectTitle: "Project Title",
+    enterProjectTitle: "Enter project title",
+    description: "Description",
+    describeYourProject: "Describe your project",
+    estimatedBudget: "Estimated Budget",
+    projectDeadline: "Project Deadline",
+    submitBidRequest: "Submit Bid Request",
+    recentCommunityBids: "Recent Community Bids",
+    bathroomRenovation: "Bathroom Renovation",
+    communityBathroomUpgrade: "Community bathroom upgrade",
+    deadline: "Deadline",
+    viewDetails: "View Details",
+    hallwayPainting: "Hallway Painting",
+    communityHallwayRefresh: "Community hallway refresh",
+    lightingUpgrade: "Lighting Upgrade",
+    energyEfficientLighting: "Energy efficient lighting"
   }
 };
 
@@ -512,7 +731,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const [language, setLanguage] = useState<Language>("en");
 
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations[typeof language]] || key;
+    return baseTranslations[language][key as keyof typeof baseTranslations[typeof language]] || key;
   };
 
   const value = {
