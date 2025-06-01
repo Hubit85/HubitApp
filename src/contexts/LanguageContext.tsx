@@ -307,6 +307,184 @@ const translations = {
     loading: "Loading...",
     noData: "No data available",
     noResults: "No results found"
+  },
+  // Dashboard content translations
+  "whoWeAreContent1": {
+    es: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
+    en: "We are a comprehensive platform that connects property administrators, service companies and neighbors to provide transparency in the needs of neighborhood communities."
+  },
+  "whoWeAreContent2": {
+    es: "Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.",
+    en: "Our mission is to facilitate communication, evaluation and service management, helping companies expand their business while offering total transparency to communities."
+  },
+  "whoWeAreContent3": {
+    es: "Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.",
+    en: "We create an ecosystem where all participants benefit: administrators can efficiently manage their communities' needs, service companies can showcase their professionalism and gain new clients, and neighbors can rate received services and have a voice in community decisions."
+  },
+  "whoWeAreContent4": {
+    es: "La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.",
+    en: "Transparency is our fundamental value, allowing all involved parties to have access to relevant information, facilitating decision-making and improving quality of life in neighborhood communities."
+  },
+  "howItWorksContent1": {
+    es: "Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:",
+    en: "Our platform works as an integrated ecosystem that connects the three fundamental pillars of neighborhood communities:"
+  },
+  "forAdministrators": {
+    es: "Para Administradores",
+    en: "For Administrators"
+  },
+  "forAdministratorsDesc": {
+    es: "Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.",
+    en: "We offer digital tools that simplify daily management, allowing you to identify needs, request quotes and coordinate services from a single intuitive control panel."
+  },
+  "forServiceCompanies": {
+    es: "Para Empresas de Servicios",
+    en: "For Service Companies"
+  },
+  "forServiceCompaniesDesc": {
+    es: "Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.",
+    en: "We provide a digital showcase where you can display your professionalism, receive quote requests and obtain verified ratings that boost your reputation."
+  },
+  "forNeighbors": {
+    es: "Para Vecinos",
+    en: "For Neighbors"
+  },
+  "forNeighborsDesc": {
+    es: "Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.",
+    en: "We provide a platform where they can report incidents, track their resolution in real time and rate received services with complete transparency."
+  },
+  "ratingSystem": {
+    es: "Sistema de Valoraciones",
+    en: "Rating System"
+  },
+  "ratingSystemDesc": {
+    es: "Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.",
+    en: "We implement an evaluation system that allows neighbors to rate services, generating trust and helping make informed decisions."
+  },
+  "howItWorksContent2": {
+    es: "Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.",
+    en: "This integration creates a virtuous circle where all participants benefit: better services for communities, more business opportunities for providers and more efficient management for administrators."
+  },
+  "achievementsContent1": {
+    es: "Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:",
+    en: "Since launching our platform, we have achieved important advances that demonstrate the positive impact of our approach to community management:"
+  },
+  "connectedCommunities": {
+    es: "Comunidades conectadas",
+    en: "Connected Communities"
+  },
+  "connectedCommunitiesDesc": {
+    es: "Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.",
+    en: "Our platform is already being used by hundreds of neighborhood communities throughout the country."
+  },
+  "verifiedCompanies": {
+    es: "Empresas verificadas",
+    en: "Verified Companies"
+  },
+  "verifiedCompaniesDesc": {
+    es: "Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.",
+    en: "We have an extensive network of quality service providers who have passed through our verification process."
+  },
+  "satisfactionIndex": {
+    es: "Índice de satisfacción",
+    en: "Satisfaction Index"
+  },
+  "satisfactionIndexDesc": {
+    es: "Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.",
+    en: "User ratings show a high level of satisfaction with the platform and services."
+  },
+  "resolvedIncidents": {
+    es: "Incidencias resueltas",
+    en: "Resolved Incidents"
+  },
+  "resolvedIncidentsDesc": {
+    es: "Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.",
+    en: "We have facilitated the efficient resolution of thousands of incidents in communities, improving quality of life."
+  },
+  "achievementsContent2": {
+    es: "Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.",
+    en: "These achievements reflect our commitment to creating a transparent and efficient ecosystem that benefits all participants: administrators, service companies and neighbors."
+  },
+  // Luxury homes translations
+  "residentialElitePanorama": {
+    es: "Residencial Élite Panorama",
+    en: "Elite Panorama Residential"
+  },
+  "luxuryCommunityMadrid": {
+    es: "Comunidad de lujo en Madrid",
+    en: "Luxury community in Madrid"
+  },
+  "altavistaResidentialComplex": {
+    es: "Complejo Residencial Altavista",
+    en: "Altavista Residential Complex"
+  },
+  "exclusiveUrbanizationBarcelona": {
+    es: "Urbanización exclusiva en Barcelona",
+    en: "Exclusive urbanization in Barcelona"
+  },
+  "residentialGoldenPark": {
+    es: "Residencial Parque Dorado",
+    en: "Golden Park Residential"
+  },
+  "premiumCommunityValencia": {
+    es: "Comunidad premium en Valencia",
+    en: "Premium community in Valencia"
+  },
+  "residentialSeaViewpoint": {
+    es: "Residencial Mirador del Mar",
+    en: "Sea Viewpoint Residential"
+  },
+  "luxuryCommunityMarbella": {
+    es: "Comunidad de lujo en Marbella",
+    en: "Luxury community in Marbella"
+  },
+  "platinumTowersComplex": {
+    es: "Complejo Platinum Towers",
+    en: "Platinum Towers Complex"
+  },
+  "exclusiveApartmentsBilbao": {
+    es: "Pisos exclusivos en Bilbao",
+    en: "Exclusive apartments in Bilbao"
+  },
+  "residentialEmeraldCoast": {
+    es: "Residencial Costa Esmeralda",
+    en: "Emerald Coast Residential"
+  },
+  "premiumCommunityMalaga": {
+    es: "Comunidad premium en Málaga",
+    en: "Premium community in Málaga"
+  },
+  "residentialPradoGardens": {
+    es: "Residencial Jardines del Prado",
+    en: "Prado Gardens Residential"
+  },
+  "luxuryUrbanizationSeville": {
+    es: "Urbanización de lujo en Sevilla",
+    en: "Luxury urbanization in Seville"
+  },
+  "residentialMontecarlo": {
+    es: "Residencial Montecarlo",
+    en: "Montecarlo Residential"
+  },
+  "exclusiveCommunitySanSebastian": {
+    es: "Comunidad exclusiva en San Sebastián",
+    en: "Exclusive community in San Sebastián"
+  },
+  "eliteSkylineComplex": {
+    es: "Complejo Élite Skyline",
+    en: "Elite Skyline Complex"
+  },
+  "luxuryApartmentsZaragoza": {
+    es: "Pisos de lujo en Zaragoza",
+    en: "Luxury apartments in Zaragoza"
+  },
+  "residentialExclusiveBay": {
+    es: "Residencial Bahía Exclusiva",
+    en: "Exclusive Bay Residential"
+  },
+  "premiumCommunityAlicante": {
+    es: "Comunidad premium en Alicante",
+    en: "Premium community in Alicante"
   }
 };
 
