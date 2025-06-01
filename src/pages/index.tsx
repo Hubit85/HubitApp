@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building, Wrench, Star } from "lucide-react";
+import { Users, Building, Wrench, Star, TrendingUp } from "lucide-react";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -143,6 +143,84 @@ export default function Home() {
                   Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Nuestros Logros Section */}
+        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Nuestros Logros
+              </h2>
+              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+                Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+              {/* 500+ Comunidades conectadas */}
+              <Card className="text-center h-full">
+                <CardContent className="pt-8">
+                  <div className="text-5xl font-bold text-blue-600 mb-2">500+</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Comunidades conectadas
+                  </h3>
+                  <p className="text-gray-600">
+                    Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* 300+ Empresas verificadas */}
+              <Card className="text-center h-full">
+                <CardContent className="pt-8">
+                  <div className="text-5xl font-bold text-green-600 mb-2">300+</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Empresas verificadas
+                  </h3>
+                  <p className="text-gray-600">
+                    Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* 95% Índice de satisfacción */}
+              <Card className="text-center h-full">
+                <CardContent className="pt-8">
+                  <div className="text-5xl font-bold text-purple-600 mb-2">95%</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Índice de satisfacción
+                  </h3>
+                  <p className="text-gray-600">
+                    Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* 10,000+ Incidencias resueltas */}
+              <Card className="text-center h-full">
+                <CardContent className="pt-8">
+                  <div className="text-5xl font-bold text-orange-600 mb-2">10,000+</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Incidencias resueltas
+                  </h3>
+                  <p className="text-gray-600">
+                    Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Conclusión */}
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
+              <div className="mx-auto mb-4 p-3 bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center">
+                <TrendingUp className="h-8 w-8 text-indigo-600" />
+              </div>
+              <p className="text-xl text-gray-700 font-medium max-w-4xl mx-auto">
+                Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.
+              </p>
             </div>
           </div>
         </section>
