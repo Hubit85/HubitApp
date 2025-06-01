@@ -1,9 +1,9 @@
-
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function Header() {
   const router = useRouter();
@@ -21,6 +21,7 @@ export function Header() {
         </div>
         
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
           {isLoggedIn ? (
             <>
               <Button variant="ghost" asChild>
