@@ -91,7 +91,6 @@ const baseTranslations = {
     serviceProviders: "Proveedores de Servicios",
     financialReports: "Informes Financieros",
     communications: "Comunicaciones",
-    addProperty: "Añadir Propiedad",
     manageResidents: "Gestionar Residentes",
     
     // Particular
@@ -197,6 +196,7 @@ const baseTranslations = {
     noFavoriteProviders: "No tienes proveedores favoritos",
     addFavoriteProvidersDesc: "Agrega proveedores a tus favoritos para acceder rápidamente a ellos",
     exploreProviders: "Explorar Proveedores",
+    addProperty: "Agregar Propiedad",
     apartment: "Apartamento",
     house: "Casa",
     apartmentInCenter: "Apartamento en Centro",
@@ -336,7 +336,6 @@ const baseTranslations = {
     serviceProviders: "Service Providers",
     financialReports: "Financial Reports",
     communications: "Communications",
-    addProperty: "Add Property",
     manageResidents: "Manage Residents",
     
     // Particular
@@ -442,6 +441,7 @@ const baseTranslations = {
     noFavoriteProviders: "You have no favorite providers",
     addFavoriteProvidersDesc: "Add providers to your favorites to quickly access them",
     exploreProviders: "Explore Providers",
+    addProperty: "Add Property",
     apartment: "Apartment",
     house: "House",
     apartmentInCenter: "Apartment in Center",
