@@ -378,7 +378,8 @@ const baseTranslations = {
     medium: "Medio",
     high: "Alto",
     critical: "Crítico",
-    submitIssue: "Enviar Problema"
+    submitIssue: "Enviar Problema",
+    communityMemberDashboard: "Panel de Miembro de Comunidad"
   },
   en: {
     // Common
@@ -754,7 +755,8 @@ const baseTranslations = {
     medium: "Medium",
     high: "High",
     critical: "Critical",
-    submitIssue: "Submit Issue"
+    submitIssue: "Submit Issue",
+    communityMemberDashboard: "Community Member Dashboard"
   }
 };
 
