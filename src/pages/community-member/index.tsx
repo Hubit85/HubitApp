@@ -969,6 +969,266 @@ export default function CommunityMemberDashboard() {
                 </div>
               </div>
             )}
+            
+            {/* Proveedores de Servicios Tab */}
+            {activeTab === "proveedores" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold">{t("serviceProviders")}</h2>
+                  <div className="relative w-64">
+                    <Input placeholder={t("searchProviders")} className="pr-10" />
+                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {serviceProviders.map((provider) => (
+                    <Card key={provider.id} className="overflow-hidden">
+                      <div className="h-40 overflow-hidden">
+                        <img 
+                          src={provider.image} 
+                          alt={provider.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-4">
+                        <Badge className="mb-2">{provider.category}</Badge>
+                        <h3 className="font-bold text-lg">{provider.name}</h3>
+                        <div className="flex items-center mt-1 mb-2">
+                          <div className="flex mr-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star 
+                                key={star} 
+                                className={`h-4 w-4 ${star <= Math.floor(provider.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews} {t("reviews")})</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          <span>{provider.location}</span>
+                        </div>
+                        <div className="mt-4 flex justify-between">
+                          <Button variant="outline" size="sm">{t("viewProfile")}</Button>
+                          <Button size="sm">{t("request")}</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                <div className="mt-6 flex justify-center">
+                  <Button variant="outline">{t("loadMoreProviders")}</Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Notificaciones Tab */}
+            {activeTab === "notificaciones" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">{t("notifications")}</h2>
+                
+                <div className="space-y-4">
+                  <Card className="border-l-4 border-blue-500">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold">{t("quoteReceived")}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{t("quoteReceivedDesc")}</p>
+                        </div>
+                        <span className="text-xs text-gray-500">{t("hoursAgo")}</span>
+                      </div>
+                      <div className="mt-2 flex justify-end">
+                        <Button size="sm">{t("viewQuote")}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-l-4 border-green-500">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold">{t("serviceCompleted")}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{t("serviceCompletedDesc")}</p>
+                        </div>
+                        <span className="text-xs text-gray-500">{t("yesterday")}</span>
+                      </div>
+                      <div className="mt-2 flex justify-end">
+                        <Button size="sm">{t("rateService")}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="border-l-4 border-yellow-500">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold">{t("appointmentReminder")}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{t("appointmentReminderDesc")}</p>
+                        </div>
+                        <span className="text-xs text-gray-500">{t("daysAgo")}</span>
+                      </div>
+                      <div className="mt-2 flex justify-end">
+                        <Button variant="outline" size="sm" className="mr-2">{t("reschedule")}</Button>
+                        <Button size="sm">{t("confirm")}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="mt-6 flex justify-center">
+                  <Button variant="outline">{t("viewAllNotifications")}</Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Recomendaciones Tab */}
+            {activeTab === "recomendaciones" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">{t("recommendations")}</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {favoriteProviders.map((provider) => (
+                    <Card key={provider.id} className="overflow-hidden">
+                      <div className="h-40 overflow-hidden">
+                        <img 
+                          src={provider.image} 
+                          alt={provider.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-4">
+                        <Badge className="mb-2">{provider.category}</Badge>
+                        <h3 className="font-bold text-lg">{provider.name}</h3>
+                        <div className="flex items-center mt-1 mb-2">
+                          <div className="flex mr-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star 
+                                key={star} 
+                                className={`h-4 w-4 ${star <= Math.floor(provider.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews} {t("reviews")})</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          <span>{provider.location}</span>
+                        </div>
+                        <div className="mt-4 flex justify-between">
+                          <Button variant="outline" size="sm">{t("viewProfile")}</Button>
+                          <Button size="sm">{t("request")}</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                {favoriteProviders.length === 0 && (
+                  <div className="text-center py-12">
+                    <ThumbsUp className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noFavoriteProviders")}</h3>
+                    <p className="text-gray-500 mb-4">{t("addFavoriteProvidersDesc")}</p>
+                    <Button onClick={() => setActiveTab("proveedores")}>{t("exploreProviders")}</Button>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Configuración Tab */}
+            {activeTab === "configuracion" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">{t("configuration")}</h2>
+                
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("accountPreferences")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="language">{t("language")}</Label>
+                          <select id="language" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                            <option>{t("spanish")}</option>
+                            <option>{t("english")}</option>
+                            <option>{t("catalan")}</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="notifications">{t("notifications")}</Label>
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span>{t("emailNotifications")}</span>
+                              <input type="checkbox" checked readOnly />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>{t("pushNotifications")}</span>
+                              <input type="checkbox" checked readOnly />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>{t("smsNotifications")}</span>
+                              <input type="checkbox" readOnly />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="privacy">{t("privacy")}</Label>
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span>{t("profileVisibleToProviders")}</span>
+                              <input type="checkbox" checked readOnly />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>{t("shareServiceHistory")}</span>
+                              <input type="checkbox" readOnly />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("security")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <Button variant="outline" className="w-full">{t("changePassword")}</Button>
+                        </div>
+                        <div>
+                          <Button variant="outline" className="w-full">{t("setupTwoFactor")}</Button>
+                        </div>
+                        <div>
+                          <Button variant="outline" className="w-full">{t("manageConnectedDevices")}</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("dataAndPrivacy")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <Button variant="outline" className="w-full">{t("downloadMyData")}</Button>
+                        </div>
+                        <div>
+                          <Button variant="outline" className="w-full">{t("deleteMyAccount")}</Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
