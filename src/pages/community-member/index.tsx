@@ -246,6 +246,38 @@ export default function CommunityMemberDashboard() {
                 {t('prepareBid')}
               </Button>
               <Button 
+                variant={activeTab === 'proveedores' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('proveedores')}
+              >
+                <Store className='mr-2 h-5 w-5' />
+                {t('serviceProviders')}
+              </Button>
+              <Button 
+                variant={activeTab === 'notificaciones' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('notificaciones')}
+              >
+                <Bell className='mr-2 h-5 w-5' />
+                {t('notifications')}
+              </Button>
+              <Button 
+                variant={activeTab === 'recomendaciones' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('recomendaciones')}
+              >
+                <ThumbsUp className='mr-2 h-5 w-5' />
+                {t('recommendations')}
+              </Button>
+              <Button 
+                variant={activeTab === 'configuracion' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('configuracion')}
+              >
+                <Settings className='mr-2 h-5 w-5' />
+                {t('configuration')}
+              </Button>
+              <Button 
                 variant={activeTab === 'valoraciones' ? 'default' : 'ghost'} 
                 className='w-full justify-start'
                 onClick={() => setActiveTab('valoraciones')}
