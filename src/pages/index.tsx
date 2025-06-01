@@ -1,23 +1,24 @@
-
 import React from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Home() {
+  const { t } = useLanguage();
+
   return (
     <>
       <Head>
-        <title>HANDYMAN - Servicios profesionales</title>
-        <meta name="description" content="Servicios profesionales para tu hogar" />
+        <title>{t("homeTitle")}</title>
+        <meta name="description" content={t("homeDescription")} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
       <Header />
       
       <main className="flex flex-col items-center justify-center relative">
-        {/* Hero Section with Background Image */}
         <section className="min-h-screen w-full flex flex-col items-center justify-center relative">
           <div 
             className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
@@ -28,13 +29,12 @@ export default function Home() {
             }}
           />
           
-          {/* Hero Content */}
           <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
             <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
-              HANDYMAN
+              {t("handyman")}
             </h1>
             <p className="text-xl md:text-2xl text-white drop-shadow-md">
-              Servicios profesionales para tu hogar
+              {t("professionalServicesForHome")}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
@@ -43,7 +43,7 @@ export default function Home() {
                 className="text-lg px-8 py-6 bg-black text-white hover:bg-black/80"
                 asChild
               >
-                <Link href="/auth/register">Registrarse</Link>
+                <Link href="/auth/register">{t("register")}</Link>
               </Button>
               <Button 
                 size="lg" 
@@ -51,7 +51,7 @@ export default function Home() {
                 className="text-lg px-8 py-6 bg-white text-black border-black hover:bg-white/90"
                 asChild
               >
-                <Link href="/auth/login">Iniciar sesión</Link>
+                <Link href="/auth/login">{t("login")}</Link>
               </Button>
             </div>
           </div>
