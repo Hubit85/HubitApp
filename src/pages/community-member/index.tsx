@@ -71,7 +71,7 @@ interface ServiceProvider {
 }
 
 export default function CommunityMemberDashboard() {
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState("perfil");
   const { t } = useLanguage();
   const router = useRouter();
   
@@ -189,6 +189,14 @@ export default function CommunityMemberDashboard() {
           <div className='p-4'>
             <h2 className='text-2xl font-bold mb-6'>{t('dashboard')}</h2>
             <nav className='space-y-2'>
+              <Button 
+                variant={activeTab === 'perfil' ? 'default' : 'ghost'} 
+                className='w-full justify-start'
+                onClick={() => setActiveTab('perfil')}
+              >
+                <User className='mr-2 h-5 w-5' />
+                {t('myProfile')}
+              </Button>
               <Button 
                 variant={activeTab === 'chat' ? 'default' : 'ghost'} 
                 className='w-full justify-start'
@@ -309,8 +317,148 @@ export default function CommunityMemberDashboard() {
         <div className="flex-1 overflow-auto">
           <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">
-              {t("communityMemberDashboard")}
+              {activeTab === "perfil" ? t("myProfile") :
+               activeTab === "chat" ? t("communityChat") :
+               activeTab === "videoconference" ? t("scheduleVideoConference") :
+               activeTab === "issue" ? t("informIssue") :
+               activeTab === "contracts" ? t("communityContracts") :
+               activeTab === "budget" ? t("communityBudget") :
+               activeTab === "contact" ? t("contactAdministrator") :
+               activeTab === "bid" ? t("prepareBid") :
+               activeTab === "proveedores" ? t("serviceProviders") :
+               activeTab === "notificaciones" ? t("notifications") :
+               activeTab === "recomendaciones" ? t("recommendations") :
+               activeTab === "configuracion" ? t("configuration") :
+               activeTab === "valoraciones" ? t("serviceRatings") :
+               activeTab === "mejores" ? t("bestRated") :
+               activeTab === "cuenta" ? t("myAccount") :
+               t("communityMemberDashboard")}
             </h1>
+            
+            {/* Mi Perfil Tab */}
+            {activeTab === "perfil" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex flex-col md:flex-row gap-8">
+                  <div className="md:w-1/3">
+                    <Card>
+                      <CardContent className="p-6 flex flex-col items-center">
+                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                          <User className="h-16 w-16 text-gray-500" />
+                        </div>
+                        <h2 className="text-xl font-bold">María González</h2>
+                        <p className="text-gray-500 mb-4">{t("communityMember")}</p>
+                        <Button className="w-full">{t("editProfile")}</Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div className="md:w-2/3">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{t("personalInformation")}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="name">{t("fullNameLabel")}</Label>
+                              <Input id="name" value="María González López" readOnly className="bg-gray-50" />
+                            </div>
+                            <div>
+                              <Label htmlFor="email">{t("emailLabel")}</Label>
+                              <Input id="email" value="maria.gonzalez@example.com" readOnly className="bg-gray-50" />
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="phone">{t("phoneLabel")}</Label>
+                              <Input id="phone" value="+34 654 321 987" readOnly className="bg-gray-50" />
+                            </div>
+                            <div>
+                              <Label htmlFor="location">{t("locationLabel")}</Label>
+                              <Input id="location" value="Barcelona, España" readOnly className="bg-gray-50" />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="address">{t("mainAddress")}</Label>
+                            <Input id="address" value="Residencial Las Flores, Bloque A, 3º B, 08001, Barcelona" readOnly className="bg-gray-50" />
+                          </div>
+                          
+                          <div className="pt-4 border-t">
+                            <h3 className="font-medium text-lg mb-2">{t("contactPreferences")}</h3>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <input type="checkbox" id="contact-email" checked readOnly />
+                                <Label htmlFor="contact-email" className="cursor-pointer">{t("email")}</Label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <input type="checkbox" id="contact-phone" checked readOnly />
+                                <Label htmlFor="contact-phone" className="cursor-pointer">{t("phoneLabel")}</Label>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <input type="checkbox" id="contact-sms" readOnly />
+                                <Label htmlFor="contact-sms" className="cursor-pointer">SMS</Label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="mt-4">
+                      <CardHeader>
+                        <CardTitle>{t("serviceHistory")}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="border rounded-lg p-4">
+                            <div className="flex justify-between">
+                              <div>
+                                <Badge className="mb-1">{t("cleaning")}</Badge>
+                                <h4 className="font-bold">{t("cleaning")} {t("communityNews")}</h4>
+                                <p className="text-sm text-gray-500">Servicios de Limpieza - 20/05/2025</p>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="flex">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                      key={star} 
+                                      className={`h-4 w-4 ${star <= 5 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="border rounded-lg p-4">
+                            <div className="flex justify-between">
+                              <div>
+                                <Badge className="mb-1">{t("maintenance")}</Badge>
+                                <h4 className="font-bold">{t("elevatorMaintenance")}</h4>
+                                <p className="text-sm text-gray-500">Mantenimiento Profesional - 10/04/2025</p>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="flex">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                      key={star} 
+                                      className={`h-4 w-4 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Community Chat Tab */}
             {activeTab === "chat" && (
