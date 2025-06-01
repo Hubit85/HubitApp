@@ -146,13 +146,13 @@ export default function ParticularDashboard() {
         <div className="flex-1 overflow-auto">
           <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">
-              {activeTab === "perfil" ? "Mi Perfil" : 
-               activeTab === "presupuesto" ? "Solicitar Presupuesto" :
-               activeTab === "proveedores" ? "Proveedores de Servicios" :
-               activeTab === "favoritos" ? "Mis Favoritos" :
-               activeTab === "propiedades" ? "Mis Propiedades" :
-               activeTab === "notificaciones" ? "Notificaciones" :
-               "Configuración"}
+              {activeTab === "perfil" ? t("myProfile") : 
+               activeTab === "presupuesto" ? t("requestQuote") :
+               activeTab === "proveedores" ? t("serviceProviders") :
+               activeTab === "favoritos" ? t("myFavorites") :
+               activeTab === "propiedades" ? t("myProperties") :
+               activeTab === "notificaciones" ? t("notifications") :
+               t("configuration")}
             </h1>
             
             {/* Mi Perfil Tab */}
@@ -166,8 +166,8 @@ export default function ParticularDashboard() {
                           <User className="h-16 w-16 text-gray-500" />
                         </div>
                         <h2 className="text-xl font-bold">Carlos García</h2>
-                        <p className="text-gray-500 mb-4">Particular</p>
-                        <Button className="w-full">Editar Perfil</Button>
+                        <p className="text-gray-500 mb-4">{t("individual")}</p>
+                        <Button className="w-full">{t("editProfile")}</Button>
                       </CardContent>
                     </Card>
                   </div>
@@ -175,47 +175,47 @@ export default function ParticularDashboard() {
                   <div className="md:w-2/3">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Información Personal</CardTitle>
+                        <CardTitle>{t("personalInformation")}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="name">Nombre Completo</Label>
+                              <Label htmlFor="name">{t("fullNameLabel")}</Label>
                               <Input id="name" value="Carlos García Martínez" readOnly className="bg-gray-50" />
                             </div>
                             <div>
-                              <Label htmlFor="email">Email</Label>
+                              <Label htmlFor="email">{t("emailLabel")}</Label>
                               <Input id="email" value="carlos.garcia@example.com" readOnly className="bg-gray-50" />
                             </div>
                           </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="phone">Teléfono</Label>
+                              <Label htmlFor="phone">{t("phoneLabel")}</Label>
                               <Input id="phone" value="+34 612 345 678" readOnly className="bg-gray-50" />
                             </div>
                             <div>
-                              <Label htmlFor="location">Ubicación</Label>
+                              <Label htmlFor="location">{t("locationLabel")}</Label>
                               <Input id="location" value="Madrid, España" readOnly className="bg-gray-50" />
                             </div>
                           </div>
                           
                           <div>
-                            <Label htmlFor="address">Dirección Principal</Label>
+                            <Label htmlFor="address">{t("mainAddress")}</Label>
                             <Input id="address" value="Calle Gran Vía 25, 5B, 28013, Madrid" readOnly className="bg-gray-50" />
                           </div>
                           
                           <div className="pt-4 border-t">
-                            <h3 className="font-medium text-lg mb-2">Preferencias de Contacto</h3>
+                            <h3 className="font-medium text-lg mb-2">{t("contactPreferences")}</h3>
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-2">
                                 <input type="checkbox" id="contact-email" checked readOnly />
-                                <Label htmlFor="contact-email" className="cursor-pointer">Email</Label>
+                                <Label htmlFor="contact-email" className="cursor-pointer">{t("email")}</Label>
                               </div>
                               <div className="flex items-center gap-2">
                                 <input type="checkbox" id="contact-phone" checked readOnly />
-                                <Label htmlFor="contact-phone" className="cursor-pointer">Teléfono</Label>
+                                <Label htmlFor="contact-phone" className="cursor-pointer">{t("phoneLabel")}</Label>
                               </div>
                               <div className="flex items-center gap-2">
                                 <input type="checkbox" id="contact-sms" readOnly />
@@ -229,15 +229,15 @@ export default function ParticularDashboard() {
                     
                     <Card className="mt-4">
                       <CardHeader>
-                        <CardTitle>Historial de Servicios</CardTitle>
+                        <CardTitle>{t("serviceHistory")}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
                           <div className="border rounded-lg p-4">
                             <div className="flex justify-between">
                               <div>
-                                <Badge className="mb-1">Fontanería</Badge>
-                                <h4 className="font-bold">Reparación de Fuga</h4>
+                                <Badge className="mb-1">{t("plumbing")}</Badge>
+                                <h4 className="font-bold">{t("leakRepair")}</h4>
                                 <p className="text-sm text-gray-500">Fontanería Express - 15/04/2025</p>
                               </div>
                               <div className="flex items-center">
@@ -256,8 +256,8 @@ export default function ParticularDashboard() {
                           <div className="border rounded-lg p-4">
                             <div className="flex justify-between">
                               <div>
-                                <Badge className="mb-1">Electricidad</Badge>
-                                <h4 className="font-bold">Instalación de Luces</h4>
+                                <Badge className="mb-1">{t("electrical")}</Badge>
+                                <h4 className="font-bold">{t("lightInstallation")}</h4>
                                 <p className="text-sm text-gray-500">Electricidad Rápida - 02/03/2025</p>
                               </div>
                               <div className="flex items-center">
@@ -283,72 +283,72 @@ export default function ParticularDashboard() {
             {/* Solicitar Presupuesto Tab */}
             {activeTab === "presupuesto" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Solicitar Presupuesto</h2>
+                <h2 className="text-2xl font-bold mb-4">{t("requestQuote")}</h2>
                 <Card>
                   <CardContent className="p-6">
                     <form className="space-y-6">
                       <div>
-                        <Label htmlFor="service-type" className="text-base font-medium">Tipo de Servicio</Label>
+                        <Label htmlFor="service-type" className="text-base font-medium">{t("serviceType")}</Label>
                         <select id="service-type" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                          <option value="">Selecciona un tipo de servicio</option>
-                          <option value="plumbing">Fontanería</option>
-                          <option value="electrical">Electricidad</option>
-                          <option value="painting">Pintura</option>
-                          <option value="carpentry">Carpintería</option>
-                          <option value="masonry">Albañilería</option>
-                          <option value="roofing">Techado</option>
-                          <option value="cleaning">Limpieza</option>
-                          <option value="gardening">Jardinería</option>
-                          <option value="other">Otro</option>
+                          <option value="">{t("selectServiceType")}</option>
+                          <option value="plumbing">{t("plumbing")}</option>
+                          <option value="electrical">{t("electrical")}</option>
+                          <option value="painting">{t("painting")}</option>
+                          <option value="carpentry">{t("carpentry")}</option>
+                          <option value="masonry">{t("masonry")}</option>
+                          <option value="roofing">{t("roofing")}</option>
+                          <option value="cleaning">{t("cleaning")}</option>
+                          <option value="gardening">{t("gardening")}</option>
+                          <option value="other">{t("other")}</option>
                         </select>
                       </div>
                       
                       <div>
-                        <Label htmlFor="service-title" className="text-base font-medium">Título del Servicio</Label>
-                        <Input id="service-title" className="mt-1" placeholder="Ej: Reparación de fuga en baño" />
+                        <Label htmlFor="service-title" className="text-base font-medium">{t("serviceTitle")}</Label>
+                        <Input id="service-title" className="mt-1" placeholder={t("exampleLeakRepair")} />
                       </div>
                       
                       <div>
-                        <Label htmlFor="service-description" className="text-base font-medium">Descripción Detallada</Label>
-                        <Textarea id="service-description" className="mt-1" rows={5} placeholder="Describe detalladamente el servicio que necesitas..." />
+                        <Label htmlFor="service-description" className="text-base font-medium">{t("detailedDescription")}</Label>
+                        <Textarea id="service-description" className="mt-1" rows={5} placeholder={t("describeServiceNeeded")} />
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="service-location" className="text-base font-medium">Ubicación</Label>
-                          <Input id="service-location" className="mt-1" placeholder="Dirección donde se realizará el servicio" />
+                          <Label htmlFor="service-location" className="text-base font-medium">{t("location")}</Label>
+                          <Input id="service-location" className="mt-1" placeholder={t("serviceLocationAddress")} />
                         </div>
                         <div>
-                          <Label htmlFor="service-date" className="text-base font-medium">Fecha Preferida</Label>
+                          <Label htmlFor="service-date" className="text-base font-medium">{t("preferredDate")}</Label>
                           <Input id="service-date" type="date" className="mt-1" />
                         </div>
                       </div>
                       
                       <div>
-                        <Label htmlFor="service-budget" className="text-base font-medium">Presupuesto Estimado (Opcional)</Label>
+                        <Label htmlFor="service-budget" className="text-base font-medium">{t("estimatedBudgetOptional")}</Label>
                         <Input id="service-budget" className="mt-1" placeholder="€" />
                       </div>
                       
                       <div>
-                        <Label className="text-base font-medium">Fotos (Opcional)</Label>
+                        <Label className="text-base font-medium">{t("photosOptional")}</Label>
                         <div className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                           <Upload className="h-8 w-8 mx-auto text-gray-400" />
-                          <p className="mt-2 text-sm text-gray-500">Arrastra y suelta fotos aquí o haz clic para seleccionar</p>
-                          <Button variant="outline" size="sm" className="mt-2">Seleccionar Archivos</Button>
+                          <p className="mt-2 text-sm text-gray-500">{t("dragDropOrClick")}</p>
+                          <Button variant="outline" size="sm" className="mt-2">{t("selectFiles")}</Button>
                         </div>
                       </div>
                       
                       <div>
-                        <Label htmlFor="service-urgency" className="text-base font-medium">Nivel de Urgencia</Label>
+                        <Label htmlFor="service-urgency" className="text-base font-medium">{t("urgencyLevel")}</Label>
                         <select id="service-urgency" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                          <option>Baja - En las próximas semanas</option>
-                          <option>Media - En los próximos días</option>
-                          <option>Alta - Lo antes posible</option>
-                          <option>Urgente - Hoy mismo</option>
+                          <option>{t("lowNextWeeks")}</option>
+                          <option>{t("mediumNextDays")}</option>
+                          <option>{t("highAsap")}</option>
+                          <option>{t("urgentToday")}</option>
                         </select>
                       </div>
                       
-                      <Button className="w-full">Solicitar Presupuestos</Button>
+                      <Button className="w-full">{t("requestQuotes")}</Button>
                     </form>
                   </CardContent>
                 </Card>
@@ -359,9 +359,9 @@ export default function ParticularDashboard() {
             {activeTab === "proveedores" && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">Proveedores de Servicios</h2>
+                  <h2 className="text-2xl font-bold">{t("serviceProviders")}</h2>
                   <div className="relative w-64">
-                    <Input placeholder="Buscar proveedores..." className="pr-10" />
+                    <Input placeholder={t("searchProviders")} className="pr-10" />
                     <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   </div>
                 </div>
@@ -388,15 +388,15 @@ export default function ParticularDashboard() {
                               />
                             ))}
                           </div>
-                          <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews} reseñas)</span>
+                          <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews} {t("reviews")})</span>
                         </div>
                         <div className="flex items-center text-sm text-gray-500">
                           <MapPin className="h-4 w-4 mr-1" />
                           <span>{provider.location}</span>
                         </div>
                         <div className="mt-4 flex justify-between">
-                          <Button variant="outline" size="sm">Ver Perfil</Button>
-                          <Button size="sm">Solicitar</Button>
+                          <Button variant="outline" size="sm">{t("viewProfile")}</Button>
+                          <Button size="sm">{t("request")}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -404,7 +404,7 @@ export default function ParticularDashboard() {
                 </div>
                 
                 <div className="mt-6 flex justify-center">
-                  <Button variant="outline">Cargar Más Proveedores</Button>
+                  <Button variant="outline">{t("loadMoreProviders")}</Button>
                 </div>
               </div>
             )}
@@ -412,7 +412,7 @@ export default function ParticularDashboard() {
             {/* Mis Favoritos Tab */}
             {activeTab === "favoritos" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Mis Proveedores Favoritos</h2>
+                <h2 className="text-2xl font-bold mb-4">{t("myFavoriteProviders")}</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {favoriteProviders.map((provider) => (
@@ -436,15 +436,15 @@ export default function ParticularDashboard() {
                               />
                             ))}
                           </div>
-                          <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews} reseñas)</span>
+                          <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews} {t("reviews")})</span>
                         </div>
                         <div className="flex items-center text-sm text-gray-500">
                           <MapPin className="h-4 w-4 mr-1" />
                           <span>{provider.location}</span>
                         </div>
                         <div className="mt-4 flex justify-between">
-                          <Button variant="outline" size="sm">Ver Perfil</Button>
-                          <Button size="sm">Solicitar</Button>
+                          <Button variant="outline" size="sm">{t("viewProfile")}</Button>
+                          <Button size="sm">{t("request")}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -454,9 +454,9 @@ export default function ParticularDashboard() {
                 {favoriteProviders.length === 0 && (
                   <div className="text-center py-12">
                     <Star className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-600 mb-2">No tienes proveedores favoritos</h3>
-                    <p className="text-gray-500 mb-4">Añade proveedores a tus favoritos para acceder rápidamente a ellos</p>
-                    <Button onClick={() => setActiveTab("proveedores")}>Explorar Proveedores</Button>
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noFavoriteProviders")}</h3>
+                    <p className="text-gray-500 mb-4">{t("addFavoriteProvidersDesc")}</p>
+                    <Button onClick={() => setActiveTab("proveedores")}>{t("exploreProviders")}</Button>
                   </div>
                 )}
               </div>
@@ -466,8 +466,8 @@ export default function ParticularDashboard() {
             {activeTab === "propiedades" && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">Mis Propiedades</h2>
-                  <Button>Añadir Propiedad</Button>
+                  <h2 className="text-2xl font-bold">{t("myProperties")}</h2>
+                  <Button>{t("addProperty")}</Button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -481,18 +481,18 @@ export default function ParticularDashboard() {
                         />
                       </div>
                       <CardContent className="p-4">
-                        <h3 className="font-bold text-lg">{property.name}</h3>
+                        <h3 className="font-bold text-lg">{property.name === "Apartamento en Centro" ? t("apartmentInCenter") : property.name === "Casa en la Playa" ? t("beachHouse") : property.name}</h3>
                         <div className="flex items-center text-sm text-gray-500 mt-1">
                           <MapPin className="h-4 w-4 mr-1" />
                           <span>{property.address}</span>
                         </div>
                         <div className="flex justify-between mt-2">
-                          <Badge variant="outline">{property.type}</Badge>
+                          <Badge variant="outline">{property.type === "Apartamento" ? t("apartment") : property.type === "Casa" ? t("house") : property.type}</Badge>
                           <Badge variant="outline">{property.size}</Badge>
                         </div>
                         <div className="mt-4 flex justify-between">
-                          <Button variant="outline" size="sm">Ver Detalles</Button>
-                          <Button size="sm">Gestionar</Button>
+                          <Button variant="outline" size="sm">{t("viewDetails")}</Button>
+                          <Button size="sm">{t("manage")}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -502,9 +502,9 @@ export default function ParticularDashboard() {
                 {properties.length === 0 && (
                   <div className="text-center py-12">
                     <Home className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-600 mb-2">No tienes propiedades registradas</h3>
-                    <p className="text-gray-500 mb-4">Añade tus propiedades para gestionar sus servicios</p>
-                    <Button>Añadir Propiedad</Button>
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noPropertiesRegistered")}</h3>
+                    <p className="text-gray-500 mb-4">{t("addPropertiesDesc")}</p>
+                    <Button>{t("addProperty")}</Button>
                   </div>
                 )}
               </div>
@@ -513,20 +513,20 @@ export default function ParticularDashboard() {
             {/* Notificaciones Tab */}
             {activeTab === "notificaciones" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Notificaciones</h2>
+                <h2 className="text-2xl font-bold mb-4">{t("notifications")}</h2>
                 
                 <div className="space-y-4">
                   <Card className="border-l-4 border-blue-500">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-bold">Presupuesto Recibido</h3>
-                          <p className="text-sm text-gray-600 mt-1">Has recibido un nuevo presupuesto para "Reparación de Fuga" de Fontanería Express.</p>
+                          <h3 className="font-bold">{t("quoteReceived")}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{t("quoteReceivedDesc")}</p>
                         </div>
-                        <span className="text-xs text-gray-500">Hace 2 horas</span>
+                        <span className="text-xs text-gray-500">{t("hoursAgo")}</span>
                       </div>
                       <div className="mt-2 flex justify-end">
-                        <Button size="sm">Ver Presupuesto</Button>
+                        <Button size="sm">{t("viewQuote")}</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -535,13 +535,13 @@ export default function ParticularDashboard() {
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-bold">Servicio Completado</h3>
-                          <p className="text-sm text-gray-600 mt-1">El servicio "Instalación de Luces" ha sido marcado como completado. Por favor, valora tu experiencia.</p>
+                          <h3 className="font-bold">{t("serviceCompleted")}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{t("serviceCompletedDesc")}</p>
                         </div>
-                        <span className="text-xs text-gray-500">Ayer</span>
+                        <span className="text-xs text-gray-500">{t("yesterday")}</span>
                       </div>
                       <div className="mt-2 flex justify-end">
-                        <Button size="sm">Valorar Servicio</Button>
+                        <Button size="sm">{t("rateService")}</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -550,21 +550,21 @@ export default function ParticularDashboard() {
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-bold">Recordatorio de Cita</h3>
-                          <p className="text-sm text-gray-600 mt-1">Recuerda que tienes una cita programada mañana a las 10:00 con Carpintería Artesanal.</p>
+                          <h3 className="font-bold">{t("appointmentReminder")}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{t("appointmentReminderDesc")}</p>
                         </div>
-                        <span className="text-xs text-gray-500">2 días atrás</span>
+                        <span className="text-xs text-gray-500">{t("daysAgo")}</span>
                       </div>
                       <div className="mt-2 flex justify-end">
-                        <Button variant="outline" size="sm" className="mr-2">Reprogramar</Button>
-                        <Button size="sm">Confirmar</Button>
+                        <Button variant="outline" size="sm" className="mr-2">{t("reschedule")}</Button>
+                        <Button size="sm">{t("confirm")}</Button>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
                 
                 <div className="mt-6 flex justify-center">
-                  <Button variant="outline">Ver Todas las Notificaciones</Button>
+                  <Button variant="outline">{t("viewAllNotifications")}</Button>
                 </div>
               </div>
             )}
@@ -572,51 +572,51 @@ export default function ParticularDashboard() {
             {/* Configuración Tab */}
             {activeTab === "configuracion" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Configuración</h2>
+                <h2 className="text-2xl font-bold mb-4">{t("configuration")}</h2>
                 
                 <div className="space-y-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Preferencias de Cuenta</CardTitle>
+                      <CardTitle>{t("accountPreferences")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="language">Idioma</Label>
+                          <Label htmlFor="language">{t("language")}</Label>
                           <select id="language" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <option>Español</option>
-                            <option>English</option>
-                            <option>Català</option>
+                            <option>{t("spanish")}</option>
+                            <option>{t("english")}</option>
+                            <option>{t("catalan")}</option>
                           </select>
                         </div>
                         
                         <div>
-                          <Label htmlFor="notifications">Notificaciones</Label>
+                          <Label htmlFor="notifications">{t("notifications")}</Label>
                           <div className="mt-2 space-y-2">
                             <div className="flex items-center justify-between">
-                              <span>Notificaciones por Email</span>
+                              <span>{t("emailNotifications")}</span>
                               <input type="checkbox" checked readOnly />
                             </div>
                             <div className="flex items-center justify-between">
-                              <span>Notificaciones Push</span>
+                              <span>{t("pushNotifications")}</span>
                               <input type="checkbox" checked readOnly />
                             </div>
                             <div className="flex items-center justify-between">
-                              <span>Notificaciones SMS</span>
+                              <span>{t("smsNotifications")}</span>
                               <input type="checkbox" readOnly />
                             </div>
                           </div>
                         </div>
                         
                         <div>
-                          <Label htmlFor="privacy">Privacidad</Label>
+                          <Label htmlFor="privacy">{t("privacy")}</Label>
                           <div className="mt-2 space-y-2">
                             <div className="flex items-center justify-between">
-                              <span>Perfil Visible para Proveedores</span>
+                              <span>{t("profileVisibleToProviders")}</span>
                               <input type="checkbox" checked readOnly />
                             </div>
                             <div className="flex items-center justify-between">
-                              <span>Compartir Historial de Servicios</span>
+                              <span>{t("shareServiceHistory")}</span>
                               <input type="checkbox" readOnly />
                             </div>
                           </div>
@@ -627,18 +627,18 @@ export default function ParticularDashboard() {
                   
                   <Card>
                     <CardHeader>
-                      <CardTitle>Seguridad</CardTitle>
+                      <CardTitle>{t("security")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div>
-                          <Button variant="outline" className="w-full">Cambiar Contraseña</Button>
+                          <Button variant="outline" className="w-full">{t("changePassword")}</Button>
                         </div>
                         <div>
-                          <Button variant="outline" className="w-full">Configurar Autenticación de Dos Factores</Button>
+                          <Button variant="outline" className="w-full">{t("setupTwoFactor")}</Button>
                         </div>
                         <div>
-                          <Button variant="outline" className="w-full">Gestionar Dispositivos Conectados</Button>
+                          <Button variant="outline" className="w-full">{t("manageConnectedDevices")}</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -646,15 +646,15 @@ export default function ParticularDashboard() {
                   
                   <Card>
                     <CardHeader>
-                      <CardTitle>Datos y Privacidad</CardTitle>
+                      <CardTitle>{t("dataAndPrivacy")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div>
-                          <Button variant="outline" className="w-full">Descargar Mis Datos</Button>
+                          <Button variant="outline" className="w-full">{t("downloadMyData")}</Button>
                         </div>
                         <div>
-                          <Button variant="outline" className="w-full">Eliminar Mi Cuenta</Button>
+                          <Button variant="outline" className="w-full">{t("deleteMyAccount")}</Button>
                         </div>
                       </div>
                     </CardContent>
