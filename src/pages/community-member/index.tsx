@@ -25,7 +25,13 @@ import {
   Home,
   ThumbsUp,
   Award,
-  CreditCard
+  CreditCard,
+  Bell,
+  Settings,
+  Store,
+  Star,
+  Search,
+  MapPin
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
@@ -51,6 +57,17 @@ interface CommunityContract {
   type: string;
   date: string;
   fileType: "pdf" | "word";
+}
+
+// Define service provider type
+interface ServiceProvider {
+  id: string;
+  name: string;
+  category: string;
+  rating: number;
+  reviews: number;
+  location: string;
+  image: string;
 }
 
 export default function CommunityMemberDashboard() {
@@ -95,6 +112,67 @@ export default function CommunityMemberDashboard() {
     { id: "9", title: t("parkingRegulations"), type: t("legalDocument"), date: "05/10/2023", fileType: "pdf" },
     { id: "10", title: t("swimmingPoolMaintenance"), type: t("serviceContract"), date: "20/11/2023", fileType: "word" }
   ];
+
+  // Sample service providers data
+  const serviceProviders: ServiceProvider[] = [
+    { 
+      id: "1", 
+      name: "Fontanería Express", 
+      category: "Fontanería", 
+      rating: 4.8, 
+      reviews: 124, 
+      location: "Madrid", 
+      image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+    },
+    { 
+      id: "2", 
+      name: "Electricidad Rápida", 
+      category: "Electricidad", 
+      rating: 4.6, 
+      reviews: 98, 
+      location: "Barcelona", 
+      image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80" 
+    },
+    { 
+      id: "3", 
+      name: "Pinturas Modernas", 
+      category: "Pintura", 
+      rating: 4.9, 
+      reviews: 156, 
+      location: "Valencia", 
+      image: "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+    },
+    { 
+      id: "4", 
+      name: "Carpintería Artesanal", 
+      category: "Carpintería", 
+      rating: 4.7, 
+      reviews: 87, 
+      location: "Sevilla", 
+      image: "https://images.unsplash.com/photo-1622150162806-409d3a83a585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+    },
+    { 
+      id: "5", 
+      name: "Albañilería Profesional", 
+      category: "Albañilería", 
+      rating: 4.5, 
+      reviews: 112, 
+      location: "Zaragoza", 
+      image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+    },
+    { 
+      id: "6", 
+      name: "Techadores Expertos", 
+      category: "Techado", 
+      rating: 4.4, 
+      reviews: 76, 
+      location: "Málaga", 
+      image: "https://images.unsplash.com/photo-1598252976330-b8a1461d47c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+    }
+  ];
+
+  // Sample favorite providers
+  const favoriteProviders = serviceProviders.slice(0, 3);
 
   return (
     <>
