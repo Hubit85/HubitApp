@@ -8,23 +8,24 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/layout/Header";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica de autenticación
     router.push("/dashboard");
   };
 
   return (
     <>
       <Head>
-        <title>Iniciar sesión | HANDYMAN</title>
-        <meta name="description" content="Inicia sesión en tu cuenta de HANDYMAN" />
+        <title>{t("login")} | {t("handyman")}</title>
+        <meta name="description" content={t("loginToAccess")} />
       </Head>
 
       <Header />
@@ -32,19 +33,19 @@ export default function LoginPage() {
       <main className="flex items-center justify-center min-h-screen bg-gray-50 px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Bienvenido de nuevo</CardTitle>
+            <CardTitle className="text-2xl font-bold">{t("welcomeBack")}</CardTitle>
             <CardDescription>
-              Inicia sesión para acceder a tu cuenta
+              {t("loginToAccess")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="email">{t("email")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Introduce tu correo electrónico"
+                  placeholder={t("enterEmail")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -52,30 +53,30 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Contraseña</Label>
+                  <Label htmlFor="password">{t("password")}</Label>
                   <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:underline">
-                    ¿Olvidaste tu contraseña?
+                    {t("forgotPassword")}
                   </Link>
                 </div>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Introduce tu contraseña"
+                  placeholder={t("enterPassword")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
               <Button type="submit" className="w-full">
-                Iniciar sesión
+                {t("login")}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
             <div className="text-sm text-gray-500">
-              ¿No tienes una cuenta?{" "}
+              {t("dontHaveAccount")}{" "}
               <Link href="/auth/register" className="text-blue-600 hover:underline">
-                Crear cuenta
+                {t("createAccount")}
               </Link>
             </div>
           </CardFooter>
