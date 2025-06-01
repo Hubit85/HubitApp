@@ -505,7 +505,30 @@ const baseTranslations = {
     solarRoofInstallation: "Instalación techo solar",
     solarRoofing: "Techado Solar",
     roofInspection: "Inspección de techo",
-    roofInspectors: "Inspectores de Techo"
+    roofInspectors: "Inspectores de Techo",
+    
+    // Estate Administrator specific translations
+    map: "Mapa",
+    assets: "Activos",
+    currentServices: "Servicios Actuales",
+    meetings: "Juntas",
+    pendingIssues: "Temas Pendientes",
+    communityMap: "Mapa de Comunidades",
+    communitiesOnMap: "Comunidades en el Mapa",
+    coordinates: "Coordenadas",
+    viewOnMap: "Ver en Mapa",
+    managedCommunities: "Comunidades Gestionadas",
+    viewDetails: "Ver Detalles",
+    redirectingToServiceDashboard: "Redirigiendo al panel de servicios",
+    goToServiceDashboard: "Ir al Panel de Servicios",
+    communityMeetings: "Juntas de Comunidades",
+    scheduledMeetings: "Reuniones Programadas",
+    noMeetingsThisMonth: "No hay reuniones este mes",
+    community: "Comunidad",
+    amountStatus: "Importe/Estado",
+    action: "Acción",
+    manage: "Gestionar",
+    dashboardDesc: "Panel de control del administrador de fincas"
   },
   en: {
     // Common
@@ -1007,7 +1030,30 @@ const baseTranslations = {
     solarRoofInstallation: "Solar roof installation",
     solarRoofing: "Solar Roofing",
     roofInspection: "Roof inspection",
-    roofInspectors: "Roof Inspectors"
+    roofInspectors: "Roof Inspectors",
+    
+    // Estate Administrator specific translations
+    map: "Map",
+    assets: "Assets",
+    currentServices: "Current Services",
+    meetings: "Meetings",
+    pendingIssues: "Pending Issues",
+    communityMap: "Community Map",
+    communitiesOnMap: "Communities on Map",
+    coordinates: "Coordinates",
+    viewOnMap: "View on Map",
+    managedCommunities: "Managed Communities",
+    viewDetails: "View Details",
+    redirectingToServiceDashboard: "Redirecting to service dashboard",
+    goToServiceDashboard: "Go to Service Dashboard",
+    communityMeetings: "Community Meetings",
+    scheduledMeetings: "Scheduled Meetings",
+    noMeetingsThisMonth: "No meetings this month",
+    community: "Community",
+    amountStatus: "Amount/Status",
+    action: "Action",
+    manage: "Manage",
+    dashboardDesc: "Estate administrator dashboard"
   }
 };
 
