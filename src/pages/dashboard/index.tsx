@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
@@ -6,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Building, Wrench, Star, TrendingUp } from "lucide-react";
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -240,7 +239,7 @@ export default function Dashboard() {
             >
               <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
                 <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
-                  <CardTitle className='text-2xl font-bold text-foreground'>{t('howItWorks')}</CardTitle>
+                  <CardTitle className='text-2xl font-bold text-foreground'>Cómo Funciona</CardTitle>
                 </CardHeader>
                 <motion.div
                   initial={{ height: '150px' }}
@@ -252,34 +251,44 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p className='text-lg leading-relaxed'>
-                      {t('howItWorksContent1')}
+                      Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:
                     </p>
                     
                     <div className='space-y-4'>
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('forAdministrators')}</h3>
-                        <p>{t('forAdministratorsDesc')}</p>
+                        <h3 className='font-bold text-xl mb-2'>Para Administradores</h3>
+                        <p className='text-lg leading-relaxed'>
+                          Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.
+                        </p>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('forServiceCompanies')}</h3>
-                        <p>{t('forServiceCompaniesDesc')}</p>
+                        <h3 className='font-bold text-xl mb-2'>Para Empresas de Servicios</h3>
+                        <p className='text-lg leading-relaxed'>
+                          Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.
+                        </p>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('forNeighbors')}</h3>
-                        <p>{t('forNeighborsDesc')}</p>
+                        <h3 className='font-bold text-xl mb-2'>Para Vecinos</h3>
+                        <p className='text-lg leading-relaxed'>
+                          Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.
+                        </p>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('ratingSystem')}</h3>
-                        <p>{t('ratingSystemDesc')}</p>
+                        <h3 className='font-bold text-xl mb-2'>Sistema de Valoraciones</h3>
+                        <p className='text-lg leading-relaxed'>
+                          Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.
+                        </p>
                       </div>
                     </div>
                     
-                    <p className='text-lg leading-relaxed'>
-                      {t('howItWorksContent2')}
-                    </p>
+                    <div className='bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700'>
+                      <p className='text-lg leading-relaxed font-medium'>
+                        Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.
+                      </p>
+                    </div>
                   </CardContent>
                 </motion.div>
                 {expandedCard !== 'howItWorks' && (
@@ -298,7 +307,7 @@ export default function Dashboard() {
             >
               <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
                 <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
-                  <CardTitle className='text-2xl font-bold text-foreground'>{t('achievements')}</CardTitle>
+                  <CardTitle className='text-2xl font-bold text-foreground'>Nuestros Logros</CardTitle>
                 </CardHeader>
                 <motion.div
                   initial={{ height: '150px' }}
@@ -310,46 +319,48 @@ export default function Dashboard() {
                 >
                   <CardContent className='text-foreground space-y-4 p-6'>
                     <p className='text-lg leading-relaxed'>
-                      {t('achievementsContent1')}
+                      Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:
                     </p>
                     
                     <div className='space-y-4'>
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700 flex items-center gap-4'>
-                        <div className='text-3xl font-bold text-primary'>500+</div>
+                        <div className='text-3xl font-bold text-blue-600'>500+</div>
                         <div>
-                          <h3 className='font-bold text-lg'>{t('connectedCommunities')}</h3>
-                          <p>{t('connectedCommunitiesDesc')}</p>
+                          <h3 className='font-bold text-lg'>Comunidades conectadas</h3>
+                          <p>Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.</p>
                         </div>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700 flex items-center gap-4'>
-                        <div className='text-3xl font-bold text-primary'>300+</div>
+                        <div className='text-3xl font-bold text-green-600'>300+</div>
                         <div>
-                          <h3 className='font-bold text-lg'>{t('verifiedCompanies')}</h3>
-                          <p>{t('verifiedCompaniesDesc')}</p>
+                          <h3 className='font-bold text-lg'>Empresas verificadas</h3>
+                          <p>Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.</p>
                         </div>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700 flex items-center gap-4'>
-                        <div className='text-3xl font-bold text-primary'>95%</div>
+                        <div className='text-3xl font-bold text-purple-600'>95%</div>
                         <div>
-                          <h3 className='font-bold text-lg'>{t('satisfactionIndex')}</h3>
-                          <p>{t('satisfactionIndexDesc')}</p>
+                          <h3 className='font-bold text-lg'>Índice de satisfacción</h3>
+                          <p>Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.</p>
                         </div>
                       </div>
                       
                       <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700 flex items-center gap-4'>
-                        <div className='text-3xl font-bold text-primary'>10,000+</div>
+                        <div className='text-3xl font-bold text-orange-600'>10,000+</div>
                         <div>
-                          <h3 className='font-bold text-lg'>{t('resolvedIncidents')}</h3>
-                          <p>{t('resolvedIncidentsDesc')}</p>
+                          <h3 className='font-bold text-lg'>Incidencias resueltas</h3>
+                          <p>Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.</p>
                         </div>
                       </div>
                     </div>
                     
-                    <p className='text-lg leading-relaxed'>
-                      {t('achievementsContent2')}
-                    </p>
+                    <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                      <p className='text-lg leading-relaxed font-medium'>
+                        Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.
+                      </p>
+                    </div>
                   </CardContent>
                 </motion.div>
                 {expandedCard !== 'achievements' && (
