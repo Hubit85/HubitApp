@@ -617,7 +617,10 @@ const baseTranslations = {
     exampleLeakRepair: "Ej.: Reparación de Fugas en Baño",
     describeServiceNeeded: "Describa en detalle el servicio que necesita...",
     serviceLocationAddress: "Dirección donde se realizará el servicio",
-    individual: "Individual"
+    individual: "Individual",
+    myPayments: "Mis Pagos",
+    recommendations: "Recomendaciones",
+    myAwards: "Mis Premios"
   },
   en: {
     // Common
@@ -969,7 +972,7 @@ const baseTranslations = {
     lightingUpgrade: "Lighting Upgrade",
     energyEfficientLighting: "Energy efficient lighting",
     
-    // Service Provider Dashboard - Missing translations
+    // Service Provider Dashboard
     serviceProviderDashboard: "Service Provider Dashboard",
     overview: "Overview",
     activeBids: "Active Bids",
@@ -1132,7 +1135,6 @@ const baseTranslations = {
     coordinates: "Coordinates",
     viewOnMap: "View on Map",
     managedCommunities: "Managed Communities",
-    viewDetails: "View Details",
     redirectingToServiceDashboard: "Redirecting to service dashboard",
     goToServiceDashboard: "Go to Service Dashboard",
     communityMeetings: "Community Meetings",
@@ -1231,7 +1233,10 @@ const baseTranslations = {
     exampleLeakRepair: "E.g.: Bathroom leak repair",
     describeServiceNeeded: "Describe in detail the service you need...",
     serviceLocationAddress: "Address where the service will be performed",
-    individual: "Individual"
+    individual: "Individual",
+    myPayments: "My Payments",
+    recommendations: "Recommendations",
+    myAwards: "My Awards"
   }
 };
 
@@ -1256,7 +1261,7 @@ interface LanguageProviderProps {
 }
 
 export function LanguageProvider({ children }: LanguageProviderProps) {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>("es");
 
   const t = (key: string): string => {
     return baseTranslations[language][key as keyof typeof baseTranslations[typeof language]] || key;
