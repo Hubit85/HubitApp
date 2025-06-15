@@ -64,14 +64,14 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Quiénes Somos
+                {t("whoWeAreTitle")}
               </h2>
             </div>
 
             <div className="max-w-5xl mx-auto space-y-8">
               <div className="text-center">
                 <p className="text-xl text-gray-700 leading-relaxed">
-                  Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.
+                  {t("whoWeAreIntro")}
                 </p>
               </div>
 
@@ -80,17 +80,17 @@ export default function Home() {
                   <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
                     <Heart className="h-8 w-8 text-blue-600" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Nuestra Misión</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{t("ourMission")}</h3>
                 </div>
                 <p className="text-lg text-gray-700 leading-relaxed text-center">
-                  Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.
+                  {t("ourMissionText")}
                 </p>
               </div>
 
               <div className="bg-blue-50 rounded-lg p-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Nuestro Ecosistema</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t("ourEcosystem")}</h3>
                 <p className="text-lg text-gray-700 leading-relaxed text-center mb-6">
-                  Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.
+                  {t("ourEcosystemText")}
                 </p>
               </div>
 
@@ -99,10 +99,10 @@ export default function Home() {
                   <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
                     <Star className="h-8 w-8 text-green-600" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Nuestro Valor Fundamental</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{t("ourFundamentalValue")}</h3>
                 </div>
                 <p className="text-lg text-gray-700 leading-relaxed text-center">
-                  La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.
+                  {t("ourFundamentalValueText")}
                 </p>
               </div>
             </div>
@@ -114,10 +114,10 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Cómo Funciona
+                {t("howItWorksTitle")}
               </h2>
               <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:
+                {t("howItWorksIntro")}
               </p>
             </div>
 
@@ -129,12 +129,12 @@ export default function Home() {
                     <Building className="h-8 w-8 text-blue-600" />
                   </div>
                   <CardTitle className="text-2xl font-bold text-gray-900">
-                    Para Administradores
+                    {t("forAdministrators")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 text-center">
-                    Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.
+                    {t("forAdministratorsText")}
                   </p>
                 </CardContent>
               </Card>
@@ -146,12 +146,12 @@ export default function Home() {
                     <Wrench className="h-8 w-8 text-green-600" />
                   </div>
                   <CardTitle className="text-2xl font-bold text-gray-900">
-                    Para Empresas de Servicios
+                    {t("forServiceCompanies")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 text-center">
-                    Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.
+                    {t("forServiceCompaniesText")}
                   </p>
                 </CardContent>
               </Card>
@@ -163,12 +163,12 @@ export default function Home() {
                     <Users className="h-8 w-8 text-purple-600" />
                   </div>
                   <CardTitle className="text-2xl font-bold text-gray-900">
-                    Para Vecinos
+                    {t("forNeighbors")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 text-center">
-                    Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.
+                    {t("forNeighborsText")}
                   </p>
                 </CardContent>
               </Card>
@@ -181,16 +181,16 @@ export default function Home() {
                   <Star className="h-8 w-8 text-yellow-600" />
                 </div>
                 <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                  Sistema de Valoraciones
+                  {t("ratingsSystem")}
                 </h3>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                  Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.
+                  {t("ratingsSystemText")}
                 </p>
               </div>
               
               <div className="text-center">
                 <p className="text-xl text-gray-700 font-medium max-w-4xl mx-auto">
-                  Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.
+                  {t("virtuousCircle")}
                 </p>
               </div>
             </div>
@@ -202,10 +202,10 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Nuestros Logros
+                {t("ourAchievementsTitle")}
               </h2>
               <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:
+                {t("ourAchievementsIntro")}
               </p>
             </div>
 
@@ -215,10 +215,10 @@ export default function Home() {
                 <CardContent className="pt-8">
                   <div className="text-5xl font-bold text-blue-600 mb-2">500+</div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    Comunidades conectadas
+                    {t("connectedCommunities")}
                   </h3>
                   <p className="text-gray-600">
-                    Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.
+                    {t("connectedCommunitiesText")}
                   </p>
                 </CardContent>
               </Card>
@@ -228,10 +228,10 @@ export default function Home() {
                 <CardContent className="pt-8">
                   <div className="text-5xl font-bold text-green-600 mb-2">300+</div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    Empresas verificadas
+                    {t("verifiedCompanies")}
                   </h3>
                   <p className="text-gray-600">
-                    Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.
+                    {t("verifiedCompaniesText")}
                   </p>
                 </CardContent>
               </Card>
@@ -241,10 +241,10 @@ export default function Home() {
                 <CardContent className="pt-8">
                   <div className="text-5xl font-bold text-purple-600 mb-2">95%</div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    Índice de satisfacción
+                    {t("satisfactionIndex")}
                   </h3>
                   <p className="text-gray-600">
-                    Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.
+                    {t("satisfactionIndexText")}
                   </p>
                 </CardContent>
               </Card>
@@ -254,10 +254,10 @@ export default function Home() {
                 <CardContent className="pt-8">
                   <div className="text-5xl font-bold text-orange-600 mb-2">10,000+</div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    Incidencias resueltas
+                    {t("resolvedIncidents")}
                   </h3>
                   <p className="text-gray-600">
-                    Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.
+                    {t("resolvedIncidentsText")}
                   </p>
                 </CardContent>
               </Card>
@@ -269,7 +269,7 @@ export default function Home() {
                 <TrendingUp className="h-8 w-8 text-indigo-600" />
               </div>
               <p className="text-xl text-gray-700 font-medium max-w-4xl mx-auto">
-                Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.
+                {t("achievementsConclusion")}
               </p>
             </div>
           </div>
