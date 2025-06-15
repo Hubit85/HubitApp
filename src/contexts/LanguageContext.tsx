@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 // Define the Language type
@@ -55,6 +54,7 @@ const baseTranslations = {
     // Who We Are section
     whoWeAreTitle: "Quiénes Somos",
     whoWeAreIntro: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
+    whoWeAreSummary: "Plataforma digital que conecta administradores de fincas, empresas de servicios y vecinos. Facilitamos la gestión transparente de comunidades mediante herramientas intuitivas, sistema de valoraciones verificadas y comunicación directa. Transformamos la administración tradicional en un ecosistema colaborativo donde todos se benefician: mejor gestión, servicios de calidad y comunidades más satisfechas.",
     ourMission: "Nuestra Misión",
     ourMissionText: "Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.",
     ourEcosystem: "Nuestro Ecosistema",
@@ -652,6 +652,7 @@ const baseTranslations = {
     // Who We Are section
     whoWeAreTitle: "Who We Are",
     whoWeAreIntro: "We are a comprehensive platform that connects property managers, service companies, and neighbors to provide transparency in the needs of neighborhood communities.",
+    whoWeAreSummary: "Plataforma digital que conecta administradores de fincas, empresas de servicios y vecinos. Facilitamos la gestión transparente de comunidades mediante herramientas intuitivas, sistema de valoraciones verificadas y comunicación directa. Transformamos la administración tradicional en un ecosistema colaborativo donde todos se benefician: mejor gestión, servicios de calidad y comunidades más satisfechas.",
     ourMission: "Our Mission",
     ourMissionText: "Our mission is to facilitate communication, valuation, and management of services, helping companies expand their business while offering full transparency to communities.",
     ourEcosystem: "Our Ecosystem",
