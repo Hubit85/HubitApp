@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building, Wrench, Star, TrendingUp, Heart } from "lucide-react";
+import { Users, Building, Wrench, Star, TrendingUp, Heart, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Shield, Gift } from "lucide-react";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -271,6 +271,309 @@ export default function Home() {
               <p className="text-xl text-gray-700 font-medium max-w-4xl mx-auto">
                 {t("achievementsConclusion")}
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Sistema de Pagos Híbrido Section */}
+        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                {t("paymentSystemTitle")}
+              </h2>
+              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+                {t("paymentSystemIntro")}
+              </p>
+            </div>
+
+            {/* Métodos de Pago */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              {/* FIAT */}
+              <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors">
+                <CardHeader className="text-center">
+                  <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <CreditCard className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold text-gray-900">
+                    {t("fiatCurrencies")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 text-center mb-4">
+                    {t("fiatDescription")}
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Tarjetas de Crédito/Débito</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Transferencias Bancarias</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Efectivo</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Criptomonedas */}
+              <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors">
+                <CardHeader className="text-center">
+                  <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Coins className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold text-gray-900">
+                    {t("cryptocurrencies")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 text-center mb-4">
+                    {t("cryptoDescription")}
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <CheckCircle className="h-4 w-4 text-orange-500" />
+                      <span>{t("bitcoin")}</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <CheckCircle className="h-4 w-4 text-blue-500" />
+                      <span>{t("ethereum")}</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <CheckCircle className="h-4 w-4 text-yellow-500" />
+                      <span>{t("binanceCoin")}</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <CheckCircle className="h-4 w-4 text-purple-500" />
+                      <span>{t("solana")}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* HDMN Token */}
+              <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors bg-gradient-to-br from-green-50 to-emerald-50">
+                <CardHeader className="text-center">
+                  <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Star className="h-8 w-8 text-green-600" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold text-gray-900">
+                    {t("handymanToken")}
+                  </CardTitle>
+                  <div className="text-sm font-mono bg-green-200 text-green-800 px-3 py-1 rounded-full inline-block mt-2">
+                    HDMN
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 text-center mb-4">
+                    {t("hdmnDescription")}
+                  </p>
+                  <div className="text-center">
+                    <div className="text-sm text-green-600 font-semibold">
+                      Red Solana
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tipos de Pagos Soportados */}
+            <div className="bg-white rounded-lg p-8 shadow-lg mb-16">
+              <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
+                {t("acceptedPayments")}
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-lg font-semibold text-blue-600 mb-2">P2P</div>
+                  <div className="text-sm text-gray-600">{t("p2pPayments")}</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-lg font-semibold text-green-600 mb-2">P2B</div>
+                  <div className="text-sm text-gray-600">{t("p2bPayments")}</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-lg font-semibold text-purple-600 mb-2">B2P</div>
+                  <div className="text-sm text-gray-600">{t("b2pPayments")}</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-lg font-semibold text-orange-600 mb-2">B2B</div>
+                  <div className="text-sm text-gray-600">{t("b2bPayments")}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Cómo Comprar HDMN Section */}
+        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                {t("howToBuyHdmnTitle")}
+              </h2>
+              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+                {t("howToBuyHdmnIntro")}
+              </p>
+            </div>
+
+            {/* Pasos para comprar HDMN */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              {/* Paso 1 */}
+              <div className="relative">
+                <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors">
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 relative">
+                      <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Wallet className="h-10 w-10 text-blue-600" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        1
+                      </div>
+                    </div>
+                    <CardTitle className="text-xl font-bold text-gray-900">
+                      {t("step1Title")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center mb-4">
+                      {t("step1Description")}
+                    </p>
+                    <div className="text-center">
+                      <img 
+                        src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                        alt="Wallet Setup" 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                {/* Arrow */}
+                <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                  <ArrowRight className="h-8 w-8 text-gray-400" />
+                </div>
+              </div>
+
+              {/* Paso 2 */}
+              <div className="relative">
+                <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors">
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 relative">
+                      <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
+                        <Coins className="h-10 w-10 text-purple-600" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        2
+                      </div>
+                    </div>
+                    <CardTitle className="text-xl font-bold text-gray-900">
+                      {t("step2Title")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center mb-4">
+                      {t("step2Description")}
+                    </p>
+                    <div className="text-center">
+                      <img 
+                        src="https://images.unsplash.com/photo-1621761191319-c6fb62004040?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                        alt="Buy SOL" 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                {/* Arrow */}
+                <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                  <ArrowRight className="h-8 w-8 text-gray-400" />
+                </div>
+              </div>
+
+              {/* Paso 3 */}
+              <div className="relative">
+                <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors">
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 relative">
+                      <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                        <Star className="h-10 w-10 text-green-600" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        3
+                      </div>
+                    </div>
+                    <CardTitle className="text-xl font-bold text-gray-900">
+                      {t("step3Title")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center mb-4">
+                      {t("step3Description")}
+                    </p>
+                    <div className="text-center">
+                      <img 
+                        src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                        alt="DEX Trading" 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Beneficios de HDMN */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-8">
+              <h3 className="text-3xl font-bold text-gray-900 text-center mb-8">
+                {t("hdmnBenefits")}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Gift className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">{t("benefit1")}</h4>
+                </div>
+                <div className="text-center">
+                  <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Zap className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">{t("benefit2")}</h4>
+                </div>
+                <div className="text-center">
+                  <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Star className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">{t("benefit3")}</h4>
+                </div>
+                <div className="text-center">
+                  <div className="mx-auto mb-4 p-3 bg-orange-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Heart className="h-8 w-8 text-orange-600" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">{t("benefit4")}</h4>
+                </div>
+              </div>
+
+              {/* Call to Action */}
+              <div className="text-center mt-12">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button 
+                    size="lg" 
+                    className="text-lg px-8 py-6 bg-green-600 text-white hover:bg-green-700"
+                  >
+                    {t("startUsingHdmn")}
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="text-lg px-8 py-6 border-green-600 text-green-600 hover:bg-green-50"
+                  >
+                    {t("learnMore")}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
