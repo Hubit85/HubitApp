@@ -615,6 +615,18 @@ const baseTranslations = {
     benefit4: "Participa en la gobernanza de la plataforma",
     startUsingHdmn: "Comienza a Usar HDMN",
     learnMore: "Aprende Más",
+    
+    // Sidebar interactive translations
+    whatsYourRole: "¿Cuál es tu rol?",
+    selectYourProfile: "Selecciona tu perfil",
+    howDoYouWantAccess: "¿Cómo quieres acceder?",
+    chooseUserType: "Elige tu tipo de usuario",
+    whatBestDescribes: "¿Qué describe mejor tu situación?",
+    clickToExplore: "Haz clic para explorar",
+    accessForResidents: "Acceso para residentes",
+    portalForCompanies: "Portal para empresas",
+    propertyManagement: "Gestión de propiedades",
+    individualServices: "Servicios individuales",
   },
   en: {
     // Common
@@ -1213,6 +1225,18 @@ const baseTranslations = {
     benefit4: "Participate in platform governance",
     startUsingHdmn: "Start Using HDMN",
     learnMore: "Learn More",
+    
+    // Sidebar interactive translations
+    whatsYourRole: "What's your role?",
+    selectYourProfile: "Select your profile",
+    howDoYouWantAccess: "How do you want to access?",
+    chooseUserType: "Choose your user type",
+    whatBestDescribes: "What best describes your situation?",
+    clickToExplore: "Click to explore",
+    accessForResidents: "Access for residents",
+    portalForCompanies: "Portal for companies",
+    propertyManagement: "Property management",
+    individualServices: "Individual services",
   },
 };
 

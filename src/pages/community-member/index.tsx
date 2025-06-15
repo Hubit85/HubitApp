@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +33,7 @@ import {
   Star,
   Search,
   MapPin
-} from 'lucide-react';
+} from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
@@ -177,137 +178,137 @@ export default function CommunityMemberDashboard() {
   return (
     <>
       <Head>
-        <title>{t('communityMemberDashboard')} | {t('handyman')}</title>
-        <meta name='description' content={t('communityMemberDesc')} />
+        <title>{t("communityMemberDashboard")} | {t("handyman")}</title>
+        <meta name="description" content={t("communityMemberDesc")} />
       </Head>
       
       <Header />
       
-      <div className='flex h-screen bg-gray-100 pt-16'>
+      <div className="flex h-screen bg-gray-100 pt-16">
         {/* Sidebar */}
-        <div className='w-64 bg-gray-800 text-white shadow-lg'>
-          <div className='p-4'>
-            <h2 className='text-2xl font-bold mb-6'>{t('dashboard')}</h2>
-            <nav className='space-y-2'>
+        <div className="w-64 bg-gray-800 text-white shadow-lg">
+          <div className="p-4">
+            <h2 className="text-2xl font-bold mb-6">{t("dashboard")}</h2>
+            <nav className="space-y-2">
               <Button 
-                variant={activeTab === 'perfil' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('perfil')}
+                variant={activeTab === "perfil" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("perfil")}
               >
-                <User className='mr-2 h-5 w-5' />
-                {t('myProfile')}
+                <User className="mr-2 h-5 w-5" />
+                {t("myProfile")}
               </Button>
               <Button 
-                variant={activeTab === 'chat' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('chat')}
+                variant={activeTab === "chat" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("chat")}
               >
-                <MessageSquare className='mr-2 h-5 w-5' />
-                {t('communityChat')}
+                <MessageSquare className="mr-2 h-5 w-5" />
+                {t("communityChat")}
               </Button>
               <Button 
-                variant={activeTab === 'videoconference' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('videoconference')}
+                variant={activeTab === "videoconference" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("videoconference")}
               >
-                <Video className='mr-2 h-5 w-5' />
-                {t('scheduleVideoConference')}
+                <Video className="mr-2 h-5 w-5" />
+                {t("scheduleVideoConference")}
               </Button>
               <Button 
-                variant={activeTab === 'issue' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('issue')}
+                variant={activeTab === "issue" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("issue")}
               >
-                <AlertTriangle className='mr-2 h-5 w-5' />
-                {t('informIssue')}
+                <AlertTriangle className="mr-2 h-5 w-5" />
+                {t("informIssue")}
               </Button>
               <Button 
-                variant={activeTab === 'contracts' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('contracts')}
+                variant={activeTab === "contracts" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("contracts")}
               >
-                <FileText className='mr-2 h-5 w-5' />
-                {t('communityContracts')}
+                <FileText className="mr-2 h-5 w-5" />
+                {t("communityContracts")}
               </Button>
               <Button 
-                variant={activeTab === 'budget' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('budget')}
+                variant={activeTab === "budget" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("budget")}
               >
-                <Calculator className='mr-2 h-5 w-5' />
-                {t('communityBudget')}
+                <Calculator className="mr-2 h-5 w-5" />
+                {t("communityBudget")}
               </Button>
               <Button 
-                variant={activeTab === 'contact' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('contact')}
+                variant={activeTab === "contact" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("contact")}
               >
-                <Mail className='mr-2 h-5 w-5' />
-                {t('contactAdministrator')}
+                <Mail className="mr-2 h-5 w-5" />
+                {t("contactAdministrator")}
               </Button>
               <Button 
-                variant={activeTab === 'bid' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('bid')}
+                variant={activeTab === "bid" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("bid")}
               >
-                <ShoppingBag className='mr-2 h-5 w-5' />
-                {t('prepareBid')}
+                <ShoppingBag className="mr-2 h-5 w-5" />
+                {t("prepareBid")}
               </Button>
               <Button 
-                variant={activeTab === 'proveedores' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('proveedores')}
+                variant={activeTab === "proveedores" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("proveedores")}
               >
-                <Store className='mr-2 h-5 w-5' />
-                {t('serviceProviders')}
+                <Store className="mr-2 h-5 w-5" />
+                {t("serviceProviders")}
               </Button>
               <Button 
-                variant={activeTab === 'notificaciones' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('notificaciones')}
+                variant={activeTab === "notificaciones" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("notificaciones")}
               >
-                <Bell className='mr-2 h-5 w-5' />
-                {t('notifications')}
+                <Bell className="mr-2 h-5 w-5" />
+                {t("notifications")}
               </Button>
               <Button 
-                variant={activeTab === 'recomendaciones' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('recomendaciones')}
+                variant={activeTab === "recomendaciones" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("recomendaciones")}
               >
-                <ThumbsUp className='mr-2 h-5 w-5' />
-                {t('recommendations')}
+                <ThumbsUp className="mr-2 h-5 w-5" />
+                {t("recommendations")}
               </Button>
               <Button 
-                variant={activeTab === 'configuracion' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('configuracion')}
+                variant={activeTab === "configuracion" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("configuracion")}
               >
-                <Settings className='mr-2 h-5 w-5' />
-                {t('configuration')}
+                <Settings className="mr-2 h-5 w-5" />
+                {t("configuration")}
               </Button>
               <Button 
-                variant={activeTab === 'valoraciones' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('valoraciones')}
+                variant={activeTab === "valoraciones" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("valoraciones")}
               >
-                <ThumbsUp className='mr-2 h-5 w-5' />
-                {t('serviceRatings')}
+                <ThumbsUp className="mr-2 h-5 w-5" />
+                {t("serviceRatings")}
               </Button>
               <Button 
-                variant={activeTab === 'mejores' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('mejores')}
+                variant={activeTab === "mejores" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("mejores")}
               >
-                <Award className='mr-2 h-5 w-5' />
-                {t('bestRated')}
+                <Award className="mr-2 h-5 w-5" />
+                {t("bestRated")}
               </Button>
               <Button 
-                variant={activeTab === 'cuenta' ? 'default' : 'ghost'} 
-                className='w-full justify-start'
-                onClick={() => setActiveTab('cuenta')}
+                variant={activeTab === "cuenta" ? "default" : "ghost"} 
+                className="w-full justify-start"
+                onClick={() => setActiveTab("cuenta")}
               >
-                <CreditCard className='mr-2 h-5 w-5' />
-                {t('myAccount')}
+                <CreditCard className="mr-2 h-5 w-5" />
+                {t("myAccount")}
               </Button>
             </nav>
           </div>
@@ -331,6 +332,7 @@ export default function CommunityMemberDashboard() {
                activeTab === "configuracion" ? t("configuration") :
                activeTab === "valoraciones" ? t("serviceRatings") :
                activeTab === "mejores" ? t("bestRated") :
+               activeTab === "cuenta" ? t("myAccount") : /* Added missing case for "myAccount" */
                t("communityMemberDashboard")}
             </h1>
             
@@ -389,11 +391,11 @@ export default function CommunityMemberDashboard() {
                             <h3 className="font-medium text-lg mb-2">{t("contactPreferences")}</h3>
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-2">
-                                <input type="checkbox" id="contact-email" checked readOnly />
+                                <input type="checkbox" id="contact-email" defaultChecked readOnly />
                                 <Label htmlFor="contact-email" className="cursor-pointer">{t("email")}</Label>
                               </div>
                               <div className="flex items-center gap-2">
-                                <input type="checkbox" id="contact-phone" checked readOnly />
+                                <input type="checkbox" id="contact-phone" defaultChecked readOnly />
                                 <Label htmlFor="contact-phone" className="cursor-pointer">{t("phoneLabel")}</Label>
                               </div>
                               <div className="flex items-center gap-2">
@@ -462,7 +464,6 @@ export default function CommunityMemberDashboard() {
             {/* Community Chat Tab */}
             {activeTab === "chat" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("communityChat")}</h2>
                 <div className="grid grid-cols-1 gap-4">
                   {communityContacts.map((contact) => (
                     <Card key={contact.id} className="hover:bg-gray-50 transition-colors">
@@ -497,7 +498,6 @@ export default function CommunityMemberDashboard() {
             {/* Video Conference Tab */}
             {activeTab === "videoconference" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("scheduleVideoConference")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Card>
@@ -597,7 +597,6 @@ export default function CommunityMemberDashboard() {
             {/* Report Issue Tab */}
             {activeTab === "issue" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("informIssue")}</h2>
                 <Card>
                   <CardContent className="p-6">
                     <form className="space-y-6">
@@ -649,7 +648,6 @@ export default function CommunityMemberDashboard() {
             {/* Community Contracts Tab */}
             {activeTab === "contracts" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("communityContracts")}</h2>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -689,7 +687,6 @@ export default function CommunityMemberDashboard() {
             {/* Community Budget Tab */}
             {activeTab === "budget" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("communityBudget")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <Card className="bg-green-50">
                     <CardContent className="p-4">
@@ -785,7 +782,6 @@ export default function CommunityMemberDashboard() {
             {/* Contact Administrator Tab */}
             {activeTab === "contact" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("contactAdministrator")}</h2>
                 <Card>
                   <CardContent className="p-6">
                     <div className="mb-6">
@@ -840,7 +836,6 @@ export default function CommunityMemberDashboard() {
             {/* Prepare Bid Tab */}
             {activeTab === "bid" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("prepareBid")}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
@@ -973,7 +968,6 @@ export default function CommunityMemberDashboard() {
             {activeTab === "proveedores" && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">{t("serviceProviders")}</h2>
                   <div className="relative w-64">
                     <Input placeholder={t("searchProviders")} className="pr-10" />
                     <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -1026,8 +1020,6 @@ export default function CommunityMemberDashboard() {
             {/* Notificaciones Tab */}
             {activeTab === "notificaciones" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("notifications")}</h2>
-                
                 <div className="space-y-4">
                   <Card className="border-l-4 border-blue-500">
                     <CardContent className="p-4">
@@ -1085,8 +1077,6 @@ export default function CommunityMemberDashboard() {
             {/* Recomendaciones Tab */}
             {activeTab === "recomendaciones" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("recommendations")}</h2>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {favoriteProviders.map((provider) => (
                     <Card key={provider.id} className="overflow-hidden">
@@ -1138,8 +1128,6 @@ export default function CommunityMemberDashboard() {
             {/* Configuración Tab */}
             {activeTab === "configuracion" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("configuration")}</h2>
-                
                 <div className="space-y-6">
                   <Card>
                     <CardHeader>
@@ -1161,11 +1149,11 @@ export default function CommunityMemberDashboard() {
                           <div className="mt-2 space-y-2">
                             <div className="flex items-center justify-between">
                               <span>{t("emailNotifications")}</span>
-                              <input type="checkbox" checked readOnly />
+                              <input type="checkbox" defaultChecked readOnly />
                             </div>
                             <div className="flex items-center justify-between">
                               <span>{t("pushNotifications")}</span>
-                              <input type="checkbox" checked readOnly />
+                              <input type="checkbox" defaultChecked readOnly />
                             </div>
                             <div className="flex items-center justify-between">
                               <span>{t("smsNotifications")}</span>
@@ -1179,7 +1167,7 @@ export default function CommunityMemberDashboard() {
                           <div className="mt-2 space-y-2">
                             <div className="flex items-center justify-between">
                               <span>{t("profileVisibleToProviders")}</span>
-                              <input type="checkbox" checked readOnly />
+                              <input type="checkbox" defaultChecked readOnly />
                             </div>
                             <div className="flex items-center justify-between">
                               <span>{t("shareServiceHistory")}</span>
@@ -1226,6 +1214,44 @@ export default function CommunityMemberDashboard() {
                     </CardContent>
                   </Card>
                 </div>
+              </div>
+            )}
+
+            {/* Valoraciones de Servicios Tab */}
+            {activeTab === "valoraciones" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("ratePendingServices")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600">{t("noPendingServicesToRate")}</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("myPastRatings")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600">{t("noPastRatings")}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+
+            {/* Mejores Valorados Tab */}
+            {activeTab === "mejores" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <p className="text-gray-600">{t("bestRatedProvidersFeatureComingSoon")}</p>
+              </div>
+            )}
+
+            {/* Mi Cuenta Tab */}
+            {activeTab === "cuenta" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <p className="text-gray-600">{t("myAccountFeatureComingSoon")}</p>
               </div>
             )}
           </div>

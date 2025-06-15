@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChevronLeft, ChevronRight, Users, Building, Wrench, Star, TrendingUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, Building, Wrench, Star, TrendingUp, HelpCircle } from "lucide-react";
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -77,25 +77,36 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [luxuryHomes.length]);
 
-  // Subtle horizontal animation for the sidebar
+  // Enhanced horizontal animation for the sidebar with wider movement
   useEffect(() => {
     const interval = setInterval(() => {
       if (!sidebarOpen) {
         const sidebar = document.getElementById('granite-sidebar');
-        if (sidebar) {
-          sidebar.style.transform = 'translateX(6px)';
+        const questionIcon = document.getElementById('question-icon');
+        if (sidebar && questionIcon) {
+          // Wider movement animation
+          sidebar.style.transform = 'translateX(15px)';
+          questionIcon.style.opacity = '1';
+          questionIcon.style.transform = 'translateX(20px) scale(1.1)';
+          
           setTimeout(() => {
             sidebar.style.transform = 'translateX(0px)';
-          }, 400);
+            questionIcon.style.transform = 'translateX(0px) scale(1)';
+          }, 600);
+          
           setTimeout(() => {
-            sidebar.style.transform = 'translateX(-3px)';
-          }, 800);
-          setTimeout(() => {
-            sidebar.style.transform = 'translateX(0px)';
+            sidebar.style.transform = 'translateX(-8px)';
+            questionIcon.style.transform = 'translateX(-5px) scale(0.95)';
           }, 1200);
+          
+          setTimeout(() => {
+            sidebar.style.transform = 'translateX(0px)';
+            questionIcon.style.transform = 'translateX(0px) scale(1)';
+            questionIcon.style.opacity = '0.7';
+          }, 1800);
         }
       }
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [sidebarOpen]);
@@ -117,50 +128,86 @@ export default function Dashboard() {
       
       <Header />
       
-      {/* Thin Granite Sidebar */}
-      <motion.div
-        id="granite-sidebar"
-        className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-2 bg-stone-500 shadow-lg z-50 cursor-pointer"
-        style={{ 
-          background: 'linear-gradient(180deg, #78716c 0%, #57534e 50%, #44403c 100%)',
-          transition: 'transform 0.4s ease-in-out'
-        }}
-        onMouseEnter={() => setSidebarOpen(true)}
-        whileHover={{ width: '8px' }}
-        transition={{ duration: 0.2 }}
-      />
+      {/* Enhanced Thin Granite Sidebar with Question Icon */}
+      <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] z-50">
+        <motion.div
+          id="granite-sidebar"
+          className="relative w-3 h-full bg-stone-500 shadow-lg cursor-pointer"
+          style={{ 
+            background: 'linear-gradient(180deg, #78716c 0%, #57534e 50%, #44403c 100%)',
+            transition: 'transform 0.6s ease-in-out'
+          }}
+          onMouseEnter={() => setSidebarOpen(true)}
+          whileHover={{ width: '12px', boxShadow: '0 0 20px rgba(0,0,0,0.3)' }}
+          transition={{ duration: 0.3 }}
+        />
+        
+        {/* Floating Question Icon */}
+        <motion.div
+          id="question-icon"
+          className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg opacity-70"
+          style={{ 
+            transition: 'all 0.6s ease-in-out'
+          }}
+          whileHover={{ scale: 1.2 }}
+        >
+          <HelpCircle className="h-4 w-4 text-stone-600" />
+        </motion.div>
+        
+        {/* Interactive Text */}
+        <motion.div
+          className="absolute top-1/2 left-12 transform -translate-y-1/2 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg opacity-0 pointer-events-none"
+          animate={{ 
+            opacity: sidebarOpen ? 0 : 0.8,
+            x: sidebarOpen ? -20 : 0
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <p className="text-sm font-medium text-stone-700 whitespace-nowrap">
+            {t('whatsYourRole')}
+          </p>
+        </motion.div>
+      </div>
 
-      {/* Expanded Sidebar on Hover */}
+      {/* Enhanced Expanded Sidebar on Hover */}
       <motion.div
         className="fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-2xl z-40 overflow-hidden"
         initial={{ width: 0 }}
-        animate={{ width: sidebarOpen ? '320px' : 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+        animate={{ width: sidebarOpen ? '380px' : 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         onMouseLeave={() => setSidebarOpen(false)}
       >
         <div className="p-6 h-full flex flex-col">
-          <h3 className="text-lg font-bold text-gray-800 mb-6 border-b border-gray-200 pb-3">
-            {t('selectUserType')}
-          </h3>
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <HelpCircle className="h-6 w-6 text-stone-600" />
+              <h3 className="text-xl font-bold text-gray-800">
+                {t('whatsYourRole')}
+              </h3>
+            </div>
+            <p className="text-sm text-gray-500 border-b border-gray-200 pb-3">
+              {t('clickToExplore')}
+            </p>
+          </div>
           
           <div className="space-y-4 flex-1">
             {/* Community Member */}
             <motion.div
               className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
               onClick={() => router.push("/community-member")}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, x: 5 }}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                  <Users className="h-5 w-5 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <Users className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-800 group-hover:text-blue-700">
                     {t('communityMember')}
                   </h4>
                   <p className="text-sm text-gray-500">
-                    Acceso para residentes
+                    {t('accessForResidents')}
                   </p>
                 </div>
               </div>
@@ -170,19 +217,19 @@ export default function Dashboard() {
             <motion.div
               className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-200"
               onClick={() => router.push("/service-provider/dashboard")}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, x: 5 }}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                  <Wrench className="h-5 w-5 text-green-600" />
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  <Wrench className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-800 group-hover:text-green-700">
                     {t('serviceProvider')}
                   </h4>
                   <p className="text-sm text-gray-500">
-                    Portal para empresas
+                    {t('portalForCompanies')}
                   </p>
                 </div>
               </div>
@@ -192,19 +239,19 @@ export default function Dashboard() {
             <motion.div
               className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
               onClick={() => router.push("/administrador-fincas")}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, x: 5 }}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                  <Building className="h-5 w-5 text-purple-600" />
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                  <Building className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-800 group-hover:text-purple-700">
                     {t('estateAdministrator')}
                   </h4>
                   <p className="text-sm text-gray-500">
-                    Gestión de propiedades
+                    {t('propertyManagement')}
                   </p>
                 </div>
               </div>
@@ -214,19 +261,19 @@ export default function Dashboard() {
             <motion.div
               className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200"
               onClick={() => router.push("/particular")}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, x: 5 }}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-                  <Star className="h-5 w-5 text-orange-600" />
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                  <Star className="h-6 w-6 text-orange-600" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-800 group-hover:text-orange-700">
                     {t('particular')}
                   </h4>
                   <p className="text-sm text-gray-500">
-                    Servicios individuales
+                    {t('individualServices')}
                   </p>
                 </div>
               </div>
@@ -235,7 +282,7 @@ export default function Dashboard() {
 
           <div className="mt-6 pt-4 border-t border-gray-200">
             <p className="text-xs text-gray-400 text-center">
-              Selecciona tu tipo de usuario
+              {t('selectYourProfile')}
             </p>
           </div>
         </div>
@@ -307,201 +354,89 @@ export default function Dashboard() {
         />
         
         <main className='flex-1 container mx-auto px-4 py-8 sm:px-6 lg:px-8 z-10'>
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 max-w-7xl mx-auto'>
-            {/* Who We Are Card - Expandable on hover */}
-            <motion.div
-              onMouseEnter={() => setExpandedCard('whoWeAre')}
-              onMouseLeave={() => setExpandedCard(null)}
-              layout
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className='relative'
-            >
-              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
-                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
-                  <CardTitle className='text-2xl font-bold text-foreground'>{t('whoWeAre')}</CardTitle>
-                </CardHeader>
-                <motion.div
-                  initial={{ height: '150px' }}
-                  animate={{ 
-                    height: expandedCard === 'whoWeAre' ? 'auto' : '150px',
-                    overflow: expandedCard === 'whoWeAre' ? 'visible' : 'hidden'
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <CardContent className='text-foreground space-y-4 p-6'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 max-w-6xl mx-auto'>
+            {/* Who We Are Card - Always expanded */}
+            <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
+              <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
+                <CardTitle className='text-2xl font-bold text-foreground'>{t('whoWeAre')}</CardTitle>
+              </CardHeader>
+              <CardContent className='text-foreground space-y-4 p-6'>
+                <p className='text-lg leading-relaxed'>
+                  {t('whoWeAreIntro')}
+                </p>
+                
+                <div className='space-y-4'>
+                  <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                    <h3 className='font-bold text-xl mb-2'>{t('ourMission')}</h3>
                     <p className='text-lg leading-relaxed'>
-                      {t('whoWeAreIntro')}
+                      {t('ourMissionText')}
                     </p>
-                    
-                    <div className='space-y-4'>
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('ourMission')}</h3>
-                        <p className='text-lg leading-relaxed'>
-                          {t('ourMissionText')}
-                        </p>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('ourEcosystem')}</h3>
-                        <p className='text-lg leading-relaxed'>
-                          {t('ourEcosystemText')}
-                        </p>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('ourFundamentalValue')}</h3>
-                        <p className='text-lg leading-relaxed'>
-                          {t('ourFundamentalValueText')}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </motion.div>
-                {expandedCard !== 'whoWeAre' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
-                )}
-              </Card>
-            </motion.div>
+                  </div>
+                  
+                  <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                    <h3 className='font-bold text-xl mb-2'>{t('ourEcosystem')}</h3>
+                    <p className='text-lg leading-relaxed'>
+                      {t('ourEcosystemText')}
+                    </p>
+                  </div>
+                  
+                  <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                    <h3 className='font-bold text-xl mb-2'>{t('ourFundamentalValue')}</h3>
+                    <p className='text-lg leading-relaxed'>
+                      {t('ourFundamentalValueText')}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             
-            {/* How It Works Card - Expandable on hover */}
-            <motion.div
-              onMouseEnter={() => setExpandedCard('howItWorks')}
-              onMouseLeave={() => setExpandedCard(null)}
-              layout
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className='relative'
-            >
-              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
-                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
-                  <CardTitle className='text-2xl font-bold text-foreground'>{t('howItWorksTitle')}</CardTitle>
-                </CardHeader>
-                <motion.div
-                  initial={{ height: '150px' }}
-                  animate={{ 
-                    height: expandedCard === 'howItWorks' ? 'auto' : '150px',
-                    overflow: expandedCard === 'howItWorks' ? 'visible' : 'hidden'
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <CardContent className='text-foreground space-y-4 p-6'>
+            {/* How It Works Card - Always expanded */}
+            <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
+              <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
+                <CardTitle className='text-2xl font-bold text-foreground'>{t('howItWorksTitle')}</CardTitle>
+              </CardHeader>
+              <CardContent className='text-foreground space-y-4 p-6'>
+                <p className='text-lg leading-relaxed'>
+                  {t('howItWorksIntro')}
+                </p>
+                
+                <div className='space-y-4'>
+                  <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                    <h3 className='font-bold text-xl mb-2'>{t('forAdministrators')}</h3>
                     <p className='text-lg leading-relaxed'>
-                      {t('howItWorksIntro')}
+                      {t('forAdministratorsText')}
                     </p>
-                    
-                    <div className='space-y-4'>
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('forAdministrators')}</h3>
-                        <p className='text-lg leading-relaxed'>
-                          {t('forAdministratorsText')}
-                        </p>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('forServiceCompanies')}</h3>
-                        <p className='text-lg leading-relaxed'>
-                          {t('forServiceCompaniesText')}
-                        </p>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('forNeighbors')}</h3>
-                        <p className='text-lg leading-relaxed'>
-                          {t('forNeighborsText')}
-                        </p>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                        <h3 className='font-bold text-xl mb-2'>{t('ratingsSystem')}</h3>
-                        <p className='text-lg leading-relaxed'>
-                          {t('ratingsSystemText')}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className='bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700'>
-                      <p className='text-lg leading-relaxed font-medium'>
-                        {t('virtuousCircle')}
-                      </p>
-                    </div>
-                  </CardContent>
-                </motion.div>
-                {expandedCard !== 'howItWorks' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
-                )}
-              </Card>
-            </motion.div>
-            
-            {/* Our Greatest Achievements Card - Expandable on hover */}
-            <motion.div
-              onMouseEnter={() => setExpandedCard('achievements')}
-              onMouseLeave={() => setExpandedCard(null)}
-              layout
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className='relative'
-            >
-              <Card className='w-full shadow-lg bg-card rounded-lg overflow-hidden'>
-                <CardHeader className='bg-white dark:bg-[hsl(0,0%,20%)] border-b'>
-                  <CardTitle className='text-2xl font-bold text-foreground'>{t('ourAchievementsTitle')}</CardTitle>
-                </CardHeader>
-                <motion.div
-                  initial={{ height: '150px' }}
-                  animate={{ 
-                    height: expandedCard === 'achievements' ? 'auto' : '150px',
-                    overflow: expandedCard === 'achievements' ? 'visible' : 'hidden'
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <CardContent className='text-foreground space-y-4 p-6'>
+                  </div>
+                  
+                  <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                    <h3 className='font-bold text-xl mb-2'>{t('forServiceCompanies')}</h3>
                     <p className='text-lg leading-relaxed'>
-                      {t('ourAchievementsIntro')}
+                      {t('forServiceCompaniesText')}
                     </p>
-                    
-                    <div className='space-y-4'>
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700 flex items-center gap-4'>
-                        <div className='text-3xl font-bold text-blue-600'>500+</div>
-                        <div>
-                          <h3 className='font-bold text-lg'>{t('connectedCommunities')}</h3>
-                          <p>{t('connectedCommunitiesText')}</p>
-                        </div>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700 flex items-center gap-4'>
-                        <div className='text-3xl font-bold text-green-600'>300+</div>
-                        <div>
-                          <h3 className='font-bold text-lg'>{t('verifiedCompanies')}</h3>
-                          <p>{t('verifiedCompaniesText')}</p>
-                        </div>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700 flex items-center gap-4'>
-                        <div className='text-3xl font-bold text-purple-600'>95%</div>
-                        <div>
-                          <h3 className='font-bold text-lg'>{t('satisfactionIndex')}</h3>
-                          <p>{t('satisfactionIndexText')}</p>
-                        </div>
-                      </div>
-                      
-                      <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700 flex items-center gap-4'>
-                        <div className='text-3xl font-bold text-orange-600'>10,000+</div>
-                        <div>
-                          <h3 className='font-bold text-lg'>{t('resolvedIncidents')}</h3>
-                          <p>{t('resolvedIncidentsText')}</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
-                      <p className='text-lg leading-relaxed font-medium'>
-                        {t('achievementsConclusion')}
-                      </p>
-                    </div>
-                  </CardContent>
-                </motion.div>
-                {expandedCard !== 'achievements' && (
-                  <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card/80 to-transparent pointer-events-none' />
-                )}
-              </Card>
-            </motion.div>
+                  </div>
+                  
+                  <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                    <h3 className='font-bold text-xl mb-2'>{t('forNeighbors')}</h3>
+                    <p className='text-lg leading-relaxed'>
+                      {t('forNeighborsText')}
+                    </p>
+                  </div>
+                  
+                  <div className='bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-100 dark:border-gray-700'>
+                    <h3 className='font-bold text-xl mb-2'>{t('ratingsSystem')}</h3>
+                    <p className='text-lg leading-relaxed'>
+                      {t('ratingsSystemText')}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className='bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700'>
+                  <p className='text-lg leading-relaxed font-medium'>
+                    {t('virtuousCircle')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </main>
         
