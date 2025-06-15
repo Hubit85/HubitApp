@@ -36,6 +36,42 @@ const baseTranslations = {
     homeDescription: "Servicios profesionales para tu hogar",
     professionalServicesForHome: "Servicios profesionales para tu hogar",
     
+    // Who We Are section
+    whoWeAreTitle: "Quiénes Somos",
+    whoWeAreIntro: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
+    ourMission: "Nuestra Misión",
+    ourMissionText: "Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.",
+    ourEcosystem: "Nuestro Ecosistema",
+    ourEcosystemText: "Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.",
+    ourFundamentalValue: "Nuestro Valor Fundamental",
+    ourFundamentalValueText: "La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.",
+    
+    // How It Works section
+    howItWorksTitle: "Cómo Funciona",
+    howItWorksIntro: "Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:",
+    forAdministrators: "Para Administradores",
+    forAdministratorsText: "Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.",
+    forServiceCompanies: "Para Empresas de Servicios",
+    forServiceCompaniesText: "Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.",
+    forNeighbors: "Para Vecinos",
+    forNeighborsText: "Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.",
+    ratingsSystem: "Sistema de Valoraciones",
+    ratingsSystemText: "Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.",
+    virtuousCircle: "Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.",
+    
+    // Our Achievements section
+    ourAchievementsTitle: "Nuestros Logros",
+    ourAchievementsIntro: "Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:",
+    connectedCommunities: "Comunidades conectadas",
+    connectedCommunitiesText: "Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.",
+    verifiedCompanies: "Empresas verificadas",
+    verifiedCompaniesText: "Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.",
+    satisfactionIndex: "Índice de satisfacción",
+    satisfactionIndexText: "Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.",
+    resolvedIncidents: "Incidencias resueltas",
+    resolvedIncidentsText: "Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.",
+    achievementsConclusion: "Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.",
+    
     // Dashboard
     luxuryResidences: "Residencias de Lujo",
     luxuryResidencesDesc: "Comunidades de vecinos exclusivas",
@@ -823,6 +859,42 @@ const baseTranslations = {
     homeDescription: "Professional services for your home",
     professionalServicesForHome: "Professional services for your home",
     
+    // Who We Are section
+    whoWeAreTitle: "Quiénes Somos",
+    whoWeAreIntro: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
+    ourMission: "Nuestra Misión",
+    ourMissionText: "Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.",
+    ourEcosystem: "Nuestro Ecosistema",
+    ourEcosystemText: "Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos y tener voz en las decisiones comunitarias.",
+    ourFundamentalValue: "Nuestro Valor Fundamental",
+    ourFundamentalValueText: "La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.",
+    
+    // How It Works section
+    howItWorksTitle: "Cómo Funciona",
+    howItWorksIntro: "Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:",
+    forAdministrators: "Para Administradores",
+    forAdministratorsText: "Ofrecemos herramientas digitales que simplifican la gestión diaria, permitiendo identificar necesidades, solicitar presupuestos y coordinar servicios desde un único panel de control intuitivo.",
+    forServiceCompanies: "Para Empresas de Servicios",
+    forServiceCompaniesText: "Proporcionamos un escaparate digital donde mostrar su profesionalidad, recibir solicitudes de presupuestos y obtener valoraciones verificadas que impulsan su reputación.",
+    forNeighbors: "Para Vecinos",
+    forNeighborsText: "Facilitamos una plataforma donde pueden reportar incidencias, seguir su resolución en tiempo real y valorar los servicios recibidos con total transparencia.",
+    ratingsSystem: "Sistema de Valoraciones",
+    ratingsSystemText: "Implementamos un sistema de evaluación que permite a los vecinos calificar los servicios, generando confianza y ayudando a tomar decisiones informadas.",
+    virtuousCircle: "Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.",
+    
+    // Our Achievements section
+    ourAchievementsTitle: "Nuestros Logros",
+    ourAchievementsIntro: "Desde el lanzamiento de nuestra plataforma, hemos logrado importantes avances que demuestran el impacto positivo de nuestro enfoque en la gestión de comunidades:",
+    connectedCommunities: "Comunidades conectadas",
+    connectedCommunitiesText: "Nuestra plataforma ya está siendo utilizada por cientos de comunidades de vecinos en todo el país.",
+    verifiedCompanies: "Empresas verificadas",
+    verifiedCompaniesText: "Contamos con una amplia red de proveedores de servicios de calidad que han pasado por nuestro proceso de verificación.",
+    satisfactionIndex: "Índice de satisfacción",
+    satisfactionIndexText: "Las valoraciones de los usuarios muestran un alto nivel de satisfacción con la plataforma y los servicios.",
+    resolvedIncidents: "Incidencias resueltas",
+    resolvedIncidentsText: "Hemos facilitado la resolución eficiente de miles de incidencias en comunidades, mejorando la calidad de vida.",
+    achievementsConclusion: "Estos logros reflejan nuestro compromiso con la creación de un ecosistema transparente y eficiente que beneficia a todos los participantes: administradores, empresas de servicios y vecinos.",
+    
     // Dashboard
     luxuryResidences: "Luxury Residences",
     luxuryResidencesDesc: "Exclusive community properties",
@@ -1308,313 +1380,4 @@ const baseTranslations = {
     floorRevival: "Renovación de Suelos",
     laminateLords: "Señores del Laminado",
     repairRight: "Reparación Correcta",
-    marbleMasters: "Maestros del Mármol",
-    foundationFix: "Arreglo de Cimientos",
-    warmWalkers: "Caminantes Cálidos",
-    
-    // Roofing translations
-    completeRoofReplacement: "Reemplazo Completo de Techo",
-    roofRepair: "Reparación de Techo",
-    gutterInstallation: "Instalación de Canalones",
-    chimneyRepair: "Reparación de Chimenea",
-    ventInstallation: "Instalación de Ventilación",
-    metalRoofInstallation: "Instalación de Techo Metálico",
-    skylightInstallation: "Instalación de Tragaluz",
-    flatRoofCoating: "Recubrimiento de Techo Plano",
-    solarRoofInstallation: "Instalación de Techo Solar",
-    roofInspection: "Inspección de Techo",
-    
-    // Roofing companies
-    topRoofing: "Techado Superior",
-    leakStoppers: "Detener Fugas",
-    gutterGuards: "Guardianes de Canalones",
-    chimneyChamps: "Campeones de Chimeneas",
-    ventilationPros: "Profesionales de Ventilación",
-    metalMasters: "Maestros del Metal",
-    skyBrights: "Brillos del Cielo",
-    flatRoofExperts: "Expertos en Techos Planos",
-    solarRoofing: "Techado Solar",
-    roofInspectors: "Inspectores de Techos",
-    
-    // HVAC translations
-    acInstallation: "Instalación de Aire Acondicionado",
-    furnaceInstallation: "Instalación de Caldera",
-    hvacMaintenance: "Mantenimiento de Climatización",
-    ductCleaning: "Limpieza de Conductos",
-    heatPumpInstallation: "Instalación de Bomba de Calor",
-    thermostatInstallation: "Instalación de Termostato",
-    ventilationImprovement: "Mejora de Ventilación",
-    filterReplacement: "Reemplazo de Filtros",
-    zoneSystemInstallation: "Instalación de Sistema de Zonas",
-    refrigerantRecharge: "Recarga de Refrigerante",
-    
-    // HVAC companies
-    coolAirPros: "Profesionales de Aire Fresco",
-    heatMasters: "Maestros del Calor",
-    systemService: "Servicio de Sistemas",
-    freshAirDucts: "Conductos de Aire Fresco",
-    efficientHeat: "Calor Eficiente",
-    smartControl: "Control Inteligente",
-    airFlowExperts: "Expertos en Flujo de Aire",
-    cleanAirSystems: "Sistemas de Aire Limpio",
-    comfortZones: "Zonas de Confort",
-    coolantPros: "Profesionales de Refrigerante",
-    
-    // Carpentry translations
-    customCabinetry: "Ebanistería Personalizada",
-    deckConstruction: "Construcción de Terraza",
-    crownMolding: "Moldura de Corona",
-    customClosets: "Armarios Personalizados",
-    stairwayRenovation: "Renovación de Escalera",
-    doorInstallation: "Instalación de Puertas",
-    windowReplacement: "Reemplazo de Ventanas",
-    kitchenRemodel: "Remodelación de Cocina",
-    trimWork: "Trabajo de Molduras",
-    customShelving: "Estanterías Personalizadas",
-    
-    // Carpentry companies
-    cabinetCraftsmen: "Artesanos de Gabinetes",
-    deckBuilders: "Constructores de Terrazas",
-    crownKings: "Reyes de Coronas",
-    closetCreations: "Creaciones de Armarios",
-    stairMasters: "Maestros de Escaleras",
-    doorExperts: "Expertos en Puertas",
-    clearViewPros: "Profesionales de Vista Clara",
-    kitchenCraft: "Artesanía de Cocina",
-    trimArtisans: "Artesanos de Molduras",
-    shelfSolutions: "Soluciones de Estanterías",
-    
-    // Locksmith translations
-    lockRekeying: "Cambio de Llaves",
-    deadboltInstallation: "Instalación de Cerrojo",
-    smartLockInstallation: "Instalación de Cerradura Inteligente",
-    lockoutService: "Servicio de Apertura",
-    safeCombinationChange: "Cambio de Combinación de Caja Fuerte",
-    mailboxLockReplacement: "Reemplazo de Cerradura de Buzón",
-    highSecurityLocks: "Cerraduras de Alta Seguridad",
-    keylessSecurity: "Seguridad Sin Llaves",
-    cabinetLocks: "Cerraduras de Gabinetes",
-    completeHomeRekeying: "Cambio Completo de Llaves de Casa",
-    
-    // Locksmith companies
-    keyMasters: "Maestros de Llaves",
-    secureLocks: "Cerraduras Seguras",
-    smartSecurity: "Seguridad Inteligente",
-    quickAccess: "Acceso Rápido",
-    safeExperts: "Expertos en Cajas Fuertes",
-    mailSecure: "Correo Seguro",
-    fortressLocks: "Cerraduras Fortaleza",
-    modernLocks: "Cerraduras Modernas",
-    secureCabinets: "Gabinetes Seguros",
-    totalSecurity: "Seguridad Total",
-    
-    // Appliance repair translations
-    refrigeratorRepair: "Reparación de Refrigerador",
-    washerRepair: "Reparación de Lavadora",
-    dryerRepair: "Reparación de Secadora",
-    dishwasherRepair: "Reparación de Lavavajillas",
-    ovenRepair: "Reparación de Horno",
-    microwaveRepair: "Reparación de Microondas",
-    rangeHoodRepair: "Reparación de Campana Extractora",
-    iceMarkerRepair: "Reparación de Máquina de Hielo",
-    garbageDisposalRepair: "Reparación de Triturador de Basura",
-    wineCollerRepair: "Reparación de Vinoteca",
-    
-    // Appliance companies
-    coolFixers: "Reparadores Frescos",
-    washWizards: "Magos del Lavado",
-    dryerDocs: "Doctores de Secadoras",
-    dishDoctors: "Doctores de Lavavajillas",
-    ovenExperts: "Expertos en Hornos",
-    microTechs: "Técnicos de Microondas",
-    ventPros: "Profesionales de Ventilación",
-    iceFixers: "Reparadores de Hielo",
-    disposalDocs: "Doctores de Trituradores",
-    wineTechs: "Técnicos de Vino",
-    
-    // Landscaping translations
-    lawnDesign: "Diseño de Césped",
-    gardenInstallation: "Instalación de Jardín",
-    treeTriming: "Poda de Árboles",
-    outdoorKitchen: "Cocina Exterior",
-    irrigationSystem: "Sistema de Riego",
-    fenceInstallation: "Instalación de Cerca",
-    patioConstruction: "Construcción de Patio",
-    mulchingService: "Servicio de Acolchado",
-    retainingWall: "Muro de Contención",
-    waterFeature: "Fuente de Agua",
-    
-    // Landscaping companies
-    lawnArtists: "Artistas del Césped",
-    gardenGurus: "Gurús del Jardín",
-    treeTrimmers: "Podadores de Árboles",
-    outdoorLiving: "Vida Exterior",
-    waterWise: "Agua Inteligente",
-    boundaryPros: "Profesionales de Límites",
-    patioBuilders: "Constructores de Patios",
-    groundCovers: "Cubiertas de Suelo",
-    wallWorks: "Trabajos de Muros",
-    waterWonders: "Maravillas del Agua",
-    
-    // Moving services translations
-    localMove: "Mudanza Local",
-    longDistanceMove: "Mudanza de Larga Distancia",
-    furnitureDelivery: "Entrega de Muebles",
-    packingServices: "Servicios de Embalaje",
-    loadingServices: "Servicios de Carga",
-    officeRelocation: "Reubicación de Oficina",
-    pianoMoving: "Mudanza de Piano",
-    storageServices: "Servicios de Almacenamiento",
-    applianceMoving: "Mudanza de Electrodomésticos",
-    internationalShipping: "Envío Internacional",
-    
-    // Moving companies
-    cityMovers: "Mudanzas de Ciudad",
-    distanceMovers: "Mudanzas de Distancia",
-    furnitureShippers: "Transportistas de Muebles",
-    packPros: "Profesionales de Embalaje",
-    heavyLifters: "Levantadores Pesados",
-    businessMovers: "Mudanzas de Negocios",
-    pianoTransport: "Transporte de Pianos",
-    secureStorage: "Almacenamiento Seguro",
-    applianceShifters: "Transportistas de Electrodomésticos",
-    globalMovers: "Mudanzas Globales",
-    
-    // Networking translations
-    wifiSetup: "Configuración de WiFi",
-    homeNetworkInstallation: "Instalación de Red Doméstica",
-    routerConfiguration: "Configuración de Router",
-    smartHomeIntegration: "Integración de Casa Inteligente",
-    securityCameraInstallation: "Instalación de Cámaras de Seguridad",
-    meshNetworkSetup: "Configuración de Red Mesh",
-    tvMounting: "Montaje de TV",
-    homeTheaterSetup: "Configuración de Cine en Casa",
-    gamingNetworkOptimization: "Optimización de Red para Juegos",
-    officeNetworkSetup: "Configuración de Red de Oficina",
-    
-    // Networking companies
-    wifiWizards: "Magos del WiFi",
-    networkNinjas: "Ninjas de Redes",
-    routerPros: "Profesionales de Routers",
-    smartIntegrators: "Integradores Inteligentes",
-    securityVision: "Visión de Seguridad",
-    meshMasters: "Maestros de Mesh",
-    displayDoctors: "Doctores de Pantallas",
-    theaterTechs: "Técnicos de Cine",
-    gamingGurus: "Gurús de Juegos",
-    businessTech: "Tecnología de Negocios",
-    
-    // Additional service categories
-    brickWallConstruction: "Construcción de Muro de Ladrillo",
-    stonePathway: "Sendero de Piedra",
-    fireplaceConstruction: "Construcción de Chimenea",
-    solidStructures: "Estructuras Sólidas",
-    brickRepair: "Reparación de Ladrillos",
-    stoneFacade: "Fachada de Piedra",
-    chimneyMasters: "Maestros de Chimeneas",
-    stepRepair: "Reparación de Escalones",
-    
-    // Masonry companies
-    brickMasters: "Maestros del Ladrillo",
-    stoneCraftsmen: "Artesanos de Piedra",
-    fireplaceExperts: "Expertos en Chimeneas",
-    brickDoctors: "Doctores del Ladrillo",
-    facadePros: "Profesionales de Fachadas",
-    stepByStep: "Paso a Paso",
-    
-    // Roof tiles translations
-    clayTileReplacement: "Reemplazo de Tejas de Arcilla",
-    concreteTileInstallation: "Instalación de Tejas de Concreto",
-    tileRepair: "Reparación de Tejas",
-    completeRoofTileReplacement: "Reemplazo Completo de Tejas",
-    ridgeTileRepair: "Reparación de Tejas de Cumbrera",
-    valleyRepair: "Reparación de Limatesas",
-    slateTileInstallation: "Instalación de Tejas de Pizarra",
-    tileSealing: "Sellado de Tejas",
-    decorativeTileWork: "Trabajo de Tejas Decorativas",
-    historicTileRestoration: "Restauración de Tejas Históricas",
-    
-    // Roof tile companies
-    clayTilePros: "Profesionales de Tejas de Arcilla",
-    concreteMasters: "Maestros del Concreto",
-    tileFixers: "Reparadores de Tejas",
-    completeRoofing: "Techado Completo",
-    ridgeExperts: "Expertos en Cumbreras",
-    valleyPros: "Profesionales de Limatesas",
-    slateSpecialists: "Especialistas en Pizarra",
-    sealTeam: "Equipo de Sellado",
-    decorativePros: "Profesionales Decorativos",
-    heritageTiles: "Tejas Patrimoniales",
-    
-    // Community requests translations
-    bathroomSinkInstallation: "Instalación de Lavabo de Baño",
-    showerLeakRepair: "Reparación de Fuga de Ducha",
-    waterHeaterInstallation: "Instalación de Calentador de Agua",
-    electricalOutletInstallation: "Instalación de Enchufe Eléctrico",
-    ceilingFanWiring: "Cableado de Ventilador de Techo",
-    livingRoomPainting: "Pintura de Sala de Estar",
-    exteriorHousePainting: "Pintura Exterior de Casa",
-    kitchenCabinetPainting: "Pintura de Gabinetes de Cocina",
-    hardwoodFloorRepair: "Reparación de Suelo de Madera",
-    kitchenTileInstallation: "Instalación de Azulejos de Cocina",
-    basementCarpetInstallation: "Instalación de Alfombra de Sótano",
-    roofLeakRepair: "Reparación de Fuga de Techo",
-    gutterCleaning: "Limpieza de Canalones",
-    acMaintenance: "Mantenimiento de Aire Acondicionado",
-    furnaceReplacement: "Reemplazo de Caldera",
-    customShelvingInstallation: "Instalación de Estanterías Personalizadas",
-    deckBuilding: "Construcción de Terraza",
-    kitchenCabinetInstallation: "Instalación de Gabinetes de Cocina",
-    lockReplacement: "Reemplazo de Cerradura",
-    safeUnlocking: "Apertura de Caja Fuerte",
-    dishwasherInstallation: "Instalación de Lavavajillas",
-    gardenDesign: "Diseño de Jardín",
-    lawnCare: "Cuidado del Césped",
-    sprinklerSystemInstallation: "Instalación de Sistema de Aspersores",
-    apartmentMove: "Mudanza de Apartamento",
-    furnitureRearrangement: "Reorganización de Muebles",
-    crossCountryMove: "Mudanza Interestatal",
-    wifiNetworkSetup: "Configuración de Red WiFi",
-    smartHomeConfiguration: "Configuración de Casa Inteligente"
-  }
-};
-
-interface LanguageContextType {
-  language: Language;
-  setLanguage: (language: Language) => void;
-  t: (key: string) => string;
-}
-
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
-export function useLanguage() {
-  const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
-  }
-  return context;
-}
-
-interface LanguageProviderProps {
-  children: ReactNode;
-}
-
-export function LanguageProvider({ children }: LanguageProviderProps) {
-  const [language, setLanguage] = useState<Language>("es");
-
-  const t = (key: string): string => {
-    return baseTranslations[language][key as keyof typeof baseTranslations[typeof language]] || key;
-  };
-
-  const value = {
-    language,
-    setLanguage,
-    t
-  };
-
-  return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
-  );
-}
+    marbleMasters: "Maest
