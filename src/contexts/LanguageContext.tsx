@@ -652,7 +652,7 @@ const baseTranslations = {
     // Who We Are section
     whoWeAreTitle: "Who We Are",
     whoWeAreIntro: "We are a comprehensive platform that connects property managers, service companies, and neighbors to provide transparency in the needs of neighborhood communities.",
-    whoWeAreSummary: "Plataforma digital que conecta administradores de fincas, empresas de servicios y vecinos. Facilitamos la gestión transparente de comunidades mediante herramientas intuitivas, sistema de valoraciones verificadas y comunicación directa. Transformamos la administración tradicional en un ecosistema colaborativo donde todos se benefician: mejor gestión, servicios de calidad y comunidades más satisfechas.",
+    whoWeAreSummary: "Digital platform connecting property managers, service companies and neighbors. We facilitate transparent community management through intuitive tools, verified rating systems and direct communication. We transform traditional administration into a collaborative ecosystem where everyone benefits: better management, quality services and more satisfied communities.",
     ourMission: "Our Mission",
     ourMissionText: "Our mission is to facilitate communication, valuation, and management of services, helping companies expand their business while offering full transparency to communities.",
     ourEcosystem: "Our Ecosystem",
