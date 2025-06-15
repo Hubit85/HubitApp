@@ -3,7 +3,10 @@ import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin, Shovel, Construction, Brush, Sparkles, Palette, Leaf, Gem, Tv, Key, Package, Scissors, Utensils, User, CreditCard } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer, Trees, Truck, Wifi, Calendar, ClipboardList, Building, MapPin, Shovel, Construction, Brush, Sparkles, Palette, Leaf, Gem, Tv, Key, Package, Scissors, Utensils, User, CreditCard, Star, Award, Phone, Mail, Globe, Camera, Upload, CheckCircle, Clock, Users } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
@@ -32,7 +35,7 @@ interface CommunityRequest {
 }
 
 export default function ServiceProviderDashboard() {
-  const [activeTab, setActiveTab] = useState("plumbing");
+  const [activeTab, setActiveTab] = useState("overview");
   const { t } = useLanguage();
   const router = useRouter();
   
@@ -477,12 +480,12 @@ export default function ServiceProviderDashboard() {
                 {t('overview')}
               </Button>
               <Button 
-                variant={activeTab === 'cuenta' ? 'default' : 'ghost'} 
+                variant={activeTab === 'perfil' ? 'default' : 'ghost'} 
                 className='w-full justify-start'
-                onClick={() => setActiveTab('cuenta')}
+                onClick={() => setActiveTab('perfil')}
               >
                 <User className='mr-2 h-5 w-5' />
-                {t('myAccount')}
+                {t('myProfile')}
               </Button>
               <Button 
                 variant={activeTab === 'plumbing' ? 'default' : 'ghost'} 
@@ -589,112 +592,198 @@ export default function ServiceProviderDashboard() {
           <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">
               {activeTab === "overview" ? t("serviceProviderDashboard") : 
+               activeTab === "perfil" ? t("myProfile") :
                repairCategories.find(c => c.id === activeTab)?.name + " " + t("services")}
             </h1>
             
-            {/* Overview Tab */}
-            {activeTab === "overview" && (
+            {/* Mi Perfil Tab */}
+            {activeTab === "perfil" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("serviceOverview")}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {repairCategories.slice(0, 6).map((category) => (
-                    <Card key={category.id} className="hover:bg-gray-50 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                          {category.icon}
-                          <div>
-                            <h3 className="font-bold text-lg">{category.name}</h3>
-                            <p className="text-gray-600">
-                              {bidData[category.id as keyof typeof bidData]?.length || 0} {t("activeBids")}
-                            </p>
-                          </div>
+                <div className="flex flex-col lg:flex-row gap-8">
+                  {/* Company Profile Card */}
+                  <div className="lg:w-1/3">
+                    <Card>
+                      <CardContent className="p-6 flex flex-col items-center">
+                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-4 relative">
+                          <Building className="h-16 w-16 text-gray-500" />
+                          <Button 
+                            size="sm" 
+                            className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+                          >
+                            <Camera className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2 w-full"
-                          onClick={() => setActiveTab(category.id)}
-                        >
-                          {t("viewDetails")}
-                        </Button>
+                        <h2 className="text-xl font-bold text-center">Fontanería Express S.L.</h2>
+                        <p className="text-gray-500 mb-2 text-center">{t("serviceProvider")}</p>
+                        <div className="flex items-center mb-4">
+                          <div className="flex mr-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star 
+                                key={star} 
+                                className={`h-4 w-4 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-600">4.8 (124 {t("reviews")})</span>
+                        </div>
+                        <Button className="w-full mb-2">{t("editProfile")}</Button>
+                        <Button variant="outline" className="w-full">{t("viewPublicProfile")}</Button>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Service Category Tabs */}
-            {activeTab !== "overview" && (
-              <div className="grid grid-cols-1 gap-8">
-                {/* Bids Section */}
-                <Card className="shadow-md">
-                  <CardHeader className="bg-white border-b">
-                    <CardTitle className="text-xl flex items-center justify-between">
-                      <span>{t("activeBids")}</span>
-                      <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
-                        {categoryBids.length} {t("bids")}
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="divide-y">
-                      {categoryBids.map((bid) => (
-                        <div key={bid.id} className="p-4 hover:bg-gray-50 transition-colors">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-medium">{bid.company}</h3>
-                            <span className="text-lg font-bold text-blue-600">{bid.amount}</span>
+                    
+                    {/* Quick Stats */}
+                    <Card className="mt-4">
+                      <CardHeader>
+                        <CardTitle className="text-lg">{t("quickStats")}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">{t("completedJobs")}</span>
+                            <span className="font-bold">156</span>
                           </div>
-                          <p className="text-gray-600 mb-3">{bid.scope}</p>
-                          <div className="flex justify-end">
-                            <Button variant="outline" size="sm" className="mr-2">{t("editBid")}</Button>
-                            <Button size="sm">{t("contactClient")}</Button>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">{t("activeBids")}</span>
+                            <span className="font-bold">12</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">{t("responseTime")}</span>
+                            <span className="font-bold">2h</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">{t("memberSince")}</span>
+                            <span className="font-bold">2022</span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                {/* Community Requests Section */}
-                <Card className="shadow-md">
-                  <CardHeader className="bg-white border-b">
-                    <CardTitle className="text-xl flex items-center justify-between">
-                      <span>{t("communityRequests")}</span>
-                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                        {filteredRequests.length} {t("requests")}
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    {filteredRequests.length > 0 ? (
-                      <div className="divide-y">
-                        {filteredRequests.map((request) => (
-                          <div key={request.id} className="p-4 hover:bg-gray-50 transition-colors">
-                            <div className="flex justify-between items-start mb-2">
-                              <p className="text-gray-600">{request.description}</p>
-                              <span className="font-bold text-green-600">{request.budget}</span>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  {/* Company Information */}
+                  <div className="lg:w-2/3">
+                    <div className="space-y-6">
+                      {/* Basic Company Info */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{t("companyInformation")}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="company-name">{t("companyName")}</Label>
+                                <Input id="company-name" value="Fontanería Express S.L." readOnly className="bg-gray-50" />
+                              </div>
+                              <div>
+                                <Label htmlFor="tax-id">{t("taxId")}</Label>
+                                <Input id="tax-id" value="B-12345678" readOnly className="bg-gray-50" />
+                              </div>
                             </div>
-                            <div className="flex justify-end">
-                              <Button variant="outline" size="sm" className="mr-2">{t("viewDetails")}</Button>
-                              <Button size="sm">{t("submitBid")}</Button>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="phone">{t("phoneLabel")}</Label>
+                                <Input id="phone" value="+34 912 345 678" readOnly className="bg-gray-50" />
+                              </div>
+                              <div>
+                                <Label htmlFor="email">{t("emailLabel")}</Label>
+                                <Input id="email" value="info@fontaneriaexpress.com" readOnly className="bg-gray-50" />
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="address">{t("businessAddress")}</Label>
+                              <Input id="address" value="Calle Mayor 123, 28001 Madrid, España" readOnly className="bg-gray-50" />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="website">{t("website")}</Label>
+                              <Input id="website" value="www.fontaneriaexpress.com" readOnly className="bg-gray-50" />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="description">{t("companyDescription")}</Label>
+                              <Textarea 
+                                id="description" 
+                                value="Empresa especializada en servicios de fontanería con más de 15 años de experiencia. Ofrecemos servicios 24/7 para emergencias y trabajamos con las mejores marcas del mercado."
+                                readOnly 
+                                className="bg-gray-50"
+                                rows={3}
+                              />
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-8 text-center text-gray-500">
-                        <p>{t("noRequests")}</p>
-                        <Button variant="outline" className="mt-4">{t("browseAllRequests")}</Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+                        </CardContent>
+                      </Card>
+                      
+                      {/* Services Offered */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{t("servicesOffered")}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <Badge className="justify-center p-2">
+                              <Droplet className="mr-1 h-4 w-4" />
+                              {t("plumbing")}
+                            </Badge>
+                            <Badge className="justify-center p-2">
+                              <Wrench className="mr-1 h-4 w-4" />
+                              {t("applianceRepair")}
+                            </Badge>
+                            <Badge className="justify-center p-2">
+                              <Home className="mr-1 h-4 w-4" />
+                              {t("bathroomRenovation")}
+                            </Badge>
+                            <Badge className="justify-center p-2">
+                              <Thermometer className="mr-1 h-4 w-4" />
+                              {t("waterHeating")}
+                            </Badge>
+                            <Badge className="justify-center p-2">
+                              <Clock className="mr-1 h-4 w-4" />
+                              {t("emergencyService")}
+                            </Badge>
+                            <Badge className="justify-center p-2">
+                              <CheckCircle className="mr-1 h-4 w-4" />
+                              {t("maintenance")}
+                            </Badge>
+                          </div>
+                          <Button variant="outline" className="mt-4 w-full">{t("editServices")}</Button>
+                        </CardContent>
+                      </Card>
+                      
+                      {/* Certifications & Licenses */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{t("certificationsLicenses")}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center">
+                                <Award className="h-5 w-5 text-blue-600 mr-3" />
+                                <div>
+                                  <h4 className="font-medium">{t("professionalLicense")}</h4>
+                                  <p className="text-sm text-gray-500">{t("validUntil")}: 12/2025</p>
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="bg-green-100 text-green-800">
+                                {t("verified")}
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center">
+                                <Award className="h-5 w-5 text-blue-600 mr-3" />
+                                <div>
+                                  <h4 className="font-medium">{t("insuranceCertificate")}</h4>
+                                  <p className="text-sm text-gray-500">{t("coverage")}: €500,000</p>
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="bg-green-100 text-green-800">
+                                {t("verified")}
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center">
+                                <Award className="h-5 w-
