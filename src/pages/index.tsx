@@ -33,7 +33,7 @@ export default function Home() {
           
           <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
             <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
-              {t("handyman")}
+              {t("hubit")}
             </h1>
             <p className="text-xl md:text-2xl text-white drop-shadow-md">
               {t("professionalServicesForHome")}
@@ -355,22 +355,22 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              {/* HDMN Token */}
+              {/* HBIT Token */}
               <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors bg-gradient-to-br from-green-50 to-emerald-50">
                 <CardHeader className="text-center">
                   <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
                     <Star className="h-8 w-8 text-green-600" />
                   </div>
                   <CardTitle className="text-2xl font-bold text-gray-900">
-                    {t("handymanToken")}
+                    {t("hubitToken")}
                   </CardTitle>
                   <div className="text-sm font-mono bg-green-200 text-green-800 px-3 py-1 rounded-full inline-block mt-2">
-                    HDMN
+                    HBIT
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 text-center mb-4">
-                    {t("hdmnDescription")}
+                    {t("hbitDescription")}
                   </p>
                   <div className="text-center">
                     <div className="text-sm text-green-600 font-semibold">
@@ -408,19 +408,19 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Cómo Comprar HDMN Section */}
+        {/* Cómo Comprar HBIT Section */}
         <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {t("howToBuyHdmnTitle")}
+                {t("howToBuyHbitTitle")}
               </h2>
               <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                {t("howToBuyHdmnIntro")}
+                {t("howToBuyHbitIntro")}
               </p>
             </div>
 
-            {/* Pasos para comprar HDMN */}
+            {/* Pasos para comprar HBIT */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
               {/* Paso 1 */}
               <div className="relative">
@@ -524,10 +524,10 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Beneficios de HDMN */}
+            {/* Beneficios de HBIT */}
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-8">
               <h3 className="text-3xl font-bold text-gray-900 text-center mb-8">
-                {t("hdmnBenefits")}
+                {t("hbitBenefits")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="text-center">
@@ -563,7 +563,7 @@ export default function Home() {
                     size="lg" 
                     className="text-lg px-8 py-6 bg-green-600 text-white hover:bg-green-700"
                   >
-                    {t("startUsingHdmn")}
+                    {t("startUsingHbit")}
                   </Button>
                   <Button 
                     size="lg" 

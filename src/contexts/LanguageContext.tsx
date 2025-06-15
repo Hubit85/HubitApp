@@ -26,7 +26,7 @@ const baseTranslations = {
     signOut: "Cerrar sesión",
     languageEs: "Español",
     languageEn: "Inglés",
-    handyman: "HANDYMAN",
+    hubit: "HUBIT",
     login: "Iniciar sesión",
     register: "Registrarse",
     welcomeBack: "Bienvenido de nuevo",
@@ -47,9 +47,9 @@ const baseTranslations = {
     alreadyHaveAccount: "¿Ya tienes una cuenta?",
     
     // Home page
-    homeTitle: "HANDYMAN - Servicios profesionales",
-    homeDescription: "Servicios profesionales para tu hogar",
-    professionalServicesForHome: "Servicios profesionales para tu hogar",
+    homeTitle: "HUBIT - Hub de servicios comunitarios",
+    homeDescription: "Hub de servicios comunitarios con pagos en criptomonedas",
+    professionalServicesForHome: "Hub de servicios comunitarios",
     
     // Who We Are section
     whoWeAreTitle: "Quiénes Somos",
@@ -582,7 +582,7 @@ const baseTranslations = {
     gutterInstallation: "Instalación de Canalones",
     chimneyRepair: "Reparación de Chimenea",
 
-    // Payment System & HDMN Token Translations
+    // Payment System & HBIT Token Translations
     paymentSystemTitle: "Sistema de Pagos Híbrido",
     paymentSystemIntro: "Nuestra plataforma ofrece un sistema de pagos flexible, combinando métodos tradicionales y criptomonedas para tu conveniencia.",
     fiatCurrencies: "Monedas FIAT",
@@ -593,27 +593,27 @@ const baseTranslations = {
     ethereum: "Ethereum (ETH)",
     binanceCoin: "Binance Coin (BNB)",
     solana: "Solana (SOL)",
-    handymanToken: "Handyman Token (HDMN)",
-    hdmnDescription: "Utiliza nuestro token nativo HDMN, basado en la red Solana, para obtener beneficios exclusivos y descuentos.",
+    hubitToken: "Hubit Token (HBIT)",
+    hbitDescription: "Utiliza nuestro token nativo HBIT, basado en la red Solana, para obtener beneficios exclusivos y descuentos en nuestra red de servicios comunitarios.",
     acceptedPayments: "Tipos de Pagos Aceptados",
     p2pPayments: "P2P (Persona a Persona)",
     p2bPayments: "P2B (Persona a Empresa)",
     b2pPayments: "B2P (Empresa a Persona)",
     b2bPayments: "B2B (Empresa a Empresa)",
-    howToBuyHdmnTitle: "Cómo Comprar Tokens HDMN",
-    howToBuyHdmnIntro: "Adquiere tus tokens HDMN de forma sencilla y segura siguiendo estos tres pasos:",
+    howToBuyHbitTitle: "Cómo Comprar Tokens HBIT",
+    howToBuyHbitIntro: "Adquiere tus tokens HBIT de forma sencilla y segura siguiendo estos tres pasos:",
     step1Title: "Configura una Billetera Solana",
     step1Description: "Crea o utiliza una billetera compatible con Solana (ej. Phantom, Solflare) para almacenar tus tokens.",
     step2Title: "Adquiere SOL",
     step2Description: "Compra SOL (la moneda nativa de Solana) en un exchange y envíalo a tu billetera Solana.",
-    step3Title: "Intercambia SOL por HDMN",
-    step3Description: "Utiliza un exchange descentralizado (DEX) en la red Solana (ej. Raydium, Jupiter) para intercambiar tus SOL por tokens HDMN.",
-    hdmnBenefits: "Beneficios de Usar HDMN",
+    step3Title: "Intercambia SOL por HBIT",
+    step3Description: "Utiliza un exchange descentralizado (DEX) en la red Solana (ej. Raydium, Jupiter) para intercambiar tus SOL por tokens HBIT.",
+    hbitBenefits: "Beneficios de Usar HBIT",
     benefit1: "Descuentos exclusivos en servicios",
     benefit2: "Procesamiento de transacciones más rápido",
     benefit3: "Acceso a funciones premium",
     benefit4: "Participa en la gobernanza de la plataforma",
-    startUsingHdmn: "Comienza a Usar HDMN",
+    startUsingHbit: "Comienza a Usar HBIT",
     learnMore: "Aprende Más",
     
     // Sidebar interactive translations
@@ -636,7 +636,7 @@ const baseTranslations = {
     signOut: "Sign Out",
     languageEs: "Spanish",
     languageEn: "English",
-    handyman: "HANDYMAN",
+    hubit: "HUBIT",
     login: "Login",
     register: "Register",
     welcomeBack: "Welcome back",
@@ -657,9 +657,9 @@ const baseTranslations = {
     alreadyHaveAccount: "Already have an account?",
 
     // Home page
-    homeTitle: "HANDYMAN - Professional Services",
-    homeDescription: "Professional services for your home",
-    professionalServicesForHome: "Professional services for your home",
+    homeTitle: "HUBIT - Community Services Hub",
+    homeDescription: "Community services hub with cryptocurrency payments",
+    professionalServicesForHome: "Community services hub",
 
     // Who We Are section
     whoWeAreTitle: "Who We Are",
@@ -1192,7 +1192,7 @@ const baseTranslations = {
     gutterInstallation: "Gutter Installation",
     chimneyRepair: "Chimney Repair",
 
-    // Payment System & HDMN Token Translations
+    // Payment System & HBIT Token Translations
     paymentSystemTitle: "Hybrid Payment System",
     paymentSystemIntro: "Our platform offers a flexible payment system, combining traditional methods and cryptocurrencies for your convenience.",
     fiatCurrencies: "FIAT Currencies",
@@ -1203,27 +1203,27 @@ const baseTranslations = {
     ethereum: "Ethereum (ETH)",
     binanceCoin: "Binance Coin (BNB)",
     solana: "Solana (SOL)",
-    handymanToken: "Handyman Token (HDMN)",
-    hdmnDescription: "Use our native HDMN token, built on the Solana network, for exclusive benefits and discounts.",
+    hubitToken: "Hubit Token (HBIT)",
+    hbitDescription: "Use our native HBIT token, built on the Solana network, for exclusive benefits and discounts in our community services network.",
     acceptedPayments: "Accepted Payment Types",
     p2pPayments: "P2P (Peer-to-Peer)",
     p2bPayments: "P2B (Peer-to-Business)",
     b2pPayments: "B2P (Business-to-Peer)",
     b2bPayments: "B2B (Business-to-Business)",
-    howToBuyHdmnTitle: "How to Buy HDMN Tokens",
-    howToBuyHdmnIntro: "Get your HDMN tokens easily and securely by following these three steps:",
+    howToBuyHbitTitle: "How to Buy HBIT Tokens",
+    howToBuyHbitIntro: "Get your HBIT tokens easily and securely by following these three steps:",
     step1Title: "Set Up a Solana Wallet",
     step1Description: "Create or use an existing Solana-compatible wallet (e.g., Phantom, Solflare) to store your tokens.",
     step2Title: "Acquire SOL",
     step2Description: "Buy SOL (Solana's native currency) from an exchange and send it to your Solana wallet.",
-    step3Title: "Swap SOL for HDMN",
-    step3Description: "Use a decentralized exchange (DEX) on the Solana network (e.g., Raydium, Jupiter) to swap your SOL for HDMN tokens.",
-    hdmnBenefits: "Benefits of Using HDMN",
+    step3Title: "Swap SOL for HBIT",
+    step3Description: "Use a decentralized exchange (DEX) on the Solana network (e.g., Raydium, Jupiter) to swap your SOL for HBIT tokens.",
+    hbitBenefits: "Benefits of Using HBIT",
     benefit1: "Exclusive discounts on services",
     benefit2: "Faster transaction processing",
     benefit3: "Access to premium features",
     benefit4: "Participate in platform governance",
-    startUsingHdmn: "Start Using HDMN",
+    startUsingHbit: "Start Using HBIT",
     learnMore: "Learn More",
     
     // Sidebar interactive translations
