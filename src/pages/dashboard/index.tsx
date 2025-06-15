@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
@@ -78,6 +77,29 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [luxuryHomes.length]);
 
+  // Subtle horizontal animation for the sidebar
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!sidebarOpen) {
+        const sidebar = document.getElementById('granite-sidebar');
+        if (sidebar) {
+          sidebar.style.transform = 'translateX(6px)';
+          setTimeout(() => {
+            sidebar.style.transform = 'translateX(0px)';
+          }, 400);
+          setTimeout(() => {
+            sidebar.style.transform = 'translateX(-3px)';
+          }, 800);
+          setTimeout(() => {
+            sidebar.style.transform = 'translateX(0px)';
+          }, 1200);
+        }
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [sidebarOpen]);
+
   const goToNextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % luxuryHomes.length);
   };
@@ -94,6 +116,130 @@ export default function Dashboard() {
       </Head>
       
       <Header />
+      
+      {/* Thin Granite Sidebar */}
+      <motion.div
+        id="granite-sidebar"
+        className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-2 bg-stone-500 shadow-lg z-50 cursor-pointer"
+        style={{ 
+          background: 'linear-gradient(180deg, #78716c 0%, #57534e 50%, #44403c 100%)',
+          transition: 'transform 0.4s ease-in-out'
+        }}
+        onMouseEnter={() => setSidebarOpen(true)}
+        whileHover={{ width: '8px' }}
+        transition={{ duration: 0.2 }}
+      />
+
+      {/* Expanded Sidebar on Hover */}
+      <motion.div
+        className="fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-2xl z-40 overflow-hidden"
+        initial={{ width: 0 }}
+        animate={{ width: sidebarOpen ? '320px' : 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        onMouseLeave={() => setSidebarOpen(false)}
+      >
+        <div className="p-6 h-full flex flex-col">
+          <h3 className="text-lg font-bold text-gray-800 mb-6 border-b border-gray-200 pb-3">
+            {t('selectUserType')}
+          </h3>
+          
+          <div className="space-y-4 flex-1">
+            {/* Community Member */}
+            <motion.div
+              className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+              onClick={() => router.push("/community-member")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800 group-hover:text-blue-700">
+                    {t('communityMember')}
+                  </h4>
+                  <p className="text-sm text-gray-500">
+                    Acceso para residentes
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Service Provider */}
+            <motion.div
+              className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-200"
+              onClick={() => router.push("/service-provider/dashboard")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  <Wrench className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800 group-hover:text-green-700">
+                    {t('serviceProvider')}
+                  </h4>
+                  <p className="text-sm text-gray-500">
+                    Portal para empresas
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Estate Administrator */}
+            <motion.div
+              className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
+              onClick={() => router.push("/administrador-fincas")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                  <Building className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800 group-hover:text-purple-700">
+                    {t('estateAdministrator')}
+                  </h4>
+                  <p className="text-sm text-gray-500">
+                    Gestión de propiedades
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Private Individual */}
+            <motion.div
+              className="group cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-200"
+              onClick={() => router.push("/particular")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                  <Star className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800 group-hover:text-orange-700">
+                    {t('particular')}
+                  </h4>
+                  <p className="text-sm text-gray-500">
+                    Servicios individuales
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-400 text-center">
+              Selecciona tu tipo de usuario
+            </p>
+          </div>
+        </div>
+      </motion.div>
       
       <main className='min-h-screen bg-gray-100 pt-16'>
         <div className='container mx-auto px-4 py-8'>
