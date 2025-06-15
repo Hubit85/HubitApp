@@ -1,7 +1,22 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
 
+import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
+
+// Define the Language type
 type Language = "es" | "en";
 
+// Define the shape of the context
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (language: Language) => void;
+  t: (key: string, langOverride?: Language) => string;
+}
+
+// Create the context with a default undefined value
+export const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
+
+// Define translations
 const baseTranslations = {
   es: {
     // Common
@@ -101,7 +116,7 @@ const baseTranslations = {
     communityNews: "Noticias de la Comunidad",
     maintenance: "Mantenimiento",
     cleaning: "Limpieza",
-    security: "Seguridad",
+    security: "Seguridad", // First instance of security
     gardening: "Jardinería",
     plumbing: "Fontanería",
     electrical: "Electricidad",
@@ -115,7 +130,7 @@ const baseTranslations = {
     earnings: "Ganancias",
     schedule: "Horario",
     clients: "Clientes",
-    reviews: "Reseñas",
+    // reviews: "Reseñas", // This key is duplicated below, removing this one. The one under "Particular Dashboard" seems more specific.
     addService: "Añadir Servicio",
     manageServices: "Gestionar Servicios",
     
@@ -223,7 +238,7 @@ const baseTranslations = {
     urgentToday: "Urgente - Hoy",
     requestQuotes: "Solicitar Cotizaciones",
     searchProviders: "Buscar proveedores...",
-    reviews: "reseñas",
+    reviews: "reseñas", // This is the specific 'reviews' for providers
     viewProfile: "Ver Perfil",
     request: "Solicitar",
     loadMoreProviders: "Cargar Más Proveedores",
@@ -263,7 +278,7 @@ const baseTranslations = {
     privacy: "Privacidad",
     profileVisibleToProviders: "Perfil Visible a Proveedores",
     shareServiceHistory: "Compartir Historial de Servicios",
-    security: "Seguridad",
+    accountSecurity: "Seguridad de Cuenta", // Renamed from 'security'
     changePassword: "Cambiar Contraseña",
     setupTwoFactor: "Configurar Autenticación de Dos Factores",
     manageConnectedDevices: "Gestionar Dispositivos Conectados",
@@ -924,7 +939,7 @@ const baseTranslations = {
     communityNews: "Community News",
     maintenance: "Maintenance",
     cleaning: "Cleaning",
-    security: "Security",
+    security: "Security", // First instance of security
     gardening: "Gardening",
     plumbing: "Plumbing",
     electrical: "Electrical",
@@ -938,7 +953,7 @@ const baseTranslations = {
     earnings: "Earnings",
     schedule: "Schedule",
     clients: "Clients",
-    reviews: "Reviews",
+    // reviews: "Reviews", // Duplicated, see below
     addService: "Add Service",
     manageServices: "Manage Services",
     
@@ -1046,7 +1061,7 @@ const baseTranslations = {
     urgentToday: "Urgent - Today",
     requestQuotes: "Request Quotes",
     searchProviders: "Search providers...",
-    reviews: "reviews",
+    reviews: "reviews", // Specific 'reviews' for providers
     viewProfile: "View Profile",
     request: "Request",
     loadMoreProviders: "Load More Providers",
@@ -1086,7 +1101,7 @@ const baseTranslations = {
     privacy: "Privacy",
     profileVisibleToProviders: "Profile Visible to Providers",
     shareServiceHistory: "Share Service History",
-    security: "Security",
+    accountSecurity: "Account Security", // Renamed from 'security'
     changePassword: "Change Password",
     setupTwoFactor: "Setup Two-Factor Authentication",
     manageConnectedDevices: "Manage Connected Devices",
@@ -1648,9 +1663,37 @@ const baseTranslations = {
     crossCountryMove: "Cross Country Move",
     wifiNetworkSetup: "WiFi Network Setup",
     smartHomeConfiguration: "Smart Home Configuration"
-  } // Correctly closes the 'en' translations object. No comma as it's the last property.
-}; // Correctly closes the 'baseTranslations' object.
+  }
+};
 
-export const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined
-);
+// Define the Provider component
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [language, setLanguage] = useState<Language>("es"); // Default language
+
+  const t = useCallback(
+    (key: string, langOverride?: Language): string => {
+      const currentLang = langOverride || language;
+      // Ensure that baseTranslations[currentLang] is treated as Record<string, string>
+      // and that all keys exist or a fallback is provided.
+      const translationsByLang = baseTranslations[currentLang] as Record<string, string | undefined>;
+      const translation = translationsByLang[key];
+      return translation || key; // Return key if translation not found
+    },
+    [language]
+  );
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+// Define the custom hook to use the context
+export const useLanguage = (): LanguageContextType => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error("useLanguage must be used within a LanguageProvider");
+  }
+  return context;
+};
