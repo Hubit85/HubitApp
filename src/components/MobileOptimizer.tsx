@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+
+import { useEffect, useState, useCallback, useRef } from "react";
 
 interface MobileOptimizerProps {
   children: React.ReactNode;
@@ -11,65 +12,39 @@ export default function MobileOptimizer({
   enablePinchZoom = true, 
   className = "" 
 }: MobileOptimizerProps) {
-  const [isIOSState, setIsIOSState] = useState(false); // Renamed to avoid conflict
+  const [isIOS, setIsIOS] = useState(false);
   const [isDuckDuckGo, setIsDuckDuckGo] = useState(false);
   const [scale, setScale] = useState(1);
   const [lastTouchDistance, setLastTouchDistance] = useState(0);
+  const [isZooming, setIsZooming] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleGestureStart = useCallback((e: Event) => {
-    if (!enablePinchZoom) {
-      e.preventDefault();
-    }
-  }, [enablePinchZoom]);
-
-  const handleGestureChange = useCallback((e: Event) => {
-    if (!enablePinchZoom) {
-      e.preventDefault();
-    }
-  }, [enablePinchZoom]);
-
-  const handleGestureEnd = useCallback((e: Event) => {
-    if (!enablePinchZoom) {
-      e.preventDefault();
-    }
-  }, [enablePinchZoom]);
-
+  // Detectar dispositivos y navegadores
   useEffect(() => {
-    // Detectar iOS
-    const currentIsIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    setIsIOSState(currentIsIOS);
+    const userAgent = navigator.userAgent;
+    const isIOSDevice = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream;
+    const isDuckDuckGoBrowser = /DuckDuckGo/.test(userAgent);
+    
+    setIsIOS(isIOSDevice);
+    setIsDuckDuckGo(isDuckDuckGoBrowser);
 
-    // Detectar DuckDuckGo
-    const duckDuckGo = /DuckDuckGo/.test(navigator.userAgent);
-    setIsDuckDuckGo(duckDuckGo);
-
-    // Configurar viewport para iOS
-    if (currentIsIOS) {
-      const viewport = document.querySelector('meta[name=viewport]');
-      if (viewport) {
+    // Configurar viewport para dispositivos móviles
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport && enablePinchZoom) {
+      if (isIOSDevice) {
         viewport.setAttribute('content', 
           'width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5, user-scalable=yes, viewport-fit=cover'
         );
+      } else {
+        viewport.setAttribute('content', 
+          'width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5, user-scalable=yes'
+        );
       }
     }
+  }, [enablePinchZoom]);
 
-    // Prevenir zoom accidental en iOS
-    if (currentIsIOS) {
-      document.addEventListener('gesturestart', handleGestureStart, { passive: false });
-      document.addEventListener('gesturechange', handleGestureChange, { passive: false });
-      document.addEventListener('gestureend', handleGestureEnd, { passive: false });
-    }
-
-    return () => {
-      if (currentIsIOS) {
-        document.removeEventListener('gesturestart', handleGestureStart);
-        document.removeEventListener('gesturechange', handleGestureChange);
-        document.removeEventListener('gestureend', handleGestureEnd);
-      }
-    };
-  }, [handleGestureStart, handleGestureChange, handleGestureEnd]); // Removed iOS from dependencies
-
-  const getTouchDistance = (touches: React.TouchList) => {
+  // Calcular distancia entre dos puntos táctiles
+  const getTouchDistance = useCallback((touches: TouchList) => {
     if (touches.length < 2) return 0;
     
     const touch1 = touches[0];
@@ -79,17 +54,23 @@ export default function MobileOptimizer({
       Math.pow(touch2.clientX - touch1.clientX, 2) + 
       Math.pow(touch2.clientY - touch1.clientY, 2)
     );
-  };
+  }, []);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!enablePinchZoom || e.touches.length !== 2) return;
+  // Manejar inicio del gesto táctil
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    if (!enablePinchZoom) return;
     
-    const distance = getTouchDistance(e.touches);
-    setLastTouchDistance(distance);
-  };
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const distance = getTouchDistance(e.touches);
+      setLastTouchDistance(distance);
+      setIsZooming(true);
+    }
+  }, [enablePinchZoom, getTouchDistance]);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!enablePinchZoom || e.touches.length !== 2) return;
+  // Manejar movimiento del gesto táctil
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!enablePinchZoom || !isZooming || e.touches.length !== 2) return;
     
     e.preventDefault();
     
@@ -100,45 +81,109 @@ export default function MobileOptimizer({
       setScale(newScale);
     }
     setLastTouchDistance(distance);
-  };
+  }, [enablePinchZoom, isZooming, lastTouchDistance, scale, getTouchDistance]);
 
-  const handleTouchEnd = () => {
-    setLastTouchDistance(0);
-  };
-
-  const handleDoubleClick = () => {
-    if (enablePinchZoom) {
-      setScale(scale === 1 ? 2 : 1);
+  // Manejar fin del gesto táctil
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (!enablePinchZoom) return;
+    
+    if (e.touches.length < 2) {
+      setLastTouchDistance(0);
+      setIsZooming(false);
     }
-  };
+  }, [enablePinchZoom]);
+
+  // Manejar doble toque para zoom
+  const handleDoubleClick = useCallback(() => {
+    if (enablePinchZoom) {
+      setScale(prevScale => prevScale === 1 ? 2 : 1);
+    }
+  }, [enablePinchZoom]);
+
+  // Configurar event listeners
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !enablePinchZoom) return;
+
+    // Agregar event listeners con opciones específicas
+    const options = { passive: false };
+    
+    container.addEventListener('touchstart', handleTouchStart, options);
+    container.addEventListener('touchmove', handleTouchMove, options);
+    container.addEventListener('touchend', handleTouchEnd, options);
+    container.addEventListener('dblclick', handleDoubleClick);
+
+    // Prevenir gestos por defecto en iOS
+    if (isIOS) {
+      const preventGesture = (e: Event) => {
+        if (!enablePinchZoom) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('gesturestart', preventGesture, options);
+      document.addEventListener('gesturechange', preventGesture, options);
+      document.addEventListener('gestureend', preventGesture, options);
+
+      return () => {
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchmove', handleTouchMove);
+        container.removeEventListener('touchend', handleTouchEnd);
+        container.removeEventListener('dblclick', handleDoubleClick);
+        document.removeEventListener('gesturestart', preventGesture);
+        document.removeEventListener('gesturechange', preventGesture);
+        document.removeEventListener('gestureend', preventGesture);
+      };
+    }
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+      container.removeEventListener('dblclick', handleDoubleClick);
+    };
+  }, [enablePinchZoom, isIOS, handleTouchStart, handleTouchMove, handleTouchEnd, handleDoubleClick]);
+
+  // Resetear zoom con botón
+  const resetZoom = useCallback(() => {
+    setScale(1);
+  }, []);
 
   const containerClasses = [
     className,
     enablePinchZoom ? "pinch-zoom" : "touch-manipulation",
-    isIOSState ? "ios-scroll" : "", // Use renamed state variable
-    "transition-transform duration-200 ease-out"
+    isIOS ? "ios-scroll" : "",
+    "transition-transform duration-200 ease-out",
+    "overflow-hidden"
   ].filter(Boolean).join(" ");
 
   return (
     <div
+      ref={containerRef}
       className={containerClasses}
       style={{
         transform: enablePinchZoom ? `scale(${scale})` : undefined,
-        transformOrigin: "center center"
+        transformOrigin: "center center",
+        touchAction: enablePinchZoom ? "none" : "manipulation"
       }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onDoubleClick={handleDoubleClick}
     >
       {children}
       
-      {/* Indicador de compatibilidad (solo en desarrollo) */}
+      {/* Controles de zoom (solo en desarrollo) */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 right-4 bg-black/80 text-white text-xs p-2 rounded z-50">
-          <div>iOS: {isIOSState ? '✓' : '✗'}</div> {/* Use renamed state variable */}
+        <div className="fixed bottom-4 right-4 bg-black/90 text-white text-xs p-3 rounded-lg z-50 space-y-1">
+          <div>iOS: {isIOS ? '✓' : '✗'}</div>
           <div>DuckDuckGo: {isDuckDuckGo ? '✓' : '✗'}</div>
           <div>Zoom: {scale.toFixed(1)}x</div>
+          <div>Zooming: {isZooming ? '✓' : '✗'}</div>
+          {enablePinchZoom && scale !== 1 && (
+            <button 
+              onClick={resetZoom}
+              className="bg-white text-black px-2 py-1 rounded text-xs mt-1 w-full"
+            >
+              Reset Zoom
+            </button>
+          )}
         </div>
       )}
     </div>
