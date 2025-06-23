@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Calendar as CalendarIcon, ClipboardList, Building, Wrench } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
+import ZoomableSection from "@/components/ZoomableSection";
 
 // Coordenadas de Vizcaya, España
 const center = {
@@ -142,167 +143,169 @@ export default function AdministradorFincas() {
 
         {/* Main Content */}
         <div className="flex-1 overflow-auto">
-          <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">{t("estateAdministrator")}</h1>
+          <ZoomableSection className="h-full" enableZoom={true} maxScale={3} minScale={0.5}>
+            <div className="p-6">
+              <h1 className="text-3xl font-bold mb-6">{t("estateAdministrator")}</h1>
 
-            {/* Mapa */}
-            {activeTab === "mapa" && (
-              <div className='bg-white rounded-lg shadow-md overflow-hidden'>
-                <div className='p-6'>
-                  <h2 className='text-xl font-semibold mb-4'>{t("communityMap")}</h2>
-                  <div className='h-[600px] w-full rounded-lg overflow-hidden'>
-                    <iframe 
-                      src='https://www.openstreetmap.org/export/embed.html?bbox=-3.0334,43.1603,-2.8334,43.3603&layer=mapnik&marker=43.3553,-2.8469' 
-                      width='100%' 
-                      height='100%' 
-                      frameBorder='0' 
-                      style={{ border: 0 }} 
-                      allowFullScreen 
-                      aria-hidden='false' 
-                      tabIndex={0}
-                    ></iframe>
-                  </div>
-                  <div className='mt-4'>
-                    <h3 className='text-lg font-semibold mb-2'>{t("communitiesOnMap")}</h3>
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                      {comunidades.map((comunidad) => (
-                        <Card key={comunidad.id} className='hover:bg-gray-50 transition-colors'>
-                          <CardContent className='p-4'>
-                            <div>
-                              <h3 className='font-bold text-lg'>{comunidad.nombre}</h3>
-                              <p className='text-gray-600'>{comunidad.direccion}</p>
-                              <p className='text-sm text-gray-500 mt-2'>
-                                {t("coordinates")}: {comunidad.lat.toFixed(4)}, {comunidad.lng.toFixed(4)}
-                              </p>
-                            </div>
-                            <Button variant='outline' size='sm' className='mt-2'>
-                              {t("viewOnMap")}
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      ))}
+              {/* Mapa */}
+              {activeTab === "mapa" && (
+                <div className='bg-white rounded-lg shadow-md overflow-hidden'>
+                  <div className='p-6'>
+                    <h2 className='text-xl font-semibold mb-4'>{t("communityMap")}</h2>
+                    <div className='h-[600px] w-full rounded-lg overflow-hidden'>
+                      <iframe 
+                        src='https://www.openstreetmap.org/export/embed.html?bbox=-3.0334,43.1603,-2.8334,43.3603&layer=mapnik&marker=43.3553,-2.8469' 
+                        width='100%' 
+                        height='100%' 
+                        frameBorder='0' 
+                        style={{ border: 0 }} 
+                        allowFullScreen 
+                        aria-hidden='false' 
+                        tabIndex={0}
+                      ></iframe>
                     </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Activos */}
-            {activeTab === "activos" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("managedCommunities")}</h2>
-                <div className="grid gap-4">
-                  {comunidades.map((comunidad) => (
-                    <Card key={comunidad.id} className="hover:bg-gray-50 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-bold text-lg">{comunidad.nombre}</h3>
-                            <p className="text-gray-600">{comunidad.direccion}</p>
-                          </div>
-                          <Button variant="outline" size="sm">{t("viewDetails")}</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Servicios Actuales */}
-            {activeTab === "servicios" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("currentServices")}</h2>
-                <p className="text-gray-600 mb-4">{t("redirectingToServiceDashboard")}</p>
-                <Button onClick={handleServicesDashboardClick}>{t("goToServiceDashboard")}</Button>
-              </div>
-            )}
-
-            {/* Juntas */}
-            {activeTab === "juntas" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("communityMeetings")}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      className="border rounded-md"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-3">
-                      {t("scheduledMeetings")}: {date?.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { month: 'long', year: 'numeric' })}
-                    </h3>
-                    {filteredJuntas.length > 0 ? (
-                      <div className="space-y-3">
-                        {filteredJuntas.map((junta) => (
-                          <Card key={junta.id}>
-                            <CardContent className="p-4">
-                              <p className="font-bold">{junta.comunidad}</p>
-                              <p className="text-sm text-gray-600">
-                                {junta.fecha.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')} - {junta.hora}
-                              </p>
-                              <p>{junta.asunto}</p>
+                    <div className='mt-4'>
+                      <h3 className='text-lg font-semibold mb-2'>{t("communitiesOnMap")}</h3>
+                      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                        {comunidades.map((comunidad) => (
+                          <Card key={comunidad.id} className='hover:bg-gray-50 transition-colors'>
+                            <CardContent className='p-4'>
+                              <div>
+                                <h3 className='font-bold text-lg'>{comunidad.nombre}</h3>
+                                <p className='text-gray-600'>{comunidad.direccion}</p>
+                                <p className='text-sm text-gray-500 mt-2'>
+                                  {t("coordinates")}: {comunidad.lat.toFixed(4)}, {comunidad.lng.toFixed(4)}
+                                </p>
+                              </div>
+                              <Button variant='outline' size='sm' className='mt-2'>
+                                {t("viewOnMap")}
+                              </Button>
                             </CardContent>
                           </Card>
                         ))}
                       </div>
-                    ) : (
-                      <p className="text-gray-500">{t("noMeetingsThisMonth")}</p>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Temas Pendientes */}
-            {activeTab === "pendientes" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">{t("pendingIssues")}</h2>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("community")}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("type")}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("description")}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("amountStatus")}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("date")}</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("action")}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {temasPendientes.map((tema) => (
-                        <tr key={tema.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">{tema.comunidad}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              tema.tipo === "Derrama" ? "bg-blue-100 text-blue-800" :
-                              tema.tipo === "Deuda" ? "bg-red-100 text-red-800" :
-                              tema.tipo === "Alzamiento" ? "bg-purple-100 text-purple-800" :
-                              tema.tipo === "Obra" ? "bg-yellow-100 text-yellow-800" :
-                              tema.tipo === "Inspección" ? "bg-green-100 text-green-800" :
-                              "bg-gray-100 text-gray-800"
-                            }`}>
-                              {tema.tipo}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">{tema.descripcion}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{tema.importe || tema.estado}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{tema.fecha}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <Button variant="outline" size="sm">{t("manage")}</Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {/* Activos */}
+              {activeTab === "activos" && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold mb-4">{t("managedCommunities")}</h2>
+                  <div className="grid gap-4">
+                    {comunidades.map((comunidad) => (
+                      <Card key={comunidad.id} className="hover:bg-gray-50 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h3 className="font-bold text-lg">{comunidad.nombre}</h3>
+                              <p className="text-gray-600">{comunidad.direccion}</p>
+                            </div>
+                            <Button variant="outline" size="sm">{t("viewDetails")}</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+
+              {/* Servicios Actuales */}
+              {activeTab === "servicios" && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold mb-4">{t("currentServices")}</h2>
+                  <p className="text-gray-600 mb-4">{t("redirectingToServiceDashboard")}</p>
+                  <Button onClick={handleServicesDashboardClick}>{t("goToServiceDashboard")}</Button>
+                </div>
+              )}
+
+              {/* Juntas */}
+              {activeTab === "juntas" && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold mb-4">{t("communityMeetings")}</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        className="border rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold mb-3">
+                        {t("scheduledMeetings")}: {date?.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', { month: 'long', year: 'numeric' })}
+                      </h3>
+                      {filteredJuntas.length > 0 ? (
+                        <div className="space-y-3">
+                          {filteredJuntas.map((junta) => (
+                            <Card key={junta.id}>
+                              <CardContent className="p-4">
+                                <p className="font-bold">{junta.comunidad}</p>
+                                <p className="text-sm text-gray-600">
+                                  {junta.fecha.toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')} - {junta.hora}
+                                </p>
+                                <p>{junta.asunto}</p>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500">{t("noMeetingsThisMonth")}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Temas Pendientes */}
+              {activeTab === "pendientes" && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold mb-4">{t("pendingIssues")}</h2>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("community")}</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("type")}</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("description")}</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("amountStatus")}</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("date")}</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("action")}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {temasPendientes.map((tema) => (
+                          <tr key={tema.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">{tema.comunidad}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                tema.tipo === "Derrama" ? "bg-blue-100 text-blue-800" :
+                                tema.tipo === "Deuda" ? "bg-red-100 text-red-800" :
+                                tema.tipo === "Alzamiento" ? "bg-purple-100 text-purple-800" :
+                                tema.tipo === "Obra" ? "bg-yellow-100 text-yellow-800" :
+                                tema.tipo === "Inspección" ? "bg-green-100 text-green-800" :
+                                "bg-gray-100 text-gray-800"
+                              }`}>
+                                {tema.tipo}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">{tema.descripcion}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{tema.importe || tema.estado}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{tema.fecha}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <Button variant="outline" size="sm">{t("manage")}</Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </ZoomableSection>
         </div>
       </div>
     </>
