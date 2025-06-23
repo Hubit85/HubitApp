@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Building, Wrench, Star, TrendingUp, Heart, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Shield, Gift } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
+import Image from "next/image"; // Added import for Next/Image
 
 export default function Home() {
   const { t } = useLanguage();
@@ -444,11 +445,13 @@ export default function Home() {
                       <p className="text-gray-600 text-center mb-4">
                         {t("step1Description")}
                       </p>
-                      <div className="text-center">
-                        <img 
+                      <div className="text-center relative w-full h-32"> {/* Added relative and dimensions */}
+                        <Image 
                           src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
                           alt="Wallet Setup" 
-                          className="w-full h-32 object-cover rounded-lg"
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-lg"
                         />
                       </div>
                     </CardContent>
@@ -479,11 +482,13 @@ export default function Home() {
                       <p className="text-gray-600 text-center mb-4">
                         {t("step2Description")}
                       </p>
-                      <div className="text-center">
-                        <img 
+                      <div className="text-center relative w-full h-32"> {/* Added relative and dimensions */}
+                        <Image 
                           src="https://images.unsplash.com/photo-1621761191319-c6fb62004040?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
                           alt="Buy SOL" 
-                          className="w-full h-32 object-cover rounded-lg"
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-lg"
                         />
                       </div>
                     </CardContent>
@@ -514,11 +519,13 @@ export default function Home() {
                       <p className="text-gray-600 text-center mb-4">
                         {t("step3Description")}
                       </p>
-                      <div className="text-center">
-                        <img 
+                      <div className="text-center relative w-full h-32"> {/* Added relative and dimensions */}
+                        <Image 
                           src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
                           alt="DEX Trading" 
-                          className="w-full h-32 object-cover rounded-lg"
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-lg"
                         />
                       </div>
                     </CardContent>

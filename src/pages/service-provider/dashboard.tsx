@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -510,7 +511,7 @@ export default function ServiceProviderDashboard() {
               <h1 className="text-3xl font-bold mb-6">
                 {activeTab === "overview" ? t("serviceProviderDashboard") : 
                  activeTab === "perfil" ? t("myProfile") :
-                 repairCategories.find(c => c.id === activeTab)?.name + " " + t("services")}
+                 (repairCategories.find(c => c.id === activeTab)?.name || "") + " " + t("services")}
               </h1>
               
               {/* Mi Perfil Tab */}
@@ -879,4 +880,49 @@ export default function ServiceProviderDashboard() {
                               </CardContent>
                             </Card>
                           ))}
-                        </div
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground">{t("noBidsInCategory")}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Community Requests Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("communityRequestsFor")} {repairCategories.find(c => c.id === activeTab)?.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {filteredRequests.length > 0 ? (
+                        <div className="space-y-4">
+                          {filteredRequests.map((request) => (
+                            <Card key={request.id}>
+                              <CardContent className="p-4">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <h4 className="font-bold">{request.description}</h4>
+                                    <p className="text-sm text-gray-500">{t("budget")}: {request.budget}</p>
+                                  </div>
+                                  <Badge>{request.category}</Badge>
+                                </div>
+                                <div className="mt-2 flex justify-end">
+                                  <Button size="sm">{t("submitBid")}</Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground">{t("noRequestsInCategory")}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </ZoomableSection>
+        </div>
+      </div>
+    </>
+  );
+}

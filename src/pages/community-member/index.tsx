@@ -40,6 +40,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import ZoomableSection from "@/components/ZoomableSection";
+import Image from "next/image"; // Added import for Next/Image
 
 // Define community contact type
 interface CommunityContact {
@@ -978,11 +979,12 @@ export default function CommunityMemberDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {serviceProviders.map((provider) => (
                       <Card key={provider.id} className="overflow-hidden">
-                        <div className="h-40 overflow-hidden">
-                          <img 
+                        <div className="h-40 overflow-hidden relative">
+                          <Image 
                             src={provider.image} 
                             alt={provider.name} 
-                            className="w-full h-full object-cover"
+                            layout="fill"
+                            objectFit="cover"
                           />
                         </div>
                         <CardContent className="p-4">
@@ -1081,11 +1083,12 @@ export default function CommunityMemberDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {favoriteProviders.map((provider) => (
                       <Card key={provider.id} className="overflow-hidden">
-                        <div className="h-40 overflow-hidden">
-                          <img 
+                        <div className="h-40 overflow-hidden relative">
+                          <Image 
                             src={provider.image} 
                             alt={provider.name} 
-                            className="w-full h-full object-cover"
+                            layout="fill"
+                            objectFit="cover"
                           />
                         </div>
                         <CardContent className="p-4">
