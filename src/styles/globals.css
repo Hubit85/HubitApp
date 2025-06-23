@@ -310,3 +310,94 @@ input, textarea, [contenteditable] {
     overscroll-behavior: contain;
   }
 }
+
+/* Mobile optimization styles */
+.pinch-zoom {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+.ios-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .ios-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* DuckDuckGo browser specific styles */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .pinch-zoom {
+    -webkit-transform-origin: center center;
+    transform-origin: center center;
+  }
+}
+
+/* Prevent text selection during pinch zoom */
+.pinch-zoom * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection for specific elements */
+.pinch-zoom p,
+.pinch-zoom h1,
+.pinch-zoom h2,
+.pinch-zoom h3,
+.pinch-zoom h4,
+.pinch-zoom h5,
+.pinch-zoom h6,
+.pinch-zoom span,
+.pinch-zoom div[contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Smooth transitions for zoom */
+.transition-transform {
+  transition: transform 0.2s ease-out;
+}
+
+/* Mobile viewport fixes */
+@media screen and (max-width: 768px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
