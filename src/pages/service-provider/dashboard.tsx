@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import { Wrench, Zap, Paintbrush, Grid, Droplet, Thermometer, Home, Lock, Hammer
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
+import ZoomableSection from "@/components/ZoomableSection";
 
 // Define repair category type
 interface RepairCategory {
@@ -460,7 +460,7 @@ export default function ServiceProviderDashboard() {
   return (
     <>
       <Head>
-        <title>{t('serviceProviderDashboard')} | {t('handyman')}</title>
+        <title>{t('serviceProviderDashboard')} | {t('hubit')}</title>
         <meta name='description' content={t('serviceProviderDesc')} />
       </Head>
       
@@ -504,460 +504,294 @@ export default function ServiceProviderDashboard() {
         </div>
         
         {/* Main Content */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-6">
-            <h1 className="text-3xl font-bold mb-6">
-              {activeTab === "overview" ? t("serviceProviderDashboard") : 
-               activeTab === "perfil" ? t("myProfile") :
-               repairCategories.find(c => c.id === activeTab)?.name + " " + t("services")}
-            </h1>
-            
-            {/* Mi Perfil Tab */}
-            {activeTab === "perfil" && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex flex-col lg:flex-row gap-8">
-                  {/* Company Profile Card */}
-                  <div className="lg:w-1/3">
-                    <Card>
-                      <CardContent className="p-6 flex flex-col items-center">
-                        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-4 relative">
-                          <Building className="h-16 w-16 text-gray-500" />
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-white hover:bg-gray-100"
-                          >
-                            <Camera className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <h2 className="text-xl font-bold text-center">Fontanería Express S.L.</h2>
-                        <p className="text-gray-500 mb-2 text-center">{t("serviceProvider")}</p>
-                        <div className="flex items-center mb-4">
-                          <div className="flex mr-2">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star} 
-                                className={`h-4 w-4 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-600">4.8 (124 {t("reviews")})</span>
-                        </div>
-                        <Button className="w-full mb-2">{t("editProfile")}</Button>
-                        <Button variant="outline" className="w-full">{t("viewPublicProfile")}</Button>
-                      </CardContent>
-                    </Card>
-                    
-                    {/* Quick Stats */}
-                    <Card className="mt-4">
-                      <CardHeader>
-                        <CardTitle className="text-lg">{t("quickStats")}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">{t("completedJobs")}</span>
-                            <span className="font-bold">156</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">{t("activeBids")}</span>
-                            <span className="font-bold">12</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">{t("responseTime")}</span>
-                            <span className="font-bold">2h</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">{t("memberSince")}</span>
-                            <span className="font-bold">2022</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                  {/* Company Information */}
-                  <div className="lg:w-2/3">
-                    <div className="space-y-6">
-                      {/* Basic Company Info */}
+        <div className="flex-1 overflow-hidden">
+          <ZoomableSection className="h-full overflow-auto" enableZoom={true} maxScale={3} minScale={0.5}>
+            <div className="p-6 min-h-full">
+              <h1 className="text-3xl font-bold mb-6">
+                {activeTab === "overview" ? t("serviceProviderDashboard") : 
+                 activeTab === "perfil" ? t("myProfile") :
+                 repairCategories.find(c => c.id === activeTab)?.name + " " + t("services")}
+              </h1>
+              
+              {/* Mi Perfil Tab */}
+              {activeTab === "perfil" && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Company Profile Card */}
+                    <div className="lg:w-1/3">
                       <Card>
+                        <CardContent className="p-6 flex flex-col items-center">
+                          <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-4 relative">
+                            <Building className="h-16 w-16 text-gray-500" />
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0 bg-white hover:bg-gray-100"
+                            >
+                              <Camera className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <h2 className="text-xl font-bold text-center">Fontanería Express S.L.</h2>
+                          <p className="text-gray-500 mb-2 text-center">{t("serviceProvider")}</p>
+                          <div className="flex items-center mb-4">
+                            <div className="flex mr-2">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star} 
+                                  className={`h-4 w-4 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                                />
+                              ))}
+                            </div>
+                            <span className="text-sm text-gray-600">4.8 (124 {t("reviews")})</span>
+                          </div>
+                          <Button className="w-full mb-2">{t("editProfile")}</Button>
+                          <Button variant="outline" className="w-full">{t("viewPublicProfile")}</Button>
+                        </CardContent>
+                      </Card>
+                      
+                      {/* Quick Stats */}
+                      <Card className="mt-4">
                         <CardHeader>
-                          <CardTitle>{t("companyInformation")}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="company-name">{t("companyName")}</Label>
-                                <Input id="company-name" defaultValue="Fontanería Express S.L." />
-                              </div>
-                              <div>
-                                <Label htmlFor="tax-id">{t("taxId")}</Label>
-                                <Input id="tax-id" defaultValue="B-12345678" />
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="phone">{t("phoneLabel")}</Label>
-                                <Input id="phone" type="tel" defaultValue="+34 912 345 678" />
-                              </div>
-                              <div>
-                                <Label htmlFor="email">{t("emailLabel")}</Label>
-                                <Input id="email" type="email" defaultValue="info@fontaneriaexpress.com" />
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="address">{t("businessAddress")}</Label>
-                              <Input id="address" defaultValue="Calle Mayor 123, 28001 Madrid, España" />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="website">{t("website")}</Label>
-                              <Input id="website" type="url" defaultValue="www.fontaneriaexpress.com" />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="description">{t("companyDescription")}</Label>
-                              <Textarea 
-                                id="description" 
-                                defaultValue="Empresa especializada en servicios de fontanería con más de 15 años de experiencia. Ofrecemos servicios 24/7 para emergencias y trabajamos con las mejores marcas del mercado."
-                                rows={3}
-                              />
-                            </div>
-                            <Button className="w-full">{t("saveChanges")}</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      {/* Services Offered */}
-                      <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                          <CardTitle>{t("servicesOffered")}</CardTitle>
-                          <Button variant="outline" size="sm">{t("editServices")}</Button>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="secondary" className="p-2 text-sm">
-                              <Droplet className="mr-1 h-4 w-4" />
-                              {t("plumbing")}
-                            </Badge>
-                            <Badge variant="secondary" className="p-2 text-sm">
-                              <Wrench className="mr-1 h-4 w-4" />
-                              {t("applianceRepair")}
-                            </Badge>
-                            <Badge variant="secondary" className="p-2 text-sm">
-                              <Home className="mr-1 h-4 w-4" />
-                              {t("bathroomRenovation")}
-                            </Badge>
-                            <Badge variant="secondary" className="p-2 text-sm">
-                              <Thermometer className="mr-1 h-4 w-4" />
-                              {t("waterHeating")}
-                            </Badge>
-                            <Badge variant="secondary" className="p-2 text-sm">
-                              <Clock className="mr-1 h-4 w-4" />
-                              {t("emergencyService")}
-                            </Badge>
-                            <Badge variant="secondary" className="p-2 text-sm">
-                              <CheckCircle className="mr-1 h-4 w-4" />
-                              {t("maintenance")}
-                            </Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      {/* Certifications & Licenses */}
-                      <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                          <CardTitle>{t("certificationsLicenses")}</CardTitle>
-                           <Button variant="outline" size="sm">{t("addCertification")}</Button>
+                          <CardTitle className="text-lg">{t("quickStats")}</CardTitle>
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-3">
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div className="flex items-center">
-                                <FileText className="h-5 w-5 text-blue-600 mr-3" />
-                                <div>
-                                  <h4 className="font-medium">{t("professionalLicense")}</h4>
-                                  <p className="text-sm text-gray-500">{t("validUntil")}: 12/2025</p>
-                                </div>
-                              </div>
-                              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                                {t("verified")}
-                              </Badge>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">{t("completedJobs")}</span>
+                              <span className="font-bold">156</span>
                             </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div className="flex items-center">
-                                <FileText className="h-5 w-5 text-blue-600 mr-3" />
-                                <div>
-                                  <h4 className="font-medium">{t("insuranceCertificate")}</h4>
-                                  <p className="text-sm text-gray-500">{t("coverage")}: €500,000</p>
-                                </div>
-                              </div>
-                              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                                {t("verified")}
-                              </Badge>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">{t("activeBids")}</span>
+                              <span className="font-bold">12</span>
                             </div>
-                            
-                            <div className="flex items-center justify-between p-3 border rounded-lg">
-                              <div className="flex items-center">
-                                <Award className="h-5 w-5 text-blue-600 mr-3" />
-                                <div>
-                                  <h4 className="font-medium">{t("qualityCertification")}</h4>
-                                  <p className="text-sm text-gray-500">ISO 9001:2015</p>
-                                </div>
-                              </div>
-                              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                                {t("verified")}
-                              </Badge>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">{t("responseTime")}</span>
+                              <span className="font-bold">2h</span>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      {/* Portfolio */}
-                      <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                          <CardTitle>{t("portfolio")}</CardTitle>
-                          <Button variant="outline" size="sm">{t("addPhoto")}</Button>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {[1,2,3,4,5].map(i => (
-                              <div key={i} className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center relative group">
-                                <ImageIcon className="h-12 w-12 text-gray-400" />
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/20"><Camera className="mr-1 h-4 w-4" /> {t("change")}</Button>
-                                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/20"><FileText className="mr-1 h-4 w-4" /> {t("details")}</Button>
-                                </div>
-                              </div>
-                            ))}
-                            <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 cursor-pointer hover:border-gray-400 hover:bg-gray-200 transition-colors">
-                              <div className="text-center">
-                                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-1" />
-                                <p className="text-sm text-gray-500">{t("uploadPhoto")}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      {/* Recent Reviews */}
-                      <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                          <CardTitle>{t("recentReviews")}</CardTitle>
-                          <Button variant="link" size="sm">{t("viewAllReviews")}</Button>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="border-b pb-4">
-                              <div className="flex justify-between items-start mb-1">
-                                <div>
-                                  <h4 className="font-medium">María González</h4>
-                                  <div className="flex items-center">
-                                    <div className="flex mr-2">
-                                      {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star 
-                                          key={star} 
-                                          className="h-4 w-4 text-yellow-400 fill-yellow-400" 
-                                        />
-                                      ))}
-                                    </div>
-                                    <span className="text-sm text-gray-500">5.0</span>
-                                  </div>
-                                </div>
-                                <span className="text-xs text-gray-500">2 {t("daysAgo")}</span>
-                              </div>
-                              <p className="text-gray-600 text-sm">
-                                "Excelente servicio. Llegaron puntuales y solucionaron el problema de la tubería rápidamente. Muy profesionales."
-                              </p>
-                            </div>
-                            
-                            <div className="border-b pb-4">
-                              <div className="flex justify-between items-start mb-1">
-                                <div>
-                                  <h4 className="font-medium">Carlos Rodríguez</h4>
-                                  <div className="flex items-center">
-                                    <div className="flex mr-2">
-                                      {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star 
-                                          key={star} 
-                                          className={`h-4 w-4 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
-                                        />
-                                      ))}
-                                    </div>
-                                    <span className="text-sm text-gray-500">4.0</span>
-                                  </div>
-                                </div>
-                                <span className="text-xs text-gray-500">1 {t("weekAgo")}</span>
-                              </div>
-                              <p className="text-gray-600 text-sm">
-                                "Buen trabajo en la instalación del nuevo grifo. Precio justo y trabajo limpio."
-                              </p>
-                            </div>
-                            
-                            <div>
-                              <div className="flex justify-between items-start mb-1">
-                                <div>
-                                  <h4 className="font-medium">Ana Martínez</h4>
-                                  <div className="flex items-center">
-                                    <div className="flex mr-2">
-                                      {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star 
-                                          key={star} 
-                                          className="h-4 w-4 text-yellow-400 fill-yellow-400" 
-                                        />
-                                      ))}
-                                    </div>
-                                    <span className="text-sm text-gray-500">5.0</span>
-                                  </div>
-                                </div>
-                                <span className="text-xs text-gray-500">2 {t("weeksAgo")}</span>
-                              </div>
-                              <p className="text-gray-600 text-sm">
-                                "Servicio de emergencia excelente. Vinieron en domingo y arreglaron la fuga inmediatamente."
-                              </p>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">{t("memberSince")}</span>
+                              <span className="font-bold">2022</span>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
                     </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Overview Tab */}
-            {activeTab === "overview" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t("activeBids")}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-4xl font-bold">12</p>
-                    <p className="text-gray-500">{t("bidsPlaced")}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t("completedJobs")}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-4xl font-bold">156</p>
-                    <p className="text-gray-500">{t("jobsSuccessfullyCompleted")}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t("earningsThisMonth")}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-4xl font-bold">€2,345</p>
-                    <p className="text-gray-500">{t("totalEarnings")}</p>
-                  </CardContent>
-                </Card>
-                <Card className="lg:col-span-3">
-                  <CardHeader>
-                    <CardTitle>{t("recentActivity")}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      <li className="flex items-center justify-between">
-                        <div>
-                          <p>{t("newBidPlacedOn")} "{t("kitchenSinkInstallation")}"</p>
-                          <p className="text-sm text-gray-500">Comunidad El Roble</p>
-                        </div>
-                        <Badge variant="secondary">{t("pending")}</Badge>
-                      </li>
-                      <li className="flex items-center justify-between">
-                        <div>
-                          <p>{t("jobCompleted")} "{t("bathroomPlumbingOverhaul")}"</p>
-                          <p className="text-sm text-gray-500">Comunidad Los Pinos</p>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800">{t("completed")}</Badge>
-                      </li>
-                      <li className="flex items-center justify-between">
-                        <div>
-                          <p>{t("newRequestReceivedFor")} {t("electrical")}</p>
-                          <p className="text-sm text-gray-500">Comunidad Las Acacias</p>
-                        </div>
-                        <Button size="sm" variant="outline">{t("viewRequest")}</Button>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-
-            {/* Service Category Tabs */}
-            {repairCategories.map((category) => 
-              activeTab === category.id && (
-                <div key={category.id} className="space-y-6">
-                  {/* Community Requests for this category */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>{t("communityRequestsFor")} {category.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {filteredRequests.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {filteredRequests.map((request) => (
-                            <Card key={request.id}>
-                              <CardHeader>
-                                <CardTitle className="text-lg">{request.description}</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <p className="text-sm text-gray-600 mb-1"><strong>{t("budget")}:</strong> {request.budget}</p>
-                                <p className="text-sm text-gray-600 mb-3"><strong>{t("category")}:</strong> {category.name}</p>
-                                <Button className="w-full">{t("viewDetailsAndBid")}</Button>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">{t("noCommunityRequestsCategory")}</p>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Bids for this category */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>{t("yourBidsFor")} {category.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {categoryBids.length > 0 ? (
-                        <div className="space-y-4">
-                          {categoryBids.map((bid) => (
-                            <Card key={bid.id} className="p-4">
-                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    
+                    {/* Company Information */}
+                    <div className="lg:w-2/3">
+                      <div className="space-y-6">
+                        {/* Basic Company Info */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>{t("companyInformation")}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                  <h3 className="font-semibold">{bid.scope}</h3>
-                                  <p className="text-sm text-gray-500">{t("bidAmount")}: {bid.amount}</p>
+                                  <Label htmlFor="company-name">{t("companyName")}</Label>
+                                  <Input id="company-name" defaultValue="Fontanería Express S.L." />
                                 </div>
-                                <div className="mt-2 sm:mt-0">
-                                  <Badge variant={bid.id.includes("1") ? "default" : "secondary"}>
-                                    {bid.id.includes("1") ? t("active") : t("pendingReview")}
-                                  </Badge>
+                                <div>
+                                  <Label htmlFor="tax-id">{t("taxId")}</Label>
+                                  <Input id="tax-id" defaultValue="B-12345678" />
                                 </div>
                               </div>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">{t("noBidsInCategory")}</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              )
-            )}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="phone">{t("phoneLabel")}</Label>
+                                  <Input id="phone" type="tel" defaultValue="+34 912 345 678" />
+                                </div>
+                                <div>
+                                  <Label htmlFor="email">{t("emailLabel")}</Label>
+                                  <Input id="email" type="email" defaultValue="info@fontaneriaexpress.com" />
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="address">{t("businessAddress")}</Label>
+                                <Input id="address" defaultValue="Calle Mayor 123, 28001 Madrid, España" />
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="website">{t("website")}</Label>
+                                <Input id="website" type="url" defaultValue="www.fontaneriaexpress.com" />
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="description">{t("companyDescription")}</Label>
+                                <Textarea 
+                                  id="description" 
+                                  defaultValue="Empresa especializada en servicios de fontanería con más de 15 años de experiencia. Ofrecemos servicios 24/7 para emergencias y trabajamos con las mejores marcas del mercado."
+                                  rows={3}
+                                />
+                              </div>
+                              <Button className="w-full">{t("saveChanges")}</Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        {/* Services Offered */}
+                        <Card>
+                          <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>{t("servicesOffered")}</CardTitle>
+                            <Button variant="outline" size="sm">{t("editServices")}</Button>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                              <Badge variant="secondary" className="p-2 text-sm">
+                                <Droplet className="mr-1 h-4 w-4" />
+                                {t("plumbing")}
+                              </Badge>
+                              <Badge variant="secondary" className="p-2 text-sm">
+                                <Wrench className="mr-1 h-4 w-4" />
+                                {t("applianceRepair")}
+                              </Badge>
+                              <Badge variant="secondary" className="p-2 text-sm">
+                                <Home className="mr-1 h-4 w-4" />
+                                {t("bathroomRenovation")}
+                              </Badge>
+                              <Badge variant="secondary" className="p-2 text-sm">
+                                <Thermometer className="mr-1 h-4 w-4" />
+                                {t("waterHeating")}
+                              </Badge>
+                              <Badge variant="secondary" className="p-2 text-sm">
+                                <Clock className="mr-1 h-4 w-4" />
+                                {t("emergencyService")}
+                              </Badge>
+                              <Badge variant="secondary" className="p-2 text-sm">
+                                <CheckCircle className="mr-1 h-4 w-4" />
+                                {t("maintenance")}
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        {/* Certifications & Licenses */}
+                        <Card>
+                          <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>{t("certificationsLicenses")}</CardTitle>
+                             <Button variant="outline" size="sm">{t("addCertification")}</Button>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between p-3 border rounded-lg">
+                                <div className="flex items-center">
+                                  <FileText className="h-5 w-5 text-blue-600 mr-3" />
+                                  <div>
+                                    <h4 className="font-medium">{t("professionalLicense")}</h4>
+                                    <p className="text-sm text-gray-500">{t("validUntil")}: 12/2025</p>
+                                  </div>
+                                </div>
+                                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                                  {t("verified")}
+                                </Badge>
+                              </div>
+                              
+                              <div className="flex items-center justify-between p-3 border rounded-lg">
+                                <div className="flex items-center">
+                                  <FileText className="h-5 w-5 text-blue-600 mr-3" />
+                                  <div>
+                                    <h4 className="font-medium">{t("insuranceCertificate")}</h4>
+                                    <p className="text-sm text-gray-500">{t("coverage")}: €500,000</p>
+                                  </div>
+                                </div>
+                                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                                  {t("verified")}
+                                </Badge>
+                              </div>
+                              
+                              <div className="flex items-center justify-between p-3 border rounded-lg">
+                                <div className="flex items-center">
+                                  <Award className="h-5 w-5 text-blue-600 mr-3" />
+                                  <div>
+                                    <h4 className="font-medium">{t("qualityCertification")}</h4>
+                                    <p className="text-sm text-gray-500">ISO 9001:2015</p>
+                                  </div>
+                                </div>
+                                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                                  {t("verified")}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        {/* Portfolio */}
+                        <Card>
+                          <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>{t("portfolio")}</CardTitle>
+                            <Button variant="outline" size="sm">{t("addPhoto")}</Button>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                              {[1,2,3,4,5].map(i => (
+                                <div key={i} className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center relative group">
+                                  <ImageIcon className="h-12 w-12 text-gray-400" />
+                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/20"><Camera className="mr-1 h-4 w-4" /> {t("change")}</Button>
+                                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/20"><FileText className="mr-1 h-4 w-4" /> {t("details")}</Button>
+                                  </div>
+                                </div>
+                              ))}
+                              <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 cursor-pointer hover:border-gray-400 hover:bg-gray-200 transition-colors">
+                                <div className="text-center">
+                                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-1" />
+                                  <p className="text-sm text-gray-500">{t("uploadPhoto")}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        
+                        {/* Recent Reviews */}
+                        <Card>
+                          <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>{t("recentReviews")}</CardTitle>
+                            <Button variant="link" size="sm">{t("viewAllReviews")}</Button>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              <div className="border-b pb-4">
+                                <div className="flex justify-between items-start mb-1">
+                                  <div>
+                                    <h4 className="font-medium">María González</h4>
+                                    <div className="flex items-center">
+                                      <div className="flex mr-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                          <Star 
+                                            key={star} 
+                                            className="h-4 w-4 text-yellow-400 fill-yellow-400" 
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-sm text-gray-500">5.0</span>
+                                    </div>
+                                  </div>
+                                  <span className="text-xs text-gray-500">2 {t("daysAgo")}</span>
+                                </div>
+                                <p className="text-gray-600 text-sm">
+                                  "Excelente servicio. Llegaron puntuales y solucionaron el problema de la tubería rápidamente. Muy profesionales."
+                                </p>
+                              </div>
+                              
+                              <div className="border-b pb-4">
+                                <div className="flex justify-between items-start mb-1">
+                                  <div>
+                                    <h4 className="font-medium">Carlos Rodríguez</h4>
+                                    <div className="flex items-center">
+                                      <div className="flex mr-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                          <Star 
+                                            key={star} 
+                                            className={`h-4 w-4 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                                          />
+                                        ))}
+                                      </div>
+                                      <span className="text-sm text-gray-500">4.0</span>
+                                    </div>
+                                  </div>
+                                  <span className="text-xs text-gray-500">1 {t("weekAgo")}</span>
+                                </div>
+                                <p

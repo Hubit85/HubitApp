@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Building, Wrench, Star, TrendingUp, Heart, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Shield, Gift } from "lucide-react";
+import ZoomableSection from "@/components/ZoomableSection";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -21,562 +22,564 @@ export default function Home() {
       <Header />
       
       <main className="flex flex-col items-center justify-center relative">
-        <section className="min-h-screen w-full flex flex-col items-center justify-center relative">
-          <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
-              backgroundSize: "cover",
-              filter: "brightness(0.7)"
-            }}
-          />
-          
-          <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
-            <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
-              {t("hubit")}
-            </h1>
-            <p className="text-xl md:text-2xl text-white drop-shadow-md">
-              {t("professionalServicesForHome")}
-            </p>
+        <ZoomableSection className="w-full" enableZoom={true} maxScale={3} minScale={0.5}>
+          <section className="min-h-screen w-full flex flex-col items-center justify-center relative">
+            <div 
+              className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+              style={{
+                backgroundImage: "url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
+                backgroundSize: "cover",
+                filter: "brightness(0.7)"
+              }}
+            />
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <Button 
-                size="lg" 
-                className="text-lg px-8 py-6 bg-black text-white hover:bg-black/80"
-                asChild
-              >
-                <Link href="/auth/register">{t("register")}</Link>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-8 py-6 bg-white text-black border-black hover:bg-white/90"
-                asChild
-              >
-                <Link href="/auth/login">{t("login")}</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Quiénes Somos Section */}
-        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {t("whoWeAreTitle")}
-              </h2>
-            </div>
-
-            <div className="max-w-5xl mx-auto space-y-8">
-              <div className="text-center">
-                <p className="text-xl text-gray-700 leading-relaxed">
-                  {t("whoWeAreIntro")}
-                </p>
-              </div>
-
-              <div className="bg-gray-50 rounded-lg p-8">
-                <div className="text-center mb-6">
-                  <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Heart className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{t("ourMission")}</h3>
-                </div>
-                <p className="text-lg text-gray-700 leading-relaxed text-center">
-                  {t("ourMissionText")}
-                </p>
-              </div>
-
-              <div className="bg-blue-50 rounded-lg p-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t("ourEcosystem")}</h3>
-                <p className="text-lg text-gray-700 leading-relaxed text-center mb-6">
-                  {t("ourEcosystemText")}
-                </p>
-              </div>
-
-              <div className="bg-green-50 rounded-lg p-8">
-                <div className="text-center mb-6">
-                  <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Star className="h-8 w-8 text-green-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{t("ourFundamentalValue")}</h3>
-                </div>
-                <p className="text-lg text-gray-700 leading-relaxed text-center">
-                  {t("ourFundamentalValueText")}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Cómo Funciona Section */}
-        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {t("howItWorksTitle")}
-              </h2>
-              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                {t("howItWorksIntro")}
+            <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
+              <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
+                {t("hubit")}
+              </h1>
+              <p className="text-xl md:text-2xl text-white drop-shadow-md">
+                {t("professionalServicesForHome")}
               </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-              {/* Para Administradores */}
-              <Card className="h-full">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Building className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">
-                    {t("forAdministrators")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-center">
-                    {t("forAdministratorsText")}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Para Empresas de Servicios */}
-              <Card className="h-full">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Wrench className="h-8 w-8 text-green-600" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">
-                    {t("forServiceCompanies")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-center">
-                    {t("forServiceCompaniesText")}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Para Vecinos */}
-              <Card className="h-full">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Users className="h-8 w-8 text-purple-600" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">
-                    {t("forNeighbors")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-center">
-                    {t("forNeighborsText")}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Sistema de Valoraciones */}
-            <div className="bg-white rounded-lg p-8 shadow-lg">
-              <div className="text-center mb-8">
-                <div className="mx-auto mb-4 p-3 bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center">
-                  <Star className="h-8 w-8 text-yellow-600" />
-                </div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                  {t("ratingsSystem")}
-                </h3>
-                <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                  {t("ratingsSystemText")}
-                </p>
-              </div>
               
-              <div className="text-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                <Button 
+                  size="lg" 
+                  className="text-lg px-8 py-6 bg-black text-white hover:bg-black/80"
+                  asChild
+                >
+                  <Link href="/auth/register">{t("register")}</Link>
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="text-lg px-8 py-6 bg-white text-black border-black hover:bg-white/90"
+                  asChild
+                >
+                  <Link href="/auth/login">{t("login")}</Link>
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          {/* Quiénes Somos Section */}
+          <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  {t("whoWeAreTitle")}
+                </h2>
+              </div>
+
+              <div className="max-w-5xl mx-auto space-y-8">
+                <div className="text-center">
+                  <p className="text-xl text-gray-700 leading-relaxed">
+                    {t("whoWeAreIntro")}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-8">
+                  <div className="text-center mb-6">
+                    <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Heart className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{t("ourMission")}</h3>
+                  </div>
+                  <p className="text-lg text-gray-700 leading-relaxed text-center">
+                    {t("ourMissionText")}
+                  </p>
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t("ourEcosystem")}</h3>
+                  <p className="text-lg text-gray-700 leading-relaxed text-center mb-6">
+                    {t("ourEcosystemText")}
+                  </p>
+                </div>
+
+                <div className="bg-green-50 rounded-lg p-8">
+                  <div className="text-center mb-6">
+                    <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Star className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{t("ourFundamentalValue")}</h3>
+                  </div>
+                  <p className="text-lg text-gray-700 leading-relaxed text-center">
+                    {t("ourFundamentalValueText")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Cómo Funciona Section */}
+          <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  {t("howItWorksTitle")}
+                </h2>
+                <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+                  {t("howItWorksIntro")}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                {/* Para Administradores */}
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Building className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold text-gray-900">
+                      {t("forAdministrators")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      {t("forAdministratorsText")}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Para Empresas de Servicios */}
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Wrench className="h-8 w-8 text-green-600" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold text-gray-900">
+                      {t("forServiceCompanies")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      {t("forServiceCompaniesText")}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Para Vecinos */}
+                <Card className="h-full">
+                  <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Users className="h-8 w-8 text-purple-600" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold text-gray-900">
+                      {t("forNeighbors")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-center">
+                      {t("forNeighborsText")}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sistema de Valoraciones */}
+              <div className="bg-white rounded-lg p-8 shadow-lg">
+                <div className="text-center mb-8">
+                  <div className="mx-auto mb-4 p-3 bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center">
+                    <Star className="h-8 w-8 text-yellow-600" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                    {t("ratingsSystem")}
+                  </h3>
+                  <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                    {t("ratingsSystemText")}
+                  </p>
+                </div>
+                
+                <div className="text-center">
+                  <p className="text-xl text-gray-700 font-medium max-w-4xl mx-auto">
+                    {t("virtuousCircle")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Nuestros Logros Section */}
+          <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  {t("ourAchievementsTitle")}
+                </h2>
+                <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+                  {t("ourAchievementsIntro")}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                {/* 500+ Comunidades conectadas */}
+                <Card className="text-center h-full">
+                  <CardContent className="pt-8">
+                    <div className="text-5xl font-bold text-blue-600 mb-2">500+</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                      {t("connectedCommunities")}
+                    </h3>
+                    <p className="text-gray-600">
+                      {t("connectedCommunitiesText")}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* 300+ Empresas verificadas */}
+                <Card className="text-center h-full">
+                  <CardContent className="pt-8">
+                    <div className="text-5xl font-bold text-green-600 mb-2">300+</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                      {t("verifiedCompanies")}
+                    </h3>
+                    <p className="text-gray-600">
+                      {t("verifiedCompaniesText")}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* 95% Índice de satisfacción */}
+                <Card className="text-center h-full">
+                  <CardContent className="pt-8">
+                    <div className="text-5xl font-bold text-purple-600 mb-2">95%</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                      {t("satisfactionIndex")}
+                    </h3>
+                    <p className="text-gray-600">
+                      {t("satisfactionIndexText")}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* 10,000+ Incidencias resueltas */}
+                <Card className="text-center h-full">
+                  <CardContent className="pt-8">
+                    <div className="text-5xl font-bold text-orange-600 mb-2">10,000+</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                      {t("resolvedIncidents")}
+                    </h3>
+                    <p className="text-gray-600">
+                      {t("resolvedIncidentsText")}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Conclusión */}
+              <div className="bg-gray-50 rounded-lg p-8 text-center">
+                <div className="mx-auto mb-4 p-3 bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center">
+                  <TrendingUp className="h-8 w-8 text-indigo-600" />
+                </div>
                 <p className="text-xl text-gray-700 font-medium max-w-4xl mx-auto">
-                  {t("virtuousCircle")}
+                  {t("achievementsConclusion")}
                 </p>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Nuestros Logros Section */}
-        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {t("ourAchievementsTitle")}
-              </h2>
-              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                {t("ourAchievementsIntro")}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              {/* 500+ Comunidades conectadas */}
-              <Card className="text-center h-full">
-                <CardContent className="pt-8">
-                  <div className="text-5xl font-bold text-blue-600 mb-2">500+</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    {t("connectedCommunities")}
-                  </h3>
-                  <p className="text-gray-600">
-                    {t("connectedCommunitiesText")}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* 300+ Empresas verificadas */}
-              <Card className="text-center h-full">
-                <CardContent className="pt-8">
-                  <div className="text-5xl font-bold text-green-600 mb-2">300+</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    {t("verifiedCompanies")}
-                  </h3>
-                  <p className="text-gray-600">
-                    {t("verifiedCompaniesText")}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* 95% Índice de satisfacción */}
-              <Card className="text-center h-full">
-                <CardContent className="pt-8">
-                  <div className="text-5xl font-bold text-purple-600 mb-2">95%</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    {t("satisfactionIndex")}
-                  </h3>
-                  <p className="text-gray-600">
-                    {t("satisfactionIndexText")}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* 10,000+ Incidencias resueltas */}
-              <Card className="text-center h-full">
-                <CardContent className="pt-8">
-                  <div className="text-5xl font-bold text-orange-600 mb-2">10,000+</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                    {t("resolvedIncidents")}
-                  </h3>
-                  <p className="text-gray-600">
-                    {t("resolvedIncidentsText")}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Conclusión */}
-            <div className="bg-gray-50 rounded-lg p-8 text-center">
-              <div className="mx-auto mb-4 p-3 bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center">
-                <TrendingUp className="h-8 w-8 text-indigo-600" />
+          {/* Sistema de Pagos Híbrido Section */}
+          <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  {t("paymentSystemTitle")}
+                </h2>
+                <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+                  {t("paymentSystemIntro")}
+                </p>
               </div>
-              <p className="text-xl text-gray-700 font-medium max-w-4xl mx-auto">
-                {t("achievementsConclusion")}
-              </p>
-            </div>
-          </div>
-        </section>
 
-        {/* Sistema de Pagos Híbrido Section */}
-        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {t("paymentSystemTitle")}
-              </h2>
-              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                {t("paymentSystemIntro")}
-              </p>
-            </div>
-
-            {/* Métodos de Pago */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              {/* FIAT */}
-              <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <CreditCard className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">
-                    {t("fiatCurrencies")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-center mb-4">
-                    {t("fiatDescription")}
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span>Tarjetas de Crédito/Débito</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span>Transferencias Bancarias</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span>Efectivo</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Criptomonedas */}
-              <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Coins className="h-8 w-8 text-purple-600" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">
-                    {t("cryptocurrencies")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-center mb-4">
-                    {t("cryptoDescription")}
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-orange-500" />
-                      <span>{t("bitcoin")}</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-blue-500" />
-                      <span>{t("ethereum")}</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-yellow-500" />
-                      <span>{t("binanceCoin")}</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                      <CheckCircle className="h-4 w-4 text-purple-500" />
-                      <span>{t("solana")}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* HBIT Token */}
-              <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors bg-gradient-to-br from-green-50 to-emerald-50">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Star className="h-8 w-8 text-green-600" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">
-                    {t("hubitToken")}
-                  </CardTitle>
-                  <div className="text-sm font-mono bg-green-200 text-green-800 px-3 py-1 rounded-full inline-block mt-2">
-                    HBIT
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 text-center mb-4">
-                    {t("hbitDescription")}
-                  </p>
-                  <div className="text-center">
-                    <div className="text-sm text-green-600 font-semibold">
-                      Red Solana
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Tipos de Pagos Soportados */}
-            <div className="bg-white rounded-lg p-8 shadow-lg mb-16">
-              <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
-                {t("acceptedPayments")}
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-lg font-semibold text-blue-600 mb-2">P2P</div>
-                  <div className="text-sm text-gray-600">{t("p2pPayments")}</div>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-lg font-semibold text-green-600 mb-2">P2B</div>
-                  <div className="text-sm text-gray-600">{t("p2bPayments")}</div>
-                </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-lg font-semibold text-purple-600 mb-2">B2P</div>
-                  <div className="text-sm text-gray-600">{t("b2pPayments")}</div>
-                </div>
-                <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="text-lg font-semibold text-orange-600 mb-2">B2B</div>
-                  <div className="text-sm text-gray-600">{t("b2bPayments")}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Cómo Comprar HBIT Section */}
-        <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {t("howToBuyHbitTitle")}
-              </h2>
-              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                {t("howToBuyHbitIntro")}
-              </p>
-            </div>
-
-            {/* Pasos para comprar HBIT */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              {/* Paso 1 */}
-              <div className="relative">
+              {/* Métodos de Pago */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                {/* FIAT */}
                 <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors">
                   <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 relative">
-                      <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Wallet className="h-10 w-10 text-blue-600" />
-                      </div>
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                        1
-                      </div>
+                    <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <CreditCard className="h-8 w-8 text-blue-600" />
                     </div>
-                    <CardTitle className="text-xl font-bold text-gray-900">
-                      {t("step1Title")}
+                    <CardTitle className="text-2xl font-bold text-gray-900">
+                      {t("fiatCurrencies")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      {t("step1Description")}
+                      {t("fiatDescription")}
                     </p>
-                    <div className="text-center">
-                      <img 
-                        src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
-                        alt="Wallet Setup" 
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Tarjetas de Crédito/Débito</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Transferencias Bancarias</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Efectivo</span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-                {/* Arrow */}
-                <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                  <ArrowRight className="h-8 w-8 text-gray-400" />
-                </div>
-              </div>
 
-              {/* Paso 2 */}
-              <div className="relative">
+                {/* Criptomonedas */}
                 <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors">
                   <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 relative">
-                      <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
-                        <Coins className="h-10 w-10 text-purple-600" />
-                      </div>
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                        2
-                      </div>
+                    <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Coins className="h-8 w-8 text-purple-600" />
                     </div>
-                    <CardTitle className="text-xl font-bold text-gray-900">
-                      {t("step2Title")}
+                    <CardTitle className="text-2xl font-bold text-gray-900">
+                      {t("cryptocurrencies")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      {t("step2Description")}
+                      {t("cryptoDescription")}
                     </p>
-                    <div className="text-center">
-                      <img 
-                        src="https://images.unsplash.com/photo-1621761191319-c6fb62004040?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
-                        alt="Buy SOL" 
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                        <CheckCircle className="h-4 w-4 text-orange-500" />
+                        <span>{t("bitcoin")}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                        <CheckCircle className="h-4 w-4 text-blue-500" />
+                        <span>{t("ethereum")}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                        <CheckCircle className="h-4 w-4 text-yellow-500" />
+                        <span>{t("binanceCoin")}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                        <CheckCircle className="h-4 w-4 text-purple-500" />
+                        <span>{t("solana")}</span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-                {/* Arrow */}
-                <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                  <ArrowRight className="h-8 w-8 text-gray-400" />
-                </div>
-              </div>
 
-              {/* Paso 3 */}
-              <div className="relative">
-                <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors">
+                {/* HBIT Token */}
+                <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors bg-gradient-to-br from-green-50 to-emerald-50">
                   <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 relative">
-                      <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                        <Star className="h-10 w-10 text-green-600" />
-                      </div>
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                        3
-                      </div>
+                    <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Star className="h-8 w-8 text-green-600" />
                     </div>
-                    <CardTitle className="text-xl font-bold text-gray-900">
-                      {t("step3Title")}
+                    <CardTitle className="text-2xl font-bold text-gray-900">
+                      {t("hubitToken")}
                     </CardTitle>
+                    <div className="text-sm font-mono bg-green-200 text-green-800 px-3 py-1 rounded-full inline-block mt-2">
+                      HBIT
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      {t("step3Description")}
+                      {t("hbitDescription")}
                     </p>
                     <div className="text-center">
-                      <img 
-                        src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
-                        alt="DEX Trading" 
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
+                      <div className="text-sm text-green-600 font-semibold">
+                        Red Solana
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
-            </div>
 
-            {/* Beneficios de HBIT */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-8">
-              <h3 className="text-3xl font-bold text-gray-900 text-center mb-8">
-                {t("hbitBenefits")}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Gift className="h-8 w-8 text-green-600" />
+              {/* Tipos de Pagos Soportados */}
+              <div className="bg-white rounded-lg p-8 shadow-lg mb-16">
+                <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
+                  {t("acceptedPayments")}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-lg font-semibold text-blue-600 mb-2">P2P</div>
+                    <div className="text-sm text-gray-600">{t("p2pPayments")}</div>
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">{t("benefit1")}</h4>
-                </div>
-                <div className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Zap className="h-8 w-8 text-blue-600" />
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-lg font-semibold text-green-600 mb-2">P2B</div>
+                    <div className="text-sm text-gray-600">{t("p2bPayments")}</div>
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">{t("benefit2")}</h4>
-                </div>
-                <div className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Star className="h-8 w-8 text-purple-600" />
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-lg font-semibold text-purple-600 mb-2">B2P</div>
+                    <div className="text-sm text-gray-600">{t("b2pPayments")}</div>
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">{t("benefit3")}</h4>
-                </div>
-                <div className="text-center">
-                  <div className="mx-auto mb-4 p-3 bg-orange-100 rounded-full w-16 h-16 flex items-center justify-center">
-                    <Heart className="h-8 w-8 text-orange-600" />
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-lg font-semibold text-orange-600 mb-2">B2B</div>
+                    <div className="text-sm text-gray-600">{t("b2bPayments")}</div>
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">{t("benefit4")}</h4>
-                </div>
-              </div>
-
-              {/* Call to Action */}
-              <div className="text-center mt-12">
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button 
-                    size="lg" 
-                    className="text-lg px-8 py-6 bg-green-600 text-white hover:bg-green-700"
-                  >
-                    {t("startUsingHbit")}
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
-                    className="text-lg px-8 py-6 border-green-600 text-green-600 hover:bg-green-50"
-                  >
-                    {t("learnMore")}
-                  </Button>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          {/* Cómo Comprar HBIT Section */}
+          <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  {t("howToBuyHbitTitle")}
+                </h2>
+                <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+                  {t("howToBuyHbitIntro")}
+                </p>
+              </div>
+
+              {/* Pasos para comprar HBIT */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                {/* Paso 1 */}
+                <div className="relative">
+                  <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors">
+                    <CardHeader className="text-center">
+                      <div className="mx-auto mb-4 relative">
+                        <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Wallet className="h-10 w-10 text-blue-600" />
+                        </div>
+                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          1
+                        </div>
+                      </div>
+                      <CardTitle className="text-xl font-bold text-gray-900">
+                        {t("step1Title")}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 text-center mb-4">
+                        {t("step1Description")}
+                      </p>
+                      <div className="text-center">
+                        <img 
+                          src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                          alt="Wallet Setup" 
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  {/* Arrow */}
+                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                    <ArrowRight className="h-8 w-8 text-gray-400" />
+                  </div>
+                </div>
+
+                {/* Paso 2 */}
+                <div className="relative">
+                  <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors">
+                    <CardHeader className="text-center">
+                      <div className="mx-auto mb-4 relative">
+                        <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Coins className="h-10 w-10 text-purple-600" />
+                        </div>
+                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          2
+                        </div>
+                      </div>
+                      <CardTitle className="text-xl font-bold text-gray-900">
+                        {t("step2Title")}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 text-center mb-4">
+                        {t("step2Description")}
+                      </p>
+                      <div className="text-center">
+                        <img 
+                          src="https://images.unsplash.com/photo-1621761191319-c6fb62004040?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                          alt="Buy SOL" 
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  {/* Arrow */}
+                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                    <ArrowRight className="h-8 w-8 text-gray-400" />
+                  </div>
+                </div>
+
+                {/* Paso 3 */}
+                <div className="relative">
+                  <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors">
+                    <CardHeader className="text-center">
+                      <div className="mx-auto mb-4 relative">
+                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                          <Star className="h-10 w-10 text-green-600" />
+                        </div>
+                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          3
+                        </div>
+                      </div>
+                      <CardTitle className="text-xl font-bold text-gray-900">
+                        {t("step3Title")}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 text-center mb-4">
+                        {t("step3Description")}
+                      </p>
+                      <div className="text-center">
+                        <img 
+                          src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
+                          alt="DEX Trading" 
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Beneficios de HBIT */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-8">
+                <h3 className="text-3xl font-bold text-gray-900 text-center mb-8">
+                  {t("hbitBenefits")}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Gift className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">{t("benefit1")}</h4>
+                  </div>
+                  <div className="text-center">
+                    <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Zap className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">{t("benefit2")}</h4>
+                  </div>
+                  <div className="text-center">
+                    <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Star className="h-8 w-8 text-purple-600" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">{t("benefit3")}</h4>
+                  </div>
+                  <div className="text-center">
+                    <div className="mx-auto mb-4 p-3 bg-orange-100 rounded-full w-16 h-16 flex items-center justify-center">
+                      <Heart className="h-8 w-8 text-orange-600" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">{t("benefit4")}</h4>
+                  </div>
+                </div>
+
+                {/* Call to Action */}
+                <div className="text-center mt-12">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button 
+                      size="lg" 
+                      className="text-lg px-8 py-6 bg-green-600 text-white hover:bg-green-700"
+                    >
+                      {t("startUsingHbit")}
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline" 
+                      className="text-lg px-8 py-6 border-green-600 text-green-600 hover:bg-green-50"
+                    >
+                      {t("learnMore")}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ZoomableSection>
       </main>
     </>
   );
