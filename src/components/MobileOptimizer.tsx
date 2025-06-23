@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 interface MobileOptimizerProps {
   children: React.ReactNode;
@@ -15,6 +15,24 @@ export default function MobileOptimizer({
   const [isDuckDuckGo, setIsDuckDuckGo] = useState(false);
   const [scale, setScale] = useState(1);
   const [lastTouchDistance, setLastTouchDistance] = useState(0);
+
+  const handleGestureStart = useCallback((e: Event) => {
+    if (!enablePinchZoom) {
+      e.preventDefault();
+    }
+  }, [enablePinchZoom]);
+
+  const handleGestureChange = useCallback((e: Event) => {
+    if (!enablePinchZoom) {
+      e.preventDefault();
+    }
+  }, [enablePinchZoom]);
+
+  const handleGestureEnd = useCallback((e: Event) => {
+    if (!enablePinchZoom) {
+      e.preventDefault();
+    }
+  }, [enablePinchZoom]);
 
   useEffect(() => {
     // Detectar iOS
@@ -49,27 +67,9 @@ export default function MobileOptimizer({
         document.removeEventListener('gestureend', handleGestureEnd);
       }
     };
-  }, []);
+  }, [iOS, handleGestureStart, handleGestureChange, handleGestureEnd]);
 
-  const handleGestureStart = (e: Event) => {
-    if (!enablePinchZoom) {
-      e.preventDefault();
-    }
-  };
-
-  const handleGestureChange = (e: Event) => {
-    if (!enablePinchZoom) {
-      e.preventDefault();
-    }
-  };
-
-  const handleGestureEnd = (e: Event) => {
-    if (!enablePinchZoom) {
-      e.preventDefault();
-    }
-  };
-
-  const getTouchDistance = (touches: TouchList) => {
+  const getTouchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
     
     const touch1 = touches[0];
