@@ -15,7 +15,7 @@ export function Header() {
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex flex-col">
           <Link href={isLoggedIn ? '/dashboard' : '/'} className="text-2xl font-bold text-black tracking-wide">
-            {t("handyman")}
+            {t("hubit")}
           </Link>
           <p className="text-sm text-gray-600">{t("professionalServices")}</p>
         </div>
