@@ -11,7 +11,7 @@ export default function MobileOptimizer({
   enablePinchZoom = true, 
   className = "" 
 }: MobileOptimizerProps) {
-  const [isIOS, setIsIOS] = useState(false);
+  const [isIOSState, setIsIOSState] = useState(false); // Renamed to avoid conflict
   const [isDuckDuckGo, setIsDuckDuckGo] = useState(false);
   const [scale, setScale] = useState(1);
   const [lastTouchDistance, setLastTouchDistance] = useState(0);
@@ -36,15 +36,15 @@ export default function MobileOptimizer({
 
   useEffect(() => {
     // Detectar iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    setIsIOS(iOS);
+    const currentIsIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOSState(currentIsIOS);
 
     // Detectar DuckDuckGo
     const duckDuckGo = /DuckDuckGo/.test(navigator.userAgent);
     setIsDuckDuckGo(duckDuckGo);
 
     // Configurar viewport para iOS
-    if (iOS) {
+    if (currentIsIOS) {
       const viewport = document.querySelector('meta[name=viewport]');
       if (viewport) {
         viewport.setAttribute('content', 
@@ -54,20 +54,20 @@ export default function MobileOptimizer({
     }
 
     // Prevenir zoom accidental en iOS
-    if (iOS) {
+    if (currentIsIOS) {
       document.addEventListener('gesturestart', handleGestureStart, { passive: false });
       document.addEventListener('gesturechange', handleGestureChange, { passive: false });
       document.addEventListener('gestureend', handleGestureEnd, { passive: false });
     }
 
     return () => {
-      if (iOS) {
+      if (currentIsIOS) {
         document.removeEventListener('gesturestart', handleGestureStart);
         document.removeEventListener('gesturechange', handleGestureChange);
         document.removeEventListener('gestureend', handleGestureEnd);
       }
     };
-  }, [iOS, handleGestureStart, handleGestureChange, handleGestureEnd]);
+  }, [handleGestureStart, handleGestureChange, handleGestureEnd]); // Removed iOS from dependencies
 
   const getTouchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
@@ -115,7 +115,7 @@ export default function MobileOptimizer({
   const containerClasses = [
     className,
     enablePinchZoom ? "pinch-zoom" : "touch-manipulation",
-    isIOS ? "ios-scroll" : "",
+    isIOSState ? "ios-scroll" : "", // Use renamed state variable
     "transition-transform duration-200 ease-out"
   ].filter(Boolean).join(" ");
 
@@ -136,7 +136,7 @@ export default function MobileOptimizer({
       {/* Indicador de compatibilidad (solo en desarrollo) */}
       {process.env.NODE_ENV === 'development' && (
         <div className="fixed bottom-4 right-4 bg-black/80 text-white text-xs p-2 rounded z-50">
-          <div>iOS: {isIOS ? '✓' : '✗'}</div>
+          <div>iOS: {isIOSState ? '✓' : '✗'}</div> {/* Use renamed state variable */}
           <div>DuckDuckGo: {isDuckDuckGo ? '✓' : '✗'}</div>
           <div>Zoom: {scale.toFixed(1)}x</div>
         </div>
