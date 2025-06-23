@@ -794,4 +794,89 @@ export default function ServiceProviderDashboard() {
                                   </div>
                                   <span className="text-xs text-gray-500">1 {t("weekAgo")}</span>
                                 </div>
-                                <p
+                                <p className="text-gray-600 text-sm">
+                                  "Buen trabajo en general, aunque tardaron un poco más de lo esperado. El resultado final fue satisfactorio."
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Overview Tab */}
+              {activeTab === "overview" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">{t("activeBids")}</CardTitle>
+                      <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">12</div>
+                      <p className="text-xs text-muted-foreground">+5 {t("vsLastWeek")}</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">{t("completedJobs")}</CardTitle>
+                      <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">156</div>
+                      <p className="text-xs text-muted-foreground">+20 {t("thisMonth")}</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">{t("averageRating")}</CardTitle>
+                      <Star className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">4.8</div>
+                      <p className="text-xs text-muted-foreground">{t("basedOn")} 124 {t("reviews")}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="lg:col-span-3">
+                    <CardHeader>
+                      <CardTitle>{t("upcomingAppointments")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {/* Placeholder for upcoming appointments */}
+                      <p className="text-muted-foreground">{t("noUpcomingAppointments")}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Category Specific Bids and Requests */}
+              {repairCategories.some(c => c.id === activeTab) && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Bids Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t("currentBidsFor")} {repairCategories.find(c => c.id === activeTab)?.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {categoryBids.length > 0 ? (
+                        <div className="space-y-4">
+                          {categoryBids.map((bid) => (
+                            <Card key={bid.id}>
+                              <CardContent className="p-4">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <h4 className="font-bold">{bid.scope}</h4>
+                                    <p className="text-sm text-gray-500">{bid.company}</p>
+                                  </div>
+                                  <Badge variant="secondary">{bid.amount}</Badge>
+                                </div>
+                                <div className="mt-2 flex justify-end">
+                                  <Button size="sm" variant="outline">{t("viewDetails")}</Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div
