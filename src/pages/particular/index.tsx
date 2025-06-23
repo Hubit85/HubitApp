@@ -144,9 +144,9 @@ export default function ParticularDashboard() {
         <SidebarParticular activeTab={activeTab} setActiveTab={setActiveTab} />
         
         {/* Main Content */}
-        <div className="flex-1 overflow-auto">
-          <ZoomableSection className="h-full" enableZoom={true} maxScale={3} minScale={0.5}>
-            <div className="p-6">
+        <div className="flex-1 overflow-hidden">
+          <ZoomableSection className="h-full overflow-auto" enableZoom={true} maxScale={3} minScale={0.5}>
+            <div className="p-6 min-h-full">
               <h1 className="text-3xl font-bold mb-6">
                 {activeTab === "perfil" ? t("myProfile") : 
                  activeTab === "presupuesto" ? t("requestQuote") :
