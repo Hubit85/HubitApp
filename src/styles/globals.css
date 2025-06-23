@@ -13,11 +13,97 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  /* Optimizaciones para móvil */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Soporte para zoom con pellizco */
+  touch-action: manipulation;
+  /* Prevenir selección accidental en móvil */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Permitir selección en elementos de texto */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Optimizaciones específicas para iOS */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* Prevenir bounce en iOS */
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+  
+  #__next {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Soporte para zoom con pellizco */
+.zoomable {
+  touch-action: pinch-zoom;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Optimizaciones para DuckDuckGo */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  body {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* Utilidades para móvil */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .pinch-zoom {
+    touch-action: pinch-zoom;
+  }
+  
+  .pan-zoom {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+  
+  /* Utilidades para iOS */
+  .ios-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+  }
+  
+  .no-bounce {
+    overscroll-behavior: none;
   }
 }
 
@@ -118,6 +204,35 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Optimizaciones para elementos interactivos en móvil */
+  button, [role="button"], input[type="submit"], input[type="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Optimizaciones para inputs en iOS */
+  input, textarea, select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Prevenir zoom automático en inputs en iOS */
+  input[type="text"], input[type="email"], input[type="password"], 
+  input[type="number"], input[type="tel"], input[type="url"], 
+  textarea, select {
+    font-size: 16px;
+  }
+  
+  @media screen and (max-width: 768px) {
+    input[type="text"], input[type="email"], input[type="password"], 
+    input[type="number"], input[type="tel"], input[type="url"], 
+    textarea, select {
+      font-size: 16px !important;
+    }
+  }
 }
 
 @layer components {
@@ -128,28 +243,70 @@ body {
   /* Estilos profesionales para tarjetas */
   .card {
     @apply shadow-md rounded-md overflow-hidden border border-border;
+    /* Optimización para móvil */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   
   /* Estilos para botones con aspecto profesional */
   .btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors;
+    /* Optimización táctil */
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
   }
   
   .btn-secondary {
     @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors;
+    /* Optimización táctil */
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
   }
   
   .btn-vintage {
     @apply bg-[hsl(25,30%,35%)] text-white hover:bg-[hsl(25,30%,30%)] transition-colors;
+    /* Optimización táctil */
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
   }
   
   /* Estilos para encabezados con aspecto profesional */
   .header-professional {
     @apply bg-white dark:bg-black border-b border-border shadow-sm;
+    /* Soporte para notch en iOS */
+    padding-top: env(safe-area-inset-top);
   }
   
   /* Estilos para barras laterales con aspecto profesional */
   .sidebar-professional {
     @apply bg-[hsl(0,0%,20%)] text-white border-r border-border;
+    /* Soporte para notch en iOS */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Contenedor principal con soporte para safe areas */
+  .main-container {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Clase para elementos que soportan zoom */
+  .zoom-container {
+    touch-action: pinch-zoom;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* Optimizaciones para scroll en móvil */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }
