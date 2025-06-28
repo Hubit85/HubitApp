@@ -370,6 +370,7 @@ const baseTranslations = {
     phoneLabel: "Teléfono",
     emailLabel: "Correo Electrónico",
     daysAgo: "días atrás",
+    editProfile: "Editar Perfil",
     
     // All other service categories and companies
     interiorPainting: "Pintura Interior",
@@ -869,7 +870,6 @@ const baseTranslations = {
     frontYardLandscaping: "Paisajismo de Jardín Delantero",
     herbGardenSetup: "Configuración de Jardín de Hierbas",
     gardenIrrigationSystem: "Sistema de Riego de Jardín",
-    kitchenRemodel: "Remodelación de Cocina",
     bathroomUpgrade: "Mejora de Baño",
     basementConversion: "Conversión de Sótano",
   },
@@ -1225,6 +1225,7 @@ const baseTranslations = {
     phoneLabel: "Phone",
     emailLabel: "Email",
     daysAgo: "days ago",
+    editProfile: "Edit Profile",
     
     // Additional translations needed for full functionality
     interiorPainting: "Interior Painting",
@@ -1724,11 +1725,10 @@ const baseTranslations = {
     frontYardLandscaping: "Front Yard Landscaping",
     herbGardenSetup: "Herb Garden Setup",
     gardenIrrigationSystem: "Garden Irrigation System",
-    kitchenRemodel: "Kitchen Remodel",
     bathroomUpgrade: "Bathroom Upgrade",
     basementConversion: "Basement Conversion",
   }
-};
+}
 
 // Provider component
 export default function LanguageProvider({ children }: { children: ReactNode }) {
