@@ -84,6 +84,7 @@ const translations = {
     welcomeToDashboard: "Bienvenido al Panel de Control",
     selectUserType: "Selecciona tu tipo de usuario",
     selectUserTypeDesc: "Elige la opción que mejor describa tu perfil para acceder a las funcionalidades específicas",
+    whatsYourRole: "¿Cuál es tu rol?",
     communityMemberDesc: "Accede a servicios exclusivos para tu comunidad",
     serviceProviderDesc: "Gestiona tus servicios y clientes",
     estateAdministratorDesc: "Administra propiedades y comunidades",
@@ -909,6 +910,7 @@ const translations = {
     welcomeToDashboard: "Welcome to the Dashboard",
     selectUserType: "Select your user type",
     selectUserTypeDesc: "Choose the option that best describes your profile to access specific functionalities",
+    whatsYourRole: "What's your role?",
     communityMemberDesc: "Access exclusive services for your community",
     serviceProviderDesc: "Manage your services and clients",
     estateAdministratorDesc: "Manage properties and communities",
@@ -1247,7 +1249,7 @@ const translations = {
     safeExperts: "Safe Experts",
     mailboxLockReplacement: "Mailbox Lock Replacement",
     mailSecure: "Mail Secure",
-    highSecurityLocks: "High-Security Locks",
+    highSecurityLocks: "High Security Locks",
     fortressLocks: "Fortress Locks",
     keylessSecurity: "Keyless Security",
     modernLocks: "Modern Locks",
@@ -1297,7 +1299,7 @@ const translations = {
     waterWonders: "Water Wonders",
     localMove: "Local Move",
     cityMovers: "City Movers",
-    longDistanceMove: "Long-Distance Move",
+    longDistanceMove: "Long Distance Move",
     distanceMovers: "Distance Movers",
     furnitureDelivery: "Furniture Delivery",
     furnitureShippers: "Furniture Shippers",
@@ -1408,7 +1410,7 @@ const translations = {
     basementRevival: "Basement Revival",
     kitchenDeepCleaning: "Kitchen Deep Cleaning",
     kitchenSanitizers: "Kitchen Sanitizers",
-    wholehouseDeepCleaning: "Whole-House Deep Cleaning",
+    wholehouseDeepCleaning: "Whole-house Deep Cleaning",
     totalRefresh: "Total Refresh",
     interiorStyling: "Interior Styling",
     styleExperts: "Style Experts",
@@ -1514,7 +1516,7 @@ const translations = {
     lengthLuxury: "Length Luxury",
     highlights: "Highlights",
     dimensionDesigners: "Dimension Designers",
-    trimAndStyle: "Trim and Style",
+    trimAndStyle: "Trim & Style",
     quickCuts: "Quick Cuts",
     keratin: "Keratin",
     smoothSolutions: "Smooth Solutions",
@@ -1533,12 +1535,12 @@ const translations = {
     deliveryMeal: "Delivery Meal",
     homeGourmet: "Home Gourmet",
     cocktailParty: "Cocktail Party",
-    mixAndMingle: "Mix and Mingle",
+    mixAndMingle: "Mix & Mingle",
     holidayDinner: "Holiday Dinner",
     festiveFeasts: "Festive Feasts",
     brunch: "Brunch",
     morningDelights: "Morning Delights",
-    fullServiceEvent: "Full-Service Event",
+    fullServiceEvent: "Full Service Event",
     completeCreations: "Complete Creations",
     dessertBar: "Dessert Bar",
     sweetTreats: "Sweet Treats",
@@ -1579,7 +1581,7 @@ const translations = {
     historicDoorRestoration: "Historic Door Restoration",
     woodworkRepair: "Woodwork Repair",
     moveOutDeepCleaning: "Move-Out Deep Cleaning",
-    carpetAndUpholsteryCleaning: "Carpet and Upholstery Cleaning",
+    carpetAndUpholsteryCleaning: "Carpet & Upholstery Cleaning",
     postRenovationCleaning: "Post-Renovation Cleaning",
     livingRoomStyling: "Living Room Styling",
     holidayDecoration: "Holiday Decoration",
@@ -1594,10 +1596,10 @@ const translations = {
     shareYourExperience: "Share your experience with this service...",
     tags: "Tags",
     makeRatingPublic: "Make this rating public",
-    privacyNotice: "Your real identity will remain private. Only your public name and community code will be shown.",
+    privacyNotice: "Your real identity will remain private. Only your public name and community code will be displayed.",
     submitRating: "Submit Rating",
     pleaseSelectRating: "Please select a rating",
-    commentTooShort: "Comment must be at least 10 characters long",
+    commentTooShort: "Comment must be at least 10 characters",
     ratingDistribution: "Rating Distribution",
     popularTags: "Popular Tags",
     totalReviews: "Total Reviews",
@@ -1612,12 +1614,12 @@ const translations = {
     comunicativo: "Communicative",
     precio_justo: "Fair Price",
     calidad_excelente: "Excellent Quality",
-    recomendable: "Recommended",
+    recomendable: "Recommendable",
     rapido: "Fast",
     cuidadoso: "Careful",
     experimentado: "Experienced",
     amable: "Friendly",
-    resolutivo: "Problem Solver",
+    resolutivo: "Decisive",
     organizado: "Organized",
     confiable: "Reliable",
     communityCode: "Community Code",
@@ -1656,21 +1658,49 @@ const translations = {
     unitNumber: "Unit Number",
     ownerName: "Owner Name",
     tenantName: "Tenant Name",
-    propertyOwner: "Owner",
-    propertyTenant: "Tenant",
+    propertyOwner: "Property Owner",
+    propertyTenant: "Property Tenant",
     verifyOwnership: "Verify Ownership",
     ownershipVerified: "Ownership Verified",
     pendingVerification: "Pending Verification",
   },
 };
 
-export default function LanguageProvider({ children }: { children: ReactNode }) {
+interface LanguageProviderProps {
+  children: ReactNode;
+}
+
+export const LanguageProvider = ({ children }: LanguageProviderProps) => {
   const [language, setLanguage] = useState<Language>("es");
 
   const t = useCallback((key: string, langOverride?: Language): string => {
-    const currentLang = langOverride || language;
-    const langTranslations = translations[currentLang] || translations.es;
-    return (langTranslations as any)[key] || key;
+    const lang = langOverride || language;
+    const keys = key.split('.');
+    let result: any = translations[lang];
+    if (!result) {
+        result = translations.es; // Fallback to Spanish
+    }
+    for (const k of keys) {
+      result = result?.[k];
+      if (result === undefined) {
+        // Fallback to English if translation is not found in the current language
+        let fallbackResult: any = translations.en;
+        for (const fk of keys) {
+          fallbackResult = fallbackResult?.[fk];
+          if (fallbackResult === undefined) {
+            // If not in English, try Spanish
+            let esFallback: any = translations.es;
+            for (const esk of keys) {
+                esFallback = esFallback?.[esk];
+                if(esFallback === undefined) return key;
+            }
+            return esFallback || key;
+          }
+        }
+        return fallbackResult || key;
+      }
+    }
+    return result || key;
   }, [language]);
 
   return (
@@ -1678,12 +1708,12 @@ export default function LanguageProvider({ children }: { children: ReactNode }) 
       {children}
     </LanguageContext.Provider>
   );
-}
+};
 
-export function useLanguage() {
+export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
     throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
-}
+};

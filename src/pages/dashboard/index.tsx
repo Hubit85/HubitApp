@@ -129,11 +129,11 @@ export default function Dashboard() {
       
       <Header />
       
-      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 pt-16 relative overflow-hidden">
+      <main className="min-h-screen bg-white pt-16 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
-            className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30"
+            className="absolute top-20 left-10 w-72 h-72 bg-gray-100 rounded-full mix-blend-multiply filter blur-xl opacity-20"
             animate={{
               x: [0, 100, 0],
               y: [0, -50, 0],
@@ -145,7 +145,7 @@ export default function Dashboard() {
             }}
           />
           <motion.div
-            className="absolute top-40 right-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30"
+            className="absolute top-40 right-10 w-72 h-72 bg-gray-200 rounded-full mix-blend-multiply filter blur-xl opacity-20"
             animate={{
               x: [0, -100, 0],
               y: [0, 50, 0],
@@ -157,7 +157,7 @@ export default function Dashboard() {
             }}
           />
           <motion.div
-            className="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30"
+            className="absolute bottom-20 left-1/2 w-72 h-72 bg-gray-150 rounded-full mix-blend-multiply filter blur-xl opacity-20"
             animate={{
               x: [0, 50, 0],
               y: [0, -30, 0],
@@ -186,7 +186,7 @@ export default function Dashboard() {
                   transition={{ delay: 0.5, duration: 1 }}
                 />
                 <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 relative">
-                  ¿Cuál es tu rol?
+                  {t('whatsYourRole')}
                   <motion.div
                     className="absolute top-0 right-0 transform translate-x-4 -translate-y-2"
                     animate={{ 
