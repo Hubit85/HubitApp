@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,6 +46,89 @@ interface PropertySelectorProps {
   onCancel: () => void;
 }
 
+// Mock data defined outside the component to prevent re-creation on re-renders
+const mockProperties: Property[] = [
+  {
+    id: '1',
+    address: 'Calle Mayor 123, Madrid',
+    propertyType: 'apartment',
+    communityName: 'Residencial Mayor',
+    totalUnits: 48,
+    buildingYear: 2010,
+    administrator: 'Administraciones García S.L.',
+    units: [
+      {
+        id: '1-1',
+        unitNumber: '1A',
+        floor: 1,
+        door: 'A',
+        ownerName: 'Juan Pérez',
+        isVerified: true,
+        userType: 'owner'
+      },
+      {
+        id: '1-2',
+        unitNumber: '1B',
+        floor: 1,
+        door: 'B',
+        ownerName: 'María García',
+        tenantName: 'Carlos López',
+        isVerified: false,
+        userType: 'tenant'
+      },
+      {
+        id: '1-3',
+        unitNumber: '2A',
+        floor: 2,
+        door: 'A',
+        ownerName: 'Ana Martín',
+        isVerified: true,
+        userType: 'owner'
+      }
+    ]
+  },
+  {
+    id: '2',
+    address: 'Avenida de la Paz 45, Madrid',
+    propertyType: 'house',
+    communityName: 'Urbanización La Paz',
+    totalUnits: 24,
+    buildingYear: 2015,
+    administrator: 'Gestión Inmobiliaria Plus',
+    units: [
+      {
+        id: '2-1',
+        unitNumber: '45',
+        floor: 0,
+        door: 'Única',
+        ownerName: 'Roberto Silva',
+        isVerified: true,
+        userType: 'owner'
+      }
+    ]
+  },
+  {
+    id: '3',
+    address: 'Plaza del Sol 8, Madrid',
+    propertyType: 'penthouse',
+    communityName: 'Edificio Sol',
+    totalUnits: 12,
+    buildingYear: 2020,
+    administrator: 'Administraciones Modernas',
+    units: [
+      {
+        id: '3-1',
+        unitNumber: 'Ático',
+        floor: 5,
+        door: 'Única',
+        ownerName: 'Elena Ruiz',
+        isVerified: true,
+        userType: 'owner'
+      }
+    ]
+  }
+];
+
 export default function PropertySelector({ userType, onPropertySelected, onCancel }: PropertySelectorProps) {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,89 +136,6 @@ export default function PropertySelector({ userType, onPropertySelected, onCance
   const [selectedUnit, setSelectedUnit] = useState<PropertyUnit | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-
-  // Mock data for demonstration
-  const mockProperties: Property[] = [
-    {
-      id: '1',
-      address: 'Calle Mayor 123, Madrid',
-      propertyType: 'apartment',
-      communityName: 'Residencial Mayor',
-      totalUnits: 48,
-      buildingYear: 2010,
-      administrator: 'Administraciones García S.L.',
-      units: [
-        {
-          id: '1-1',
-          unitNumber: '1A',
-          floor: 1,
-          door: 'A',
-          ownerName: 'Juan Pérez',
-          isVerified: true,
-          userType: 'owner'
-        },
-        {
-          id: '1-2',
-          unitNumber: '1B',
-          floor: 1,
-          door: 'B',
-          ownerName: 'María García',
-          tenantName: 'Carlos López',
-          isVerified: false,
-          userType: 'tenant'
-        },
-        {
-          id: '1-3',
-          unitNumber: '2A',
-          floor: 2,
-          door: 'A',
-          ownerName: 'Ana Martín',
-          isVerified: true,
-          userType: 'owner'
-        }
-      ]
-    },
-    {
-      id: '2',
-      address: 'Avenida de la Paz 45, Madrid',
-      propertyType: 'house',
-      communityName: 'Urbanización La Paz',
-      totalUnits: 24,
-      buildingYear: 2015,
-      administrator: 'Gestión Inmobiliaria Plus',
-      units: [
-        {
-          id: '2-1',
-          unitNumber: '45',
-          floor: 0,
-          door: 'Única',
-          ownerName: 'Roberto Silva',
-          isVerified: true,
-          userType: 'owner'
-        }
-      ]
-    },
-    {
-      id: '3',
-      address: 'Plaza del Sol 8, Madrid',
-      propertyType: 'penthouse',
-      communityName: 'Edificio Sol',
-      totalUnits: 12,
-      buildingYear: 2020,
-      administrator: 'Administraciones Modernas',
-      units: [
-        {
-          id: '3-1',
-          unitNumber: 'Ático',
-          floor: 5,
-          door: 'Única',
-          ownerName: 'Elena Ruiz',
-          isVerified: true,
-          userType: 'owner'
-        }
-      ]
-    }
-  ];
 
   useEffect(() => {
     if (searchTerm.length >= 3) {

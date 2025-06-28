@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChevronLeft, ChevronRight, Users, Building, Wrench, Star, TrendingUp, HelpCircle } from "lucide-react";
+import { Users, Building, Wrench, User } from "lucide-react";
 import PropertySelector from '@/components/PropertySelector';
+import ZoomableSection from "@/components/ZoomableSection";
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
