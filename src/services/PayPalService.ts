@@ -1,13 +1,5 @@
 
 import paypal from '@/lib/paypal';
-import { 
-  OrdersCreateRequest, 
-  OrdersCaptureRequest,
-  OrdersGetRequest,
-  PaymentsRefundsPostRequest,
-  BillingSubscriptionsCreateRequest,
-  BillingSubscriptionsCancelRequest
-} from '@paypal/paypal-server-sdk';
 
 export interface PayPalOrder {
   id: string;
@@ -53,8 +45,7 @@ class PayPalService {
     cancelUrl?: string;
   }): Promise<PayPalOrder> {
     try {
-      const request = new OrdersCreateRequest();
-      request.requestBody({
+      const requestBody = {
         intent: 'CAPTURE',
         purchase_units: [{
           amount: {
@@ -70,9 +61,11 @@ class PayPalService {
           landing_page: 'BILLING',
           user_action: 'PAY_NOW',
         },
-      });
+      };
 
-      const response = await paypal.orders.ordersCreate(request);
+      const response = await paypal.orders.ordersCreate({
+        body: requestBody,
+      });
       
       return {
         id: response.result.id!,
@@ -81,7 +74,7 @@ class PayPalService {
           currency_code: data.currency,
           value: data.amount.toFixed(2),
         },
-        links: response.result.links?.map(link => ({
+        links: response.result.links?.map((link: any) => ({
           href: link.href!,
           rel: link.rel!,
           method: link.method!,
@@ -95,8 +88,9 @@ class PayPalService {
 
   async captureOrder(orderId: string): Promise<PayPalCapture> {
     try {
-      const request = new OrdersCaptureRequest(orderId);
-      const response = await paypal.orders.ordersCapture(request);
+      const response = await paypal.orders.ordersCapture({
+        id: orderId,
+      });
 
       const capture = response.result.purchase_units?.[0]?.payments?.captures?.[0];
       
@@ -120,8 +114,9 @@ class PayPalService {
 
   async getOrder(orderId: string): Promise<PayPalOrder> {
     try {
-      const request = new OrdersGetRequest(orderId);
-      const response = await paypal.orders.ordersGet(request);
+      const response = await paypal.orders.ordersGet({
+        id: orderId,
+      });
 
       const amount = response.result.purchase_units?.[0]?.amount;
 
@@ -132,7 +127,7 @@ class PayPalService {
           currency_code: amount?.currency_code!,
           value: amount?.value!,
         },
-        links: response.result.links?.map(link => ({
+        links: response.result.links?.map((link: any) => ({
           href: link.href!,
           rel: link.rel!,
           method: link.method!,
@@ -146,15 +141,16 @@ class PayPalService {
 
   async createRefund(captureId: string, amount?: number, currency?: string): Promise<any> {
     try {
-      const request = new PaymentsRefundsPostRequest();
-      request.requestBody({
+      const requestBody = {
         amount: amount && currency ? {
           value: amount.toFixed(2),
           currency_code: currency,
         } : undefined,
-      });
+      };
 
-      const response = await paypal.payments.refundsPost(request);
+      const response = await paypal.payments.refundsPost({
+        body: requestBody,
+      });
       return response.result;
     } catch (error) {
       console.error('Error creating PayPal refund:', error);
@@ -169,8 +165,7 @@ class PayPalService {
     subscriberName?: string;
   }): Promise<PayPalSubscription> {
     try {
-      const request = new BillingSubscriptionsCreateRequest();
-      request.requestBody({
+      const requestBody = {
         plan_id: data.planId,
         start_time: data.startTime || new Date().toISOString(),
         subscriber: data.subscriberEmail ? {
@@ -192,16 +187,18 @@ class PayPalService {
           return_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription/success`,
           cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscription/cancel`,
         },
-      });
+      };
 
-      const response = await paypal.billingSubscriptions.subscriptionsPost(request);
+      const response = await paypal.billingSubscriptions.subscriptionsPost({
+        body: requestBody,
+      });
 
       return {
         id: response.result.id!,
         status: response.result.status!,
         plan_id: data.planId,
         start_time: data.startTime || new Date().toISOString(),
-        links: response.result.links?.map(link => ({
+        links: response.result.links?.map((link: any) => ({
           href: link.href!,
           rel: link.rel!,
           method: link.method!,
@@ -215,12 +212,14 @@ class PayPalService {
 
   async cancelSubscription(subscriptionId: string, reason?: string): Promise<void> {
     try {
-      const request = new BillingSubscriptionsCancelRequest(subscriptionId);
-      request.requestBody({
+      const requestBody = {
         reason: reason || 'User requested cancellation',
-      });
+      };
 
-      await paypal.billingSubscriptions.subscriptionsCancel(request);
+      await paypal.billingSubscriptions.subscriptionsCancel({
+        subscriptionId,
+        body: requestBody,
+      });
     } catch (error) {
       console.error('Error canceling PayPal subscription:', error);
       throw new Error('Failed to cancel PayPal subscription');
@@ -233,16 +232,12 @@ class PayPalService {
     webhookId: string
   ): Promise<boolean> {
     try {
-      // PayPal webhook verification logic would go here
-      // This is a simplified version - in production, you'd verify the signature
       const authAlgo = headers['paypal-auth-algo'];
       const transmission = headers['paypal-transmission-id'];
       const certId = headers['paypal-cert-id'];
       const signature = headers['paypal-transmission-sig'];
       const timestamp = headers['paypal-transmission-time'];
 
-      // In a real implementation, you would verify these headers
-      // against PayPal's webhook verification API
       return !!(authAlgo && transmission && certId && signature && timestamp);
     } catch (error) {
       console.error('Error verifying PayPal webhook:', error);

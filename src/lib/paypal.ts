@@ -1,11 +1,11 @@
 
-import { PayPalApi, Environment } from '@paypal/paypal-server-sdk';
+import { Client, Environment } from '@paypal/paypal-server-sdk';
 
 const environment = process.env.NODE_ENV === 'production' 
-  ? Environment.Live 
+  ? Environment.Production 
   : Environment.Sandbox;
 
-const paypal = new PayPalApi({
+const paypal = new Client({
   environment,
   clientCredentialsAuthCredentials: {
     oAuthClientId: process.env.PAYPAL_CLIENT_ID!,
