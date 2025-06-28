@@ -180,4 +180,5 @@ class RatingService {
   }
 }
 
-export default new RatingService();
+const ratingService = new RatingService();
+export default ratingService;
