@@ -139,7 +139,7 @@ export default function PropertySelection() {
 
       <Header />
 
-      <main className="min-h-screen bg-gray-50 py-8">
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="mb-8">
@@ -148,7 +148,7 @@ export default function PropertySelection() {
                 variant="outline"
                 size="sm"
                 onClick={() => router.back()}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-white hover:bg-blue-50 border-blue-200"
               >
                 <ArrowLeft className="h-4 w-4" />
                 {t("back")}
@@ -175,10 +175,10 @@ export default function PropertySelection() {
                   placeholder={t("searchProperties")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-white border-blue-200 focus:border-blue-400"
                 />
               </div>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4" />
                 {t("addProperty")}
               </Button>
@@ -190,7 +190,7 @@ export default function PropertySelection() {
             {filteredProperties.map((property) => (
               <Card 
                 key={property.id} 
-                className="hover:shadow-lg transition-shadow cursor-pointer"
+                className="hover:shadow-lg transition-all duration-300 cursor-pointer bg-white border-blue-100 hover:border-blue-300 hover:scale-105"
                 onClick={() => handlePropertySelect(property.id)}
               >
                 <CardHeader>
@@ -228,7 +228,7 @@ export default function PropertySelection() {
                     )}
                     
                     <div className="pt-4">
-                      <Button className="w-full">
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                         {t("selectProperty")}
                       </Button>
                     </div>
@@ -241,14 +241,16 @@ export default function PropertySelection() {
           {/* Empty State */}
           {filteredProperties.length === 0 && (
             <div className="text-center py-12">
-              <Building className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <div className="mx-auto mb-6 p-4 bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center">
+                <Building className="h-10 w-10 text-blue-600" />
+              </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {t("noPropertiesFound")}
               </h3>
               <p className="text-gray-600 mb-6">
                 {t("noPropertiesFoundDescription")}
               </p>
-              <Button className="flex items-center gap-2 mx-auto">
+              <Button className="flex items-center gap-2 mx-auto bg-blue-600 hover:bg-blue-700">
                 <Plus className="h-4 w-4" />
                 {t("addFirstProperty")}
               </Button>
