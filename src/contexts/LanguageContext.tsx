@@ -627,6 +627,24 @@ const baseTranslations = {
     portalForCompanies: "Portal para empresas",
     propertyManagement: "Gestión de propiedades",
     individualServices: "Servicios individuales",
+    
+    // Property selection translations
+    selectProperty: "Seleccionar Propiedad",
+    selectPropertyDesc: "Elige la propiedad para la cual deseas gestionar servicios y solicitar presupuestos.",
+    selectCommunityProperty: "Seleccionar Propiedad de la Comunidad",
+    selectCommunityPropertyDesc: "Elige la comunidad de la cual eres miembro para acceder a tu panel de control.",
+    accessPropertyDashboard: "Acceder al Panel de la Propiedad",
+    accessCommunityDashboard: "Acceder al Panel de la Comunidad",
+    noCommunityPropertiesFound: "No se encontraron propiedades de comunidad",
+    noCommunityPropertiesDesc: "Parece que no eres miembro de ninguna comunidad aún. Contacta con tu administrador para ser agregado.",
+    addNewCommunityProperty: "Agregar Nueva Propiedad de Comunidad",
+    units: "unidades",
+    apartmentInCenter: "Apartamento en Centro",
+    beachHouse: "Casa en la Playa", 
+    chaletInSuburbs: "Chalet en las Afueras",
+    apartment: "Apartamento",
+    house: "Casa",
+    chalet: "Chalet",
   },
   en: {
     // Common
@@ -1237,6 +1255,24 @@ const baseTranslations = {
     portalForCompanies: "Portal for companies",
     propertyManagement: "Property management",
     individualServices: "Individual services",
+    
+    // Property selection translations
+    selectProperty: "Select Property",
+    selectPropertyDesc: "Choose the property for which you want to manage services and request quotes.",
+    selectCommunityProperty: "Select Community Property", 
+    selectCommunityPropertyDesc: "Choose the community you are a member of to access your control panel.",
+    accessPropertyDashboard: "Access Property Dashboard",
+    accessCommunityDashboard: "Access Community Dashboard",
+    noCommunityPropertiesFound: "No community properties found",
+    noCommunityPropertiesDesc: "It seems you are not a member of any community yet. Contact your administrator to be added.",
+    addNewCommunityProperty: "Add New Community Property",
+    units: "units",
+    apartmentInCenter: "Apartment in Center",
+    beachHouse: "Beach House",
+    chaletInSuburbs: "Chalet in Suburbs", 
+    apartment: "Apartment",
+    house: "House",
+    chalet: "Chalet",
   },
 };
 
