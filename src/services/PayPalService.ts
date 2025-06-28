@@ -1,6 +1,4 @@
 
-import paypal from '@/lib/paypal';
-
 export interface PayPalOrder {
   id: string;
   status: string;
@@ -37,6 +35,29 @@ export interface PayPalSubscription {
 }
 
 class PayPalService {
+  private baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://api.paypal.com' 
+    : 'https://api.sandbox.paypal.com';
+
+  private async getAccessToken(): Promise<string> {
+    const clientId = process.env.PAYPAL_CLIENT_ID!;
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET!;
+    
+    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    
+    const response = await fetch(`${this.baseUrl}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'grant_type=client_credentials',
+    });
+
+    const data = await response.json();
+    return data.access_token;
+  }
+
   async createOrder(data: {
     amount: number;
     currency: string;
@@ -45,6 +66,8 @@ class PayPalService {
     cancelUrl?: string;
   }): Promise<PayPalOrder> {
     try {
+      const accessToken = await this.getAccessToken();
+      
       const requestBody = {
         intent: 'CAPTURE',
         purchase_units: [{
@@ -63,22 +86,25 @@ class PayPalService {
         },
       };
 
-      const response = await paypal.orders.ordersCreate({
-        body: requestBody,
+      const response = await fetch(`${this.baseUrl}/v2/checkout/orders`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       });
+
+      const result = await response.json();
       
       return {
-        id: response.result.id!,
-        status: response.result.status!,
+        id: result.id,
+        status: result.status,
         amount: {
           currency_code: data.currency,
           value: data.amount.toFixed(2),
         },
-        links: response.result.links?.map((link: any) => ({
-          href: link.href!,
-          rel: link.rel!,
-          method: link.method!,
-        })) || [],
+        links: result.links || [],
       };
     } catch (error) {
       console.error('Error creating PayPal order:', error);
@@ -88,22 +114,29 @@ class PayPalService {
 
   async captureOrder(orderId: string): Promise<PayPalCapture> {
     try {
-      const response = await paypal.orders.ordersCapture({
-        id: orderId,
+      const accessToken = await this.getAccessToken();
+
+      const response = await fetch(`${this.baseUrl}/v2/checkout/orders/${orderId}/capture`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
       });
 
-      const capture = response.result.purchase_units?.[0]?.payments?.captures?.[0];
+      const result = await response.json();
+      const capture = result.purchase_units?.[0]?.payments?.captures?.[0];
       
       if (!capture) {
         throw new Error('No capture found in PayPal response');
       }
 
       return {
-        id: capture.id!,
-        status: capture.status!,
+        id: capture.id,
+        status: capture.status,
         amount: {
-          currency_code: capture.amount?.currency_code!,
-          value: capture.amount?.value!,
+          currency_code: capture.amount?.currency_code,
+          value: capture.amount?.value,
         },
       };
     } catch (error) {
@@ -114,24 +147,27 @@ class PayPalService {
 
   async getOrder(orderId: string): Promise<PayPalOrder> {
     try {
-      const response = await paypal.orders.ordersGet({
-        id: orderId,
+      const accessToken = await this.getAccessToken();
+
+      const response = await fetch(`${this.baseUrl}/v2/checkout/orders/${orderId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
       });
 
-      const amount = response.result.purchase_units?.[0]?.amount;
+      const result = await response.json();
+      const amount = result.purchase_units?.[0]?.amount;
 
       return {
-        id: response.result.id!,
-        status: response.result.status!,
+        id: result.id,
+        status: result.status,
         amount: {
-          currency_code: amount?.currency_code!,
-          value: amount?.value!,
+          currency_code: amount?.currency_code,
+          value: amount?.value,
         },
-        links: response.result.links?.map((link: any) => ({
-          href: link.href!,
-          rel: link.rel!,
-          method: link.method!,
-        })) || [],
+        links: result.links || [],
       };
     } catch (error) {
       console.error('Error getting PayPal order:', error);
@@ -141,6 +177,8 @@ class PayPalService {
 
   async createRefund(captureId: string, amount?: number, currency?: string): Promise<any> {
     try {
+      const accessToken = await this.getAccessToken();
+      
       const requestBody = {
         amount: amount && currency ? {
           value: amount.toFixed(2),
@@ -148,10 +186,16 @@ class PayPalService {
         } : undefined,
       };
 
-      const response = await paypal.payments.refundsPost({
-        body: requestBody,
+      const response = await fetch(`${this.baseUrl}/v2/payments/captures/${captureId}/refund`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       });
-      return response.result;
+
+      return await response.json();
     } catch (error) {
       console.error('Error creating PayPal refund:', error);
       throw new Error('Failed to create PayPal refund');
@@ -165,6 +209,8 @@ class PayPalService {
     subscriberName?: string;
   }): Promise<PayPalSubscription> {
     try {
+      const accessToken = await this.getAccessToken();
+      
       const requestBody = {
         plan_id: data.planId,
         start_time: data.startTime || new Date().toISOString(),
@@ -189,20 +235,23 @@ class PayPalService {
         },
       };
 
-      const response = await paypal.billingSubscriptions.subscriptionsPost({
-        body: requestBody,
+      const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       });
 
+      const result = await response.json();
+
       return {
-        id: response.result.id!,
-        status: response.result.status!,
+        id: result.id,
+        status: result.status,
         plan_id: data.planId,
         start_time: data.startTime || new Date().toISOString(),
-        links: response.result.links?.map((link: any) => ({
-          href: link.href!,
-          rel: link.rel!,
-          method: link.method!,
-        })) || [],
+        links: result.links || [],
       };
     } catch (error) {
       console.error('Error creating PayPal subscription:', error);
@@ -212,13 +261,19 @@ class PayPalService {
 
   async cancelSubscription(subscriptionId: string, reason?: string): Promise<void> {
     try {
+      const accessToken = await this.getAccessToken();
+      
       const requestBody = {
         reason: reason || 'User requested cancellation',
       };
 
-      await paypal.billingSubscriptions.subscriptionsCancel({
-        subscriptionId,
-        body: requestBody,
+      await fetch(`${this.baseUrl}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       });
     } catch (error) {
       console.error('Error canceling PayPal subscription:', error);
