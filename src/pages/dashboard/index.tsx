@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Users, Building, Wrench, User, ChevronRight, Star, MapPin, Calendar, Clock, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
@@ -11,21 +12,15 @@ import PropertySelector from '@/components/PropertySelector';
 import ZoomableSection from "@/components/ZoomableSection";
 
 export default function Dashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedUserType, setSelectedUserType] = useState<string | null>(null);
   const [showPropertySelector, setShowPropertySelector] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const { t } = useLanguage();
   const router = useRouter();
 
-  const images = [
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
-  ];
+  const MotionButton = motion(Button);
 
   const userTypeImages = {
     communityMember: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
@@ -33,13 +28,6 @@ export default function Dashboard() {
     serviceProvider: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     estateAdministrator: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
   };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [images.length]);
 
   const handleUserTypeSelect = (userType: string) => {
     if (userType === 'particular' || userType === 'communityMember') {
@@ -77,7 +65,7 @@ export default function Dashboard() {
     setExpandedCard(expandedCard === cardType ? null : cardType);
   };
 
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, y: 50, scale: 0.9 },
     visible: (i: number) => ({
       opacity: 1,
@@ -101,7 +89,7 @@ export default function Dashboard() {
     }
   };
 
-  const iconVariants = {
+  const iconVariants: Variants = {
     initial: { scale: 1, rotate: 0 },
     hover: { 
       scale: 1.1, 
@@ -111,7 +99,7 @@ export default function Dashboard() {
     tap: { scale: 0.95 }
   };
 
-  const shimmerVariants = {
+  const shimmerVariants: Variants = {
     initial: { x: "-100%" },
     animate: {
       x: "100%",
@@ -398,7 +386,7 @@ export default function Dashboard() {
                     
                     <CardFooter>
                       <motion.div className="w-full">
-                        <Button 
+                        <MotionButton 
                           className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -408,13 +396,13 @@ export default function Dashboard() {
                           whileTap={{ scale: 0.95 }}
                         >
                           <motion.span
-                            className="flex items-center gap-2"
+                            className="flex items-center justify-center gap-2"
                             whileHover={{ x: 5 }}
                           >
                             {t('accessDashboard')}
                             <Zap className="h-4 w-4" />
                           </motion.span>
-                        </Button>
+                        </MotionButton>
                       </motion.div>
                     </CardFooter>
                   </div>
@@ -593,7 +581,7 @@ export default function Dashboard() {
                     
                     <CardFooter>
                       <motion.div className="w-full">
-                        <Button 
+                        <MotionButton 
                           className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -603,13 +591,13 @@ export default function Dashboard() {
                           whileTap={{ scale: 0.95 }}
                         >
                           <motion.span
-                            className="flex items-center gap-2"
+                            className="flex items-center justify-center gap-2"
                             whileHover={{ x: 5 }}
                           >
                             {t('accessDashboard')}
                             <Zap className="h-4 w-4" />
                           </motion.span>
-                        </Button>
+                        </MotionButton>
                       </motion.div>
                     </CardFooter>
                   </div>
@@ -788,7 +776,7 @@ export default function Dashboard() {
                     
                     <CardFooter>
                       <motion.div className="w-full">
-                        <Button 
+                        <MotionButton 
                           className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -798,13 +786,13 @@ export default function Dashboard() {
                           whileTap={{ scale: 0.95 }}
                         >
                           <motion.span
-                            className="flex items-center gap-2"
+                            className="flex items-center justify-center gap-2"
                             whileHover={{ x: 5 }}
                           >
                             {t('accessDashboard')}
                             <Zap className="h-4 w-4" />
                           </motion.span>
-                        </Button>
+                        </MotionButton>
                       </motion.div>
                     </CardFooter>
                   </div>
@@ -983,7 +971,7 @@ export default function Dashboard() {
                     
                     <CardFooter>
                       <motion.div className="w-full">
-                        <Button 
+                        <MotionButton 
                           className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -993,13 +981,13 @@ export default function Dashboard() {
                           whileTap={{ scale: 0.95 }}
                         >
                           <motion.span
-                            className="flex items-center gap-2"
+                            className="flex items-center justify-center gap-2"
                             whileHover={{ x: 5 }}
                           >
                             {t('accessDashboard')}
                             <Zap className="h-4 w-4" />
                           </motion.span>
-                        </Button>
+                        </MotionButton>
                       </motion.div>
                     </CardFooter>
                   </div>
