@@ -124,94 +124,101 @@ export default function Dashboard() {
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
                 <Card 
-                  className={`shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group ${
-                    expandedCard === 'communityMember' ? 'md:col-span-2 bg-gray-50' : 'hover:bg-gray-50'
+                  className={`shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group relative overflow-hidden ${
+                    expandedCard === 'communityMember' ? 'md:col-span-2' : ''
                   }`}
                   onClick={() => handleCardExpand('communityMember')}
                 >
-                  <CardHeader className="text-center">
-                    <div 
-                      className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${userTypeImages.communityMember})` }}
-                    >
-                      <div className="w-full h-full rounded-full bg-black bg-opacity-40 flex items-center justify-center">
-                        <Users className="h-10 w-10 text-white" />
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${userTypeImages.communityMember})` }}
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-50" />
+                  <div className="relative z-10">
+                    <CardHeader className="text-center">
+                      <div 
+                        className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-cover bg-center border-4 border-white"
+                        style={{ backgroundImage: `url(${userTypeImages.communityMember})` }}
+                      >
+                        <div className="w-full h-full rounded-full bg-black bg-opacity-40 flex items-center justify-center">
+                          <Users className="h-10 w-10 text-white" />
+                        </div>
                       </div>
-                    </div>
-                    <CardTitle className="text-2xl text-gray-800 flex items-center justify-center gap-2">
-                      {t('communityMember')}
-                      <ChevronRight className={`h-5 w-5 transition-transform ${expandedCard === 'communityMember' ? 'rotate-90' : ''}`} />
-                    </CardTitle>
-                    <CardDescription className="text-gray-600">
-                      {t('communityMemberDesc')}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  {expandedCard === 'communityMember' && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <CardContent className="pt-0">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800">{t('features')}</h3>
-                            <ul className="space-y-2 text-gray-600">
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('manageCommonAreas')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('viewCommunityBudget')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('participateInVoting')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('communicateWithNeighbors')}
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800">{t('recentActivity')}</h3>
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                                <Calendar className="h-4 w-4 text-gray-500" />
-                                <div>
-                                  <p className="text-sm font-medium">{t('nextMeeting')}</p>
-                                  <p className="text-xs text-gray-500">15 {t('january')} 2024</p>
+                      <CardTitle className="text-2xl text-white flex items-center justify-center gap-2">
+                        {t('communityMember')}
+                        <ChevronRight className={`h-5 w-5 transition-transform ${expandedCard === 'communityMember' ? 'rotate-90' : ''}`} />
+                      </CardTitle>
+                      <CardDescription className="text-gray-200">
+                        {t('communityMemberDesc')}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    {expandedCard === 'communityMember' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <CardContent className="pt-0">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-white">{t('features')}</h3>
+                              <ul className="space-y-2 text-gray-200">
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('manageCommonAreas')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('viewCommunityBudget')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('participateInVoting')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('communicateWithNeighbors')}
+                                </li>
+                              </ul>
+                            </div>
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-white">{t('recentActivity')}</h3>
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
+                                  <Calendar className="h-4 w-4 text-gray-300" />
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{t('nextMeeting')}</p>
+                                    <p className="text-xs text-gray-300">15 {t('january')} 2024</p>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                                <Clock className="h-4 w-4 text-gray-500" />
-                                <div>
-                                  <p className="text-sm font-medium">{t('pendingPayments')}</p>
-                                  <p className="text-xs text-gray-500">€125.50</p>
+                                <div className="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
+                                  <Clock className="h-4 w-4 text-gray-300" />
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{t('pendingPayments')}</p>
+                                    <p className="text-xs text-gray-300">€125.50</p>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </motion.div>
-                  )}
-                  
-                  <CardFooter>
-                    <Button 
-                      className="w-full bg-gray-800 hover:bg-gray-700 text-white"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUserTypeSelect('communityMember');
-                      }}
-                    >
-                      {t('accessDashboard')}
-                    </Button>
-                  </CardFooter>
+                        </CardContent>
+                      </motion.div>
+                    )}
+                    
+                    <CardFooter>
+                      <Button 
+                        className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30 backdrop-blur-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUserTypeSelect('communityMember');
+                        }}
+                      >
+                        {t('accessDashboard')}
+                      </Button>
+                    </CardFooter>
+                  </div>
                 </Card>
               </motion.div>
 
@@ -222,94 +229,101 @@ export default function Dashboard() {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <Card 
-                  className={`shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group ${
-                    expandedCard === 'serviceProvider' ? 'md:col-span-2 bg-gray-50' : 'hover:bg-gray-50'
+                  className={`shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group relative overflow-hidden ${
+                    expandedCard === 'serviceProvider' ? 'md:col-span-2' : ''
                   }`}
                   onClick={() => handleCardExpand('serviceProvider')}
                 >
-                  <CardHeader className="text-center">
-                    <div 
-                      className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${userTypeImages.serviceProvider})` }}
-                    >
-                      <div className="w-full h-full rounded-full bg-black bg-opacity-40 flex items-center justify-center">
-                        <Wrench className="h-10 w-10 text-white" />
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${userTypeImages.serviceProvider})` }}
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-50" />
+                  <div className="relative z-10">
+                    <CardHeader className="text-center">
+                      <div 
+                        className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-cover bg-center border-4 border-white"
+                        style={{ backgroundImage: `url(${userTypeImages.serviceProvider})` }}
+                      >
+                        <div className="w-full h-full rounded-full bg-black bg-opacity-40 flex items-center justify-center">
+                          <Wrench className="h-10 w-10 text-white" />
+                        </div>
                       </div>
-                    </div>
-                    <CardTitle className="text-2xl text-gray-800 flex items-center justify-center gap-2">
-                      {t('serviceProvider')}
-                      <ChevronRight className={`h-5 w-5 transition-transform ${expandedCard === 'serviceProvider' ? 'rotate-90' : ''}`} />
-                    </CardTitle>
-                    <CardDescription className="text-gray-600">
-                      {t('serviceProviderDesc')}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  {expandedCard === 'serviceProvider' && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <CardContent className="pt-0">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800">{t('services')}</h3>
-                            <ul className="space-y-2 text-gray-600">
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('receiveServiceRequests')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('manageQuotes')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('trackJobs')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('buildReputation')}
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800">{t('statistics')}</h3>
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                <div>
-                                  <p className="text-sm font-medium">{t('averageRating')}</p>
-                                  <p className="text-xs text-gray-500">4.8/5.0</p>
+                      <CardTitle className="text-2xl text-white flex items-center justify-center gap-2">
+                        {t('serviceProvider')}
+                        <ChevronRight className={`h-5 w-5 transition-transform ${expandedCard === 'serviceProvider' ? 'rotate-90' : ''}`} />
+                      </CardTitle>
+                      <CardDescription className="text-gray-200">
+                        {t('serviceProviderDesc')}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    {expandedCard === 'serviceProvider' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <CardContent className="pt-0">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-white">{t('services')}</h3>
+                              <ul className="space-y-2 text-gray-200">
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('receiveServiceRequests')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('manageQuotes')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('trackJobs')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('buildReputation')}
+                                </li>
+                              </ul>
+                            </div>
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-white">{t('statistics')}</h3>
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{t('averageRating')}</p>
+                                    <p className="text-xs text-gray-300">4.8/5.0</p>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                                <Clock className="h-4 w-4 text-gray-500" />
-                                <div>
-                                  <p className="text-sm font-medium">{t('completedJobs')}</p>
-                                  <p className="text-xs text-gray-500">156 {t('thisMonth')}</p>
+                                <div className="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
+                                  <Clock className="h-4 w-4 text-gray-300" />
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{t('completedJobs')}</p>
+                                    <p className="text-xs text-gray-300">156 {t('thisMonth')}</p>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </motion.div>
-                  )}
-                  
-                  <CardFooter>
-                    <Button 
-                      className="w-full bg-gray-800 hover:bg-gray-700 text-white"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUserTypeSelect('serviceProvider');
-                      }}
-                    >
-                      {t('accessDashboard')}
-                    </Button>
-                  </CardFooter>
+                        </CardContent>
+                      </motion.div>
+                    )}
+                    
+                    <CardFooter>
+                      <Button 
+                        className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30 backdrop-blur-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUserTypeSelect('serviceProvider');
+                        }}
+                      >
+                        {t('accessDashboard')}
+                      </Button>
+                    </CardFooter>
+                  </div>
                 </Card>
               </motion.div>
 
@@ -320,94 +334,101 @@ export default function Dashboard() {
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
                 <Card 
-                  className={`shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group ${
-                    expandedCard === 'estateAdministrator' ? 'md:col-span-2 bg-gray-50' : 'hover:bg-gray-50'
+                  className={`shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group relative overflow-hidden ${
+                    expandedCard === 'estateAdministrator' ? 'md:col-span-2' : ''
                   }`}
                   onClick={() => handleCardExpand('estateAdministrator')}
                 >
-                  <CardHeader className="text-center">
-                    <div 
-                      className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${userTypeImages.estateAdministrator})` }}
-                    >
-                      <div className="w-full h-full rounded-full bg-black bg-opacity-40 flex items-center justify-center">
-                        <Building className="h-10 w-10 text-white" />
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${userTypeImages.estateAdministrator})` }}
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-50" />
+                  <div className="relative z-10">
+                    <CardHeader className="text-center">
+                      <div 
+                        className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-cover bg-center border-4 border-white"
+                        style={{ backgroundImage: `url(${userTypeImages.estateAdministrator})` }}
+                      >
+                        <div className="w-full h-full rounded-full bg-black bg-opacity-40 flex items-center justify-center">
+                          <Building className="h-10 w-10 text-white" />
+                        </div>
                       </div>
-                    </div>
-                    <CardTitle className="text-2xl text-gray-800 flex items-center justify-center gap-2">
-                      {t('estateAdministrator')}
-                      <ChevronRight className={`h-5 w-5 transition-transform ${expandedCard === 'estateAdministrator' ? 'rotate-90' : ''}`} />
-                    </CardTitle>
-                    <CardDescription className="text-gray-600">
-                      {t('estateAdministratorDesc')}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  {expandedCard === 'estateAdministrator' && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <CardContent className="pt-0">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800">{t('management')}</h3>
-                            <ul className="space-y-2 text-gray-600">
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('manageMultipleProperties')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('financialReporting')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('maintenanceCoordination')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('legalCompliance')}
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800">{t('portfolio')}</h3>
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                                <Building className="h-4 w-4 text-gray-500" />
-                                <div>
-                                  <p className="text-sm font-medium">{t('managedProperties')}</p>
-                                  <p className="text-xs text-gray-500">24 {t('buildings')}</p>
+                      <CardTitle className="text-2xl text-white flex items-center justify-center gap-2">
+                        {t('estateAdministrator')}
+                        <ChevronRight className={`h-5 w-5 transition-transform ${expandedCard === 'estateAdministrator' ? 'rotate-90' : ''}`} />
+                      </CardTitle>
+                      <CardDescription className="text-gray-200">
+                        {t('estateAdministratorDesc')}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    {expandedCard === 'estateAdministrator' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <CardContent className="pt-0">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-white">{t('management')}</h3>
+                              <ul className="space-y-2 text-gray-200">
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('manageMultipleProperties')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('financialReporting')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('maintenanceCoordination')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('legalCompliance')}
+                                </li>
+                              </ul>
+                            </div>
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-white">{t('portfolio')}</h3>
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
+                                  <Building className="h-4 w-4 text-gray-300" />
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{t('managedProperties')}</p>
+                                    <p className="text-xs text-gray-300">24 {t('buildings')}</p>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                                <Users className="h-4 w-4 text-gray-500" />
-                                <div>
-                                  <p className="text-sm font-medium">{t('totalUnits')}</p>
-                                  <p className="text-xs text-gray-500">1,247 {t('units')}</p>
+                                <div className="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
+                                  <Users className="h-4 w-4 text-gray-300" />
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{t('totalUnits')}</p>
+                                    <p className="text-xs text-gray-300">1,247 {t('units')}</p>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </motion.div>
-                  )}
-                  
-                  <CardFooter>
-                    <Button 
-                      className="w-full bg-gray-800 hover:bg-gray-700 text-white"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUserTypeSelect('estateAdministrator');
-                      }}
-                    >
-                      {t('accessDashboard')}
-                    </Button>
-                  </CardFooter>
+                        </CardContent>
+                      </motion.div>
+                    )}
+                    
+                    <CardFooter>
+                      <Button 
+                        className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30 backdrop-blur-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUserTypeSelect('estateAdministrator');
+                        }}
+                      >
+                        {t('accessDashboard')}
+                      </Button>
+                    </CardFooter>
+                  </div>
                 </Card>
               </motion.div>
 
@@ -418,128 +439,106 @@ export default function Dashboard() {
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
                 <Card 
-                  className={`shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group ${
-                    expandedCard === 'particular' ? 'md:col-span-2 bg-gray-50' : 'hover:bg-gray-50'
+                  className={`shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group relative overflow-hidden ${
+                    expandedCard === 'particular' ? 'md:col-span-2' : ''
                   }`}
                   onClick={() => handleCardExpand('particular')}
                 >
-                  <CardHeader className="text-center">
-                    <div 
-                      className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${userTypeImages.particular})` }}
-                    >
-                      <div className="w-full h-full rounded-full bg-black bg-opacity-40 flex items-center justify-center">
-                        <User className="h-10 w-10 text-white" />
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${userTypeImages.particular})` }}
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-50" />
+                  <div className="relative z-10">
+                    <CardHeader className="text-center">
+                      <div 
+                        className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4 bg-cover bg-center border-4 border-white"
+                        style={{ backgroundImage: `url(${userTypeImages.particular})` }}
+                      >
+                        <div className="w-full h-full rounded-full bg-black bg-opacity-40 flex items-center justify-center">
+                          <User className="h-10 w-10 text-white" />
+                        </div>
                       </div>
-                    </div>
-                    <CardTitle className="text-2xl text-gray-800 flex items-center justify-center gap-2">
-                      {t('particular')}
-                      <ChevronRight className={`h-5 w-5 transition-transform ${expandedCard === 'particular' ? 'rotate-90' : ''}`} />
-                    </CardTitle>
-                    <CardDescription className="text-gray-600">
-                      {t('particularDesc')}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  {expandedCard === 'particular' && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <CardContent className="pt-0">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800">{t('services')}</h3>
-                            <ul className="space-y-2 text-gray-600">
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('requestQuotes')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('findServiceProviders')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('manageProperties')}
-                              </li>
-                              <li className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-gray-500" />
-                                {t('trackProjects')}
-                              </li>
-                            </ul>
-                          </div>
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800">{t('quickAccess')}</h3>
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                                <MapPin className="h-4 w-4 text-gray-500" />
-                                <div>
-                                  <p className="text-sm font-medium">{t('nearbyProviders')}</p>
-                                  <p className="text-xs text-gray-500">15 {t('available')}</p>
+                      <CardTitle className="text-2xl text-white flex items-center justify-center gap-2">
+                        {t('particular')}
+                        <ChevronRight className={`h-5 w-5 transition-transform ${expandedCard === 'particular' ? 'rotate-90' : ''}`} />
+                      </CardTitle>
+                      <CardDescription className="text-gray-200">
+                        {t('particularDesc')}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    {expandedCard === 'particular' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <CardContent className="pt-0">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-white">{t('services')}</h3>
+                              <ul className="space-y-2 text-gray-200">
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('requestQuotes')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('findServiceProviders')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('manageProperties')}
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-gray-300" />
+                                  {t('trackProjects')}
+                                </li>
+                              </ul>
+                            </div>
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-white">{t('quickAccess')}</h3>
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
+                                  <MapPin className="h-4 w-4 text-gray-300" />
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{t('nearbyProviders')}</p>
+                                    <p className="text-xs text-gray-300">15 {t('available')}</p>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                                <Clock className="h-4 w-4 text-gray-500" />
-                                <div>
-                                  <p className="text-sm font-medium">{t('activeRequests')}</p>
-                                  <p className="text-xs text-gray-500">3 {t('pending')}</p>
+                                <div className="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg backdrop-blur-sm">
+                                  <Clock className="h-4 w-4 text-gray-300" />
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{t('activeRequests')}</p>
+                                    <p className="text-xs text-gray-300">3 {t('pending')}</p>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </motion.div>
-                  )}
-                  
-                  <CardFooter>
-                    <Button 
-                      className="w-full bg-gray-800 hover:bg-gray-700 text-white"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUserTypeSelect('particular');
-                      }}
-                    >
-                      {t('accessDashboard')}
-                    </Button>
-                  </CardFooter>
+                        </CardContent>
+                      </motion.div>
+                    )}
+                    
+                    <CardFooter>
+                      <Button 
+                        className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white border border-white border-opacity-30 backdrop-blur-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUserTypeSelect('particular');
+                        }}
+                      >
+                        {t('accessDashboard')}
+                      </Button>
+                    </CardFooter>
+                  </div>
                 </Card>
               </motion.div>
             </div>
 
-            {/* Hero Section with Rotating Images */}
-            <motion.div 
-              className="mt-16 relative h-96 rounded-lg overflow-hidden shadow-xl"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            >
-              <div className="absolute inset-0">
-                {images.map((image, index) => (
-                  <motion.div
-                    key={index}
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${image})` }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: index === currentImageIndex ? 1 : 0 }}
-                    transition={{ duration: 1 }}
-                  />
-                ))}
-                <div className="absolute inset-0 bg-black bg-opacity-40" />
-              </div>
-              <div className="relative z-10 flex items-center justify-center h-full text-white text-center">
-                <div>
-                  <h2 className="text-4xl font-bold mb-4">{t('transformYourProperty')}</h2>
-                  <p className="text-xl mb-6">{t('connectWithProfessionals')}</p>
-                  <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100">
-                    {t('getStarted')}
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
+            {/* Remove the Hero Section completely */}
           </div>
         </ZoomableSection>
       </main>
