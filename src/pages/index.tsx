@@ -425,9 +425,12 @@ export default function Home() {
 
               {/* Pasos para comprar HBIT */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                {/* Paso 1 */}
+                {/* Paso 1 - Configura billetera Solana */}
                 <div className="relative">
-                  <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors">
+                  <Card 
+                    className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors cursor-pointer transform hover:scale-105 transition-transform"
+                    onClick={() => window.open("https://phantom.com", "_blank")}
+                  >
                     <CardHeader className="text-center">
                       <div className="mx-auto mb-4 relative">
                         <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
@@ -445,7 +448,7 @@ export default function Home() {
                       <p className="text-gray-600 text-center mb-4">
                         {t("step1Description")}
                       </p>
-                      <div className="text-center relative w-full h-32"> {/* Added relative and dimensions */}
+                      <div className="text-center relative w-full h-32">
                         <Image 
                           src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
                           alt="Wallet Setup" 
@@ -453,6 +456,9 @@ export default function Home() {
                           objectFit="cover"
                           className="rounded-lg"
                         />
+                      </div>
+                      <div className="text-center mt-4">
+                        <span className="text-sm text-blue-600 font-medium">Haz clic para ir a Phantom →</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -462,9 +468,12 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Paso 2 */}
+                {/* Paso 2 - Intercambia SOL por HBIT */}
                 <div className="relative">
-                  <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors">
+                  <Card 
+                    className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors cursor-pointer transform hover:scale-105 transition-transform"
+                    onClick={() => window.open("https://gmgn.ai/trend?chain=sol", "_blank")}
+                  >
                     <CardHeader className="text-center">
                       <div className="mx-auto mb-4 relative">
                         <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
@@ -482,7 +491,7 @@ export default function Home() {
                       <p className="text-gray-600 text-center mb-4">
                         {t("step2Description")}
                       </p>
-                      <div className="text-center relative w-full h-32"> {/* Added relative and dimensions */}
+                      <div className="text-center relative w-full h-32">
                         <Image 
                           src="https://images.unsplash.com/photo-1621761191319-c6fb62004040?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
                           alt="Buy SOL" 
@@ -490,6 +499,9 @@ export default function Home() {
                           objectFit="cover"
                           className="rounded-lg"
                         />
+                      </div>
+                      <div className="text-center mt-4">
+                        <span className="text-sm text-purple-600 font-medium">Haz clic para intercambiar →</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -519,7 +531,7 @@ export default function Home() {
                       <p className="text-gray-600 text-center mb-4">
                         {t("step3Description")}
                       </p>
-                      <div className="text-center relative w-full h-32"> {/* Added relative and dimensions */}
+                      <div className="text-center relative w-full h-32">
                         <Image 
                           src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" 
                           alt="DEX Trading" 
