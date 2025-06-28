@@ -111,27 +111,12 @@ export default function ServiceProviderDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>{t("companyName")}</Label>
-                      <p className="text-gray-600">Fontanería Express S.L.</p>
-                    </div>
-                    <div>
-                      <Label>{t("taxId")}</Label>
-                      <p className="text-gray-600">B-12345678</p>
-                    </div>
-                    <div>
-                      <Label>{t("phoneLabel")}</Label>
-                      <p className="text-gray-600">+34 912 345 678</p>
-                    </div>
-                    <div>
-                      <Label>{t("emailLabel")}</Label>
-                      <p className="text-gray-600">info@fontaneriaexpress.com</p>
-                    </div>
+                    <div><Label>{t("companyName")}</Label><p className="text-gray-600">Fontanería Express S.L.</p></div>
+                    <div><Label>{t("taxId")}</Label><p className="text-gray-600">B-12345678</p></div>
+                    <div><Label>{t("phoneLabel")}</Label><p className="text-gray-600">+34 912 345 678</p></div>
+                    <div><Label>{t("emailLabel")}</Label><p className="text-gray-600">info@fontaneriaexpress.com</p></div>
                   </div>
-                  <div className="mt-4">
-                    <Label>{t("businessAddress")}</Label>
-                    <p className="text-gray-600">Calle Mayor 123, 28001 Madrid, España</p>
-                  </div>
+                  <div className="mt-4"><Label>{t("businessAddress")}</Label><p className="text-gray-600">Calle Mayor 123, 28001 Madrid, España</p></div>
                 </CardContent>
               </Card>
             </div>
@@ -140,67 +125,33 @@ export default function ServiceProviderDashboard() {
           {activeTab === "overview" && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t("activeBids")}</CardTitle>
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">12</div>
-                  <p className="text-xs text-muted-foreground">+5 {t("vsLastWeek")}</p>
-                </CardContent>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t("activeBids")}</CardTitle><Briefcase className="h-4 w-4 text-muted-foreground" /></CardHeader>
+                <CardContent><div className="text-2xl font-bold">12</div><p className="text-xs text-muted-foreground">+5 {t("vsLastWeek")}</p></CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t("completedJobs")}</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">156</div>
-                  <p className="text-xs text-muted-foreground">+20 {t("thisMonth")}</p>
-                </CardContent>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t("completedJobs")}</CardTitle><CheckCircle className="h-4 w-4 text-muted-foreground" /></CardHeader>
+                <CardContent><div className="text-2xl font-bold">156</div><p className="text-xs text-muted-foreground">+20 {t("thisMonth")}</p></CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t("averageRating")}</CardTitle>
-                  <Star className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">4.8</div>
-                  <p className="text-xs text-muted-foreground">{t("basedOn")} 124 {t("reviews")}</p>
-                </CardContent>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t("averageRating")}</CardTitle><Star className="h-4 w-4 text-muted-foreground" /></CardHeader>
+                <CardContent><div className="text-2xl font-bold">4.8</div><p className="text-xs text-muted-foreground">{t("basedOn")} 124 {t("reviews")}</p></CardContent>
               </Card>
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{t("responseTime")}</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">2h</div>
-                  <p className="text-xs text-muted-foreground">{t("average")}</p>
-                </CardContent>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t("responseTime")}</CardTitle><Clock className="h-4 w-4 text-muted-foreground" /></CardHeader>
+                <CardContent><div className="text-2xl font-bold">2h</div><p className="text-xs text-muted-foreground">{t("average")}</p></CardContent>
               </Card>
               
               <Card className="lg:col-span-4">
-                <CardHeader>
-                  <CardTitle>{t("recentActivity")}</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>{t("recentActivity")}</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{t("newQuoteRequest")}</h4>
-                        <p className="text-sm text-gray-500">{t("bathroomPlumbingOverhaul")} - €450</p>
-                      </div>
+                      <div><h4 className="font-medium">{t("newQuoteRequest")}</h4><p className="text-sm text-gray-500">{t("bathroomPlumbingOverhaul")} - €450</p></div>
                       <Button size="sm">{t("respond")}</Button>
                     </div>
                     <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{t("jobCompleted")}</h4>
-                        <p className="text-sm text-gray-500">{t("kitchenSinkInstallation")} - €280</p>
-                      </div>
-                      <Badge variant="outline" className="bg-green-100 text-green-800">
-                        {t("completed")}
-                      </Badge>
+                      <div><h4 className="font-medium">{t("jobCompleted")}</h4><p className="text-sm text-gray-500">{t("kitchenSinkInstallation")} - €280</p></div>
+                      <Badge variant="outline" className="bg-green-100 text-green-800">{t("completed")}</Badge>
                     </div>
                   </div>
                 </CardContent>
@@ -211,72 +162,45 @@ export default function ServiceProviderDashboard() {
           {repairCategories.some(c => c.id === activeTab) && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>{t("availableJobs")} - {repairCategories.find(c => c.id === activeTab)?.name}</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>{t("availableJobs")} - {repairCategories.find(c => c.id === activeTab)?.name}</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="border rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-bold">{t("bathroomPlumbingOverhaul")}</h4>
-                          <p className="text-sm text-gray-500">{t("budget")}: €450</p>
-                        </div>
+                        <div><h4 className="font-bold">{t("bathroomPlumbingOverhaul")}</h4><p className="text-sm text-gray-500">{t("budget")}: €450</p></div>
                         <Badge variant="secondary">Urgente</Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Necesito reparar una fuga en el baño principal y cambiar la grifería.
-                      </p>
+                      <p className="text-sm text-gray-600 mb-3">Necesito reparar una fuga en el baño principal y cambiar la grifería.</p>
                       <Button size="sm">{t("submitBid")}</Button>
                     </div>
-                    
                     <div className="border rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-bold">{t("kitchenSinkInstallation")}</h4>
-                          <p className="text-sm text-gray-500">{t("budget")}: €280</p>
-                        </div>
+                        <div><h4 className="font-bold">{t("kitchenSinkInstallation")}</h4><p className="text-sm text-gray-500">{t("budget")}: €280</p></div>
                         <Badge variant="outline">Normal</Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Instalación de nuevo fregadero de cocina con grifería incluida.
-                      </p>
+                      <p className="text-sm text-gray-600 mb-3">Instalación de nuevo fregadero de cocina con grifería incluida.</p>
                       <Button size="sm">{t("submitBid")}</Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-
               <Card>
-                <CardHeader>
-                  <CardTitle>{t("myBids")} - {repairCategories.find(c => c.id === activeTab)?.name}</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>{t("myBids")} - {repairCategories.find(c => c.id === activeTab)?.name}</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="border rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-bold">{t("toiletRepair")}</h4>
-                          <p className="text-sm text-gray-500">{t("myBid")}: €175</p>
-                        </div>
+                        <div><h4 className="font-bold">{t("toiletRepair")}</h4><p className="text-sm text-gray-500">{t("myBid")}: €175</p></div>
                         <Badge className="bg-yellow-100 text-yellow-800">Pendiente</Badge>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        Reparación de cisterna y cambio de mecanismo interno.
-                      </p>
+                      <p className="text-sm text-gray-600">Reparación de cisterna y cambio de mecanismo interno.</p>
                     </div>
-                    
                     <div className="border rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h4 className="font-bold">{t("leakDetection")}</h4>
-                          <p className="text-sm text-gray-500">{t("myBid")}: €320</p>
-                        </div>
+                        <div><h4 className="font-bold">{t("leakDetection")}</h4><p className="text-sm text-gray-500">{t("myBid")}: €320</p></div>
                         <Badge className="bg-green-100 text-green-800">Aceptado</Badge>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        Detección y reparación de fuga en tubería principal.
-                      </p>
+                      <p className="text-sm text-gray-600">Detección y reparación de fuga en tubería principal.</p>
                     </div>
                   </div>
                 </CardContent>

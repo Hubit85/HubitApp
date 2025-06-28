@@ -57,18 +57,12 @@ export default function Dashboard() {
     }
   };
 
-  const handlePropertySelectorCancel = () => {
-    setShowPropertySelector(false);
-    setSelectedUserType(null);
-  };
-
   // Show property selector if needed
-  if (showPropertySelector && selectedUserType) {
+  if (showPropertySelector) {
     return (
       <PropertySelector
-        userType={selectedUserType as 'particular' | 'community_member'}
         onPropertySelected={handlePropertySelected}
-        onCancel={handlePropertySelectorCancel}
+        onCancel={() => setShowPropertySelector(false)}
       />
     );
   }
