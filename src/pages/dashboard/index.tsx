@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
@@ -185,7 +184,7 @@ export default function Dashboard() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5, duration: 1 }}
                 />
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 relative">
+                <h1 className="text-5xl font-bold text-gray-800 mb-4 relative">
                   {t('whatsYourRole')}
                   <motion.div
                     className="absolute top-0 right-0 transform translate-x-4 -translate-y-2"
@@ -199,7 +198,7 @@ export default function Dashboard() {
                       repeatDelay: 3
                     }}
                   >
-                    <Sparkles className="h-8 w-8 text-yellow-400" />
+                    <Sparkles className="h-8 w-8 text-amber-600" />
                   </motion.div>
                 </h1>
               </motion.div>
@@ -231,7 +230,7 @@ export default function Dashboard() {
                   onClick={() => handleCardExpand('communityMember')}
                   style={{
                     background: hoveredCard === 'communityMember' 
-                      ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))'
+                      ? 'linear-gradient(135deg, rgba(64, 64, 64, 0.1), rgba(101, 67, 33, 0.1))'
                       : 'rgba(255, 255, 255, 0.95)'
                   }}
                 >
@@ -249,7 +248,7 @@ export default function Dashboard() {
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                     style={{ backgroundImage: `url(${userTypeImages.communityMember})` }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900/70 via-blue-800/60 to-purple-900/70 transition-opacity duration-500 group-hover:opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900/70 via-amber-800/60 to-gray-900/70 transition-opacity duration-500 group-hover:opacity-80" />
                   
                   {/* Floating particles */}
                   <AnimatePresence>
@@ -426,7 +425,7 @@ export default function Dashboard() {
                   onClick={() => handleCardExpand('serviceProvider')}
                   style={{
                     background: hoveredCard === 'serviceProvider' 
-                      ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.1))'
+                      ? 'linear-gradient(135deg, rgba(64, 64, 64, 0.1), rgba(101, 67, 33, 0.1))'
                       : 'rgba(255, 255, 255, 0.95)'
                   }}
                 >
@@ -444,7 +443,7 @@ export default function Dashboard() {
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                     style={{ backgroundImage: `url(${userTypeImages.serviceProvider})` }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-900/70 via-blue-800/60 to-teal-900/70 transition-opacity duration-500 group-hover:opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900/70 via-amber-800/60 to-gray-900/70 transition-opacity duration-500 group-hover:opacity-80" />
                   
                   {/* Floating particles */}
                   <AnimatePresence>
@@ -453,7 +452,7 @@ export default function Dashboard() {
                         {[...Array(6)].map((_, i) => (
                           <motion.div
                             key={i}
-                            className="absolute w-2 h-2 bg-green-300 rounded-full opacity-60"
+                            className="absolute w-2 h-2 bg-white rounded-full opacity-60"
                             initial={{ 
                               x: Math.random() * 400,
                               y: Math.random() * 300,
@@ -621,7 +620,7 @@ export default function Dashboard() {
                   onClick={() => handleCardExpand('estateAdministrator')}
                   style={{
                     background: hoveredCard === 'estateAdministrator' 
-                      ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1))'
+                      ? 'linear-gradient(135deg, rgba(64, 64, 64, 0.1), rgba(101, 67, 33, 0.1))'
                       : 'rgba(255, 255, 255, 0.95)'
                   }}
                 >
@@ -816,7 +815,7 @@ export default function Dashboard() {
                   onClick={() => handleCardExpand('particular')}
                   style={{
                     background: hoveredCard === 'particular' 
-                      ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.1))'
+                      ? 'linear-gradient(135deg, rgba(64, 64, 64, 0.1), rgba(101, 67, 33, 0.1))'
                       : 'rgba(255, 255, 255, 0.95)'
                   }}
                 >
@@ -834,7 +833,7 @@ export default function Dashboard() {
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                     style={{ backgroundImage: `url(${userTypeImages.particular})` }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-900/70 via-red-800/60 to-yellow-900/70 transition-opacity duration-500 group-hover:opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-900/70 via-gray-800/60 to-gray-900/70 transition-opacity duration-500 group-hover:opacity-80" />
                   
                   {/* Floating particles */}
                   <AnimatePresence>
