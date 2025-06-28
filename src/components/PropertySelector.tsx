@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,9 +40,8 @@ interface PropertyUnit {
 }
 
 interface PropertySelectorProps {
-  userType: 'particular' | 'community_member';
-  onPropertySelected: (property: Property, unit: PropertyUnit) => void;
-  onCancel: () => void;
+  value: string | null;
+  onChange: (value: string | null) => void;
 }
 
 // Mock data defined outside the component to prevent re-creation on re-renders
@@ -129,7 +127,8 @@ const mockProperties: Property[] = [
   }
 ];
 
-export default function PropertySelector({ userType, onPropertySelected, onCancel }: PropertySelectorProps) {
+export default function PropertySelector({ value, onChange }: PropertySelectorProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -192,6 +191,84 @@ export default function PropertySelector({ userType, onPropertySelected, onCance
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Home className="h-5 w-5 mr-3 text-gray-500" />
+              <div>
+                <p className="font-medium text-gray-800">
+                  {value
+                    ? properties.find((p) => p.id === value)?.name
+                    : t("selectProperty")}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {value
+                    ? properties.find((p) => p.id === value)?.address
+                    : t("noPropertySelected")}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {t('changeProperty')}
+            </Button>
+          </div>
+          {isOpen && (
+            <div className="absolute z-10 mt-2 w-full bg-white rounded-md shadow-lg border">
+              <ul className="py-1">
+                {properties.map((property) => (
+                  <li
+                    key={property.id}
+                    className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center"
+                    onClick={() => {
+                      onChange(property.id);
+                      setIsOpen(false);
+                    }}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <div className="text-blue-600 mt-1">
+                          {getPropertyTypeIcon(property.propertyType)}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">{property.communityName}</h3>
+                          <div className="flex items-center text-gray-600 mt-1">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            <span>{property.address}</span>
+                          </div>
+                          <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                            <div className="flex items-center">
+                              <Users className="h-4 w-4 mr-1" />
+                              <span>{property.totalUnits} {t('totalUnits')}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              <span>{property.buildingYear}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">
+                        {t(property.propertyType)}
+                      </Badge>
+                    </div>
+                  </li>
+                ))}
+                <li
+                  className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center text-blue-600"
+                  onClick={() => {
+                    onChange(null);
+                    setIsOpen(false);
+                  }}
+                >
+                  <PlusCircle className="h-5 w-5 mr-3" />
+                  {t('addProperty')}
+                </li>
+              </ul>
+            </div>
+          )}
           {!selectedProperty ? (
             <>
               {/* Search Section */}

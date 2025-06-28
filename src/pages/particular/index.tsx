@@ -12,22 +12,11 @@ import {
   Home, 
   Settings, 
   Bell,
-  Mail,
-  Phone,
   MapPin,
-  Calendar,
-  Upload,
-  Droplet,
-  Zap,
-  Paintbrush,
-  Hammer,
-  Construction,
   Search,
   CreditCard,
   ThumbsUp,
-  Award,
-  ChevronLeft,
-  ChevronRight
+  Award
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
@@ -36,8 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import PropertySelector from "@/components/PropertySelector";
 import Image from "next/image";
+import { SidebarParticular } from "@/components/layout/SidebarParticular";
 
-// Define service provider type
 interface ServiceProvider {
   id: string;
   name: string;
@@ -50,11 +39,9 @@ interface ServiceProvider {
 
 export default function ParticularDashboard() {
   const [activeTab, setActiveTab] = useState("perfil");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
   const { t } = useLanguage();
   
-  // Sample service providers data
   const serviceProviders: ServiceProvider[] = [
     { 
       id: "1", 
@@ -83,39 +70,10 @@ export default function ParticularDashboard() {
       location: "Valencia", 
       image: "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
     },
-    { 
-      id: "4", 
-      name: "Carpintería Artesanal", 
-      category: "Carpintería", 
-      rating: 4.7, 
-      reviews: 87, 
-      location: "Sevilla", 
-      image: "https://images.unsplash.com/photo-1622150162806-409d3a83a585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-    },
-    { 
-      id: "5", 
-      name: "Albañilería Profesional", 
-      category: "Albañilería", 
-      rating: 4.5, 
-      reviews: 112, 
-      location: "Zaragoza", 
-      image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-    },
-    { 
-      id: "6", 
-      name: "Techadores Expertos", 
-      category: "Techado", 
-      rating: 4.4, 
-      reviews: 76, 
-      location: "Málaga", 
-      image: "https://images.unsplash.com/photo-1598252976330-b8a1461d47c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-    }
   ];
 
-  // Sample favorite providers
   const favoriteProviders = serviceProviders.slice(0, 3);
 
-  // Sample properties
   const properties = [
     {
       id: "1",
@@ -135,19 +93,6 @@ export default function ParticularDashboard() {
     }
   ];
 
-  const sidebarItems = [
-    { id: "perfil", label: t("myProfile"), icon: User },
-    { id: "presupuesto", label: t("requestQuote"), icon: FileText },
-    { id: "proveedores", label: t("serviceProviders"), icon: Store },
-    { id: "favoritos", label: t("myFavorites"), icon: Star },
-    { id: "propiedades", label: t("myProperties"), icon: Home },
-    { id: "notificaciones", label: t("notifications"), icon: Bell },
-    { id: "configuracion", label: t("configuration"), icon: Settings },
-    { id: "pagos", label: t("myPayments") || "Mis Pagos", icon: CreditCard },
-    { id: "recomendaciones", label: t("recommendations") || "Recomendaciones", icon: ThumbsUp },
-    { id: "premios", label: t("myAwards") || "Mis Premios", icon: Award }
-  ];
-
   return (
     <>
       <Head>
@@ -158,202 +103,122 @@ export default function ParticularDashboard() {
       <Header />
       
       <div className='flex h-screen bg-gray-100 pt-16'>
-        {/* Collapsible Sidebar */}
-        <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-gray-800 text-white shadow-lg transition-all duration-300 overflow-y-auto`}>
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-6">
-              {!sidebarCollapsed && <h2 className="text-2xl font-bold">{t("dashboard")}</h2>}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="text-white hover:bg-gray-700"
-              >
-                {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-              </Button>
-            </div>
-            <nav className="space-y-2">
-              {sidebarItems.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <Button
-                    key={item.id}
-                    variant={activeTab === item.id ? "default" : "ghost"}
-                    className={`w-full ${sidebarCollapsed ? 'justify-center px-2' : 'justify-start'} text-white hover:bg-gray-700`}
-                    onClick={() => setActiveTab(item.id)}
-                    title={sidebarCollapsed ? item.label : undefined}
-                  >
-                    <IconComponent className={`h-5 w-5 ${!sidebarCollapsed ? 'mr-2' : ''}`} />
-                    {!sidebarCollapsed && item.label}
-                  </Button>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
+        <SidebarParticular activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-6">
-            {/* Property Selector */}
-            <div className="mb-6">
-              <PropertySelector
-                selectedProperty={selectedProperty}
-                onPropertyChange={setSelectedProperty}
-              />
-            </div>
+        <main className="flex-1 overflow-auto p-6">
+          <div className="mb-6">
+            <PropertySelector
+              value={selectedProperty}
+              onChange={setSelectedProperty}
+            />
+          </div>
 
-            <h1 className="text-3xl font-bold mb-6">
-              {activeTab === "perfil" ? t("myProfile") : 
-               activeTab === "presupuesto" ? t("requestQuote") :
-               activeTab === "proveedores" ? t("serviceProviders") :
-               activeTab === "favoritos" ? t("myFavorites") :
-               activeTab === "propiedades" ? t("myProperties") :
-               activeTab === "notificaciones" ? t("notifications") :
-               activeTab === "pagos" ? t("myPayments") || "Mis Pagos" :
-               activeTab === "recomendaciones" ? t("recommendations") || "Recomendaciones" :
-               activeTab === "premios" ? t("myAwards") || "Mis Premios" :
-               t("configuration")}
-            </h1>
-            
-            {/* Mi Perfil Tab */}
-            {activeTab === "perfil" && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
-                      <User className="h-12 w-12 text-gray-500" />
-                    </div>
-                    <h2 className="text-xl font-bold">Carlos García</h2>
-                    <p className="text-gray-500 mb-4">{t("individual")}</p>
-                    <Button className="w-full">{t("editProfile")}</Button>
-                  </CardContent>
-                </Card>
-                
-                <Card className="lg:col-span-2">
-                  <CardHeader>
-                    <CardTitle>{t("personalInformation")}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>{t("fullNameLabel")}</Label>
-                        <p className="text-gray-600">Carlos García Martínez</p>
-                      </div>
-                      <div>
-                        <Label>{t("emailLabel")}</Label>
-                        <p className="text-gray-600">carlos.garcia@example.com</p>
-                      </div>
-                      <div>
-                        <Label>{t("phoneLabel")}</Label>
-                        <p className="text-gray-600">+34 612 345 678</p>
-                      </div>
-                      <div>
-                        <Label>{t("locationLabel")}</Label>
-                        <p className="text-gray-600">Madrid, España</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            {/* Solicitar Presupuesto Tab */}
-            {activeTab === "presupuesto" && (
+          <h1 className="text-3xl font-bold mb-6">
+            {activeTab === "perfil" ? t("myProfile") : 
+             activeTab === "presupuesto" ? t("requestQuote") :
+             activeTab === "proveedores" ? t("serviceProviders") :
+             activeTab === "favoritos" ? t("myFavorites") :
+             activeTab === "propiedades" ? t("myProperties") :
+             activeTab === "notificaciones" ? t("notifications") :
+             activeTab === "pagos" ? t("myPayments") || "Mis Pagos" :
+             activeTab === "recomendaciones" ? t("recommendations") || "Recomendaciones" :
+             activeTab === "premios" ? t("myAwards") || "Mis Premios" :
+             t("configuration")}
+          </h1>
+          
+          {activeTab === "perfil" && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>{t("requestQuote")}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="service-type">{t("serviceType")}</Label>
-                        <select id="service-type" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                          <option value="">{t("selectServiceType")}</option>
-                          <option value="plumbing">{t("plumbing")}</option>
-                          <option value="electrical">{t("electrical")}</option>
-                          <option value="painting">{t("painting")}</option>
-                          <option value="carpentry">{t("carpentry")}</option>
-                          <option value="other">{t("other")}</option>
-                        </select>
-                      </div>
-                      <div>
-                        <Label htmlFor="service-date">{t("preferredDate")}</Label>
-                        <Input id="service-date" type="date" />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="service-title">{t("serviceTitle")}</Label>
-                      <Input id="service-title" placeholder={t("exampleLeakRepair")} />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="service-description">{t("detailedDescription")}</Label>
-                      <Textarea id="service-description" rows={4} placeholder={t("describeServiceNeeded")} />
-                    </div>
-                    
-                    <Button className="w-full">{t("requestQuotes")}</Button>
-                  </form>
+                <CardContent className="p-6 text-center">
+                  <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
+                    <User className="h-12 w-12 text-gray-500" />
+                  </div>
+                  <h2 className="text-xl font-bold">Carlos García</h2>
+                  <p className="text-gray-500 mb-4">{t("individual")}</p>
+                  <Button className="w-full">{t("editProfile")}</Button>
                 </CardContent>
               </Card>
-            )}
-            
-            {/* Proveedores de Servicios Tab */}
-            {activeTab === "proveedores" && (
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <div className="relative w-64">
-                    <Input placeholder={t("searchProviders")} className="pr-10" />
-                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>{t("personalInformation")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>{t("fullNameLabel")}</Label>
+                      <p className="text-gray-600">Carlos García Martínez</p>
+                    </div>
+                    <div>
+                      <Label>{t("emailLabel")}</Label>
+                      <p className="text-gray-600">carlos.garcia@example.com</p>
+                    </div>
+                    <div>
+                      <Label>{t("phoneLabel")}</Label>
+                      <p className="text-gray-600">+34 612 345 678</p>
+                    </div>
+                    <div>
+                      <Label>{t("locationLabel")}</Label>
+                      <p className="text-gray-600">Madrid, España</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {serviceProviders.map((provider) => (
-                    <Card key={provider.id}>
-                      <div className="h-40 overflow-hidden relative">
-                        <Image 
-                          src={provider.image} 
-                          alt={provider.name} 
-                          layout="fill"
-                          objectFit="cover"
-                        />
-                      </div>
-                      <CardContent className="p-4">
-                        <Badge className="mb-2">{provider.category}</Badge>
-                        <h3 className="font-bold">{provider.name}</h3>
-                        <div className="flex items-center mt-1 mb-2">
-                          <div className="flex mr-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star 
-                                key={star} 
-                                className={`h-4 w-4 ${star <= Math.floor(provider.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews})</span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500 mb-4">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          <span>{provider.location}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1">{t("viewProfile")}</Button>
-                          <Button size="sm" className="flex-1">{t("request")}</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
+          {activeTab === "presupuesto" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("requestQuote")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="service-type">{t("serviceType")}</Label>
+                      <select id="service-type" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <option value="">{t("selectServiceType")}</option>
+                        <option value="plumbing">{t("plumbing")}</option>
+                        <option value="electrical">{t("electrical")}</option>
+                        <option value="painting">{t("painting")}</option>
+                        <option value="carpentry">{t("carpentry")}</option>
+                        <option value="other">{t("other")}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="service-date">{t("preferredDate")}</Label>
+                      <Input id="service-date" type="date" />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="service-title">{t("serviceTitle")}</Label>
+                    <Input id="service-title" placeholder={t("exampleLeakRepair")} />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="service-description">{t("detailedDescription")}</Label>
+                    <Textarea id="service-description" rows={4} placeholder={t("describeServiceNeeded")} />
+                  </div>
+                  
+                  <Button className="w-full">{t("requestQuotes")}</Button>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+          
+          {activeTab === "proveedores" && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <div className="relative w-64">
+                  <Input placeholder={t("searchProviders")} className="pr-10" />
+                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
               </div>
-            )}
-            
-            {/* Mis Favoritos Tab */}
-            {activeTab === "favoritos" && (
+              
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {favoriteProviders.map((provider) => (
+                {serviceProviders.map((provider) => (
                   <Card key={provider.id}>
                     <div className="h-40 overflow-hidden relative">
                       <Image 
@@ -389,150 +254,184 @@ export default function ParticularDashboard() {
                   </Card>
                 ))}
               </div>
-            )}
-            
-            {/* Mis Propiedades Tab */}
-            {activeTab === "propiedades" && (
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <Button>{t("addProperty")}</Button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {properties.map((property) => (
-                    <Card key={property.id}>
-                      <div className="h-48 overflow-hidden relative">
-                        <Image 
-                          src={property.image} 
-                          alt={property.name} 
-                          layout="fill"
-                          objectFit="cover"
-                        />
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-bold">{property.name === "Apartamento en Centro" ? t("apartmentInCenter") : property.name === "Casa en la Playa" ? t("beachHouse") : property.name}</h3>
-                        <div className="flex items-center text-sm text-gray-500 mt-1 mb-2">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          <span>{property.address}</span>
-                        </div>
-                        <div className="flex justify-between mb-4">
-                          <Badge variant="outline">{property.type === "Apartamento" ? t("apartment") : property.type === "Casa" ? t("house") : property.type}</Badge>
-                          <Badge variant="outline">{property.size}</Badge>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1">{t("viewDetails")}</Button>
-                          <Button size="sm" className="flex-1">{t("manage")}</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Notificaciones Tab */}
-            {activeTab === "notificaciones" && (
-              <div className="space-y-4">
-                <Card className="border-l-4 border-blue-500">
+            </div>
+          )}
+          
+          {activeTab === "favoritos" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {favoriteProviders.map((provider) => (
+                <Card key={provider.id}>
+                  <div className="h-40 overflow-hidden relative">
+                    <Image 
+                      src={provider.image} 
+                      alt={provider.name} 
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
                   <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-bold">{t("quoteReceived")}</h3>
-                        <p className="text-sm text-gray-600">{t("quoteReceivedDesc")}</p>
+                    <Badge className="mb-2">{provider.category}</Badge>
+                    <h3 className="font-bold">{provider.name}</h3>
+                    <div className="flex items-center mt-1 mb-2">
+                      <div className="flex mr-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star} 
+                            className={`h-4 w-4 ${star <= Math.floor(provider.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                          />
+                        ))}
                       </div>
-                      <span className="text-xs text-gray-500">{t("hoursAgo")}</span>
+                      <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews})</span>
                     </div>
-                    <Button size="sm" className="mt-2">{t("viewQuote")}</Button>
+                    <div className="flex items-center text-sm text-gray-500 mb-4">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{provider.location}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1">{t("viewProfile")}</Button>
+                      <Button size="sm" className="flex-1">{t("request")}</Button>
+                    </div>
                   </CardContent>
                 </Card>
-                
-                <Card className="border-l-4 border-green-500">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-bold">{t("serviceCompleted")}</h3>
-                        <p className="text-sm text-gray-600">{t("serviceCompletedDesc")}</p>
-                      </div>
-                      <span className="text-xs text-gray-500">{t("yesterday")}</span>
-                    </div>
-                    <Button size="sm" className="mt-2">{t("rateService")}</Button>
-                  </CardContent>
-                </Card>
+              ))}
+            </div>
+          )}
+          
+          {activeTab === "propiedades" && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <Button>{t("addProperty")}</Button>
               </div>
-            )}
-            
-            {/* Configuración Tab */}
-            {activeTab === "configuracion" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("accountPreferences")}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="language">{t("language")}</Label>
-                      <select id="language" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                        <option>{t("spanish")}</option>
-                        <option>{t("english")}</option>
-                        <option>{t("catalan")}</option>
-                      </select>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {properties.map((property) => (
+                  <Card key={property.id}>
+                    <div className="h-48 overflow-hidden relative">
+                      <Image 
+                        src={property.image} 
+                        alt={property.name} 
+                        layout="fill"
+                        objectFit="cover"
+                      />
                     </div>
-                    
+                    <CardContent className="p-4">
+                      <h3 className="font-bold">{property.name === "Apartamento en Centro" ? t("apartmentInCenter") : property.name === "Casa en la Playa" ? t("beachHouse") : property.name}</h3>
+                      <div className="flex items-center text-sm text-gray-500 mt-1 mb-2">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        <span>{property.address}</span>
+                      </div>
+                      <div className="flex justify-between mb-4">
+                        <Badge variant="outline">{property.type === "Apartamento" ? t("apartment") : property.type === "Casa" ? t("house") : property.type}</Badge>
+                        <Badge variant="outline">{property.size}</Badge>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="flex-1">{t("viewDetails")}</Button>
+                        <Button size="sm" className="flex-1">{t("manage")}</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {activeTab === "notificaciones" && (
+            <div className="space-y-4">
+              <Card className="border-l-4 border-blue-500">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start">
                     <div>
-                      <Label>{t("notifications")}</Label>
-                      <div className="mt-2 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span>{t("emailNotifications")}</span>
-                          <input type="checkbox" checked readOnly />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span>{t("pushNotifications")}</span>
-                          <input type="checkbox" checked readOnly />
-                        </div>
+                      <h3 className="font-bold">{t("quoteReceived")}</h3>
+                      <p className="text-sm text-gray-600">{t("quoteReceivedDesc")}</p>
+                    </div>
+                    <span className="text-xs text-gray-500">{t("hoursAgo")}</span>
+                  </div>
+                  <Button size="sm" className="mt-2">{t("viewQuote")}</Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-l-4 border-green-500">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold">{t("serviceCompleted")}</h3>
+                      <p className="text-sm text-gray-600">{t("serviceCompletedDesc")}</p>
+                    </div>
+                    <span className="text-xs text-gray-500">{t("yesterday")}</span>
+                  </div>
+                  <Button size="sm" className="mt-2">{t("rateService")}</Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
+          {activeTab === "configuracion" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("accountPreferences")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="language">{t("language")}</Label>
+                    <select id="language" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                      <option>{t("spanish")}</option>
+                      <option>{t("english")}</option>
+                      <option>{t("catalan")}</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label>{t("notifications")}</Label>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span>{t("emailNotifications")}</span>
+                        <input type="checkbox" defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>{t("pushNotifications")}</span>
+                        <input type="checkbox" defaultChecked />
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Pagos Tab */}
-            {activeTab === "pagos" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("myPayments") || "Mis Pagos"}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-500">{t("noPaymentHistory") || "No hay historial de pagos disponible."}</p>
-                </CardContent>
-              </Card>
-            )}
+          {activeTab === "pagos" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("myPayments") || "Mis Pagos"}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-500">{t("noPaymentHistory") || "No hay historial de pagos disponible."}</p>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Recomendaciones Tab */}
-            {activeTab === "recomendaciones" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("recommendations") || "Recomendaciones"}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-500">{t("noRecommendations") || "No hay recomendaciones disponibles."}</p>
-                </CardContent>
-              </Card>
-            )}
+          {activeTab === "recomendaciones" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("recommendations") || "Recomendaciones"}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-500">{t("noRecommendations") || "No hay recomendaciones disponibles."}</p>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Premios Tab */}
-            {activeTab === "premios" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("myAwards") || "Mis Premios"}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-500">{t("noAwards") || "No hay premios disponibles."}</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+          {activeTab === "premios" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("myAwards") || "Mis Premios"}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-500">{t("noAwards") || "No hay premios disponibles."}</p>
+              </CardContent>
+            </Card>
+          )}
+        </main>
       </div>
     </>
   );
