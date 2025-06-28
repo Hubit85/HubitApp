@@ -185,10 +185,10 @@ export default function Home() {
                     </p>
                     <div className="space-y-2">
                       <Button asChild className="w-full">
-                        <Link href="/property-selection?userType=community">{t("selectProperty")}</Link>
+                        <Link href="/property-selection?userType=community">Miembro de la Comunidad</Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full">
-                        <Link href="/property-selection?userType=particular">{t("selectProperty")}</Link>
+                        <Link href="/property-selection?userType=particular">Particular</Link>
                       </Button>
                     </div>
                   </CardContent>
