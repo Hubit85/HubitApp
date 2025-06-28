@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building, Wrench, Star, TrendingUp, Heart, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Shield, Gift } from "lucide-react";
+import { Users, Building, Wrench, Star, Heart, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Gift } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
-import Image from "next/image"; // Added import for Next/Image
+import Image from "next/image";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -196,84 +196,6 @@ export default function Home() {
                     {t("virtuousCircle")}
                   </p>
                 </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Nuestros Logros Section */}
-          <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
-            <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                  {t("ourAchievementsTitle")}
-                </h2>
-                <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-                  {t("ourAchievementsIntro")}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-                {/* 500+ Comunidades conectadas */}
-                <Card className="text-center h-full">
-                  <CardContent className="pt-8">
-                    <div className="text-5xl font-bold text-blue-600 mb-2">500+</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                      {t("connectedCommunities")}
-                    </h3>
-                    <p className="text-gray-600">
-                      {t("connectedCommunitiesText")}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                {/* 300+ Empresas verificadas */}
-                <Card className="text-center h-full">
-                  <CardContent className="pt-8">
-                    <div className="text-5xl font-bold text-green-600 mb-2">300+</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                      {t("verifiedCompanies")}
-                    </h3>
-                    <p className="text-gray-600">
-                      {t("verifiedCompaniesText")}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                {/* 95% Índice de satisfacción */}
-                <Card className="text-center h-full">
-                  <CardContent className="pt-8">
-                    <div className="text-5xl font-bold text-purple-600 mb-2">95%</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                      {t("satisfactionIndex")}
-                    </h3>
-                    <p className="text-gray-600">
-                      {t("satisfactionIndexText")}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                {/* 10,000+ Incidencias resueltas */}
-                <Card className="text-center h-full">
-                  <CardContent className="pt-8">
-                    <div className="text-5xl font-bold text-orange-600 mb-2">10,000+</div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                      {t("resolvedIncidents")}
-                    </h3>
-                    <p className="text-gray-600">
-                      {t("resolvedIncidentsText")}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Conclusión */}
-              <div className="bg-gray-50 rounded-lg p-8 text-center">
-                <div className="mx-auto mb-4 p-3 bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center">
-                  <TrendingUp className="h-8 w-8 text-indigo-600" />
-                </div>
-                <p className="text-xl text-gray-700 font-medium max-w-4xl mx-auto">
-                  {t("achievementsConclusion")}
-                </p>
               </div>
             </div>
           </section>
