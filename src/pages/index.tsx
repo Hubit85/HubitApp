@@ -441,12 +441,12 @@ export default function Home() {
                         </div>
                       </div>
                       <CardTitle className="text-xl font-bold text-gray-900">
-                        {t("step1Title")}
+                        Configura una billetera Solana
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-gray-600 text-center mb-4">
-                        {t("step1Description")}
+                        Descarga e instala Phantom Wallet para gestionar tus tokens SOL y HBIT de forma segura.
                       </p>
                       <div className="text-center relative w-full h-32">
                         <Image 
@@ -468,28 +468,28 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Paso 2 - Intercambia SOL por HBIT */}
+                {/* Paso 2 - Adquiere SOL */}
                 <div className="relative">
                   <Card 
-                    className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors cursor-pointer transform hover:scale-105 transition-transform"
-                    onClick={() => window.open("https://gmgn.ai/trend?chain=sol", "_blank")}
+                    className="h-full border-2 border-green-200 hover:border-green-400 transition-colors cursor-pointer transform hover:scale-105 transition-transform"
+                    onClick={() => window.open("https://phantom.com/learn/crypto-101/where-and-how-to-buy-solana-SOL", "_blank")}
                   >
                     <CardHeader className="text-center">
                       <div className="mx-auto mb-4 relative">
-                        <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
-                          <Coins className="h-10 w-10 text-purple-600" />
+                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                          <CreditCard className="h-10 w-10 text-green-600" />
                         </div>
-                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           2
                         </div>
                       </div>
                       <CardTitle className="text-xl font-bold text-gray-900">
-                        {t("step2Title")}
+                        Adquiere SOL
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-gray-600 text-center mb-4">
-                        {t("step2Description")}
+                        Compra tokens SOL a través de exchanges o directamente en tu billetera Phantom.
                       </p>
                       <div className="text-center relative w-full h-32">
                         <Image 
@@ -501,7 +501,7 @@ export default function Home() {
                         />
                       </div>
                       <div className="text-center mt-4">
-                        <span className="text-sm text-purple-600 font-medium">Haz clic para intercambiar →</span>
+                        <span className="text-sm text-green-600 font-medium">Haz clic para aprender a comprar SOL →</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -511,25 +511,28 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Paso 3 */}
+                {/* Paso 3 - Intercambia SOL por HBIT */}
                 <div className="relative">
-                  <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors">
+                  <Card 
+                    className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors cursor-pointer transform hover:scale-105 transition-transform"
+                    onClick={() => window.open("https://gmgn.ai/trend?chain=sol", "_blank")}
+                  >
                     <CardHeader className="text-center">
                       <div className="mx-auto mb-4 relative">
-                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                          <Star className="h-10 w-10 text-green-600" />
+                        <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Coins className="h-10 w-10 text-purple-600" />
                         </div>
-                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           3
                         </div>
                       </div>
                       <CardTitle className="text-xl font-bold text-gray-900">
-                        {t("step3Title")}
+                        Intercambia SOL por HBIT
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-gray-600 text-center mb-4">
-                        {t("step3Description")}
+                        Utiliza un DEX como GMGN para intercambiar tus tokens SOL por HBIT de forma descentralizada.
                       </p>
                       <div className="text-center relative w-full h-32">
                         <Image 
@@ -539,6 +542,9 @@ export default function Home() {
                           objectFit="cover"
                           className="rounded-lg"
                         />
+                      </div>
+                      <div className="text-center mt-4">
+                        <span className="text-sm text-purple-600 font-medium">Haz clic para intercambiar →</span>
                       </div>
                     </CardContent>
                   </Card>
