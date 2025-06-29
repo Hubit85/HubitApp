@@ -44,7 +44,7 @@ interface PropertyUnit {
 interface PropertySelectorProps {
   onPropertySelected: (property: Property, unit: PropertyUnit) => void;
   onCancel: () => void;
-  userType?: string;
+  userType?: string | null;
 }
 
 const mockUserProperties: Property[] = [
