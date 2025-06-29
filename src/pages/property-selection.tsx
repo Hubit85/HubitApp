@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
@@ -149,7 +148,7 @@ export default function PropertySelection() {
                 variant="outline"
                 size="sm"
                 onClick={() => router.back()}
-                className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-300"
+                className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white border-black"
               >
                 <ArrowLeft className="h-4 w-4" />
                 {t("back")}
@@ -179,7 +178,7 @@ export default function PropertySelection() {
                   className="pl-10 bg-white border-gray-300 focus:border-gray-500"
                 />
               </div>
-              <Button className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white">
+              <Button className="flex items-center gap-2 bg-white hover:bg-gray-100 text-black border border-black">
                 <Plus className="h-4 w-4" />
                 {t("addProperty")}
               </Button>
@@ -251,7 +250,7 @@ export default function PropertySelection() {
               <p className="text-gray-600 mb-6">
                 {t("noPropertiesFoundDescription")}
               </p>
-              <Button className="flex items-center gap-2 mx-auto bg-black hover:bg-gray-800 text-white">
+              <Button className="flex items-center gap-2 mx-auto bg-white hover:bg-gray-100 text-black border border-black">
                 <Plus className="h-4 w-4" />
                 {t("addFirstProperty")}
               </Button>

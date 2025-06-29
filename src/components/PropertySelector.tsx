@@ -189,7 +189,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
                         variant="outline" 
                         size="sm" 
                         onClick={() => setShowSearch(true)}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white border-black"
                       >
                         <Search className="h-4 w-4" />
                         {t('searchOtherProperties') || 'Buscar otras propiedades'}
@@ -236,7 +236,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
                     <Button 
                       variant="outline" 
                       onClick={handleRegisterProperty}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-white hover:bg-gray-100 text-black border-black"
                     >
                       <PlusCircle className="h-4 w-4" />
                       {t('registerAnotherProperty') || 'Registrar otra propiedad'}
@@ -259,7 +259,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Button 
                       onClick={handleRegisterProperty}
-                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                      className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white"
                     >
                       <FileText className="h-4 w-4" />
                       {t('registerProperty') || 'Registrar Inmueble'}
@@ -267,7 +267,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
                     <Button 
                       variant="outline" 
                       onClick={() => setShowSearch(true)}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-white hover:bg-gray-100 text-black border-black"
                     >
                       <Search className="h-4 w-4" />
                       {t('searchExistingProperty') || 'Buscar propiedad existente'}
@@ -286,6 +286,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
                           variant="outline" 
                           size="sm" 
                           onClick={() => setShowSearch(false)}
+                          className="bg-black hover:bg-gray-800 text-white border-black"
                         >
                           {t('backToMyProperties') || 'Volver a mis propiedades'}
                         </Button>
@@ -345,7 +346,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
                       <p className="text-gray-600">{t('noPropertiesFound')}</p>
                       <Button 
                         onClick={handleRegisterProperty}
-                        className="flex items-center gap-2 mx-auto"
+                        className="flex items-center gap-2 mx-auto bg-white hover:bg-gray-100 text-black border border-black"
                       >
                         <PlusCircle className="h-4 w-4" />
                         {t('registerProperty') || 'Registrar Inmueble'}
@@ -365,7 +366,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">{t('propertyDetails')}</h3>
-                  <Button variant="outline" size="sm" onClick={() => setSelectedProperty(null)}>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedProperty(null)} className="bg-black hover:bg-gray-800 text-white border-black">
                     {t('changeProperty')}
                   </Button>
                 </div>
@@ -418,7 +419,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
                     <p className="font-semibold">{t('propertySelected')}</p>
                     <p className="text-sm text-gray-600">{selectedProperty.communityName} - {t('unitNumber')} {selectedUnit.unitNumber}</p>
                   </div>
-                  <Button onClick={handleConfirmSelection} className="flex items-center space-x-2">
+                  <Button onClick={handleConfirmSelection} className="flex items-center space-x-2 bg-white hover:bg-gray-100 text-black border border-black">
                     <span>{t('confirmSelection')}</span>
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -427,7 +428,7 @@ export default function PropertySelector({ onPropertySelected, onCancel, userTyp
             </>
           )}
           <div className="flex justify-center pt-4 border-t">
-            <Button variant="outline" onClick={onCancel}>{t('cancel')}</Button>
+            <Button variant="outline" onClick={onCancel} className="bg-black hover:bg-gray-800 text-white border-black">{t('cancel')}</Button>
           </div>
         </CardContent>
       </Card>

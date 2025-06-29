@@ -27,7 +27,7 @@ export function Header() {
               <Button 
                 variant="outline" 
                 onClick={() => router.push('/')}
-                className="bg-black hover:bg-gray-800 text-white border-black"
+                className="bg-white hover:bg-gray-100 text-black border-black"
               >
                 {t("signOut")}
               </Button>
@@ -37,7 +37,7 @@ export function Header() {
               <Button variant="ghost" asChild className="bg-black hover:bg-gray-800 text-white">
                 <Link href="/auth/login">{t("login")}</Link>
               </Button>
-              <Button variant="outline" asChild className="bg-black hover:bg-gray-800 text-white border-black">
+              <Button variant="outline" asChild className="bg-white hover:bg-gray-100 text-black border-black">
                 <Link href="/auth/register">{t("register")}</Link>
               </Button>
             </>
