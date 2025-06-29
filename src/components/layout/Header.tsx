@@ -9,6 +9,7 @@ export function Header() {
   const router = useRouter();
   const { t } = useLanguage();
   const isLoggedIn = router.pathname.startsWith('/dashboard');
+  const isHomePage = router.pathname === '/';
 
   return (
     <header className="w-full py-4 px-4 sm:px-6 lg:px-8 bg-white shadow-sm">
@@ -32,7 +33,7 @@ export function Header() {
                 {t("signOut")}
               </Button>
             </>
-          ) : (
+          ) : !isHomePage ? (
             <>
               <Button variant="ghost" asChild className="bg-black hover:bg-gray-800 text-white">
                 <Link href="/auth/login">{t("login")}</Link>
@@ -41,7 +42,7 @@ export function Header() {
                 <Link href="/auth/register">{t("register")}</Link>
               </Button>
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </header>
