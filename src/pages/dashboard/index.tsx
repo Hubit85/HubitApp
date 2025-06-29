@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Users, Building, Wrench, User, ChevronRight, Star, MapPin, Calendar, Clock, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import PropertySelector from '@/components/PropertySelector';
 import ZoomableSection from "@/components/ZoomableSection";
+import { CheckIcon } from "lucide-react";
 
 export default function Dashboard() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -108,6 +109,331 @@ export default function Dashboard() {
         ease: "linear"
       }
     }
+  };
+
+  const DashboardPage: React.FC = () => {
+    const [expanded, setExpanded] = useState<string | null>(null);
+    const { t } = useLanguage();
+
+    const handleExpand = (card: string) => {
+      setExpanded(expanded === card ? null : card);
+    };
+
+    return (
+      <>
+        <Head>
+          <title>¿Cuál es tu rol? | {t('hubit')}</title>
+          <meta name="description" content={t('selectUserTypeDesc')} />
+        </Head>
+        
+        <Header />
+        
+        <main className="min-h-screen bg-white pt-16 relative overflow-hidden">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <motion.div
+              className="absolute top-20 left-10 w-72 h-72 bg-gray-100 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+              animate={{
+                x: [0, 100, 0],
+                y: [0, -50, 0],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+            <motion.div
+              className="absolute top-40 right-10 w-72 h-72 bg-gray-200 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+              animate={{
+                x: [0, -100, 0],
+                y: [0, 50, 0],
+              }}
+              transition={{
+                duration: 25,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+            <motion.div
+              className="absolute bottom-20 left-1/2 w-72 h-72 bg-gray-150 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+              animate={{
+                x: [0, 50, 0],
+                y: [0, -30, 0],
+              }}
+              transition={{
+                duration: 30,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+          </div>
+
+          <ZoomableSection className="min-h-screen relative z-10" enableZoom={true} maxScale={3} minScale={0.5}>
+            <div className="container mx-auto px-4 py-12">
+              <div className="text-center mb-12">
+                <motion.div
+                  initial={{ opacity: 0, y: -30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="relative"
+                >
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 1 }}
+                  />
+                  <h1 className="text-5xl font-bold text-gray-800 mb-4 relative">
+                    {t('whatsYourRole')}
+                    <motion.div
+                      className="absolute top-0 right-0 transform translate-x-4 -translate-y-2"
+                      animate={{ 
+                        rotate: [0, 10, -10, 0],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        repeatDelay: 3
+                      }}
+                    >
+                      <Sparkles className="h-8 w-8 text-amber-600" />
+                    </motion.div>
+                  </h1>
+                </motion.div>
+                <motion.p 
+                  className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  {t('selectUserTypeDesc')}
+                </motion.p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                {/* Particular Card */}
+                <Card className="w-full cursor-pointer" onClick={() => handleExpand("particular")}>
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <User className="w-8 h-8" />
+                      <div>
+                        <CardTitle>{t("particular")}</CardTitle>
+                        <CardDescription>{t("particularDesc")}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  {expanded === "particular" && (
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h3 className="font-semibold mb-2">{t("features")}</h3>
+                          <ul className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("requestQuotes")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("findServiceProviders")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("manageProperties")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("trackProjects")}</span>
+                            </li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-2">{t("quickAccess")}</h3>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span>{t("nearbyProviders")}</span>
+                              <span className="font-medium">15 {t("available")}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>{t("activeRequests")}</span>
+                              <span className="font-medium">3 {t("pending")}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <Button className="mt-4 w-full" onClick={() => router.push("/particular")}>{t("accessDashboard")}</Button>
+                    </CardContent>
+                  )}
+                </Card>
+
+                {/* Community Member Card */}
+                <Card className="w-full cursor-pointer" onClick={() => handleExpand("miembro")}>
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <Users className="w-8 h-8" />
+                      <div>
+                        <CardTitle>{t("communityMember")}</CardTitle>
+                        <CardDescription>{t("communityMemberDesc")}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  {expanded === "miembro" && (
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h3 className="font-semibold mb-2">{t("features")}</h3>
+                          <ul className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("manageCommonAreas")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("viewCommunityBudget")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("participateInVoting")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("communicateWithNeighbors")}</span>
+                            </li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-2">{t("recentActivity")}</h3>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span>{t("nextMeeting")}</span>
+                              <span className="font-medium">{t("january")} 15th</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>{t("pendingPayments")}</span>
+                              <span className="font-medium">2</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <Button className="mt-4 w-full" onClick={() => router.push("/community-member")}>{t("accessDashboard")}</Button>
+                    </CardContent>
+                  )}
+                </Card>
+
+                {/* Service Provider Card */}
+                <Card className="w-full cursor-pointer" onClick={() => handleExpand("proveedor")}>
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <Briefcase className="w-8 h-8" />
+                      <div>
+                        <CardTitle>{t("serviceProvider")}</CardTitle>
+                        <CardDescription>{t("serviceProviderDesc")}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  {expanded === "proveedor" && (
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h3 className="font-semibold mb-2">{t("features")}</h3>
+                          <ul className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("receiveServiceRequests")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("manageQuotes")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("trackJobs")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("buildReputation")}</span>
+                            </li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-2">{t("statistics")}</h3>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span>{t("completedJobs")}</span>
+                              <span className="font-medium">125</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>{t("averageRating")}</span>
+                              <span className="font-medium">4.8/5</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <Button className="mt-4 w-full" onClick={() => router.push("/service-provider")}>{t("accessProviderPanel")}</Button>
+                    </CardContent>
+                  )}
+                </Card>
+
+                {/* Estate Administrator Card */}
+                <Card className="w-full cursor-pointer" onClick={() => handleExpand("administrador")}>
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <Building className="w-8 h-8" />
+                      <div>
+                        <CardTitle>{t("estateAdministrator")}</CardTitle>
+                        <CardDescription>{t("estateAdministratorDesc")}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  {expanded === "administrador" && (
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h3 className="font-semibold mb-2">{t("management")}</h3>
+                          <ul className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("manageMultipleProperties")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("financialReporting")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("maintenanceCoordination")}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckIcon className="w-4 h-4 text-green-500" />
+                              <span>{t("legalCompliance")}</span>
+                            </li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-2">{t("portfolio")}</h3>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span>{t("managedProperties")}</span>
+                              <span className="font-medium">12 {t("buildings")}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>{t("residents")}</span>
+                              <span className="font-medium">150 {t("units")}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <Button className="mt-4 w-full" onClick={() => router.push("/administrador-fincas")}>{t("accessAdministratorPanel")}</Button>
+                    </CardContent>
+                  )}
+                </Card>
+              </div>
+            </div>
+          </ZoomableSection>
+        </main>
+      </>
+    );
   };
 
   if (showPropertySelector) {
