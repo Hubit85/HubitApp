@@ -14,7 +14,7 @@ export function LanguageSwitcher() {
         className={`flex items-center gap-1 ${
           language === "es" 
             ? "bg-black hover:bg-gray-800 text-white" 
-            : "bg-black hover:bg-gray-800 text-white border-black"
+            : "bg-white hover:bg-gray-100 text-black border-black"
         }`}
       >
         <span className="text-sm">🇪🇸</span>
@@ -27,7 +27,7 @@ export function LanguageSwitcher() {
         className={`flex items-center gap-1 ${
           language === "en" 
             ? "bg-black hover:bg-gray-800 text-white" 
-            : "bg-black hover:bg-gray-800 text-white border-black"
+            : "bg-white hover:bg-gray-100 text-black border-black"
         }`}
       >
         <span className="text-sm">🇬🇧</span>
