@@ -115,6 +115,7 @@ export default function Dashboard() {
       <PropertySelector
         onPropertySelected={handlePropertySelected}
         onCancel={() => setShowPropertySelector(false)}
+        userType={selectedUserType}
       />
     );
   }
