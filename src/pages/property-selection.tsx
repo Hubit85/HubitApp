@@ -179,7 +179,7 @@ export default function PropertySelection() {
                   className="pl-10 bg-white border-gray-300 focus:border-gray-500"
                 />
               </div>
-              <Button className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white">
+              <Button className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white">
                 <Plus className="h-4 w-4" />
                 {t("addProperty")}
               </Button>
@@ -229,7 +229,7 @@ export default function PropertySelection() {
                     )}
                     
                     <div className="pt-4">
-                      <Button className="w-full bg-gray-800 hover:bg-gray-700 text-white">
+                      <Button className="w-full bg-black hover:bg-gray-800 text-white">
                         {t("selectProperty")}
                       </Button>
                     </div>
@@ -251,7 +251,7 @@ export default function PropertySelection() {
               <p className="text-gray-600 mb-6">
                 {t("noPropertiesFoundDescription")}
               </p>
-              <Button className="flex items-center gap-2 mx-auto bg-gray-800 hover:bg-gray-700 text-white">
+              <Button className="flex items-center gap-2 mx-auto bg-black hover:bg-gray-800 text-white">
                 <Plus className="h-4 w-4" />
                 {t("addFirstProperty")}
               </Button>
