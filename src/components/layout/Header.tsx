@@ -24,12 +24,6 @@ export function Header() {
           <LanguageSwitcher />
           {isLoggedIn ? (
             <>
-              <Button variant="ghost" asChild>
-                <Link href="/dashboard/services">{t("services")}</Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link href="/dashboard/profile">{t("profile")}</Link>
-              </Button>
               <Button 
                 variant="outline" 
                 onClick={() => router.push('/')}
