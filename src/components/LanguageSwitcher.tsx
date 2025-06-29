@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,11 @@ export function LanguageSwitcher() {
         variant={language === "es" ? "default" : "outline"}
         size="sm"
         onClick={() => setLanguage("es")}
-        className="flex items-center gap-1"
+        className={`flex items-center gap-1 ${
+          language === "es" 
+            ? "bg-black hover:bg-gray-800 text-white" 
+            : "bg-black hover:bg-gray-800 text-white border-black"
+        }`}
       >
         <span className="text-sm">🇪🇸</span>
         <span className="hidden sm:inline">{t("languageEs")}</span>
@@ -21,7 +24,11 @@ export function LanguageSwitcher() {
         variant={language === "en" ? "default" : "outline"}
         size="sm"
         onClick={() => setLanguage("en")}
-        className="flex items-center gap-1"
+        className={`flex items-center gap-1 ${
+          language === "en" 
+            ? "bg-black hover:bg-gray-800 text-white" 
+            : "bg-black hover:bg-gray-800 text-white border-black"
+        }`}
       >
         <span className="text-sm">🇬🇧</span>
         <span className="hidden sm:inline">{t("languageEn")}</span>
