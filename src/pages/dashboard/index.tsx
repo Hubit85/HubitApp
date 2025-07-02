@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Users, Building, Wrench, User, ChevronRight, Star, MapPin, Calendar, Clock, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
-import PropertySelector from '@/components/PropertySelector';
+import { Users, Building, Wrench, User, ChevronRight, Star, MapPin, Calendar, Clock, Sparkles, TrendingUp, Shield, Zap, Briefcase } from "lucide-react";
+import PropertySelector from "@/components/PropertySelector";
 import ZoomableSection from "@/components/ZoomableSection";
 import { CheckIcon } from "lucide-react";
 
