@@ -17,29 +17,29 @@ export default function Document() {
         {/* Meta tags específicos para iOS */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="HuBiT v4.0" />
+        <meta name="apple-mobile-web-app-title" content="HuBiT v5.0" />
         <meta name="mobile-web-app-capable" content="yes" />
         
         {/* Meta tags para PWA */}
-        <meta name="application-name" content="HuBiT v4.0" />
+        <meta name="application-name" content="HuBiT v5.0" />
         <meta name="theme-color" content="#8B5A3C" />
         <meta name="msapplication-TileColor" content="#8B5A3C" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
         {/* Meta tags para SEO y compatibilidad */}
-        <meta name="description" content="HuBiT v4.0 - Plataforma integral para gestión de fincas y servicios" />
+        <meta name="description" content="HuBiT v5.0 - Plataforma integral para gestión de fincas y servicios" />
         <meta name="keywords" content="fincas, gestión, servicios, administración, comunidades" />
         <meta name="author" content="HuBiT" />
         
         {/* Open Graph para redes sociales */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="HuBiT v4.0" />
+        <meta property="og:title" content="HuBiT v5.0" />
         <meta property="og:description" content="Plataforma integral para gestión de fincas y servicios" />
         <meta property="og:site_name" content="HuBiT" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="HuBiT v4.0" />
+        <meta name="twitter:title" content="HuBiT v5.0" />
         <meta name="twitter:description" content="Plataforma integral para gestión de fincas y servicios" />
         
         {/* Preconnect para optimización */}
