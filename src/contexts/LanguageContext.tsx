@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 type Language = "es" | "en";
@@ -390,6 +389,19 @@ const translations = {
     learnMore: "Saber más",
     accessAdministratorPanel: "Acceder al Panel de Administrador",
     accessProviderPanel: "Acceder al Panel de Proveedor",
+    availableJobs: "Trabajos Disponibles",
+    myBids: "Mis Ofertas",
+    urgent: "Urgente",
+    normal: "Normal",
+    low: "Baja",
+    pendingStatus: "Pendiente",
+    acceptedStatus: "Aceptado",
+    rejectedStatus: "Rechazado",
+    myBid: "Mi Oferta",
+    newQuoteRequest: "Nueva Solicitud de Presupuesto",
+    jobCompleted: "Trabajo Completado",
+    respond: "Responder",
+    average: "Promedio",
   },
   en: {
     professionalServices: "Professional Services",
@@ -735,9 +747,9 @@ const translations = {
     quickAccess: "Quick Access",
     nearbyProviders: "Nearby providers",
     available: "available",
-    activeRequests: "Active requests",
+    activeRequests: "active requests",
     january: "January",
-    managedProperties: "Managed properties",
+    managedProperties: "managed properties",
     buildings: "buildings",
     units: "units",
     pendingVerification: "Pending Verification",
@@ -769,6 +781,19 @@ const translations = {
     learnMore: "Learn more",
     accessAdministratorPanel: "Access Administrator Panel",
     accessProviderPanel: "Access Provider Panel",
+    availableJobs: "Available Jobs",
+    myBids: "My Bids",
+    urgent: "Urgent",
+    normal: "Normal",
+    low: "Low",
+    pendingStatus: "Pending",
+    acceptedStatus: "Accepted",
+    rejectedStatus: "Rejected",
+    myBid: "My Bid",
+    newQuoteRequest: "New Quote Request",
+    jobCompleted: "Job Completed",
+    respond: "Respond",
+    average: "Average",
   },
 };
 

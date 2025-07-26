@@ -571,26 +571,26 @@ export default function ServiceProviderDashboard() {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'urgent':
-        return <Badge variant="destructive">Urgente</Badge>;
+        return <Badge variant="destructive">{t("urgent")}</Badge>;
       case 'normal':
-        return <Badge variant="outline">Normal</Badge>;
+        return <Badge variant="outline">{t("normal")}</Badge>;
       case 'low':
-        return <Badge variant="secondary">Baja</Badge>;
+        return <Badge variant="secondary">{t("low")}</Badge>;
       default:
-        return <Badge variant="outline">Normal</Badge>;
+        return <Badge variant="outline">{t("normal")}</Badge>;
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800">Pendiente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800">{t("pendingStatus")}</Badge>;
       case 'accepted':
-        return <Badge className="bg-green-100 text-green-800">Aceptado</Badge>;
+        return <Badge className="bg-green-100 text-green-800">{t("acceptedStatus")}</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-100 text-red-800">Rechazado</Badge>;
+        return <Badge className="bg-red-100 text-red-800">{t("rejectedStatus")}</Badge>;
       default:
-        return <Badge className="bg-yellow-100 text-yellow-800">Pendiente</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800">{t("pendingStatus")}</Badge>;
     }
   };
 
