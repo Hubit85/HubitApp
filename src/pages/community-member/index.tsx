@@ -349,22 +349,6 @@ export default function CommunityMemberDashboard() {
                 <ThumbsUp className="mr-2 h-5 w-5" />
                 {t("serviceRatings")}
               </Button>
-              <Button 
-                variant={activeTab === "mejores" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("mejores")}
-              >
-                <Award className="mr-2 h-5 w-5" />
-                {t("bestRated")}
-              </Button>
-              <Button 
-                variant={activeTab === "cuenta" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("cuenta")}
-              >
-                <CreditCard className="mr-2 h-5 w-5" />
-                {t("myAccount")}
-              </Button>
             </nav>
           </div>
         </div>
@@ -387,8 +371,6 @@ export default function CommunityMemberDashboard() {
                  activeTab === "recomendaciones" ? t("recommendations") :
                  activeTab === "configuracion" ? t("configuration") :
                  activeTab === "valoraciones" ? t("serviceRatings") :
-                 activeTab === "mejores" ? t("bestRated") :
-                 activeTab === "cuenta" ? t("myAccount") :
                  t("communityMemberDashboard")}
               </h1>
               
@@ -1401,20 +1383,6 @@ export default function CommunityMemberDashboard() {
                       </CardContent>
                     </Card>
                   </div>
-                </div>
-              )}
-
-              {/* Mejores Valorados Tab */}
-              {activeTab === "mejores" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <p className="text-gray-600">{t("bestRatedProvidersFeatureComingSoon")}</p>
-                </div>
-              )}
-
-              {/* Mi Cuenta Tab */}
-              {activeTab === "cuenta" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <p className="text-gray-600">{t("myAccountFeatureComingSoon")}</p>
                 </div>
               )}
             </div>
