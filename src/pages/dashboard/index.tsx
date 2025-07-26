@@ -20,8 +20,6 @@ export default function Dashboard() {
   const { t } = useLanguage();
   const router = useRouter();
 
-  const MotionButton = motion(Button);
-
   const userTypeImages = {
     communityMember: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     particular: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
@@ -712,8 +710,8 @@ export default function Dashboard() {
                     
                     <CardFooter>
                       <motion.div className="w-full">
-                        <MotionButton 
-                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl"
+                        <motion.button 
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl rounded-md transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleUserTypeSelect('communityMember');
@@ -728,7 +726,7 @@ export default function Dashboard() {
                             {t('accessDashboard')}
                             <Zap className="h-4 w-4" />
                           </motion.span>
-                        </MotionButton>
+                        </motion.button>
                       </motion.div>
                     </CardFooter>
                   </div>
@@ -907,8 +905,8 @@ export default function Dashboard() {
                     
                     <CardFooter>
                       <motion.div className="w-full">
-                        <MotionButton 
-                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl"
+                        <motion.button 
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl rounded-md transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleUserTypeSelect('serviceProvider');
@@ -923,7 +921,7 @@ export default function Dashboard() {
                             {t('accessDashboard')}
                             <Zap className="h-4 w-4" />
                           </motion.span>
-                        </MotionButton>
+                        </motion.button>
                       </motion.div>
                     </CardFooter>
                   </div>
@@ -1102,8 +1100,8 @@ export default function Dashboard() {
                     
                     <CardFooter>
                       <motion.div className="w-full">
-                        <MotionButton 
-                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl"
+                        <motion.button 
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl rounded-md transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleUserTypeSelect('estateAdministrator');
@@ -1118,7 +1116,7 @@ export default function Dashboard() {
                             {t('accessDashboard')}
                             <Zap className="h-4 w-4" />
                           </motion.span>
-                        </MotionButton>
+                        </motion.button>
                       </motion.div>
                     </CardFooter>
                   </div>
@@ -1297,8 +1295,8 @@ export default function Dashboard() {
                     
                     <CardFooter>
                       <motion.div className="w-full">
-                        <MotionButton 
-                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl"
+                        <motion.button 
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm font-semibold py-3 text-lg shadow-xl rounded-md transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleUserTypeSelect('particular');
@@ -1313,7 +1311,7 @@ export default function Dashboard() {
                             {t('accessDashboard')}
                             <Zap className="h-4 w-4" />
                           </motion.span>
-                        </MotionButton>
+                        </motion.button>
                       </motion.div>
                     </CardFooter>
                   </div>
