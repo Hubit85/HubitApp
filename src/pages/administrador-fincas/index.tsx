@@ -28,7 +28,8 @@ import {
   Eye,
   Download,
   Edit,
-  Trash2
+  Trash2,
+  LogOut
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
@@ -247,6 +248,21 @@ export default function AdministradorFincas() {
                 {t("pendingIssues")}
               </Button>
             </nav>
+            
+            {/* Sign Out Button */}
+            <div className="mt-8 pt-4 border-t border-gray-600">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                onClick={() => {
+                  // Handle sign out logic here
+                  console.log("Sign out clicked");
+                }}
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                {t("signOut")}
+              </Button>
+            </div>
           </div>
         </div>
 
