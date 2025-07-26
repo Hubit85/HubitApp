@@ -326,28 +326,12 @@ export default function CommunityMemberDashboard() {
                 {t("notifications")}
               </Button>
               <Button 
-                variant={activeTab === "recomendaciones" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("recomendaciones")}
-              >
-                <ThumbsUp className="mr-2 h-5 w-5" />
-                {t("recommendations")}
-              </Button>
-              <Button 
                 variant={activeTab === "configuracion" ? "default" : "ghost"} 
                 className="w-full justify-start"
                 onClick={() => setActiveTab("configuracion")}
               >
                 <Settings className="mr-2 h-5 w-5" />
                 {t("configuration")}
-              </Button>
-              <Button 
-                variant={activeTab === "valoraciones" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("valoraciones")}
-              >
-                <ThumbsUp className="mr-2 h-5 w-5" />
-                {t("serviceRatings")}
               </Button>
             </nav>
           </div>
@@ -368,9 +352,7 @@ export default function CommunityMemberDashboard() {
                  activeTab === "bid" ? t("prepareBid") :
                  activeTab === "proveedores" ? t("serviceProviders") :
                  activeTab === "notificaciones" ? t("notifications") :
-                 activeTab === "recomendaciones" ? t("recommendations") :
                  activeTab === "configuracion" ? t("configuration") :
-                 activeTab === "valoraciones" ? t("serviceRatings") :
                  t("communityMemberDashboard")}
               </h1>
               
