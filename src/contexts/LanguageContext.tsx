@@ -403,7 +403,6 @@ const translations = {
     respond: "Responder",
     average: "Promedio",
     elevatorMaintenance: "Mantenimiento de Ascensor",
-    // Community Member Dashboard translations
     communityMemberDashboard: "Panel de Miembro de la Comunidad",
     communityChat: "Chat de la Comunidad",
     scheduleVideoConference: "Programar Videoconferencia",
@@ -421,7 +420,6 @@ const translations = {
     locationLabel: "Ubicación",
     mainAddress: "Dirección Principal",
     contactPreferences: "Preferencias de Contacto",
-    // Community contacts roles
     communityPresident: "Presidente de la Comunidad",
     treasurer: "Tesorero",
     secretary: "Secretario",
@@ -429,7 +427,6 @@ const translations = {
     maintenanceManager: "Responsable de Mantenimiento",
     securityGuard: "Guardia de Seguridad",
     maintenanceStaff: "Personal de Mantenimiento",
-    // Community contact messages
     goodMorningNeighbors: "Buenos días vecinos",
     monthlyFeesReminder: "Recordatorio de cuotas mensuales",
     meetingMinutesAvailable: "Actas de reunión disponibles",
@@ -450,7 +447,6 @@ const translations = {
     internetProviderSuggestion: "Sugerencia de proveedor de internet",
     balconyPlantCare: "Cuidado de plantas del balcón",
     budgetApprovalNeeded: "Aprobación de presupuesto necesaria",
-    // Video conference
     scheduleNewMeeting: "Programar Nueva Reunión",
     meetingTitle: "Título de la Reunión",
     enterMeetingTitle: "Introduce el título de la reunión",
@@ -467,7 +463,6 @@ const translations = {
     joinMeeting: "Unirse a la Reunión",
     maintenanceCoordinationMeeting: "Reunión de Coordinación de Mantenimiento",
     communityEventPlanning: "Planificación de Evento Comunitario",
-    // Issue reporting
     whatHappened: "¿Qué pasó?",
     briefDescriptionOfIssue: "Breve descripción de la incidencia",
     when: "¿Cuándo?",
@@ -485,7 +480,6 @@ const translations = {
     high: "Alto",
     critical: "Crítico",
     submitIssue: "Enviar Incidencia",
-    // Contract types
     communityBylaws: "Estatutos de la Comunidad",
     legalDocument: "Documento Legal",
     maintenanceContract: "Contrato de Mantenimiento",
@@ -503,7 +497,6 @@ const translations = {
     format: "Formato",
     actions: "Acciones",
     download: "Descargar",
-    // Budget
     totalIncome: "Ingresos Totales",
     annualCommunityFees: "Cuotas Anuales de la Comunidad",
     totalExpenses: "Gastos Totales",
@@ -520,7 +513,6 @@ const translations = {
     interestEarned: "Intereses Ganados",
     downloadExcelFile: "Descargar Archivo Excel",
     viewDetailedBudget: "Ver Presupuesto Detallado",
-    // Contact administrator
     yourEstateAdministrator: "Tu Administrador de Fincas",
     officeHours: "Horario de Oficina",
     subject: "Asunto",
@@ -530,7 +522,6 @@ const translations = {
     attachFiles: "Adjuntar Archivos",
     saveAsDraft: "Guardar como Borrador",
     sendEmail: "Enviar Email",
-    // Bid preparation
     selectServiceCategory: "Seleccionar Categoría de Servicio",
     viewAllCategories: "Ver Todas las Categorías",
     bidDetails: "Detalles de la Licitación",
@@ -549,12 +540,10 @@ const translations = {
     communityHallwayRefresh: "Renovación del pasillo comunitario",
     lightingUpgrade: "Mejora de Iluminación",
     energyEfficientLighting: "Iluminación eficiente energéticamente",
-    // Service providers
     searchProviders: "Buscar Proveedores",
     viewProfile: "Ver Perfil",
     request: "Solicitar",
     loadMoreProviders: "Cargar Más Proveedores",
-    // Notifications
     quoteReceived: "Presupuesto Recibido",
     quoteReceivedDesc: "Has recibido un nuevo presupuesto para tu solicitud",
     hoursAgo: "hace 2 horas",
@@ -568,11 +557,9 @@ const translations = {
     reschedule: "Reprogramar",
     confirm: "Confirmar",
     viewAllNotifications: "Ver Todas las Notificaciones",
-    // Recommendations
     noFavoriteProviders: "No tienes proveedores favoritos",
     addFavoriteProvidersDesc: "Añade proveedores a tus favoritos para acceso rápido",
     exploreProviders: "Explorar Proveedores",
-    // Configuration
     accountPreferences: "Preferencias de Cuenta",
     language: "Idioma",
     spanish: "Español",
@@ -584,19 +571,16 @@ const translations = {
     privacy: "Privacidad",
     profileVisibleToProviders: "Perfil visible para proveedores",
     shareServiceHistory: "Compartir historial de servicios",
-    security: "Seguridad",
     changePassword: "Cambiar Contraseña",
     setupTwoFactor: "Configurar Autenticación de Dos Factores",
     manageConnectedDevices: "Gestionar Dispositivos Conectados",
     dataAndPrivacy: "Datos y Privacidad",
     downloadMyData: "Descargar Mis Datos",
     deleteMyAccount: "Eliminar Mi Cuenta",
-    // Service ratings
     ratePendingServices: "Valorar Servicios Pendientes",
     noPendingServicesToRate: "No tienes servicios pendientes de valorar",
     myPastRatings: "Mis Valoraciones Anteriores",
     noPastRatings: "No tienes valoraciones anteriores",
-    // Estate Administrator translations
     map: "Mapa",
     assets: "Activos",
     currentServices: "Servicios Actuales",
@@ -616,7 +600,6 @@ const translations = {
     amountStatus: "Importe/Estado",
     action: "Acción",
     manage: "Gestionar",
-    // New translations for estate administrator
     controlPanel: "Panel de Control",
     communityDetails: "Detalles de la Comunidad",
     communityIncidents: "Incidencias de la Comunidad",
@@ -627,7 +610,6 @@ const translations = {
     bidsByStatus: "Licitaciones por Estado",
     resolved: "Resueltas",
     inProgress: "En Progreso",
-    open: "Abiertas",
     closed: "Cerradas",
     totalIncidents: "Total de Incidencias",
     totalBids: "Total de Licitaciones",
@@ -636,7 +618,6 @@ const translations = {
     viewAllIncidents: "Ver Todas las Incidencias",
     viewAllBids: "Ver Todas las Licitaciones",
     incidentDetails: "Detalles de la Incidencia",
-    bidDetails: "Detalles de la Licitación",
     reportedBy: "Reportado por",
     assignedTo: "Asignado a",
     priority: "Prioridad",
@@ -1059,7 +1040,6 @@ const translations = {
     respond: "Respond",
     average: "Average",
     elevatorMaintenance: "Elevator Maintenance",
-    // Community Member Dashboard translations
     communityMemberDashboard: "Community Member Dashboard",
     communityChat: "Community Chat",
     scheduleVideoConference: "Schedule Video Conference",
@@ -1077,7 +1057,6 @@ const translations = {
     locationLabel: "Location",
     mainAddress: "Main Address",
     contactPreferences: "Contact Preferences",
-    // Community contacts roles
     communityPresident: "Community President",
     treasurer: "Treasurer",
     secretary: "Secretary",
@@ -1085,7 +1064,6 @@ const translations = {
     maintenanceManager: "Maintenance Manager",
     securityGuard: "Security Guard",
     maintenanceStaff: "Maintenance Staff",
-    // Community contact messages
     goodMorningNeighbors: "Good morning neighbors",
     monthlyFeesReminder: "Monthly fees reminder",
     meetingMinutesAvailable: "Meeting minutes available",
@@ -1106,7 +1084,6 @@ const translations = {
     internetProviderSuggestion: "Internet provider suggestion",
     balconyPlantCare: "Balcony plant care",
     budgetApprovalNeeded: "Budget approval needed",
-    // Video conference
     scheduleNewMeeting: "Schedule New Meeting",
     meetingTitle: "Meeting Title",
     enterMeetingTitle: "Enter meeting title",
@@ -1123,7 +1100,6 @@ const translations = {
     joinMeeting: "Join Meeting",
     maintenanceCoordinationMeeting: "Maintenance Coordination Meeting",
     communityEventPlanning: "Community Event Planning",
-    // Issue reporting
     whatHappened: "What happened?",
     briefDescriptionOfIssue: "Brief description of the issue",
     when: "When?",
@@ -1141,7 +1117,6 @@ const translations = {
     high: "High",
     critical: "Critical",
     submitIssue: "Submit Issue",
-    // Contract types
     communityBylaws: "Community Bylaws",
     legalDocument: "Legal Document",
     maintenanceContract: "Maintenance Contract",
@@ -1159,7 +1134,6 @@ const translations = {
     format: "Format",
     actions: "Actions",
     download: "Download",
-    // Budget
     totalIncome: "Total Income",
     annualCommunityFees: "Annual Community Fees",
     totalExpenses: "Total Expenses",
@@ -1176,7 +1150,6 @@ const translations = {
     interestEarned: "Interest Earned",
     downloadExcelFile: "Download Excel File",
     viewDetailedBudget: "View Detailed Budget",
-    // Contact administrator
     yourEstateAdministrator: "Your Estate Administrator",
     officeHours: "Office Hours",
     subject: "Subject",
@@ -1186,7 +1159,6 @@ const translations = {
     attachFiles: "Attach Files",
     saveAsDraft: "Save as Draft",
     sendEmail: "Send Email",
-    // Bid preparation
     selectServiceCategory: "Select Service Category",
     viewAllCategories: "View All Categories",
     bidDetails: "Bid Details",
@@ -1205,12 +1177,10 @@ const translations = {
     communityHallwayRefresh: "Community hallway refresh",
     lightingUpgrade: "Lighting Upgrade",
     energyEfficientLighting: "Energy efficient lighting",
-    // Service providers
     searchProviders: "Search Providers",
     viewProfile: "View Profile",
     request: "Request",
     loadMoreProviders: "Load More Providers",
-    // Notifications
     quoteReceived: "Quote Received",
     quoteReceivedDesc: "You have received a new quote for your request",
     hoursAgo: "2 hours ago",
@@ -1224,11 +1194,9 @@ const translations = {
     reschedule: "Reschedule",
     confirm: "Confirm",
     viewAllNotifications: "View All Notifications",
-    // Recommendations
     noFavoriteProviders: "You have no favorite providers",
     addFavoriteProvidersDesc: "Add providers to your favorites for quick access",
     exploreProviders: "Explore Providers",
-    // Configuration
     accountPreferences: "Account Preferences",
     language: "Language",
     spanish: "Spanish",
@@ -1247,12 +1215,10 @@ const translations = {
     dataAndPrivacy: "Data and Privacy",
     downloadMyData: "Download My Data",
     deleteMyAccount: "Delete My Account",
-    // Service ratings
     ratePendingServices: "Rate Pending Services",
     noPendingServicesToRate: "You have no pending services to rate",
     myPastRatings: "My Past Ratings",
     noPastRatings: "You have no past ratings",
-    // Estate Administrator translations
     map: "Map",
     assets: "Assets",
     currentServices: "Current Services",
@@ -1272,7 +1238,6 @@ const translations = {
     amountStatus: "Amount/Status",
     action: "Action",
     manage: "Manage",
-    // New translations for estate administrator
     controlPanel: "Control Panel",
     communityDetails: "Community Details",
     communityIncidents: "Community Incidents",
@@ -1283,7 +1248,6 @@ const translations = {
     bidsByStatus: "Bids by Status",
     resolved: "Resolved",
     inProgress: "In Progress",
-    open: "Open",
     closed: "Closed",
     totalIncidents: "Total Incidents",
     totalBids: "Total Bids",
@@ -1292,7 +1256,6 @@ const translations = {
     viewAllIncidents: "View All Incidents",
     viewAllBids: "View All Bids",
     incidentDetails: "Incident Details",
-    bidDetails: "Bid Details",
     reportedBy: "Reported by",
     assignedTo: "Assigned to",
     priority: "Priority",
