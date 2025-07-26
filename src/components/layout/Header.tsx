@@ -41,8 +41,8 @@ export function Header() {
           {/* Show sign out button when in dashboard pages */}
           {isDashboardPage && (
             <Button 
-              variant="ghost" 
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              variant="outline" 
+              className="bg-red-900 hover:bg-red-800 text-white font-bold border-red-900 hover:border-red-800"
               onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
