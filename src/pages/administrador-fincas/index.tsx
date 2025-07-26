@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -216,12 +215,12 @@ export default function AdministradorFincas() {
                 {t("map")}
               </Button>
               <Button 
-                variant={activeTab === "activos" ? "default" : "ghost"} 
+                variant={activeTab === "comunidades" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("activos")}
+                onClick={() => setActiveTab("comunidades")}
               >
                 <Building className="mr-2 h-5 w-5" />
-                {t("assets")}
+                {t("communities")}
               </Button>
               <Button 
                 variant={activeTab === "servicios" ? "default" : "ghost"} 
@@ -259,7 +258,7 @@ export default function AdministradorFincas() {
                 {activeTab === "controlPanel" ? t("controlPanel") :
                  activeTab === "videoconference" ? t("scheduleVideoConference") :
                  activeTab === "mapa" ? t("map") :
-                 activeTab === "activos" ? t("assets") :
+                 activeTab === "comunidades" ? t("communities") :
                  activeTab === "servicios" ? t("currentServices") :
                  activeTab === "juntas" ? t("meetings") :
                  activeTab === "pendientes" ? t("pendingIssues") :
@@ -506,8 +505,8 @@ export default function AdministradorFincas() {
                 </div>
               )}
 
-              {/* Activos */}
-              {activeTab === "activos" && (
+              {/* Comunidades */}
+              {activeTab === "comunidades" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-2xl font-bold mb-4">{t("managedCommunities")}</h2>
                   <div className="grid gap-4">

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 type Language = "es" | "en";
@@ -582,7 +583,7 @@ const translations = {
     myPastRatings: "Mis Valoraciones Anteriores",
     noPastRatings: "No tienes valoraciones anteriores",
     map: "Mapa",
-    assets: "Activos",
+    communities: "Comunidades",
     currentServices: "Servicios Actuales",
     meetings: "Reuniones",
     pendingIssues: "Temas Pendientes",
@@ -1208,7 +1209,6 @@ const translations = {
     privacy: "Privacy",
     profileVisibleToProviders: "Profile visible to providers",
     shareServiceHistory: "Share service history",
-    security: "Security",
     changePassword: "Change Password",
     setupTwoFactor: "Setup Two-Factor Authentication",
     manageConnectedDevices: "Manage Connected Devices",
@@ -1220,7 +1220,7 @@ const translations = {
     myPastRatings: "My Past Ratings",
     noPastRatings: "You have no past ratings",
     map: "Map",
-    assets: "Assets",
+    communities: "Communities",
     currentServices: "Current Services",
     meetings: "Meetings",
     pendingIssues: "Pending Issues",
