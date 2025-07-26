@@ -402,6 +402,7 @@ const translations = {
     jobCompleted: "Trabajo Completado",
     respond: "Responder",
     average: "Promedio",
+    elevatorMaintenance: "Mantenimiento de Ascensor",
     // Community Member Dashboard translations
     communityMemberDashboard: "Panel de Miembro de la Comunidad",
     communityChat: "Chat de la Comunidad",
@@ -992,6 +993,7 @@ const translations = {
     jobCompleted: "Job Completed",
     respond: "Respond",
     average: "Average",
+    elevatorMaintenance: "Elevator Maintenance",
     // Community Member Dashboard translations
     communityMemberDashboard: "Community Member Dashboard",
     communityChat: "Community Chat",
