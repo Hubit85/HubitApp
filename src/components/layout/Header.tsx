@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LogOut } from "lucide-react";
 
 export function Header() {
   const router = useRouter();
@@ -18,6 +19,12 @@ export function Header() {
   
   const isHomePage = router.pathname === '/';
 
+  const handleSignOut = () => {
+    // Handle sign out logic here
+    console.log("Sign out clicked");
+    // You can add actual sign out logic here
+  };
+
   return (
     <header className="w-full py-4 px-4 sm:px-6 lg:px-8 bg-white shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
@@ -30,6 +37,19 @@ export function Header() {
         
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
+          
+          {/* Show sign out button when in dashboard pages */}
+          {isDashboardPage && (
+            <Button 
+              variant="ghost" 
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleSignOut}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              {t("signOut")}
+            </Button>
+          )}
+          
           {/* Only show login/register buttons on non-dashboard pages and non-home page */}
           {!isDashboardPage && !isHomePage && (
             <>
