@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -117,6 +117,11 @@ export default function AdministradorFincas() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [activeTab, setActiveTab] = useState("controlPanel");
   const [selectedCommunity, setSelectedCommunity] = useState<number | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleMarkerClick = (id: number) => {
     setSelectedMarker(id);
@@ -175,6 +180,130 @@ export default function AdministradorFincas() {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+
+  if (!isClient) {
+    return (
+      <>
+        <Head>
+          <title>Estate Administrator - Dashboard</title>
+          <meta name="description" content="Dashboard" />
+        </Head>
+
+        <Header />
+
+        <div className="flex h-screen bg-gray-100 pt-16">
+          <div className="w-64 bg-gray-800 text-white shadow-lg">
+            <div className="p-4">
+              <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
+              <nav className="space-y-2">
+                <Button 
+                  variant="default"
+                  className="w-full justify-start"
+                >
+                  <TrendingUp className="mr-2 h-5 w-5" />
+                  Control Panel
+                </Button>
+                <Button 
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <Video className="mr-2 h-5 w-5" />
+                  Video Conference
+                </Button>
+                <Button 
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <MapPin className="mr-2 h-5 w-5" />
+                  Map
+                </Button>
+                <Button 
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <Building className="mr-2 h-5 w-5" />
+                  Communities
+                </Button>
+                <Button 
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <Wrench className="mr-2 h-5 w-5" />
+                  Current Services
+                </Button>
+                <Button 
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <CalendarIcon className="mr-2 h-5 w-5" />
+                  Meetings
+                </Button>
+                <Button 
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <ClipboardList className="mr-2 h-5 w-5" />
+                  Pending Issues
+                </Button>
+              </nav>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-hidden">
+            <ZoomableSection className="h-full overflow-auto" enableZoom={true} maxScale={3} minScale={0.5}>
+              <div className="p-6 min-h-full">
+                <h1 className="text-3xl font-bold mb-6">Control Panel</h1>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Managed Communities</CardTitle>
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">10</div>
+                        <p className="text-xs text-muted-foreground">+2 this month</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Incidents</CardTitle>
+                        <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">23</div>
+                        <p className="text-xs text-muted-foreground">-5 vs last week</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Bids</CardTitle>
+                        <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">12</div>
+                        <p className="text-xs text-muted-foreground">+3 this month</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+                        <Calculator className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">€8,450</div>
+                        <p className="text-xs text-muted-foreground">-€1,200 vs last week</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </ZoomableSection>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
