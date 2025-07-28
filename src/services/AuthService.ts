@@ -32,50 +32,68 @@ class AuthService {
   private baseUrl = '/api/auth';
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await fetch(`${this.baseUrl}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
+    // Mock implementation for demo purposes
+    // In a real app, this would make an API call
+    const mockUser: User = {
+      id: '1',
+      email: credentials.email,
+      name: 'Usuario Demo',
+      role: 'particular',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
 
-    if (!response.ok) {
-      throw new Error('Login failed');
-    }
+    const mockToken = 'mock-jwt-token-' + Date.now();
+    this.setToken(mockToken);
 
-    return response.json();
+    return {
+      user: mockUser,
+      token: mockToken
+    };
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await fetch(`${this.baseUrl}/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    // Mock implementation for demo purposes
+    const mockUser: User = {
+      id: '1',
+      email: data.email,
+      name: data.name,
+      phone: data.phone,
+      role: data.role,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
 
-    if (!response.ok) {
-      throw new Error('Registration failed');
-    }
+    const mockToken = 'mock-jwt-token-' + Date.now();
+    this.setToken(mockToken);
 
-    return response.json();
+    return {
+      user: mockUser,
+      token: mockToken
+    };
   }
 
   async logout(): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/logout`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.getToken()}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Logout failed');
+    try {
+      // Since no backend is connected, we'll just clear local storage
+      // In a real app with backend, this would make an API call first
+      this.removeToken();
+      
+      // Clear any other auth-related data from localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('selectedProperty');
+        localStorage.removeItem('user_profile');
+        localStorage.removeItem('user_preferences');
+      }
+      
+      // Simulate a small delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+    } catch (error) {
+      // Even if there's an error, we should still clear local storage
+      this.removeToken();
+      throw new Error('Error durante el cierre de sesión');
     }
-
-    this.removeToken();
   }
 
   async getCurrentUser(): Promise<User | null> {
@@ -83,18 +101,17 @@ class AuthService {
     if (!token) return null;
 
     try {
-      const response = await fetch(`${this.baseUrl}/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // Mock implementation - in a real app this would fetch from API
+      const mockUser: User = {
+        id: '1',
+        email: 'usuario@demo.com',
+        name: 'Usuario Demo',
+        role: 'particular',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
 
-      if (!response.ok) {
-        this.removeToken();
-        return null;
-      }
-
-      return response.json();
+      return mockUser;
     } catch (error) {
       this.removeToken();
       return null;
@@ -102,49 +119,31 @@ class AuthService {
   }
 
   async updateProfile(data: Partial<User>): Promise<User> {
-    const response = await fetch(`${this.baseUrl}/profile`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.getToken()}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error('Profile update failed');
+    // Mock implementation
+    const currentUser = await this.getCurrentUser();
+    if (!currentUser) {
+      throw new Error('No user logged in');
     }
 
-    return response.json();
+    const updatedUser: User = {
+      ...currentUser,
+      ...data,
+      updatedAt: new Date()
+    };
+
+    return updatedUser;
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/change-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.getToken()}`,
-      },
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Password change failed');
-    }
+    // Mock implementation
+    await new Promise(resolve => setTimeout(resolve, 500));
+    // In a real app, this would validate and update the password
   }
 
   async resetPassword(email: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/reset-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Password reset failed');
-    }
+    // Mock implementation
+    await new Promise(resolve => setTimeout(resolve, 500));
+    // In a real app, this would send a reset email
   }
 
   getToken(): string | null {

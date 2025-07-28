@@ -72,12 +72,13 @@ export function Header() {
           {isDashboardPage && (
             <Button 
               variant="outline" 
-              className="bg-red-900 hover:bg-red-800 text-white font-bold border-red-900 hover:border-red-800 transition-all duration-200 hover:scale-105 active:scale-95"
+              size="sm"
+              className="bg-red-900 hover:bg-red-800 text-white border-red-900 hover:border-red-800 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-1"
               onClick={handleSignOut}
               data-signout-btn
             >
-              <LogOut className="mr-2 h-4 w-4" />
-              {t("signOut")}
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">{t("signOut")}</span>
             </Button>
           )}
           
