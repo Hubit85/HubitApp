@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LogOut } from "lucide-react";
+import { authService } from "@/services/AuthService";
 
 export function Header() {
   const router = useRouter();
@@ -19,17 +20,46 @@ export function Header() {
   
   const isHomePage = router.pathname === '/';
 
-  const handleSignOut = () => {
-    // Handle sign out logic here
-    console.log("Sign out clicked");
-    // You can add actual sign out logic here
+  const handleSignOut = async () => {
+    try {
+      // Show loading state with subtle animation
+      const signOutButton = document.querySelector('[data-signout-btn]') as HTMLButtonElement;
+      if (signOutButton) {
+        signOutButton.disabled = true;
+        signOutButton.style.opacity = '0.7';
+        signOutButton.style.transform = 'scale(0.98)';
+      }
+
+      // Call the logout service
+      await authService.logout();
+      
+      // Add a smooth transition before redirect
+      setTimeout(() => {
+        // Redirect to home page
+        router.push('/');
+      }, 300);
+      
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      
+      // Reset button state on error
+      const signOutButton = document.querySelector('[data-signout-btn]') as HTMLButtonElement;
+      if (signOutButton) {
+        signOutButton.disabled = false;
+        signOutButton.style.opacity = '1';
+        signOutButton.style.transform = 'scale(1)';
+      }
+      
+      // You could add a toast notification here for better UX
+      alert("Error al cerrar sesión. Por favor, inténtalo de nuevo.");
+    }
   };
 
   return (
     <header className="w-full py-4 px-4 sm:px-6 lg:px-8 bg-white shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex flex-col">
-          <Link href={isDashboardPage ? '/dashboard' : '/'} className="text-2xl font-bold text-black tracking-wide">
+          <Link href={isDashboardPage ? '/dashboard' : '/'} className="text-2xl font-bold text-black tracking-wide hover:text-gray-700 transition-colors duration-200">
             {t("hubit")}
           </Link>
           <p className="text-sm text-gray-600">{t("professionalServices")}</p>
@@ -42,8 +72,9 @@ export function Header() {
           {isDashboardPage && (
             <Button 
               variant="outline" 
-              className="bg-red-900 hover:bg-red-800 text-white font-bold border-red-900 hover:border-red-800"
+              className="bg-red-900 hover:bg-red-800 text-white font-bold border-red-900 hover:border-red-800 transition-all duration-200 hover:scale-105 active:scale-95"
               onClick={handleSignOut}
+              data-signout-btn
             >
               <LogOut className="mr-2 h-4 w-4" />
               {t("signOut")}
@@ -53,10 +84,10 @@ export function Header() {
           {/* Only show login/register buttons on non-dashboard pages and non-home page */}
           {!isDashboardPage && !isHomePage && (
             <>
-              <Button variant="ghost" asChild className="bg-black hover:bg-gray-800 text-white">
+              <Button variant="ghost" asChild className="bg-black hover:bg-gray-800 text-white transition-all duration-200 hover:scale-105">
                 <Link href="/auth/login">{t("login")}</Link>
               </Button>
-              <Button variant="outline" asChild className="bg-white hover:bg-gray-100 text-black border-black">
+              <Button variant="outline" asChild className="bg-white hover:bg-gray-100 text-black border-black transition-all duration-200 hover:scale-105">
                 <Link href="/auth/register">{t("register")}</Link>
               </Button>
             </>
