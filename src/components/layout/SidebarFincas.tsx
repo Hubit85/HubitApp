@@ -1,6 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, ClipboardList, Building, Wrench, User, ThumbsUp, Award, CreditCard } from "lucide-react";
+import { useRouter } from "next/router";
+import { MapPin, Calendar, ClipboardList, Building, Wrench, User, ThumbsUp, Award, CreditCard, LogOut } from "lucide-react";
+import { authService } from "@/services/AuthService";
 
 interface SidebarFincasProps {
   activeTab: string;
@@ -8,9 +10,23 @@ interface SidebarFincasProps {
 }
 
 export function SidebarFincas({ activeTab, setActiveTab }: SidebarFincasProps) {
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await authService.logout();
+      setTimeout(() => {
+        router.push('/');
+      }, 300);
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      alert("Error al cerrar sesión. Por favor, inténtalo de nuevo.");
+    }
+  };
+
   return (
-    <div className="w-64 bg-gray-800 text-white shadow-lg">
-      <div className="p-4">
+    <div className="w-64 bg-gray-800 text-white shadow-lg flex flex-col h-full">
+      <div className="p-4 flex-1">
         <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
         <nav className="space-y-2">
           <Button 
@@ -86,6 +102,18 @@ export function SidebarFincas({ activeTab, setActiveTab }: SidebarFincasProps) {
             Pagos
           </Button>
         </nav>
+      </div>
+      
+      {/* Sign Out Button at Bottom */}
+      <div className="p-4 border-t border-gray-700">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-all duration-200"
+          onClick={handleSignOut}
+        >
+          <LogOut className="mr-2 h-5 w-5" />
+          Cerrar Sesión
+        </Button>
       </div>
     </div>
   );
