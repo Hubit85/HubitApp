@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 type Language = "es" | "en";
@@ -740,6 +739,33 @@ const translations = {
     actualVsBudget: "Real vs Presupuesto",
     yearToDate: "Año hasta la Fecha",
     projectedAnnual: "Proyección Anual",
+    
+    // Service Provider Dashboard Specific
+    serviceHistory: "Service History",
+    customerRating: "Customer Rating",
+    viewFullRating: "View Full Rating",
+    notRatedYet: "Not rated yet",
+    waitingForCustomerRating: "Waiting for customer rating",
+    contactCustomer: "Contact Customer",
+    totalServicesProvided: "Total services provided",
+    averageCustomerRating: "Average customer rating",
+    monthlyRevenue: "Monthly revenue",
+    completionRate: "Completion rate",
+    responseRate: "Response rate",
+    servicesThisMonth: "Services this month",
+    recentServices: "Recent Services",
+    topRatedServices: "Top Rated Services",
+    servicePerformance: "Service Performance",
+    customerFeedback: "Customer Feedback",
+    filterByCustomerType: "Filter by Customer Type",
+    allCustomerTypes: "All Customer Types",
+    particularCustomers: "Individual Customers",
+    communityCustomers: "Community Customers",
+    providerServiceHistory: "My Service History",
+    servicesProvidedTo: "Services provided to",
+    gatesCleaning: "Gates Cleaning",
+    commonAreasGardening: "Common Areas Gardening",
+    lightingRepair: "Lighting Repair",
     
     // Mock Data Specific Translations
     plumbingRepair: "Reparación de Fontanería",
@@ -1496,6 +1522,33 @@ const translations = {
     yearToDate: "Year to Date",
     projectedAnnual: "Projected Annual",
 
+    // Service Provider Dashboard Specific
+    serviceHistory: "Service History",
+    customerRating: "Customer Rating",
+    viewFullRating: "View Full Rating",
+    notRatedYet: "Not rated yet",
+    waitingForCustomerRating: "Waiting for customer rating",
+    contactCustomer: "Contact Customer",
+    totalServicesProvided: "Total services provided",
+    averageCustomerRating: "Average customer rating",
+    monthlyRevenue: "Monthly revenue",
+    completionRate: "Completion rate",
+    responseRate: "Response rate",
+    servicesThisMonth: "Services this month",
+    recentServices: "Recent Services",
+    topRatedServices: "Top Rated Services",
+    servicePerformance: "Service Performance",
+    customerFeedback: "Customer Feedback",
+    filterByCustomerType: "Filter by Customer Type",
+    allCustomerTypes: "All Customer Types",
+    particularCustomers: "Individual Customers",
+    communityCustomers: "Community Customers",
+    providerServiceHistory: "My Service History",
+    servicesProvidedTo: "Services provided to",
+    gatesCleaning: "Gates Cleaning",
+    commonAreasGardening: "Common Areas Gardening",
+    lightingRepair: "Lighting Repair",
+    
     // Mock Data Specific Translations
     plumbingRepair: "Plumbing Repair",
     electricalInstallation: "Electrical Installation",
