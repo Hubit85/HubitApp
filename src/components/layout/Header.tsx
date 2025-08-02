@@ -60,12 +60,12 @@ export function Header() {
     <header className="w-full py-4 px-4 sm:px-6 lg:px-8 bg-white shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 transition-transform duration-200 hover:scale-105">
+          <div className="relative w-10 h-10 transition-transform duration-200 hover:scale-105 overflow-hidden rounded-md">
             <Image
               src="/HuBiT.jpeg"
               alt="HuBiT Logo"
               fill
-              className="object-contain rounded-md"
+              className="object-cover object-left"
               priority
             />
           </div>
