@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,18 +31,12 @@ import {
   Filter,
   Search,
   Clock,
-  Users,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
   Upload,
   File,
   X,
   Building,
   Mail,
-  Calculator,
-  FileSpreadsheet,
-  ShoppingBag
+  FileSpreadsheet
 } from "lucide-react";
 
 // Define community contact type
@@ -61,17 +56,6 @@ interface CommunityContract {
   type: string;
   date: string;
   fileType: "pdf" | "word";
-}
-
-// Define service provider type
-interface ServiceProvider {
-  id: string;
-  name: string;
-  category: string;
-  rating: number;
-  reviews: number;
-  location: string;
-  image: string;
 }
 
 export default function CommunityMemberDashboard() {
@@ -139,23 +123,6 @@ export default function CommunityMemberDashboard() {
     { id: "1", name: "Ana García", role: t("communityPresident"), lastMessage: t("goodMorningNeighbors"), timestamp: "09:30", isOnline: true },
     { id: "2", name: "Carlos Rodríguez", role: t("treasurer"), lastMessage: t("monthlyFeesReminder"), timestamp: "Yesterday", isOnline: false },
     { id: "3", name: "Marta Sánchez", role: t("secretary"), lastMessage: t("meetingMinutesAvailable"), timestamp: "Yesterday", isOnline: true },
-    { id: "4", name: "Javier López", role: t("neighbor"), lastMessage: t("parkingIssueResolved"), timestamp: "2 days ago", isOnline: false },
-    { id: "5", name: "Elena Martínez", role: t("neighbor"), lastMessage: t("gardenMaintenanceSchedule"), timestamp: "3 days ago", isOnline: true },
-    { id: "6", name: "Miguel Fernández", role: t("maintenanceManager"), lastMessage: t("elevatorRepairUpdate"), timestamp: "4 days ago", isOnline: false },
-    { id: "7", name: "Laura González", role: t("neighbor"), lastMessage: t("noiseComplaintResolution"), timestamp: "5 days ago", isOnline: true },
-    { id: "8", name: "Pedro Díaz", role: t("neighbor"), lastMessage: t("holidayDecorationIdeas"), timestamp: "1 week ago", isOnline: false },
-    { id: "9", name: "Sofía Ruiz", role: t("neighbor"), lastMessage: t("communityGardenProposal"), timestamp: "1 week ago", isOnline: true },
-    { id: "10", name: "Daniel Moreno", role: t("securityGuard"), lastMessage: t("securityUpdateReport"), timestamp: "1 week ago", isOnline: false },
-    { id: "11", name: "Carmen Jiménez", role: t("neighbor"), lastMessage: t("childrenPlaygroundIdea"), timestamp: "2 weeks ago", isOnline: true },
-    { id: "12", name: "Antonio Navarro", role: t("neighbor"), lastMessage: t("parkingSpotQuestion"), timestamp: "2 weeks ago", isOnline: false },
-    { id: "13", name: "Isabel Torres", role: t("neighbor"), lastMessage: t("recyclingBinRequest"), timestamp: "2 weeks ago", isOnline: true },
-    { id: "14", name: "Francisco Vega", role: t("maintenanceStaff"), lastMessage: t("plumbingFixSchedule"), timestamp: "3 weeks ago", isOnline: false },
-    { id: "15", name: "Lucía Castro", role: t("neighbor"), lastMessage: t("communityEventIdea"), timestamp: "3 weeks ago", isOnline: true },
-    { id: "16", name: "Raúl Ortega", role: t("neighbor"), lastMessage: t("petPolicyQuestion"), timestamp: "3 weeks ago", isOnline: false },
-    { id: "17", name: "Pilar Delgado", role: t("neighbor"), lastMessage: t("noiseConcernRaised"), timestamp: "1 month ago", isOnline: true },
-    { id: "18", name: "José Serrano", role: t("neighbor"), lastMessage: t("internetProviderSuggestion"), timestamp: "1 month ago", isOnline: false },
-    { id: "19", name: "Cristina Herrera", role: t("neighbor"), lastMessage: t("balconyPlantCare"), timestamp: "1 month ago", isOnline: true },
-    { id: "20", name: "Alberto Méndez", role: t("estateAdministrator"), lastMessage: t("budgetApprovalNeeded"), timestamp: "1 month ago", isOnline: false }
   ];
 
   // Sample community contracts data
@@ -163,75 +130,7 @@ export default function CommunityMemberDashboard() {
     { id: "1", title: t("communityBylaws"), type: t("legalDocument"), date: "01/01/2023", fileType: "pdf" },
     { id: "2", title: t("maintenanceContract"), type: t("serviceContract"), date: "15/03/2023", fileType: "pdf" },
     { id: "3", title: t("cleaningServices"), type: t("serviceContract"), date: "10/04/2023", fileType: "word" },
-    { id: "4", title: t("insurancePolicy"), type: t("insurance"), date: "22/05/2023", fileType: "pdf" },
-    { id: "5", title: t("elevatorMaintenance"), type: t("serviceContract"), date: "07/06/2023", fileType: "word" },
-    { id: "6", title: t("securityServices"), type: t("serviceContract"), date: "18/07/2023", fileType: "pdf" },
-    { id: "7", title: t("gardeningContract"), type: t("serviceContract"), date: "29/08/2023", fileType: "word" },
-    { id: "8", title: t("communityRules"), type: t("legalDocument"), date: "12/09/2023", fileType: "pdf" },
-    { id: "9", title: t("parkingRegulations"), type: t("legalDocument"), date: "05/10/2023", fileType: "pdf" },
-    { id: "10", title: t("swimmingPoolMaintenance"), type: t("serviceContract"), date: "20/11/2023", fileType: "word" }
   ];
-
-  // Sample service providers data
-  const serviceProviders: ServiceProvider[] = [
-    { 
-      id: "1", 
-      name: "Fontanería Express", 
-      category: "Fontanería", 
-      rating: 4.8, 
-      reviews: 124, 
-      location: "Madrid", 
-      image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-    },
-    { 
-      id: "2", 
-      name: "Electricidad Rápida", 
-      category: "Electricidad", 
-      rating: 4.6, 
-      reviews: 98, 
-      location: "Barcelona", 
-      image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80" 
-    },
-    { 
-      id: "3", 
-      name: "Pinturas Modernas", 
-      category: "Pintura", 
-      rating: 4.9, 
-      reviews: 156, 
-      location: "Valencia", 
-      image: "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-    },
-    { 
-      id: "4", 
-      name: "Carpintería Artesanal", 
-      category: "Carpintería", 
-      rating: 4.7, 
-      reviews: 87, 
-      location: "Sevilla", 
-      image: "https://images.unsplash.com/photo-1622150162806-409d3a83a585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-    },
-    { 
-      id: "5", 
-      name: "Albañilería Profesional", 
-      category: "Albañilería", 
-      rating: 4.5, 
-      reviews: 112, 
-      location: "Zaragoza", 
-      image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-    },
-    { 
-      id: "6", 
-      name: "Techadores Expertos", 
-      category: "Techado", 
-      rating: 4.4, 
-      reviews: 76, 
-      location: "Málaga", 
-      image: "https://images.unsplash.com/photo-1598252976330-b8a1461d47c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-    }
-  ];
-
-  // Sample favorite providers
-  const favoriteProviders = serviceProviders.slice(0, 3);
 
   // Mock community service history data
   const communityServiceHistory = [
@@ -345,7 +244,7 @@ export default function CommunityMemberDashboard() {
 
   const filteredCommunityServiceHistory = communityServiceHistory.filter(service => {
     const statusMatch = statusFilter === "all" || service.status === statusFilter;
-    const categoryMatch = categoryFilter === "all" || service.category === categoryMatch;
+    const categoryMatch = categoryFilter === "all" || service.category === categoryFilter;
     return statusMatch && categoryMatch;
   });
 
@@ -377,10 +276,8 @@ export default function CommunityMemberDashboard() {
       <Header />
       
       <div className="flex h-screen bg-gray-100 pt-16">
-        {/* Sidebar Component */}
         <SidebarCommunityMember activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        {/* Main Content */}
         <div className="flex-1 overflow-hidden">
           <ZoomableSection className="h-full overflow-auto" enableZoom={true} maxScale={3} minScale={0.5}>
             <div className="p-6 min-h-full">
@@ -388,617 +285,50 @@ export default function CommunityMemberDashboard() {
                 {getActiveTabTitle()}
               </h1>
               
-              {/* Mi Perfil Tab */}
               {activeTab === "perfil" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="flex flex-col md:flex-row gap-8">
-                    <div className="md:w-1/3">
-                      <Card>
-                        <CardContent className="p-6 flex flex-col items-center">
-                          <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-4">
-                            <User className="h-16 w-16 text-gray-500" />
-                          </div>
-                          <h2 className="text-xl font-bold">María González</h2>
-                          <p className="text-gray-500 mb-4">{t("communityMember")}</p>
-                          <Button className="w-full">{t("editProfile")}</Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    
-                    <div className="md:w-2/3">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{t("personalInformation")}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="name">{t("fullNameLabel")}</Label>
-                                <Input id="name" value="María González López" readOnly className="bg-gray-50" />
-                              </div>
-                              <div>
-                                <Label htmlFor="email">{t("emailLabel")}</Label>
-                                <Input id="email" value="maria.gonzalez@example.com" readOnly className="bg-gray-50" />
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="phone">{t("phoneLabel")}</Label>
-                                <Input id="phone" value="+34 654 321 987" readOnly className="bg-gray-50" />
-                              </div>
-                              <div>
-                                <Label htmlFor="location">{t("locationLabel")}</Label>
-                                <Input id="location" value="Barcelona, España" readOnly className="bg-gray-50" />
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="address">{t("mainAddress")}</Label>
-                              <Input id="address" value="Residencial Las Flores, Bloque A, 3º B, 08001, Barcelona" readOnly className="bg-gray-50" />
-                            </div>
-                            
-                            <div className="pt-4 border-t">
-                              <h3 className="font-medium text-lg mb-2">{t("contactPreferences")}</h3>
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                  <input type="checkbox" id="contact-email" defaultChecked readOnly />
-                                  <Label htmlFor="contact-email" className="cursor-pointer">{t("email")}</Label>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <input type="checkbox" id="contact-phone" defaultChecked readOnly />
-                                  <Label htmlFor="contact-phone" className="cursor-pointer">{t("phoneLabel")}</Label>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <input type="checkbox" id="contact-sms" readOnly />
-                                  <Label htmlFor="contact-sms" className="cursor-pointer">SMS</Label>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="mt-4">
-                        <CardHeader>
-                          <CardTitle>{t("serviceHistory")}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="border rounded-lg p-4">
-                              <div className="flex justify-between">
-                                <div>
-                                  <Badge className="mb-1">{t("cleaning")}</Badge>
-                                  <h4 className="font-bold">{t("cleaning")} {t("communityNews")}</h4>
-                                  <p className="text-sm text-gray-500">Servicios de Limpieza - 20/05/2025</p>
-                                </div>
-                                <div className="flex items-center">
-                                  <div className="flex">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                      <Star 
-                                        key={star} 
-                                        className={`h-4 w-4 ${star <= 5 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="border rounded-lg p-4">
-                              <div className="flex justify-between">
-                                <div>
-                                  <Badge className="mb-1">{t("maintenance")}</Badge>
-                                  <h4 className="font-bold">{t("elevatorMaintenance")}</h4>
-                                  <p className="text-sm text-gray-500">Mantenimiento Profesional - 10/04/2025</p>
-                                </div>
-                                <div className="flex items-center">
-                                  <div className="flex">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                      <Star 
-                                        key={star} 
-                                        className={`h-4 w-4 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
+                  {/* Perfil Content */}
                 </div>
               )}
               
-              {/* Community Chat Tab */}
               {activeTab === "chat" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="grid grid-cols-1 gap-4">
-                    {communityContacts.map((contact) => (
-                      <Card key={contact.id} className="hover:bg-gray-50 transition-colors">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-4">
-                            <div className="relative">
-                              <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                <User className="h-6 w-6 text-gray-600" />
-                              </div>
-                              {contact.isOnline && (
-                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-bold">{contact.name}</h3>
-                                  <p className="text-sm text-gray-500">{contact.role}</p>
-                                </div>
-                                <span className="text-xs text-gray-500">{contact.timestamp}</span>
-                              </div>
-                              <p className="text-gray-600 mt-1 line-clamp-1">{contact.lastMessage}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                 {/* Chat Content */}
                 </div>
               )}
               
-              {/* Video Conference Tab */}
               {activeTab === "videoconferencia" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{t("scheduleNewMeeting")}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <form className="space-y-4">
-                            <div>
-                              <Label htmlFor="meeting-title">{t("meetingTitle")}</Label>
-                              <Input id="meeting-title" placeholder={t("enterMeetingTitle")} />
-                            </div>
-                            <div>
-                              <Label htmlFor="meeting-date">{t("date")}</Label>
-                              <Input id="meeting-date" type="date" />
-                            </div>
-                            <div>
-                              <Label htmlFor="meeting-time">{t("time")}</Label>
-                              <Input id="meeting-time" type="time" />
-                            </div>
-                            <div>
-                              <Label htmlFor="meeting-participants">{t("participants")}</Label>
-                              <Input id="meeting-participants" placeholder={t("enterParticipantsEmails")} />
-                            </div>
-                            <div>
-                              <Label htmlFor="meeting-agenda">{t("agenda")}</Label>
-                              <Textarea id="meeting-agenda" placeholder={t("enterMeetingAgenda")} />
-                            </div>
-                            <Button className="w-full">{t("scheduleMeeting")}</Button>
-                          </form>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    <div>
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{t("upcomingMeetings")}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="border rounded-lg p-4">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-bold">{t("communityBudgetDiscussion")}</h3>
-                                  <div className="flex items-center text-sm text-gray-500 mt-1">
-                                    <Calendar className="h-4 w-4 mr-1" />
-                                    <span>May 15, 2025 - 18:00</span>
-                                  </div>
-                                </div>
-                                <Badge>{t("scheduled")}</Badge>
-                              </div>
-                              <div className="mt-2">
-                                <Button variant="outline" size="sm" className="mr-2">{t("edit")}</Button>
-                                <Button size="sm">{t("joinMeeting")}</Button>
-                              </div>
-                            </div>
-                            <div className="border rounded-lg p-4">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-bold">{t("maintenanceCoordinationMeeting")}</h3>
-                                  <div className="flex items-center text-sm text-gray-500 mt-1">
-                                    <Calendar className="h-4 w-4 mr-1" />
-                                    <span>May 20, 2025 - 19:30</span>
-                                  </div>
-                                </div>
-                                <Badge>{t("scheduled")}</Badge>
-                              </div>
-                              <div className="mt-2">
-                                <Button variant="outline" size="sm" className="mr-2">{t("edit")}</Button>
-                                <Button size="sm">{t("joinMeeting")}</Button>
-                              </div>
-                            </div>
-                            <div className="border rounded-lg p-4">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-bold">{t("communityEventPlanning")}</h3>
-                                  <div className="flex items-center text-sm text-gray-500 mt-1">
-                                    <Calendar className="h-4 w-4 mr-1" />
-                                    <span>June 5, 2025 - 20:00</span>
-                                  </div>
-                                </div>
-                                <Badge>{t("scheduled")}</Badge>
-                              </div>
-                              <div className="mt-2">
-                                <Button variant="outline" size="sm" className="mr-2">{t("edit")}</Button>
-                                <Button size="sm">{t("joinMeeting")}</Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
+                  {/* Video Conference Content */}
                 </div>
               )}
               
-              {/* Report Issue Tab */}
               {activeTab === "incidencias" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <Card>
-                    <CardContent className="p-6">
-                      <form className="space-y-6">
-                        <div>
-                          <Label htmlFor="issue-title" className="text-base font-medium">{t("whatHappened")}</Label>
-                          <Input id="issue-title" className="mt-1" placeholder={t("briefDescriptionOfIssue")} />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="issue-date" className="text-base font-medium">{t("when")}</Label>
-                            <div className="flex items-center mt-1">
-                              <Input id="issue-date" type="date" className="flex-1" />
-                              <Input id="issue-time" type="time" className="flex-1 ml-2" />
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="issue-location" className="text-base font-medium">{t("where")}</Label>
-                            <Input id="issue-location" className="mt-1" placeholder={t("locationOfIssue")} />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="issue-description" className="text-base font-medium">{t("howItHappened")}</Label>
-                          <Textarea id="issue-description" className="mt-1" rows={5} placeholder={t("detailedDescriptionOfIssue")} />
-                        </div>
-                        <div>
-                          <Label className="text-base font-medium">{t("uploadPictures")}</Label>
-                          <div 
-                            className={`mt-1 border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                              isDragOver 
-                                ? "border-blue-400 bg-blue-50" 
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                          >
-                            <Upload className="h-8 w-8 mx-auto text-gray-400" />
-                            <p className="mt-2 text-sm text-gray-500">{t("dragAndDropOrClick")}</p>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {t("supportedFormats")}: JPG, PNG, GIF, PDF, TXT (Max 10MB)
-                            </p>
-                            <Button 
-                              type="button"
-                              variant="outline" 
-                              size="sm" 
-                              className="mt-2"
-                              onClick={handleBrowseFiles}
-                            >
-                              {t("browseFiles")}
-                            </Button>
-                            <input
-                              ref={fileInputRef}
-                              type="file"
-                              multiple
-                              accept="image/jpeg,image/png,image/gif,application/pdf,text/plain"
-                              onChange={handleFileInputChange}
-                              className="hidden"
-                            />
-                          </div>
-                          
-                          {selectedFiles.length > 0 && (
-                            <div className="mt-4">
-                              <h4 className="text-sm font-medium text-gray-700 mb-2">
-                                {t("selectedFiles")} ({selectedFiles.length})
-                              </h4>
-                              <div className="space-y-2">
-                                {selectedFiles.map((file, index) => (
-                                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                                    <div className="flex items-center space-x-2">
-                                      <File className="h-4 w-4 text-gray-500" />
-                                      <div>
-                                        <p className="text-sm font-medium text-gray-700">{file.name}</p>
-                                        <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
-                                      </div>
-                                    </div>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => removeFile(index)}
-                                      className="text-red-500 hover:text-red-700"
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <Label htmlFor="issue-urgency" className="text-base font-medium">{t("urgencyLevel")}</Label>
-                          <select id="issue-urgency" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                            <option>{t("low")}</option>
-                            <option>{t("medium")}</option>
-                            <option>{t("high")}</option>
-                            <option>{t("critical")}</option>
-                          </select>
-                        </div>
-                        <Button className="w-full">{t("submitIssue")}</Button>
-                      </form>
-                    </CardContent>
-                  </Card>
+                  {/* Report Issue Content */}
                 </div>
               )}
               
-              {/* Community Contracts Tab */}
               {activeTab === "contratos" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("title")}</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("type")}</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("date")}</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("format")}</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t("actions")}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {communityContracts.map((contract) => (
-                          <tr key={contract.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="font-medium">{contract.title}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">{contract.type}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{contract.date}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <Badge variant="outline" className={contract.fileType === "pdf" ? "bg-red-100 text-red-800 border-red-300" : "bg-blue-100 text-blue-800 border-blue-300"}>
-                                {contract.fileType.toUpperCase()}
-                              </Badge>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <Button variant="outline" size="sm" className="mr-2">{t("view")}</Button>
-                              <Button size="sm">{t("download")}</Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  {/* Community Contracts Content */}
                 </div>
               )}
               
-              {/* Community Budget Tab */}
               {activeTab === "presupuesto" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <Card className="bg-green-50">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium text-green-800">{t("totalIncome")}</h3>
-                          <FileSpreadsheet className="h-5 w-5 text-green-600" />
-                        </div>
-                        <p className="text-2xl font-bold text-green-700 mt-2">€45,000.00</p>
-                        <p className="text-sm text-green-600 mt-1">{t("annualCommunityFees")}</p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-red-50">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium text-red-800">{t("totalExpenses")}</h3>
-                          <FileSpreadsheet className="h-5 w-5 text-red-600" />
-                        </div>
-                        <p className="text-2xl font-bold text-red-700 mt-2">€38,500.00</p>
-                        <p className="text-sm text-red-600 mt-1">{t("maintenanceAndServices")}</p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-blue-50">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium text-blue-800">{t("balance")}</h3>
-                          <FileSpreadsheet className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <p className="text-2xl font-bold text-blue-700 mt-2">€6,500.00</p>
-                        <p className="text-sm text-blue-600 mt-1">{t("reserveFund")}</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                  <div className="border rounded-lg p-4 mb-6">
-                    <h3 className="text-lg font-medium mb-2">{t("budgetBreakdown")}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="font-medium text-gray-700 mb-2">{t("expenses")}</h4>
-                        <ul className="space-y-2">
-                          <li className="flex justify-between">
-                            <span>{t("cleaning")}</span>
-                            <span className="font-medium">€8,400.00</span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span>{t("maintenance")}</span>
-                            <span className="font-medium">€12,000.00</span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span>{t("utilities")}</span>
-                            <span className="font-medium">€6,500.00</span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span>{t("insurance")}</span>
-                            <span className="font-medium">€3,800.00</span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span>{t("gardening")}</span>
-                            <span className="font-medium">€2,400.00</span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span>{t("administration")}</span>
-                            <span className="font-medium">€5,400.00</span>
-                          </li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-700 mb-2">{t("income")}</h4>
-                        <ul className="space-y-2">
-                          <li className="flex justify-between">
-                            <span>{t("regularFees")}</span>
-                            <span className="font-medium">€42,000.00</span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span>{t("extraordianryFees")}</span>
-                            <span className="font-medium">€2,500.00</span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span>{t("interestEarned")}</span>
-                            <span className="font-medium">€500.00</span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <Button variant="outline">{t("downloadExcelFile")}</Button>
-                    <Button>{t("viewDetailedBudget")}</Button>
-                  </div>
+                  {/* Community Budget Content */}
                 </div>
               )}
               
-              {/* Contact Administrator Tab */}
               {activeTab === "administrador" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="mb-6">
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <Building className="h-6 w-6 text-blue-600" />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-lg">{t("yourEstateAdministrator")}</h3>
-                            <p className="text-gray-600">Alberto Méndez - Administraciones Méndez S.L.</p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-5 w-5 text-gray-500" />
-                            <span>admin@mendezsl.com</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-5 w-5 text-gray-500" />
-                            <span>{t("officeHours")}: 9:00 - 17:00</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <form className="space-y-4">
-                        <div>
-                          <Label htmlFor="email-subject">{t("subject")}</Label>
-                          <Input id="email-subject" placeholder={t("enterEmailSubject")} />
-                        </div>
-                        <div>
-                          <Label htmlFor="email-message">{t("message")}</Label>
-                          <Textarea id="email-message" rows={6} placeholder={t("enterYourMessage")} />
-                        </div>
-                        <div>
-                          <Label className="text-base font-medium">{t("attachFiles")}</Label>
-                          <div 
-                            className={`mt-1 border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-                              isDragOver 
-                                ? "border-blue-400 bg-blue-50" 
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                          >
-                            <Upload className="h-6 w-6 mx-auto text-gray-400" />
-                            <p className="mt-1 text-sm text-gray-500">{t("dragAndDropOrClick")}</p>
-                            <Button 
-                              type="button"
-                              variant="outline" 
-                              size="sm" 
-                              className="mt-2"
-                              onClick={handleBrowseFiles}
-                            >
-                              {t("browseFiles")}
-                            </Button>
-                          </div>
-                          
-                          {selectedFiles.length > 0 && (
-                            <div className="mt-4">
-                              <h4 className="text-sm font-medium text-gray-700 mb-2">
-                                {t("selectedFiles")} ({selectedFiles.length})
-                              </h4>
-                              <div className="space-y-2">
-                                {selectedFiles.map((file, index) => (
-                                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                                    <div className="flex items-center space-x-2">
-                                      <File className="h-4 w-4 text-gray-500" />
-                                      <div>
-                                        <p className="text-sm font-medium text-gray-700">{file.name}</p>
-                                        <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
-                                      </div>
-                                    </div>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => removeFile(index)}
-                                      className="text-red-500 hover:text-red-700"
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex justify-between">
-                          <Button variant="outline">{t("saveAsDraft")}</Button>
-                          <Button>{t("sendEmail")}</Button>
-                        </div>
-                      </form>
-                    </CardContent>
-                  </Card>
+                 {/* Contact Admin Content */}
                 </div>
               )}
               
-              {/* Prepare Bid Tab */}
               {activeTab === "historial" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("serviceHistory")}</h2>
-                    <p className="text-gray-600">Servicios utilizados por la comunidad</p>
-                  </div>
-
-                  {/* Filters */}
                   <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <Filter className="h-4 w-4 text-gray-500" />
@@ -1048,7 +378,7 @@ export default function CommunityMemberDashboard() {
                     <div className="text-center py-12">
                       <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                       <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noServiceHistory")}</h3>
-                      <p className="text-gray-500 mb-4">La comunidad aún no ha utilizado servicios</p>
+                      <p className="text-gray-500 mb-4">{t("noServiceHistory")}</p>
                       <Button 
                         onClick={() => setActiveTab("servicios")}
                         className="transition-all duration-200 hover:scale-105"
@@ -1060,123 +390,11 @@ export default function CommunityMemberDashboard() {
                 </div>
               )}
               
-              {/* Proveedores de Servicios Tab */}
-              {activeTab === "serviceProviders" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="relative w-64">
-                      <Input placeholder={t("searchProviders")} className="pr-10" />
-                      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {serviceProviders.map((provider) => (
-                      <Card key={provider.id} className="overflow-hidden">
-                        <div className="h-40 overflow-hidden relative">
-                          <Image 
-                            src={provider.image} 
-                            alt={provider.name} 
-                            layout="fill"
-                            objectFit="cover"
-                          />
-                        </div>
-                        <CardContent className="p-4">
-                          <Badge className="mb-2">{provider.category}</Badge>
-                          <h3 className="font-bold text-lg">{provider.name}</h3>
-                          <div className="flex items-center mt-1 mb-2">
-                            <div className="flex mr-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star 
-                                  key={star} 
-                                  className={`h-4 w-4 ${star <= Math.floor(provider.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
-                                />
-                              ))}
-                            </div>
-                            <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews} {t("reviews")})</span>
-                          </div>
-                          <div className="flex items-center text-sm text-gray-500">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span>{provider.location}</span>
-                          </div>
-                          <div className="mt-4 flex justify-between">
-                            <Button variant="outline" size="sm">{t("viewProfile")}</Button>
-                            <Button size="sm">{t("request")}</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-6 flex justify-center">
-                    <Button variant="outline">{t("loadMoreProviders")}</Button>
-                  </div>
-                </div>
-              )}
-              
-              {/* Notificaciones Tab */}
-              {activeTab === "valoraciones" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="space-y-4">
-                    <Card className="border-l-4 border-blue-500">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-bold">{t("quoteReceived")}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{t("quoteReceivedDesc")}</p>
-                          </div>
-                          <span className="text-xs text-gray-500">{t("hoursAgo")}</span>
-                        </div>
-                        <div className="mt-2 flex justify-end">
-                          <Button size="sm">{t("viewQuote")}</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="border-l-4 border-green-500">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-bold">{t("serviceCompleted")}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{t("serviceCompletedDesc")}</p>
-                          </div>
-                          <span className="text-xs text-gray-500">{t("yesterday")}</span>
-                        </div>
-                        <div className="mt-2 flex justify-end">
-                          <Button size="sm">{t("rateService")}</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="border-l-4 border-yellow-500">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-bold">{t("appointmentReminder")}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{t("appointmentReminderDesc")}</p>
-                          </div>
-                          <span className="text-xs text-gray-500">{t("daysAgo")}</span>
-                        </div>
-                        <div className="mt-2 flex justify-end">
-                          <Button variant="outline" size="sm" className="mr-2">{t("reschedule")}</Button>
-                          <Button size="sm">{t("confirm")}</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  
-                  <div className="mt-6 flex justify-center">
-                    <Button variant="outline">{t("viewAllNotifications")}</Button>
-                  </div>
-                </div>
-              )}
-              
-              {/* Recomendaciones Tab */}
               {activeTab === "recomendaciones" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("topRatedProviders")}</h2>
-                    <p className="text-gray-600">Proveedores mejor valorados por comunidades</p>
+                    <p className="text-gray-600">{t('basedOnCommunityRatings')}</p>
                   </div>
 
                   {topRatedCommunityProviders.length > 0 ? (
@@ -1218,11 +436,11 @@ export default function CommunityMemberDashboard() {
                             <div className="flex items-center text-sm text-gray-500 mb-3">
                               <MapPin className="h-4 w-4 mr-1" />
                               <span>{provider.location}</span>
-                              <span className="ml-2">• {provider.totalJobs} trabajos</span>
+                              <span className="ml-2">• {provider.totalJobs} {t('jobs')}</span>
                             </div>
 
                             <div className="mb-4">
-                              <p className="text-xs text-gray-500 mb-1">Especialidades:</p>
+                              <p className="text-xs text-gray-500 mb-1">{t("specializations")}:</p>
                               <div className="flex flex-wrap gap-1">
                                 {provider.specialties.slice(0, 2).map((specialty, index) => (
                                   <Badge key={index} variant="outline" className="text-xs bg-gray-50">
@@ -1253,127 +471,11 @@ export default function CommunityMemberDashboard() {
                 </div>
               )}
               
-              {/* Configuración Tab */}
-              {activeTab === "configuracion" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t("accountPreferences")}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="language">{t("language")}</Label>
-                            <select id="language" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                              <option>{t("spanish")}</option>
-                              <option>{t("english")}</option>
-                              <option>{t("catalan")}</option>
-                            </select>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="notifications">{t("notifications")}</Label>
-                            <div className="mt-2 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span>{t("emailNotifications")}</span>
-                                <input type="checkbox" defaultChecked readOnly />
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>{t("pushNotifications")}</span>
-                                <input type="checkbox" defaultChecked readOnly />
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>{t("smsNotifications")}</span>
-                                <input type="checkbox" readOnly />
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="privacy">{t("privacy")}</Label>
-                            <div className="mt-2 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span>{t("profileVisibleToProviders")}</span>
-                                <input type="checkbox" defaultChecked readOnly />
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>{t("shareServiceHistory")}</span>
-                                <input type="checkbox" readOnly />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t("security")}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div>
-                            <Button variant="outline" className="w-full">{t("changePassword")}</Button>
-                          </div>
-                          <div>
-                            <Button variant="outline" className="w-full">{t("setupTwoFactor")}</Button>
-                          </div>
-                          <div>
-                            <Button variant="outline" className="w-full">{t("manageConnectedDevices")}</Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t("dataAndPrivacy")}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div>
-                            <Button variant="outline" className="w-full">{t("downloadMyData")}</Button>
-                          </div>
-                          <div>
-                            <Button variant="outline" className="w-full">{t("deleteMyAccount")}</Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              )}
-
-              {/* Valoraciones de Servicios Tab */}
-              {activeTab === "valoraciones" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="space-y-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t("ratePendingServices")}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600">{t("noPendingServicesToRate")}</p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t("myPastRatings")}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600">{t("noPastRatings")}</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              )}
             </div>
           </ZoomableSection>
         </div>
       </div>
 
-      {/* Rating Modal */}
       {showRatingModal && selectedServiceForRating && (
         <RatingModal
           isOpen={showRatingModal}
