@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,11 +71,13 @@ export default function CommunityMemberDashboard() {
     name: "Ana García",
     email: "ana.garcia@email.com",
     phone: "+34 600 123 456",
+    communityName: "Residencial Alameda",
+    address: "Calle Mayor 123",
+    portalNumber: "Portal 2",
+    city: "Madrid",
     apartment: "3º A",
-    building: "Edificio Alameda",
-    address: "Calle Mayor 123, Madrid",
     memberSince: "Enero 2020",
-    communityRole: "Propietaria"
+    communityRole: "Presidente"
   });
 
   // Datos mock para el chat comunitario
@@ -432,21 +433,58 @@ export default function CommunityMemberDashboard() {
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
                           <Building className="h-5 w-5" />
-                          <span>Información de la Vivienda</span>
+                          <span>Información de la Comunidad y Vivienda</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="communityName">Nombre de la Comunidad</Label>
+                          {isEditing ? (
+                              <Input id="communityName" value={profileData.communityName} onChange={(e) => setProfileData({ ...profileData, communityName: e.target.value })} />
+                          ) : (
+                              <p className="text-gray-800 font-medium">{profileData.communityName}</p>
+                          )}
+                        </div>
+                        <div>
+                            <Label htmlFor="address">Dirección</Label>
+                            {isEditing ? (
+                                <Input id="address" value={profileData.address} onChange={(e) => setProfileData({ ...profileData, address: e.target.value })} />
+                            ) : (
+                                <p className="text-gray-800 font-medium">{profileData.address}</p>
+                            )}
+                        </div>
+                        <div>
+                            <Label htmlFor="portalNumber">Número de Portal</Label>
+                            {isEditing ? (
+                                <Input id="portalNumber" value={profileData.portalNumber} onChange={(e) => setProfileData({ ...profileData, portalNumber: e.target.value })} />
+                            ) : (
+                                <p className="text-gray-800 font-medium">{profileData.portalNumber}</p>
+                            )}
+                        </div>
+                        <div>
+                            <Label htmlFor="city">Ciudad</Label>
+                            {isEditing ? (
+                                <Input id="city" value={profileData.city} onChange={(e) => setProfileData({ ...profileData, city: e.target.value })} />
+                            ) : (
+                                <p className="text-gray-800 font-medium">{profileData.city}</p>
+                            )}
+                        </div>
                         <div>
                           <Label>Apartamento</Label>
                           <p className="text-gray-800 font-medium">{profileData.apartment}</p>
                         </div>
                         <div>
-                          <Label>Edificio</Label>
-                          <p className="text-gray-800 font-medium">{profileData.building}</p>
-                        </div>
-                        <div>
-                          <Label>Dirección</Label>
-                          <p className="text-gray-800 font-medium">{profileData.address}</p>
+                            <Label htmlFor="communityRole">Rol en la comunidad</Label>
+                            {isEditing ? (
+                                <select id="communityRole" value={profileData.communityRole} onChange={(e) => setProfileData({ ...profileData, communityRole: e.target.value })} className="w-full px-3 py-2 border rounded-md bg-white">
+                                    <option value="Propietario">Propietario</option>
+                                    <option value="Presidente">Presidente</option>
+                                    <option value="Vicepresidente">Vicepresidente</option>
+                                    <option value="Inquilino">Inquilino</option>
+                                </select>
+                            ) : (
+                                <p className="text-gray-800 font-medium">{profileData.communityRole}</p>
+                            )}
                         </div>
                         <div>
                           <Label>Miembro desde</Label>
