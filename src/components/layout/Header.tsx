@@ -65,7 +65,7 @@ export function Header() {
               src="/logo hubit.jpg"
               alt="HuBiT Logo"
               fill
-              className="object-cover object-left brightness-0"
+              className="object-cover object-left filter contrast-125 saturate-110"
               priority
             />
           </div>
