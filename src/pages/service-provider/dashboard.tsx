@@ -14,7 +14,24 @@ import {
   Calendar, 
   Clock,
   Filter,
-  Search
+  Search,
+  User,
+  Building,
+  Globe,
+  Phone,
+  Mail,
+  MapPin,
+  Edit,
+  Save,
+  Briefcase,
+  Wrench,
+  PaintBucket,
+  Zap,
+  Droplets,
+  TreePine,
+  Building2,
+  Home,
+  Hammer
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +43,110 @@ export default function ServiceProviderDashboard() {
   const [customerTypeFilter, setCustomerTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [isEditing, setIsEditing] = useState(false);
   const { t } = useLanguage();
+
+  // Estados para el perfil de la empresa
+  const [companyProfile, setCompanyProfile] = useState({
+    companyName: "Servicios Integrales Madrid",
+    description: "Empresa especializada en servicios de mantenimiento y reformas para comunidades y particulares",
+    website: "www.serviciosintegrales-madrid.com",
+    email: "info@serviciosintegrales-madrid.com",
+    phone: "+34 91 123 45 67",
+    address: "Calle Alcalá 123, Madrid",
+    cif: "B12345678",
+    founded: "2015",
+    employees: "15-20",
+    serviceAreas: ["Madrid", "Alcalá de Henares", "Getafe", "Leganés"],
+    specializations: ["Mantenimiento integral", "Reformas", "Servicios urgentes"],
+    certifications: ["ISO 9001", "Certificado instalador autorizado", "Seguro responsabilidad civil"],
+    allServices: true,
+    workingHours: "Lunes a Viernes: 8:00 - 18:00, Sábados: 9:00 - 14:00"
+  });
+
+  // Servicios profesionales con precios
+  const professionalServices = [
+    {
+      id: "albañileria",
+      name: "Albañilería",
+      icon: Building2,
+      description: "Trabajos de construcción y reparación",
+      priceType: "hour",
+      price: 35,
+      currency: "€",
+      services: ["Reparación de muros", "Construcción de tabiques", "Alicatado", "Enfoscados"]
+    },
+    {
+      id: "pintura",
+      name: "Pintura",
+      icon: PaintBucket,
+      description: "Pintura interior y exterior",
+      priceType: "m2",
+      price: 12,
+      currency: "€",
+      services: ["Pintura de fachadas", "Pintura interior", "Lacados", "Barnizados"]
+    },
+    {
+      id: "electricidad",
+      name: "Electricidad",
+      icon: Zap,
+      description: "Instalaciones y reparaciones eléctricas",
+      priceType: "hour",
+      price: 45,
+      currency: "€",
+      services: ["Instalaciones eléctricas", "Reparación de averías", "Cuadros eléctricos", "Iluminación"]
+    },
+    {
+      id: "fontaneria",
+      name: "Fontanería",
+      icon: Droplets,
+      description: "Instalaciones y reparaciones de fontanería",
+      priceType: "hour",
+      price: 40,
+      currency: "€",
+      services: ["Reparación de tuberías", "Instalación de sanitarios", "Calefacción", "Desatascos"]
+    },
+    {
+      id: "jardineria",
+      name: "Jardinería",
+      icon: TreePine,
+      description: "Mantenimiento de jardines y zonas verdes",
+      priceType: "m2",
+      price: 8,
+      currency: "€",
+      services: ["Poda de árboles", "Plantación", "Sistemas de riego", "Diseño paisajístico"]
+    },
+    {
+      id: "ascensores",
+      name: "Mantenimiento de Ascensores",
+      icon: Building,
+      description: "Mantenimiento y reparación de ascensores",
+      priceType: "hour",
+      price: 65,
+      currency: "€",
+      services: ["Mantenimiento preventivo", "Reparaciones", "Modernización", "Revisiones técnicas"]
+    },
+    {
+      id: "fachadas",
+      name: "Fachadas",
+      icon: Home,
+      description: "Rehabilitación y mantenimiento de fachadas",
+      priceType: "m2",
+      price: 25,
+      currency: "€",
+      services: ["Rehabilitación de fachadas", "Impermeabilización", "Aislamiento térmico", "Pintura exterior"]
+    },
+    {
+      id: "tejados",
+      name: "Tejados",
+      icon: Hammer,
+      description: "Reparación y mantenimiento de cubiertas",
+      priceType: "m2",
+      price: 30,
+      currency: "€",
+      services: ["Reparación de goteras", "Impermeabilización", "Cambio de tejas", "Canalones"]
+    }
+  ];
 
   // Mock data para historial de servicios del proveedor
   const providerServiceHistory = [
@@ -113,7 +233,8 @@ export default function ServiceProviderDashboard() {
   const getActiveTabTitle = () => {
     switch (activeTab) {
       case "overview": return t("overview");
-      case "profile": return t("professionalProfile");
+      case "profile": return "Mi Perfil";
+      case "services": return "Servicios Profesionales";
       case "requests": return t("serviceRequests");
       case "bids": return t("activeBids");
       case "historial": return t("serviceHistory");
@@ -128,7 +249,7 @@ export default function ServiceProviderDashboard() {
 
   const filteredProviderServiceHistory = providerServiceHistory.filter(service => {
     const customerTypeMatch = customerTypeFilter === "all" || service.customerType === customerTypeFilter;
-    const statusMatch = statusFilter === "all" || service.status === statusMatch;
+    const statusMatch = statusFilter === "all" || service.status === statusFilter;
     const categoryMatch = categoryFilter === "all" || service.category === categoryFilter;
     return customerTypeMatch && statusMatch && categoryMatch;
   });
@@ -143,6 +264,11 @@ export default function ServiceProviderDashboard() {
 
   const handleViewRating = (serviceId: string) => {
     console.log("View rating details:", serviceId);
+  };
+
+  const handleSaveProfile = () => {
+    setIsEditing(false);
+    console.log("Company profile saved:", companyProfile);
   };
 
   return (
@@ -293,11 +419,131 @@ export default function ServiceProviderDashboard() {
                 </div>
               )}
 
-              {/* Resto de tabs existentes */}
               {activeTab === "profile" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-xl font-semibold mb-4">{t("professionalProfile")}</h2>
                   <p className="text-gray-600">{t("manageOfferings")}</p>
+                  {isEditing ? (
+                    <div className="mt-4">
+                      <Input 
+                        value={companyProfile.companyName} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, companyName: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.description} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, description: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.website} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, website: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.email} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, email: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.phone} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, phone: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.address} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, address: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.cif} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, cif: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.founded} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, founded: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.employees} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, employees: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.serviceAreas.join(", ")} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, serviceAreas: e.target.value.split(", ") }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.specializations.join(", ")} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, specializations: e.target.value.split(", ") }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.certifications.join(", ")} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, certifications: e.target.value.split(", ") }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.allServices ? "true" : "false"} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, allServices: e.target.value === "true" }))}
+                        className="mb-2"
+                      />
+                      <Input 
+                        value={companyProfile.workingHours} 
+                        onChange={(e) => setCompanyProfile(prev => ({ ...prev, workingHours: e.target.value }))}
+                        className="mb-2"
+                      />
+                      <Button onClick={handleSaveProfile} className="mt-4">
+                        <Save className="h-4 w-4 mr-2" />
+                        {t("save")}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="mt-4">
+                      <p className="text-gray-600">{companyProfile.companyName}</p>
+                      <p className="text-gray-600">{companyProfile.description}</p>
+                      <p className="text-gray-600">{companyProfile.website}</p>
+                      <p className="text-gray-600">{companyProfile.email}</p>
+                      <p className="text-gray-600">{companyProfile.phone}</p>
+                      <p className="text-gray-600">{companyProfile.address}</p>
+                      <p className="text-gray-600">{companyProfile.cif}</p>
+                      <p className="text-gray-600">{companyProfile.founded}</p>
+                      <p className="text-gray-600">{companyProfile.employees}</p>
+                      <p className="text-gray-600">{companyProfile.serviceAreas.join(", ")}</p>
+                      <p className="text-gray-600">{companyProfile.specializations.join(", ")}</p>
+                      <p className="text-gray-600">{companyProfile.certifications.join(", ")}</p>
+                      <p className="text-gray-600">{companyProfile.allServices ? "true" : "false"}</p>
+                      <p className="text-gray-600">{companyProfile.workingHours}</p>
+                      <Button onClick={() => setIsEditing(true)} className="mt-4">
+                        <Edit className="h-4 w-4 mr-2" />
+                        {t("edit")}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "services" && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-xl font-semibold mb-4">{t("professionalServices")}</h2>
+                  <p className="text-gray-600">{t("manageOfferings")}</p>
+                  <div className="mt-4">
+                    {professionalServices.map((service) => (
+                      <div key={service.id} className="flex items-center mb-4">
+                        <div className="mr-4">
+                          <service.icon className="h-6 w-6 text-gray-600" />
+                        </div>
+                        <div>
+                          <p className="text-gray-600">{service.name}</p>
+                          <p className="text-gray-600">{service.description}</p>
+                          <p className="text-gray-600">{service.priceType}: {service.price} {service.currency}</p>
+                          <p className="text-gray-600">{service.services.join(", ")}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

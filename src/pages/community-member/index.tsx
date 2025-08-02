@@ -705,10 +705,56 @@ export default function CommunityMemberDashboard() {
                         />
                       </div>
 
+                      {/* Hidden file input */}
+                      <input
+                        type="file"
+                        id="image-upload"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: 'none' }}
+                      />
+
+                      {/* Image previews */}
+                      {attachedImages.length > 0 && (
+                        <div>
+                          <Label>Imágenes Adjuntas ({attachedImages.length})</Label>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+                            {attachedImages.map((file, index) => (
+                              <div key={index} className="relative">
+                                <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                                  <Image
+                                    src={URL.createObjectURL(file)}
+                                    alt={`Imagen ${index + 1}`}
+                                    layout="fill"
+                                    objectFit="cover"
+                                  />
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                                  onClick={() => removeImage(index)}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                                <p className="text-xs text-gray-500 mt-1 truncate">{file.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex space-x-4">
-                        <Button variant="outline" className="flex-1">
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={triggerFileInput}
+                        >
                           <Camera className="h-4 w-4 mr-2" />
-                          Adjuntar Foto
+                          Adjuntar Foto{attachedImages.length > 0 && ` (${attachedImages.length})`}
                         </Button>
                         <Button 
                           onClick={handleSubmitIssue}
@@ -1106,7 +1152,7 @@ export default function CommunityMemberDashboard() {
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <Star 
                                   key={star} 
-                                  className={`h-5 w-5 ${star <= service.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                                  className={`h-5 w-5 ${star <= (service.rating || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
                                 />
                               ))}
                               <span className="ml-2 text-lg font-semibold">{service.rating}</span>

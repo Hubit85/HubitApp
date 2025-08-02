@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
@@ -40,17 +39,18 @@ export function SidebarServiceProvider({ activeTab, setActiveTab }: SidebarServi
     }
   };
   
-  const navItems = [
-    { id: "overview", label: "overview", icon: TrendingUp },
-    { id: "profile", label: "professionalProfile", icon: User },
-    { id: "requests", label: "serviceRequests", icon: FileText },
-    { id: "bids", label: "activeBids", icon: Store },
-    { id: "historial", label: "serviceHistory", icon: History },
-    { id: "reviews", label: "reviews", icon: Star },
-    { id: "earnings", label: "earnings", icon: Award },
-    { id: "schedule", label: "schedule", icon: Calendar },
-    { id: "notifications", label: "notifications", icon: Bell },
-    { id: "settings", label: "settings", icon: Settings },
+  const menuItems = [
+    { id: "overview", label: t("overview"), icon: TrendingUp },
+    { id: "profile", label: "Mi Perfil", icon: User },
+    { id: "services", label: "Servicios Profesionales", icon: Briefcase },
+    { id: "requests", label: t("serviceRequests"), icon: FileText },
+    { id: "bids", label: t("activeBids"), icon: DollarSign },
+    { id: "historial", label: t("serviceHistory"), icon: Calendar },
+    { id: "reviews", label: t("reviews"), icon: Star },
+    { id: "earnings", label: t("earnings"), icon: DollarSign },
+    { id: "schedule", label: t("schedule"), icon: Clock },
+    { id: "notifications", label: t("notifications"), icon: Bell },
+    { id: "settings", label: t("settings"), icon: Settings }
   ];
 
   return (
@@ -58,7 +58,7 @@ export function SidebarServiceProvider({ activeTab, setActiveTab }: SidebarServi
       <div className="p-4 flex-1">
         <h2 className="text-2xl font-bold mb-6">{t("serviceProvider")}</h2>
         <nav className="space-y-2">
-          {navItems.map((item) => (
+          {menuItems.map((item) => (
             <Button 
               key={item.id}
               variant={activeTab === item.id ? "default" : "ghost"} 
@@ -66,7 +66,7 @@ export function SidebarServiceProvider({ activeTab, setActiveTab }: SidebarServi
               onClick={() => setActiveTab(item.id)}
             >
               <item.icon className="mr-2 h-5 w-5" />
-              {t(item.label)}
+              {item.label}
             </Button>
           ))}
         </nav>
