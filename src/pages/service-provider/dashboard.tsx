@@ -35,13 +35,24 @@ import {
   Hammer,
   Check,
   Circle,
-  Info
+  Info,
+  Eye,
+  Send
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ZoomableSection from "@/components/ZoomableSection";
 import ProviderServiceHistoryCard from "@/components/ratings/ProviderServiceHistoryCard";
 import { Textarea } from "@/components/ui/textarea";
+
+const serviceRequests = [
+  { id: 'inc-1', title: "Fuga de agua en el garaje", description: "Fuga importante en tubería principal del garaje.", category: "fontaneria", source: 'community' as const, communityName: "Comunidad Abando", address: "Calle Ercilla 24, Bilbao", status: 'new' as const, date: '2025-01-15' },
+  { id: 'inc-2', title: "Iluminación del portal", description: "Varias luces del portal no funcionan.", category: "electricidad", source: 'community' as const, communityName: "Comunidad Deusto", address: "Avenida Lehendakari Aguirre 33, Bilbao", status: 'viewed' as const, date: '2025-01-20' },
+  { id: 'asm-1', title: "Renovación completa de fachada", description: "Rehabilitación integral de la fachada del edificio incluyendo aislamiento térmico.", category: "fachadas", source: 'assessment' as const, communityName: "Comunidad Abando", address: "Calle Ercilla 24, Bilbao", budget: 25000, deadline: "2025-03-15", status: 'bidding' as const, date: '2025-02-01' },
+  { id: 'asm-2', title: "Reparación integral del tejado", description: "Reparación completa del tejado incluyendo impermeabilización.", category: "tejados", source: 'assessment' as const, communityName: "Comunidad Deusto", address: "Avenida Lehendakari Aguirre 33, Bilbao", budget: 18000, deadline: "2025-03-01", status: 'new' as const, date: '2025-02-10' },
+  { id: 'ind-1', title: "Pintar piso completo", description: "Pintar piso de 3 habitaciones, 80m2.", category: "pintura", source: 'individual' as const, customerName: "Juan Pérez", address: "Calle Gran Vía 10, Bilbao", status: 'new' as const, date: '2025-02-05' },
+  { id: 'ind-2', title: "Cambiar grifo de la cocina", description: "El grifo de la cocina gotea y necesita ser reemplazado.", category: "fontaneria", source: 'individual' as const, customerName: "Lucía Gómez", address: "Plaza Moyúa 5, Bilbao", status: 'viewed' as const, date: '2025-02-08' },
+];
 
 export default function ServiceProviderDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -104,7 +115,27 @@ export default function ServiceProviderDashboard() {
     }
   };
 
-  const filteredProviderServiceHistory = providerServiceHistory.filter(service => (customerTypeFilter === "all" || service.customerType === customerTypeFilter) && (statusFilter === "all" || service.status === statusFilter) && (categoryFilter === "all" || service.category === categoryFilter));
+  const [requestSourceFilter, setRequestSourceFilter] = useState("all");
+  const [requestCategoryFilter, setRequestCategoryFilter] = useState("all");
+
+  const filteredServiceRequests = serviceRequests.filter(req => 
+    (requestSourceFilter === 'all' || req.source === requestSourceFilter) &&
+    (requestCategoryFilter === 'all' || req.category === requestCategoryFilter)
+  );
+
+  const getCategoryIcon = (categoria: string) => {
+    switch (categoria) {
+      case "fontaneria": return <Droplets className="h-6 w-6 text-blue-600" />;
+      case "electricidad": return <Zap className="h-6 w-6 text-blue-600" />;
+      case "pintura": return <PaintBucket className="h-6 w-6 text-blue-600" />;
+      case "ascensores": return <Building className="h-6 w-6 text-blue-600" />;
+      case "fachadas": return <Home className="h-6 w-6 text-blue-600" />;
+      case "tejados": return <Hammer className="h-6 w-6 text-blue-600" />;
+      case "jardineria": return <TreePine className="h-6 w-6 text-blue-600" />;
+      case "albañileria": return <Building2 className="h-6 w-6 text-blue-600" />;
+      default: return <Wrench className="h-6 w-6 text-blue-600" />;
+    }
+  };
 
   const handleSaveProfile = () => {
     setIsEditingProfile(false);
@@ -235,20 +266,84 @@ export default function ServiceProviderDashboard() {
                   </CardContent>
                 </Card>
               )}
+              
+              {activeTab === "requests" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Solicitudes de Servicio</CardTitle>
+                    <CardDescription>Explora y oferta en nuevas oportunidades de trabajo de comunidades, derramas y particulares.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Filter className="h-4 w-4 text-gray-500" />
+                        <Label className="text-sm font-medium">Filtrar por origen:</Label>
+                        <select value={requestSourceFilter} onChange={(e) => setRequestSourceFilter(e.target.value)} className="px-3 py-1 border rounded-md text-sm">
+                          <option value="all">Todos</option>
+                          <option value="community">Incidencia Comunidad</option>
+                          <option value="assessment">Derrama Importante</option>
+                          <option value="individual">Particular</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Label className="text-sm font-medium">Filtrar por categoría:</Label>
+                        <select value={requestCategoryFilter} onChange={(e) => setRequestCategoryFilter(e.target.value)} className="px-3 py-1 border rounded-md text-sm">
+                           <option value="all">Todas</option>
+                           {Array.from(new Set(serviceRequests.map(r => r.category))).map(cat => (
+                             <option key={cat} value={cat} className="capitalize">{cat}</option>
+                           ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {filteredServiceRequests.length > 0 ? filteredServiceRequests.map(req => (
+                        <Card key={req.id} className="border-l-4 data-[source=community]:border-orange-400 data-[source=assessment]:border-purple-400 data-[source=individual]:border-blue-400" data-source={req.source}>
+                          <CardContent className="p-4">
+                            <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-4 mb-2">
+                                  <div className="p-3 bg-gray-100 rounded-full">{getCategoryIcon(req.category)}</div>
+                                  <div>
+                                    <CardTitle className="text-lg">{req.title}</CardTitle>
+                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                      <Badge variant="outline" className="capitalize">{req.source === 'community' ? 'Incidencia' : req.source === 'assessment' ? 'Derrama' : 'Particular'}</Badge>
+                                      <span>•</span>
+                                      <span>{req.source === 'individual' ? req.customerName : req.communityName}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <p className="text-gray-600 mb-3">{req.description}</p>
+                                <div className="text-sm text-gray-500 space-y-1">
+                                  <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {req.address}</div>
+                                  {req.budget && <div className="flex items-center gap-2"><DollarSign className="h-4 w-4" /> Presupuesto aprox: <strong>€{req.budget.toLocaleString()}</strong></div>}
+                                  {req.deadline && <div className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Fecha límite: <strong>{req.deadline}</strong></div>}
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-2 shrink-0">
+                                <Button className="bg-blue-600 hover:bg-blue-700"><DollarSign className="h-4 w-4 mr-2"/> Enviar Presupuesto</Button>
+                                <Button variant="outline"><Eye className="h-4 w-4 mr-2"/> Ver Detalles</Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )) : (
+                        <div className="text-center py-12 text-gray-500">
+                          <Info className="mx-auto h-10 w-10 mb-4" />
+                          <p className="font-semibold">No hay solicitudes de servicio</p>
+                          <p>No se encontraron solicitudes que coincidan con los filtros seleccionados.</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-              {/* Other tabs remain the same */}
               {activeTab === "historial" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   {/* Historial content */}
                 </div>
               )}
-              {activeTab === "requests" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-xl font-semibold mb-4">{t("serviceRequests")}</h2>
-                  <p className="text-gray-600">{t("noRequests")}</p>
-                </div>
-              )}
-
+             
               {activeTab === "bids" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-xl font-semibold mb-4">{t("activeBids")}</h2>
