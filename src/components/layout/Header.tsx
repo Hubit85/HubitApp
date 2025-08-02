@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LogOut } from "lucide-react";
 import { authService } from "@/services/AuthService";
+import Image from "next/image";
 
 export function Header() {
   const router = useRouter();
@@ -58,11 +59,22 @@ export function Header() {
   return (
     <header className="w-full py-4 px-4 sm:px-6 lg:px-8 bg-white shadow-sm">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex flex-col">
-          <Link href={isDashboardPage ? '/dashboard' : '/'} className="text-2xl font-bold text-black tracking-wide hover:text-gray-700 transition-colors duration-200">
-            {t("hubit")}
-          </Link>
-          <p className="text-sm text-gray-600">{t("professionalServices")}</p>
+        <div className="flex items-center gap-3">
+          <div className="relative w-10 h-10 transition-transform duration-200 hover:scale-105">
+            <Image
+              src="/HuBiT.jpeg"
+              alt="HuBiT Logo"
+              fill
+              className="object-contain filter brightness-0"
+              priority
+            />
+          </div>
+          <div className="flex flex-col">
+            <Link href={isDashboardPage ? '/dashboard' : '/'} className="text-2xl font-bold text-black tracking-wide hover:text-gray-700 transition-colors duration-200">
+              {t("hubit")}
+            </Link>
+            <p className="text-sm text-gray-600">{t("professionalServices")}</p>
+          </div>
         </div>
         
         <div className="flex items-center gap-4">
