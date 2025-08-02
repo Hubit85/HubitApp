@@ -64,6 +64,7 @@ export default function CommunityMemberDashboard() {
   const [chatMessage, setChatMessage] = useState("");
   const [issueDescription, setIssueDescription] = useState("");
   const [selectedIssueType, setSelectedIssueType] = useState("maintenance");
+  const [attachedImages, setAttachedImages] = useState<File[]>([]);
   const { t } = useLanguage();
   
   // Estados para el perfil
@@ -783,7 +784,7 @@ export default function CommunityMemberDashboard() {
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6">
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">Presupuesto Comunitario 2024</h2>
-                    <p className="text-gray-600">Estado actual del presupuesto anual</p>
+                    <p className="text-gray-600">Estado actual del presupuestoanual</p>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
