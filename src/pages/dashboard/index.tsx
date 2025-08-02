@@ -34,7 +34,7 @@ export default function Dashboard() {
     } else {
       switch (userType) {
         case 'serviceProvider':
-          router.push('/service-provider');
+          router.push('/service-provider/dashboard');
           break;
         case 'estateAdministrator':
           router.push('/administrador-fincas');
@@ -368,7 +368,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      <Button className="mt-4 w-full" onClick={() => router.push("/service-provider")}>{t("accessProviderPanel")}</Button>
+                      <Button className="mt-4 w-full" onClick={() => router.push("/service-provider/dashboard")}>{t("accessProviderPanel")}</Button>
                     </CardContent>
                   )}
                 </Card>
