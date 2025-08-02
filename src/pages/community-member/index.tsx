@@ -33,7 +33,15 @@ import {
   Users,
   CheckCircle,
   AlertCircle,
-  XCircle
+  XCircle,
+  Upload,
+  File,
+  X,
+  Building,
+  Mail,
+  Calculator,
+  FileSpreadsheet,
+  ShoppingBag
 } from "lucide-react";
 
 // Define community contact type
@@ -72,8 +80,9 @@ export default function CommunityMemberDashboard() {
   const [selectedServiceForRating, setSelectedServiceForRating] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
   const { t } = useLanguage();
-  const router = useRouter();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (files: FileList | null) => {
@@ -368,120 +377,15 @@ export default function CommunityMemberDashboard() {
       <Header />
       
       <div className="flex h-screen bg-gray-100 pt-16">
-        {/* Sidebar */}
-        <div className="w-64 bg-gray-800 text-white shadow-lg">
-          <div className="p-4">
-            <h2 className="text-2xl font-bold mb-6">{t("dashboard")}</h2>
-            <nav className="space-y-2">
-              <Button 
-                variant={activeTab === "perfil" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("perfil")}
-              >
-                <User className="mr-2 h-5 w-5" />
-                {t("myProfile")}
-              </Button>
-              <Button 
-                variant={activeTab === "chat" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("chat")}
-              >
-                <MessageSquare className="mr-2 h-5 w-5" />
-                {t("communityChat")}
-              </Button>
-              <Button 
-                variant={activeTab === "videoconferencia" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("videoconferencia")}
-              >
-                <Video className="mr-2 h-5 w-5" />
-                {t("scheduleVideoConference")}
-              </Button>
-              <Button 
-                variant={activeTab === "incidencias" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("incidencias")}
-              >
-                <AlertTriangle className="mr-2 h-5 w-5" />
-                {t("informIssue")}
-              </Button>
-              <Button 
-                variant={activeTab === "contratos" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("contratos")}
-              >
-                <FileText className="mr-2 h-5 w-5" />
-                {t("communityContracts")}
-              </Button>
-              <Button 
-                variant={activeTab === "presupuesto" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("presupuesto")}
-              >
-                <Calculator className="mr-2 h-5 w-5" />
-                {t("communityBudget")}
-              </Button>
-              <Button 
-                variant={activeTab === "administrador" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("administrador")}
-              >
-                <Mail className="mr-2 h-5 w-5" />
-                {t("contactAdministrator")}
-              </Button>
-              <Button 
-                variant={activeTab === "historial" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("historial")}
-              >
-                <ShoppingBag className="mr-2 h-5 w-5" />
-                {t("serviceHistory")}
-              </Button>
-              <Button 
-                variant={activeTab === "recomendaciones" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("recomendaciones")}
-              >
-                <Store className="mr-2 h-5 w-5" />
-                {t("serviceProviders")}
-              </Button>
-              <Button 
-                variant={activeTab === "valoraciones" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("valoraciones")}
-              >
-                <Bell className="mr-2 h-5 w-5" />
-                {t("serviceRatings")}
-              </Button>
-              <Button 
-                variant={activeTab === "configuracion" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("configuracion")}
-              >
-                <Settings className="mr-2 h-5 w-5" />
-                {t("configuration")}
-              </Button>
-            </nav>
-          </div>
-        </div>
+        {/* Sidebar Component */}
+        <SidebarCommunityMember activeTab={activeTab} setActiveTab={setActiveTab} />
         
         {/* Main Content */}
         <div className="flex-1 overflow-hidden">
           <ZoomableSection className="h-full overflow-auto" enableZoom={true} maxScale={3} minScale={0.5}>
             <div className="p-6 min-h-full">
-              <h1 className="text-3xl font-bold mb-6">
-                {activeTab === "perfil" ? t("myProfile") :
-                 activeTab === "chat" ? t("communityChat") :
-                 activeTab === "videoconferencia" ? t("scheduleVideoConference") :
-                 activeTab === "incidencias" ? t("informIssue") :
-                 activeTab === "contratos" ? t("communityContracts") :
-                 activeTab === "presupuesto" ? t("communityBudget") :
-                 activeTab === "administrador" ? t("contactAdministrator") :
-                 activeTab === "historial" ? t("serviceHistory") :
-                 activeTab === "recomendaciones" ? t("serviceProviders") :
-                 activeTab === "valoraciones" ? t("serviceRatings") :
-                 activeTab === "configuracion" ? t("configuration") :
-                 t("communityMemberDashboard")}
+              <h1 className="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-gray-200 pb-2">
+                {getActiveTabTitle()}
               </h1>
               
               {/* Mi Perfil Tab */}
