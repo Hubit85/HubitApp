@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +16,9 @@ import {
   CreditCard,
   ThumbsUp,
   Award,
-  LogOut
+  LogOut,
+  Filter,
+  Calendar
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
@@ -28,6 +29,8 @@ import { Label } from "@/components/ui/label";
 import PropertySelector from "@/components/PropertySelector";
 import Image from "next/image";
 import ZoomableSection from "@/components/ZoomableSection";
+import ServiceHistoryCard from "@/components/ratings/ServiceHistoryCard";
+import RatingModal from "@/components/ratings/RatingModal";
 
 interface ServiceProvider {
   id: string;
@@ -48,6 +51,10 @@ export default function ParticularDashboard() {
   const [activeTab, setActiveTab] = useState("perfil");
   const [showPropertySelector, setShowPropertySelector] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<SelectedPropertyInfo | null>(null);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [selectedServiceForRating, setSelectedServiceForRating] = useState<any>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const { t } = useLanguage();
   
   const serviceProviders: ServiceProvider[] = [
@@ -63,6 +70,102 @@ export default function ParticularDashboard() {
     { id: "2", name: t("beachHouse"), address: "Avenida Marítima 12, Málaga", type: t("house"), size: "120m²", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
   ];
 
+  // Mock service history data
+  const serviceHistory = [
+    {
+      id: "1",
+      serviceName: "Reparación de Fontanería",
+      providerName: "Fontanería Express",
+      providerImage: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "plumbing",
+      date: "15 Mar 2024",
+      cost: 85.50,
+      status: "completed" as const,
+      rating: 5,
+      comment: "Excelente servicio, muy profesional y rápido",
+      location: "Madrid Centro",
+      duration: "2 horas"
+    },
+    {
+      id: "2", 
+      serviceName: "Instalación Eléctrica",
+      providerName: "Electricidad Rápida",
+      providerImage: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "electrical",
+      date: "22 Feb 2024",
+      cost: 120.00,
+      status: "completed" as const,
+      rating: 4,
+      comment: "Buen trabajo, aunque tardó un poco más de lo esperado",
+      location: "Madrid Centro", 
+      duration: "3 horas"
+    },
+    {
+      id: "3",
+      serviceName: "Pintura de Salon",
+      providerName: "Pinturas Modernas",
+      providerImage: "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "painting",
+      date: "10 Jan 2024",
+      cost: 300.00,
+      status: "completed" as const,
+      location: "Madrid Centro",
+      duration: "1 día"
+    },
+    {
+      id: "4",
+      serviceName: "Limpieza General",
+      providerName: "Limpiezas Premium",
+      providerImage: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "cleaning",
+      date: "5 Dec 2023",
+      cost: 60.00,
+      status: "pending" as const,
+      location: "Madrid Centro",
+      duration: "4 horas"
+    }
+  ];
+
+  // Top rated providers for recommendations
+  const topRatedProviders = [
+    {
+      id: "1",
+      name: "Fontanería Express", 
+      category: t("plumbing"),
+      rating: 4.9,
+      reviews: 156,
+      totalJobs: 324,
+      location: "Madrid",
+      image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+      specialties: ["Reparaciones de emergencia", "Instalaciones nuevas", "Mantenimiento"],
+      verified: true
+    },
+    {
+      id: "2",
+      name: "Pinturas Modernas",
+      category: t("painting"), 
+      rating: 4.8,
+      reviews: 203,
+      totalJobs: 445,
+      location: "Madrid", 
+      image: "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+      specialties: ["Pintura interior", "Pintura exterior", "Decorativa"],
+      verified: true
+    },
+    {
+      id: "3", 
+      name: "Electricidad Pro",
+      category: t("electrical"),
+      rating: 4.7,
+      reviews: 189,
+      totalJobs: 378,
+      location: "Madrid",
+      image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", 
+      specialties: ["Instalaciones", "Reparaciones", "Domótica"],
+      verified: true
+    }
+  ];
+
   const handlePropertySelected = (property: any, unit: any) => {
     setSelectedProperty({ communityName: property.communityName, unitNumber: unit.unitNumber });
     setShowPropertySelector(false);
@@ -75,6 +178,7 @@ export default function ParticularDashboard() {
       case "proveedores": return t("serviceProviders");
       case "favoritos": return t("myFavorites");
       case "propiedades": return t("myProperties");
+      case "historial": return t("serviceHistory");
       case "notificaciones": return t("notifications");
       case "configuracion": return t("configuration");
       case "pagos": return t("myPayments");
@@ -83,6 +187,27 @@ export default function ParticularDashboard() {
       default: return t("dashboard");
     }
   };
+
+  const handleRateService = (serviceId: string) => {
+    const service = serviceHistory.find(s => s.id === serviceId);
+    if (service) {
+      setSelectedServiceForRating(service);
+      setShowRatingModal(true);
+    }
+  };
+
+  const handleSubmitRating = (rating: number, comment: string, wouldRecommend: boolean) => {
+    console.log("Rating submitted:", { rating, comment, wouldRecommend });
+    // Here you would update the service history with the new rating
+    setShowRatingModal(false);
+    setSelectedServiceForRating(null);
+  };
+
+  const filteredServiceHistory = serviceHistory.filter(service => {
+    const statusMatch = statusFilter === "all" || service.status === statusFilter;
+    const categoryMatch = categoryFilter === "all" || service.category === categoryFilter;
+    return statusMatch && categoryMatch;
+  });
 
   return (
     <>
@@ -405,50 +530,68 @@ export default function ParticularDashboard() {
                 </div>
               )}
               
-              {/* Notifications Tab */}
-              {activeTab === "notificaciones" && (
+              {/* Service History Tab */}
+              {activeTab === "historial" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
-                  <div className="space-y-4">
-                    <Card className="border-l-4 border-blue-500 transition-all duration-200 hover:shadow-lg">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-bold text-gray-800">{t("quoteReceived")}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{t("quoteReceivedDesc")}</p>
-                          </div>
-                          <span className="text-xs text-gray-500">{t("hoursAgo")}</span>
-                        </div>
-                        <div className="mt-2 flex justify-end">
-                          <Button size="sm" className="transition-all duration-200 hover:scale-105">
-                            {t("viewQuote")}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                  {/* Filters */}
+                  <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Filter className="h-4 w-4 text-gray-500" />
+                      <Label className="text-sm font-medium">{t("filterByStatus")}:</Label>
+                      <select 
+                        value={statusFilter} 
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="px-3 py-1 border rounded-md text-sm"
+                      >
+                        <option value="all">{t("allStatuses")}</option>
+                        <option value="completed">{t("completed")}</option>
+                        <option value="pending">{t("pending")}</option>
+                        <option value="cancelled">{t("cancelled")}</option>
+                      </select>
+                    </div>
                     
-                    <Card className="border-l-4 border-green-500 transition-all duration-200 hover:shadow-lg">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-bold text-gray-800">{t("serviceCompleted")}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{t("serviceCompletedDesc")}</p>
-                          </div>
-                          <span className="text-xs text-gray-500">{t("yesterday")}</span>
-                        </div>
-                        <div className="mt-2 flex justify-end">
-                          <Button size="sm" className="transition-all duration-200 hover:scale-105">
-                            {t("rateService")}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div className="flex items-center space-x-2">
+                      <Label className="text-sm font-medium">{t("filterByCategory")}:</Label>
+                      <select 
+                        value={categoryFilter} 
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        className="px-3 py-1 border rounded-md text-sm"
+                      >
+                        <option value="all">{t("allCategories")}</option>
+                        <option value="plumbing">{t("plumbing")}</option>
+                        <option value="electrical">{t("electrical")}</option>
+                        <option value="painting">{t("painting")}</option>
+                        <option value="cleaning">{t("cleaning")}</option>
+                      </select>
+                    </div>
                   </div>
-                  
-                  <div className="mt-6 flex justify-center">
-                    <Button variant="outline" className="transition-all duration-200 hover:scale-105">
-                      {t("viewAllNotifications")}
-                    </Button>
-                  </div>
+
+                  {filteredServiceHistory.length > 0 ? (
+                    <div className="space-y-4">
+                      {filteredServiceHistory.map((service) => (
+                        <ServiceHistoryCard
+                          key={service.id}
+                          service={service}
+                          onRate={handleRateService}
+                          onViewDetails={(id) => console.log("View details", id)}
+                          onRepeatService={(id) => console.log("Repeat service", id)}
+                          onContactProvider={(id) => console.log("Contact provider", id)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noServiceHistory")}</h3>
+                      <p className="text-gray-500 mb-4">Aún no has utilizado ningún servicio</p>
+                      <Button 
+                        onClick={() => setActiveTab("proveedores")}
+                        className="transition-all duration-200 hover:scale-105"
+                      >
+                        {t("exploreProviders")}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
               
@@ -507,17 +650,82 @@ export default function ParticularDashboard() {
               
               {activeTab === "recomendaciones" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
-                  <Card className="transition-all duration-200 hover:shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="text-gray-800">{t("recommendations")}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center py-12">
-                        <ThumbsUp className="h-12 w-12 mx-auto text-gray-300 mb-4 transition-all duration-200 hover:scale-110" />
-                        <p className="text-gray-500">{t("noRecommendations")}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("topRatedProviders")}</h2>
+                    <p className="text-gray-600">{t("basedOnHistory")}</p>
+                  </div>
+
+                  {topRatedProviders.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {topRatedProviders.map((provider) => (
+                        <Card key={provider.id} className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:scale-105">
+                          <div className="h-40 overflow-hidden relative">
+                            <Image 
+                              src={provider.image} 
+                              alt={provider.name} 
+                              layout="fill"
+                              objectFit="cover"
+                              className="transition-all duration-200 hover:scale-110"
+                            />
+                            {provider.verified && (
+                              <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                ✓ {t("verified")}
+                              </div>
+                            )}
+                          </div>
+                          <CardContent className="p-4">
+                            <Badge className="mb-2 bg-purple-100 text-purple-800">{provider.category}</Badge>
+                            <h3 className="font-bold text-lg text-gray-800">{provider.name}</h3>
+                            
+                            <div className="flex items-center mt-1 mb-2">
+                              <div className="flex mr-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star 
+                                    key={star} 
+                                    className={`h-4 w-4 transition-all duration-200 ${star <= Math.floor(provider.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-sm text-gray-600 font-medium">
+                                {provider.rating} ({provider.reviews} {t("reviews")})
+                              </span>
+                            </div>
+
+                            <div className="flex items-center text-sm text-gray-500 mb-3">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              <span>{provider.location}</span>
+                              <span className="ml-2">• {provider.totalJobs} trabajos</span>
+                            </div>
+
+                            <div className="mb-4">
+                              <p className="text-xs text-gray-500 mb-1">Especialidades:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {provider.specialties.slice(0, 2).map((specialty, index) => (
+                                  <Badge key={index} variant="outline" className="text-xs bg-gray-50">
+                                    {specialty}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm" className="flex-1 transition-all duration-200 hover:scale-105">
+                                {t("viewProfile")}
+                              </Button>
+                              <Button size="sm" className="flex-1 transition-all duration-200 hover:scale-105">
+                                {t("request")}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <ThumbsUp className="h-12 w-12 mx-auto text-gray-300 mb-4 transition-all duration-200 hover:scale-110" />
+                      <p className="text-gray-500">{t("noRecommendations")}</p>
+                    </div>
+                  )}
                 </div>
               )}
               
@@ -540,6 +748,22 @@ export default function ParticularDashboard() {
           </ZoomableSection>
         </div>
       </div>
+
+      {/* Rating Modal */}
+      {showRatingModal && selectedServiceForRating && (
+        <RatingModal
+          isOpen={showRatingModal}
+          onClose={() => {
+            setShowRatingModal(false);
+            setSelectedServiceForRating(null);
+          }}
+          serviceName={selectedServiceForRating.serviceName}
+          providerName={selectedServiceForRating.providerName}
+          currentRating={selectedServiceForRating.rating}
+          currentComment={selectedServiceForRating.comment}
+          onSubmit={handleSubmitRating}
+        />
+      )}
     </>
   );
 }

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
@@ -33,6 +32,7 @@ export function SidebarParticular({ activeTab, setActiveTab }: SidebarParticular
     { id: "proveedores", label: "serviceProviders", icon: Store },
     { id: "favoritos", label: "myFavorites", icon: Star },
     { id: "propiedades", label: "myProperties", icon: Home },
+    { id: "historial", label: "serviceHistory", icon: FileText },
     { id: "notificaciones", label: "notifications", icon: Bell },
     { id: "configuracion", label: "configuration", icon: Settings },
     { id: "pagos", label: "myPayments", icon: CreditCard },
