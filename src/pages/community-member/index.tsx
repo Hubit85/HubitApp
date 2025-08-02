@@ -39,104 +39,18 @@ import {
   FileSpreadsheet
 } from "lucide-react";
 
-// Define community contact type
-interface CommunityContact {
-  id: string;
-  name: string;
-  role: string;
-  lastMessage: string;
-  timestamp: string;
-  isOnline: boolean;
-}
-
-// Define community contract type
-interface CommunityContract {
-  id: string;
-  title: string;
-  type: string;
-  date: string;
-  fileType: "pdf" | "word";
-}
-
 export default function CommunityMemberDashboard() {
   const [activeTab, setActiveTab] = useState("perfil");
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedServiceForRating, setSelectedServiceForRating] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [isDragOver, setIsDragOver] = useState(false);
   const { t } = useLanguage();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (files: FileList | null) => {
-    if (files) {
-      const newFiles = Array.from(files);
-      const validFiles = newFiles.filter(file => {
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain'];
-        return file.size <= maxSize && allowedTypes.includes(file.type);
-      });
-      setSelectedFiles(prev => [...prev, ...validFiles]);
-    }
-  };
-
-  const handleBrowseFiles = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileSelect(event.target.files);
-    event.target.value = '';
-  };
-
-  const handleDragOver = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(false);
-    handleFileSelect(event.dataTransfer.files);
-  };
-
-  const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  // Sample community contacts data
-  const communityContacts: CommunityContact[] = [
-    { id: "1", name: "Ana García", role: t("communityPresident"), lastMessage: t("goodMorningNeighbors"), timestamp: "09:30", isOnline: true },
-    { id: "2", name: "Carlos Rodríguez", role: t("treasurer"), lastMessage: t("monthlyFeesReminder"), timestamp: "Yesterday", isOnline: false },
-    { id: "3", name: "Marta Sánchez", role: t("secretary"), lastMessage: t("meetingMinutesAvailable"), timestamp: "Yesterday", isOnline: true },
-  ];
-
-  // Sample community contracts data
-  const communityContracts: CommunityContract[] = [
-    { id: "1", title: t("communityBylaws"), type: t("legalDocument"), date: "01/01/2023", fileType: "pdf" },
-    { id: "2", title: t("maintenanceContract"), type: t("serviceContract"), date: "15/03/2023", fileType: "pdf" },
-    { id: "3", title: t("cleaningServices"), type: t("serviceContract"), date: "10/04/2023", fileType: "word" },
-  ];
-
-  // Mock community service history data
+  
   const communityServiceHistory = [
     {
       id: "1",
-      serviceName: "Mantenimiento de Ascensor",
+      serviceName: t("elevatorMaintenance"),
       providerName: "Ascensores Madrid",
       providerImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "maintenance",
@@ -144,13 +58,13 @@ export default function CommunityMemberDashboard() {
       cost: 450.00,
       status: "completed" as const,
       rating: 5,
-      comment: "Servicio excelente para toda la comunidad",
+      comment: t("excellentCommunityServiceComment"),
       location: "Edificio Central",
       duration: "4 horas"
     },
     {
       id: "2", 
-      serviceName: "Limpieza de Portales",
+      serviceName: t("gatesCleaning"),
       providerName: "Limpiezas Comunidad",
       providerImage: "https://images.unsplash.com/photo-1563453392212-326f5e854473?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "cleaning",
@@ -158,13 +72,13 @@ export default function CommunityMemberDashboard() {
       cost: 180.00,
       status: "completed" as const,
       rating: 4,
-      comment: "Buen trabajo general, podrían mejorar en escaleras",
+      comment: t("goodWorkStairsComment"),
       location: "Todos los portales", 
       duration: "3 horas"
     },
     {
       id: "3",
-      serviceName: "Jardinería Zonas Comunes",
+      serviceName: t("commonAreasGardening"),
       providerName: "Jardines Verdes",
       providerImage: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "gardening",
@@ -176,7 +90,7 @@ export default function CommunityMemberDashboard() {
     },
     {
       id: "4",
-      serviceName: "Reparación Iluminación",
+      serviceName: t("lightingRepair"),
       providerName: "Electricidad Comunal",
       providerImage: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "electrical",
@@ -188,7 +102,6 @@ export default function CommunityMemberDashboard() {
     }
   ];
 
-  // Top rated community service providers
   const topRatedCommunityProviders = [
     {
       id: "1",
@@ -199,7 +112,7 @@ export default function CommunityMemberDashboard() {
       totalJobs: 156,
       location: "Madrid",
       image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      specialties: ["Mantenimiento preventivo", "Reparaciones urgentes", "Modernización"],
+      specialties: [t("preventiveMaintenance"), t("urgentRepairs"), t("modernization")],
       verified: true
     },
     {
@@ -211,7 +124,7 @@ export default function CommunityMemberDashboard() {
       totalJobs: 134,
       location: "Madrid", 
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      specialties: ["Diseño paisajístico", "Mantenimiento jardines", "Sistemas de riego"],
+      specialties: [t("landscapeDesign"), t("maintenanceSpec"), t("irrigationSystems")],
       verified: true
     },
     {
@@ -223,7 +136,7 @@ export default function CommunityMemberDashboard() {
       totalJobs: 289,
       location: "Madrid",
       image: "https://images.unsplash.com/photo-1563453392212-326f5e854473?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", 
-      specialties: ["Limpieza portales", "Desinfección", "Mantenimiento"],
+      specialties: [t("gatesDisinfection"), "Limpieza de portales", t("maintenanceSpec")],
       verified: true
     }
   ];
@@ -442,7 +355,7 @@ export default function CommunityMemberDashboard() {
                             <div className="mb-4">
                               <p className="text-xs text-gray-500 mb-1">{t("specializations")}:</p>
                               <div className="flex flex-wrap gap-1">
-                                {provider.specialties.slice(0, 2).map((specialty, index) => (
+                                {provider.specialties.map((specialty, index) => (
                                   <Badge key={index} variant="outline" className="text-xs bg-gray-50">
                                     {specialty}
                                   </Badge>

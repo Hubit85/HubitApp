@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +17,6 @@ import {
   CreditCard,
   ThumbsUp,
   Award,
-  LogOut,
   Filter,
   Calendar
 } from 'lucide-react';
@@ -70,11 +70,10 @@ export default function ParticularDashboard() {
     { id: "2", name: t("beachHouse"), address: "Avenida Marítima 12, Málaga", type: t("house"), size: "120m²", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
   ];
 
-  // Mock service history data
   const serviceHistory = [
     {
       id: "1",
-      serviceName: "Reparación de Fontanería",
+      serviceName: t("plumbingRepair"),
       providerName: "Fontanería Express",
       providerImage: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "plumbing",
@@ -82,13 +81,13 @@ export default function ParticularDashboard() {
       cost: 85.50,
       status: "completed" as const,
       rating: 5,
-      comment: "Excelente servicio, muy profesional y rápido",
+      comment: t("excellentServiceComment"),
       location: "Madrid Centro",
       duration: "2 horas"
     },
     {
       id: "2", 
-      serviceName: "Instalación Eléctrica",
+      serviceName: t("electricalInstallation"),
       providerName: "Electricidad Rápida",
       providerImage: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "electrical",
@@ -96,13 +95,13 @@ export default function ParticularDashboard() {
       cost: 120.00,
       status: "completed" as const,
       rating: 4,
-      comment: "Buen trabajo, aunque tardó un poco más de lo esperado",
+      comment: t("goodWorkComment"),
       location: "Madrid Centro", 
       duration: "3 horas"
     },
     {
       id: "3",
-      serviceName: "Pintura de Salon",
+      serviceName: t("loungePainting"),
       providerName: "Pinturas Modernas",
       providerImage: "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "painting",
@@ -114,7 +113,7 @@ export default function ParticularDashboard() {
     },
     {
       id: "4",
-      serviceName: "Limpieza General",
+      serviceName: t("generalCleaning"),
       providerName: "Limpiezas Premium",
       providerImage: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "cleaning",
@@ -126,7 +125,6 @@ export default function ParticularDashboard() {
     }
   ];
 
-  // Top rated providers for recommendations
   const topRatedProviders = [
     {
       id: "1",
@@ -137,7 +135,7 @@ export default function ParticularDashboard() {
       totalJobs: 324,
       location: "Madrid",
       image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      specialties: ["Reparaciones de emergencia", "Instalaciones nuevas", "Mantenimiento"],
+      specialties: [t("emergencyRepairs"), t("newInstallations"), t("maintenanceSpec")],
       verified: true
     },
     {
@@ -149,7 +147,7 @@ export default function ParticularDashboard() {
       totalJobs: 445,
       location: "Madrid", 
       image: "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      specialties: ["Pintura interior", "Pintura exterior", "Decorativa"],
+      specialties: [t("interiorPaintingSpec"), t("exteriorPaintingSpec"), t("decorativePaintingSpec")],
       verified: true
     },
     {
@@ -161,7 +159,7 @@ export default function ParticularDashboard() {
       totalJobs: 378,
       location: "Madrid",
       image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", 
-      specialties: ["Instalaciones", "Reparaciones", "Domótica"],
+      specialties: [t("installationsSpec"), t("repairsSpec"), t("domoticsSpec")],
       verified: true
     }
   ];
@@ -198,7 +196,6 @@ export default function ParticularDashboard() {
 
   const handleSubmitRating = (rating: number, comment: string, wouldRecommend: boolean) => {
     console.log("Rating submitted:", { rating, comment, wouldRecommend });
-    // Here you would update the service history with the new rating
     setShowRatingModal(false);
     setSelectedServiceForRating(null);
   };
@@ -226,14 +223,11 @@ export default function ParticularDashboard() {
       <Header />
       
       <div className="flex h-screen bg-gray-100 pt-16">
-        {/* Sidebar Component */}
         <SidebarParticular activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        {/* Main Content */}
         <div className="flex-1 overflow-hidden">
           <ZoomableSection className="h-full overflow-auto" enableZoom={true} maxScale={3} minScale={0.5}>
             <div className="p-6 min-h-full">
-              {/* Property Selection Card */}
               <Card className="mb-6 shadow-sm border-l-4 border-l-blue-500 transition-all duration-200 hover:shadow-md">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
@@ -260,7 +254,6 @@ export default function ParticularDashboard() {
                 {getActiveTabTitle()}
               </h1>
               
-              {/* Mi Perfil Tab */}
               {activeTab === "perfil" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   <div className="flex flex-col md:flex-row gap-8">
@@ -315,7 +308,6 @@ export default function ParticularDashboard() {
                 </div>
               )}
               
-              {/* Request Quote Tab */}
               {activeTab === "presupuesto" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   <Card className="transition-all duration-200 hover:shadow-lg">
@@ -358,7 +350,6 @@ export default function ParticularDashboard() {
                 </div>
               )}
               
-              {/* Service Providers Tab */}
               {activeTab === "proveedores" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   <div className="flex justify-between items-center mb-6">
@@ -419,7 +410,6 @@ export default function ParticularDashboard() {
                 </div>
               )}
               
-              {/* My Favorites Tab */}
               {activeTab === "favoritos" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   {favoriteProviders.length > 0 ? (
@@ -481,7 +471,6 @@ export default function ParticularDashboard() {
                 </div>
               )}
               
-              {/* My Properties Tab */}
               {activeTab === "propiedades" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   <div className="flex justify-between items-center mb-6">
@@ -530,10 +519,8 @@ export default function ParticularDashboard() {
                 </div>
               )}
               
-              {/* Service History Tab */}
               {activeTab === "historial" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
-                  {/* Filters */}
                   <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-2">
                       <Filter className="h-4 w-4 text-gray-500" />
@@ -583,7 +570,7 @@ export default function ParticularDashboard() {
                     <div className="text-center py-12">
                       <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                       <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noServiceHistory")}</h3>
-                      <p className="text-gray-500 mb-4">Aún no has utilizado ningún servicio</p>
+                      <p className="text-gray-500 mb-4">{t('noServiceHistoryMessage')}</p>
                       <Button 
                         onClick={() => setActiveTab("proveedores")}
                         className="transition-all duration-200 hover:scale-105"
@@ -595,7 +582,6 @@ export default function ParticularDashboard() {
                 </div>
               )}
               
-              {/* Configuration Tab */}
               {activeTab === "configuracion" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   <Card className="transition-all duration-200 hover:shadow-lg">
@@ -631,7 +617,6 @@ export default function ParticularDashboard() {
                 </div>
               )}
 
-              {/* Additional Tabs */}
               {activeTab === "pagos" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
                   <Card className="transition-all duration-200 hover:shadow-lg">
@@ -694,13 +679,13 @@ export default function ParticularDashboard() {
                             <div className="flex items-center text-sm text-gray-500 mb-3">
                               <MapPin className="h-4 w-4 mr-1" />
                               <span>{provider.location}</span>
-                              <span className="ml-2">• {provider.totalJobs} trabajos</span>
+                              <span className="ml-2">• {provider.totalJobs} {t('jobs')}</span>
                             </div>
 
                             <div className="mb-4">
-                              <p className="text-xs text-gray-500 mb-1">Especialidades:</p>
+                              <p className="text-xs text-gray-500 mb-1">{t("specializations")}:</p>
                               <div className="flex flex-wrap gap-1">
-                                {provider.specialties.slice(0, 2).map((specialty, index) => (
+                                {provider.specialties.map((specialty, index) => (
                                   <Badge key={index} variant="outline" className="text-xs bg-gray-50">
                                     {specialty}
                                   </Badge>
@@ -749,7 +734,6 @@ export default function ParticularDashboard() {
         </div>
       </div>
 
-      {/* Rating Modal */}
       {showRatingModal && selectedServiceForRating && (
         <RatingModal
           isOpen={showRatingModal}
