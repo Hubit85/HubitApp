@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 type Language = "es" | "en";
@@ -412,13 +411,7 @@ const translations = {
     communityBudget: "Presupuesto de la Comunidad",
     contactAdministrator: "Contactar Administrador",
     prepareBid: "Preparar Licitación",
-    notifications: "Notificaciones",
-    recommendations: "Recomendaciones",
-    configuration: "Configuración",
     serviceRatings: "Valoraciones de Servicios",
-    personalInformation: "Información Personal",
-    fullNameLabel: "Nombre Completo",
-    locationLabel: "Ubicación",
     mainAddress: "Dirección Principal",
     contactPreferences: "Preferencias de Contacto",
     communityPresident: "Presidente de la Comunidad",
@@ -541,18 +534,6 @@ const translations = {
     communityHallwayRefresh: "Renovación del pasillo comunitario",
     lightingUpgrade: "Mejora de Iluminación",
     energyEfficientLighting: "Iluminación eficiente energéticamente",
-    searchProviders: "Buscar Proveedores",
-    viewProfile: "Ver Perfil",
-    request: "Solicitar",
-    loadMoreProviders: "Cargar Más Proveedores",
-    quoteReceived: "Presupuesto Recibido",
-    quoteReceivedDesc: "Has recibido un nuevo presupuesto para tu solicitud",
-    hoursAgo: "hace 2 horas",
-    viewQuote: "Ver Presupuesto",
-    serviceCompleted: "Servicio Completado",
-    serviceCompletedDesc: "El servicio de fontanería ha sido completado",
-    yesterday: "ayer",
-    rateService: "Valorar Servicio",
     appointmentReminder: "Recordatorio de Cita",
     appointmentReminderDesc: "Tienes una cita programada para mañana",
     reschedule: "Reprogramar",
@@ -600,7 +581,6 @@ const translations = {
     community: "Comunidad",
     amountStatus: "Importe/Estado",
     action: "Acción",
-    manage: "Gestionar",
     controlPanel: "Panel de Control",
     communityDetails: "Detalles de la Comunidad",
     communityIncidents: "Incidencias de la Comunidad",
@@ -762,6 +742,11 @@ const translations = {
     serviceHistory: "Service History",
     bookService: "Book Service",
     searchServices: "Search Services",
+
+    // COMPLETE NEW TRANSLATIONS FOR PARTICULAR SECTION
+    // ================================================
+    
+    // Navigation and general interface
     save: "Save",
     cancel: "Cancel",
     edit: "Edit",
@@ -804,6 +789,97 @@ const translations = {
     loading: "Loading...",
     noData: "No data available",
     noResults: "No results found",
+
+    // Personal profile
+    myProfile: "My Profile",
+    personalInformation: "Personal Information",
+    fullNameLabel: "Full Name",
+    emailLabel: "Email",
+    phoneLabel: "Phone",
+    locationLabel: "Location",
+    editProfile: "Edit Profile",
+    individual: "Individual",
+
+    // Request quote
+    requestQuote: "Request Quote",
+    serviceType: "Service Type",
+    selectServiceType: "Select service type",
+    preferredDate: "Preferred Date",
+    serviceTitle: "Service Title",
+    exampleLeakRepair: "e.g. Bathroom leak repair",
+    detailedDescription: "Detailed Description",
+    describeServiceNeeded: "Describe the service you need",
+    requestQuotes: "Request Quotes",
+    other: "Other",
+
+    // Service providers
+    searchProviders: "Search Providers",
+    viewProfile: "View Profile",
+    request: "Request",
+    loadMoreProviders: "Load More Providers",
+
+    // My favorites
+    myFavorites: "My Favorites",
+    noFavoriteProviders: "You have no favorite providers",
+    addFavoriteProvidersDesc: "Add providers to your favorites for quick access",
+    exploreProviders: "Explore Providers",
+
+    // My properties
+    myProperties: "My Properties",
+    addProperty: "Add Property",
+    apartmentInCenter: "Downtown Apartment",
+    beachHouse: "Beach House",
+    apartment: "Apartment",
+    house: "House",
+    viewDetails: "View Details",
+    manage: "Manage",
+
+    // Notifications
+    notifications: "Notifications",
+    quoteReceived: "Quote Received",
+    quoteReceivedDesc: "You have received a new quote for your request",
+    hoursAgo: "2 hours ago",
+    viewQuote: "View Quote",
+    serviceCompleted: "Service Completed",
+    serviceCompletedDesc: "The plumbing service has been completed",
+    yesterday: "yesterday",
+    rateService: "Rate Service",
+    viewAllNotifications: "View All Notifications",
+
+    // Configuration
+    configuration: "Configuration",
+    accountPreferences: "Account Preferences",
+    language: "Language",
+    spanish: "Spanish",
+    english: "English",
+    catalan: "Catalan",
+    emailNotifications: "Email Notifications",
+    pushNotifications: "Push Notifications",
+
+    // My payments
+    myPayments: "My Payments",
+    noPaymentHistory: "No payment history available",
+
+    // Recommendations
+    recommendations: "Recommendations",
+    noRecommendations: "No recommendations available",
+
+    // My awards
+    myAwards: "My Awards",
+    noAwards: "No awards available",
+
+    // Property selection
+    unit: "Unit",
+    noPropertySelected: "No property selected",
+    propertySelected: "Property selected",
+    selectAPropertyToManage: "Select a property to manage",
+    changeProperty: "Change Property",
+
+    // Other important terms
+    signOut: "Sign Out",
+    reviews: "reviews",
+
+    // Rest of existing translations...
     serviceProviderPortal: "Service Provider Portal",
     dashboardTitle: "Dashboard",
     dashboardDesc: "Manage your services and clients",
@@ -941,13 +1017,7 @@ const translations = {
     nightLightPros: "Night Light Pros",
     masonry: "Masonry",
     roofing: "Roofing",
-    myProfile: "My Profile",
-    reviews: "reviews",
-    viewDetails: "View Details",
-    phoneLabel: "Phone",
-    emailLabel: "Email",
     daysAgo: "days ago",
-    editProfile: "Edit Profile",
     interiorPainting: "Interior Painting",
     exteriorPainting: "Exterior Painting",
     accentWall: "Accent Wall",
@@ -1049,13 +1119,7 @@ const translations = {
     communityBudget: "Community Budget",
     contactAdministrator: "Contact Administrator",
     prepareBid: "Prepare Bid",
-    notifications: "Notifications",
-    recommendations: "Recommendations",
-    configuration: "Configuration",
     serviceRatings: "Service Ratings",
-    personalInformation: "Personal Information",
-    fullNameLabel: "Full Name",
-    locationLabel: "Location",
     mainAddress: "Main Address",
     contactPreferences: "Contact Preferences",
     communityPresident: "Community President",
@@ -1178,33 +1242,10 @@ const translations = {
     communityHallwayRefresh: "Community hallway refresh",
     lightingUpgrade: "Lighting Upgrade",
     energyEfficientLighting: "Energy efficient lighting",
-    searchProviders: "Search Providers",
-    viewProfile: "View Profile",
-    request: "Request",
-    loadMoreProviders: "Load More Providers",
-    quoteReceived: "Quote Received",
-    quoteReceivedDesc: "You have received a new quote for your request",
-    hoursAgo: "2 hours ago",
-    viewQuote: "View Quote",
-    serviceCompleted: "Service Completed",
-    serviceCompletedDesc: "The plumbing service has been completed",
-    yesterday: "yesterday",
-    rateService: "Rate Service",
     appointmentReminder: "Appointment Reminder",
     appointmentReminderDesc: "You have an appointment scheduled for tomorrow",
     reschedule: "Reschedule",
     confirm: "Confirm",
-    viewAllNotifications: "View All Notifications",
-    noFavoriteProviders: "You have no favorite providers",
-    addFavoriteProvidersDesc: "Add providers to your favorites for quick access",
-    exploreProviders: "Explore Providers",
-    accountPreferences: "Account Preferences",
-    language: "Language",
-    spanish: "Spanish",
-    english: "English",
-    catalan: "Catalan",
-    emailNotifications: "Email Notifications",
-    pushNotifications: "Push Notifications",
     smsNotifications: "SMS Notifications",
     privacy: "Privacy",
     profileVisibleToProviders: "Profile visible to providers",
@@ -1237,7 +1278,6 @@ const translations = {
     community: "Community",
     amountStatus: "Amount/Status",
     action: "Action",
-    manage: "Manage",
     controlPanel: "Control Panel",
     communityDetails: "Community Details",
     communityIncidents: "Community Incidents",
