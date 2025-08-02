@@ -3,47 +3,38 @@ import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  MessageSquare, 
-  Video, 
-  AlertTriangle, 
-  FileText, 
-  Calculator, 
-  Mail, 
-  ShoppingBag,
-  User,
-  Calendar,
-  Upload,
-  Clock,
-  FileSpreadsheet,
-  Building,
-  Droplet,
-  Zap,
-  Paintbrush,
-  Hammer,
-  Construction,
-  Home,
-  ThumbsUp,
-  Award,
-  CreditCard,
-  Bell,
-  Settings,
-  Store,
-  Star,
-  Search,
-  MapPin,
-  X,
-  File,
-  LogOut
-} from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { Header } from "@/components/layout/Header";
-import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Header } from "@/components/layout/Header";
+import { SidebarCommunityMember } from "@/components/layout/SidebarCommunityMember";
 import ZoomableSection from "@/components/ZoomableSection";
+import ServiceHistoryCard from "@/components/ratings/ServiceHistoryCard";
+import RatingModal from "@/components/ratings/RatingModal";
 import Image from "next/image";
+import {
+  User,
+  MessageSquare,
+  Video,
+  AlertTriangle,
+  FileCheck,
+  FileText,
+  Bell,
+  Calendar,
+  ThumbsUp,
+  Star,
+  Settings,
+  Store,
+  MapPin,
+  Filter,
+  Search,
+  Clock,
+  Users,
+  CheckCircle,
+  AlertCircle,
+  XCircle
+} from "lucide-react";
 
 // Define community contact type
 interface CommunityContact {
@@ -77,8 +68,10 @@ interface ServiceProvider {
 
 export default function CommunityMemberDashboard() {
   const [activeTab, setActiveTab] = useState("perfil");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [isDragOver, setIsDragOver] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [selectedServiceForRating, setSelectedServiceForRating] = useState<any>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const { t } = useLanguage();
   const router = useRouter();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -231,6 +224,140 @@ export default function CommunityMemberDashboard() {
   // Sample favorite providers
   const favoriteProviders = serviceProviders.slice(0, 3);
 
+  // Mock community service history data
+  const communityServiceHistory = [
+    {
+      id: "1",
+      serviceName: "Mantenimiento de Ascensor",
+      providerName: "Ascensores Madrid",
+      providerImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "maintenance",
+      date: "20 Mar 2024",
+      cost: 450.00,
+      status: "completed" as const,
+      rating: 5,
+      comment: "Servicio excelente para toda la comunidad",
+      location: "Edificio Central",
+      duration: "4 horas"
+    },
+    {
+      id: "2", 
+      serviceName: "Limpieza de Portales",
+      providerName: "Limpiezas Comunidad",
+      providerImage: "https://images.unsplash.com/photo-1563453392212-326f5e854473?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "cleaning",
+      date: "18 Mar 2024",
+      cost: 180.00,
+      status: "completed" as const,
+      rating: 4,
+      comment: "Buen trabajo general, podrían mejorar en escaleras",
+      location: "Todos los portales", 
+      duration: "3 horas"
+    },
+    {
+      id: "3",
+      serviceName: "Jardinería Zonas Comunes",
+      providerName: "Jardines Verdes",
+      providerImage: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "gardening",
+      date: "15 Mar 2024",
+      cost: 320.00,
+      status: "completed" as const,
+      location: "Jardín comunitario",
+      duration: "1 día"
+    },
+    {
+      id: "4",
+      serviceName: "Reparación Iluminación",
+      providerName: "Electricidad Comunal",
+      providerImage: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "electrical",
+      date: "10 Mar 2024",
+      cost: 280.00,
+      status: "pending" as const,
+      location: "Pasillos comunitarios",
+      duration: "2 horas"
+    }
+  ];
+
+  // Top rated community service providers
+  const topRatedCommunityProviders = [
+    {
+      id: "1",
+      name: "Ascensores Madrid", 
+      category: t("maintenance"),
+      rating: 4.9,
+      reviews: 89,
+      totalJobs: 156,
+      location: "Madrid",
+      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+      specialties: ["Mantenimiento preventivo", "Reparaciones urgentes", "Modernización"],
+      verified: true
+    },
+    {
+      id: "2",
+      name: "Jardines Verdes",
+      category: t("gardening"), 
+      rating: 4.8,
+      reviews: 67,
+      totalJobs: 134,
+      location: "Madrid", 
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+      specialties: ["Diseño paisajístico", "Mantenimiento jardines", "Sistemas de riego"],
+      verified: true
+    },
+    {
+      id: "3", 
+      name: "Limpiezas Comunidad",
+      category: t("cleaning"),
+      rating: 4.7,
+      reviews: 125,
+      totalJobs: 289,
+      location: "Madrid",
+      image: "https://images.unsplash.com/photo-1563453392212-326f5e854473?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", 
+      specialties: ["Limpieza portales", "Desinfección", "Mantenimiento"],
+      verified: true
+    }
+  ];
+
+  const handleRateService = (serviceId: string) => {
+    const service = communityServiceHistory.find(s => s.id === serviceId);
+    if (service) {
+      setSelectedServiceForRating(service);
+      setShowRatingModal(true);
+    }
+  };
+
+  const handleSubmitRating = (rating: number, comment: string, wouldRecommend: boolean) => {
+    console.log("Community rating submitted:", { rating, comment, wouldRecommend });
+    setShowRatingModal(false);
+    setSelectedServiceForRating(null);
+  };
+
+  const filteredCommunityServiceHistory = communityServiceHistory.filter(service => {
+    const statusMatch = statusFilter === "all" || service.status === statusFilter;
+    const categoryMatch = categoryFilter === "all" || service.category === categoryMatch;
+    return statusMatch && categoryMatch;
+  });
+
+  const getActiveTabTitle = () => {
+    switch (activeTab) {
+      case "perfil": return t("myProfile");
+      case "servicios": return t("availableServices");
+      case "chat": return t("communityChat");
+      case "videoconferencia": return t("scheduleVideoConference");
+      case "incidencias": return t("informIssue");
+      case "contratos": return t("communityContracts");
+      case "presupuesto": return t("communityBudget");
+      case "administrador": return t("contactAdministrator");
+      case "historial": return t("serviceHistory");
+      case "recomendaciones": return t("recommendations");
+      case "valoraciones": return t("serviceRatings");
+      case "configuracion": return t("configuration");
+      default: return t("communityMemberDashboard");
+    }
+  };
+
   return (
     <>
       <Head>
@@ -263,68 +390,68 @@ export default function CommunityMemberDashboard() {
                 {t("communityChat")}
               </Button>
               <Button 
-                variant={activeTab === "videoconference" ? "default" : "ghost"} 
+                variant={activeTab === "videoconferencia" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("videoconference")}
+                onClick={() => setActiveTab("videoconferencia")}
               >
                 <Video className="mr-2 h-5 w-5" />
                 {t("scheduleVideoConference")}
               </Button>
               <Button 
-                variant={activeTab === "issue" ? "default" : "ghost"} 
+                variant={activeTab === "incidencias" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("issue")}
+                onClick={() => setActiveTab("incidencias")}
               >
                 <AlertTriangle className="mr-2 h-5 w-5" />
                 {t("informIssue")}
               </Button>
               <Button 
-                variant={activeTab === "contracts" ? "default" : "ghost"} 
+                variant={activeTab === "contratos" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("contracts")}
+                onClick={() => setActiveTab("contratos")}
               >
                 <FileText className="mr-2 h-5 w-5" />
                 {t("communityContracts")}
               </Button>
               <Button 
-                variant={activeTab === "budget" ? "default" : "ghost"} 
+                variant={activeTab === "presupuesto" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("budget")}
+                onClick={() => setActiveTab("presupuesto")}
               >
                 <Calculator className="mr-2 h-5 w-5" />
                 {t("communityBudget")}
               </Button>
               <Button 
-                variant={activeTab === "contact" ? "default" : "ghost"} 
+                variant={activeTab === "administrador" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("contact")}
+                onClick={() => setActiveTab("administrador")}
               >
                 <Mail className="mr-2 h-5 w-5" />
                 {t("contactAdministrator")}
               </Button>
               <Button 
-                variant={activeTab === "bid" ? "default" : "ghost"} 
+                variant={activeTab === "historial" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("bid")}
+                onClick={() => setActiveTab("historial")}
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
-                {t("prepareBid")}
+                {t("serviceHistory")}
               </Button>
               <Button 
-                variant={activeTab === "proveedores" ? "default" : "ghost"} 
+                variant={activeTab === "recomendaciones" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("proveedores")}
+                onClick={() => setActiveTab("recomendaciones")}
               >
                 <Store className="mr-2 h-5 w-5" />
                 {t("serviceProviders")}
               </Button>
               <Button 
-                variant={activeTab === "notificaciones" ? "default" : "ghost"} 
+                variant={activeTab === "valoraciones" ? "default" : "ghost"} 
                 className="w-full justify-start"
-                onClick={() => setActiveTab("notificaciones")}
+                onClick={() => setActiveTab("valoraciones")}
               >
                 <Bell className="mr-2 h-5 w-5" />
-                {t("notifications")}
+                {t("serviceRatings")}
               </Button>
               <Button 
                 variant={activeTab === "configuracion" ? "default" : "ghost"} 
@@ -345,14 +472,14 @@ export default function CommunityMemberDashboard() {
               <h1 className="text-3xl font-bold mb-6">
                 {activeTab === "perfil" ? t("myProfile") :
                  activeTab === "chat" ? t("communityChat") :
-                 activeTab === "videoconference" ? t("scheduleVideoConference") :
-                 activeTab === "issue" ? t("informIssue") :
-                 activeTab === "contracts" ? t("communityContracts") :
-                 activeTab === "budget" ? t("communityBudget") :
-                 activeTab === "contact" ? t("contactAdministrator") :
-                 activeTab === "bid" ? t("prepareBid") :
-                 activeTab === "proveedores" ? t("serviceProviders") :
-                 activeTab === "notificaciones" ? t("notifications") :
+                 activeTab === "videoconferencia" ? t("scheduleVideoConference") :
+                 activeTab === "incidencias" ? t("informIssue") :
+                 activeTab === "contratos" ? t("communityContracts") :
+                 activeTab === "presupuesto" ? t("communityBudget") :
+                 activeTab === "administrador" ? t("contactAdministrator") :
+                 activeTab === "historial" ? t("serviceHistory") :
+                 activeTab === "recomendaciones" ? t("serviceProviders") :
+                 activeTab === "valoraciones" ? t("serviceRatings") :
                  activeTab === "configuracion" ? t("configuration") :
                  t("communityMemberDashboard")}
               </h1>
@@ -517,7 +644,7 @@ export default function CommunityMemberDashboard() {
               )}
               
               {/* Video Conference Tab */}
-              {activeTab === "videoconference" && (
+              {activeTab === "videoconferencia" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -616,7 +743,7 @@ export default function CommunityMemberDashboard() {
               )}
               
               {/* Report Issue Tab */}
-              {activeTab === "issue" && (
+              {activeTab === "incidencias" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <Card>
                     <CardContent className="p-6">
@@ -725,7 +852,7 @@ export default function CommunityMemberDashboard() {
               )}
               
               {/* Community Contracts Tab */}
-              {activeTab === "contracts" && (
+              {activeTab === "contratos" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -764,7 +891,7 @@ export default function CommunityMemberDashboard() {
               )}
               
               {/* Community Budget Tab */}
-              {activeTab === "budget" && (
+              {activeTab === "presupuesto" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <Card className="bg-green-50">
@@ -859,7 +986,7 @@ export default function CommunityMemberDashboard() {
               )}
               
               {/* Contact Administrator Tab */}
-              {activeTab === "contact" && (
+              {activeTab === "administrador" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <Card>
                     <CardContent className="p-6">
@@ -960,138 +1087,77 @@ export default function CommunityMemberDashboard() {
               )}
               
               {/* Prepare Bid Tab */}
-              {activeTab === "bid" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t("selectServiceCategory")}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button variant="outline" className="justify-start">
-                            <Droplet className="mr-2 h-4 w-4" />
-                            {t("plumbing")}
-                          </Button>
-                          <Button variant="outline" className="justify-start">
-                            <Zap className="mr-2 h-4 w-4" />
-                            {t("electrical")}
-                          </Button>
-                          <Button variant="outline" className="justify-start">
-                            <Paintbrush className="mr-2 h-4 w-4" />
-                            {t("painting")}
-                          </Button>
-                          <Button variant="outline" className="justify-start">
-                            <Hammer className="mr-2 h-4 w-4" />
-                            {t("carpentry")}
-                          </Button>
-                          <Button variant="outline" className="justify-start">
-                            <Construction className="mr-2 h-4 w-4" />
-                            {t("masonry")}
-                          </Button>
-                          <Button variant="outline" className="justify-start">
-                            <Home className="mr-2 h-4 w-4" />
-                            {t("roofing")}
-                          </Button>
-                        </div>
-                        <div className="mt-4">
-                          <Button className="w-full">{t("viewAllCategories")}</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t("bidDetails")}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <form className="space-y-4">
-                          <div>
-                            <Label htmlFor="bid-title">{t("projectTitle")}</Label>
-                            <Input id="bid-title" placeholder={t("enterProjectTitle")} />
-                          </div>
-                          <div>
-                            <Label htmlFor="bid-description">{t("description")}</Label>
-                            <Textarea id="bid-description" placeholder={t("describeYourProject")} />
-                          </div>
-                          <div>
-                            <Label htmlFor="bid-budget">{t("estimatedBudget")}</Label>
-                            <Input id="bid-budget" placeholder="€" />
-                          </div>
-                          <div>
-                            <Label htmlFor="bid-deadline">{t("projectDeadline")}</Label>
-                            <Input id="bid-deadline" type="date" />
-                          </div>
-                          <Button className="w-full">{t("submitBidRequest")}</Button>
-                        </form>
-                      </CardContent>
-                    </Card>
+              {activeTab === "historial" && (
+                <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("serviceHistory")}</h2>
+                    <p className="text-gray-600">Servicios utilizados por la comunidad</p>
                   </div>
-                  
-                  <div className="mt-6">
-                    <h3 className="text-xl font-semibold mb-4">{t("recentCommunityBids")}</h3>
-                    <div className="space-y-4">
-                      <Card>
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <Badge className="mb-2">{t("plumbing")}</Badge>
-                              <h4 className="font-bold">{t("bathroomRenovation")}</h4>
-                              <p className="text-sm text-gray-600 mt-1">{t("communityBathroomUpgrade")}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-bold text-green-600">€3,500</p>
-                              <p className="text-xs text-gray-500">{t("deadline")}: June 15, 2025</p>
-                            </div>
-                          </div>
-                          <div className="flex justify-end mt-4">
-                            <Button variant="outline" size="sm">{t("viewDetails")}</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <Badge className="mb-2">{t("painting")}</Badge>
-                              <h4 className="font-bold">{t("hallwayPainting")}</h4>
-                              <p className="text-sm text-gray-600 mt-1">{t("communityHallwayRefresh")}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-bold text-green-600">€2,200</p>
-                              <p className="text-xs text-gray-500">{t("deadline")}: May 30, 2025</p>
-                            </div>
-                          </div>
-                          <div className="flex justify-end mt-4">
-                            <Button variant="outline" size="sm">{t("viewDetails")}</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <Badge className="mb-2">{t("electrical")}</Badge>
-                              <h4 className="font-bold">{t("lightingUpgrade")}</h4>
-                              <p className="text-sm text-gray-600 mt-1">{t("energyEfficientLighting")}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-bold text-green-600">€1,800</p>
-                              <p className="text-xs text-gray-500">{t("deadline")}: July 10, 2025</p>
-                            </div>
-                          </div>
-                          <div className="flex justify-end mt-4">
-                            <Button variant="outline" size="sm">{t("viewDetails")}</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+
+                  {/* Filters */}
+                  <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Filter className="h-4 w-4 text-gray-500" />
+                      <Label className="text-sm font-medium">{t("filterByStatus")}:</Label>
+                      <select 
+                        value={statusFilter} 
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="px-3 py-1 border rounded-md text-sm"
+                      >
+                        <option value="all">{t("allStatuses")}</option>
+                        <option value="completed">{t("completed")}</option>
+                        <option value="pending">{t("pending")}</option>
+                        <option value="cancelled">{t("cancelled")}</option>
+                      </select>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Label className="text-sm font-medium">{t("filterByCategory")}:</Label>
+                      <select 
+                        value={categoryFilter} 
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        className="px-3 py-1 border rounded-md text-sm"
+                      >
+                        <option value="all">{t("allCategories")}</option>
+                        <option value="maintenance">{t("maintenance")}</option>
+                        <option value="cleaning">{t("cleaning")}</option>
+                        <option value="gardening">{t("gardening")}</option>
+                        <option value="electrical">{t("electrical")}</option>
+                      </select>
                     </div>
                   </div>
+
+                  {filteredCommunityServiceHistory.length > 0 ? (
+                    <div className="space-y-4">
+                      {filteredCommunityServiceHistory.map((service) => (
+                        <ServiceHistoryCard
+                          key={service.id}
+                          service={service}
+                          onRate={handleRateService}
+                          onViewDetails={(id) => console.log("View community service details", id)}
+                          onRepeatService={(id) => console.log("Request community service again", id)}
+                          onContactProvider={(id) => console.log("Contact community provider", id)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noServiceHistory")}</h3>
+                      <p className="text-gray-500 mb-4">La comunidad aún no ha utilizado servicios</p>
+                      <Button 
+                        onClick={() => setActiveTab("servicios")}
+                        className="transition-all duration-200 hover:scale-105"
+                      >
+                        {t("findServices")}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
               
               {/* Proveedores de Servicios Tab */}
-              {activeTab === "proveedores" && (
+              {activeTab === "serviceProviders" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex justify-between items-center mb-6">
                     <div className="relative w-64">
@@ -1145,7 +1211,7 @@ export default function CommunityMemberDashboard() {
               )}
               
               {/* Notificaciones Tab */}
-              {activeTab === "notificaciones" && (
+              {activeTab === "valoraciones" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="space-y-4">
                     <Card className="border-l-4 border-blue-500">
@@ -1203,51 +1269,81 @@ export default function CommunityMemberDashboard() {
               
               {/* Recomendaciones Tab */}
               {activeTab === "recomendaciones" && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {favoriteProviders.map((provider) => (
-                      <Card key={provider.id} className="overflow-hidden">
-                        <div className="h-40 overflow-hidden relative">
-                          <Image 
-                            src={provider.image} 
-                            alt={provider.name} 
-                            layout="fill"
-                            objectFit="cover"
-                          />
-                        </div>
-                        <CardContent className="p-4">
-                          <Badge className="mb-2">{provider.category}</Badge>
-                          <h3 className="font-bold text-lg">{provider.name}</h3>
-                          <div className="flex items-center mt-1 mb-2">
-                            <div className="flex mr-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star 
-                                  key={star} 
-                                  className={`h-4 w-4 ${star <= Math.floor(provider.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
-                                />
-                              ))}
-                            </div>
-                            <span className="text-sm text-gray-600">{provider.rating} ({provider.reviews} {t("reviews")})</span>
-                          </div>
-                          <div className="flex items-center text-sm text-gray-500">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span>{provider.location}</span>
-                          </div>
-                          <div className="mt-4 flex justify-between">
-                            <Button variant="outline" size="sm">{t("viewProfile")}</Button>
-                            <Button size="sm">{t("request")}</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("topRatedProviders")}</h2>
+                    <p className="text-gray-600">Proveedores mejor valorados por comunidades</p>
                   </div>
-                  
-                  {favoriteProviders.length === 0 && (
+
+                  {topRatedCommunityProviders.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {topRatedCommunityProviders.map((provider) => (
+                        <Card key={provider.id} className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:scale-105">
+                          <div className="h-40 overflow-hidden relative">
+                            <Image 
+                              src={provider.image} 
+                              alt={provider.name} 
+                              layout="fill"
+                              objectFit="cover"
+                              className="transition-all duration-200 hover:scale-110"
+                            />
+                            {provider.verified && (
+                              <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                ✓ {t("verified")}
+                              </div>
+                            )}
+                          </div>
+                          <CardContent className="p-4">
+                            <Badge className="mb-2 bg-purple-100 text-purple-800">{provider.category}</Badge>
+                            <h3 className="font-bold text-lg text-gray-800">{provider.name}</h3>
+                            
+                            <div className="flex items-center mt-1 mb-2">
+                              <div className="flex mr-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star 
+                                    key={star} 
+                                    className={`h-4 w-4 transition-all duration-200 ${star <= Math.floor(provider.rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-sm text-gray-600 font-medium">
+                                {provider.rating} ({provider.reviews} {t("reviews")})
+                              </span>
+                            </div>
+
+                            <div className="flex items-center text-sm text-gray-500 mb-3">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              <span>{provider.location}</span>
+                              <span className="ml-2">• {provider.totalJobs} trabajos</span>
+                            </div>
+
+                            <div className="mb-4">
+                              <p className="text-xs text-gray-500 mb-1">Especialidades:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {provider.specialties.slice(0, 2).map((specialty, index) => (
+                                  <Badge key={index} variant="outline" className="text-xs bg-gray-50">
+                                    {specialty}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm" className="flex-1 transition-all duration-200 hover:scale-105">
+                                {t("viewProfile")}
+                              </Button>
+                              <Button size="sm" className="flex-1 transition-all duration-200 hover:scale-105">
+                                {t("request")}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
                     <div className="text-center py-12">
-                      <ThumbsUp className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noFavoriteProviders")}</h3>
-                      <p className="text-gray-500 mb-4">{t("addFavoriteProvidersDesc")}</p>
-                      <Button onClick={() => setActiveTab("proveedores")}>{t("exploreProviders")}</Button>
+                      <ThumbsUp className="h-12 w-12 mx-auto text-gray-300 mb-4 transition-all duration-200 hover:scale-110" />
+                      <p className="text-gray-500">{t("noRecommendations")}</p>
                     </div>
                   )}
                 </div>
@@ -1372,6 +1468,22 @@ export default function CommunityMemberDashboard() {
           </ZoomableSection>
         </div>
       </div>
+
+      {/* Rating Modal */}
+      {showRatingModal && selectedServiceForRating && (
+        <RatingModal
+          isOpen={showRatingModal}
+          onClose={() => {
+            setShowRatingModal(false);
+            setSelectedServiceForRating(null);
+          }}
+          serviceName={selectedServiceForRating.serviceName}
+          providerName={selectedServiceForRating.providerName}
+          currentRating={selectedServiceForRating.rating}
+          currentComment={selectedServiceForRating.comment}
+          onSubmit={handleSubmitRating}
+        />
+      )}
     </>
   );
 }
