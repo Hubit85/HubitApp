@@ -65,7 +65,7 @@ export function Header() {
               src="/HuBiT.jpeg"
               alt="HuBiT Logo"
               fill
-              className="object-contain filter brightness-0"
+              className="object-contain rounded-md"
               priority
             />
           </div>
