@@ -13,7 +13,9 @@ import {
   Briefcase,
   Award,
   LogOut,
-  History
+  History,
+  DollarSign,
+  Clock
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { authService } from "@/services/AuthService";

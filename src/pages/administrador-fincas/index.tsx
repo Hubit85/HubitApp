@@ -29,7 +29,16 @@ import {
   Download,
   Edit,
   Trash2,
-  LogOut
+  LogOut,
+  Send,
+  Plus,
+  PaintBucket,
+  Zap,
+  Droplets,
+  TreePine,
+  Building2,
+  Home,
+  Hammer
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
@@ -110,6 +119,23 @@ const contractsData = [
   { id: 5, comunidad: "Comunidad Santutxu", titulo: "Mantenimiento de Calefacción", tipo: "Mantenimiento", valor: 1500, estado: "pending", contratista: "Calefacciones Norte S.A.", fechaVencimiento: "2025-03-31", fechaRenovacion: "2025-02-01" }
 ];
 
+// Incidencias reportadas por miembros de comunidad
+const communityIncidents = [
+  { id: 1, comunidad: "Comunidad Abando", titulo: "Fuga de agua en el garaje", descripcion: "Fuga importante en tubería principal del garaje", categoria: "fontaneria", prioridad: "urgent", estado: "pendiente", reportadoPor: "María García", fechaCreacion: "2025-01-15", estimacionCosto: "€500-800" },
+  { id: 2, comunidad: "Comunidad Indautxu", titulo: "Ascensor averiado", descripcion: "El ascensor principal no funciona desde ayer", categoria: "ascensores", prioridad: "urgent", estado: "pendiente", reportadoPor: "Carlos López", fechaCreacion: "2025-01-18", estimacionCosto: "€200-400" },
+  { id: 3, comunidad: "Comunidad Deusto", titulo: "Iluminación del portal", descripcion: "Varias luces del portal no funcionan", categoria: "electricidad", prioridad: "medium", estado: "pendiente", reportadoPor: "Ana Martín", fechaCreacion: "2025-01-20", estimacionCosto: "€150-250" },
+  { id: 4, comunidad: "Urbide 25", titulo: "Goteras en el tejado", descripcion: "Goteras en varias viviendas del último piso", categoria: "tejados", prioridad: "urgent", estado: "pendiente", reportadoPor: "Pedro Sánchez", fechaCreacion: "2025-01-12", estimacionCosto: "€1200-2000" },
+  { id: 5, comunidad: "Comunidad Santutxu", titulo: "Pintura zonas comunes", descripcion: "Las paredes de las zonas comunes necesitan pintura", categoria: "pintura", prioridad: "low", estado: "pendiente", reportadoPor: "Laura Fernández", fechaCreacion: "2025-01-22", estimacionCosto: "€800-1200" }
+];
+
+// Derramas importantes para licitar
+const importantAssessments = [
+  { id: 1, comunidad: "Comunidad Abando", titulo: "Renovación completa de fachada", descripcion: "Rehabilitación integral de la fachada del edificio incluyendo aislamiento térmico", categoria: "fachadas", presupuestoEstimado: 25000, fechaLimitePropuestas: "2025-03-15", estado: "abierta" },
+  { id: 2, comunidad: "Comunidad Indautxu", titulo: "Instalación de ascensor", descripcion: "Instalación de nuevo ascensor en el edificio principal", categoria: "ascensores", presupuestoEstimado: 45000, fechaLimitePropuestas: "2025-02-28", estado: "abierta" },
+  { id: 3, comunidad: "Comunidad Deusto", titulo: "Reparación integral del tejado", descripcion: "Reparación completa del tejado incluyendo impermeabilización", categoria: "tejados", presupuestoEstimado: 18000, fechaLimitePropuestas: "2025-03-01", estado: "abierta" },
+  { id: 4, comunidad: "Urbide 25", titulo: "Instalación de placas solares", descripcion: "Instalación de sistema de energía solar para el edificio", categoria: "electricidad", presupuestoEstimado: 35000, fechaLimitePropuestas: "2025-04-10", estado: "cerrada" }
+];
+
 export default function AdministradorFincas() {
   const { t, language } = useLanguage();
   const router = useRouter();
@@ -118,6 +144,14 @@ export default function AdministradorFincas() {
   const [activeTab, setActiveTab] = useState("controlPanel");
   const [selectedCommunity, setSelectedCommunity] = useState<number | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [newAssessment, setNewAssessment] = useState({
+    comunidad: "",
+    titulo: "",
+    descripcion: "",
+    categoria: "",
+    presupuestoEstimado: "",
+    fechaLimitePropuestas: ""
+  });
 
   useEffect(() => {
     setIsClient(true);
@@ -178,6 +212,44 @@ export default function AdministradorFincas() {
         return <Badge className="bg-red-100 text-red-800">{t("expired")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const handleCreateAssessment = () => {
+    if (newAssessment.titulo && newAssessment.descripcion && newAssessment.categoria) {
+      console.log("Nueva derrama creada:", newAssessment);
+      // Aquí se enviaría a los proveedores según la categoría
+      alert("Derrama publicada correctamente. Los proveedores especializados han sido notificados.");
+      setNewAssessment({
+        comunidad: "",
+        titulo: "",
+        descripcion: "",
+        categoria: "",
+        presupuestoEstimado: "",
+        fechaLimitePropuestas: ""
+      });
+    }
+  };
+
+  const handlePublishIncident = (incidentId: number) => {
+    const incident = communityIncidents.find(i => i.id === incidentId);
+    if (incident) {
+      console.log("Incidencia enviada a proveedores:", incident);
+      alert(`Incidencia "${incident.titulo}" enviada a proveedores de ${incident.categoria}.`);
+    }
+  };
+
+  const getCategoryIcon = (categoria: string) => {
+    switch (categoria) {
+      case "fontaneria": return <Droplets className="h-5 w-5" />;
+      case "electricidad": return <Zap className="h-5 w-5" />;
+      case "pintura": return <PaintBucket className="h-5 w-5" />;
+      case "ascensores": return <Building className="h-5 w-5" />;
+      case "fachadas": return <Home className="h-5 w-5" />;
+      case "tejados": return <Hammer className="h-5 w-5" />;
+      case "jardineria": return <TreePine className="h-5 w-5" />;
+      case "albañileria": return <Building2 className="h-5 w-5" />;
+      default: return <Wrench className="h-5 w-5" />;
     }
   };
 
@@ -390,6 +462,7 @@ export default function AdministradorFincas() {
                  activeTab === "mapa" ? t("map") :
                  activeTab === "comunidades" ? t("communities") :
                  activeTab === "servicios" ? t("currentServices") :
+                 activeTab === "solicitar-presupuesto" ? "Solicitar Presupuesto" :
                  activeTab === "juntas" ? t("meetings") :
                  activeTab === "pendientes" ? t("pendingIssues") :
                  t("estateAdministrator")}
@@ -933,6 +1006,226 @@ export default function AdministradorFincas() {
                       </tbody>
                     </table>
                   </div>
+                </div>
+              )}
+
+              {/* Solicitar Presupuesto */}
+              {activeTab === "solicitar-presupuesto" && (
+                <div className="space-y-8">
+                  {/* Incidencias Reportadas por Miembros */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-6 w-6 text-orange-500" />
+                        Incidencias Reportadas por Miembros de Comunidad
+                      </CardTitle>
+                      <CardDescription>
+                        Gestiona las incidencias enviadas por los miembros y solicita presupuestos a proveedores especializados
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {communityIncidents.map((incident) => (
+                          <Card key={incident.id} className="border-l-4 border-l-orange-400">
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-start mb-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    {getCategoryIcon(incident.categoria)}
+                                    <h4 className="font-semibold text-lg">{incident.titulo}</h4>
+                                    <Badge className={
+                                      incident.prioridad === 'urgent' ? 'bg-red-100 text-red-800' :
+                                      incident.prioridad === 'high' ? 'bg-orange-100 text-orange-800' :
+                                      incident.prioridad === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }>
+                                      {incident.prioridad === 'urgent' ? 'Urgente' :
+                                       incident.prioridad === 'high' ? 'Alta' :
+                                       incident.prioridad === 'medium' ? 'Media' : 'Baja'}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-gray-600 mb-2">{incident.descripcion}</p>
+                                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
+                                    <p><strong>Comunidad:</strong> {incident.comunidad}</p>
+                                    <p><strong>Reportado por:</strong> {incident.reportadoPor}</p>
+                                    <p><strong>Fecha:</strong> {incident.fechaCreacion}</p>
+                                    <p><strong>Coste estimado:</strong> {incident.estimacionCosto}</p>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => handlePublishIncident(incident.id)}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                  >
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Solicitar Presupuestos
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Ver Detalles
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Crear Nueva Derrama Importante */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Plus className="h-6 w-6 text-green-500" />
+                        Licitar Derrama Importante
+                      </CardTitle>
+                      <CardDescription>
+                        Crea y licita derramas extraordinarias para obras importantes en las comunidades
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="assessment-community">Comunidad</Label>
+                            <select 
+                              id="assessment-community"
+                              value={newAssessment.comunidad}
+                              onChange={(e) => setNewAssessment({...newAssessment, comunidad: e.target.value})}
+                              className="w-full p-2 border rounded-md"
+                            >
+                              <option value="">Seleccionar comunidad</option>
+                              {comunidades.map((comunidad) => (
+                                <option key={comunidad.id} value={comunidad.nombre}>{comunidad.nombre}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <Label htmlFor="assessment-title">Título de la Derrama</Label>
+                            <Input 
+                              id="assessment-title"
+                              value={newAssessment.titulo}
+                              onChange={(e) => setNewAssessment({...newAssessment, titulo: e.target.value})}
+                              placeholder="Ej: Renovación completa de fachada"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="assessment-category">Categoría del Servicio</Label>
+                            <select 
+                              id="assessment-category"
+                              value={newAssessment.categoria}
+                              onChange={(e) => setNewAssessment({...newAssessment, categoria: e.target.value})}
+                              className="w-full p-2 border rounded-md"
+                            >
+                              <option value="">Seleccionar categoría</option>
+                              <option value="fachadas">Fachadas</option>
+                              <option value="tejados">Tejados</option>
+                              <option value="ascensores">Ascensores</option>
+                              <option value="electricidad">Electricidad</option>
+                              <option value="fontaneria">Fontanería</option>
+                              <option value="jardineria">Jardinería</option>
+                              <option value="pintura">Pintura</option>
+                              <option value="albañileria">Albañilería</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="assessment-description">Descripción Detallada</Label>
+                            <Textarea 
+                              id="assessment-description"
+                              value={newAssessment.descripcion}
+                              onChange={(e) => setNewAssessment({...newAssessment, descripcion: e.target.value})}
+                              placeholder="Describe detalladamente el trabajo a realizar..."
+                              rows={4}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="assessment-budget">Presupuesto Estimado (€)</Label>
+                            <Input 
+                              id="assessment-budget"
+                              type="number"
+                              value={newAssessment.presupuestoEstimado}
+                              onChange={(e) => setNewAssessment({...newAssessment, presupuestoEstimado: e.target.value})}
+                              placeholder="25000"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="assessment-deadline">Fecha Límite para Propuestas</Label>
+                            <Input 
+                              id="assessment-deadline"
+                              type="date"
+                              value={newAssessment.fechaLimitePropuestas}
+                              onChange={(e) => setNewAssessment({...newAssessment, fechaLimitePropuestas: e.target.value})}
+                            />
+                          </div>
+                          <Button 
+                            onClick={handleCreateAssessment}
+                            className="w-full bg-green-600 hover:bg-green-700"
+                            disabled={!newAssessment.titulo || !newAssessment.descripcion || !newAssessment.categoria}
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            Publicar Derrama y Licitar
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Derramas Activas */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <ShoppingBag className="h-6 w-6 text-blue-500" />
+                        Derramas en Proceso de Licitación
+                      </CardTitle>
+                      <CardDescription>
+                        Derramas importantes actualmente abiertas para propuestas de proveedores
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {importantAssessments.map((assessment) => (
+                          <Card key={assessment.id} className="border-l-4 border-l-blue-400">
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    {getCategoryIcon(assessment.categoria)}
+                                    <h4 className="font-semibold text-lg">{assessment.titulo}</h4>
+                                    <Badge className={
+                                      assessment.estado === 'abierta' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                    }>
+                                      {assessment.estado === 'abierta' ? 'Abierta' : 'Cerrada'}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-gray-600 mb-3">{assessment.descripcion}</p>
+                                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
+                                    <p><strong>Comunidad:</strong> {assessment.comunidad}</p>
+                                    <p><strong>Presupuesto estimado:</strong> €{assessment.presupuestoEstimado.toLocaleString()}</p>
+                                    <p><strong>Categoría:</strong> {assessment.categoria}</p>
+                                    <p><strong>Fecha límite:</strong> {assessment.fechaLimitePropuestas}</p>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                  <Button variant="outline" size="sm">
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Ver Propuestas
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Gestionar
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
             </div>

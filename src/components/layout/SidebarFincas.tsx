@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
-import { MapPin, Calendar, ClipboardList, Building, Wrench, User, ThumbsUp, Award, CreditCard, LogOut } from "lucide-react";
+import { MapPin, Calendar, ClipboardList, Building, Wrench, User, ThumbsUp, Award, CreditCard, LogOut, FileText } from "lucide-react";
 import { authService } from "@/services/AuthService";
 
 interface SidebarFincasProps {
@@ -52,6 +52,14 @@ export function SidebarFincas({ activeTab, setActiveTab }: SidebarFincasProps) {
           >
             <Wrench className='mr-2 h-5 w-5' />
             Servicios Actuales
+          </Button>
+          <Button 
+            variant={activeTab === "solicitar-presupuesto" ? "default" : "ghost"} 
+            className="w-full justify-start"
+            onClick={() => setActiveTab("solicitar-presupuesto")}
+          >
+            <FileText className="mr-2 h-5 w-5" />
+            Solicitar Presupuesto
           </Button>
           <Button 
             variant={activeTab === "juntas" ? "default" : "ghost"} 
