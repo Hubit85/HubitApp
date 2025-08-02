@@ -318,8 +318,39 @@ export default function CommunityMemberDashboard() {
 
   const handleSubmitIssue = () => {
     if (issueDescription.trim()) {
-      console.log("Issue submitted:", { type: selectedIssueType, description: issueDescription });
+      console.log("Issue submitted:", { 
+        type: selectedIssueType, 
+        description: issueDescription,
+        attachedImages: attachedImages 
+      });
       setIssueDescription("");
+      setAttachedImages([]);
+    }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const imageFiles = Array.from(files).filter(file => 
+        file.type.startsWith('image/')
+      );
+      
+      if (imageFiles.length !== files.length) {
+        alert("Solo se permiten archivos de imagen");
+      }
+      
+      setAttachedImages(prev => [...prev, ...imageFiles]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setAttachedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const triggerFileInput = () => {
+    const fileInput = document.getElementById('image-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
     }
   };
 
