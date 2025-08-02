@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
@@ -46,6 +45,7 @@ export function SidebarCommunityMember({ activeTab, setActiveTab }: SidebarCommu
   
   const navItems = [
     { id: "perfil", label: "myProfile", icon: User },
+    { id: "mis-propiedades", label: "myProperties", icon: Home },
     { id: "servicios", label: "availableServices", icon: Store },
     { id: "chat", label: "communityChat", icon: MessageSquare },
     { id: "videoconferencia", label: "scheduleVideoConference", icon: Video },
