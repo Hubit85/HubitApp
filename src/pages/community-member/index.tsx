@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
 import { SidebarCommunityMember } from "@/components/layout/SidebarCommunityMember";
@@ -13,6 +14,7 @@ import ZoomableSection from "@/components/ZoomableSection";
 import ServiceHistoryCard from "@/components/ratings/ServiceHistoryCard";
 import RatingModal from "@/components/ratings/RatingModal";
 import Image from "next/image";
+import { Property, PropertyFormData } from "@/types/property";
 import {
   User,
   MessageSquare,
@@ -51,7 +53,14 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Activity
+  Activity,
+  Trash2,
+  ExternalLink,
+  CheckCheck,
+  Bed,
+  Bath,
+  Ruler,
+  Calendar as CalendarIcon
 } from "lucide-react";
 
 export default function CommunityMemberDashboard() {
@@ -65,6 +74,76 @@ export default function CommunityMemberDashboard() {
   const [issueDescription, setIssueDescription] = useState("");
   const [selectedIssueType, setSelectedIssueType] = useState("maintenance");
   const [attachedImages, setAttachedImages] = useState<File[]>([]);
+  
+  // Estados para propiedades
+  const [showPropertyModal, setShowPropertyModal] = useState(false);
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [propertyFormData, setPropertyFormData] = useState<PropertyFormData>({
+    name: "",
+    address: "",
+    city: "",
+    postalCode: "",
+    country: "España",
+    type: "apartment",
+    status: "owned",
+    size: undefined,
+    bedrooms: undefined,
+    bathrooms: undefined,
+    yearBuilt: undefined,
+    description: "",
+    communityName: "",
+    portalNumber: "",
+    apartmentNumber: ""
+  });
+  
+  const [userProperties, setUserProperties] = useState<Property[]>([
+    {
+      id: "1",
+      name: "Apartamento Centro Madrid",
+      address: "Calle Mayor, 123",
+      city: "Madrid",
+      postalCode: "28013",
+      country: "España",
+      type: "apartment",
+      status: "owned",
+      size: 85,
+      bedrooms: 2,
+      bathrooms: 1,
+      yearBuilt: 2015,
+      description: "Luminoso apartamento en el centro histórico",
+      communityInfo: {
+        communityName: "Residencial Los Pinos",
+        portalNumber: "Portal A",
+        apartmentNumber: "3º A",
+        totalUnits: 45,
+        managementCompany: "Gestiones Madrid"
+      },
+      images: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
+      isCurrentlySelected: true,
+      createdAt: new Date("2023-01-15"),
+      updatedAt: new Date("2024-01-15")
+    },
+    {
+      id: "2",
+      name: "Casa Familiar Pozuelo",
+      address: "Avenida de Europa, 45",
+      city: "Pozuelo de Alarcón",
+      postalCode: "28224",
+      country: "España",
+      type: "house",
+      status: "owned",
+      size: 180,
+      bedrooms: 4,
+      bathrooms: 3,
+      yearBuilt: 2010,
+      description: "Casa unifamiliar con jardín y piscina",
+      images: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
+      isCurrentlySelected: false,
+      createdAt: new Date("2023-06-20"),
+      updatedAt: new Date("2024-01-10")
+    }
+  ]);
+
   const { t } = useLanguage();
   
   // Estados para el perfil
@@ -357,6 +436,7 @@ export default function CommunityMemberDashboard() {
   const getActiveTabTitle = () => {
     switch (activeTab) {
       case "perfil": return t("myProfile");
+      case "mis-propiedades": return t("myProperties");
       case "servicios": return t("availableServices");
       case "chat": return t("communityChat");
       case "videoconferencia": return t("scheduleVideoConference");
@@ -370,6 +450,140 @@ export default function CommunityMemberDashboard() {
       case "configuracion": return t("configuration");
       default: return t("communityMemberDashboard");
     }
+  };
+
+  // Funciones para gestión de propiedades
+  const handleAddProperty = () => {
+    setEditingProperty(null);
+    setPropertyFormData({
+      name: "",
+      address: "",
+      city: "",
+      postalCode: "",
+      country: "España",
+      type: "apartment",
+      status: "owned",
+      size: undefined,
+      bedrooms: undefined,
+      bathrooms: undefined,
+      yearBuilt: undefined,
+      description: "",
+      communityName: "",
+      portalNumber: "",
+      apartmentNumber: ""
+    });
+    setShowPropertyModal(true);
+  };
+
+  const handleEditProperty = (property: Property) => {
+    setEditingProperty(property);
+    setPropertyFormData({
+      name: property.name,
+      address: property.address,
+      city: property.city,
+      postalCode: property.postalCode,
+      country: property.country,
+      type: property.type,
+      status: property.status,
+      size: property.size,
+      bedrooms: property.bedrooms,
+      bathrooms: property.bathrooms,
+      yearBuilt: property.yearBuilt,
+      description: property.description || "",
+      communityName: property.communityInfo?.communityName || "",
+      portalNumber: property.communityInfo?.portalNumber || "",
+      apartmentNumber: property.communityInfo?.apartmentNumber || ""
+    });
+    setShowPropertyModal(true);
+  };
+
+  const handleSaveProperty = () => {
+    if (editingProperty) {
+      // Actualizar propiedad existente
+      setUserProperties(prev => prev.map(prop => 
+        prop.id === editingProperty.id 
+          ? {
+              ...prop,
+              ...propertyFormData,
+              communityInfo: {
+                ...prop.communityInfo,
+                communityName: propertyFormData.communityName,
+                portalNumber: propertyFormData.portalNumber,
+                apartmentNumber: propertyFormData.apartmentNumber
+              },
+              updatedAt: new Date()
+            }
+          : prop
+      ));
+    } else {
+      // Crear nueva propiedad
+      const newProperty: Property = {
+        id: Date.now().toString(),
+        ...propertyFormData,
+        communityInfo: {
+          communityName: propertyFormData.communityName,
+          portalNumber: propertyFormData.portalNumber,
+          apartmentNumber: propertyFormData.apartmentNumber
+        },
+        images: ["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
+        isCurrentlySelected: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      setUserProperties(prev => [...prev, newProperty]);
+    }
+    setShowPropertyModal(false);
+  };
+
+  const handleDeleteProperty = (propertyId: string) => {
+    if (confirm("¿Estás seguro de que quieres eliminar esta propiedad?")) {
+      setUserProperties(prev => prev.filter(prop => prop.id !== propertyId));
+    }
+  };
+
+  const handleSelectProperty = (propertyId: string) => {
+    setUserProperties(prev => prev.map(prop => ({
+      ...prop,
+      isCurrentlySelected: prop.id === propertyId
+    })));
+  };
+
+  const getPropertyTypeIcon = (type: Property["type"]) => {
+    switch (type) {
+      case "apartment": return <Building className="h-5 w-5" />;
+      case "house": return <Home className="h-5 w-5" />;
+      case "townhouse": return <Building className="h-5 w-5" />;
+      case "condo": return <Building className="h-5 w-5" />;
+      case "studio": return <Building className="h-5 w-5" />;
+      case "commercial": return <Store className="h-5 w-5" />;
+      default: return <Building className="h-5 w-5" />;
+    }
+  };
+
+  const getPropertyStatusBadges = (status: Property["status"]) => {
+    switch (status) {
+      case "owned":
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">{t("owned")}</Badge>;
+      case "rented":
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">{t("rented")}</Badge>;
+      case "vacant":
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">{t("vacant")}</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getCurrentProperty = () => {
+    return userProperties.find(prop => prop.isCurrentlySelected) || userProperties[0];
+  };
+
+  const getPropertyStats = () => {
+    return {
+      totalProperties: userProperties.length,
+      ownedProperties: userProperties.filter(p => p.status === "owned").length,
+      rentedProperties: userProperties.filter(p => p.status === "rented").length,
+      vacantProperties: userProperties.filter(p => p.status === "vacant").length
+    };
   };
 
   return (
@@ -525,6 +739,459 @@ export default function CommunityMemberDashboard() {
                       </CardContent>
                     </Card>
                   </div>
+                </div>
+              )}
+
+              {activeTab === "mis-propiedades" && (
+                <div className="space-y-8">
+                  {/* Property Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-blue-600 text-sm font-medium">{t("properties")}</p>
+                            <p className="text-3xl font-bold text-blue-900">{getPropertyStats().totalProperties}</p>
+                          </div>
+                          <div className="p-3 bg-blue-200 rounded-full">
+                            <Building className="h-6 w-6 text-blue-700" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all duration-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-green-600 text-sm font-medium">{t("owned")}</p>
+                            <p className="text-3xl font-bold text-green-900">{getPropertyStats().ownedProperties}</p>
+                          </div>
+                          <div className="p-3 bg-green-200 rounded-full">
+                            <CheckCircle className="h-6 w-6 text-green-700" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-all duration-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-purple-600 text-sm font-medium">{t("rented")}</p>
+                            <p className="text-3xl font-bold text-purple-900">{getPropertyStats().rentedProperties}</p>
+                          </div>
+                          <div className="p-3 bg-purple-200 rounded-full">
+                            <Users className="h-6 w-6 text-purple-700" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-all duration-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-orange-600 text-sm font-medium">{t("vacant")}</p>
+                            <p className="text-3xl font-bold text-orange-900">{getPropertyStats().vacantProperties}</p>
+                          </div>
+                          <div className="p-3 bg-orange-200 rounded-full">
+                            <AlertCircle className="h-6 w-6 text-orange-700" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  {/* Add Property Button */}
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("myProperties")}</h2>
+                      <p className="text-gray-600">Gestiona y organiza todas tus propiedades desde aquí</p>
+                    </div>
+                    <Button 
+                      onClick={handleAddProperty}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    >
+                      <Plus className="h-5 w-5 mr-2" />
+                      {t("addProperty")}
+                    </Button>
+                  </div>
+
+                  {/* Properties Grid */}
+                  {userProperties.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {userProperties.map((property, index) => (
+                        <Card 
+                          key={property.id} 
+                          className={`group overflow-hidden transition-all duration-500 hover:shadow-2xl transform hover:scale-105 ${
+                            property.isCurrentlySelected 
+                              ? 'ring-2 ring-blue-500 shadow-lg bg-gradient-to-br from-blue-50 to-white' 
+                              : 'hover:shadow-lg bg-white'
+                          }`}
+                          style={{
+                            animationDelay: `${index * 0.1}s`,
+                            animation: 'fadeInUp 0.6s ease-out forwards'
+                          }}
+                        >
+                          {/* Property Image */}
+                          <div className="relative h-48 overflow-hidden">
+                            <Image
+                              src={property.images?.[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                              alt={property.name}
+                              layout="fill"
+                              objectFit="cover"
+                              className="group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute top-4 left-4 flex gap-2">
+                              {getPropertyStatusBadges(property.status)}
+                              {property.isCurrentlySelected && (
+                                <Badge className="bg-blue-600 text-white">
+                                  <CheckCheck className="h-3 w-3 mr-1" />
+                                  Seleccionada
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="absolute top-4 right-4 p-2 bg-white/90 rounded-full backdrop-blur-sm">
+                              {getPropertyTypeIcon(property.type)}
+                            </div>
+                          </div>
+
+                          <CardContent className="p-6">
+                            <div className="mb-4">
+                              <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                {property.name}
+                              </h3>
+                              <div className="flex items-center text-gray-600 mb-2">
+                                <MapPin className="h-4 w-4 mr-2 text-gray-400" />
+                                <span className="text-sm">{property.address}, {property.city}</span>
+                              </div>
+                              {property.communityInfo?.apartmentNumber && (
+                                <p className="text-sm text-blue-600 font-medium">
+                                  {property.communityInfo.apartmentNumber} - {property.communityInfo.communityName}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Property Details */}
+                            <div className="flex justify-between items-center mb-4 text-sm text-gray-600">
+                              {property.size && (
+                                <div className="flex items-center">
+                                  <Ruler className="h-4 w-4 mr-1" />
+                                  <span>{property.size}m²</span>
+                                </div>
+                              )}
+                              {property.bedrooms && (
+                                <div className="flex items-center">
+                                  <Bed className="h-4 w-4 mr-1" />
+                                  <span>{property.bedrooms}</span>
+                                </div>
+                              )}
+                              {property.bathrooms && (
+                                <div className="flex items-center">
+                                  <Bath className="h-4 w-4 mr-1" />
+                                  <span>{property.bathrooms}</span>
+                                </div>
+                              )}
+                              {property.yearBuilt && (
+                                <div className="flex items-center">
+                                  <CalendarIcon className="h-4 w-4 mr-1" />
+                                  <span>{property.yearBuilt}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {property.description && (
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                {property.description}
+                              </p>
+                            )}
+
+                            {/* Actions */}
+                            <div className="flex gap-2">
+                              {!property.isCurrentlySelected && (
+                                <Button 
+                                  onClick={() => handleSelectProperty(property.id)}
+                                  size="sm"
+                                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200"
+                                >
+                                  <CheckCheck className="h-4 w-4 mr-1" />
+                                  Seleccionar
+                                </Button>
+                              )}
+                              <Button 
+                                onClick={() => handleEditProperty(property)}
+                                variant="outline" 
+                                size="sm"
+                                className="px-3"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                onClick={() => handleDeleteProperty(property.id)}
+                                variant="outline" 
+                                size="sm"
+                                className="px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="mx-auto mb-6 p-4 bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center">
+                        <Building className="h-10 w-10 text-gray-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {t("noPropertiesFound")}
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Añade tu primera propiedad para empezar a gestionar tus servicios
+                      </p>
+                      <Button 
+                        onClick={handleAddProperty}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        <Plus className="h-5 w-5 mr-2" />
+                        {t("addFirstProperty")}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Property Management Modal */}
+                  <Dialog open={showPropertyModal} onOpenChange={setShowPropertyModal}>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold text-gray-900">
+                          {editingProperty ? "Editar Propiedad" : "Añadir Nueva Propiedad"}
+                        </DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="property-name" className="text-sm font-medium text-gray-700">
+                              Nombre de la Propiedad *
+                            </Label>
+                            <Input
+                              id="property-name"
+                              value={propertyFormData.name}
+                              onChange={(e) => setPropertyFormData({...propertyFormData, name: e.target.value})}
+                              placeholder="Ej. Apartamento Centro Madrid"
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="property-address" className="text-sm font-medium text-gray-700">
+                              Dirección *
+                            </Label>
+                            <Input
+                              id="property-address"
+                              value={propertyFormData.address}
+                              onChange={(e) => setPropertyFormData({...propertyFormData, address: e.target.value})}
+                              placeholder="Calle Mayor, 123"
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="property-city" className="text-sm font-medium text-gray-700">
+                                Ciudad *
+                              </Label>
+                              <Input
+                                id="property-city"
+                                value={propertyFormData.city}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, city: e.target.value})}
+                                placeholder="Madrid"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="property-postal" className="text-sm font-medium text-gray-700">
+                                Código Postal *
+                              </Label>
+                              <Input
+                                id="property-postal"
+                                value={propertyFormData.postalCode}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, postalCode: e.target.value})}
+                                placeholder="28013"
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="property-type" className="text-sm font-medium text-gray-700">
+                                Tipo de Propiedad *
+                              </Label>
+                              <select
+                                id="property-type"
+                                value={propertyFormData.type}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, type: e.target.value as Property["type"]})}
+                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="apartment">{t("apartment")}</option>
+                                <option value="house">{t("house")}</option>
+                                <option value="townhouse">{t("townhouse")}</option>
+                                <option value="condo">{t("condo")}</option>
+                                <option value="studio">{t("studio")}</option>
+                              </select>
+                            </div>
+                            <div>
+                              <Label htmlFor="property-status" className="text-sm font-medium text-gray-700">
+                                Estado *
+                              </Label>
+                              <select
+                                id="property-status"
+                                value={propertyFormData.status}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, status: e.target.value as Property["status"]})}
+                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="owned">{t("owned")}</option>
+                                <option value="rented">{t("rented")}</option>
+                                <option value="vacant">{t("vacant")}</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-3 gap-4">
+                            <div>
+                              <Label htmlFor="property-size" className="text-sm font-medium text-gray-700">
+                                Tamaño (m²)
+                              </Label>
+                              <Input
+                                id="property-size"
+                                type="number"
+                                value={propertyFormData.size || ""}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, size: e.target.value ? parseInt(e.target.value) : undefined})}
+                                placeholder="85"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="property-bedrooms" className="text-sm font-medium text-gray-700">
+                                Dormitorios
+                              </Label>
+                              <Input
+                                id="property-bedrooms"
+                                type="number"
+                                value={propertyFormData.bedrooms || ""}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, bedrooms: e.target.value ? parseInt(e.target.value) : undefined})}
+                                placeholder="2"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="property-bathrooms" className="text-sm font-medium text-gray-700">
+                                Baños
+                              </Label>
+                              <Input
+                                id="property-bathrooms"
+                                type="number"
+                                value={propertyFormData.bathrooms || ""}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, bathrooms: e.target.value ? parseInt(e.target.value) : undefined})}
+                                placeholder="1"
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="property-year" className="text-sm font-medium text-gray-700">
+                              Año de Construcción
+                            </Label>
+                            <Input
+                              id="property-year"
+                              type="number"
+                              value={propertyFormData.yearBuilt || ""}
+                              onChange={(e) => setPropertyFormData({...propertyFormData, yearBuilt: e.target.value ? parseInt(e.target.value) : undefined})}
+                              placeholder="2015"
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="community-name" className="text-sm font-medium text-gray-700">
+                              Nombre de la Comunidad
+                            </Label>
+                            <Input
+                              id="community-name"
+                              value={propertyFormData.communityName || ""}
+                              onChange={(e) => setPropertyFormData({...propertyFormData, communityName: e.target.value})}
+                              placeholder="Residencial Los Pinos"
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="portal-number" className="text-sm font-medium text-gray-700">
+                                Número de Portal
+                              </Label>
+                              <Input
+                                id="portal-number"
+                                value={propertyFormData.portalNumber || ""}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, portalNumber: e.target.value})}
+                                placeholder="Portal A"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="apartment-number" className="text-sm font-medium text-gray-700">
+                                Número de Apartamento
+                              </Label>
+                              <Input
+                                id="apartment-number"
+                                value={propertyFormData.apartmentNumber || ""}
+                                onChange={(e) => setPropertyFormData({...propertyFormData, apartmentNumber: e.target.value})}
+                                placeholder="3º A"
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="property-description" className="text-sm font-medium text-gray-700">
+                              Descripción
+                            </Label>
+                            <Textarea
+                              id="property-description"
+                              value={propertyFormData.description || ""}
+                              onChange={(e) => setPropertyFormData({...propertyFormData, description: e.target.value})}
+                              placeholder="Luminoso apartamento en el centro histórico..."
+                              rows={3}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end gap-4 pt-4 border-t">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setShowPropertyModal(false)}
+                        >
+                          {t("cancel")}
+                        </Button>
+                        <Button 
+                          onClick={handleSaveProperty}
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                          disabled={!propertyFormData.name || !propertyFormData.address || !propertyFormData.city}
+                        >
+                          <Save className="h-4 w-4 mr-2" />
+                          {editingProperty ? "Actualizar Propiedad" : "Crear Propiedad"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
 
@@ -864,7 +1531,7 @@ export default function CommunityMemberDashboard() {
                     <p className="text-gray-600">Estado actual del presupuestoanual</p>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <Card className="bg-blue-50">
                       <CardContent className="p-6 text-center">
                         <Euro className="h-8 w-8 mx-auto text-blue-600 mb-2" />
