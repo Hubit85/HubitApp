@@ -87,7 +87,7 @@ export function Header() {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-none transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-lg hover:shadow-xl"
+                className="bg-white text-black border-black hover:bg-white/90 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
               >
                 <FileText className="h-4 w-4" />
                 <span>Whitepaper</span>
