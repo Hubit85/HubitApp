@@ -36,36 +36,50 @@ export default function Home() {
             
             <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
               <div className="flex items-center justify-center gap-4">
-                <svg 
-                  width="64" 
-                  height="64" 
-                  viewBox="0 0 100 100" 
-                  className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0"
-                  fill="white"
-                >
-                  {/* Casa principal */}
-                  <path d="M20 45 L50 20 L80 45 L80 75 L20 75 Z" fill="white" />
-                  
-                  {/* Techo triangular */}
-                  <path d="M15 45 L50 15 L85 45 L80 45 L50 20 L20 45 Z" fill="white" />
-                  
-                  {/* Puerta */}
-                  <rect x="42" y="60" width="16" height="15" fill="black" />
-                  
-                  {/* Ventanas */}
-                  <rect x="28" y="35" width="8" height="8" fill="black" />
-                  <rect x="64" y="35" width="8" height="8" fill="black" />
-                  <rect x="28" y="50" width="8" height="8" fill="black" />
-                  <rect x="64" y="50" width="8" height="8" fill="black" />
-                  
-                  {/* Dientes de llave (parte inferior) */}
-                  <rect x="25" y="75" width="4" height="6" fill="white" />
-                  <rect x="32" y="75" width="4" height="10" fill="white" />
-                  <rect x="39" y="75" width="4" height="4" fill="white" />
-                  <rect x="61" y="75" width="4" height="8" fill="white" />
-                  <rect x="68" y="75" width="4" height="5" fill="white" />
-                  <rect x="75" y="75" width="4" height="12" fill="white" />
-                </svg>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 flex items-center justify-center">
+                  <svg 
+                    width="100%" 
+                    height="100%" 
+                    viewBox="0 0 120 120" 
+                    className="fill-white drop-shadow-lg"
+                  >
+                    {/* Casa principal con forma de llave */}
+                    <g>
+                      {/* Base de la casa (parte superior de la llave) */}
+                      <path 
+                        d="M25 55 L60 25 L95 55 L95 80 L25 80 Z" 
+                        fill="white" 
+                        stroke="rgba(255,255,255,0.3)" 
+                        strokeWidth="1"
+                      />
+                      
+                      {/* Techo triangular */}
+                      <path 
+                        d="M20 55 L60 20 L100 55 L95 55 L60 25 L25 55 Z" 
+                        fill="white" 
+                        stroke="rgba(255,255,255,0.3)" 
+                        strokeWidth="1"
+                      />
+                      
+                      {/* Puerta */}
+                      <rect x="52" y="65" width="16" height="15" fill="#1a1a1a" rx="1" />
+                      
+                      {/* Ventanas */}
+                      <rect x="35" y="45" width="10" height="10" fill="#1a1a1a" rx="1" />
+                      <rect x="75" y="45" width="10" height="10" fill="#1a1a1a" rx="1" />
+                      <rect x="35" y="62" width="10" height="8" fill="#1a1a1a" rx="1" />
+                      <rect x="75" y="62" width="10" height="8" fill="#1a1a1a" rx="1" />
+                      
+                      {/* Mango de la llave (dientes en la parte inferior) */}
+                      <rect x="30" y="80" width="6" height="8" fill="white" />
+                      <rect x="40" y="80" width="6" height="12" fill="white" />
+                      <rect x="50" y="80" width="6" height="6" fill="white" />
+                      <rect x="64" y="80" width="6" height="10" fill="white" />
+                      <rect x="74" y="80" width="6" height="7" fill="white" />
+                      <rect x="84" y="80" width="6" height="14" fill="white" />
+                    </g>
+                  </svg>
+                </div>
                 <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
                   {t("hubit")}
                 </h1>
