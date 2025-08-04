@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { LogOut } from "lucide-react";
+import { LogOut, FileText } from "lucide-react";
 import { authService } from "@/services/AuthService";
 import Image from "next/image";
+import WhitepaperModal from "@/components/modals/WhitepaperModal";
 
 export function Header() {
   const router = useRouter();
@@ -79,6 +80,20 @@ export function Header() {
         
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
+          
+          {/* Show Whitepaper button only on home page */}
+          {isHomePage && (
+            <WhitepaperModal>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-none transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-lg hover:shadow-xl"
+              >
+                <FileText className="h-4 w-4" />
+                <span>Whitepaper</span>
+              </Button>
+            </WhitepaperModal>
+          )}
           
           {/* Show sign out button when in dashboard pages */}
           {isDashboardPage && (
