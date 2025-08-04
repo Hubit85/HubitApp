@@ -59,7 +59,7 @@ export default function WhitepaperModal({ children }: WhitepaperModalProps) {
           </div>
         </DialogHeader>
         
-        <ScrollArea className="h-[calc(90vh-200px)] px-8 pb-8">
+        <ScrollArea className="h-[calc(90vh-200px)] px-8 pb-8 whitepaper-scroll slow-scroll">
           <div className="space-y-8 pt-6">
             {/* Executive Summary */}
             <section>
