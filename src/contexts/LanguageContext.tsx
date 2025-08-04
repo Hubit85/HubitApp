@@ -597,7 +597,7 @@ const translations = {
   },
   es: {
     // General & Navigation
-    professionalServices: "Professional Services Hub",
+    professionalServices: "Hub de Servicios Profesionales",
     services: "Servicios",
     profile: "Perfil",
     signOut: "Cerrar sesión",
