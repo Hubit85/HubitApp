@@ -35,9 +35,20 @@ export default function Home() {
             />
             
             <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
-              <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
-                {t("hubit")}
-              </h1>
+              <div className="flex items-center justify-center gap-4">
+                <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+                  <Image
+                    src="/HuBiT logo.png"
+                    alt="HuBiT Logo"
+                    fill
+                    className="object-contain filter brightness-0 invert"
+                    priority
+                  />
+                </div>
+                <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
+                  {t("hubit")}
+                </h1>
+              </div>
               <p className="text-xl md:text-2xl text-white drop-shadow-md">
                 {t("professionalServicesForHome")}
               </p>
