@@ -40,43 +40,33 @@ export default function Home() {
                   <svg 
                     width="100%" 
                     height="100%" 
-                    viewBox="0 0 120 120" 
+                    viewBox="0 0 100 100"
                     className="fill-white drop-shadow-lg"
                   >
                     {/* Casa principal con forma de llave */}
-                    <g>
+                    <g fill="white" stroke="rgba(255,255,255,0.3)" strokeWidth="1">
                       {/* Base de la casa (parte superior de la llave) */}
-                      <path 
-                        d="M25 55 L60 25 L95 55 L95 80 L25 80 Z" 
-                        fill="white" 
-                        stroke="rgba(255,255,255,0.3)" 
-                        strokeWidth="1"
-                      />
+                      <path d="M20 50 L50 20 L80 50 L80 70 L20 70 Z" />
                       
                       {/* Techo triangular */}
-                      <path 
-                        d="M20 55 L60 20 L100 55 L95 55 L60 25 L25 55 Z" 
-                        fill="white" 
-                        stroke="rgba(255,255,255,0.3)" 
-                        strokeWidth="1"
-                      />
+                      <path d="M15 50 L50 15 L85 50 L80 50 L50 20 L20 50 Z" />
                       
                       {/* Puerta */}
-                      <rect x="52" y="65" width="16" height="15" fill="#1a1a1a" rx="1" />
+                      <rect x="45" y="58" width="10" height="12" fill="#1a1a1a" rx="1" />
                       
                       {/* Ventanas */}
-                      <rect x="35" y="45" width="10" height="10" fill="#1a1a1a" rx="1" />
-                      <rect x="75" y="45" width="10" height="10" fill="#1a1a1a" rx="1" />
-                      <rect x="35" y="62" width="10" height="8" fill="#1a1a1a" rx="1" />
-                      <rect x="75" y="62" width="10" height="8" fill="#1a1a1a" rx="1" />
+                      <rect x="30" y="40" width="8" height="8" fill="#1a1a1a" rx="1" />
+                      <rect x="62" y="40" width="8" height="8" fill="#1a1a1a" rx="1" />
+                      <rect x="30" y="55" width="8" height="6" fill="#1a1a1a" rx="1" />
+                      <rect x="62" y="55" width="8" height="6" fill="#1a1a1a" rx="1" />
                       
                       {/* Mango de la llave (dientes en la parte inferior) */}
-                      <rect x="30" y="80" width="6" height="8" fill="white" />
-                      <rect x="40" y="80" width="6" height="12" fill="white" />
-                      <rect x="50" y="80" width="6" height="6" fill="white" />
-                      <rect x="64" y="80" width="6" height="10" fill="white" />
-                      <rect x="74" y="80" width="6" height="7" fill="white" />
-                      <rect x="84" y="80" width="6" height="14" fill="white" />
+                      <rect x="25" y="70" width="5" height="6" fill="white" />
+                      <rect x="33" y="70" width="5" height="9" fill="white" />
+                      <rect x="41" y="70" width="5" height="5" fill="white" />
+                      <rect x="54" y="70" width="5" height="8" fill="white" />
+                      <rect x="62" y="70" width="5" height="6" fill="white" />
+                      <rect x="70" y="70" width="5" height="11" fill="white" />
                     </g>
                   </svg>
                 </div>

@@ -1,0 +1,28 @@
+
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Casa principal con forma de llave -->
+  <g fill="white" stroke="rgba(255,255,255,0.3)" stroke-width="1">
+    <!-- Base de la casa (parte superior de la llave) -->
+    <path d="M20 50 L50 20 L80 50 L80 70 L20 70 Z" />
+    
+    <!-- Techo triangular -->
+    <path d="M15 50 L50 15 L85 50 L80 50 L50 20 L20 50 Z" />
+    
+    <!-- Puerta -->
+    <rect x="45" y="58" width="10" height="12" fill="#1a1a1a" rx="1" />
+    
+    <!-- Ventanas -->
+    <rect x="30" y="40" width="8" height="8" fill="#1a1a1a" rx="1" />
+    <rect x="62" y="40" width="8" height="8" fill="#1a1a1a" rx="1" />
+    <rect x="30" y="55" width="8" height="6" fill="#1a1a1a" rx="1" />
+    <rect x="62" y="55" width="8" height="6" fill="#1a1a1a" rx="1" />
+    
+    <!-- Mango de la llave (dientes en la parte inferior) -->
+    <rect x="25" y="70" width="5" height="6" fill="white" />
+    <rect x="33" y="70" width="5" height="9" fill="white" />
+    <rect x="41" y="70" width="5" height="5" fill="white" />
+    <rect x="54" y="70" width="5" height="8" fill="white" />
+    <rect x="62" y="70" width="5" height="6" fill="white" />
+    <rect x="70" y="70" width="5" height="11" fill="white" />
+  </g>
+</svg>
