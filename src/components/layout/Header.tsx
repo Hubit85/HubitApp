@@ -66,7 +66,7 @@ export function Header() {
               src="/HuBiT logo.png"
               alt="HuBiT Logo"
               fill
-              className="object-cover object-left brightness-0 invert"
+              className="object-cover object-left"
               priority
             />
           </div>
