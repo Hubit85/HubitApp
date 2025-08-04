@@ -36,15 +36,28 @@ export default function Home() {
             
             <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
               <div className="flex items-center justify-center gap-4">
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
-                  <Image
-                    src="/HuBiT logo.png"
-                    alt="HuBiT Logo"
-                    fill
-                    className="object-contain brightness-0 invert"
-                    priority
-                  />
-                </div>
+                <svg 
+                  width="64" 
+                  height="64" 
+                  viewBox="0 0 100 100" 
+                  className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 fill-white"
+                >
+                  <g>
+                    {/* House shape */}
+                    <path d="M20 50 L50 25 L80 50 L80 80 L60 80 L60 65 L40 65 L40 80 L20 80 Z" />
+                    {/* Windows */}
+                    <rect x="30" y="35" width="8" height="8" className="fill-black" />
+                    <rect x="62" y="35" width="8" height="8" className="fill-black" />
+                    <rect x="30" y="47" width="8" height="8" className="fill-black" />
+                    <rect x="62" y="47" width="8" height="8" className="fill-black" />
+                    {/* Key teeth at bottom */}
+                    <rect x="45" y="80" width="4" height="4" />
+                    <rect x="51" y="80" width="4" height="6" />
+                    <rect x="57" y="80" width="4" height="4" />
+                    <rect x="63" y="80" width="4" height="8" />
+                    <rect x="69" y="80" width="4" height="3" />
+                  </g>
+                </svg>
                 <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
                   {t("hubit")}
                 </h1>
