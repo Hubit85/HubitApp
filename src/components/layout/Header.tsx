@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
@@ -12,6 +12,12 @@ import WhitepaperModal from "@/components/modals/WhitepaperModal";
 export function Header() {
   const router = useRouter();
   const { t, language } = useLanguage();
+  const [slogan, setSlogan] = useState(t("professionalServices"));
+  
+  // Force re-render when language changes
+  useEffect(() => {
+    setSlogan(t("professionalServices"));
+  }, [language, t]);
   
   // Check if user is in any dashboard/control panel
   const isDashboardPage = router.pathname.startsWith('/dashboard') || 
@@ -74,8 +80,8 @@ export function Header() {
             <Link href={isDashboardPage ? '/dashboard' : '/'} className="text-2xl font-bold text-black tracking-wide hover:text-gray-700 transition-colors duration-200">
               {t("hubit")}
             </Link>
-            <p className="text-sm text-gray-600" key={language}>
-              {t("professionalServices")}
+            <p className="text-sm text-gray-600">
+              {slogan}
             </p>
           </div>
         </div>
