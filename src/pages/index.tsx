@@ -37,14 +37,28 @@ export default function Home() {
             <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
               <div className="flex items-center justify-center gap-4">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 flex items-center justify-center">
-                  <Image
-                    src="/HuBiT-logo-white.svg"
-                    alt="HuBiT Logo"
-                    width={80}
-                    height={80}
+                  <svg 
+                    width="100%" 
+                    height="100%" 
+                    viewBox="0 0 100 100"
                     className="drop-shadow-lg"
-                    priority
-                  />
+                  >
+                    <g fill="white" stroke="rgba(255,255,255,0.3)" strokeWidth="1">
+                      <path d="M20 50 L50 20 L80 50 L80 70 L20 70 Z" />
+                      <path d="M15 50 L50 15 L85 50 L80 50 L50 20 L20 50 Z" />
+                      <rect x="45" y="58" width="10" height="12" fill="#1a1a1a" rx="1" />
+                      <rect x="30" y="40" width="8" height="8" fill="#1a1a1a" rx="1" />
+                      <rect x="62" y="40" width="8" height="8" fill="#1a1a1a" rx="1" />
+                      <rect x="30" y="55" width="8" height="6" fill="#1a1a1a" rx="1" />
+                      <rect x="62" y="55" width="8" height="6" fill="#1a1a1a" rx="1" />
+                      <rect x="25" y="70" width="5" height="6" fill="white" />
+                      <rect x="33" y="70" width="5" height="9" fill="white" />
+                      <rect x="41" y="70" width="5" height="5" fill="white" />
+                      <rect x="54" y="70" width="5" height="8" fill="white" />
+                      <rect x="62" y="70" width="5" height="6" fill="white" />
+                      <rect x="70" y="70" width="5" height="11" fill="white" />
+                    </g>
+                  </svg>
                 </div>
                 <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
                   {t("hubit")}
