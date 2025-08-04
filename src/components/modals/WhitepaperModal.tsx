@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import {
   ExternalLink, 
   TrendingUp, 
   Users, 
-  Shield, 
   Zap, 
   Globe, 
   Calendar,
@@ -18,8 +18,7 @@ import {
   DollarSign,
   CheckCircle,
   Rocket,
-  Award,
-  Lock
+  Award
 } from "lucide-react";
 
 interface WhitepaperModalProps {
@@ -59,7 +58,7 @@ export default function WhitepaperModal({ children }: WhitepaperModalProps) {
           </div>
         </DialogHeader>
         
-        <ScrollArea className="h-[calc(90vh-200px)] px-8 pb-8 whitepaper-scroll slow-scroll">
+        <ScrollArea className="h-[calc(90vh-200px)] px-8 pb-8 whitepaper-scroll ultra-slow-scroll">
           <div className="space-y-8 pt-6">
             {/* Executive Summary */}
             <section>
@@ -286,144 +285,6 @@ export default function WhitepaperModal({ children }: WhitepaperModalProps) {
                   </CardContent>
                 </Card>
               </div>
-            </section>
-
-            {/* Technology */}
-            <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <Zap className="h-5 w-5 text-black" />
-                </div>
-                <h2 className="text-2xl font-bold text-black">4. Technology</h2>
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="border border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="text-black">Solana Advantages</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Zap className="h-5 w-5 text-black" />
-                      <span className="text-gray-700"><strong>Speed:</strong> 400ms block times</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <DollarSign className="h-5 w-5 text-black" />
-                      <span className="text-gray-700"><strong>Cost:</strong> Transactions {"<$0.01"}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <TrendingUp className="h-5 w-5 text-black" />
-                      <span className="text-gray-700"><strong>Scalability:</strong> Thousands of users simultaneously</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="text-black">App Features</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Shield className="h-5 w-5 text-black" />
-                      <span className="text-gray-700"><strong>Transparent Service Tracking:</strong> All requests/reviews on-chain</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <DollarSign className="h-5 w-5 text-black" />
-                      <span className="text-gray-700"><strong>HuBiT Wallet:</strong> Built-in Solana wallet for seamless payments</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Award className="h-5 w-5 text-black" />
-                      <span className="text-gray-700"><strong>Reputation System:</strong> NFT-based badges for top-rated providers</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
-
-            {/* Security & Compliance */}
-            <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <Shield className="h-5 w-5 text-black" />
-                </div>
-                <h2 className="text-2xl font-bold text-black">5. Security & Compliance</h2>
-              </div>
-              
-              <Card className="bg-gray-50 border-gray-200">
-                <CardContent className="pt-6 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Lock className="h-5 w-5 text-black" />
-                    <span className="text-gray-700"><strong>Audits:</strong> Smart contract audit by Certik or Kudelski Security</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Users className="h-5 w-5 text-black" />
-                    <span className="text-gray-700"><strong>KYC:</strong> Optional for fiat on-ramps (partner: MoonPay/Stripe)</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-black" />
-                    <span className="text-gray-700"><strong>Legal:</strong> Structured as a utility token (no securities regulations)</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-
-            {/* Team */}
-            <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <Users className="h-5 w-5 text-black" />
-                </div>
-                <h2 className="text-2xl font-bold text-black">6. Team</h2>
-              </div>
-              
-              <Card className="border border-gray-200">
-                <CardContent className="pt-6 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Award className="h-5 w-5 text-black" />
-                    <span className="text-gray-700"><strong>Founders:</strong> Experienced in proptech and blockchain</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Users className="h-5 w-5 text-black" />
-                    <span className="text-gray-700"><strong>Advisors:</strong> Solana devs, legal experts, real estate veterans</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-
-            {/* Conclusion */}
-            <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <Target className="h-5 w-5 text-black" />
-                </div>
-                <h2 className="text-2xl font-bold text-black">7. Conclusion</h2>
-              </div>
-              
-              <Card className="bg-gray-50 border-gray-200">
-                <CardContent className="pt-6">
-                  <p className="text-gray-700 leading-relaxed mb-6">
-                    HuBiT leverages Solana's efficiency to disrupt property management with transparency and decentralized governance. By holding HuBiT, users become stakeholders in the ecosystem's growth.
-                  </p>
-                  
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <h3 className="font-semibold text-black mb-3">Next Steps:</h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-black" />
-                        <span className="text-sm text-gray-700">Finalize smart contract (audit in progress)</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-black" />
-                        <span className="text-sm text-gray-700">Launch Q3 2025 marketing campaign</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-black" />
-                        <span className="text-sm text-gray-700">Grow partnerships with property managers</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </section>
 
             <Separator className="bg-gray-200" />

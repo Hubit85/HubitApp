@@ -408,6 +408,7 @@ input, textarea, [contenteditable] {
 .whitepaper-scroll {
   scroll-behavior: smooth;
   scroll-padding-top: 2rem;
+  scroll-snap-type: y proximity;
 }
 
 .whitepaper-scroll::-webkit-scrollbar {
@@ -429,15 +430,47 @@ input, textarea, [contenteditable] {
   background: #94a3b8;
 }
 
-/* Custom slow scroll for whitepaper */
-.slow-scroll {
+/* Ultra slow scroll for whitepaper */
+.ultra-slow-scroll {
   scroll-behavior: smooth;
   overscroll-behavior: contain;
+  transition: scroll-top 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Firefox smooth scrolling */
+/* CSS custom properties for ultra smooth scrolling */
+.ultra-slow-scroll {
+  --scroll-timing: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --scroll-duration: 1.5s;
+}
+
+/* Firefox smooth scrolling with enhanced timing */
 @supports (scroll-behavior: smooth) {
-  .slow-scroll {
+  .ultra-slow-scroll {
+    scroll-behavior: smooth;
+    scroll-snap-type: y proximity;
+  }
+}
+
+/* Enhanced smooth scrolling for Webkit browsers */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .ultra-slow-scroll {
+    -webkit-scroll-behavior: smooth;
     scroll-behavior: smooth;
   }
+}
+
+/* Section snap points for smoother scrolling */
+.ultra-slow-scroll section {
+  scroll-snap-align: start;
+  scroll-margin-top: 2rem;
+}
+
+/* Additional browser-specific smooth scroll optimizations */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrolling physics for ultra-smooth experience */
+.ultra-slow-scroll * {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
