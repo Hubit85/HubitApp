@@ -41,11 +41,8 @@ export default function Home() {
                     src="/HuBiT logo.png"
                     alt="HuBiT Logo"
                     fill
-                    className="object-contain"
+                    className="object-contain brightness-0 invert"
                     priority
-                    style={{
-                      filter: 'brightness(0) invert(1)'
-                    }}
                   />
                 </div>
                 <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
