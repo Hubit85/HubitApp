@@ -13,7 +13,7 @@ export const LanguageContext = createContext<LanguageContextType | undefined>(un
 const translations = {
   en: {
     // General & Navigation
-    professionalServices: "Professional Services",
+    professionalServices: "Professional Services Hub",
     services: "Services",
     profile: "Profile",
     signOut: "Sign Out",
@@ -597,7 +597,7 @@ const translations = {
   },
   es: {
     // General & Navigation
-    professionalServices: "Servicios profesionales",
+    professionalServices: "Professional Services Hub",
     services: "Servicios",
     profile: "Perfil",
     signOut: "Cerrar sesión",
