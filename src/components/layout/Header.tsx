@@ -63,7 +63,7 @@ export function Header() {
         <div className="flex items-center gap-3">
           <div className="relative w-16 h-16 transition-transform duration-200 hover:scale-105 overflow-hidden">
             <Image
-              src="/HuBiT logo.jpeg"
+              src="/HuBiT logo.png"
               alt="HuBiT Logo"
               fill
               className="object-cover object-left"
