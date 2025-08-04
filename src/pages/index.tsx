@@ -41,7 +41,7 @@ export default function Home() {
                 </h1>
               </div>
               <p className="text-xl md:text-2xl text-white drop-shadow-md">
-                {t("professionalServicesForHome")}
+                {t("professionalServices")}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
