@@ -227,11 +227,11 @@ export default function WhitepaperModal({ children }: WhitepaperModalProps) {
                   <CardContent className="space-y-2">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-black" />
-                      <span className="text-sm text-gray-700"><strong>MVP Development:</strong> Demo of HuBiT app (Solana wallet integration)</span>
+                      <span className="text-sm text-gray-700"><strong>MVP Development:</strong> Demo of HuBiT app</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-black" />
-                      <span className="text-sm text-gray-700"><strong>Brand Launch:</strong> Website + Twitter + Telegram community</span>
+                      <span className="text-sm text-gray-700"><strong>Brand Launch:</strong> Website + Twitter</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-black" />
@@ -250,11 +250,11 @@ export default function WhitepaperModal({ children }: WhitepaperModalProps) {
                   <CardContent className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm text-gray-700"><strong>App Beta Release:</strong> iOS/Android (property management features)</span>
+                      <span className="text-sm text-gray-700"><strong>App Beta Release:</strong> iOS/Android (property management features, Solana wallet integration)</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm text-gray-700"><strong>Listings:</strong> CoinMarketCap, CoinGecko, CEXs (OKX, Bybit), DEXs (Raydium, Orca)</span>
+                      <span className="text-sm text-gray-700"><strong>Listings:</strong> CoinMarketCap, CoinGecko, centralized and decentralized exchanges</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-gray-600" />
@@ -273,7 +273,7 @@ export default function WhitepaperModal({ children }: WhitepaperModalProps) {
                   <CardContent className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Globe className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm text-gray-700"><strong>Global Expansion:</strong> Localized campaigns (Spain, Latam, UAE)</span>
+                      <span className="text-sm text-gray-700"><strong>Global Expansion:</strong> International market campaigns</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-gray-500" />
