@@ -36,16 +36,6 @@ export default function Home() {
             
             <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
               <div className="flex items-center justify-center gap-4">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 flex items-center justify-center">
-                  <Image
-                    src="/HuBiT-logo-white.svg"
-                    alt="HuBiT Logo"
-                    width={80}
-                    height={80}
-                    className="drop-shadow-lg"
-                    priority
-                  />
-                </div>
                 <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
                   {t("hubit")}
                 </h1>
