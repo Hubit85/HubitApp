@@ -11,7 +11,7 @@ import WhitepaperModal from "@/components/modals/WhitepaperModal";
 
 export function Header() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   // Check if user is in any dashboard/control panel
   const isDashboardPage = router.pathname.startsWith('/dashboard') || 
@@ -74,7 +74,9 @@ export function Header() {
             <Link href={isDashboardPage ? '/dashboard' : '/'} className="text-2xl font-bold text-black tracking-wide hover:text-gray-700 transition-colors duration-200">
               {t("hubit")}
             </Link>
-            <p className="text-sm text-gray-600">{t("professionalServices")}</p>
+            <p className="text-sm text-gray-600" key={language}>
+              {t("professionalServices")}
+            </p>
           </div>
         </div>
         
