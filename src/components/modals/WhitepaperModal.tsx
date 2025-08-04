@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -43,9 +42,9 @@ export default function WhitepaperModal({ children }: WhitepaperModalProps) {
               HuBiT Whitepaper
             </DialogTitle>
           </div>
-          <p className="text-blue-100 text-lg">
+          <DialogDescription className="text-blue-100 text-lg">
             Decentralized Property Management on Solana
-          </p>
+          </DialogDescription>
           <div className="flex items-center gap-2 mt-3">
             <Globe className="h-4 w-4 text-blue-200" />
             <a 
