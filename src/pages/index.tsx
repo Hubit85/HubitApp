@@ -36,15 +36,36 @@ export default function Home() {
             
             <div className="z-10 text-center space-y-8 px-4 sm:px-6 max-w-4xl">
               <div className="flex items-center justify-center gap-4">
-                <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
-                  <Image
-                    src="/HuBiT logo.png"
-                    alt="HuBiT Logo"
-                    fill
-                    className="object-contain filter brightness-0 invert"
-                    priority
-                  />
-                </div>
+                <svg 
+                  width="64" 
+                  height="64" 
+                  viewBox="0 0 100 100" 
+                  className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0"
+                  fill="white"
+                >
+                  {/* Casa principal */}
+                  <path d="M20 45 L50 20 L80 45 L80 75 L20 75 Z" fill="white" />
+                  
+                  {/* Techo triangular */}
+                  <path d="M15 45 L50 15 L85 45 L80 45 L50 20 L20 45 Z" fill="white" />
+                  
+                  {/* Puerta */}
+                  <rect x="42" y="60" width="16" height="15" fill="black" />
+                  
+                  {/* Ventanas */}
+                  <rect x="28" y="35" width="8" height="8" fill="black" />
+                  <rect x="64" y="35" width="8" height="8" fill="black" />
+                  <rect x="28" y="50" width="8" height="8" fill="black" />
+                  <rect x="64" y="50" width="8" height="8" fill="black" />
+                  
+                  {/* Dientes de llave (parte inferior) */}
+                  <rect x="25" y="75" width="4" height="6" fill="white" />
+                  <rect x="32" y="75" width="4" height="10" fill="white" />
+                  <rect x="39" y="75" width="4" height="4" fill="white" />
+                  <rect x="61" y="75" width="4" height="8" fill="white" />
+                  <rect x="68" y="75" width="4" height="5" fill="white" />
+                  <rect x="75" y="75" width="4" height="12" fill="white" />
+                </svg>
                 <h1 className="text-6xl md:text-7xl font-bold text-white drop-shadow-lg">
                   {t("hubit")}
                 </h1>
