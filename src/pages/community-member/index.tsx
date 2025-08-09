@@ -60,7 +60,11 @@ import {
   Bed,
   Bath,
   Ruler,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  ArrowUpDown,
+  ChevronDown,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 
 export default function CommunityMemberDashboard() {
@@ -69,6 +73,8 @@ export default function CommunityMemberDashboard() {
   const [selectedServiceForRating, setSelectedServiceForRating] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<"date" | "service" | "cost" | "provider" | "status">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [isEditing, setIsEditing] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [issueDescription, setIssueDescription] = useState("");
@@ -244,6 +250,7 @@ export default function CommunityMemberDashboard() {
       providerImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "maintenance",
       date: "20 Mar 2024",
+      dateForSorting: new Date("2024-03-20"),
       cost: 450.00,
       status: "completed" as const,
       rating: 5,
@@ -258,6 +265,7 @@ export default function CommunityMemberDashboard() {
       providerImage: "https://images.unsplash.com/photo-1563453392212-326f5e854473?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "cleaning",
       date: "18 Mar 2024",
+      dateForSorting: new Date("2024-03-18"),
       cost: 180.00,
       status: "completed" as const,
       rating: 4,
@@ -272,6 +280,7 @@ export default function CommunityMemberDashboard() {
       providerImage: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "gardening",
       date: "15 Mar 2024",
+      dateForSorting: new Date("2024-03-15"),
       cost: 320.00,
       status: "completed" as const,
       location: "Jardín comunitario",
@@ -284,10 +293,41 @@ export default function CommunityMemberDashboard() {
       providerImage: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
       category: "electrical",
       date: "10 Mar 2024",
+      dateForSorting: new Date("2024-03-10"),
       cost: 280.00,
       status: "pending" as const,
       location: "Pasillos comunitarios",
       duration: "2 horas"
+    },
+    {
+      id: "5",
+      serviceName: "Reparación de Fontanería",
+      providerName: "Fontanería Express",
+      providerImage: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "plumbing",
+      date: "25 Feb 2024",
+      dateForSorting: new Date("2024-02-25"),
+      cost: 195.00,
+      status: "completed" as const,
+      rating: 4,
+      comment: "Trabajo eficiente y limpio",
+      location: "Portal B - Planta baja",
+      duration: "2 horas"
+    },
+    {
+      id: "6",
+      serviceName: "Pintura de Fachada",
+      providerName: "Pintores Madrid",
+      providerImage: "https://images.unsplash.com/photo-1562259949-e8e7689d7828?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
+      category: "painting",
+      date: "12 Jan 2024",
+      dateForSorting: new Date("2024-01-12"),
+      cost: 2450.00,
+      status: "completed" as const,
+      rating: 5,
+      comment: "Excelente acabado y muy profesionales",
+      location: "Fachada principal",
+      duration: "5 días"
     }
   ];
 
@@ -377,11 +417,84 @@ export default function CommunityMemberDashboard() {
     setSelectedServiceForRating(null);
   };
 
+  // Función para ordenar los servicios
+  const sortServices = (services: any[], sortBy: string, sortOrder: string) => {
+    return [...services].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortBy) {
+        case "date":
+          aValue = a.dateForSorting;
+          bValue = b.dateForSorting;
+          break;
+        case "service":
+          aValue = a.serviceName.toLowerCase();
+          bValue = b.serviceName.toLowerCase();
+          break;
+        case "cost":
+          aValue = a.cost;
+          bValue = b.cost;
+          break;
+        case "provider":
+          aValue = a.providerName.toLowerCase();
+          bValue = b.providerName.toLowerCase();
+          break;
+        case "status":
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        default:
+          return 0;
+      }
+
+      if (sortOrder === "asc") {
+        if (aValue < bValue) return -1;
+        if (aValue > bValue) return 1;
+        return 0;
+      } else {
+        if (aValue > bValue) return -1;
+        if (aValue < bValue) return 1;
+        return 0;
+      }
+    });
+  };
+
+  const handleSort = (newSortBy: "date" | "service" | "cost" | "provider" | "status") => {
+    if (sortBy === newSortBy) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(newSortBy);
+      setSortOrder(newSortBy === "cost" || newSortBy === "date" ? "desc" : "asc");
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortBy !== field) return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
+    return sortOrder === "asc" ? 
+      <ArrowUp className="h-4 w-4 text-blue-600" /> : 
+      <ArrowDown className="h-4 w-4 text-blue-600" />;
+  };
+
+  const getSortLabel = (field: string) => {
+    const labels = {
+      date: "Fecha",
+      service: "Servicio", 
+      cost: "Coste",
+      provider: "Proveedor",
+      status: "Estado"
+    };
+    return labels[field as keyof typeof labels];
+  };
+
   const filteredCommunityServiceHistory = communityServiceHistory.filter(service => {
     const statusMatch = statusFilter === "all" || service.status === statusFilter;
     const categoryMatch = categoryFilter === "all" || service.category === categoryFilter;
     return statusMatch && categoryMatch;
   });
+
+  // Aplicar ordenamiento a los servicios filtrados
+  const sortedAndFilteredServices = sortServices(filteredCommunityServiceHistory, sortBy, sortOrder);
 
   const handleSaveProfile = () => {
     setIsEditing(false);
@@ -601,7 +714,7 @@ export default function CommunityMemberDashboard() {
         <div className="flex-1 overflow-hidden">
           <ZoomableSection className="h-full overflow-auto" enableZoom={true} maxScale={3} minScale={0.5}>
             <div className="p-6 min-h-full">
-              <h1 className="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-gray-200 pb-2">
+              <h1 className="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-gray-200 pb-1">
                 {getActiveTabTitle()}
               </h1>
               
@@ -963,7 +1076,7 @@ export default function CommunityMemberDashboard() {
 
                   {/* Property Management Modal */}
                   <Dialog open={showPropertyModal} onOpenChange={setShowPropertyModal}>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="max-w-1xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-gray-900">
                           {editingProperty ? "Editar Propiedad" : "Añadir Nueva Propiedad"}
@@ -1656,62 +1769,146 @@ export default function CommunityMemberDashboard() {
               
               {activeTab === "historial" && (
                 <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
-                  <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Filter className="h-4 w-4 text-gray-500" />
-                      <Label className="text-sm font-medium">{t("filterByStatus")}:</Label>
-                      <select 
-                        value={statusFilter} 
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="px-3 py-1 border rounded-md text-sm"
-                      >
-                        <option value="all">{t("allStatuses")}</option>
-                        <option value="completed">{t("completed")}</option>
-                        <option value="pending">{t("pending")}</option>
-                        <option value="cancelled">{t("cancelled")}</option>
-                      </select>
+                  {/* Enhanced Filters and Sorting Section */}
+                  <div className="mb-8 p-6 bg-gradient-to-r from-neutral-50 to-white border border-neutral-200/60 rounded-2xl shadow-sm">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      {/* Filters Section */}
+                      <div className="flex flex-wrap gap-4 flex-1">
+                        <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-xl border border-neutral-200/60 shadow-sm">
+                          <Filter className="h-4 w-4 text-neutral-500" />
+                          <Label className="text-sm font-medium text-neutral-700">{t("filterByStatus")}:</Label>
+                          <select 
+                            value={statusFilter} 
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-3 py-1 border-0 bg-transparent text-sm font-medium text-neutral-700 focus:ring-0 focus:outline-none cursor-pointer"
+                          >
+                            <option value="all">{t("allStatuses")}</option>
+                            <option value="completed">{t("completed")}</option>
+                            <option value="pending">{t("pending")}</option>
+                            <option value="cancelled">{t("cancelled")}</option>
+                          </select>
+                          <ChevronDown className="h-4 w-4 text-neutral-400" />
+                        </div>
+                        
+                        <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-xl border border-neutral-200/60 shadow-sm">
+                          <Label className="text-sm font-medium text-neutral-700">{t("filterByCategory")}:</Label>
+                          <select 
+                            value={categoryFilter} 
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="px-3 py-1 border-0 bg-transparent text-sm font-medium text-neutral-700 focus:ring-0 focus:outline-none cursor-pointer"
+                          >
+                            <option value="all">{t("allCategories")}</option>
+                            <option value="maintenance">{t("maintenance")}</option>
+                            <option value="cleaning">{t("cleaning")}</option>
+                            <option value="gardening">{t("gardening")}</option>
+                            <option value="electrical">{t("electrical")}</option>
+                            <option value="plumbing">Fontanería</option>
+                            <option value="painting">Pintura</option>
+                          </select>
+                          <ChevronDown className="h-4 w-4 text-neutral-400" />
+                        </div>
+                      </div>
+
+                      {/* Sorting Section */}
+                      <div className="flex flex-wrap gap-2 lg:justify-end">
+                        <div className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-xl">
+                          <span className="text-sm font-medium text-blue-700">Ordenar por:</span>
+                        </div>
+                        {["date", "service", "cost", "provider", "status"].map((field) => (
+                          <Button
+                            key={field}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSort(field as "date" | "service" | "cost" | "provider" | "status")}
+                            className={`flex items-center space-x-2 transition-all duration-200 hover:scale-105 border-neutral-200/60 ${
+                              sortBy === field 
+                                ? 'bg-blue-100 text-blue-700 border-blue-200 shadow-sm' 
+                                : 'bg-white hover:bg-neutral-50'
+                            }`}
+                          >
+                            <span className="text-sm font-medium">{getSortLabel(field)}</span>
+                            {getSortIcon(field)}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Label className="text-sm font-medium">{t("filterByCategory")}:</Label>
-                      <select 
-                        value={categoryFilter} 
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                        className="px-3 py-1 border rounded-md text-sm"
-                      >
-                        <option value="all">{t("allCategories")}</option>
-                        <option value="maintenance">{t("maintenance")}</option>
-                        <option value="cleaning">{t("cleaning")}</option>
-                        <option value="gardening">{t("gardening")}</option>
-                        <option value="electrical">{t("electrical")}</option>
-                      </select>
+
+                    {/* Results Summary */}
+                    <div className="mt-4 pt-4 border-t border-neutral-200/40">
+                      <div className="flex items-center justify-between text-sm text-neutral-600">
+                        <span>
+                          Mostrando {sortedAndFilteredServices.length} de {communityServiceHistory.length} servicios
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span>Ordenado por {getSortLabel(sortBy).toLowerCase()}</span>
+                          <span className="text-neutral-400">•</span>
+                          <span className="capitalize">{sortOrder === "asc" ? "Ascendente" : "Descendente"}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {filteredCommunityServiceHistory.length > 0 ? (
+                  {/* Services List */}
+                  {sortedAndFilteredServices.length > 0 ? (
                     <div className="space-y-4">
-                      {filteredCommunityServiceHistory.map((service) => (
-                        <ServiceHistoryCard
+                      {sortedAndFilteredServices.map((service, index) => (
+                        <div
                           key={service.id}
-                          service={service}
-                          onRate={handleRateService}
-                          onViewDetails={(id) => console.log("View community service details", id)}
-                          onRepeatService={(id) => console.log("Request community service again", id)}
-                          onContactProvider={(id) => console.log("Contact community provider", id)}
-                        />
+                          className="transform transition-all duration-300 hover:scale-[1.02]"
+                          style={{
+                            animationDelay: `${index * 0.1}s`,
+                            animation: 'fadeInUp 0.6s ease-out forwards'
+                          }}
+                        >
+                          <ServiceHistoryCard
+                            service={service}
+                            onRate={handleRateService}
+                            onViewDetails={(id) => console.log("View community service details", id)}
+                            onRepeatService={(id) => console.log("Request community service again", id)}
+                            onContactProvider={(id) => console.log("Contact community provider", id)}
+                          />
+                        </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-600 mb-2">{t("noServiceHistory")}</h3>
-                      <p className="text-gray-500 mb-4">{t("noServiceHistory")}</p>
-                      <Button 
-                        onClick={() => setActiveTab("servicios")}
-                        className="transition-all duration-200 hover:scale-105"
-                      >
-                        {t("findServices")}
-                      </Button>
+                    <div className="text-center py-16">
+                      <div className="mx-auto mb-6 p-6 bg-gradient-to-br from-neutral-100 to-neutral-50 rounded-full w-24 h-24 flex items-center justify-center shadow-lg">
+                        <Calendar className="h-12 w-12 text-neutral-400" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-neutral-700 mb-3">{t("noServiceHistory")}</h3>
+                      <p className="text-neutral-500 mb-6 max-w-md mx-auto">
+                        {statusFilter !== "all" || categoryFilter !== "all" 
+                          ? "No hay servicios que coincidan con los filtros seleccionados. Prueba a ajustar los criterios de búsqueda."
+                          : "Cuando contrates servicios para tu comunidad, aparecerán aquí con toda la información detallada."
+                        }
+                      </p>
+                      {statusFilter !== "all" || categoryFilter !== "all" ? (
+                        <div className="flex gap-3 justify-center">
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              setStatusFilter("all");
+                              setCategoryFilter("all");
+                            }}
+                            className="transition-all duration-200 hover:scale-105"
+                          >
+                            Limpiar Filtros
+                          </Button>
+                          <Button 
+                            onClick={() => setActiveTab("servicios")}
+                            className="transition-all duration-200 hover:scale-105 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                          >
+                            {t("findServices")}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button 
+                          onClick={() => setActiveTab("servicios")}
+                          className="transition-all duration-200 hover:scale-105 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        >
+                          {t("findServices")}
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
