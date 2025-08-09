@@ -478,11 +478,11 @@ export default function CommunityMemberDashboard() {
 
   const getSortLabel = (field: string) => {
     const labels = {
-      date: "Fecha",
-      service: "Servicio", 
-      cost: "Coste",
-      provider: "Proveedor",
-      status: "Estado"
+      date: t("date"),
+      service: t("service"), 
+      cost: t("cost"),
+      provider: t("provider"),
+      status: t("status")
     };
     return labels[field as keyof typeof labels];
   };
@@ -1055,7 +1055,7 @@ export default function CommunityMemberDashboard() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <div className="mx-auto mb-6 p-4 bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center">
+                      <div className="mx-auto mb-6 p-4 bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center">
                         <Building className="h-10 w-10 text-gray-600" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -1812,7 +1812,7 @@ export default function CommunityMemberDashboard() {
                       {/* Sorting Section */}
                       <div className="flex flex-wrap gap-2 lg:justify-end">
                         <div className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-xl">
-                          <span className="text-sm font-medium text-blue-700">Ordenar por:</span>
+                          <span className="text-sm font-medium text-blue-700">{t("sortBy")}:</span>
                         </div>
                         {["date", "service", "cost", "provider", "status"].map((field) => (
                           <Button
@@ -1837,12 +1837,12 @@ export default function CommunityMemberDashboard() {
                     <div className="mt-4 pt-4 border-t border-neutral-200/40">
                       <div className="flex items-center justify-between text-sm text-neutral-600">
                         <span>
-                          Mostrando {sortedAndFilteredServices.length} de {communityServiceHistory.length} servicios
+                          {t("showingServices")} {sortedAndFilteredServices.length} {t("of")} {communityServiceHistory.length} {t("services")}
                         </span>
                         <div className="flex items-center space-x-2">
-                          <span>Ordenado por {getSortLabel(sortBy).toLowerCase()}</span>
+                          <span>{t("sortedBy")} {getSortLabel(sortBy).toLowerCase()}</span>
                           <span className="text-neutral-400">•</span>
-                          <span className="capitalize">{sortOrder === "asc" ? "Ascendente" : "Descendente"}</span>
+                          <span className="capitalize">{sortOrder === "asc" ? t("ascending") : t("descending")}</span>
                         </div>
                       </div>
                     </div>
@@ -1892,7 +1892,7 @@ export default function CommunityMemberDashboard() {
                             }}
                             className="transition-all duration-200 hover:scale-105"
                           >
-                            Limpiar Filtros
+                            {t("clearFilters")}
                           </Button>
                           <Button 
                             onClick={() => setActiveTab("servicios")}
