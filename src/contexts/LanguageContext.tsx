@@ -492,7 +492,7 @@ const translations = {
     jobs: "jobs",
     properties: "Properties",
     
-    // Sorting functionality - NEW TRANSLATIONS
+    // Sorting functionality
     sortBy: "Sort By",
     sortByService: "Sort by Service",
     sortByCost: "Sort by Cost",
@@ -507,7 +507,6 @@ const translations = {
     status: "Status",
     showingServices: "Showing services",
     of: "of",
-    services: "services",
     sortedBy: "Sorted by",
     clearFilters: "Clear Filters",
   },
@@ -992,7 +991,7 @@ const translations = {
     jobs: "trabajos",
     properties: "Propiedades",
     
-    // Sorting functionality - NUEVAS TRADUCCIONES
+    // Sorting functionality
     sortBy: "Ordenar Por",
     sortByService: "Ordenar por Servicio",
     sortByCost: "Ordenar por Coste",
@@ -1007,7 +1006,6 @@ const translations = {
     status: "Estado",
     showingServices: "Mostrando servicios",
     of: "de",
-    services: "servicios",
     sortedBy: "Ordenado por",
     clearFilters: "Limpiar Filtros",
   },
