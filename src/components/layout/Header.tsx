@@ -88,9 +88,12 @@ export function Header() {
             variant="outline" 
             size="sm"
             className="bg-white text-black border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
+            asChild
           >
-            <HelpCircle className="h-4 w-4" />
-            <span>{t("help")}</span>
+            <Link href="/help">
+              <HelpCircle className="h-4 w-4" />
+              <span>{t("help")}</span>
+            </Link>
           </Button>
           
           {/* Show Whitepaper button only on home page */}
@@ -99,9 +102,12 @@ export function Header() {
               variant="outline" 
               size="sm"
               className="bg-white text-black border-black hover:bg-white/90 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
+              asChild
             >
-              <FileText className="h-4 w-4" />
-              <span>{t("whitepaper")}</span>
+              <Link href="/whitepaper">
+                <FileText className="h-4 w-4" />
+                <span>{t("whitepaper")}</span>
+              </Link>
             </Button>
           )}
           
