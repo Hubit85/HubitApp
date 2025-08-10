@@ -559,11 +559,11 @@ export default function WhitepaperPage() {
                         </div>
                       </div>
 
-                      {/* Stacked Bar Chart - Alturas corregidas para escala correcta 0-1000M */}
+                      {/* Stacked Bar Chart - CÁLCULOS CORREGIDOS para escala exacta 0-1000M */}
                       <div className="absolute inset-0 flex items-end justify-between px-8">
-                        {/* 2025 T0: 600M (Solo Pool Público) - 600/1000 * 320px = 192px */}
+                        {/* 2025 T0: 600M (Solo Pool Público) - 600M × 0.32 = 192px */}
                         <div className="flex flex-col items-center w-16">
-                          <div className="relative w-5 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '192px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '192px' }}>
                             {/* Pool Público: 600M = 192px completo */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg h-full">
                               <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">600M</div>
@@ -571,114 +571,114 @@ export default function WhitepaperPage() {
                           </div>
                         </div>
 
-                        {/* Q1 2026: 800M Total - 800/1000 * 320px = 256px */}
+                        {/* Q1 2026: 800M Total - 800M × 0.32 = 256px */}
                         <div className="flex flex-col items-center w-16">
-                          <div className="relative w-5 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '256px' }}>
-                            {/* Pool Público: 600M = 600/800 * 256px = 192px */}
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '256px' }}>
+                            {/* Pool Público: 600M × 0.32 = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            {/* Equipo: 100M = 100/800 * 256px = 32px */}
+                            {/* Equipo: 50M × 0.32 = 16px */}
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '16px' }}></div>
+                            {/* Marketing: 25M × 0.32 = 8px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '208px', height: '8px' }}></div>
+                            {/* Airdrops: 25M × 0.32 = 8px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '216px', height: '8px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">200M</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Q2 2026: 850M Total - 850M × 0.32 = 272px */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '272px' }}>
+                            {/* Pool Público: 600M × 0.32 = 192px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
+                            {/* Equipo: 75M × 0.32 = 24px */}
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '24px' }}></div>
+                            {/* Marketing: 37.5M × 0.32 = 12px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '216px', height: '12px' }}></div>
+                            {/* Airdrops: 37.5M × 0.32 = 12px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '228px', height: '12px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">250M</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Q3 2026: 900M Total - 900M × 0.32 = 288px */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '288px' }}>
+                            {/* Pool Público: 600M × 0.32 = 192px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
+                            {/* Equipo: 100M × 0.32 = 32px */}
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '32px' }}></div>
-                            {/* Marketing: 50M = 50/800 * 256px = 16px */}
+                            {/* Marketing: 50M × 0.32 = 16px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '224px', height: '16px' }}></div>
-                            {/* Airdrops: 50M = 50/800 * 256px = 16px */}
+                            {/* Airdrops: 50M × 0.32 = 16px */}
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '240px', height: '16px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">800M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">300M</div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Q2 2026: 900M Total - 900/1000 * 320px = 288px */}
+                        {/* Q4 2026: 950M Total - 950M × 0.32 = 304px */}
                         <div className="flex flex-col items-center w-16">
-                          <div className="relative w-5 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '288px' }}>
-                            {/* Pool Público: 600M = 600/900 * 288px = 192px */}
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '304px' }}>
+                            {/* Pool Público: 600M × 0.32 = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            {/* Equipo: 150M = 150/900 * 288px = 48px */}
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '48px' }}></div>
-                            {/* Marketing: 75M = 75/900 * 288px = 24px */}
-                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '240px', height: '24px' }}></div>
-                            {/* Airdrops: 75M = 75/900 * 288px = 24px */}
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '264px', height: '24px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">900M</div>
+                            {/* Equipo: 125M × 0.32 = 40px */}
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '40px' }}></div>
+                            {/* Marketing: 62.5M × 0.32 = 20px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '232px', height: '20px' }}></div>
+                            {/* Airdrops: 62.5M × 0.32 = 20px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '252px', height: '20px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">350M</div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Q3 2026: 950M Total - 950/1000 * 320px = 304px */}
+                        {/* 2027: 980M Total - 980M × 0.32 = 313.6px ≈ 314px */}
                         <div className="flex flex-col items-center w-16">
-                          <div className="relative w-5 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '304px' }}>
-                            {/* Pool Público: 600M = 600/950 * 304px = 192px */}
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '314px' }}>
+                            {/* Pool Público: 600M × 0.32 = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            {/* Equipo: 175M = 175/950 * 304px = 56px */}
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '56px' }}></div>
-                            {/* Marketing: 87.5M = 87.5/950 * 304px = 28px */}
-                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '248px', height: '28px' }}></div>
-                            {/* Airdrops: 87.5M = 87.5/950 * 304px = 28px */}
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '276px', height: '28px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">950M</div>
+                            {/* Equipo: 160M × 0.32 = 51.2px ≈ 51px */}
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '51px' }}></div>
+                            {/* Marketing: 80M × 0.32 = 25.6px ≈ 26px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '243px', height: '26px' }}></div>
+                            {/* Airdrops: 80M × 0.32 = 25.6px ≈ 26px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '269px', height: '26px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">380M</div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Q4 2026: 975M Total - 975/1000 * 320px = 312px */}
+                        {/* 2028: 995M Total - 995M × 0.32 = 318.4px ≈ 318px */}
                         <div className="flex flex-col items-center w-16">
-                          <div className="relative w-5 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '312px' }}>
-                            {/* Pool Público: 600M = 600/975 * 312px = 192px */}
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '318px' }}>
+                            {/* Pool Público: 600M × 0.32 = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            {/* Equipo: 187.5M = 187.5/975 * 312px = 60px */}
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '60px' }}></div>
-                            {/* Marketing: 93.75M = 93.75/975 * 312px = 30px */}
-                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '252px', height: '30px' }}></div>
-                            {/* Airdrops: 93.75M = 93.75/975 * 312px = 30px */}
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '282px', height: '30px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">975M</div>
+                            {/* Equipo: 185M × 0.32 = 59.2px ≈ 59px */}
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '59px' }}></div>
+                            {/* Marketing: 92.5M × 0.32 = 29.6px ≈ 30px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '251px', height: '30px' }}></div>
+                            {/* Airdrops: 92.5M × 0.32 = 29.6px ≈ 30px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '281px', height: '30px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">395M</div>
                             </div>
                           </div>
                         </div>
 
-                        {/* 2027: 990M Total - 990/1000 * 320px = 316.8px */}
+                        {/* 2029: 1000M Total - 1000M × 0.32 = 320px */}
                         <div className="flex flex-col items-center w-16">
-                          <div className="relative w-5 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '317px' }}>
-                            {/* Pool Público: 600M = 600/990 * 317px = 192px */}
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '320px' }}>
+                            {/* Pool Público: 600M × 0.32 = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            {/* Equipo: 195M = 195/990 * 317px = 62px */}
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '62px' }}></div>
-                            {/* Marketing: 97.5M = 97.5/990 * 317px = 31px */}
-                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '254px', height: '31px' }}></div>
-                            {/* Airdrops: 97.5M = 97.5/990 * 317px = 32px */}
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '285px', height: '32px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">990M</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 2028: 998M Total - 998/1000 * 320px = 319.36px */}
-                        <div className="flex flex-col items-center w-16">
-                          <div className="relative w-5 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319px' }}>
-                            {/* Pool Público: 600M = 600/998 * 319px = 192px */}
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            {/* Equipo: 199M = 199/998 * 319px = 64px */}
+                            {/* Equipo: 200M × 0.32 = 64px */}
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            {/* Marketing: 99.5M = 99.5/998 * 319px = 32px */}
+                            {/* Marketing: 100M × 0.32 = 32px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            {/* Airdrops: 99.5M = 99.5/998 * 319px = 31px */}
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '31px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">998M</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 2029: 1000M Total - 1000/1000 * 320px = 320px */}
-                        <div className="flex flex-col items-center w-16">
-                          <div className="relative w-5 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '320px' }}>
-                            {/* Pool Público: 600M = 600/1000 * 320px = 192px */}
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            {/* Equipo: 200M = 200/1000 * 320px = 64px */}
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            {/* Marketing: 100M = 100/1000 * 320px = 32px */}
-                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            {/* Airdrops: 100M = 100/1000 * 320px = 32px */}
+                            {/* Airdrops: 100M × 0.32 = 32px */}
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-rose-600 bg-white px-1 rounded shadow">1,000M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-rose-600 bg-white px-1 rounded shadow">400M</div>
                             </div>
                           </div>
                         </div>
