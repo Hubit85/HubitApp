@@ -487,61 +487,13 @@ export default function WhitepaperPage() {
                   {/* Y-Axis Title */}
                   <div className="absolute -left-4 top-1/2 transform -rotate-90 origin-center">
                     <span className="text-sm font-bold text-neutral-700">
-                      {language === "es" ? "Tokens en Circulación (Millones)" : "Circulating Tokens (Millions)"}
+                      {language === "es" ? "Tokens en Circulación" : "Circulating Tokens"}
                     </span>
                   </div>
 
                   {/* Chart Area */}
                   <div className="ml-16 mr-8">
-                    {/* Y-Axis Labels - 0 a 1000M */}
-                    <div className="absolute left-8 top-12 bottom-28 flex flex-col justify-between text-sm font-medium text-neutral-600">
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        1,000M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        900M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        800M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        700M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        600M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        500M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        400M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        300M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        200M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        100M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        0M
-                      </div>
-                    </div>
-
-                    {/* Chart Grid and Content */}
+                    {/* Chart Grid and Content - SIN ETIQUETAS DEL EJE Y */}
                     <div className="relative h-80 bg-gradient-to-t from-neutral-50/30 to-transparent overflow-x-auto">
                       {/* Grid Lines */}
                       <div className="absolute inset-0">
@@ -559,206 +511,206 @@ export default function WhitepaperPage() {
                         </div>
                       </div>
 
-                      {/* Stacked Bar Chart - 17 TRIMESTRES CON COLUMNAS GRUESAS */}
+                      {/* Stacked Bar Chart - 17 TRIMESTRES CON COLUMNAS FINAS */}
                       <div className="absolute inset-0 flex items-end justify-between gap-1 px-4" style={{ minWidth: '1200px' }}>
                         
                         {/* Q4 2025: 600M (Solo Pool Público) */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '192px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '192px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg h-full">
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">600M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">600</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q1 2026: 615M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '197px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '197px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '2px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '194px', height: '2px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '196px', height: '1px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">615M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">615</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q2 2026: 635M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '203px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '203px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '4px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '196px', height: '4px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '200px', height: '3px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">635M</div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '200px', height: '3px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">635</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q3 2026: 660M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '211px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '211px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '6px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '198px', height: '6px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '204px', height: '7px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">660M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">660</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q4 2026: 690M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '221px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '221px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '10px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '202px', height: '9px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '211px', height: '10px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">690M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">690</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q1 2027: 720M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '13px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '205px', height: '12px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '217px', height: '13px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">720M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">720</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q2 2027: 750M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '240px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '240px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '16px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '208px', height: '16px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '224px', height: '16px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">750M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">750</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q3 2027: 780M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '250px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '250px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '19px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '211px', height: '19px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '230px', height: '20px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">780M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">780</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q4 2027: 810M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '259px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '259px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '22px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '214px', height: '22px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '236px', height: '23px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">810M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">810</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q1 2028: 840M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '269px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '269px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '26px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '218px', height: '25px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '243px', height: '26px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">840M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">840</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q2 2028: 870M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '278px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '278px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '29px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '221px', height: '28px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '249px', height: '29px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">870M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">870</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q3 2028: 900M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '288px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '288px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '224px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '256px', height: '32px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">900M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">900</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q4 2028: 930M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '298px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '298px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '35px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '227px', height: '35px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '262px', height: '36px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">930M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">930</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q1 2029: 960M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '307px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '307px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '38px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '230px', height: '38px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '268px', height: '39px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">960M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">960</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q2 2029: 980M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '314px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '314px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '41px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '233px', height: '40px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '273px', height: '41px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">980M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">980</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q3 2029: 990M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '317px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '317px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '42px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '234px', height: '41px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '275px', height: '42px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">990M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">990</div>
                             </div>
                           </div>
                         </div>
 
                         {/* Q4 2029: 1000M */}
                         <div className="flex flex-col items-center">
-                          <div className="relative w-20 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '320px' }}>
+                          <div className="relative w-3 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '320px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '43px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '235px', height: '42px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '277px', height: '43px' }}>
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white px-1 rounded shadow">1,000M</div>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white px-1 rounded shadow">1,000</div>
                             </div>
                           </div>
                         </div>
