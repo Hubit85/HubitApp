@@ -47,6 +47,78 @@ const translations = {
     contact: "Contact",
     about: "About",
     whitepaper: "Whitepaper",
+
+    // Help Center Translations
+    helpCenter: "Help Center",
+    helpCenterDescription: "Find answers and get support for all your HuBiT needs",
+    searchHelp: "Search help articles...",
+    popularTopics: "Popular Topics",
+    gettingStarted: "Getting Started",
+    accountSettings: "Account & Settings",
+    paymentsAndBilling: "Payments & Billing",
+    servicesManagement: "Services Management",
+    communityFeatures: "Community Features",
+    troubleshooting: "Troubleshooting",
+    safetyAndSecurity: "Safety & Security",
+    contactSupport: "Contact Support",
+    
+    // User Role Specific Help
+    helpForCommunityMembers: "Help for Community Members",
+    helpForIndividuals: "Help for Individuals",
+    helpForServiceProviders: "Help for Service Providers",
+    helpForPropertyAdministrators: "Help for Property Administrators",
+    
+    // Community Members Help
+    communityMemberHelp: "Community Member Support",
+    howToReportIssues: "How to report community issues",
+    howToRequestServices: "How to request services",
+    howToRateServices: "How to rate and review services",
+    communityPayments: "Community payments and fees",
+    neighborCommunication: "Communicating with neighbors",
+    
+    // Individuals Help
+    individualHelp: "Individual User Support",
+    findingServices: "Finding and hiring service providers",
+    personalServiceRequests: "Managing personal service requests",
+    individualPayments: "Payment methods and billing",
+    personalAccount: "Managing your personal account",
+    
+    // Service Providers Help
+    serviceProviderHelp: "Service Provider Support",
+    createProviderProfile: "Setting up your service provider profile",
+    manageServiceOfferings: "Managing your service offerings",
+    respondToRequests: "Responding to service requests",
+    providerPayments: "Getting paid and payment processing",
+    buildReputation: "Building your reputation and ratings",
+    
+    // Property Administrators Help
+    propertyAdminHelp: "Property Administrator Support",
+    manageProperties: "Managing multiple properties",
+    coordinateServices: "Coordinating community services",
+    budgetManagement: "Budget and expense management",
+    residentCommunication: "Communicating with residents",
+    maintenanceScheduling: "Maintenance and scheduling",
+    
+    // Common Help Topics
+    hbitTokens: "HBIT Tokens and Cryptocurrency",
+    howToUseHbit: "How to use HBIT tokens",
+    walletSetup: "Setting up your crypto wallet",
+    tokenBenefits: "HBIT token benefits",
+    paymentOptions: "All payment options",
+    
+    // Contact and Support
+    stillNeedHelp: "Still need help?",
+    contactSupportTeam: "Contact our support team",
+    emailSupport: "Email Support",
+    liveChat: "Live Chat",
+    supportHours: "Monday - Friday, 9AM - 6PM",
+    
+    // FAQ Categories
+    frequentlyAsked: "Frequently Asked Questions",
+    accountQuestions: "Account Questions",
+    paymentQuestions: "Payment Questions",
+    serviceQuestions: "Service Questions",
+    technicalQuestions: "Technical Questions",
     
     // Status & Notifications
     active: "Active",
@@ -226,6 +298,78 @@ const translations = {
     contact: "Contacto",
     about: "Acerca de",
     whitepaper: "Libro Blanco",
+
+    // Help Center Translations
+    helpCenter: "Centro de Ayuda",
+    helpCenterDescription: "Encuentra respuestas y soporte para todas tus necesidades de HuBiT",
+    searchHelp: "Buscar artículos de ayuda...",
+    popularTopics: "Temas Populares",
+    gettingStarted: "Comenzando",
+    accountSettings: "Cuenta y Configuración",
+    paymentsAndBilling: "Pagos y Facturación",
+    servicesManagement: "Gestión de Servicios",
+    communityFeatures: "Características Comunitarias",
+    troubleshooting: "Solución de Problemas",
+    safetyAndSecurity: "Seguridad y Privacidad",
+    contactSupport: "Contactar Soporte",
+    
+    // User Role Specific Help
+    helpForCommunityMembers: "Ayuda para Miembros de la Comunidad",
+    helpForIndividuals: "Ayuda para Particulares",
+    helpForServiceProviders: "Ayuda para Proveedores de Servicios",
+    helpForPropertyAdministrators: "Ayuda para Administradores de Fincas",
+    
+    // Community Members Help
+    communityMemberHelp: "Soporte para Miembros de la Comunidad",
+    howToReportIssues: "Cómo reportar incidencias comunitarias",
+    howToRequestServices: "Cómo solicitar servicios",
+    howToRateServices: "Cómo calificar y valorar servicios",
+    communityPayments: "Pagos y tasas comunitarias",
+    neighborCommunication: "Comunicación con vecinos",
+    
+    // Individuals Help
+    individualHelp: "Soporte para Particulares",
+    findingServices: "Encontrar y contratar proveedores de servicios",
+    personalServiceRequests: "Gestionar solicitudes de servicios personales",
+    individualPayments: "Métodos de pago y facturación",
+    personalAccount: "Gestionar tu cuenta personal",
+    
+    // Service Providers Help
+    serviceProviderHelp: "Soporte para Proveedores de Servicios",
+    createProviderProfile: "Configurar tu perfil de proveedor de servicios",
+    manageServiceOfferings: "Gestionar tus ofertas de servicios",
+    respondToRequests: "Responder a solicitudes de servicios",
+    providerPayments: "Obtener pagos y procesar cobros",
+    buildReputation: "Construir tu reputación y calificaciones",
+    
+    // Property Administrators Help
+    propertyAdminHelp: "Soporte para Administradores de Fincas",
+    manageProperties: "Gestionar múltiples propiedades",
+    coordinateServices: "Coordinar servicios comunitarios",
+    budgetManagement: "Gestión de presupuestos y gastos",
+    residentCommunication: "Comunicarse con residentes",
+    maintenanceScheduling: "Mantenimiento y programación",
+    
+    // Common Help Topics
+    hbitTokens: "Tokens HBIT y Criptomonedas",
+    howToUseHbit: "Cómo usar tokens HBIT",
+    walletSetup: "Configurar tu billetera criptográfica",
+    tokenBenefits: "Beneficios de los tokens HBIT",
+    paymentOptions: "Todas las opciones de pago",
+    
+    // Contact and Support
+    stillNeedHelp: "¿Todavía necesitas ayuda?",
+    contactSupportTeam: "Contacta con nuestro equipo de soporte",
+    emailSupport: "Soporte por Email",
+    liveChat: "Chat en Vivo",
+    supportHours: "Lunes - Viernes, 9AM - 6PM",
+    
+    // FAQ Categories
+    frequentlyAsked: "Preguntas Frecuentes",
+    accountQuestions: "Preguntas de Cuenta",
+    paymentQuestions: "Preguntas de Pagos",
+    serviceQuestions: "Preguntas de Servicios",
+    technicalQuestions: "Preguntas Técnicas",
     
     // Status & Notifications
     active: "Activo",
@@ -365,6 +509,7 @@ const translations = {
     benefit1: "Regalos por fidelidad",
     benefit2: "Acceso a todas las funcionalidades",
     benefit3: "Publicidad de tu empresa",
+    benefit4: "Recompensas de fidelidad",
     startUsingHbit: "Comenzar a usar HBIT",
     learnMore: "Saber más"
   },
