@@ -56,14 +56,10 @@ export default function WhitepaperPage() {
           {/* Hero Section */}
           <div className="text-center space-y-8 mb-16">
             <div className="inline-flex items-center gap-4 bg-gradient-to-r from-blue-50/80 to-purple-50/80 backdrop-blur-sm px-8 py-6 rounded-3xl border border-neutral-200/60 shadow-lg shadow-neutral-900/5">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
-                <BookOpen className="h-10 w-10 text-white" />
-              </div>
-              <div className="text-left">
+              <div className="text-center">
                 <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
                   {t("whitepaper")}
                 </h1>
-                <p className="text-lg text-neutral-600 mt-1">HuBiT v8.0</p>
               </div>
             </div>
             <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
@@ -105,11 +101,11 @@ export default function WhitepaperPage() {
                   <p className="text-lg text-neutral-700 leading-relaxed">
                     {language === "es" ? (
                       <>
-                        HuBiT v8.0 representa una revolución en la gestión inmobiliaria, creando el primer ecosistema digital que funciona como un <strong>hub de servicios profesionales especializado</strong> donde la transparencia es el pilar fundamental.
+                        HuBiT representa una revolución en la gestión inmobiliaria, creando el primer ecosistema digital que funciona como un <strong>hub de servicios profesionales especializado</strong> donde la transparencia es el pilar fundamental.
                       </>
                     ) : (
                       <>
-                        HuBiT v8.0 represents a revolution in real estate management, creating the first digital ecosystem that functions as a <strong>specialized professional services hub</strong> where transparency is the fundamental pillar.
+                        HuBiT represents a revolution in real estate management, creating the first digital ecosystem that functions as a <strong>specialized professional services hub</strong> where transparency is the fundamental pillar.
                       </>
                     )}
                   </p>
@@ -653,10 +649,11 @@ export default function WhitepaperPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 
                     size="lg"
+                    onClick={() => window.open("https://x.com/HuBiTapp_", "_blank")}
                     className="flex items-center gap-3 bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 px-8 py-4 text-base shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
                   >
-                    <Users className="h-5 w-5" />
-                    {t("joinCommunity")}
+                    <Twitter className="h-5 w-5" />
+                    {language === "es" ? "Síguenos en X" : "Follow us on X"}
                   </Button>
                   <Button 
                     variant="outline"
