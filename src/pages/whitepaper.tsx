@@ -522,11 +522,11 @@ export default function WhitepaperPage() {
                       </div>
 
                       {/* Stacked Bar Chart - VESTING CORRECTO: TODOS INICIAN EN Q4 2025 */}
-                      <div className="absolute inset-0 flex items-end justify-between px-2">
+                      <div className="absolute inset-0 flex items-end justify-between px-1">
                         
                         {/* Q4 2025: 850M (600M Pool + 100M Equipo + 50M Marketing + 50M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '272px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '272px' }}>
                             {/* Pool Público: 600M = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             {/* Equipo: 100M = 32px */}
@@ -535,237 +535,237 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '224px', height: '16px' }}></div>
                             {/* Airdrops: 50M = 16px */}
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '240px', height: '16px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">850M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">850M</div>
                             </div>
                             {/* Valor siempre visible encima de la barra */}
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">850M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2025</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2025</div>
                         </div>
 
                         {/* Q1 2026: 925M (600M Pool + 150M Equipo + 75M Marketing + 75M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '296px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '296px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '48px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '240px', height: '24px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '264px', height: '24px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">925M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">925M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">925M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2026</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2026</div>
                         </div>
 
                         {/* Q2 2026: 962.5M (600M Pool + 175M Equipo + 87.5M Marketing + 87.5M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '308px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '308px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '56px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '248px', height: '28px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '276px', height: '28px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">962M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">962M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">962M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2026</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2026</div>
                         </div>
 
                         {/* Q3 2026: 981.25M (600M Pool + 187.5M Equipo + 93.75M Marketing + 93.75M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '314px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '314px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '60px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '252px', height: '30px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '282px', height: '30px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">981M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">981M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">981M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2026</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2026</div>
                         </div>
 
                         {/* Q4 2026: 990.625M (600M Pool + 193.75M Equipo + 96.875M Marketing + 96.875M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '317px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '317px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '62px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '254px', height: '31px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '285px', height: '31px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">990M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">990M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">990M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2026</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2026</div>
                         </div>
 
                         {/* Q1 2027: 995.31M (600M Pool + 196.875M Equipo + 98.44M Marketing + 98.44M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '318px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '318px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '63px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '255px', height: '31px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '286px', height: '31px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">995M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">995M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">995M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2027</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2027</div>
                         </div>
 
                         {/* Q2 2027: 997.66M (600M Pool + 198.44M Equipo + 99.22M Marketing + 99.22M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">997M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">997M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">997M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2027</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2027</div>
                         </div>
 
                         {/* Q3 2027: 998.83M (600M Pool + 199.22M Equipo + 99.61M Marketing + 99.61M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.5px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.5px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">998M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">998M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">998M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2027</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2027</div>
                         </div>
 
                         {/* Q4 2027: 999.41M (600M Pool + 199.61M Equipo + 99.805M Marketing + 99.805M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.8px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.8px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white px-2 py-1 rounded shadow-lg border">999M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">999M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2027</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2027</div>
                         </div>
 
                         {/* Q1 2028: 999.705M (600M Pool + 199.805M Equipo + 99.9025M Marketing + 99.9025M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.9px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.9px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">999M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">999M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2028</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2028</div>
                         </div>
 
                         {/* Siguientes trimestres hasta Q4 2029 aproximándose a 1000M */}
                         {/* Q2 2028: 999.85M */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.95px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.95px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">999M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">999M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2028</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2028</div>
                         </div>
 
                         {/* Q3 2028: 999.92M */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.97px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.97px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">999M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">999M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2028</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2028</div>
                         </div>
 
                         {/* Q4 2028: 999.96M */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.99px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.99px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">999M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">999M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2028</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2028</div>
                         </div>
 
                         {/* Q1 2029: 999.98M */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.99px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.99px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">999M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">999M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2029</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2029</div>
                         </div>
 
                         {/* Q2 2029: 999.99M */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.995px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.995px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">999M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">999M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2029</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2029</div>
                         </div>
 
                         {/* Q3 2029: 999.995M */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.998px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.998px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border">999M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">999M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2029</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2029</div>
                         </div>
 
                         {/* Q4 2029: 1000M (VESTING COMPLETO - 600M Pool + 200M Equipo + 100M Marketing + 100M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-4 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '320px' }}>
+                          <div className="relative w-2 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '320px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white px-2 py-1 rounded shadow-lg border">1,000M</div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white px-2 py-1 rounded shadow-lg border whitespace-nowrap">1,000M</div>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600">1,000M</div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-4 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2029</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2029</div>
                         </div>
                       </div>
                     </div>
