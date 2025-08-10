@@ -93,7 +93,7 @@ export function Header() {
                 className="bg-white text-black border-black hover:bg-white/90 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
               >
                 <FileText className="h-4 w-4" />
-                <span>Whitepaper</span>
+                <span>{t("whitepaper")}</span>
               </Button>
             </WhitepaperModal>
           )}
