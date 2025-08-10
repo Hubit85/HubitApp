@@ -1,4 +1,3 @@
-
 import React from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,12 @@ import {
   Rocket,
   Banknote,
   TrendingDown,
-  Twitter
+  Twitter,
+  Calendar,
+  Clock,
+  Unlock,
+  Activity,
+  LineChart
 } from "lucide-react";
 
 export default function WhitepaperPage() {
@@ -429,6 +433,300 @@ export default function WhitepaperPage() {
                 </div>
               </CardContent>
             </Card>
+          </section>
+
+          {/* Token Dilution Analysis Section */}
+          <section className="mb-20">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-gradient-to-br from-violet-100 to-purple-50 rounded-2xl">
+                <LineChart className="h-8 w-8 text-violet-600" />
+              </div>
+              <h2 className="text-4xl font-bold text-neutral-900">
+                {language === "es" ? "Análisis de Dilución de Tokens" : "Token Dilution Analysis"}
+              </h2>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <Card className="bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/60 hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <Activity className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                  <div className="text-2xl font-bold text-blue-600 mb-2">600M</div>
+                  <div className="text-sm text-neutral-600 font-medium">
+                    {language === "es" ? "Circulación Inicial" : "Initial Circulation"}
+                  </div>
+                  <div className="text-xs text-blue-600 mt-1">60% - {language === "es" ? "Disponible Ya" : "Available Now"}</div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60 hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <Gift className="h-8 w-8 text-emerald-600 mx-auto mb-3" />
+                  <div className="text-2xl font-bold text-emerald-600 mb-2">100M</div>
+                  <div className="text-sm text-neutral-600 font-medium">
+                    {language === "es" ? "Airdrops (1 año)" : "Airdrops (1 year)"}
+                  </div>
+                  <div className="text-xs text-emerald-600 mt-1">10% - {language === "es" ? "Desbloqueo Gradual" : "Gradual Unlock"}</div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-orange-50/60 to-amber-50/60 border-orange-200/60 hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <Megaphone className="h-8 w-8 text-orange-600 mx-auto mb-3" />
+                  <div className="text-2xl font-bold text-orange-600 mb-2">100M</div>
+                  <div className="text-sm text-neutral-600 font-medium">
+                    {language === "es" ? "Marketing (1 año)" : "Marketing (1 year)"}
+                  </div>
+                  <div className="text-xs text-orange-600 mt-1">10% - {language === "es" ? "Desbloqueo Gradual" : "Gradual Unlock"}</div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-purple-50/60 to-violet-50/60 border-purple-200/60 hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <Building className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+                  <div className="text-2xl font-bold text-purple-600 mb-2">200M</div>
+                  <div className="text-sm text-neutral-600 font-medium">
+                    {language === "es" ? "Equipo (4 años)" : "Team (4 years)"}
+                  </div>
+                  <div className="text-xs text-purple-600 mt-1">20% - {language === "es" ? "Cliff 4 años" : "4-year Cliff"}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Main Dilution Chart */}
+            <Card className="bg-gradient-to-br from-neutral-50/60 to-white border-neutral-200/60 shadow-xl mb-8">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl font-bold text-neutral-900 flex items-center gap-3">
+                  <BarChart3 className="h-7 w-7 text-neutral-700" />
+                  {language === "es" ? "Suministro Circulante Proyectado (4 Años)" : "Projected Circulating Supply (4 Years)"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Year Labels */}
+                <div className="grid grid-cols-4 gap-4 text-center text-sm font-semibold text-neutral-600 mb-4">
+                  <div>Año 1</div>
+                  <div>Año 2</div>
+                  <div>Año 3</div>
+                  <div>Año 4</div>
+                </div>
+
+                {/* Visual Chart Bars */}
+                <div className="space-y-6">
+                  {/* Liquidity Bar - Always at 60% */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-neutral-700">
+                        {language === "es" ? "Pool Público (Liquidity)" : "Public Pool (Liquidity)"}
+                      </span>
+                      <span className="text-xs text-blue-600 font-semibold">600M Tokens</span>
+                    </div>
+                    <div className="relative">
+                      <div className="w-full h-8 bg-neutral-100 rounded-xl overflow-hidden">
+                        <div className="h-full w-[60%] bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl shadow-sm"></div>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-semibold">
+                        60% - {language === "es" ? "Disponible desde el inicio" : "Available from start"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Airdrops Bar - Gradual unlock over 1 year */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-neutral-700">
+                        {language === "es" ? "Airdrops & Recompensas" : "Airdrops & Rewards"}
+                      </span>
+                      <span className="text-xs text-emerald-600 font-semibold">100M Tokens</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1 h-8">
+                      <div className="bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white text-xs font-semibold">10%</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Marketing Bar - Gradual unlock over 1 year */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-neutral-700">Marketing</span>
+                      <span className="text-xs text-orange-600 font-semibold">100M Tokens</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1 h-8">
+                      <div className="bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white text-xs font-semibold">10%</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Team Bar - Unlock starts in year 4 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-neutral-700">
+                        {language === "es" ? "Equipo" : "Team"}
+                      </span>
+                      <span className="text-xs text-purple-600 font-semibold">200M Tokens</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1 h-8">
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
+                        <span className="text-neutral-400 text-xs">0%</span>
+                      </div>
+                      <div className="bg-gradient-to-r from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white text-xs font-semibold">20%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total Supply Timeline */}
+                <div className="mt-8 pt-6 border-t border-neutral-200">
+                  <h4 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-3">
+                    <TrendingUp className="h-5 w-5 text-violet-600" />
+                    {language === "es" ? "Suministro Total en Circulación" : "Total Circulating Supply"}
+                  </h4>
+                  <div className="grid grid-cols-4 gap-4">
+                    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200/60 p-4 text-center">
+                      <div className="text-2xl font-bold text-blue-600">800M</div>
+                      <div className="text-sm text-blue-700 font-medium">Año 1</div>
+                      <div className="text-xs text-neutral-600 mt-1">80% del supply</div>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-neutral-50 to-gray-50 border-neutral-200/60 p-4 text-center">
+                      <div className="text-2xl font-bold text-neutral-600">800M</div>
+                      <div className="text-sm text-neutral-700 font-medium">Año 2</div>
+                      <div className="text-xs text-neutral-600 mt-1">80% del supply</div>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-neutral-50 to-gray-50 border-neutral-200/60 p-4 text-center">
+                      <div className="text-2xl font-bold text-neutral-600">800M</div>
+                      <div className="text-sm text-neutral-700 font-medium">Año 3</div>
+                      <div className="text-xs text-neutral-600 mt-1">80% del supply</div>
+                    </Card>
+                    <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200/60 p-4 text-center">
+                      <div className="text-2xl font-bold text-purple-600">1B</div>
+                      <div className="text-sm text-purple-700 font-medium">Año 4</div>
+                      <div className="text-xs text-neutral-600 mt-1">100% del supply</div>
+                    </Card>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Unlock Schedule Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Card className="bg-gradient-to-br from-rose-50/60 to-pink-50/60 border-rose-200/60 shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl text-rose-800">
+                    <Calendar className="h-6 w-6" />
+                    {language === "es" ? "Cronograma de Desbloqueo" : "Unlock Schedule"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                    <Clock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold text-neutral-900">
+                        {language === "es" ? "Inmediato (T0)" : "Immediate (T0)"}
+                      </div>
+                      <div className="text-sm text-neutral-600">
+                        {language === "es" ? "600M tokens disponibles para trading" : "600M tokens available for trading"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                    <Unlock className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold text-neutral-900">
+                        {language === "es" ? "Año 1: +200M tokens" : "Year 1: +200M tokens"}
+                      </div>
+                      <div className="text-sm text-neutral-600">
+                        {language === "es" ? "Airdrops y Marketing se desbloquean gradualmente" : "Airdrops and Marketing unlock gradually"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                    <Target className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold text-neutral-900">
+                        {language === "es" ? "Año 4: +200M tokens" : "Year 4: +200M tokens"}
+                      </div>
+                      <div className="text-sm text-neutral-600">
+                        {language === "es" ? "Tokens del equipo inician desbloqueo después de cliff" : "Team tokens begin unlock after cliff period"}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-amber-50/60 to-yellow-50/60 border-amber-200/60 shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl text-amber-800">
+                    <Shield className="h-6 w-6" />
+                    {language === "es" ? "Protección Contra Dilución" : "Dilution Protection"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold text-neutral-900">
+                        {language === "es" ? "80% circulando en 3 años" : "80% circulating in 3 years"}
+                      </div>
+                      <div className="text-sm text-neutral-600">
+                        {language === "es" ? "Minimiza impacto por nuevas emisiones" : "Minimizes impact from new emissions"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                    <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold text-neutral-900">
+                        {language === "es" ? "Cliff de 4 años para el equipo" : "4-year cliff for team"}
+                      </div>
+                      <div className="text-sm text-neutral-600">
+                        {language === "es" ? "Garantiza compromiso a largo plazo" : "Ensures long-term commitment"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                    <TrendingUp className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold text-neutral-900">
+                        {language === "es" ? "Desbloqueo gradual y predecible" : "Gradual and predictable unlock"}
+                      </div>
+                      <div className="text-sm text-neutral-600">
+                        {language === "es" ? "Evita shocks de supply en el mercado" : "Prevents market supply shocks"}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </section>
 
           {/* Roadmap Section */}
