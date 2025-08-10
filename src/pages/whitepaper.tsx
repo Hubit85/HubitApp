@@ -473,7 +473,7 @@ export default function WhitepaperPage() {
                     <span className="text-sm font-medium text-neutral-700">Equipo (200M)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-orange-500 rounded"></div>
+                    <div className="w-4 h-4 bg-yellow-500 rounded"></div>
                     <span className="text-sm font-medium text-neutral-700">Marketing (100M)</span>
                   </div>
                   <div className="flex items-center gap-2">
