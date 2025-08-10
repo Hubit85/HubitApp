@@ -442,665 +442,386 @@ export default function WhitepaperPage() {
                 <LineChart className="h-8 w-8 text-violet-600" />
               </div>
               <h2 className="text-4xl font-bold text-neutral-900">
-                {language === "es" ? "Análisis de Dilución de Tokens" : "Token Dilution Analysis"}
+                {language === "es" ? "Gráfica de Dilución de Tokens (Tiempo vs Oferta Circulante)" : "Token Dilution Chart (Time vs Circulating Supply)"}
               </h2>
             </div>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <Card className="bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/60 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <Activity className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-                  <div className="text-2xl font-bold text-blue-600 mb-2">600M</div>
-                  <div className="text-sm text-neutral-600 font-medium">
-                    {language === "es" ? "Circulación Inicial" : "Initial Circulation"}
-                  </div>
-                  <div className="text-xs text-blue-600 mt-1">60% - {language === "es" ? "Disponible Ya" : "Available Now"}</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <Gift className="h-8 w-8 text-emerald-600 mx-auto mb-3" />
-                  <div className="text-2xl font-bold text-emerald-600 mb-2">100M</div>
-                  <div className="text-sm text-neutral-600 font-medium">
-                    {language === "es" ? "Airdrops (1 año)" : "Airdrops (1 year)"}
-                  </div>
-                  <div className="text-xs text-emerald-600 mt-1">10% - {language === "es" ? "Desbloqueo Gradual" : "Gradual Unlock"}</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-orange-50/60 to-amber-50/60 border-orange-200/60 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <Megaphone className="h-8 w-8 text-orange-600 mx-auto mb-3" />
-                  <div className="text-2xl font-bold text-orange-600 mb-2">100M</div>
-                  <div className="text-sm text-neutral-600 font-medium">
-                    {language === "es" ? "Marketing (1 año)" : "Marketing (1 year)"}
-                  </div>
-                  <div className="text-xs text-orange-600 mt-1">10% - {language === "es" ? "Desbloqueo Gradual" : "Gradual Unlock"}</div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-purple-50/60 to-violet-50/60 border-purple-200/60 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <Building className="h-8 w-8 text-purple-600 mx-auto mb-3" />
-                  <div className="text-2xl font-bold text-purple-600 mb-2">200M</div>
-                  <div className="text-sm text-neutral-600 font-medium">
-                    {language === "es" ? "Equipo (4 años)" : "Team (4 years)"}
-                  </div>
-                  <div className="text-xs text-purple-600 mt-1">20% - {language === "es" ? "Cliff 4 años" : "4-year Cliff"}</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Main Dilution Chart */}
+            {/* Coordinate System Chart */}
             <Card className="bg-gradient-to-br from-neutral-50/60 to-white border-neutral-200/60 shadow-xl mb-8">
               <CardHeader className="pb-6">
                 <CardTitle className="text-2xl font-bold text-neutral-900 flex items-center gap-3">
-                  <BarChart3 className="h-7 w-7 text-neutral-700" />
-                  {language === "es" ? "Suministro Circulante Proyectado (4 Años)" : "Projected Circulating Supply (4 Years)"}
+                  <BarChart3 className="h-7 w-7 text-violet-600" />
+                  {language === "es" ? "Evolución de Tokens en Circulación (2025-2029)" : "Circulating Token Evolution (2025-2029)"}
                 </CardTitle>
+                <p className="text-neutral-600 mt-3">
+                  {language === "es" ? (
+                    "Gráfica de coordenadas: Tiempo (ascisas) vs Número de tokens (ordenadas)"
+                  ) : (
+                    "Coordinate chart: Time (x-axis) vs Number of tokens (y-axis)"
+                  )}
+                </p>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Year Labels */}
-                <div className="grid grid-cols-4 gap-4 text-center text-sm font-semibold text-neutral-600 mb-4">
-                  <div>Año 1</div>
-                  <div>Año 2</div>
-                  <div>Año 3</div>
-                  <div>Año 4</div>
+              <CardContent className="space-y-8">
+                {/* Main Chart Container */}
+                <div className="relative bg-white border-2 border-neutral-200/80 rounded-2xl p-8">
+                  {/* Y-Axis Title */}
+                  <div className="absolute -left-4 top-1/2 transform -rotate-90 origin-center">
+                    <span className="text-sm font-bold text-neutral-700">
+                      {language === "es" ? "Tokens en Circulación (Millones)" : "Circulating Tokens (Millions)"}
+                    </span>
+                  </div>
+
+                  {/* Chart Area */}
+                  <div className="ml-16 mr-8">
+                    {/* Y-Axis Labels */}
+                    <div className="absolute left-8 top-12 bottom-16 flex flex-col justify-between text-sm font-medium text-neutral-600">
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        1,000M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        950M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        900M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        850M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        800M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        750M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        700M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        650M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        600M
+                      </div>
+                    </div>
+
+                    {/* Chart Grid and Content */}
+                    <div className="relative h-96 bg-gradient-to-t from-neutral-50/30 to-transparent">
+                      {/* Grid Lines */}
+                      <div className="absolute inset-0">
+                        {/* Horizontal Grid Lines */}
+                        <div className="h-full flex flex-col justify-between">
+                          {Array.from({length: 9}).map((_, i) => (
+                            <div key={i} className="w-full h-px bg-neutral-200/60"></div>
+                          ))}
+                        </div>
+                        {/* Vertical Grid Lines */}
+                        <div className="absolute inset-0 flex justify-between">
+                          {Array.from({length: 17}).map((_, i) => (
+                            <div key={i} className="w-px h-full bg-neutral-200/60"></div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Chart Line and Data Points */}
+                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 384" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="chartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#3b82f6" />
+                            <stop offset="20%" stopColor="#10b981" />
+                            <stop offset="30%" stopColor="#f59e0b" />
+                            <stop offset="70%" stopColor="#8b5cf6" />
+                            <stop offset="100%" stopColor="#ec4899" />
+                          </linearGradient>
+                          <linearGradient id="chartArea" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="url(#chartGradient)" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="url(#chartGradient)" stopOpacity="0.05" />
+                          </linearGradient>
+                        </defs>
+                        
+                        {/* Area under curve */}
+                        <path
+                          d="M 0 192 L 50 192 L 100 192 L 150 192 L 200 192 L 250 96 L 300 64 L 350 48 L 400 38 L 450 38 L 500 38 L 550 38 L 600 38 L 650 38 L 700 38 L 750 32 L 800 24 L 800 384 L 0 384 Z"
+                          fill="url(#chartArea)"
+                        />
+                        
+                        {/* Main trend line */}
+                        <path
+                          d="M 0 192 L 50 192 L 100 192 L 150 192 L 200 192 L 250 96 L 300 64 L 350 48 L 400 38 L 450 38 L 500 38 L 550 38 L 600 38 L 650 38 L 700 38 L 750 32 L 800 24"
+                          stroke="url(#chartGradient)"
+                          strokeWidth="3"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="drop-shadow-sm"
+                        />
+                      </svg>
+
+                      {/* Data Points with Labels */}
+                      <div className="absolute inset-0">
+                        {/* T0 - 2025: 600M (Public Pool) */}
+                        <div className="absolute" style={{ left: '0%', bottom: '50%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-blue-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded shadow border">
+                            600M<br/>
+                            <span className="text-neutral-600 font-normal">T0 2025</span>
+                          </div>
+                        </div>
+
+                        {/* Q1 2026: 725M (600M + 25M Airdrops + 25M Marketing) */}
+                        <div className="absolute" style={{ left: '12.5%', bottom: '40%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-emerald-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded shadow border">
+                            725M<br/>
+                            <span className="text-neutral-600 font-normal">Q1 2026</span>
+                          </div>
+                        </div>
+
+                        {/* Q2 2026: 850M (+ 25M + 25M + 100M Team) */}
+                        <div className="absolute" style={{ left: '25%', bottom: '25%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-5 h-5 bg-amber-500 rounded-full shadow-lg border-2 border-white animate-pulse"></div>
+                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded shadow border">
+                            850M<br/>
+                            <span className="text-neutral-600 font-normal">Q2 2026</span>
+                          </div>
+                        </div>
+
+                        {/* Q3 2026: 925M (+ 25M + 25M + 50M Team) */}
+                        <div className="absolute" style={{ left: '31.25%', bottom: '18.75%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-orange-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded shadow border">
+                            925M<br/>
+                            <span className="text-neutral-600 font-normal">Q3 2026</span>
+                          </div>
+                        </div>
+
+                        {/* Q4 2026: 962.5M (+ 25M + 25M + 12.5M Team) */}
+                        <div className="absolute" style={{ left: '37.5%', bottom: '15%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-purple-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded shadow border">
+                            962.5M<br/>
+                            <span className="text-neutral-600 font-normal">Q4 2026</span>
+                          </div>
+                        </div>
+
+                        {/* 2027-2029: Gradual approach to 1B */}
+                        <div className="absolute" style={{ left: '62.5%', bottom: '10%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-indigo-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded shadow border">
+                            990M<br/>
+                            <span className="text-neutral-600 font-normal">2027</span>
+                          </div>
+                        </div>
+
+                        {/* 2029: 1B */}
+                        <div className="absolute" style={{ left: '100%', bottom: '6%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-5 h-5 bg-gradient-to-r from-purple-500 to-rose-500 rounded-full shadow-xl border-2 border-white animate-pulse"></div>
+                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded shadow border">
+                            1,000M<br/>
+                            <span className="text-neutral-600 font-normal">2029</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* X-Axis Labels */}
+                    <div className="flex justify-between mt-4 text-sm font-medium text-neutral-600">
+                      <span>2025</span>
+                      <span>Q1<br/>2026</span>
+                      <span>Q2<br/>2026</span>
+                      <span>Q3<br/>2026</span>
+                      <span>Q4<br/>2026</span>
+                      <span>2027</span>
+                      <span>2028</span>
+                      <span>2029</span>
+                    </div>
+
+                    {/* X-Axis Title */}
+                    <div className="text-center mt-4">
+                      <span className="text-sm font-bold text-neutral-700">
+                        {language === "es" ? "Tiempo (Trimestres)" : "Time (Quarters)"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Visual Chart Bars */}
-                <div className="space-y-6">
-                  {/* Liquidity Bar - Always at 60% */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-neutral-700">
-                        {language === "es" ? "Pool Público (Liquidity)" : "Public Pool (Liquidity)"}
-                      </span>
-                      <span className="text-xs text-blue-600 font-semibold">600M Tokens</span>
-                    </div>
-                    <div className="relative">
-                      <div className="w-full h-8 bg-neutral-100 rounded-xl overflow-hidden">
-                        <div className="h-full w-[60%] bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl shadow-sm"></div>
+                {/* Token Release Schedule Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Release Schedule */}
+                  <Card className="bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/60">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="flex items-center gap-3 text-xl text-blue-800">
+                        <Calendar className="h-6 w-6" />
+                        {language === "es" ? "Cronograma de Liberación" : "Release Schedule"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mt-1"></div>
+                          <div>
+                            <div className="font-semibold text-neutral-900">
+                              {language === "es" ? "2025: 600M tokens" : "2025: 600M tokens"}
+                            </div>
+                            <div className="text-sm text-neutral-600">
+                              {language === "es" ? "Pool público disponible inmediatamente" : "Public pool available immediately"}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                          <div className="w-3 h-3 bg-emerald-500 rounded-full mt-1"></div>
+                          <div>
+                            <div className="font-semibold text-neutral-900">
+                              {language === "es" ? "2026: +362.5M tokens" : "2026: +362.5M tokens"}
+                            </div>
+                            <div className="text-sm text-neutral-600">
+                              {language === "es" ? "Airdrops (100M) + Marketing (100M) + Equipo (162.5M)" : "Airdrops (100M) + Marketing (100M) + Team (162.5M)"}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
+                          <div className="w-3 h-3 bg-purple-500 rounded-full mt-1"></div>
+                          <div>
+                            <div className="font-semibold text-neutral-900">
+                              {language === "es" ? "2027-2029: +37.5M tokens" : "2027-2029: +37.5M tokens"}
+                            </div>
+                            <div className="text-sm text-neutral-600">
+                              {language === "es" ? "Tokens restantes del equipo gradualmente" : "Remaining team tokens gradually"}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-semibold">
-                        60% - {language === "es" ? "Disponible desde el inicio" : "Available from start"}
-                      </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
 
-                  {/* Airdrops Bar - Gradual unlock over 1 year */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-neutral-700">
-                        {language === "es" ? "Airdrops & Recompensas" : "Airdrops & Rewards"}
-                      </span>
-                      <span className="text-xs text-emerald-600 font-semibold">100M Tokens</span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-1 h-8">
-                      <div className="bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white text-xs font-semibold">10%</span>
+                  {/* Distribution Breakdown */}
+                  <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="flex items-center gap-3 text-xl text-emerald-800">
+                        <PieChart className="h-6 w-6" />
+                        {language === "es" ? "Distribución por Categoría" : "Distribution by Category"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                            <span className="font-medium text-neutral-700">Pool Público</span>
+                          </div>
+                          <span className="font-bold text-blue-600">600M (60%)</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <span className="font-medium text-neutral-700">Airdrops</span>
+                          </div>
+                          <span className="font-bold text-emerald-600">100M (10%)</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
+                            <span className="font-medium text-neutral-700">Marketing</span>
+                          </div>
+                          <span className="font-bold text-orange-600">100M (10%)</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                            <span className="font-medium text-neutral-700">Equipo</span>
+                          </div>
+                          <span className="font-bold text-purple-600">200M (20%)</span>
+                        </div>
                       </div>
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Marketing Bar - Gradual unlock over 1 year */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-neutral-700">Marketing</span>
-                      <span className="text-xs text-orange-600 font-semibold">100M Tokens</span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-1 h-8">
-                      <div className="bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white text-xs font-semibold">10%</span>
-                      </div>
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Team Bar - Unlock starts in year 4 */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-neutral-700">
-                        {language === "es" ? "Equipo" : "Team"}
-                      </span>
-                      <span className="text-xs text-purple-600 font-semibold">200M Tokens</span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-1 h-8">
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                      <div className="bg-neutral-100 rounded-lg flex items-center justify-center">
-                        <span className="text-neutral-400 text-xs">0%</span>
-                      </div>
-                      <div className="bg-gradient-to-r from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white text-xs font-semibold">20%</span>
-                      </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                {/* Total Supply Timeline */}
-                <div className="mt-8 pt-6 border-t border-neutral-200">
-                  <h4 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-3">
-                    <TrendingUp className="h-5 w-5 text-violet-600" />
-                    {language === "es" ? "Suministro Total en Circulación" : "Total Circulating Supply"}
-                  </h4>
-                  <div className="grid grid-cols-4 gap-4">
-                    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200/60 p-4 text-center">
-                      <div className="text-2xl font-bold text-blue-600">800M</div>
-                      <div className="text-sm text-blue-700 font-medium">Año 1</div>
-                      <div className="text-xs text-neutral-600 mt-1">80% del supply</div>
-                    </Card>
-                    <Card className="bg-gradient-to-br from-neutral-50 to-gray-50 border-neutral-200/60 p-4 text-center">
-                      <div className="text-2xl font-bold text-neutral-600">800M</div>
-                      <div className="text-sm text-neutral-700 font-medium">Año 2</div>
-                      <div className="text-xs text-neutral-600 mt-1">80% del supply</div>
-                    </Card>
-                    <Card className="bg-gradient-to-br from-neutral-50 to-gray-50 border-neutral-200/60 p-4 text-center">
-                      <div className="text-2xl font-bold text-neutral-600">800M</div>
-                      <div className="text-sm text-neutral-700 font-medium">Año 3</div>
-                      <div className="text-xs text-neutral-600 mt-1">80% del supply</div>
-                    </Card>
-                    <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200/60 p-4 text-center">
-                      <div className="text-2xl font-bold text-purple-600">1B</div>
-                      <div className="text-sm text-purple-700 font-medium">Año 4</div>
-                      <div className="text-xs text-neutral-600 mt-1">100% del supply</div>
-                    </Card>
-                  </div>
-                </div>
+                {/* Quarterly Breakdown Table */}
+                <Card className="bg-gradient-to-br from-amber-50/60 to-yellow-50/60 border-amber-200/60">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-3 text-xl text-amber-800">
+                      <BarChart3 className="h-6 w-6" />
+                      {language === "es" ? "Liberación Trimestral Detallada" : "Detailed Quarterly Release"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-amber-200/60">
+                            <th className="text-left py-3 font-semibold text-amber-900">
+                              {language === "es" ? "Período" : "Period"}
+                            </th>
+                            <th className="text-center py-3 font-semibold text-amber-900">Airdrops</th>
+                            <th className="text-center py-3 font-semibold text-amber-900">Marketing</th>
+                            <th className="text-center py-3 font-semibold text-amber-900">{language === "es" ? "Equipo" : "Team"}</th>
+                            <th className="text-center py-3 font-semibold text-amber-900">{language === "es" ? "Total Acum." : "Cum. Total"}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-amber-200/40">
+                          <tr>
+                            <td className="py-3 font-medium">2025 T0</td>
+                            <td className="text-center py-3">0M</td>
+                            <td className="text-center py-3">0M</td>
+                            <td className="text-center py-3">0M</td>
+                            <td className="text-center py-3 font-bold text-blue-600">600M</td>
+                          </tr>
+                          <tr>
+                            <td className="py-3 font-medium">Q1 2026</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3">100M</td>
+                            <td className="text-center py-3 font-bold text-emerald-600">750M</td>
+                          </tr>
+                          <tr>
+                            <td className="py-3 font-medium">Q2 2026</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3">50M</td>
+                            <td className="text-center py-3 font-bold text-amber-600">850M</td>
+                          </tr>
+                          <tr>
+                            <td className="py-3 font-medium">Q3 2026</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3 font-bold text-orange-600">925M</td>
+                          </tr>
+                          <tr>
+                            <td className="py-3 font-medium">Q4 2026</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3">25M</td>
+                            <td className="text-center py-3">12.5M</td>
+                            <td className="text-center py-3 font-bold text-purple-600">987.5M</td>
+                          </tr>
+                          <tr>
+                            <td className="py-3 font-medium">2027-2029</td>
+                            <td className="text-center py-3">0M</td>
+                            <td className="text-center py-3">0M</td>
+                            <td className="text-center py-3">12.5M</td>
+                            <td className="text-center py-3 font-bold text-rose-600">1,000M</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
-
-            {/* Unlock Schedule Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card className="bg-gradient-to-br from-rose-50/60 to-pink-50/60 border-rose-200/60 shadow-lg">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-xl text-rose-800">
-                    <Calendar className="h-6 w-6" />
-                    {language === "es" ? "Cronograma de Desbloqueo" : "Unlock Schedule"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                    <Clock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold text-neutral-900">
-                        {language === "es" ? "Inmediato (T0)" : "Immediate (T0)"}
-                      </div>
-                      <div className="text-sm text-neutral-600">
-                        {language === "es" ? "600M tokens disponibles para trading" : "600M tokens available for trading"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                    <Unlock className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold text-neutral-900">
-                        {language === "es" ? "Año 1: +200M tokens" : "Year 1: +200M tokens"}
-                      </div>
-                      <div className="text-sm text-neutral-600">
-                        {language === "es" ? "Airdrops y Marketing se desbloquean gradualmente" : "Airdrops and Marketing unlock gradually"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                    <Target className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold text-neutral-900">
-                        {language === "es" ? "Año 4: +200M tokens" : "Year 4: +200M tokens"}
-                      </div>
-                      <div className="text-sm text-neutral-600">
-                        {language === "es" ? "Tokens del equipo inician desbloqueo después de cliff" : "Team tokens begin unlock after cliff period"}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-amber-50/60 to-yellow-50/60 border-amber-200/60 shadow-lg">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-xl text-amber-800">
-                    <Shield className="h-6 w-6" />
-                    {language === "es" ? "Protección Contra Dilución" : "Dilution Protection"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold text-neutral-900">
-                        {language === "es" ? "80% circulando en 3 años" : "80% circulating in 3 years"}
-                      </div>
-                      <div className="text-sm text-neutral-600">
-                        {language === "es" ? "Minimiza impacto por nuevas emisiones" : "Minimizes impact from new emissions"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                    <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold text-neutral-900">
-                        {language === "es" ? "Cliff de 4 años para el equipo" : "4-year cliff for team"}
-                      </div>
-                      <div className="text-sm text-neutral-600">
-                        {language === "es" ? "Garantiza compromiso a largo plazo" : "Ensures long-term commitment"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                    <TrendingUp className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="font-semibold text-neutral-900">
-                        {language === "es" ? "Desbloqueo gradual y predecible" : "Gradual and predictable unlock"}
-                      </div>
-                      <div className="text-sm text-neutral-600">
-                        {language === "es" ? "Evita shocks de supply en el mercado" : "Prevents market supply shocks"}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          {/* Roadmap Section */}
-          <section className="mb-20">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-2xl">
-                <TrendingUp className="h-8 w-8 text-indigo-600" />
-              </div>
-              <h2 className="text-4xl font-bold text-neutral-900">
-                {t("roadmap2025")}
-              </h2>
-            </div>
-            
-            <div className="space-y-8">
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-50 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Rocket className="h-8 w-8 text-blue-600" />
-                </div>
-                <Card className="flex-1 bg-gradient-to-br from-blue-50/40 to-indigo-50/40 border-blue-200/60">
-                  <CardContent className="p-6">
-                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">
-                      {t("q3TokenLaunch")}
-                    </h3>
-                    <p className="text-neutral-600 leading-relaxed mb-4">
-                      {t("q3Description")}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{t("tokenLaunchTag")}</span>
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                        {t("demoReady")}
-                      </span>
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                        {t("ratingSystem")}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-50 rounded-2xl flex items-center justify-center shadow-lg">
-                  <CheckCircle className="h-8 w-8 text-green-600" />
-                </div>
-                <Card className="flex-1 bg-gradient-to-br from-green-50/40 to-emerald-50/40 border-green-200/60">
-                  <CardContent className="p-6">
-                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">
-                      {t("q4AppComplete")}
-                    </h3>
-                    <p className="text-neutral-600 leading-relaxed mb-4">
-                      {t("q4Description")}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                        {t("completeApp")}
-                      </span>
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                        {t("completeHub")}
-                      </span>
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                        {t("hybridPayments")}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-amber-100 to-yellow-50 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Banknote className="h-8 w-8 text-amber-600" />
-                </div>
-                <Card className="flex-1 bg-gradient-to-br from-amber-50/40 to-yellow-50/40 border-amber-200/60">
-                  <CardContent className="p-6">
-                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">
-                      {t("q1CEXListing")}
-                    </h3>
-                    <p className="text-neutral-600 leading-relaxed mb-4">
-                      {t("q1Description")}
-                    </p>
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
-                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span className="text-amber-700 font-medium text-sm">
-                          {t("topTierExchanges")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
-                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span className="text-amber-700 font-medium text-sm">
-                          {t("institutionalPlatforms")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
-                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span className="text-amber-700 font-medium text-sm">
-                          {t("regulatedMarkets")}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
-                        {t("professionalListing")}
-                      </span>
-                      <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
-                        {t("globalLiquidity")}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-100 to-violet-50 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Globe className="h-8 w-8 text-purple-600" />
-                </div>
-                <Card className="flex-1 bg-gradient-to-br from-purple-50/40 to-violet-50/40 border-purple-200/60">
-                  <CardContent className="p-6">
-                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">
-                      {t("q2GlobalExpansion")}
-                    </h3>
-                    <p className="text-neutral-600 leading-relaxed mb-4">
-                      {t("q2Description")}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                        {t("globalMarket")}
-                      </span>
-                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                        {t("multipleLanguages")}
-                      </span>
-                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">{t("partnerships")}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </section>
-
-          {/* Team Section */}
-          <section className="mb-20">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 bg-gradient-to-br from-rose-100 to-pink-50 rounded-2xl">
-                <Users className="h-8 w-8 text-rose-600" />
-              </div>
-              <h2 className="text-4xl font-bold text-neutral-900">{t("team")}</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="bg-gradient-to-br from-blue-50/40 to-indigo-50/40 border-blue-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
-                    <Users className="h-12 w-12 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">{t("foundingTeam")}</h3>
-                  <p className="text-neutral-600 leading-relaxed">
-                    {t("teamDescription")}
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-gradient-to-br from-emerald-50/40 to-green-50/40 border-emerald-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 to-green-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
-                    <Zap className="h-12 w-12 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">{t("techTeam")}</h3>
-                  <p className="text-neutral-600 leading-relaxed">
-                    {t("techDescription")}
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-gradient-to-br from-purple-50/40 to-violet-50/40 border-purple-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                <CardContent className="p-8 text-center">
-                  <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-violet-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
-                    <Building className="h-12 w-12 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">{t("advisors")}</h3>
-                  <p className="text-neutral-600 leading-relaxed">
-                    {t("advisorsDescription")}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-
-          {/* Team Vesting Schedule - Exponential Decay */}
-          <section className="mb-20">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 bg-gradient-to-br from-violet-50/60 to-purple-50 rounded-2xl">
-                <Building className="h-8 w-8 text-purple-600" />
-              </div>
-              <h2 className="text-4xl font-bold text-neutral-900">
-                {language === "es" ? "Cronograma de Vesting del Equipo (2026-2030)" : "Team Vesting Schedule (2026-2030)"}
-              </h2>
-            </div>
-            
-            <div className="space-y-8">
-              <p className="text-neutral-600 mt-2">
-                {language === "es" 
-                  ? "Sistema de dilución exponencial: cada cuatrimestre se libera la mitad de los tokens restantes" 
-                  : "Exponential dilution system: half of remaining tokens released each quarter"
-                }
-              </p>
-              
-              <div className="space-y-6">
-                <h4 className="text-lg font-semibold text-neutral-900 flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-violet-600" />
-                  {language === "es" ? "Año 2026 - Primeros Desbloqueos" : "Year 2026 - Initial Unlocks"}
-                </h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Q1 2026 */}
-                  <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200/60">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-purple-600 rounded-full"></div>
-                          <span className="font-semibold text-purple-900">
-                            {language === "es" ? "Q1 2026" : "Q1 2026"}
-                          </span>
-                        </div>
-                        <span className="text-2xl font-bold text-purple-600">100M</span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-neutral-600">{language === "es" ? "Porcentaje:" : "Percentage:"}</span>
-                          <span className="font-medium text-purple-700">50% del total</span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-3">
-                          <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full" style={{width: '50%'}}></div>
-                        </div>
-                        <p className="text-xs text-neutral-600 mt-2">
-                          {language === "es" ? "Primera liberación masiva" : "First major release"}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Q2 2026 */}
-                  <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200/60">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                          <span className="font-semibold text-indigo-900">
-                            {language === "es" ? "Abril 2026" : "April 2026"}
-                          </span>
-                        </div>
-                        <span className="text-2xl font-bold text-indigo-600">50M</span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-neutral-600">{language === "es" ? "Porcentaje:" : "Percentage:"}</span>
-                          <span className="font-medium text-indigo-700">25% del total</span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-3">
-                          <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-3 rounded-full" style={{width: '25%'}}></div>
-                        </div>
-                        <p className="text-xs text-neutral-600 mt-2">
-                          {language === "es" ? "Mitad de lo restante" : "Half of remaining"}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Q3 2026 */}
-                  <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200/60">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-emerald-600 rounded-full"></div>
-                          <span className="font-semibold text-emerald-900">
-                            {language === "es" ? "Julio 2026" : "July 2026"}
-                          </span>
-                        </div>
-                        <span className="text-2xl font-bold text-emerald-600">25M</span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-neutral-600">{language === "es" ? "Porcentaje:" : "Percentage:"}</span>
-                          <span className="font-medium text-emerald-700">12.5% del total</span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-3">
-                          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-3 rounded-full" style={{width: '12.5%'}}></div>
-                        </div>
-                        <p className="text-xs text-neutral-600 mt-2">
-                          {language === "es" ? "Patrón continúa" : "Pattern continues"}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Q4 2026 */}
-                  <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200/60">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-amber-600 rounded-full"></div>
-                          <span className="font-semibold text-amber-900">
-                            {language === "es" ? "Octubre 2026" : "October 2026"}
-                          </span>
-                        </div>
-                        <span className="text-2xl font-bold text-amber-600">12.5M</span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-neutral-600">{language === "es" ? "Porcentaje:" : "Percentage:"}</span>
-                          <span className="font-medium text-amber-700">6.25% del total</span>
-                        </div>
-                        <div className="w-full bg-neutral-200 rounded-full h-3">
-                          <div className="bg-gradient-to-r from-amber-500 to-amber-600 h-3 rounded-full" style={{width: '6.25%'}}></div>
-                        </div>
-                        <p className="text-xs text-neutral-600 mt-2">
-                          {language === "es" ? "Dilución exponencial" : "Exponential dilution"}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-
-              {/* Exponential Decay Visualization */}
-              <div className="mt-8 pt-6 border-t border-neutral-200">
-                <h4 className="text-lg font-semibold text-neutral-900 mb-6 flex items-center gap-3">
-                  <TrendingDown className="h-5 w-5 text-rose-600" />
-                  {language === "es" ? "Patrón de Dilución Exponencial (4 Años)" : "Exponential Dilution Pattern (4 Years)"}
-                </h4>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-200/60">
-                    <div className="text-3xl font-bold text-purple-600 mb-1">2026</div>
-                    <div className="text-sm text-neutral-600">187.5M tokens</div>
-                    <div className="text-xs text-purple-700 font-medium">93.75% liberado</div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-neutral-50 to-gray-50 rounded-xl border border-neutral-200/60">
-                    <div className="text-3xl font-bold text-neutral-600 mb-1">2027</div>
-                    <div className="text-sm text-neutral-600">~9.4M tokens</div>
-                    <div className="text-xs text-neutral-700 font-medium">4.7% restante</div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-neutral-50 to-gray-50 rounded-xl border border-neutral-200/60">
-                    <div className="text-3xl font-bold text-neutral-600 mb-1">2028</div>
-                    <div className="text-sm text-neutral-600">~2.3M tokens</div>
-                    <div className="text-xs text-neutral-700 font-medium">1.2% restante</div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-neutral-50 to-gray-50 rounded-xl border border-neutral-200/60">
-                    <div className="text-3xl font-bold text-neutral-600 mb-1">2029+</div>
-                    <div className="text-sm text-neutral-600">&lt;1M tokens</div>
-                    <div className="text-xs text-neutral-700 font-medium">Residual</div>
-                  </div>
-                </div>
-
-                <Card className="bg-gradient-to-r from-rose-50/50 to-orange-50/50 border-rose-200/60">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="p-2 bg-rose-100 rounded-xl">
-                        <Activity className="h-6 w-6 text-rose-600" />
-                      </div>
-                      <div>
-                        <h5 className="font-semibold text-neutral-900 mb-2">
-                          {language === "es" ? "Impacto en la Dilución" : "Dilution Impact"}
-                        </h5>
-                        <p className="text-neutral-600 leading-relaxed text-sm">
-                          {language === "es" ? (
-                            "Este modelo exponencial garantiza que el 93.75% de los tokens del equipo se liberen en el primer año (2026), con cantidades decrecientes en los años siguientes. La dilución más significativa ocurre temprano, proporcionando claridad y predictibilidad al mercado."
-                          ) : (
-                            "This exponential model ensures that 93.75% of team tokens are released in the first year (2026), with decreasing amounts in subsequent years. The most significant dilution occurs early, providing market clarity and predictability."
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
           </section>
 
           {/* Token Growth Timeline Chart - Interactive */}
