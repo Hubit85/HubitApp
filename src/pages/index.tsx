@@ -187,10 +187,10 @@ export default function Home() {
                     </p>
                     <div className="space-y-2">
                       <Button asChild className="w-full">
-                        <Link href="/property-selection?userType=community">Miembro de la Comunidad</Link>
+                        <Link href="/property-selection?userType=community">{t("communityMemberLink")}</Link>
                       </Button>
                       <Button asChild variant="outline" className="w-full">
-                        <Link href="/property-selection?userType=particular">Particular</Link>
+                        <Link href="/property-selection?userType=particular">{t("particularLink")}</Link>
                       </Button>
                     </div>
                   </CardContent>
@@ -251,15 +251,15 @@ export default function Home() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span>Tarjetas de Crédito/Débito</span>
+                        <span>{t("creditDebitCards")}</span>
                       </div>
                       <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span>Transferencias Bancarias</span>
+                        <span>{t("bankTransfers")}</span>
                       </div>
                       <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span>Efectivo</span>
+                        <span>{t("cash")}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -319,7 +319,7 @@ export default function Home() {
                     </p>
                     <div className="text-center">
                       <div className="text-sm text-green-600 font-semibold">
-                        Red Solana
+                        {t("solanaNetwork")}
                       </div>
                     </div>
                   </CardContent>
@@ -383,12 +383,12 @@ export default function Home() {
                         </div>
                       </div>
                       <CardTitle className="text-xl font-bold text-gray-900">
-                        Configura una billetera Solana
+                        {t("setupSolanaWallet")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-gray-600 text-center mb-4">
-                        Descarga e instala Phantom Wallet para gestionar tus tokens SOL y HBIT de forma segura.
+                        {t("downloadPhantomWallet")}
                       </p>
                       <div className="text-center relative w-full h-32">
                         <Image 
@@ -400,7 +400,7 @@ export default function Home() {
                         />
                       </div>
                       <div className="text-center mt-4">
-                        <span className="text-sm text-blue-600 font-medium">Haz clic para ir a Phantom →</span>
+                        <span className="text-sm text-blue-600 font-medium">{t("clickToPhantom")}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -426,12 +426,12 @@ export default function Home() {
                         </div>
                       </div>
                       <CardTitle className="text-xl font-bold text-gray-900">
-                        Adquiere SOL
+                        {t("acquireSOL")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-gray-600 text-center mb-4">
-                        Compra tokens SOL a través de exchanges o directamente en tu billetera Phantom.
+                        {t("buySOLTokens")}
                       </p>
                       <div className="text-center relative w-full h-32">
                         <Image 
@@ -443,7 +443,7 @@ export default function Home() {
                         />
                       </div>
                       <div className="text-center mt-4">
-                        <span className="text-sm text-green-600 font-medium">Haz clic para aprender a comprar SOL →</span>
+                        <span className="text-sm text-green-600 font-medium">{t("clickToLearnBuySOL")}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -469,12 +469,12 @@ export default function Home() {
                         </div>
                       </div>
                       <CardTitle className="text-xl font-bold text-gray-900">
-                        Intercambia SOL por HBIT
+                        {t("swapSOLForHBIT")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-gray-600 text-center mb-4">
-                        Utiliza un DEX como GMGN para intercambiar tus tokens SOL por HBIT de forma descentralizada.
+                        {t("useDecentralizedExchange")}
                       </p>
                       <div className="text-center relative w-full h-32">
                         <Image 
@@ -486,7 +486,7 @@ export default function Home() {
                         />
                       </div>
                       <div className="text-center mt-4">
-                        <span className="text-sm text-purple-600 font-medium">Haz clic para intercambiar →</span>
+                        <span className="text-sm text-purple-600 font-medium">{t("clickToSwap")}</span>
                       </div>
                     </CardContent>
                   </Card>

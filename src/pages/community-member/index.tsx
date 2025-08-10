@@ -172,7 +172,7 @@ export default function CommunityMemberDashboard() {
       id: 1,
       sender: "Carlos Martín",
       apartment: "2º B",
-      message: "Buenos días, ¿han visto si ya han arreglado la puerta del garaje?",
+      message: t("goodMorningQuestion"),
       timestamp: "10:30",
       isAdmin: false
     },
@@ -180,7 +180,7 @@ export default function CommunityMemberDashboard() {
       id: 2,
       sender: "Administrador",
       apartment: "Admin",
-      message: "Buenos días. Confirmamos que la puerta del garaje fue reparada ayer por la tarde. Ya está funcionando correctamente.",
+      message: t("adminConfirmation"),
       timestamp: "10:45",
       isAdmin: true
     },
@@ -188,7 +188,7 @@ export default function CommunityMemberDashboard() {
       id: 3,
       sender: "María López",
       apartment: "1º C",
-      message: "Perfecto, muchas gracias. ¿Podrían también revisar la iluminación del portal?",
+      message: t("checkLightingRequest"),
       timestamp: "11:00",
       isAdmin: false
     }
@@ -198,33 +198,33 @@ export default function CommunityMemberDashboard() {
   const communityContracts = [
     {
       id: "1",
-      title: "Contrato de Mantenimiento de Ascensores",
+      title: t("elevatorMaintenanceContract"),
       provider: "Ascensores Madrid",
       startDate: "01/01/2024",
       endDate: "31/12/2024",
       value: "€5,400/año",
       status: "active",
-      description: "Mantenimiento preventivo mensual y reparaciones de emergencia"
+      description: t("preventiveMaintenanceAndEmergencyRepairs")
     },
     {
       id: "2",
-      title: "Servicio de Limpieza",
+      title: t("cleaningService"),
       provider: "Limpiezas Comunidad",
       startDate: "15/02/2024",
       endDate: "14/02/2025",
       value: "€2,800/año",
       status: "active",
-      description: "Limpieza semanal de zonas comunes y portales"
+      description: t("weeklyCleaningCommonAreasPortals")
     },
     {
       id: "3",
-      title: "Mantenimiento de Jardines",
+      title: t("gardenMaintenance"),
       provider: "Jardines Verdes",
       startDate: "01/03/2024",
       endDate: "30/11/2024",
       value: "€1,200/temporada",
       status: "pending",
-      description: "Mantenimiento estacional de jardines y zonas verdes"
+      description: t("seasonalMaintenanceGardensGreenAreas")
     }
   ];
 
@@ -234,11 +234,11 @@ export default function CommunityMemberDashboard() {
     spent: 28500,
     remaining: 16500,
     categories: [
-      { name: "Mantenimiento", budget: 15000, spent: 12000, percentage: 80 },
-      { name: "Limpieza", budget: 8000, spent: 6500, percentage: 81 },
-      { name: "Jardinería", budget: 5000, spent: 3000, percentage: 60 },
-      { name: "Reparaciones", budget: 10000, spent: 4000, percentage: 40 },
-      { name: "Seguros", budget: 7000, spent: 3000, percentage: 43 }
+      { name: t("maintenanceCategory"), budget: 15000, spent: 12000, percentage: 80 },
+      { name: t("cleaningCategory"), budget: 8000, spent: 6500, percentage: 81 },
+      { name: t("gardeningCategory"), budget: 5000, spent: 3000, percentage: 60 },
+      { name: t("repairsCategory"), budget: 10000, spent: 4000, percentage: 40 },
+      { name: t("insuranceCategory"), budget: 7000, spent: 3000, percentage: 43 }
     ]
   };
 
@@ -310,7 +310,7 @@ export default function CommunityMemberDashboard() {
       cost: 195.00,
       status: "completed" as const,
       rating: 4,
-      comment: "Trabajo eficiente y limpio",
+      comment: t("efficientAndCleanWork"),
       location: "Portal B - Planta baja",
       duration: "2 horas"
     },
@@ -325,7 +325,7 @@ export default function CommunityMemberDashboard() {
       cost: 2450.00,
       status: "completed" as const,
       rating: 5,
-      comment: "Excelente acabado y muy profesionales",
+      comment: t("excellentFinishVeryProfessional"),
       location: "Fachada principal",
       duration: "5 días"
     }
@@ -373,13 +373,13 @@ export default function CommunityMemberDashboard() {
   const availableServices = [
     {
       id: "1",
-      name: "Mantenimiento de Ascensores",
+      name: t("elevatorMaintenance"),
       provider: "Ascensores Madrid",
       category: "maintenance",
       price: "€450-650",
       image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
       rating: 4.9,
-      availability: "Disponible"
+      availability: t("availabilityLabel")
     },
     {
       id: "2",
@@ -389,17 +389,17 @@ export default function CommunityMemberDashboard() {
       price: "€180-250",
       image: "https://images.unsplash.com/photo-1563453392212-326f5e854473?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
       rating: 4.7,
-      availability: "Disponible"
+      availability: t("availabilityLabel")
     },
     {
       id: "3",
-      name: "Jardinería",
+      name: t("gardening"),
       provider: "Jardines Verdes",
       category: "gardening",
       price: "€320-420",
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
       rating: 4.8,
-      availability: "Disponible"
+      availability: t("availabilityLabel")
     }
   ];
 
@@ -528,7 +528,7 @@ export default function CommunityMemberDashboard() {
       );
       
       if (imageFiles.length !== files.length) {
-        alert("Solo se permiten archivos de imagen");
+        alert(t("imagesOnly"));
       }
       
       setAttachedImages(prev => [...prev, ...imageFiles]);
@@ -649,7 +649,7 @@ export default function CommunityMemberDashboard() {
   };
 
   const handleDeleteProperty = (propertyId: string) => {
-    if (confirm("¿Estás seguro de que quieres eliminar esta propiedad?")) {
+    if (confirm(t("confirmDeleteProperty"))) {
       setUserProperties(prev => prev.filter(prop => prop.id !== propertyId));
     }
   };
@@ -735,7 +735,7 @@ export default function CommunityMemberDashboard() {
                       className="flex items-center space-x-2"
                     >
                       {isEditing ? <Save className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
-                      <span>{isEditing ? "Guardar" : "Editar"}</span>
+                      <span>{isEditing ? t("saveLabel") : t("editLabel")}</span>
                     </Button>
                   </div>
 
@@ -744,12 +744,12 @@ export default function CommunityMemberDashboard() {
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
                           <User className="h-5 w-5" />
-                          <span>Información Personal</span>
+                          <span>{t("personalInfo")}</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div>
-                          <Label htmlFor="name">Nombre Completo</Label>
+                          <Label htmlFor="name">{t("fullNameComplete")}</Label>
                           {isEditing ? (
                             <Input
                               id="name"
@@ -761,7 +761,7 @@ export default function CommunityMemberDashboard() {
                           )}
                         </div>
                         <div>
-                          <Label htmlFor="email">Correo Electrónico</Label>
+                          <Label htmlFor="email">{t("emailComplete")}</Label>
                           {isEditing ? (
                             <Input
                               id="email"
@@ -774,7 +774,7 @@ export default function CommunityMemberDashboard() {
                           )}
                         </div>
                         <div>
-                          <Label htmlFor="phone">Teléfono</Label>
+                          <Label htmlFor="phone">{t("phoneComplete")}</Label>
                           {isEditing ? (
                             <Input
                               id="phone"
@@ -792,12 +792,12 @@ export default function CommunityMemberDashboard() {
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
                           <Building className="h-5 w-5" />
-                          <span>Información de la Comunidad y Vivienda</span>
+                          <span>{t("communityAndHousingInfo")}</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div>
-                          <Label htmlFor="communityName">Nombre de la Comunidad</Label>
+                          <Label htmlFor="communityName">{t("communityNameComplete")}</Label>
                           {isEditing ? (
                               <Input id="communityName" value={profileData.communityName} onChange={(e) => setProfileData({ ...profileData, communityName: e.target.value })} />
                           ) : (
@@ -805,7 +805,7 @@ export default function CommunityMemberDashboard() {
                           )}
                         </div>
                         <div>
-                            <Label htmlFor="address">Dirección</Label>
+                            <Label htmlFor="address">{t("addressComplete")}</Label>
                             {isEditing ? (
                                 <Input id="address" value={profileData.address} onChange={(e) => setProfileData({ ...profileData, address: e.target.value })} />
                             ) : (
@@ -813,7 +813,7 @@ export default function CommunityMemberDashboard() {
                             )}
                         </div>
                         <div>
-                            <Label htmlFor="portalNumber">Número de Portal</Label>
+                            <Label htmlFor="portalNumber">{t("portalNumberComplete")}</Label>
                             {isEditing ? (
                                 <Input id="portalNumber" value={profileData.portalNumber} onChange={(e) => setProfileData({ ...profileData, portalNumber: e.target.value })} />
                             ) : (
@@ -821,7 +821,7 @@ export default function CommunityMemberDashboard() {
                             )}
                         </div>
                         <div>
-                            <Label htmlFor="city">Ciudad</Label>
+                            <Label htmlFor="city">{t("cityComplete")}</Label>
                             {isEditing ? (
                                 <Input id="city" value={profileData.city} onChange={(e) => setProfileData({ ...profileData, city: e.target.value })} />
                             ) : (
@@ -829,24 +829,24 @@ export default function CommunityMemberDashboard() {
                             )}
                         </div>
                         <div>
-                          <Label>Apartamento</Label>
+                          <Label>{t("apartmentComplete")}</Label>
                           <p className="text-gray-800 font-medium">{profileData.apartment}</p>
                         </div>
                         <div>
-                            <Label htmlFor="communityRole">Rol en la comunidad</Label>
+                            <Label htmlFor="communityRole">{t("communityRoleComplete")}</Label>
                             {isEditing ? (
                                 <select id="communityRole" value={profileData.communityRole} onChange={(e) => setProfileData({ ...profileData, communityRole: e.target.value })} className="w-full px-3 py-2 border rounded-md bg-white">
-                                    <option value="Propietario">Propietario</option>
-                                    <option value="Presidente">Presidente</option>
-                                    <option value="Vicepresidente">Vicepresidente</option>
-                                    <option value="Inquilino">Inquilino</option>
+                                    <option value="Propietario">{t("ownerRole")}</option>
+                                    <option value="Presidente">{t("presidentRole")}</option>
+                                    <option value="Vicepresidente">{t("vicePresidentRole")}</option>
+                                    <option value="Inquilino">{t("tenantRole")}</option>
                                 </select>
                             ) : (
                                 <p className="text-gray-800 font-medium">{profileData.communityRole}</p>
                             )}
                         </div>
                         <div>
-                          <Label>Miembro desde</Label>
+                          <Label>{t("memberSinceComplete")}</Label>
                           <p className="text-gray-800 font-medium">{profileData.memberSince}</p>
                         </div>
                       </CardContent>
@@ -920,7 +920,7 @@ export default function CommunityMemberDashboard() {
                   <div className="flex justify-between items-center">
                     <div>
                       <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("myProperties")}</h2>
-                      <p className="text-gray-600">Gestiona y organiza todas tus propiedades desde aquí</p>
+                      <p className="text-gray-600">{t("manageOrganizePropertiesDesc")}</p>
                     </div>
                     <Button 
                       onClick={handleAddProperty}
@@ -961,7 +961,7 @@ export default function CommunityMemberDashboard() {
                               {property.isCurrentlySelected && (
                                 <Badge className="bg-blue-600 text-white">
                                   <CheckCheck className="h-3 w-3 mr-1" />
-                                  Seleccionada
+                                  {t("selectedLabel")}
                                 </Badge>
                               )}
                             </div>
@@ -1029,7 +1029,7 @@ export default function CommunityMemberDashboard() {
                                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200"
                                 >
                                   <CheckCheck className="h-4 w-4 mr-1" />
-                                  Seleccionar
+                                  {t("selectBtn")}
                                 </Button>
                               )}
                               <Button 
@@ -1062,7 +1062,7 @@ export default function CommunityMemberDashboard() {
                         {t("noPropertiesFound")}
                       </h3>
                       <p className="text-gray-600 mb-6">
-                        Añade tu primera propiedad para empezar a gestionar tus servicios
+                        {t("addFirstPropertyDesc")}
                       </p>
                       <Button 
                         onClick={handleAddProperty}
@@ -1079,7 +1079,7 @@ export default function CommunityMemberDashboard() {
                     <DialogContent className="max-w-1xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold text-gray-900">
-                          {editingProperty ? "Editar Propiedad" : "Añadir Nueva Propiedad"}
+                          {editingProperty ? t("editPropertyTitle") : t("addNewPropertyTitle")}
                         </DialogTitle>
                       </DialogHeader>
                       
@@ -1087,26 +1087,26 @@ export default function CommunityMemberDashboard() {
                         <div className="space-y-4">
                           <div>
                             <Label htmlFor="property-name" className="text-sm font-medium text-gray-700">
-                              Nombre de la Propiedad *
+                              {t("propertyNameRequired2")}
                             </Label>
                             <Input
                               id="property-name"
                               value={propertyFormData.name}
                               onChange={(e) => setPropertyFormData({...propertyFormData, name: e.target.value})}
-                              placeholder="Ej. Apartamento Centro Madrid"
+                              placeholder={t("propertyNamePlaceholder")}
                               className="mt-1"
                             />
                           </div>
 
                           <div>
                             <Label htmlFor="property-address" className="text-sm font-medium text-gray-700">
-                              Dirección *
+                              {t("addressRequired")}
                             </Label>
                             <Input
                               id="property-address"
                               value={propertyFormData.address}
                               onChange={(e) => setPropertyFormData({...propertyFormData, address: e.target.value})}
-                              placeholder="Calle Mayor, 123"
+                              placeholder={t("addressPlaceholder")}
                               className="mt-1"
                             />
                           </div>
@@ -1114,25 +1114,25 @@ export default function CommunityMemberDashboard() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label htmlFor="property-city" className="text-sm font-medium text-gray-700">
-                                Ciudad *
+                                {t("cityRequired2")}
                               </Label>
                               <Input
                                 id="property-city"
                                 value={propertyFormData.city}
                                 onChange={(e) => setPropertyFormData({...propertyFormData, city: e.target.value})}
-                                placeholder="Madrid"
+                                placeholder={t("cityPlaceholder")}
                                 className="mt-1"
                               />
                             </div>
                             <div>
                               <Label htmlFor="property-postal" className="text-sm font-medium text-gray-700">
-                                Código Postal *
+                                {t("postalCodeRequired2")}
                               </Label>
                               <Input
                                 id="property-postal"
                                 value={propertyFormData.postalCode}
                                 onChange={(e) => setPropertyFormData({...propertyFormData, postalCode: e.target.value})}
-                                placeholder="28013"
+                                placeholder={t("postalCodePlaceholder")}
                                 className="mt-1"
                               />
                             </div>
@@ -1141,7 +1141,7 @@ export default function CommunityMemberDashboard() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label htmlFor="property-type" className="text-sm font-medium text-gray-700">
-                                Tipo de Propiedad *
+                                {t("propertyTypeRequired2")}
                               </Label>
                               <select
                                 id="property-type"
@@ -1158,7 +1158,7 @@ export default function CommunityMemberDashboard() {
                             </div>
                             <div>
                               <Label htmlFor="property-status" className="text-sm font-medium text-gray-700">
-                                Estado *
+                                {t("statusRequired2")}
                               </Label>
                               <select
                                 id="property-status"
@@ -1178,40 +1178,40 @@ export default function CommunityMemberDashboard() {
                           <div className="grid grid-cols-3 gap-4">
                             <div>
                               <Label htmlFor="property-size" className="text-sm font-medium text-gray-700">
-                                Tamaño (m²)
+                                {t("sizeSqm")}
                               </Label>
                               <Input
                                 id="property-size"
                                 type="number"
                                 value={propertyFormData.size || ""}
                                 onChange={(e) => setPropertyFormData({...propertyFormData, size: e.target.value ? parseInt(e.target.value) : undefined})}
-                                placeholder="85"
+                                placeholder={t("sizePlaceholder")}
                                 className="mt-1"
                               />
                             </div>
                             <div>
                               <Label htmlFor="property-bedrooms" className="text-sm font-medium text-gray-700">
-                                Dormitorios
+                                {t("bedroomsLabel")}
                               </Label>
                               <Input
                                 id="property-bedrooms"
                                 type="number"
                                 value={propertyFormData.bedrooms || ""}
                                 onChange={(e) => setPropertyFormData({...propertyFormData, bedrooms: e.target.value ? parseInt(e.target.value) : undefined})}
-                                placeholder="2"
+                                placeholder={t("bedroomsPlaceholder")}
                                 className="mt-1"
                               />
                             </div>
                             <div>
                               <Label htmlFor="property-bathrooms" className="text-sm font-medium text-gray-700">
-                                Baños
+                                {t("bathroomsLabel")}
                               </Label>
                               <Input
                                 id="property-bathrooms"
                                 type="number"
                                 value={propertyFormData.bathrooms || ""}
                                 onChange={(e) => setPropertyFormData({...propertyFormData, bathrooms: e.target.value ? parseInt(e.target.value) : undefined})}
-                                placeholder="1"
+                                placeholder={t("bathroomsPlaceholder")}
                                 className="mt-1"
                               />
                             </div>
@@ -1219,27 +1219,27 @@ export default function CommunityMemberDashboard() {
 
                           <div>
                             <Label htmlFor="property-year" className="text-sm font-medium text-gray-700">
-                              Año de Construcción
+                              {t("yearBuiltLabel")}
                             </Label>
                             <Input
                               id="property-year"
                               type="number"
                               value={propertyFormData.yearBuilt || ""}
                               onChange={(e) => setPropertyFormData({...propertyFormData, yearBuilt: e.target.value ? parseInt(e.target.value) : undefined})}
-                              placeholder="2015"
+                              placeholder={t("yearBuiltPlaceholder")}
                               className="mt-1"
                             />
                           </div>
 
                           <div>
                             <Label htmlFor="community-name" className="text-sm font-medium text-gray-700">
-                              Nombre de la Comunidad
+                              {t("communityNameLabel2")}
                             </Label>
                             <Input
                               id="community-name"
                               value={propertyFormData.communityName || ""}
                               onChange={(e) => setPropertyFormData({...propertyFormData, communityName: e.target.value})}
-                              placeholder="Residencial Los Pinos"
+                              placeholder={t("communityNamePlaceholder")}
                               className="mt-1"
                             />
                           </div>
@@ -1247,25 +1247,25 @@ export default function CommunityMemberDashboard() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label htmlFor="portal-number" className="text-sm font-medium text-gray-700">
-                                Número de Portal
+                                {t("portalNumberLabel2")}
                               </Label>
                               <Input
                                 id="portal-number"
                                 value={propertyFormData.portalNumber || ""}
                                 onChange={(e) => setPropertyFormData({...propertyFormData, portalNumber: e.target.value})}
-                                placeholder="Portal A"
+                                placeholder={t("portalNumberPlaceholder")}
                                 className="mt-1"
                               />
                             </div>
                             <div>
                               <Label htmlFor="apartment-number" className="text-sm font-medium text-gray-700">
-                                Número de Apartamento
+                                {t("apartmentNumberLabel2")}
                               </Label>
                               <Input
                                 id="apartment-number"
                                 value={propertyFormData.apartmentNumber || ""}
                                 onChange={(e) => setPropertyFormData({...propertyFormData, apartmentNumber: e.target.value})}
-                                placeholder="3º A"
+                                placeholder={t("apartmentNumberPlaceholder")}
                                 className="mt-1"
                               />
                             </div>
@@ -1273,13 +1273,13 @@ export default function CommunityMemberDashboard() {
 
                           <div>
                             <Label htmlFor="property-description" className="text-sm font-medium text-gray-700">
-                              Descripción
+                              {t("descriptionLabel")}
                             </Label>
                             <Textarea
                               id="property-description"
                               value={propertyFormData.description || ""}
                               onChange={(e) => setPropertyFormData({...propertyFormData, description: e.target.value})}
-                              placeholder="Luminoso apartamento en el centro histórico..."
+                              placeholder={t("descriptionPlaceholder")}
                               rows={3}
                               className="mt-1"
                             />
@@ -1300,7 +1300,7 @@ export default function CommunityMemberDashboard() {
                           disabled={!propertyFormData.name || !propertyFormData.address || !propertyFormData.city}
                         >
                           <Save className="h-4 w-4 mr-2" />
-                          {editingProperty ? "Actualizar Propiedad" : "Crear Propiedad"}
+                          {editingProperty ? t("updatePropertyBtn") : t("createPropertyBtn")}
                         </Button>
                       </div>
                     </DialogContent>
@@ -1311,8 +1311,8 @@ export default function CommunityMemberDashboard() {
               {activeTab === "servicios" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Servicios Disponibles</h2>
-                    <p className="text-gray-600">Proveedores recomendados para tu comunidad</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("availableServicesTitle")}</h2>
+                    <p className="text-gray-600">{t("availableServicesDesc")}</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1352,10 +1352,10 @@ export default function CommunityMemberDashboard() {
 
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" className="flex-1">
-                              Ver Detalles
+                              {t("seeDetailsBtn")}
                             </Button>
                             <Button size="sm" className="flex-1">
-                              Solicitar
+                              {t("requestBtn")}
                             </Button>
                           </div>
                         </CardContent>
@@ -1368,8 +1368,8 @@ export default function CommunityMemberDashboard() {
               {activeTab === "chat" && (
                 <div className="bg-white rounded-lg shadow-md p-6 h-full flex flex-col">
                   <div className="mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Chat Comunitario</h2>
-                    <p className="text-gray-600">Comunícate con tus vecinos y el administrador</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("communityChatlabel")}</h2>
+                    <p className="text-gray-600">{t("chatDescription")}</p>
                   </div>
 
                   <div className="flex-1 overflow-auto mb-4 border rounded-lg p-4 bg-gray-50">
@@ -1406,7 +1406,7 @@ export default function CommunityMemberDashboard() {
 
                   <div className="flex space-x-2">
                     <Input
-                      placeholder="Escribe tu mensaje..."
+                      placeholder={t("writeMessagePlaceholder")}
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -1423,25 +1423,25 @@ export default function CommunityMemberDashboard() {
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="text-center py-12">
                     <Video className="h-16 w-16 mx-auto text-blue-500 mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Videoconferencia Comunitaria</h2>
-                    <p className="text-gray-600 mb-6">Programa reuniones virtuales con el administrador y otros vecinos</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">{t("communityVideoConferenceTitle")}</h2>
+                    <p className="text-gray-600 mb-6">{t("scheduleVirtualMeetingsDesc")}</p>
                     
                     <div className="max-w-md mx-auto space-y-4">
                       <Card>
                         <CardContent className="p-4">
-                          <h3 className="font-semibold mb-2">Próxima Reunión</h3>
-                          <p className="text-sm text-gray-600 mb-2">Junta Ordinaria de Propietarios</p>
+                          <h3 className="font-semibold mb-2">{t("nextMeetingLabel")}</h3>
+                          <p className="text-sm text-gray-600 mb-2">{t("ordinaryAssemblyLabel")}</p>
                           <div className="flex items-center text-sm text-gray-500 mb-3">
                             <Calendar className="h-4 w-4 mr-1" />
-                            <span>15 de Agosto, 2024 - 19:00</span>
+                            <span>{t("meetingDate")}</span>
                           </div>
-                          <Button className="w-full">Unirse a la Reunión</Button>
+                          <Button className="w-full">{t("joinMeetingBtn")}</Button>
                         </CardContent>
                       </Card>
 
                       <Button variant="outline" className="w-full">
                         <Plus className="h-4 w-4 mr-2" />
-                        Programar Nueva Reunión
+                        {t("scheduleNewMeetingBtn")}
                       </Button>
                     </div>
                   </div>
@@ -1451,34 +1451,34 @@ export default function CommunityMemberDashboard() {
               {activeTab === "incidencias" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Reportar Incidencia</h2>
-                    <p className="text-gray-600">Informa sobre problemas en las zonas comunes</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("reportIncidentTitle")}</h2>
+                    <p className="text-gray-600">{t("reportProblemsDesc")}</p>
                   </div>
 
                   <div className="max-w-2xl mx-auto">
                     <div className="space-y-6">
                       <div>
-                        <Label htmlFor="issue-type">Tipo de Incidencia</Label>
+                        <Label htmlFor="issue-type">{t("incidentTypeLabel")}</Label>
                         <select 
                           id="issue-type"
                           value={selectedIssueType}
                           onChange={(e) => setSelectedIssueType(e.target.value)}
                           className="w-full px-3 py-2 border rounded-md"
                         >
-                          <option value="maintenance">Mantenimiento</option>
-                          <option value="cleaning">Limpieza</option>
-                          <option value="security">Seguridad</option>
+                          <option value="maintenance">{t("maintenance")}</option>
+                          <option value="cleaning">{t("cleaning")}</option>
+                          <option value="security">{t("security")}</option>
                           <option value="noise">Ruidos</option>
                           <option value="lighting">Iluminación</option>
-                          <option value="other">Otro</option>
+                          <option value="other">{t("other")}</option>
                         </select>
                       </div>
 
                       <div>
-                        <Label htmlFor="description">Descripción de la Incidencia</Label>
+                        <Label htmlFor="description">{t("incidentDescriptionLabel")}</Label>
                         <Textarea
                           id="description"
-                          placeholder="Describe detalladamente el problema..."
+                          placeholder={t("describeDetailedProblemPlaceholder")}
                           value={issueDescription}
                           onChange={(e) => setIssueDescription(e.target.value)}
                           rows={6}
@@ -1498,7 +1498,7 @@ export default function CommunityMemberDashboard() {
                       {/* Image previews */}
                       {attachedImages.length > 0 && (
                         <div>
-                          <Label>Imágenes Adjuntas ({attachedImages.length})</Label>
+                          <Label>{t("attachedImages")} ({attachedImages.length})</Label>
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
                             {attachedImages.map((file, index) => (
                               <div key={index} className="relative">
@@ -1534,7 +1534,7 @@ export default function CommunityMemberDashboard() {
                           onClick={triggerFileInput}
                         >
                           <Camera className="h-4 w-4 mr-2" />
-                          Adjuntar Foto{attachedImages.length > 0 && ` (${attachedImages.length})`}
+                          {t("attachPhotoBtn")}{attachedImages.length > 0 && ` (${attachedImages.length})`}
                         </Button>
                         <Button 
                           onClick={handleSubmitIssue}
@@ -1542,22 +1542,22 @@ export default function CommunityMemberDashboard() {
                           disabled={!issueDescription.trim()}
                         >
                           <Send className="h-4 w-4 mr-2" />
-                          Enviar Incidencia
+                          {t("sendIncidentBtn")}
                         </Button>
                       </div>
                     </div>
 
                     <div className="mt-8">
-                      <h3 className="text-lg font-semibold mb-4">Incidencias Recientes</h3>
+                      <h3 className="text-lg font-semibold mb-4">{t("recentIncidentsLabel")}</h3>
                       <div className="space-y-3">
                         <Card>
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
                               <div>
-                                <h4 className="font-medium">Puerta del garaje averiada</h4>
-                                <p className="text-sm text-gray-600">Reportado el 2 de Agosto</p>
+                                <h4 className="font-medium">{t("garageDoorBrokenText")}</h4>
+                                <p className="text-sm text-gray-600">{t("reportedAugust2Text")}</p>
                               </div>
-                              <Badge className="bg-green-100 text-green-800">Resuelto</Badge>
+                              <Badge className="bg-green-100 text-green-800">{t("solvedLabel")}</Badge>
                             </div>
                           </CardContent>
                         </Card>
@@ -1565,10 +1565,10 @@ export default function CommunityMemberDashboard() {
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
                               <div>
-                                <h4 className="font-medium">Iluminación del portal</h4>
-                                <p className="text-sm text-gray-600">Reportado el 28 de Julio</p>
+                                <h4 className="font-medium">{t("portalLightingText")}</h4>
+                                <p className="text-sm text-gray-600">{t("reportedJuly28Text")}</p>
                               </div>
-                              <Badge className="bg-yellow-100 text-yellow-800">En proceso</Badge>
+                              <Badge className="bg-yellow-100 text-yellow-800">{t("inProcessLabel")}</Badge>
                             </div>
                           </CardContent>
                         </Card>
@@ -1581,8 +1581,8 @@ export default function CommunityMemberDashboard() {
               {activeTab === "contratos" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Contratos de la Comunidad</h2>
-                    <p className="text-gray-600">Servicios contratados para el mantenimiento comunitario</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("communityContractsTitleLabel")}</h2>
+                    <p className="text-gray-600">{t("servicesContractedDesc")}</p>
                   </div>
 
                   <div className="space-y-4">
@@ -1599,7 +1599,7 @@ export default function CommunityMemberDashboard() {
                                 ? 'bg-green-100 text-green-800' 
                                 : 'bg-yellow-100 text-yellow-800'
                             }>
-                              {contract.status === 'active' ? 'Activo' : 'Pendiente'}
+                              {contract.status === 'active' ? t("activeLabel") : t("pendingLabel")}
                             </Badge>
                           </div>
 
@@ -1607,15 +1607,15 @@ export default function CommunityMemberDashboard() {
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
-                              <Label className="text-sm text-gray-500">Fecha de Inicio</Label>
+                              <Label className="text-sm text-gray-500">{t("startDateLabel")}</Label>
                               <p className="font-medium">{contract.startDate}</p>
                             </div>
                             <div>
-                              <Label className="text-sm text-gray-500">Fecha de Fin</Label>
+                              <Label className="text-sm text-gray-500">{t("endDateLabel")}</Label>
                               <p className="font-medium">{contract.endDate}</p>
                             </div>
                             <div>
-                              <Label className="text-sm text-gray-500">Valor</Label>
+                              <Label className="text-sm text-gray-500">{t("valueLabel")}</Label>
                               <p className="font-medium text-green-600">{contract.value}</p>
                             </div>
                           </div>
@@ -1623,11 +1623,11 @@ export default function CommunityMemberDashboard() {
                           <div className="flex space-x-2">
                             <Button variant="outline" size="sm">
                               <Eye className="h-4 w-4 mr-2" />
-                              Ver Contrato
+                              {t("viewContractBtn")}
                             </Button>
                             <Button variant="outline" size="sm">
                               <Download className="h-4 w-4 mr-2" />
-                              Descargar
+                              {t("downloadBtn")}
                             </Button>
                           </div>
                         </CardContent>
@@ -1640,15 +1640,15 @@ export default function CommunityMemberDashboard() {
               {activeTab === "presupuesto" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Presupuesto Comunitario 2024</h2>
-                    <p className="text-gray-600">Estado actual del presupuestoanual</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("communityBudget2024Title")}</h2>
+                    <p className="text-gray-600">{t("currentStateAnnualBudgetDesc")}</p>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <Card className="bg-blue-50">
                       <CardContent className="p-6 text-center">
                         <Euro className="h-8 w-8 mx-auto text-blue-600 mb-2" />
-                        <h3 className="text-lg font-semibold text-gray-800">Presupuesto Total</h3>
+                        <h3 className="text-lg font-semibold text-gray-800">{t("totalBudgetLabel")}</h3>
                         <p className="text-2xl font-bold text-blue-600">€{budgetData.totalBudget.toLocaleString()}</p>
                       </CardContent>
                     </Card>
@@ -1656,7 +1656,7 @@ export default function CommunityMemberDashboard() {
                     <Card className="bg-red-50">
                       <CardContent className="p-6 text-center">
                         <Activity className="h-8 w-8 mx-auto text-red-600 mb-2" />
-                        <h3 className="text-lg font-semibold text-gray-800">Gastado</h3>
+                        <h3 className="text-lg font-semibold text-gray-800">{t("spentLabel")}</h3>
                         <p className="text-2xl font-bold text-red-600">€{budgetData.spent.toLocaleString()}</p>
                       </CardContent>
                     </Card>
@@ -1664,14 +1664,14 @@ export default function CommunityMemberDashboard() {
                     <Card className="bg-green-50">
                       <CardContent className="p-6 text-center">
                         <CheckCircle className="h-8 w-8 mx-auto text-green-600 mb-2" />
-                        <h3 className="text-lg font-semibold text-gray-800">Disponible</h3>
+                        <h3 className="text-lg font-semibold text-gray-800">{t("availableLabel")}</h3>
                         <p className="text-2xl font-bold text-green-600">€{budgetData.remaining.toLocaleString()}</p>
                       </CardContent>
                     </Card>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Desglose por Categorías</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">{t("breakdownByCategoriesTitle")}</h3>
                     <div className="space-y-4">
                       {budgetData.categories.map((category, index) => (
                         <Card key={index}>
@@ -1691,7 +1691,7 @@ export default function CommunityMemberDashboard() {
                                 style={{ width: `${Math.min(category.percentage, 100)}%` }}
                               ></div>
                             </div>
-                            <p className="text-sm text-gray-600 mt-1">{category.percentage}% utilizado</p>
+                            <p className="text-sm text-gray-600 mt-1">{category.percentage}% {t("utilizedLabel")}</p>
                           </CardContent>
                         </Card>
                       ))}
@@ -1703,8 +1703,8 @@ export default function CommunityMemberDashboard() {
               {activeTab === "administrador" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Contactar Administrador</h2>
-                    <p className="text-gray-600">Comunícate directamente con la administración</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("contactAdministratorTitleLabel")}</h2>
+                    <p className="text-gray-600">{t("communicateDirectlyDesc")}</p>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -1712,29 +1712,29 @@ export default function CommunityMemberDashboard() {
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
                           <User className="h-5 w-5" />
-                          <span>Información de Contacto</span>
+                          <span>{t("contactInformationLabel")}</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center space-x-3">
                           <Mail className="h-5 w-5 text-gray-500" />
                           <div>
-                            <p className="text-sm text-gray-500">Email</p>
+                            <p className="text-sm text-gray-500">{t("emailLabel2")}</p>
                             <p className="font-medium">admin@administracionfincas.com</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
                           <Phone className="h-5 w-5 text-gray-500" />
                           <div>
-                            <p className="text-sm text-gray-500">Teléfono</p>
+                            <p className="text-sm text-gray-500">{t("phoneLabel2")}</p>
                             <p className="font-medium">+34 91 123 45 67</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
                           <Clock className="h-5 w-5 text-gray-500" />
                           <div>
-                            <p className="text-sm text-gray-500">Horario de Atención</p>
-                            <p className="font-medium">Lunes a Viernes: 9:00 - 18:00</p>
+                            <p className="text-sm text-gray-500">{t("attentionScheduleLabel")}</p>
+                            <p className="font-medium">{t("mondayToFridaySchedule")}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1742,24 +1742,24 @@ export default function CommunityMemberDashboard() {
 
                     <Card>
                       <CardHeader>
-                        <CardTitle>Enviar Mensaje</CardTitle>
+                        <CardTitle>{t("sendMessageBtn")}</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div>
-                          <Label htmlFor="subject">Asunto</Label>
-                          <Input id="subject" placeholder="Asunto del mensaje" />
+                          <Label htmlFor="subject">{t("subjectLabel")}</Label>
+                          <Input id="subject" placeholder={t("messageSubjectPlaceholder")} />
                         </div>
                         <div>
-                          <Label htmlFor="message">Mensaje</Label>
+                          <Label htmlFor="message">{t("messageLabel")}</Label>
                           <Textarea 
                             id="message" 
-                            placeholder="Escribe tu mensaje aquí..."
+                            placeholder={t("writeMessageHerePlaceholder")}
                             rows={6}
                           />
                         </div>
                         <Button className="w-full">
                           <Send className="h-4 w-4 mr-2" />
-                          Enviar Mensaje
+                          {t("sendMessageBtn")}
                         </Button>
                       </CardContent>
                     </Card>
@@ -1802,8 +1802,8 @@ export default function CommunityMemberDashboard() {
                             <option value="cleaning">{t("cleaning")}</option>
                             <option value="gardening">{t("gardening")}</option>
                             <option value="electrical">{t("electrical")}</option>
-                            <option value="plumbing">Fontanería</option>
-                            <option value="painting">Pintura</option>
+                            <option value="plumbing">{t("plumbing")}</option>
+                            <option value="painting">{t("painting")}</option>
                           </select>
                           <ChevronDown className="h-4 w-4 text-neutral-400" />
                         </div>
@@ -1998,8 +1998,8 @@ export default function CommunityMemberDashboard() {
               {activeTab === "valoraciones" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Valoraciones de Servicios</h2>
-                    <p className="text-gray-600">Tus valoraciones de los servicios comunitarios</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("serviceRatingsTitleLabel")}</h2>
+                    <p className="text-gray-600">{t("yourRatingsCommunitServicesDesc")}</p>
                   </div>
 
                   <div className="space-y-4">
@@ -2035,8 +2035,8 @@ export default function CommunityMemberDashboard() {
               {activeTab === "configuracion" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Configuración</h2>
-                    <p className="text-gray-600">Ajusta tus preferencias de la aplicación</p>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("configurationTitle")}</h2>
+                    <p className="text-gray-600">{t("adjustPreferencesDesc")}</p>
                   </div>
 
                   <div className="space-y-6">
@@ -2044,30 +2044,30 @@ export default function CommunityMemberDashboard() {
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
                           <Bell className="h-5 w-5" />
-                          <span>Notificaciones</span>
+                          <span>{t("notificationsLabel")}</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <Label className="text-base">Notificaciones de Email</Label>
-                            <p className="text-sm text-gray-500">Recibir actualizaciones por correo</p>
+                            <Label className="text-base">{t("emailNotificationsLabel")}</Label>
+                            <p className="text-sm text-gray-500">{t("emailNotificationsDesc")}</p>
                           </div>
-                          <Button variant="outline" size="sm">Activar</Button>
+                          <Button variant="outline" size="sm">{t("activateBtn")}</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
-                            <Label className="text-base">Notificaciones Push</Label>
-                            <p className="text-sm text-gray-500">Notificaciones en el navegador</p>
+                            <Label className="text-base">{t("pushNotificationsLabel")}</Label>
+                            <p className="text-sm text-gray-500">{t("pushNotificationsDesc")}</p>
                           </div>
-                          <Button variant="outline" size="sm">Activar</Button>
+                          <Button variant="outline" size="sm">{t("activateBtn")}</Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
-                            <Label className="text-base">Recordatorios de Reuniones</Label>
-                            <p className="text-sm text-gray-500">Avisos de videoconferencias</p>
+                            <Label className="text-base">{t("meetingRemindersLabel")}</Label>
+                            <p className="text-sm text-gray-500">{t("videoconferenceAlertsLabel")}</p>
                           </div>
-                          <Button variant="outline" size="sm">Activar</Button>
+                          <Button variant="outline" size="sm">{t("activateBtn")}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2076,18 +2076,18 @@ export default function CommunityMemberDashboard() {
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
                           <Shield className="h-5 w-5" />
-                          <span>Privacidad y Seguridad</span>
+                          <span>{t("privacyAndSecurityLabel")}</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <Button variant="outline" className="w-full justify-start">
-                          Cambiar Contraseña
+                          {t("changePasswordBtn")}
                         </Button>
                         <Button variant="outline" className="w-full justify-start">
-                          Configurar Autenticación en Dos Pasos
+                          {t("configureTwoFactorAuthBtn")}
                         </Button>
                         <Button variant="outline" className="w-full justify-start">
-                          Descargar Mis Datos
+                          {t("downloadMyDataBtn")}
                         </Button>
                       </CardContent>
                     </Card>
