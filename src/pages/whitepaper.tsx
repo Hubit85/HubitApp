@@ -493,15 +493,6 @@ export default function WhitepaperPage() {
 
                   {/* Chart Area - RESPONSIVE WIDTH que se ajusta al contenedor */}
                   <div className="ml-16 mr-8 pt-8">
-                    {/* Y-Axis Labels */}
-                    <div className="absolute left-0 h-80 flex flex-col justify-between py-1" style={{ top: '4rem' }}>
-                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">1000M</div>
-                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">800M</div>
-                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">600M</div>
-                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">400M</div>
-                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">200M</div>
-                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">0M</div>
-                    </div>
                     
                     {/* Chart Grid and Content */}
                     <div className="relative h-80 bg-gradient-to-t from-neutral-50/30 to-transparent">
@@ -521,20 +512,20 @@ export default function WhitepaperPage() {
                         </div>
                       </div>
 
-                      {/* Stacked Bar Chart - VESTING CORRECTO: TODOS INICIAN EN Q4 2025 */}
-                      <div className="absolute inset-0 flex items-end justify-between px-2">
+                      {/* Stacked Bar Chart - BARRAS MOVIDAS HACIA ABAJO DENTRO DEL GRID */}
+                      <div className="absolute inset-0 flex items-end justify-between px-2" style={{ paddingBottom: '32px' }}>
                         
                         {/* Q4 2025: 850M (600M Pool + 100M Equipo + 50M Marketing + 50M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '272px' }}>
-                            {/* Pool Público: 600M = 192px */}
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            {/* Equipo: 100M = 32px */}
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '32px' }}></div>
-                            {/* Marketing: 50M = 16px */}
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '224px', height: '16px' }}></div>
-                            {/* Airdrops: 50M = 16px */}
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '240px', height: '16px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '240px' }}>
+                            {/* Pool Público: 600M = 144px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            {/* Equipo: 100M = 24px */}
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '24px' }}></div>
+                            {/* Marketing: 50M = 12px */}
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '168px', height: '12px' }}></div>
+                            {/* Airdrops: 50M = 12px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '180px', height: '12px' }}>
                             </div>
                             {/* Valor siempre visible encima de la barra */}
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">850M</div>
@@ -544,11 +535,11 @@ export default function WhitepaperPage() {
 
                         {/* Q1 2026: 925M (600M Pool + 150M Equipo + 75M Marketing + 75M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '296px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '48px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '240px', height: '24px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '264px', height: '24px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '259px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '36px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '180px', height: '18px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '198px', height: '18px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">925M</div>
                           </div>
@@ -557,11 +548,11 @@ export default function WhitepaperPage() {
 
                         {/* Q2 2026: 962.5M (600M Pool + 175M Equipo + 87.5M Marketing + 87.5M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '308px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '56px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '248px', height: '28px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '276px', height: '28px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '269px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '42px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '186px', height: '21px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '207px', height: '21px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">962M</div>
                           </div>
@@ -570,11 +561,11 @@ export default function WhitepaperPage() {
 
                         {/* Q3 2026: 981.25M (600M Pool + 187.5M Equipo + 93.75M Marketing + 93.75M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '314px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '60px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '252px', height: '30px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '282px', height: '30px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '275px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '45px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '189px', height: '22px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '211px', height: '22px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">981M</div>
                           </div>
@@ -583,11 +574,11 @@ export default function WhitepaperPage() {
 
                         {/* Q4 2026: 990.625M (600M Pool + 193.75M Equipo + 96.875M Marketing + 96.875M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '317px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '62px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '254px', height: '31px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '285px', height: '31px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '278px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '46px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '190px', height: '23px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '213px', height: '23px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">990M</div>
                           </div>
@@ -596,11 +587,11 @@ export default function WhitepaperPage() {
 
                         {/* Q1 2027: 995.31M (600M Pool + 196.875M Equipo + 98.44M Marketing + 98.44M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '318px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '63px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '255px', height: '31px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '286px', height: '31px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '279px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '47px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '191px', height: '24px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '215px', height: '24px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">995M</div>
                           </div>
@@ -609,11 +600,11 @@ export default function WhitepaperPage() {
 
                         {/* Q2 2027: 997.66M (600M Pool + 198.44M Equipo + 99.22M Marketing + 99.22M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '280px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '48px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '192px', height: '24px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '216px', height: '24px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">997M</div>
                           </div>
@@ -622,11 +613,11 @@ export default function WhitepaperPage() {
 
                         {/* Q3 2027: 998.83M (600M Pool + 199.22M Equipo + 99.61M Marketing + 99.61M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.5px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '280px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '48px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '192px', height: '24px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '216px', height: '24px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">998M</div>
                           </div>
@@ -635,11 +626,11 @@ export default function WhitepaperPage() {
 
                         {/* Q4 2027: 999.41M (600M Pool + 199.61M Equipo + 99.805M Marketing + 99.805M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.8px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '281px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '48px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '192px', height: '24px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '216px', height: '24px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
@@ -648,11 +639,11 @@ export default function WhitepaperPage() {
 
                         {/* 2028: 999.9M PROMEDIO (600M Pool + 199.9M Equipo + 99.95M Marketing + 99.95M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.95px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '281px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '48px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '192px', height: '24px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '216px', height: '24px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999.9M</div>
                           </div>
@@ -661,11 +652,11 @@ export default function WhitepaperPage() {
 
                         {/* 2029: 1000M COMPLETO (600M Pool + 200M Equipo + 100M Marketing + 100M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '320px' }}>
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '282px' }}>
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '144px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '144px', height: '48px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '192px', height: '24px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '216px', height: '24px' }}>
                             </div>
                             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600">1,000M</div>
                           </div>
