@@ -138,14 +138,9 @@ export default function Home() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 text-center mb-4">
+                    <p className="text-gray-600 text-center">
                       {t("forAdministratorsText")}
                     </p>
-                    <div className="text-center">
-                      <Button asChild className="w-full">
-                        <Link href="/administrador-fincas">{t("accessAdministratorPanel")}</Link>
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
 
@@ -160,14 +155,9 @@ export default function Home() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 text-center mb-4">
+                    <p className="text-gray-600 text-center">
                       {t("forServiceCompaniesText")}
                     </p>
-                    <div className="text-center">
-                      <Button asChild className="w-full">
-                        <Link href="/service-provider">{t("accessProviderPanel")}</Link>
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
 
@@ -182,17 +172,9 @@ export default function Home() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 text-center mb-4">
+                    <p className="text-gray-600 text-center">
                       {t("forNeighborsText")}
                     </p>
-                    <div className="space-y-2">
-                      <Button asChild className="w-full">
-                        <Link href="/property-selection?userType=community">{t("communityMemberLink")}</Link>
-                      </Button>
-                      <Button asChild variant="outline" className="w-full">
-                        <Link href="/property-selection?userType=particular">{t("particularLink")}</Link>
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               </div>
