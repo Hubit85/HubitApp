@@ -746,10 +746,6 @@ const translations = {
     hubFutureDescription: "HuBiT representa la evolución natural de la gestión inmobiliaria, combinando un hub de servicios profesionales transparente con tecnología blockchain avanzada para crear un ecosistema donde la confianza, valoración de servicios y eficiencia operativa transforman la experiencia de toda la comunidad inmobiliaria.",
     joinCommunity: "Únete a la Comunidad",
     backToTop: "Volver al Inicio",
-    
-    // Actions
-    downloadWhitepaper: "Descargar PDF",
-    viewOnline: "Ver en Línea",
   },
 };
 

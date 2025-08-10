@@ -14,12 +14,9 @@ import {
   Coins,
   TrendingUp,
   CheckCircle,
-  Download,
-  Eye,
   Star,
   Target,
   Lightbulb,
-  BookOpen,
   ArrowUp,
   Gift,
   Megaphone,
@@ -65,25 +62,6 @@ export default function WhitepaperPage() {
             <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
               {t("whitepaperIntro")}
             </p>
-            
-            {/* Download and View Options */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <Button 
-                size="lg"
-                className="flex items-center gap-3 bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 px-8 py-4 text-base shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
-              >
-                <Download className="h-5 w-5" />
-                {t("downloadWhitepaper")}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="flex items-center gap-3 bg-white/80 backdrop-blur-sm hover:bg-white border-neutral-200 hover:border-neutral-300 px-8 py-4 text-base shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                <Eye className="h-5 w-5" />
-                {t("viewOnline")}
-              </Button>
-            </div>
           </div>
 
           {/* Introduction Section */}
