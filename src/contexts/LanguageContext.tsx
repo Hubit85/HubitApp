@@ -260,7 +260,73 @@ const translations = {
     benefit3: "Company advertising",
     benefit4: "Loyalty Rewards",
     startUsingHbit: "Start using HBIT",
-    learnMore: "Learn more"
+    learnMore: "Learn more",
+
+    // Whitepaper Translations
+    introduction: "Introduction",
+    whitepaperDescription: "Comprehensive technical documentation outlining HuBiT's vision, technology, and roadmap for revolutionizing community services",
+    whitepaperIntro: "HuBiT represents a paradigm shift in how neighborhood communities manage services, enabling transparent, efficient, and decentralized coordination between residents, administrators, and service providers.",
+    visionStatement: "Vision Statement",
+    visionText: "To create the world's most transparent and efficient ecosystem for community service management, powered by blockchain technology and driven by community governance.",
+    
+    // Problem & Solution
+    problemStatement: "Problem Statement",
+    lackOfTransparency: "Lack of Transparency",
+    transparencyProblem: "Current community management systems lack transparency, making it difficult for residents to understand service decisions and costs.",
+    communicationGaps: "Communication Gaps",
+    communicationProblem: "Poor communication between administrators, service providers, and residents leads to inefficiencies and misunderstandings.",
+    inefficientProcesses: "Inefficient Processes",
+    efficiencyProblem: "Manual processes and fragmented systems create delays and increase costs for all stakeholders.",
+    
+    ourSolution: "Our Solution",
+    integratedPlatform: "Integrated Platform",
+    platformDescription: "HuBiT provides a comprehensive platform that connects all stakeholders in the community service ecosystem.",
+    realTimeTracking: "Real-time service tracking",
+    automatedPayments: "Automated payment processing",
+    qualityAssurance: "Quality assurance system",
+    communityGovernance: "Community governance tools",
+    
+    // Technology
+    technologyStack: "Technology Stack",
+    blockchain: "Blockchain Infrastructure",
+    blockchainDescription: "Built on Solana for fast, low-cost transactions and smart contract functionality.",
+    webPlatform: "Web Platform",
+    webDescription: "Modern web application built with Next.js, TypeScript, and real-time capabilities.",
+    
+    // Tokenomics
+    tokenomics: "Tokenomics",
+    totalSupply: "Total Supply",
+    communityRewards: "Community Rewards",
+    development: "Development",
+    team: "Team & Advisors",
+    
+    // Roadmap
+    roadmap: "Roadmap",
+    roadmapQ1: "Platform MVP launch with basic community management features",
+    roadmapQ2: "HBIT token launch and payment integration",
+    roadmapQ3: "Advanced governance features and mobile app launch",
+    
+    // Team
+    foundingTeam: "Founding Team",
+    teamDescription: "Experienced entrepreneurs with deep expertise in PropTech and blockchain",
+    techTeam: "Technical Team",
+    techDescription: "Senior developers specializing in blockchain and web technologies",
+    advisors: "Advisors",
+    advisorsDescription: "Industry leaders from real estate, technology, and finance sectors",
+    
+    // Key Features
+    tableOfContents: "Table of Contents",
+    exploreSection: "Explore each section to learn more about HuBiT's comprehensive approach",
+    keyHighlights: "Key Highlights",
+    transparency: "Transparency",
+    transparencyDesc: "Complete visibility into all community service operations",
+    blockchainDesc: "Decentralized infrastructure ensuring security and trust",
+    community: "Community Driven",
+    communityDesc: "Governance by residents with HBIT token voting rights",
+    
+    // Actions
+    downloadWhitepaper: "Download PDF",
+    viewOnline: "View Online",
   },
   es: {
     // General & Navigation
@@ -511,7 +577,73 @@ const translations = {
     benefit3: "Publicidad de tu empresa",
     benefit4: "Recompensas de fidelidad",
     startUsingHbit: "Comenzar a usar HBIT",
-    learnMore: "Saber más"
+    learnMore: "Saber más",
+
+    // Whitepaper Translations
+    introduction: "Introducción",
+    whitepaperDescription: "Documentación técnica completa que describe la visión, tecnología y roadmap de HuBiT para revolucionar los servicios comunitarios",
+    whitepaperIntro: "HuBiT representa un cambio de paradigma en cómo las comunidades de vecinos gestionan sus servicios, permitiendo una coordinación transparente, eficiente y descentralizada entre residentes, administradores y proveedores de servicios.",
+    visionStatement: "Declaración de Visión",
+    visionText: "Crear el ecosistema de servicios comunitarios más transparente y eficiente del mundo, impulsado por tecnología blockchain y gobernado por la comunidad.",
+    
+    // Problem & Solution
+    problemStatement: "Enunciado del Problema",
+    lackOfTransparency: "Falta de Transparencia",
+    transparencyProblem: "Los sistemas actuales de gestión comunitaria carecen de transparencia, dificultando que los vecinos entiendan las decisiones y costos de los servicios.",
+    communicationGaps: "Fallas en la Comunicación",
+    communicationProblem: "La comunicación deficiente entre administradores, proveedores de servicios y vecinos genera ineficiencias y confusiones.",
+    inefficientProcesses: "Procesos Ineficientes",
+    efficiencyProblem: "Los procesos manuales y sistemas fragmentados generan retrasos y aumentan los costos para todos los involucrados.",
+    
+    ourSolution: "Nuestra Solución",
+    integratedPlatform: "Plataforma Integrada",
+    platformDescription: "HuBiT ofrece una plataforma completa que conecta a todos los participantes del ecosistema de servicios comunitarios.",
+    realTimeTracking: "Seguimiento en tiempo real de los servicios",
+    automatedPayments: "Procesamiento automático de pagos",
+    qualityAssurance: "Sistema de aseguramiento de calidad",
+    communityGovernance: "Herramientas de gobernanza comunitaria",
+    
+    // Technology
+    technologyStack: "Stack Tecnológico",
+    blockchain: "Infraestructura Blockchain",
+    blockchainDescription: "Construido en Solana para transacciones rápidas y de bajo costo con funcionalidad de smart contracts.",
+    webPlatform: "Plataforma Web",
+    webDescription: "Aplicación web moderna construida con Next.js, TypeScript y funcionalidades en tiempo real.",
+    
+    // Tokenomics
+    tokenomics: "Tokenomics",
+    totalSupply: "Suministro Total",
+    communityRewards: "Recompensas Comunitarias",
+    development: "Desarrollo",
+    team: "Equipo & Asesores",
+    
+    // Roadmap
+    roadmap: "Roadmap",
+    roadmapQ1: "Lanzamiento de la plataforma MVP con características básicas de gestión comunitaria",
+    roadmapQ2: "Lanzamiento del token HBIT y integración de pagos",
+    roadmapQ3: "Características de gobernanza avanzadas y lanzamiento de la app móvil",
+    
+    // Team
+    foundingTeam: "Equipo Fundador",
+    teamDescription: "Emprendedores experimentados con amplia experiencia en PropTech y blockchain",
+    techTeam: "Equipo Técnico",
+    techDescription: "Desarrolladores senior especializados en blockchain y tecnologías web",
+    advisors: "Asesores",
+    advisorsDescription: "Líderes del sector de inmobiliario, tecnología y finanzas",
+    
+    // Key Features
+    tableOfContents: "Tabla de Contenidos",
+    exploreSection: "Explora cada sección para conocer más sobre nuestro enfoque integral",
+    keyHighlights: "Destacados",
+    transparency: "Transparencia",
+    transparencyDesc: "Visibilidad completa en todas las operaciones de servicios comunitarios",
+    blockchainDesc: "Infraestructura descentralizada garantizando seguridad y confianza",
+    community: "Comunidad Dirigida",
+    communityDesc: "Gobierno por vecinos con derechos de votación de tokens HBIT",
+    
+    // Actions
+    downloadWhitepaper: "Descargar PDF",
+    viewOnline: "Ver en Línea",
   },
 };
 
