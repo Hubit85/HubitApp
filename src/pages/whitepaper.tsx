@@ -66,7 +66,7 @@ export default function WhitepaperPage() {
               </div>
             </div>
             <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
-              Una red social revolucionaria para la gestión inmobiliaria que combina transparencia, valoración de servicios y tecnología blockchain para transformar la experiencia de propietarios y administradores.
+              Un hub revolucionario de servicios profesionales para la gestión inmobiliaria que combina transparencia, valoración de servicios y tecnología blockchain para transformar la experiencia de propietarios y administradores.
             </p>
             
             {/* Download and View Options */}
@@ -102,7 +102,7 @@ export default function WhitepaperPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <p className="text-lg text-neutral-700 leading-relaxed">
-                    HuBiT v8.0 representa una revolución en la gestión inmobiliaria, creando el primer ecosistema digital que funciona como una <strong>red social especializada</strong> donde la transparencia es el pilar fundamental.
+                    HuBiT v8.0 representa una revolución en la gestión inmobiliaria, creando el primer ecosistema digital que funciona como un <strong>hub de servicios profesionales especializado</strong> donde la transparencia es el pilar fundamental.
                   </p>
                   <p className="text-lg text-neutral-700 leading-relaxed">
                     Nuestra plataforma permite que los propietarios e inquilinos valoren y compartan experiencias sobre servicios recibidos, generando un ambiente de confianza y mejora continua en el sector inmobiliario.
@@ -130,7 +130,7 @@ export default function WhitepaperPage() {
                     <div>
                       <h3 className="text-2xl font-semibold text-neutral-900 mb-4">Nuestra Visión</h3>
                       <p className="text-neutral-700 text-lg leading-relaxed">
-                        Crear la primera red social inmobiliaria donde la transparencia, valoración de servicios y gestión eficiente converjan en un ecosistema digital descentralizado, empoderando a propietarios, administradores y proveedores de servicios.
+                        Crear el primer hub de servicios profesionales inmobiliarios donde la transparencia, valoración de servicios y gestión eficiente converjan en un ecosistema digital descentralizado, empoderando a propietarios, administradores y proveedores de servicios.
                       </p>
                     </div>
                   </div>
@@ -206,12 +206,12 @@ export default function WhitepaperPage() {
               <CardHeader className="pb-6">
                 <CardTitle className="text-emerald-800 text-3xl flex items-center gap-3">
                   <Users className="h-8 w-8" />
-                  Red Social Inmobiliaria Transparente
+                  Hub de Servicios Profesionales Transparente
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <p className="text-emerald-700 text-lg leading-relaxed">
-                  HuBiT combina una red social especializada con herramientas de gestión inmobiliaria, permitiendo que los usuarios valoren servicios, compartan experiencias y construyan confianza a través de la transparencia y verificación blockchain.
+                  HuBiT combina un hub de servicios profesionales especializados con herramientas de gestión inmobiliaria, permitiendo que los usuarios valoren servicios, compartan experiencias y construyan confianza a través de la transparencia y verificación blockchain.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
@@ -273,7 +273,7 @@ export default function WhitepaperPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-neutral-600 leading-relaxed">
-                    Una red social donde propietarios, administradores y proveedores interactúan de forma transparente y colaborativa.
+                    Un hub de servicios profesionales donde propietarios, administradores y proveedores interactúan de forma transparente y colaborativa.
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
