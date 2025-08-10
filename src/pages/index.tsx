@@ -209,14 +209,19 @@ export default function Home() {
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
                   {t("paymentSystemTitle")}
                 </h2>
-                <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+                <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-4">
                   {t("paymentSystemIntro")}
                 </p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 max-w-4xl mx-auto">
+                  <p className="text-amber-800 font-medium text-lg">
+                    📋 <strong>Importante:</strong> Los pagos con criptomonedas son exclusivamente para suscripciones y funciones premium de la aplicación. Los servicios profesionales se pagan con métodos tradicionales (EUR) según la normativa española.
+                  </p>
+                </div>
               </div>
 
               {/* Métodos de Pago */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                {/* FIAT */}
+                {/* FIAT - Para servicios */}
                 <Card className="h-full border-2 border-blue-200 hover:border-blue-400 transition-colors">
                   <CardHeader className="text-center">
                     <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center">
@@ -225,10 +230,13 @@ export default function Home() {
                     <CardTitle className="text-2xl font-bold text-gray-900">
                       {t("fiatCurrencies")}
                     </CardTitle>
+                    <div className="text-sm font-mono bg-blue-200 text-blue-800 px-3 py-1 rounded-full inline-block mt-2">
+                      Para servicios profesionales
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      {t("fiatDescription")}
+                      Todos los servicios profesionales (limpieza, mantenimiento, reparaciones) se pagan exclusivamente en euros según la normativa española.
                     </p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
@@ -247,7 +255,7 @@ export default function Home() {
                   </CardContent>
                 </Card>
 
-                {/* Criptomonedas */}
+                {/* Criptomonedas - Solo para app */}
                 <Card className="h-full border-2 border-purple-200 hover:border-purple-400 transition-colors">
                   <CardHeader className="text-center">
                     <div className="mx-auto mb-4 p-3 bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
@@ -256,10 +264,13 @@ export default function Home() {
                     <CardTitle className="text-2xl font-bold text-gray-900">
                       {t("cryptocurrencies")}
                     </CardTitle>
+                    <div className="text-sm font-mono bg-purple-200 text-purple-800 px-3 py-1 rounded-full inline-block mt-2">
+                      Solo para usar la app
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      {t("cryptoDescription")}
+                      Las criptomonedas se utilizan únicamente para suscripciones premium, funciones avanzadas y tokens de recompensa de la plataforma.
                     </p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
@@ -282,7 +293,7 @@ export default function Home() {
                   </CardContent>
                 </Card>
 
-                {/* HBIT Token */}
+                {/* HBIT Token - Recompensas y suscripciones */}
                 <Card className="h-full border-2 border-green-200 hover:border-green-400 transition-colors bg-gradient-to-br from-green-50 to-emerald-50">
                   <CardHeader className="text-center">
                     <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
@@ -297,7 +308,7 @@ export default function Home() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      {t("hbitDescription")}
+                      Token nativo para suscripciones premium, recompensas por valoraciones y acceso a funciones exclusivas de la plataforma.
                     </p>
                     <div className="text-center">
                       <div className="text-sm text-green-600 font-semibold">
@@ -310,25 +321,36 @@ export default function Home() {
 
               {/* Tipos de Pagos Soportados */}
               <div className="bg-white rounded-lg p-8 shadow-lg mb-16">
-                <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
-                  {t("acceptedPayments")}
+                <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">
+                  Separación de Pagos por Uso
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-lg font-semibold text-blue-600 mb-2">P2P</div>
-                    <div className="text-sm text-gray-600">{t("p2pPayments")}</div>
+                <p className="text-gray-600 text-center mb-8">
+                  HuBiT mantiene una clara separación entre pagos para servicios profesionales (EUR) y funciones de la aplicación (cripto)
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-blue-50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+                      <CreditCard className="h-5 w-5 mr-2" />
+                      Servicios Profesionales (EUR)
+                    </h4>
+                    <ul className="space-y-2 text-blue-700">
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />Limpieza y mantenimiento</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />Reparaciones y obras</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />Servicios de jardinería</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />Administración de fincas</li>
+                    </ul>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-lg font-semibold text-green-600 mb-2">P2B</div>
-                    <div className="text-sm text-gray-600">{t("p2bPayments")}</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-lg font-semibold text-purple-600 mb-2">B2P</div>
-                    <div className="text-sm text-gray-600">{t("b2pPayments")}</div>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-lg font-semibold text-orange-600 mb-2">B2B</div>
-                    <div className="text-sm text-gray-600">{t("b2bPayments")}</div>
+                  <div className="bg-purple-50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-purple-800 mb-4 flex items-center">
+                      <Coins className="h-5 w-5 mr-2" />
+                      Funciones de la App (Cripto)
+                    </h4>
+                    <ul className="space-y-2 text-purple-700">
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />Suscripciones premium</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />Tokens de recompensa</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />Funciones avanzadas</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />Acceso a valoraciones premium</li>
+                    </ul>
                   </div>
                 </div>
               </div>

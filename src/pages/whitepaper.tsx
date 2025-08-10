@@ -559,7 +559,7 @@ export default function WhitepaperPage() {
               <CardContent className="p-8 text-center">
                 <h2 className="text-3xl font-bold text-neutral-900 mb-6">El Futuro de HuBiT</h2>
                 <p className="text-lg text-neutral-600 leading-relaxed max-w-3xl mx-auto mb-8">
-                  HuBiT representa la evolución natural de la gestión inmobiliaria, combinando una red social transparente con tecnología blockchain avanzada para crear un ecosistema donde la confianza, valoración de servicios y eficiencia operativa transforman la experiencia de toda la comunidad inmobiliaria.
+                  HuBiT representa la evolución natural de la gestión inmobiliaria, combinando un hub de servicios profesionales transparente con tecnología blockchain avanzada para crear un ecosistema donde la confianza, valoración de servicios y eficiencia operativa transforman la experiencia de toda la comunidad inmobiliaria.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 
