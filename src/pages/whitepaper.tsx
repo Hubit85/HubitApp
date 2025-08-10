@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 
 export default function WhitepaperPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -102,7 +102,7 @@ export default function WhitepaperPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <p className="text-lg text-neutral-700 leading-relaxed">
-                    {t("language") === "es" ? (
+                    {language === "es" ? (
                       <>
                         HuBiT v8.0 representa una revolución en la gestión inmobiliaria, creando el primer ecosistema digital que funciona como un <strong>hub de servicios profesionales especializado</strong> donde la transparencia es el pilar fundamental.
                       </>
@@ -113,7 +113,7 @@ export default function WhitepaperPage() {
                     )}
                   </p>
                   <p className="text-lg text-neutral-700 leading-relaxed">
-                    {t("language") === "es" ? (
+                    {language === "es" ? (
                       "Nuestra plataforma permite que los propietarios e inquilinos valoren y compartan experiencias sobre servicios recibidos, generando un ambiente de confianza y mejora continua en el sector inmobiliario."
                     ) : (
                       "Our platform allows owners and tenants to rate and share experiences about services received, creating an environment of trust and continuous improvement in the real estate sector."
@@ -125,15 +125,11 @@ export default function WhitepaperPage() {
                     <div className="flex items-center gap-3 mb-4">
                       <Heart className="h-6 w-6 text-emerald-600" />
                       <h3 className="text-lg font-semibold text-emerald-800">
-                        {t("language") === "es" ? "Red Social de Confianza" : "Social Network of Trust"}
+                        {t("socialNetworkOfTrust")}
                       </h3>
                     </div>
                     <p className="text-emerald-700 leading-relaxed">
-                      {t("language") === "es" ? (
-                        "Los usuarios pueden valorar servicios, compartir experiencias y construir una comunidad basada en la transparencia y calidad del servicio."
-                      ) : (
-                        "Users can rate services, share experiences and build a community based on transparency and service quality."
-                      )}
+                      {t("socialNetworkDescription")}
                     </p>
                   </CardContent>
                 </Card>
@@ -185,12 +181,12 @@ export default function WhitepaperPage() {
                 <CardHeader className="pb-4">
                   <CardTitle className="text-orange-700 flex items-center gap-3 text-lg">
                     <MessageSquare className="h-6 w-6" />
-                    {t("language") === "es" ? "Ausencia de Valoración" : "Absence of Rating"}
+                    {language === "es" ? "Ausencia de Valoración" : "Absence of Rating"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-neutral-600 leading-relaxed">
-                    {t("language") === "es" ? (
+                    {language === "es" ? (
                       "No existe un sistema estructurado donde los clientes puedan valorar servicios y compartir experiencias de forma verificable y útil."
                     ) : (
                       "There is no structured system where customers can rate services and share experiences in a verifiable and useful way."
@@ -228,7 +224,7 @@ export default function WhitepaperPage() {
               <CardHeader className="pb-6">
                 <CardTitle className="text-emerald-800 text-3xl flex items-center gap-3">
                   <Users className="h-8 w-8" />
-                  {t("language") === "es" ? "Hub de Servicios Profesionales Transparente" : "Transparent Professional Services Hub"}
+                  {language === "es" ? "Hub de Servicios Profesionales Transparente" : "Transparent Professional Services Hub"}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -239,25 +235,25 @@ export default function WhitepaperPage() {
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
                     <Star className="h-6 w-6 text-emerald-600 flex-shrink-0" />
                     <span className="text-emerald-700 font-medium">
-                      {t("language") === "es" ? "Sistema de Valoración Verificado" : "Verified Rating System"}
+                      {t("verifiedRatingSystem")}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
                     <MessageSquare className="h-6 w-6 text-emerald-600 flex-shrink-0" />
                     <span className="text-emerald-700 font-medium">
-                      {t("language") === "es" ? "Comunicación Transparente" : "Transparent Communication"}
+                      {t("transparentCommunication")}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
                     <Zap className="h-6 w-6 text-emerald-600 flex-shrink-0" />
                     <span className="text-emerald-700 font-medium">
-                      {t("language") === "es" ? "Automatización Inteligente" : "Smart Automation"}
+                      {t("smartAutomation")}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
                     <Shield className="h-6 w-6 text-emerald-600 flex-shrink-0" />
                     <span className="text-emerald-700 font-medium">
-                      {t("language") === "es" ? "Seguridad Blockchain" : "Blockchain Security"}
+                      {t("blockchainSecurity")}
                     </span>
                   </div>
                 </div>
@@ -270,34 +266,30 @@ export default function WhitepaperPage() {
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-xl">
                     <BarChart3 className="h-6 w-6 text-blue-600" />
-                    {t("language") === "es" ? "Valoración de Servicios" : "Service Rating"}
+                    {t("serviceRating")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-neutral-600 leading-relaxed">
-                    {t("language") === "es" ? (
-                      "Los usuarios pueden valorar servicios recibidos, crear reseñas detalladas y ayudar a otros propietarios a tomar decisiones informadas."
-                    ) : (
-                      "Users can rate services received, create detailed reviews and help other owners make informed decisions."
-                    )}
+                    {t("serviceRatingDescription")}
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-blue-700 font-medium">
-                        {t("language") === "es" ? "Reseñas Verificadas" : "Verified Reviews"}
+                        {t("verifiedReviews")}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-blue-700 font-medium">
-                        {t("language") === "es" ? "Ranking de Proveedores" : "Provider Ranking"}
+                        {t("providerRanking")}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-blue-700 font-medium">
-                        {t("language") === "es" ? "Historial Transparente" : "Transparent History"}
+                        {t("transparentHistory")}
                       </span>
                     </div>
                   </div>
@@ -308,34 +300,30 @@ export default function WhitepaperPage() {
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-xl">
                     <Globe className="h-6 w-6 text-purple-600" />
-                    {t("language") === "es" ? "Comunidad Global" : "Global Community"}
+                    {t("globalCommunity")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-neutral-600 leading-relaxed">
-                    {t("language") === "es" ? (
-                      "Un hub de servicios profesionales donde propietarios, administradores y proveedores interactúan de forma transparente y colaborativa."
-                    ) : (
-                      "A professional services hub where owners, administrators and providers interact transparently and collaboratively."
-                    )}
+                    {t("globalCommunityDescription")}
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                       <span className="text-purple-700 font-medium">
-                        {t("language") === "es" ? "Perfiles Verificados" : "Verified Profiles"}
+                        {t("verifiedProfiles")}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                       <span className="text-purple-700 font-medium">
-                        {t("language") === "es" ? "Red de Confianza" : "Trust Network"}
+                        {t("trustNetwork")}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                       <span className="text-purple-700 font-medium">
-                        {t("language") === "es" ? "Interacción Social" : "Social Interaction"}
+                        {t("socialInteraction")}
                       </span>
                     </div>
                   </div>
@@ -378,7 +366,7 @@ export default function WhitepaperPage() {
                       <Users className="h-8 w-8 text-blue-600 mx-auto mb-3" />
                       <div className="text-3xl font-bold text-blue-600 mb-2">60%</div>
                       <div className="text-sm text-neutral-600 font-medium">
-                        {t("language") === "es" ? "Pool Público" : "Public Pool"}
+                        {t("publicPool")}
                       </div>
                     </CardContent>
                   </Card>
@@ -396,7 +384,7 @@ export default function WhitepaperPage() {
                       <Gift className="h-8 w-8 text-emerald-600 mx-auto mb-3" />
                       <div className="text-3xl font-bold text-emerald-600 mb-2">10%</div>
                       <div className="text-sm text-neutral-600 font-medium">
-                        {t("language") === "es" ? "Airdrops & Recompensas" : "Airdrops & Rewards"}
+                        {t("airdropsRewards")}
                       </div>
                     </CardContent>
                   </Card>
@@ -413,7 +401,7 @@ export default function WhitepaperPage() {
                 {/* Token Distribution Details */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-neutral-900 mb-4">
-                    {t("language") === "es" ? "Detalles de Distribución" : "Distribution Details"}
+                    {t("distributionDetails")}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
@@ -421,14 +409,10 @@ export default function WhitepaperPage() {
                         <Users className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="font-semibold text-neutral-900">
-                            {t("language") === "es" ? "Pool Público (60%)" : "Public Pool (60%)"}
+                            {language === "es" ? "Pool Público (60%)" : "Public Pool (60%)"}
                           </div>
                           <div className="text-sm text-neutral-600">
-                            {t("language") === "es" ? (
-                              "Disponible para el público general a través de ventas y distribución"
-                            ) : (
-                              "Available to the general public through sales and distribution"
-                            )}
+                            {t("publicPoolDescription")}
                           </div>
                         </div>
                       </div>
@@ -436,14 +420,10 @@ export default function WhitepaperPage() {
                         <Building className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="font-semibold text-neutral-900">
-                            {t("language") === "es" ? "Equipo (20%)" : "Team (20%)"}
+                            {language === "es" ? "Equipo (20%)" : "Team (20%)"}
                           </div>
                           <div className="text-sm text-neutral-600">
-                            {t("language") === "es" ? (
-                              "Vesting de 4 años con cliff de 1 año para el equipo fundador"
-                            ) : (
-                              "4-year vesting with 1-year cliff for the founding team"
-                            )}
+                            {t("teamDescription2")}
                           </div>
                         </div>
                       </div>
@@ -453,14 +433,10 @@ export default function WhitepaperPage() {
                         <Gift className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="font-semibold text-neutral-900">
-                            {t("language") === "es" ? "Airdrops & Recompensas (10%)" : "Airdrops & Rewards (10%)"}
+                            {language === "es" ? "Airdrops & Recompensas (10%)" : "Airdrops & Rewards (10%)"}
                           </div>
                           <div className="text-sm text-neutral-600">
-                            {t("language") === "es" ? (
-                              "Para usuarios fieles, early adopters y recompensas de la comunidad"
-                            ) : (
-                              "For loyal users, early adopters and community rewards"
-                            )}
+                            {t("airdropsRewardsDescription")}
                           </div>
                         </div>
                       </div>
@@ -469,11 +445,7 @@ export default function WhitepaperPage() {
                         <div>
                           <div className="font-semibold text-neutral-900">Marketing (10%)</div>
                           <div className="text-sm text-neutral-600">
-                            {t("language") === "es" ? (
-                              "Campañas de marketing, promoción y desarrollo de la comunidad"
-                            ) : (
-                              "Marketing campaigns, promotion and community development"
-                            )}
+                            {t("marketingDescription")}
                           </div>
                         </div>
                       </div>
@@ -491,7 +463,7 @@ export default function WhitepaperPage() {
                 <TrendingUp className="h-8 w-8 text-indigo-600" />
               </div>
               <h2 className="text-4xl font-bold text-neutral-900">
-                {t("language") === "es" ? "Hoja de Ruta 2025-2026" : "Roadmap 2025-2026"}
+                {t("roadmap2025")}
               </h2>
             </div>
             
@@ -503,22 +475,18 @@ export default function WhitepaperPage() {
                 <Card className="flex-1 bg-gradient-to-br from-blue-50/40 to-indigo-50/40 border-blue-200/60">
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold text-neutral-900 mb-3">
-                      {t("language") === "es" ? "Q3 2025 - Lanzamiento del Token HBIT" : "Q3 2025 - HBIT Token Launch"}
+                      {t("q3TokenLaunch")}
                     </h3>
                     <p className="text-neutral-600 leading-relaxed mb-4">
-                      {t("language") === "es" ? (
-                        "Lanzamiento oficial de la criptomoneda HBIT con la demostración lista del hub de servicios profesionales, incluyendo sistema de valoración de servicios y recompensas para usuarios."
-                      ) : (
-                        "Official launch of HBIT cryptocurrency with the professional services hub demo ready, including service rating system and user rewards."
-                      )}
+                      {t("q3Description")}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Token Launch</span>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">{t("tokenLaunchTag")}</span>
                       <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "Demo Preparada" : "Demo Ready"}
+                        {t("demoReady")}
                       </span>
                       <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "Sistema de Valoración" : "Rating System"}
+                        {t("ratingSystem")}
                       </span>
                     </div>
                   </CardContent>
@@ -532,24 +500,20 @@ export default function WhitepaperPage() {
                 <Card className="flex-1 bg-gradient-to-br from-green-50/40 to-emerald-50/40 border-green-200/60">
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold text-neutral-900 mb-3">
-                      {t("language") === "es" ? "Q4 2025 - Aplicación Completada" : "Q4 2025 - Application Completed"}
+                      {t("q4AppComplete")}
                     </h3>
                     <p className="text-neutral-600 leading-relaxed mb-4">
-                      {t("language") === "es" ? (
-                        "Finalización completa de la aplicación con todas las funcionalidades del hub de servicios profesionales, incluyendo gestión avanzada, sistema de pagos híbrido (cripto para funciones de la app, EUR para servicios) y sistema completo de transparencia y valoración."
-                      ) : (
-                        "Complete application finalization with all professional services hub functionalities, including advanced management, hybrid payment system (crypto for app features, EUR for services) and complete transparency and rating system."
-                      )}
+                      {t("q4Description")}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "App Completa" : "Complete App"}
+                        {t("completeApp")}
                       </span>
                       <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "Hub Completo" : "Complete Hub"}
+                        {t("completeHub")}
                       </span>
                       <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "Pagos Híbridos" : "Hybrid Payments"}
+                        {t("hybridPayments")}
                       </span>
                     </div>
                   </CardContent>
@@ -563,41 +527,37 @@ export default function WhitepaperPage() {
                 <Card className="flex-1 bg-gradient-to-br from-amber-50/40 to-yellow-50/40 border-amber-200/60">
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold text-neutral-900 mb-3">
-                      {t("language") === "es" ? "Q1 2026 - Cotización en Mercados Centrales" : "Q1 2026 - Centralized Market Listing"}
+                      {t("q1CEXListing")}
                     </h3>
                     <p className="text-neutral-600 leading-relaxed mb-4">
-                      {t("language") === "es" ? (
-                        "Listado del token HBIT en principales exchanges centralizados reconocidos para aumentar liquidez y accesibilidad global de manera profesional y segura."
-                      ) : (
-                        "HBIT token listing on major recognized centralized exchanges to increase liquidity and global accessibility in a professional and secure manner."
-                      )}
+                      {t("q1Description")}
                     </p>
                     <div className="space-y-3 mb-4">
                       <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                         <span className="text-amber-700 font-medium text-sm">
-                          {t("language") === "es" ? "Exchanges de primer nivel - Mercados líderes mundiales" : "Top-tier exchanges - Leading global markets"}
+                          {t("topTierExchanges")}
                         </span>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                         <span className="text-amber-700 font-medium text-sm">
-                          {t("language") === "es" ? "Plataformas institucionales - Acceso profesional" : "Institutional platforms - Professional access"}
+                          {t("institutionalPlatforms")}
                         </span>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                         <span className="text-amber-700 font-medium text-sm">
-                          {t("language") === "es" ? "Mercados regulados - Cumplimiento normativo" : "Regulated markets - Regulatory compliance"}
+                          {t("regulatedMarkets")}
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "Listado Profesional" : "Professional Listing"}
+                        {t("professionalListing")}
                       </span>
                       <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "Liquidez Global" : "Global Liquidity"}
+                        {t("globalLiquidity")}
                       </span>
                     </div>
                   </CardContent>
@@ -611,23 +571,19 @@ export default function WhitepaperPage() {
                 <Card className="flex-1 bg-gradient-to-br from-purple-50/40 to-violet-50/40 border-purple-200/60">
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold text-neutral-900 mb-3">
-                      {t("language") === "es" ? "Q2 2026 - Expansión Global" : "Q2 2026 - Global Expansion"}
+                      {t("q2GlobalExpansion")}
                     </h3>
                     <p className="text-neutral-600 leading-relaxed mb-4">
-                      {t("language") === "es" ? (
-                        "Expansión internacional del hub de servicios profesionales a mercados clave en América, Europa, Asia y Oceanía, estableciendo HuBiT como el estándar global de transparencia inmobiliaria."
-                      ) : (
-                        "International expansion of the professional services hub to key markets in America, Europe, Asia and Oceania, establishing HuBiT as the global standard for real estate transparency."
-                      )}
+                      {t("q2Description")}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "Mercado Global" : "Global Market"}
+                        {t("globalMarket")}
                       </span>
                       <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                        {t("language") === "es" ? "Múltiples Idiomas" : "Multiple Languages"}
+                        {t("multipleLanguages")}
                       </span>
-                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Partnerships</span>
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">{t("partnerships")}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -688,14 +644,10 @@ export default function WhitepaperPage() {
             <Card className="bg-gradient-to-br from-neutral-50/60 to-gray-50/60 border-neutral-200/60 shadow-xl">
               <CardContent className="p-8 text-center">
                 <h2 className="text-3xl font-bold text-neutral-900 mb-6">
-                  {t("language") === "es" ? "El Futuro de HuBiT" : "The Future of HuBiT"}
+                  {t("hubFuture")}
                 </h2>
                 <p className="text-lg text-neutral-600 leading-relaxed max-w-3xl mx-auto mb-8">
-                  {t("language") === "es" ? (
-                    "HuBiT representa la evolución natural de la gestión inmobiliaria, combinando un hub de servicios profesionales transparente con tecnología blockchain avanzada para crear un ecosistema donde la confianza, valoración de servicios y eficiencia operativa transforman la experiencia de toda la comunidad inmobiliaria."
-                  ) : (
-                    "HuBiT represents the natural evolution of real estate management, combining a transparent professional services hub with advanced blockchain technology to create an ecosystem where trust, service rating and operational efficiency transform the experience of the entire real estate community."
-                  )}
+                  {t("hubFutureDescription")}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 
@@ -703,7 +655,7 @@ export default function WhitepaperPage() {
                     className="flex items-center gap-3 bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 px-8 py-4 text-base shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
                   >
                     <Users className="h-5 w-5" />
-                    {t("language") === "es" ? "Únete a la Comunidad" : "Join the Community"}
+                    {t("joinCommunity")}
                   </Button>
                   <Button 
                     variant="outline"
@@ -712,7 +664,7 @@ export default function WhitepaperPage() {
                     className="flex items-center gap-3 bg-white/80 backdrop-blur-sm hover:bg-white border-neutral-200 hover:border-neutral-300 px-8 py-4 text-base shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                   >
                     <ArrowUp className="h-5 w-5" />
-                    {t("language") === "es" ? "Volver al Inicio" : "Back to Top"}
+                    {t("backToTop")}
                   </Button>
                 </div>
               </CardContent>
