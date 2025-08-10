@@ -303,7 +303,7 @@ export default function WhitepaperPage() {
                     <CardContent className="p-6 text-center">
                       <Users className="h-8 w-8 text-blue-600 mx-auto mb-3" />
                       <div className="text-3xl font-bold text-blue-600 mb-2">60%</div>
-                      <div className="text-sm text-neutral-600 font-medium">{t("communityRewards")}</div>
+                      <div className="text-sm text-neutral-600 font-medium">Pool Público</div>
                     </CardContent>
                   </Card>
                   
@@ -325,9 +325,9 @@ export default function WhitepaperPage() {
                   
                   <Card className="bg-white/80 backdrop-blur-sm border-neutral-200/60 hover:shadow-lg transition-all duration-300">
                     <CardContent className="p-6 text-center">
-                      <Gavel className="h-8 w-8 text-orange-600 mx-auto mb-3" />
+                      <Megaphone className="h-8 w-8 text-orange-600 mx-auto mb-3" />
                       <div className="text-3xl font-bold text-orange-600 mb-2">10%</div>
-                      <div className="text-sm text-neutral-600 font-medium">Legal & Marketing</div>
+                      <div className="text-sm text-neutral-600 font-medium">Marketing</div>
                     </CardContent>
                   </Card>
                 </div>
@@ -340,8 +340,8 @@ export default function WhitepaperPage() {
                       <div className="flex items-start gap-3 p-4 bg-white/60 rounded-2xl">
                         <Users className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div>
-                          <div className="font-semibold text-neutral-900">Comunidad (60%)</div>
-                          <div className="text-sm text-neutral-600">Recompensas por participación, staking y governance</div>
+                          <div className="font-semibold text-neutral-900">Pool Público (60%)</div>
+                          <div className="text-sm text-neutral-600">Disponible para el público en general</div>
                         </div>
                       </div>
                       <div className="flex items-start gap-3 p-4 bg-white/60 rounded-2xl">
@@ -361,10 +361,10 @@ export default function WhitepaperPage() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3 p-4 bg-white/60 rounded-2xl">
-                        <Gavel className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                        <Megaphone className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
                         <div>
-                          <div className="font-semibold text-neutral-900">Legal & Marketing (10%)</div>
-                          <div className="text-sm text-neutral-600">Desarrollo legal y campañas de marketing</div>
+                          <div className="font-semibold text-neutral-900">Marketing (10%)</div>
+                          <div className="text-sm text-neutral-600">Campañas de marketing y promoción</div>
                         </div>
                       </div>
                     </div>
