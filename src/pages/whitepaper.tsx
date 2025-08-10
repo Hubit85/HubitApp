@@ -469,7 +469,7 @@ export default function WhitepaperPage() {
                     <span className="text-sm font-medium text-neutral-700">Pool Público (600M)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                    <div className="w-4 h-4 bg-red-500 rounded"></div>
                     <span className="text-sm font-medium text-neutral-700">Equipo (200M)</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -577,7 +577,7 @@ export default function WhitepaperPage() {
                             {/* Pool Público: 600M = 600/800 * 256px = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             {/* Equipo: 100M = 100/800 * 256px = 32px */}
-                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '192px', height: '32px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '32px' }}></div>
                             {/* Marketing: 50M = 50/800 * 256px = 16px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '224px', height: '16px' }}></div>
                             {/* Airdrops: 50M = 50/800 * 256px = 16px */}
@@ -593,7 +593,7 @@ export default function WhitepaperPage() {
                             {/* Pool Público: 600M = 600/900 * 288px = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             {/* Equipo: 150M = 150/900 * 288px = 48px */}
-                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '192px', height: '48px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '48px' }}></div>
                             {/* Marketing: 75M = 75/900 * 288px = 24px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '240px', height: '24px' }}></div>
                             {/* Airdrops: 75M = 75/900 * 288px = 24px */}
@@ -609,7 +609,7 @@ export default function WhitepaperPage() {
                             {/* Pool Público: 600M = 600/950 * 304px = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             {/* Equipo: 175M = 175/950 * 304px = 56px */}
-                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '192px', height: '56px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '56px' }}></div>
                             {/* Marketing: 87.5M = 87.5/950 * 304px = 28px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '248px', height: '28px' }}></div>
                             {/* Airdrops: 87.5M = 87.5/950 * 304px = 28px */}
@@ -625,7 +625,7 @@ export default function WhitepaperPage() {
                             {/* Pool Público: 600M = 600/975 * 312px = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             {/* Equipo: 187.5M = 187.5/975 * 312px = 60px */}
-                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '192px', height: '60px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '60px' }}></div>
                             {/* Marketing: 93.75M = 93.75/975 * 312px = 30px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '252px', height: '30px' }}></div>
                             {/* Airdrops: 93.75M = 93.75/975 * 312px = 30px */}
@@ -641,7 +641,7 @@ export default function WhitepaperPage() {
                             {/* Pool Público: 600M = 600/990 * 317px = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             {/* Equipo: 195M = 195/990 * 317px = 62px */}
-                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '192px', height: '62px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '62px' }}></div>
                             {/* Marketing: 97.5M = 97.5/990 * 317px = 31px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '254px', height: '31px' }}></div>
                             {/* Airdrops: 97.5M = 97.5/990 * 317px = 32px */}
@@ -657,7 +657,7 @@ export default function WhitepaperPage() {
                             {/* Pool Público: 600M = 600/998 * 319px = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             {/* Equipo: 199M = 199/998 * 319px = 64px */}
-                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '192px', height: '64px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             {/* Marketing: 99.5M = 99.5/998 * 319px = 32px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '256px', height: '32px' }}></div>
                             {/* Airdrops: 99.5M = 99.5/998 * 319px = 31px */}
@@ -673,7 +673,7 @@ export default function WhitepaperPage() {
                             {/* Pool Público: 600M = 600/1000 * 320px = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             {/* Equipo: 200M = 200/1000 * 320px = 64px */}
-                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '192px', height: '64px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
                             {/* Marketing: 100M = 100/1000 * 320px = 32px */}
                             <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '256px', height: '32px' }}></div>
                             {/* Airdrops: 100M = 100/1000 * 320px = 32px */}
@@ -717,12 +717,12 @@ export default function WhitepaperPage() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="bg-gradient-to-br from-green-50/60 to-green-100/60 border-green-200/60">
+                  <Card className="bg-gradient-to-br from-red-50/60 to-red-100/60 border-red-200/60">
                     <CardContent className="p-4 text-center">
-                      <div className="w-6 h-6 bg-green-500 rounded mx-auto mb-2"></div>
-                      <div className="text-lg font-bold text-green-600">200M</div>
+                      <div className="w-6 h-6 bg-red-500 rounded mx-auto mb-2"></div>
+                      <div className="text-lg font-bold text-red-600">200M</div>
                       <div className="text-sm text-neutral-600">Equipo</div>
-                      <div className="text-xs text-green-700 mt-1">Vesting 4 años</div>
+                      <div className="text-xs text-red-700 mt-1">Vesting 4 años</div>
                     </CardContent>
                   </Card>
                   
