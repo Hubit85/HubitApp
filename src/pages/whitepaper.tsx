@@ -451,17 +451,37 @@ export default function WhitepaperPage() {
               <CardHeader className="pb-6">
                 <CardTitle className="text-2xl font-bold text-neutral-900 flex items-center gap-3">
                   <BarChart3 className="h-7 w-7 text-violet-600" />
-                  {language === "es" ? "Evolución de Tokens en Circulación (2025-2029)" : "Circulating Token Evolution (2025-2029)"}
+                  {language === "es" ? "Evolución de Tokens en Circulación por Categorías (2025-2029)" : "Circulating Token Evolution by Categories (2025-2029)"}
                 </CardTitle>
                 <p className="text-neutral-600 mt-3">
                   {language === "es" ? (
-                    "Gráfica de coordenadas: Tiempo (ascisas) vs Número de tokens (ordenadas). Todos los tokens siguen vesting de 4 años con patrón exponencial."
+                    "Gráfica de barras apiladas: Tiempo (eje X) vs Número de tokens (eje Y de 0 a 1,000M). Cada color representa un tipo de token."
                   ) : (
-                    "Coordinate chart: Time (x-axis) vs Number of tokens (y-axis). All tokens follow 4-year vesting with exponential pattern."
+                    "Stacked bar chart: Time (X-axis) vs Number of tokens (Y-axis 0 to 1,000M). Each color represents a token type."
                   )}
                 </p>
               </CardHeader>
               <CardContent className="space-y-8">
+                {/* Color Legend */}
+                <div className="flex flex-wrap justify-center gap-6 p-4 bg-gradient-to-r from-neutral-50 to-white rounded-2xl border border-neutral-200/60">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                    <span className="text-sm font-medium text-neutral-700">Pool Público (600M)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                    <span className="text-sm font-medium text-neutral-700">Equipo (200M)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-orange-500 rounded"></div>
+                    <span className="text-sm font-medium text-neutral-700">Marketing (100M)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-emerald-500 rounded"></div>
+                    <span className="text-sm font-medium text-neutral-700">Airdrops (100M)</span>
+                  </div>
+                </div>
+
                 {/* Main Chart Container */}
                 <div className="relative bg-white border-2 border-neutral-200/80 rounded-2xl p-8">
                   {/* Y-Axis Title */}
@@ -473,15 +493,11 @@ export default function WhitepaperPage() {
 
                   {/* Chart Area */}
                   <div className="ml-16 mr-8">
-                    {/* Y-Axis Labels */}
-                    <div className="absolute left-8 top-12 bottom-16 flex flex-col justify-between text-sm font-medium text-neutral-600">
+                    {/* Y-Axis Labels - Ahora de 0 a 1000M */}
+                    <div className="absolute left-8 top-12 bottom-20 flex flex-col justify-between text-sm font-medium text-neutral-600">
                       <div className="flex items-center">
                         <div className="w-3 h-px bg-neutral-300 mr-2"></div>
                         1,000M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        950M
                       </div>
                       <div className="flex items-center">
                         <div className="w-3 h-px bg-neutral-300 mr-2"></div>
@@ -489,15 +505,7 @@ export default function WhitepaperPage() {
                       </div>
                       <div className="flex items-center">
                         <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        850M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
                         800M
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        750M
                       </div>
                       <div className="flex items-center">
                         <div className="w-3 h-px bg-neutral-300 mr-2"></div>
@@ -505,11 +513,31 @@ export default function WhitepaperPage() {
                       </div>
                       <div className="flex items-center">
                         <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        650M
+                        600M
                       </div>
                       <div className="flex items-center">
                         <div className="w-3 h-px bg-neutral-300 mr-2"></div>
-                        600M
+                        500M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        400M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        300M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        200M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        100M
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-px bg-neutral-300 mr-2"></div>
+                        0M
                       </div>
                     </div>
 
@@ -519,363 +547,199 @@ export default function WhitepaperPage() {
                       <div className="absolute inset-0">
                         {/* Horizontal Grid Lines */}
                         <div className="h-full flex flex-col justify-between">
-                          {Array.from({length: 9}).map((_, i) => (
+                          {Array.from({length: 11}).map((_, i) => (
                             <div key={i} className="w-full h-px bg-neutral-200/60"></div>
                           ))}
                         </div>
                         {/* Vertical Grid Lines */}
                         <div className="absolute inset-0 flex justify-between">
-                          {Array.from({length: 17}).map((_, i) => (
+                          {Array.from({length: 9}).map((_, i) => (
                             <div key={i} className="w-px h-full bg-neutral-200/60"></div>
                           ))}
                         </div>
                       </div>
 
-                      {/* Chart Line and Data Points */}
-                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 384" preserveAspectRatio="none">
-                        <defs>
-                          <linearGradient id="chartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#3b82f6" />
-                            <stop offset="25%" stopColor="#10b981" />
-                            <stop offset="40%" stopColor="#f59e0b" />
-                            <stop offset="60%" stopColor="#8b5cf6" />
-                            <stop offset="100%" stopColor="#ec4899" />
-                          </linearGradient>
-                          <linearGradient id="chartArea" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="url(#chartGradient)" stopOpacity="0.2" />
-                            <stop offset="100%" stopColor="url(#chartGradient)" stopOpacity="0.05" />
-                          </linearGradient>
-                        </defs>
-                        
-                        {/* Area under curve - Updated path for new progression */}
-                        <path
-                          d="M 0 192 L 100 96 L 200 48 L 300 24 L 400 12 L 500 8 L 600 6 L 700 4 L 800 0 L 800 384 L 0 384 Z"
-                          fill="url(#chartArea)"
-                        />
-                        
-                        {/* Main trend line - Updated for exponential growth */}
-                        <path
-                          d="M 0 192 L 100 96 L 200 48 L 300 24 L 400 12 L 500 8 L 600 6 L 700 4 L 800 0"
-                          stroke="url(#chartGradient)"
-                          strokeWidth="3"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="drop-shadow-sm"
-                        />
-                      </svg>
-
-                      {/* Data Points with Labels - Updated for new system */}
-                      <div className="absolute inset-0">
-                        {/* T0 - 2025: 600M (Public Pool Only) */}
-                        <div className="absolute" style={{ left: '0%', bottom: '50%', transform: 'translate(-50%, 50%)' }}>
-                          <div className="w-4 h-4 bg-blue-500 rounded-full shadow-lg border-2 border-white"></div>
-                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded shadow border">
-                            600M<br/>
-                            <span className="text-neutral-600 font-normal">T0 2025</span>
+                      {/* Stacked Bar Chart */}
+                      <div className="absolute inset-0 flex items-end justify-between px-8">
+                        {/* 2025 T0: 600M (Solo Pool Público) */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-12 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                            {/* Pool Público: 600M de 1000M = 60% de 230px = 138px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style={{ height: '138px' }}>
+                              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-xs font-bold text-white">600M</div>
+                            </div>
                           </div>
+                          <div className="text-xs font-bold text-neutral-700 mt-2 text-center">2025<br/>T0</div>
                         </div>
 
-                        {/* Q1 2026: 800M (600M + 200M: 50M airdrops + 50M marketing + 100M team) */}
-                        <div className="absolute" style={{ left: '12.5%', bottom: '25%', transform: 'translate(-50%, 50%)' }}>
-                          <div className="w-5 h-5 bg-emerald-500 rounded-full shadow-lg border-2 border-white animate-pulse"></div>
-                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded shadow border">
-                            800M<br/>
-                            <span className="text-neutral-600 font-normal">Q1 2026</span>
+                        {/* Q1 2026: 800M Total */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-12 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                            {/* Pool Público: 600M = 138px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '138px' }}></div>
+                            {/* Equipo: 100M = 23px */}
+                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '138px', height: '23px' }}></div>
+                            {/* Marketing: 50M = 11.5px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '161px', height: '11.5px' }}></div>
+                            {/* Airdrops: 50M = 11.5px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '172.5px', height: '11.5px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">800M</div>
+                            </div>
                           </div>
+                          <div className="text-xs font-bold text-neutral-700 mt-2 text-center">Q1<br/>2026</div>
                         </div>
 
-                        {/* Q2 2026: 900M (+100M: 25M + 25M + 50M) */}
-                        <div className="absolute" style={{ left: '25%', bottom: '12.5%', transform: 'translate(-50%, 50%)' }}>
-                          <div className="w-5 h-5 bg-amber-500 rounded-full shadow-lg border-2 border-white animate-pulse"></div>
-                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded shadow border">
-                            900M<br/>
-                            <span className="text-neutral-600 font-normal">Q2 2026</span>
+                        {/* Q2 2026: 900M Total */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-12 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                            {/* Pool Público: 600M = 138px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '138px' }}></div>
+                            {/* Equipo: 150M = 34.5px */}
+                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '138px', height: '34.5px' }}></div>
+                            {/* Marketing: 75M = 17.25px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '172.5px', height: '17.25px' }}></div>
+                            {/* Airdrops: 75M = 17.25px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '189.75px', height: '17.25px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">900M</div>
+                            </div>
                           </div>
+                          <div className="text-xs font-bold text-neutral-700 mt-2 text-center">Q2<br/>2026</div>
                         </div>
 
-                        {/* Q3 2026: 950M (+50M: 12.5M + 12.5M + 25M) */}
-                        <div className="absolute" style={{ left: '31.25%', bottom: '6.25%', transform: 'translate(-50%, 50%)' }}>
-                          <div className="w-4 h-4 bg-orange-500 rounded-full shadow-lg border-2 border-white"></div>
-                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded shadow border">
-                            950M<br/>
-                            <span className="text-neutral-600 font-normal">Q3 2026</span>
+                        {/* Q3 2026: 950M Total */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-12 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                            {/* Pool Público: 600M = 138px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '138px' }}></div>
+                            {/* Equipo: 175M = 40.25px */}
+                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '138px', height: '40.25px' }}></div>
+                            {/* Marketing: 87.5M = 20.125px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '178.25px', height: '20.125px' }}></div>
+                            {/* Airdrops: 87.5M = 20.125px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '198.375px', height: '20.125px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">950M</div>
+                            </div>
                           </div>
+                          <div className="text-xs font-bold text-neutral-700 mt-2 text-center">Q3<br/>2026</div>
                         </div>
 
-                        {/* Q4 2026: 975M (+25M: 6.25M + 6.25M + 12.5M) */}
-                        <div className="absolute" style={{ left: '37.5%', bottom: '3.125%', transform: 'translate(-50%, 50%)' }}>
-                          <div className="w-4 h-4 bg-purple-500 rounded-full shadow-lg border-2 border-white"></div>
-                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded shadow border">
-                            975M<br/>
-                            <span className="text-neutral-600 font-normal">Q4 2026</span>
+                        {/* Q4 2026: 975M Total */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-12 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                            {/* Pool Público: 600M = 138px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '138px' }}></div>
+                            {/* Equipo: 187.5M = 43.125px */}
+                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '138px', height: '43.125px' }}></div>
+                            {/* Marketing: 93.75M = 21.56px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '181.125px', height: '21.56px' }}></div>
+                            {/* Airdrops: 93.75M = 21.56px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '202.685px', height: '21.56px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">975M</div>
+                            </div>
                           </div>
+                          <div className="text-xs font-bold text-neutral-700 mt-2 text-center">Q4<br/>2026</div>
                         </div>
 
-                        {/* 2027: ~990M */}
-                        <div className="absolute" style={{ left: '62.5%', bottom: '2.5%', transform: 'translate(-50%, 50%)' }}>
-                          <div className="w-4 h-4 bg-indigo-500 rounded-full shadow-lg border-2 border-white"></div>
-                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded shadow border">
-                            990M<br/>
-                            <span className="text-neutral-600 font-normal">2027</span>
+                        {/* 2027: 990M Total */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-12 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                            {/* Pool Público: 600M = 138px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '138px' }}></div>
+                            {/* Equipo: 195M = 44.85px */}
+                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '138px', height: '44.85px' }}></div>
+                            {/* Marketing: 97.5M = 22.425px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '182.85px', height: '22.425px' }}></div>
+                            {/* Airdrops: 97.5M = 22.425px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '205.275px', height: '22.425px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">990M</div>
+                            </div>
                           </div>
+                          <div className="text-xs font-bold text-neutral-700 mt-2 text-center">2027</div>
                         </div>
 
-                        {/* 2029: 1000M */}
-                        <div className="absolute" style={{ left: '100%', bottom: '0%', transform: 'translate(-50%, 50%)' }}>
-                          <div className="w-5 h-5 bg-gradient-to-r from-purple-500 to-rose-500 rounded-full shadow-xl border-2 border-white animate-pulse"></div>
-                          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded shadow border">
-                            1,000M<br/>
-                            <span className="text-neutral-600 font-normal">2029</span>
+                        {/* 2028: 998M Total */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-12 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                            {/* Pool Público: 600M = 138px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '138px' }}></div>
+                            {/* Equipo: 199M = 45.77px */}
+                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '138px', height: '45.77px' }}></div>
+                            {/* Marketing: 99.5M = 22.885px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '183.77px', height: '22.885px' }}></div>
+                            {/* Airdrops: 99.5M = 22.885px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '206.655px', height: '22.885px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">998M</div>
+                            </div>
                           </div>
+                          <div className="text-xs font-bold text-neutral-700 mt-2 text-center">2028</div>
+                        </div>
+
+                        {/* 2029: 1000M Total */}
+                        <div className="flex flex-col items-center w-16">
+                          <div className="relative w-12 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '230px' }}>
+                            {/* Pool Público: 600M = 138px */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '138px' }}></div>
+                            {/* Equipo: 200M = 46px */}
+                            <div className="absolute w-full bg-gradient-to-t from-green-500 to-green-400" style={{ bottom: '138px', height: '46px' }}></div>
+                            {/* Marketing: 100M = 23px */}
+                            <div className="absolute w-full bg-gradient-to-t from-orange-500 to-orange-400" style={{ bottom: '184px', height: '23px' }}></div>
+                            {/* Airdrops: 100M = 23px */}
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '207px', height: '23px' }}>
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-rose-600 bg-white px-1 rounded shadow">1,000M</div>
+                            </div>
+                          </div>
+                          <div className="text-xs font-bold text-neutral-700 mt-2 text-center">2029</div>
                         </div>
                       </div>
                     </div>
 
-                    {/* X-Axis Labels */}
-                    <div className="flex justify-between mt-4 text-sm font-medium text-neutral-600">
-                      <span>2025</span>
-                      <span>Q1<br/>2026</span>
-                      <span>Q2<br/>2026</span>
-                      <span>Q3<br/>2026</span>
-                      <span>Q4<br/>2026</span>
-                      <span>2027</span>
-                      <span>2028</span>
-                      <span>2029</span>
-                    </div>
-
                     {/* X-Axis Title */}
-                    <div className="text-center mt-4">
+                    <div className="text-center mt-6">
                       <span className="text-sm font-bold text-neutral-700">
-                        {language === "es" ? "Tiempo (Trimestres)" : "Time (Quarters)"}
+                        {language === "es" ? "Tiempo (Años y Trimestres)" : "Time (Years and Quarters)"}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Token Release Schedule Details - Updated */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Release Schedule */}
-                  <Card className="bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/60">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center gap-3 text-xl text-blue-800">
-                        <Calendar className="h-6 w-6" />
-                        {language === "es" ? "Cronograma de Liberación Exponencial" : "Exponential Release Schedule"}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                          <div className="w-3 h-3 bg-blue-500 rounded-full mt-1"></div>
-                          <div>
-                            <div className="font-semibold text-neutral-900">
-                              {language === "es" ? "2025: 600M tokens" : "2025: 600M tokens"}
-                            </div>
-                            <div className="text-sm text-neutral-600">
-                              {language === "es" ? "Solo pool público disponible" : "Only public pool available"}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                          <div className="w-3 h-3 bg-emerald-500 rounded-full mt-1"></div>
-                          <div>
-                            <div className="font-semibold text-neutral-900">
-                              {language === "es" ? "2026: +375M tokens" : "2026: +375M tokens"}
-                            </div>
-                            <div className="text-sm text-neutral-600">
-                              {language === "es" ? "93.75% de todos los tokens de vesting liberados" : "93.75% of all vesting tokens released"}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-3 p-3 bg-white/60 rounded-xl">
-                          <div className="w-3 h-3 bg-purple-500 rounded-full mt-1"></div>
-                          <div>
-                            <div className="font-semibold text-neutral-900">
-                              {language === "es" ? "2027-2029: +25M tokens" : "2027-2029: +25M tokens"}
-                            </div>
-                            <div className="text-sm text-neutral-600">
-                              {language === "es" ? "Tokens restantes de todos los pools gradualmente" : "Remaining tokens from all pools gradually"}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                {/* Detailed Breakdown Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card className="bg-gradient-to-br from-blue-50/60 to-blue-100/60 border-blue-200/60">
+                    <CardContent className="p-4 text-center">
+                      <div className="w-6 h-6 bg-blue-500 rounded mx-auto mb-2"></div>
+                      <div className="text-lg font-bold text-blue-600">600M</div>
+                      <div className="text-sm text-neutral-600">Pool Público</div>
+                      <div className="text-xs text-blue-700 mt-1">Disponible desde T0</div>
                     </CardContent>
                   </Card>
-
-                  {/* Distribution Breakdown */}
-                  <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center gap-3 text-xl text-emerald-800">
-                        <PieChart className="h-6 w-6" />
-                        {language === "es" ? "Vesting Exponencial por Categoría" : "Exponential Vesting by Category"}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-xl">
-                          <div className="flex items-center gap-3">
-                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                            <span className="font-medium text-neutral-700">Pool Público</span>
-                          </div>
-                          <span className="font-bold text-blue-600">600M (60%) - T0</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-xl">
-                          <div className="flex items-center gap-3">
-                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
-                            <span className="font-medium text-neutral-700">Airdrops</span>
-                          </div>
-                          <span className="font-bold text-emerald-600">100M (10%) - 4 años</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-xl">
-                          <div className="flex items-center gap-3">
-                            <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
-                            <span className="font-medium text-neutral-700">Marketing</span>
-                          </div>
-                          <span className="font-bold text-orange-600">100M (10%) - 4 años</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-white/60 rounded-xl">
-                          <div className="flex items-center gap-3">
-                            <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-                            <span className="font-medium text-neutral-700">Equipo</span>
-                          </div>
-                          <span className="font-bold text-purple-600">200M (20%) - 4 años</span>
-                        </div>
-                      </div>
+                  
+                  <Card className="bg-gradient-to-br from-green-50/60 to-green-100/60 border-green-200/60">
+                    <CardContent className="p-4 text-center">
+                      <div className="w-6 h-6 bg-green-500 rounded mx-auto mb-2"></div>
+                      <div className="text-lg font-bold text-green-600">200M</div>
+                      <div className="text-sm text-neutral-600">Equipo</div>
+                      <div className="text-xs text-green-700 mt-1">Vesting 4 años</div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-gradient-to-br from-orange-50/60 to-orange-100/60 border-orange-200/60">
+                    <CardContent className="p-4 text-center">
+                      <div className="w-6 h-6 bg-orange-500 rounded mx-auto mb-2"></div>
+                      <div className="text-lg font-bold text-orange-600">100M</div>
+                      <div className="text-sm text-neutral-600">Marketing</div>
+                      <div className="text-xs text-orange-700 mt-1">Vesting 4 años</div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-gradient-to-br from-emerald-50/60 to-emerald-100/60 border-emerald-200/60">
+                    <CardContent className="p-4 text-center">
+                      <div className="w-6 h-6 bg-emerald-500 rounded mx-auto mb-2"></div>
+                      <div className="text-lg font-bold text-emerald-600">100M</div>
+                      <div className="text-sm text-neutral-600">Airdrops</div>
+                      <div className="text-xs text-emerald-700 mt-1">Vesting 4 años</div>
                     </CardContent>
                   </Card>
                 </div>
-
-                {/* Quarterly Breakdown Table - Updated */}
-                <Card className="bg-gradient-to-br from-amber-50/60 to-yellow-50/60 border-amber-200/60">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-3 text-xl text-amber-800">
-                      <BarChart3 className="h-6 w-6" />
-                      {language === "es" ? "Liberación Trimestral Detallada (Patrón Exponencial)" : "Detailed Quarterly Release (Exponential Pattern)"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-amber-200/60">
-                            <th className="text-left py-3 font-semibold text-amber-900">
-                              {language === "es" ? "Período" : "Period"}
-                            </th>
-                            <th className="text-center py-3 font-semibold text-amber-900">Airdrops</th>
-                            <th className="text-center py-3 font-semibold text-amber-900">Marketing</th>
-                            <th className="text-center py-3 font-semibold text-amber-900">{language === "es" ? "Equipo" : "Team"}</th>
-                            <th className="text-center py-3 font-semibold text-amber-900">{language === "es" ? "Total Acum." : "Cum. Total"}</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-amber-200/40">
-                          <tr>
-                            <td className="py-3 font-medium">2025 T0</td>
-                            <td className="text-center py-3">0M</td>
-                            <td className="text-center py-3">0M</td>
-                            <td className="text-center py-3">0M</td>
-                            <td className="text-center py-3 font-bold text-blue-600">600M</td>
-                          </tr>
-                          <tr className="bg-emerald-50/30">
-                            <td className="py-3 font-medium">Q1 2026</td>
-                            <td className="text-center py-3 font-bold text-emerald-600">50M</td>
-                            <td className="text-center py-3 font-bold text-emerald-600">50M</td>
-                            <td className="text-center py-3 font-bold text-emerald-600">100M</td>
-                            <td className="text-center py-3 font-bold text-emerald-600">800M</td>
-                          </tr>
-                          <tr className="bg-amber-50/30">
-                            <td className="py-3 font-medium">Q2 2026</td>
-                            <td className="text-center py-3 font-bold text-amber-600">25M</td>
-                            <td className="text-center py-3 font-bold text-amber-600">25M</td>
-                            <td className="text-center py-3 font-bold text-amber-600">50M</td>
-                            <td className="text-center py-3 font-bold text-amber-600">900M</td>
-                          </tr>
-                          <tr className="bg-orange-50/30">
-                            <td className="py-3 font-medium">Q3 2026</td>
-                            <td className="text-center py-3 font-bold text-orange-600">12.5M</td>
-                            <td className="text-center py-3 font-bold text-orange-600">12.5M</td>
-                            <td className="text-center py-3 font-bold text-orange-600">25M</td>
-                            <td className="text-center py-3 font-bold text-orange-600">950M</td>
-                          </tr>
-                          <tr className="bg-purple-50/30">
-                            <td className="py-3 font-medium">Q4 2026</td>
-                            <td className="text-center py-3 font-bold text-purple-600">6.25M</td>
-                            <td className="text-center py-3 font-bold text-purple-600">6.25M</td>
-                            <td className="text-center py-3 font-bold text-purple-600">12.5M</td>
-                            <td className="text-center py-3 font-bold text-purple-600">975M</td>
-                          </tr>
-                          <tr>
-                            <td className="py-3 font-medium">2027-2029</td>
-                            <td className="text-center py-3">6.25M</td>
-                            <td className="text-center py-3">6.25M</td>
-                            <td className="text-center py-3">12.5M</td>
-                            <td className="text-center py-3 font-bold text-rose-600">1,000M</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Exponential Pattern Explanation */}
-                <Card className="bg-gradient-to-br from-rose-50/60 to-pink-50/60 border-rose-200/60">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-3 text-xl text-rose-800">
-                      <Activity className="h-6 w-6" />
-                      {language === "es" ? "Patrón Exponencial Unificado (4 años)" : "Unified Exponential Pattern (4 years)"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="text-center p-4 bg-white/80 rounded-xl border border-rose-200/40">
-                        <div className="text-2xl font-bold text-emerald-600 mb-1">Q1 2026</div>
-                        <div className="text-sm text-neutral-600">200M tokens</div>
-                        <div className="text-xs text-emerald-700 font-medium">50% del vesting</div>
-                      </div>
-                      <div className="text-center p-4 bg-white/80 rounded-xl border border-rose-200/40">
-                        <div className="text-2xl font-bold text-amber-600 mb-1">Q2 2026</div>
-                        <div className="text-sm text-neutral-600">100M tokens</div>
-                        <div className="text-xs text-amber-700 font-medium">25% del vesting</div>
-                      </div>
-                      <div className="text-center p-4 bg-white/80 rounded-xl border border-rose-200/40">
-                        <div className="text-2xl font-bold text-orange-600 mb-1">Q3 2026</div>
-                        <div className="text-sm text-neutral-600">50M tokens</div>
-                        <div className="text-xs text-orange-700 font-medium">12.5% del vesting</div>
-                      </div>
-                      <div className="text-center p-4 bg-white/80 rounded-xl border border-rose-200/40">
-                        <div className="text-2xl font-bold text-purple-600 mb-1">Q4 2026</div>
-                        <div className="text-sm text-neutral-600">25M tokens</div>
-                        <div className="text-xs text-purple-700 font-medium">6.25% del vesting</div>
-                      </div>
-                    </div>
-
-                    <Card className="bg-white/60 border-neutral-200/40">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="p-2 bg-rose-100 rounded-xl">
-                            <Unlock className="h-6 w-6 text-rose-600" />
-                          </div>
-                          <div>
-                            <h5 className="font-semibold text-neutral-900 mb-2">
-                              {language === "es" ? "Ventaja del Vesting Unificado a 4 Años" : "Unified 4-Year Vesting Advantage"}
-                            </h5>
-                            <p className="text-neutral-600 leading-relaxed text-sm">
-                              {language === "es" ? (
-                                "Ahora TODOS los tokens siguen el mismo patrón exponencial durante 4 años, creando máxima transparencia y predictibilidad. El 93.75% de la dilución total ocurre en 2026, permitiendo al ecosistema crecer establemente sin presión de dilución significativa después del primer año."
-                              ) : (
-                                "Now ALL tokens follow the same exponential pattern over 4 years, creating maximum transparency and predictability. 93.75% of total dilution occurs in 2026, allowing the ecosystem to grow stably without significant dilution pressure after the first year."
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </CardContent>
-                </Card>
               </CardContent>
             </Card>
           </section>
