@@ -8,8 +8,6 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LogOut, FileText, HelpCircle } from "lucide-react";
 import { authService } from "@/services/AuthService";
 import Image from "next/image";
-import WhitepaperModal from "@/components/modals/WhitepaperModal";
-import HelpModal from "@/components/modals/HelpModal";
 
 export function Header() {
   const router = useRouter();
@@ -86,29 +84,25 @@ export function Header() {
           <LanguageSwitcher />
           
           {/* Help button - available on all pages */}
-          <HelpModal>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="bg-white text-black border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
-            >
-              <HelpCircle className="h-4 w-4" />
-              <span>{t("help")}</span>
-            </Button>
-          </HelpModal>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="bg-white text-black border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
+          >
+            <HelpCircle className="h-4 w-4" />
+            <span>{t("help")}</span>
+          </Button>
           
           {/* Show Whitepaper button only on home page */}
           {isHomePage && (
-            <WhitepaperModal>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="bg-white text-black border-black hover:bg-white/90 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
-              >
-                <FileText className="h-4 w-4" />
-                <span>{t("whitepaper")}</span>
-              </Button>
-            </WhitepaperModal>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="bg-white text-black border-black hover:bg-white/90 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
+            >
+              <FileText className="h-4 w-4" />
+              <span>{t("whitepaper")}</span>
+            </Button>
           )}
           
           {/* Show sign out button when in dashboard pages */}
