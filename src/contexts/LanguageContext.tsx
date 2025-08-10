@@ -1613,7 +1613,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   const t = useCallback(
     (key: string, langOverride?: Language) => {
-      const lang = langOverride || language;
+      const lang = langOverride || language
       const keys = key.split(".");
       let result: any = translations[lang];
       for (const k of keys) {
@@ -1624,7 +1624,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
           for (const fk of keys) {
             fallbackResult = fallbackResult?.[fk];
           }
-          return fallbackResult || key;
+          return fallbackResult || key
         }
       }
       return result || key;
