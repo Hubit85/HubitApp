@@ -454,28 +454,28 @@ export default function WhitepaperPage() {
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q1 2026 - Cotización en Mercados Centrales</h3>
                     <p className="text-neutral-600 leading-relaxed mb-4">
-                      Listado del token HBIT en los principales exchanges centralizados para aumentar liquidez y accesibilidad global.
+                      Listado del token HBIT en principales exchanges centralizados reconocidos para aumentar liquidez y accesibilidad global de manera profesional y segura.
                     </p>
                     <div className="space-y-3 mb-4">
-                      <div className="flex items-center gap-3 p-2 bg-white/60 rounded-lg">
+                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span className="text-amber-700 font-medium text-sm">Binance - Exchange líder mundial</span>
+                        <span className="text-amber-700 font-medium text-sm">Exchanges de primer nivel - Mercados líderes mundiales</span>
                       </div>
-                      <div className="flex items-center gap-3 p-2 bg-white/60 rounded-lg">
+                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span className="text-amber-700 font-medium text-sm">Coinbase - Mercado institucional</span>
+                        <span className="text-amber-700 font-medium text-sm">Plataformas institucionales - Acceso profesional</span>
                       </div>
-                      <div className="flex items-center gap-3 p-2 bg-white/60 rounded-lg">
+                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span className="text-amber-700 font-medium text-sm">Kraken - Mercado europeo</span>
+                        <span className="text-amber-700 font-medium text-sm">Mercados regulados - Cumplimiento normativo</span>
                       </div>
-                      <div className="flex items-center gap-3 p-2 bg-white/60 rounded-lg">
+                      <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                         <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                        <span className="text-amber-700 font-medium text-sm">KuCoin - Expansión asiática</span>
+                        <span className="text-amber-700 font-medium text-sm">Expansión global - Acceso internacional</span>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">CEX Listing</span>
+                      <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">Listado Profesional</span>
                       <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">Liquidez Global</span>
                       <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">Adopción Masiva</span>
                     </div>
