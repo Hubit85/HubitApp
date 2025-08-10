@@ -416,11 +416,11 @@ export default function WhitepaperPage() {
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q3 2025 - Lanzamiento del Token HBIT</h3>
                     <p className="text-neutral-600 leading-relaxed mb-4">
-                      Lanzamiento oficial de la criptomoneda HBIT con funcionalidades completas de valoración de servicios y sistema de recompensas para usuarios de la red social inmobiliaria.
+                      Lanzamiento oficial de la criptomoneda HBIT con la demostración lista del hub de servicios profesionales, incluyendo sistema de valoración de servicios y recompensas para usuarios.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Token Launch</span>
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Red Social Beta</span>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Demo Preparada</span>
                       <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Sistema de Valoración</span>
                     </div>
                   </CardContent>
@@ -435,11 +435,11 @@ export default function WhitepaperPage() {
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q4 2025 - Aplicación Completada</h3>
                     <p className="text-neutral-600 leading-relaxed mb-4">
-                      Finalización completa de la aplicación con todas las funcionalidades de la red social inmobiliaria, incluyendo gestión avanzada, pagos automatizados y sistema completo de transparencia y valoración.
+                      Finalización completa de la aplicación con todas las funcionalidades del hub de servicios profesionales, incluyendo gestión avanzada, pagos automatizados y sistema completo de transparencia y valoración.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">App Completa</span>
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Red Social Full</span>
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Hub Completo</span>
                       <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Pagos Cripto</span>
                     </div>
                   </CardContent>
@@ -491,7 +491,7 @@ export default function WhitepaperPage() {
                   <CardContent className="p-6">
                     <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q2 2026 - Expansión Global</h3>
                     <p className="text-neutral-600 leading-relaxed mb-4">
-                      Expansión internacional de la red social inmobiliaria a mercados clave en América, Europa, Asia y Oceanía, estableciendo HuBiT como el estándar global de transparencia inmobiliaria.
+                      Expansión internacional del hub de servicios profesionales a mercados clave en América, Europa, Asia y Oceanía, estableciendo HuBiT como el estándar global de transparencia inmobiliaria.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Mercado Global</span>
