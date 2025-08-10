@@ -21,13 +21,16 @@ import {
   Lightbulb,
   BookOpen,
   ArrowUp,
-  Gavel,
   Gift,
-  Code,
   Megaphone,
-  PieChart
+  PieChart,
+  Heart,
+  MessageSquare,
+  BarChart3,
+  Rocket,
+  Banknote,
+  TrendingDown
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 
 export default function WhitepaperPage() {
   const { t } = useLanguage();
@@ -40,7 +43,7 @@ export default function WhitepaperPage() {
     <>
       <Head>
         <title>{t("whitepaper")} - {t("hubit")}</title>
-        <meta name="description" content={`${t("hubit")} ${t("whitepaper")} - Technical documentation and roadmap`} />
+        <meta name="description" content={`${t("hubit")} ${t("whitepaper")} - Documentación técnica y hoja de ruta`} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
@@ -57,13 +60,13 @@ export default function WhitepaperPage() {
               </div>
               <div className="text-left">
                 <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
-                  {t("whitepaper")}
+                  Whitepaper
                 </h1>
                 <p className="text-lg text-neutral-600 mt-1">HuBiT v8.0</p>
               </div>
             </div>
             <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
-              {t("whitepaperDescription")}
+              Una red social revolucionaria para la gestión inmobiliaria que combina transparencia, valoración de servicios y tecnología blockchain para transformar la experiencia de propietarios y administradores.
             </p>
             
             {/* Download and View Options */}
@@ -73,7 +76,7 @@ export default function WhitepaperPage() {
                 className="flex items-center gap-3 bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 px-8 py-4 text-base shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
               >
                 <Download className="h-5 w-5" />
-                {t("downloadWhitepaper")}
+                Descargar PDF
               </Button>
               <Button 
                 variant="outline" 
@@ -81,7 +84,7 @@ export default function WhitepaperPage() {
                 className="flex items-center gap-3 bg-white/80 backdrop-blur-sm hover:bg-white border-neutral-200 hover:border-neutral-300 px-8 py-4 text-base shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               >
                 <Eye className="h-5 w-5" />
-                {t("viewOnline")}
+                Ver Online
               </Button>
             </div>
           </div>
@@ -92,13 +95,31 @@ export default function WhitepaperPage() {
               <div className="p-3 bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl">
                 <Lightbulb className="h-8 w-8 text-blue-600" />
               </div>
-              <h2 className="text-4xl font-bold text-neutral-900">{t("introduction")}</h2>
+              <h2 className="text-4xl font-bold text-neutral-900">Introducción</h2>
             </div>
             
-            <div className="space-y-6">
-              <p className="text-lg text-neutral-700 leading-relaxed">
-                {t("whitepaperIntro")}
-              </p>
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <p className="text-lg text-neutral-700 leading-relaxed">
+                    HuBiT v8.0 representa una revolución en la gestión inmobiliaria, creando el primer ecosistema digital que funciona como una <strong>red social especializada</strong> donde la transparencia es el pilar fundamental.
+                  </p>
+                  <p className="text-lg text-neutral-700 leading-relaxed">
+                    Nuestra plataforma permite que los propietarios e inquilinos valoren y compartan experiencias sobre servicios recibidos, generando un ambiente de confianza y mejora continua en el sector inmobiliario.
+                  </p>
+                </div>
+                <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Heart className="h-6 w-6 text-emerald-600" />
+                      <h3 className="text-lg font-semibold text-emerald-800">Red Social de Confianza</h3>
+                    </div>
+                    <p className="text-emerald-700 leading-relaxed">
+                      Los usuarios pueden valorar servicios, compartir experiencias y construir una comunidad basada en la transparencia y calidad del servicio.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
               
               <Card className="bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/60 shadow-lg shadow-blue-900/5">
                 <CardContent className="p-8">
@@ -107,9 +128,9 @@ export default function WhitepaperPage() {
                       <Target className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-semibold text-neutral-900 mb-4">{t("visionStatement")}</h3>
+                      <h3 className="text-2xl font-semibold text-neutral-900 mb-4">Nuestra Visión</h3>
                       <p className="text-neutral-700 text-lg leading-relaxed">
-                        {t("visionText")}
+                        Crear la primera red social inmobiliaria donde la transparencia, valoración de servicios y gestión eficiente converjan en un ecosistema digital descentralizado, empoderando a propietarios, administradores y proveedores de servicios.
                       </p>
                     </div>
                   </div>
@@ -124,7 +145,7 @@ export default function WhitepaperPage() {
               <div className="p-3 bg-gradient-to-br from-red-100 to-red-50 rounded-2xl">
                 <Target className="h-8 w-8 text-red-600" />
               </div>
-              <h2 className="text-4xl font-bold text-neutral-900">{t("problemStatement")}</h2>
+              <h2 className="text-4xl font-bold text-neutral-900">Problemática Actual</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -132,35 +153,41 @@ export default function WhitepaperPage() {
                 <CardHeader className="pb-4">
                   <CardTitle className="text-red-700 flex items-center gap-3 text-lg">
                     <Shield className="h-6 w-6" />
-                    {t("lackOfTransparency")}
+                    Falta de Transparencia
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-neutral-600 leading-relaxed">{t("transparencyProblem")}</p>
+                  <p className="text-neutral-600 leading-relaxed">
+                    Los propietarios no tienen visibilidad sobre la calidad real de los servicios contratados, generando desconfianza y decisiones mal informadas.
+                  </p>
                 </CardContent>
               </Card>
               
               <Card className="border-orange-200/60 hover:border-orange-300/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-orange-50/40 to-amber-50/40">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-orange-700 flex items-center gap-3 text-lg">
-                    <Users className="h-6 w-6" />
-                    {t("communicationGaps")}
+                    <MessageSquare className="h-6 w-6" />
+                    Ausencia de Valoración
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-neutral-600 leading-relaxed">{t("communicationProblem")}</p>
+                  <p className="text-neutral-600 leading-relaxed">
+                    No existe un sistema estructurado donde los clientes puedan valorar servicios y compartir experiencias de forma verificable y útil.
+                  </p>
                 </CardContent>
               </Card>
               
               <Card className="border-yellow-200/60 hover:border-yellow-300/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-yellow-50/40 to-amber-50/40">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-yellow-700 flex items-center gap-3 text-lg">
-                    <TrendingUp className="h-6 w-6" />
-                    {t("inefficientProcesses")}
+                    <TrendingDown className="h-6 w-6" />
+                    Procesos Ineficientes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-neutral-600 leading-relaxed">{t("efficiencyProblem")}</p>
+                  <p className="text-neutral-600 leading-relaxed">
+                    Gestión manual de pagos, seguimiento de servicios y comunicación fragmentada que reduce la eficiencia operativa.
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -172,71 +199,66 @@ export default function WhitepaperPage() {
               <div className="p-3 bg-gradient-to-br from-green-100 to-emerald-50 rounded-2xl">
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
-              <h2 className="text-4xl font-bold text-neutral-900">{t("ourSolution")}</h2>
+              <h2 className="text-4xl font-bold text-neutral-900">Nuestra Solución</h2>
             </div>
             
-            <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60 shadow-xl shadow-emerald-900/5">
+            <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60 shadow-xl shadow-emerald-900/5 mb-8">
               <CardHeader className="pb-6">
                 <CardTitle className="text-emerald-800 text-3xl flex items-center gap-3">
-                  <Zap className="h-8 w-8" />
-                  {t("integratedPlatform")}
+                  <Users className="h-8 w-8" />
+                  Red Social Inmobiliaria Transparente
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <p className="text-emerald-700 text-lg leading-relaxed">{t("platformDescription")}</p>
+                <p className="text-emerald-700 text-lg leading-relaxed">
+                  HuBiT combina una red social especializada con herramientas de gestión inmobiliaria, permitiendo que los usuarios valoren servicios, compartan experiencias y construyan confianza a través de la transparencia y verificación blockchain.
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
-                    <CheckCircle className="h-6 w-6 text-emerald-600 flex-shrink-0" />
-                    <span className="text-emerald-700 font-medium">{t("realTimeTracking")}</span>
+                    <Star className="h-6 w-6 text-emerald-600 flex-shrink-0" />
+                    <span className="text-emerald-700 font-medium">Sistema de Valoración Verificado</span>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
-                    <CheckCircle className="h-6 w-6 text-emerald-600 flex-shrink-0" />
-                    <span className="text-emerald-700 font-medium">{t("automatedPayments")}</span>
+                    <MessageSquare className="h-6 w-6 text-emerald-600 flex-shrink-0" />
+                    <span className="text-emerald-700 font-medium">Comunicación Transparente</span>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
-                    <CheckCircle className="h-6 w-6 text-emerald-600 flex-shrink-0" />
-                    <span className="text-emerald-700 font-medium">{t("qualityAssurance")}</span>
+                    <Zap className="h-6 w-6 text-emerald-600 flex-shrink-0" />
+                    <span className="text-emerald-700 font-medium">Automatización Inteligente</span>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-white/60 rounded-2xl">
-                    <CheckCircle className="h-6 w-6 text-emerald-600 flex-shrink-0" />
-                    <span className="text-emerald-700 font-medium">{t("communityGovernance")}</span>
+                    <Shield className="h-6 w-6 text-emerald-600 flex-shrink-0" />
+                    <span className="text-emerald-700 font-medium">Seguridad Blockchain</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </section>
 
-          {/* Technology Stack Section */}
-          <section className="mb-20">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 bg-gradient-to-br from-purple-100 to-blue-50 rounded-2xl">
-                <Zap className="h-8 w-8 text-purple-600" />
-              </div>
-              <h2 className="text-4xl font-bold text-neutral-900">{t("technologyStack")}</h2>
-            </div>
-            
+            {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Card className="hover:shadow-xl hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-blue-50/40 to-indigo-50/40 border-blue-200/60">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-xl">
-                    <Globe className="h-6 w-6 text-blue-600" />
-                    {t("blockchain")}
+                    <BarChart3 className="h-6 w-6 text-blue-600" />
+                    Valoración de Servicios
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-neutral-600 leading-relaxed">{t("blockchainDescription")}</p>
+                  <p className="text-neutral-600 leading-relaxed">
+                    Los usuarios pueden valorar servicios recibidos, crear reseñas detalladas y ayudar a otros propietarios a tomar decisiones informadas.
+                  </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-blue-700 font-medium">Solana Network</span>
+                      <span className="text-blue-700 font-medium">Reseñas Verificadas</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-blue-700 font-medium">Smart Contracts</span>
+                      <span className="text-blue-700 font-medium">Ranking de Proveedores</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-blue-700 font-medium">Decentralized Storage</span>
+                      <span className="text-blue-700 font-medium">Historial Transparente</span>
                     </div>
                   </div>
                 </CardContent>
@@ -245,24 +267,26 @@ export default function WhitepaperPage() {
               <Card className="hover:shadow-xl hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-purple-50/40 to-violet-50/40 border-purple-200/60">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-xl">
-                    <Code className="h-6 w-6 text-purple-600" />
-                    {t("webPlatform")}
+                    <Globe className="h-6 w-6 text-purple-600" />
+                    Comunidad Global
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-neutral-600 leading-relaxed">{t("webDescription")}</p>
+                  <p className="text-neutral-600 leading-relaxed">
+                    Una red social donde propietarios, administradores y proveedores interactúan de forma transparente y colaborativa.
+                  </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-purple-700 font-medium">Next.js & React</span>
+                      <span className="text-purple-700 font-medium">Perfiles Verificados</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-purple-700 font-medium">TypeScript</span>
+                      <span className="text-purple-700 font-medium">Red de Confianza</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-white/60 rounded-xl">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-purple-700 font-medium">Real-time Updates</span>
+                      <span className="text-purple-700 font-medium">Interacción Social</span>
                     </div>
                   </div>
                 </CardContent>
@@ -270,13 +294,13 @@ export default function WhitepaperPage() {
             </div>
           </section>
 
-          {/* Tokenomics Section with Corrected Distribution */}
+          {/* Tokenomics Section */}
           <section className="mb-20">
             <div className="flex items-center gap-4 mb-8">
               <div className="p-3 bg-gradient-to-br from-amber-100 to-yellow-50 rounded-2xl">
                 <Coins className="h-8 w-8 text-amber-600" />
               </div>
-              <h2 className="text-4xl font-bold text-neutral-900">{t("tokenomics")}</h2>
+              <h2 className="text-4xl font-bold text-neutral-900">Tokenomía</h2>
             </div>
             
             <Card className="bg-gradient-to-br from-amber-50/60 to-orange-50/60 border-amber-200/60 shadow-xl shadow-amber-900/5">
@@ -295,7 +319,7 @@ export default function WhitepaperPage() {
                     <CardContent className="p-6 text-center">
                       <PieChart className="h-8 w-8 text-purple-600 mx-auto mb-3" />
                       <div className="text-3xl font-bold text-purple-600 mb-2">1B</div>
-                      <div className="text-sm text-neutral-600 font-medium">{t("totalSupply")}</div>
+                      <div className="text-sm text-neutral-600 font-medium">Suministro Total</div>
                     </CardContent>
                   </Card>
                   
@@ -311,7 +335,7 @@ export default function WhitepaperPage() {
                     <CardContent className="p-6 text-center">
                       <Building className="h-8 w-8 text-green-600 mx-auto mb-3" />
                       <div className="text-3xl font-bold text-green-600 mb-2">20%</div>
-                      <div className="text-sm text-neutral-600 font-medium">{t("team")}</div>
+                      <div className="text-sm text-neutral-600 font-medium">Equipo</div>
                     </CardContent>
                   </Card>
                   
@@ -341,14 +365,14 @@ export default function WhitepaperPage() {
                         <Users className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="font-semibold text-neutral-900">Pool Público (60%)</div>
-                          <div className="text-sm text-neutral-600">Disponible para el público en general</div>
+                          <div className="text-sm text-neutral-600">Disponible para el público general a través de ventas y distribución</div>
                         </div>
                       </div>
                       <div className="flex items-start gap-3 p-4 bg-white/60 rounded-2xl">
                         <Building className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="font-semibold text-neutral-900">Equipo (20%)</div>
-                          <div className="text-sm text-neutral-600">Vesting de 4 años con cliff de 1 año</div>
+                          <div className="text-sm text-neutral-600">Vesting de 4 años con cliff de 1 año para el equipo fundador</div>
                         </div>
                       </div>
                     </div>
@@ -357,14 +381,14 @@ export default function WhitepaperPage() {
                         <Gift className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="font-semibold text-neutral-900">Airdrops & Recompensas (10%)</div>
-                          <div className="text-sm text-neutral-600">Para usuarios fieles y early adopters</div>
+                          <div className="text-sm text-neutral-600">Para usuarios fieles, early adopters y recompensas de la comunidad</div>
                         </div>
                       </div>
                       <div className="flex items-start gap-3 p-4 bg-white/60 rounded-2xl">
                         <Megaphone className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <div className="font-semibold text-neutral-900">Marketing (10%)</div>
-                          <div className="text-sm text-neutral-600">Campañas de marketing y promoción</div>
+                          <div className="text-sm text-neutral-600">Campañas de marketing, promoción y desarrollo de la comunidad</div>
                         </div>
                       </div>
                     </div>
@@ -374,48 +398,107 @@ export default function WhitepaperPage() {
             </Card>
           </section>
 
-          {/* Roadmap Section */}
+          {/* Updated Roadmap Section */}
           <section className="mb-20">
             <div className="flex items-center gap-4 mb-8">
               <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-50 rounded-2xl">
                 <TrendingUp className="h-8 w-8 text-indigo-600" />
               </div>
-              <h2 className="text-4xl font-bold text-neutral-900">{t("roadmap")}</h2>
+              <h2 className="text-4xl font-bold text-neutral-900">Hoja de Ruta 2025-2026</h2>
             </div>
             
             <div className="space-y-8">
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-50 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Rocket className="h-8 w-8 text-blue-600" />
+                </div>
+                <Card className="flex-1 bg-gradient-to-br from-blue-50/40 to-indigo-50/40 border-blue-200/60">
+                  <CardContent className="p-6">
+                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q3 2025 - Lanzamiento del Token HBIT</h3>
+                    <p className="text-neutral-600 leading-relaxed mb-4">
+                      Lanzamiento oficial de la criptomoneda HBIT con funcionalidades completas de valoración de servicios y sistema de recompensas para usuarios de la red social inmobiliaria.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Token Launch</span>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Red Social Beta</span>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Sistema de Valoración</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
               <div className="flex items-start gap-6">
                 <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-50 rounded-2xl flex items-center justify-center shadow-lg">
                   <CheckCircle className="h-8 w-8 text-green-600" />
                 </div>
                 <Card className="flex-1 bg-gradient-to-br from-green-50/40 to-emerald-50/40 border-green-200/60">
                   <CardContent className="p-6">
-                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q1 2024 - Completado</h3>
-                    <p className="text-neutral-600 leading-relaxed">{t("roadmapQ1")}</p>
+                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q4 2025 - Aplicación Completada</h3>
+                    <p className="text-neutral-600 leading-relaxed mb-4">
+                      Finalización completa de la aplicación con todas las funcionalidades de la red social inmobiliaria, incluyendo gestión avanzada, pagos automatizados y sistema completo de transparencia y valoración.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">App Completa</span>
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Red Social Full</span>
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Pagos Cripto</span>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
               
               <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-50 rounded-2xl flex items-center justify-center shadow-lg">
-                  <Star className="h-8 w-8 text-blue-600" />
+                <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-amber-100 to-yellow-50 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Banknote className="h-8 w-8 text-amber-600" />
                 </div>
-                <Card className="flex-1 bg-gradient-to-br from-blue-50/40 to-indigo-50/40 border-blue-200/60">
+                <Card className="flex-1 bg-gradient-to-br from-amber-50/40 to-yellow-50/40 border-amber-200/60">
                   <CardContent className="p-6">
-                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q2 2024 - En Progreso</h3>
-                    <p className="text-neutral-600 leading-relaxed">{t("roadmapQ2")}</p>
+                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q1 2026 - Cotización en Mercados Centrales</h3>
+                    <p className="text-neutral-600 leading-relaxed mb-4">
+                      Listado del token HBIT en los principales exchanges centralizados para aumentar liquidez y accesibilidad global.
+                    </p>
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center gap-3 p-2 bg-white/60 rounded-lg">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span className="text-amber-700 font-medium text-sm">Binance - Exchange líder mundial</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-2 bg-white/60 rounded-lg">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span className="text-amber-700 font-medium text-sm">Coinbase - Mercado institucional</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-2 bg-white/60 rounded-lg">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span className="text-amber-700 font-medium text-sm">Kraken - Mercado europeo</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-2 bg-white/60 rounded-lg">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span className="text-amber-700 font-medium text-sm">KuCoin - Expansión asiática</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">CEX Listing</span>
+                      <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">Liquidez Global</span>
+                      <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">Adopción Masiva</span>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
-              
+
               <div className="flex items-start gap-6">
                 <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-100 to-violet-50 rounded-2xl flex items-center justify-center shadow-lg">
-                  <TrendingUp className="h-8 w-8 text-purple-600" />
+                  <Globe className="h-8 w-8 text-purple-600" />
                 </div>
                 <Card className="flex-1 bg-gradient-to-br from-purple-50/40 to-violet-50/40 border-purple-200/60">
                   <CardContent className="p-6">
-                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q3 2024 - Planificado</h3>
-                    <p className="text-neutral-600 leading-relaxed">{t("roadmapQ3")}</p>
+                    <h3 className="text-2xl font-semibold text-neutral-900 mb-3">Q2 2026 - Expansión Global</h3>
+                    <p className="text-neutral-600 leading-relaxed mb-4">
+                      Expansión internacional de la red social inmobiliaria a mercados clave en América, Europa, Asia y Oceanía, estableciendo HuBiT como el estándar global de transparencia inmobiliaria.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Mercado Global</span>
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Múltiples Idiomas</span>
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Partnerships</span>
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Regulación</span>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -428,7 +511,7 @@ export default function WhitepaperPage() {
               <div className="p-3 bg-gradient-to-br from-rose-100 to-pink-50 rounded-2xl">
                 <Users className="h-8 w-8 text-rose-600" />
               </div>
-              <h2 className="text-4xl font-bold text-neutral-900">{t("team")}</h2>
+              <h2 className="text-4xl font-bold text-neutral-900">Equipo</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -437,8 +520,10 @@ export default function WhitepaperPage() {
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
                     <Users className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">{t("foundingTeam")}</h3>
-                  <p className="text-neutral-600 leading-relaxed">{t("teamDescription")}</p>
+                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">Equipo Fundador</h3>
+                  <p className="text-neutral-600 leading-relaxed">
+                    Expertos en tecnología blockchain, gestión inmobiliaria y desarrollo de productos con más de 10 años de experiencia combinada en el sector.
+                  </p>
                 </CardContent>
               </Card>
               
@@ -447,8 +532,10 @@ export default function WhitepaperPage() {
                   <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 to-green-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
                     <Zap className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">{t("techTeam")}</h3>
-                  <p className="text-neutral-600 leading-relaxed">{t("techDescription")}</p>
+                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">Equipo Técnico</h3>
+                  <p className="text-neutral-600 leading-relaxed">
+                    Desarrolladores especializados en blockchain, ingenieros de software y diseñadores UX/UI enfocados en crear la mejor experiencia de usuario.
+                  </p>
                 </CardContent>
               </Card>
               
@@ -457,8 +544,10 @@ export default function WhitepaperPage() {
                   <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-violet-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
                     <Building className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">{t("advisors")}</h3>
-                  <p className="text-neutral-600 leading-relaxed">{t("advisorsDescription")}</p>
+                  <h3 className="text-xl font-semibold text-neutral-900 mb-3">Asesores</h3>
+                  <p className="text-neutral-600 leading-relaxed">
+                    Profesionales del sector inmobiliario, expertos en fintech y asesores legales que guían el desarrollo estratégico y la expansión global.
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -470,22 +559,21 @@ export default function WhitepaperPage() {
               <CardContent className="p-8 text-center">
                 <h2 className="text-3xl font-bold text-neutral-900 mb-6">El Futuro de HuBiT</h2>
                 <p className="text-lg text-neutral-600 leading-relaxed max-w-3xl mx-auto mb-8">
-                  HuBiT representa la evolución natural de la gestión inmobiliaria, combinando tecnología blockchain 
-                  con una experiencia de usuario excepcional para crear un ecosistema transparente, eficiente y 
-                  centrado en la comunidad.
+                  HuBiT representa la evolución natural de la gestión inmobiliaria, combinando una red social transparente con tecnología blockchain avanzada para crear un ecosistema donde la confianza, valoración de servicios y eficiencia operativa transforman la experiencia de toda la comunidad inmobiliaria.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 
                     size="lg"
-                    className="flex items-center gap-3 bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 px-8 py-4 text-base"
+                    className="flex items-center gap-3 bg-gradient-to-r from-neutral-900 to-neutral-800 hover:from-neutral-800 hover:to-neutral-700 px-8 py-4 text-base shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
                   >
+                    <Users className="h-5 w-5" />
                     Únete a la Comunidad
                   </Button>
                   <Button 
                     variant="outline"
                     onClick={scrollToTop}
                     size="lg"
-                    className="flex items-center gap-3 bg-white/80 backdrop-blur-sm hover:bg-white border-neutral-200 hover:border-neutral-300 px-8 py-4 text-base"
+                    className="flex items-center gap-3 bg-white/80 backdrop-blur-sm hover:bg-white border-neutral-200 hover:border-neutral-300 px-8 py-4 text-base shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                   >
                     <ArrowUp className="h-5 w-5" />
                     Volver al Inicio
