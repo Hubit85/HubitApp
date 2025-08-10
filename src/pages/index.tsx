@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building, Wrench, Star, Heart, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Gift, Crown, Parachute } from "lucide-react";
+import { Users, Building, Wrench, Star, Heart, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Gift, Crown } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import Image from "next/image";
 
@@ -483,7 +483,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="text-center">
                     <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-16 h-16 flex items-center justify-center">
-                      <Parachute className="h-8 w-8 text-green-600" />
+                      <Gift className="h-8 w-8 text-green-600" />
                     </div>
                     <h4 className="font-semibold text-gray-900 mb-2">{t("benefit1")}</h4>
                   </div>
