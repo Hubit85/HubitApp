@@ -1,4 +1,3 @@
-
 import React from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
@@ -492,16 +491,6 @@ export default function WhitepaperPage() {
                     </span>
                   </div>
 
-                  {/* Y-Axis Labels */}
-                  <div className="absolute left-8 top-8 bottom-8 flex flex-col justify-between text-xs text-neutral-500">
-                    <span>1000M</span>
-                    <span>800M</span>
-                    <span>600M</span>
-                    <span>400M</span>
-                    <span>200M</span>
-                    <span>0</span>
-                  </div>
-
                   {/* Chart Area - RESPONSIVE WIDTH que se ajusta al contenedor */}
                   <div className="ml-16 mr-8 pt-8">
                     
@@ -528,6 +517,10 @@ export default function WhitepaperPage() {
                         
                         {/* Q4 2025: 850M (600M Pool + 100M Equipo + 50M Marketing + 50M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          {/* Valor de tokens circulantes encima de la barra */}
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            850M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '272px' }}>
                             {/* Pool Público: 600M = 192px */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
@@ -543,6 +536,9 @@ export default function WhitepaperPage() {
 
                         {/* Q1 2026: 925M (600M Pool + 150M Equipo + 75M Marketing + 75M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            925M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '296px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '48px' }}></div>
@@ -554,6 +550,9 @@ export default function WhitepaperPage() {
 
                         {/* Q2 2026: 962.5M (600M Pool + 175M Equipo + 87.5M Marketing + 87.5M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            962M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '308px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '56px' }}></div>
@@ -565,6 +564,9 @@ export default function WhitepaperPage() {
 
                         {/* Q3 2026: 981.25M (600M Pool + 187.5M Equipo + 93.75M Marketing + 93.75M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            981M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '314px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '60px' }}></div>
@@ -576,6 +578,9 @@ export default function WhitepaperPage() {
 
                         {/* Q4 2026: 990.625M (600M Pool + 193.75M Equipo + 96.875M Marketing + 96.875M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            990M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '317px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '62px' }}></div>
@@ -587,6 +592,9 @@ export default function WhitepaperPage() {
 
                         {/* Q1 2027: 995.31M (600M Pool + 196.875M Equipo + 98.44M Marketing + 98.44M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            995M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '318px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '63px' }}></div>
@@ -598,6 +606,9 @@ export default function WhitepaperPage() {
 
                         {/* Q2 2027: 997.66M (600M Pool + 198.44M Equipo + 99.22M Marketing + 99.22M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            997M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
@@ -609,6 +620,9 @@ export default function WhitepaperPage() {
 
                         {/* Q3 2027: 998.83M (600M Pool + 199.22M Equipo + 99.61M Marketing + 99.61M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            998M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.5px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
@@ -620,6 +634,9 @@ export default function WhitepaperPage() {
 
                         {/* Q4 2027: 999.41M (600M Pool + 199.61M Equipo + 99.805M Marketing + 99.805M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            999M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.8px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
@@ -631,6 +648,9 @@ export default function WhitepaperPage() {
 
                         {/* 2028: 999.9M PROMEDIO (600M Pool + 199.9M Equipo + 99.95M Marketing + 99.95M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            999.9M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.95px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
@@ -642,6 +662,9 @@ export default function WhitepaperPage() {
 
                         {/* 2029: 1000M COMPLETO (600M Pool + 200M Equipo + 100M Marketing + 100M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-emerald-50/90 px-2 py-1 rounded shadow border border-emerald-200">
+                            1,000M
+                          </div>
                           <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '320px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
