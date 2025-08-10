@@ -912,6 +912,197 @@ export default function WhitepaperPage() {
             </div>
           </section>
 
+          {/* Team Vesting Schedule - Exponential Decay */}
+          <section className="mb-20">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-gradient-to-br from-violet-50/60 to-purple-50 rounded-2xl">
+                <Building className="h-8 w-8 text-purple-600" />
+              </div>
+              <h2 className="text-4xl font-bold text-neutral-900">
+                {language === "es" ? "Cronograma de Vesting del Equipo (2026-2030)" : "Team Vesting Schedule (2026-2030)"}
+              </h2>
+            </div>
+            
+            <div className="space-y-8">
+              <p className="text-neutral-600 mt-2">
+                {language === "es" 
+                  ? "Sistema de dilución exponencial: cada cuatrimestre se libera la mitad de los tokens restantes" 
+                  : "Exponential dilution system: half of remaining tokens released each quarter"
+                }
+              </p>
+              
+              <div className="space-y-6">
+                <h4 className="text-lg font-semibold text-neutral-900 flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-violet-600" />
+                  {language === "es" ? "Año 2026 - Primeros Desbloqueos" : "Year 2026 - Initial Unlocks"}
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Q1 2026 */}
+                  <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200/60">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-purple-600 rounded-full"></div>
+                          <span className="font-semibold text-purple-900">
+                            {language === "es" ? "Q1 2026" : "Q1 2026"}
+                          </span>
+                        </div>
+                        <span className="text-2xl font-bold text-purple-600">100M</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-neutral-600">{language === "es" ? "Porcentaje:" : "Percentage:"}</span>
+                          <span className="font-medium text-purple-700">50% del total</span>
+                        </div>
+                        <div className="w-full bg-neutral-200 rounded-full h-3">
+                          <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full" style={{width: '50%'}}></div>
+                        </div>
+                        <p className="text-xs text-neutral-600 mt-2">
+                          {language === "es" ? "Primera liberación masiva" : "First major release"}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Q2 2026 */}
+                  <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200/60">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
+                          <span className="font-semibold text-indigo-900">
+                            {language === "es" ? "Abril 2026" : "April 2026"}
+                          </span>
+                        </div>
+                        <span className="text-2xl font-bold text-indigo-600">50M</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-neutral-600">{language === "es" ? "Porcentaje:" : "Percentage:"}</span>
+                          <span className="font-medium text-indigo-700">25% del total</span>
+                        </div>
+                        <div className="w-full bg-neutral-200 rounded-full h-3">
+                          <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-3 rounded-full" style={{width: '25%'}}></div>
+                        </div>
+                        <p className="text-xs text-neutral-600 mt-2">
+                          {language === "es" ? "Mitad de lo restante" : "Half of remaining"}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Q3 2026 */}
+                  <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200/60">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-emerald-600 rounded-full"></div>
+                          <span className="font-semibold text-emerald-900">
+                            {language === "es" ? "Julio 2026" : "July 2026"}
+                          </span>
+                        </div>
+                        <span className="text-2xl font-bold text-emerald-600">25M</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-neutral-600">{language === "es" ? "Porcentaje:" : "Percentage:"}</span>
+                          <span className="font-medium text-emerald-700">12.5% del total</span>
+                        </div>
+                        <div className="w-full bg-neutral-200 rounded-full h-3">
+                          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-3 rounded-full" style={{width: '12.5%'}}></div>
+                        </div>
+                        <p className="text-xs text-neutral-600 mt-2">
+                          {language === "es" ? "Patrón continúa" : "Pattern continues"}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Q4 2026 */}
+                  <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200/60">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-amber-600 rounded-full"></div>
+                          <span className="font-semibold text-amber-900">
+                            {language === "es" ? "Octubre 2026" : "October 2026"}
+                          </span>
+                        </div>
+                        <span className="text-2xl font-bold text-amber-600">12.5M</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-neutral-600">{language === "es" ? "Porcentaje:" : "Percentage:"}</span>
+                          <span className="font-medium text-amber-700">6.25% del total</span>
+                        </div>
+                        <div className="w-full bg-neutral-200 rounded-full h-3">
+                          <div className="bg-gradient-to-r from-amber-500 to-amber-600 h-3 rounded-full" style={{width: '6.25%'}}></div>
+                        </div>
+                        <p className="text-xs text-neutral-600 mt-2">
+                          {language === "es" ? "Dilución exponencial" : "Exponential dilution"}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Exponential Decay Visualization */}
+              <div className="mt-8 pt-6 border-t border-neutral-200">
+                <h4 className="text-lg font-semibold text-neutral-900 mb-6 flex items-center gap-3">
+                  <TrendingDown className="h-5 w-5 text-rose-600" />
+                  {language === "es" ? "Patrón de Dilución Exponencial (4 Años)" : "Exponential Dilution Pattern (4 Years)"}
+                </h4>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-200/60">
+                    <div className="text-3xl font-bold text-purple-600 mb-1">2026</div>
+                    <div className="text-sm text-neutral-600">187.5M tokens</div>
+                    <div className="text-xs text-purple-700 font-medium">93.75% liberado</div>
+                  </div>
+                  <div className="text-center p-4 bg-gradient-to-br from-neutral-50 to-gray-50 rounded-xl border border-neutral-200/60">
+                    <div className="text-3xl font-bold text-neutral-600 mb-1">2027</div>
+                    <div className="text-sm text-neutral-600">~9.4M tokens</div>
+                    <div className="text-xs text-neutral-700 font-medium">4.7% restante</div>
+                  </div>
+                  <div className="text-center p-4 bg-gradient-to-br from-neutral-50 to-gray-50 rounded-xl border border-neutral-200/60">
+                    <div className="text-3xl font-bold text-neutral-600 mb-1">2028</div>
+                    <div className="text-sm text-neutral-600">~2.3M tokens</div>
+                    <div className="text-xs text-neutral-700 font-medium">1.2% restante</div>
+                  </div>
+                  <div className="text-center p-4 bg-gradient-to-br from-neutral-50 to-gray-50 rounded-xl border border-neutral-200/60">
+                    <div className="text-3xl font-bold text-neutral-600 mb-1">2029+</div>
+                    <div className="text-sm text-neutral-600">&lt;1M tokens</div>
+                    <div className="text-xs text-neutral-700 font-medium">Residual</div>
+                  </div>
+                </div>
+
+                <Card className="bg-gradient-to-r from-rose-50/50 to-orange-50/50 border-rose-200/60">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-rose-100 rounded-xl">
+                        <Activity className="h-6 w-6 text-rose-600" />
+                      </div>
+                      <div>
+                        <h5 className="font-semibold text-neutral-900 mb-2">
+                          {language === "es" ? "Impacto en la Dilución" : "Dilution Impact"}
+                        </h5>
+                        <p className="text-neutral-600 leading-relaxed text-sm">
+                          {language === "es" ? (
+                            "Este modelo exponencial garantiza que el 93.75% de los tokens del equipo se liberen en el primer año (2026), con cantidades decrecientes en los años siguientes. La dilución más significativa ocurre temprano, proporcionando claridad y predictibilidad al mercado."
+                          ) : (
+                            "This exponential model ensures that 93.75% of team tokens are released in the first year (2026), with decreasing amounts in subsequent years. The most significant dilution occurs early, providing market clarity and predictability."
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+
           {/* Conclusion Section */}
           <section className="mb-12">
             <Card className="bg-gradient-to-br from-neutral-50/60 to-gray-50/60 border-neutral-200/60 shadow-xl">
