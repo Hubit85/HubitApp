@@ -29,7 +29,8 @@ import {
   BarChart3,
   Rocket,
   Banknote,
-  TrendingDown
+  TrendingDown,
+  Twitter
 } from "lucide-react";
 
 export default function WhitepaperPage() {
