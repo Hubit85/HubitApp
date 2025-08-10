@@ -500,25 +500,6 @@ export default function Home() {
                     <h4 className="font-semibold text-gray-900 mb-2">{t("benefit3")}</h4>
                   </div>
                 </div>
-
-                {/* Call to Action */}
-                <div className="text-center mt-12">
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button 
-                      size="lg" 
-                      className="text-lg px-8 py-6 bg-green-600 text-white hover:bg-green-700"
-                    >
-                      {t("startUsingHbit")}
-                    </Button>
-                    <Button 
-                      size="lg" 
-                      variant="outline" 
-                      className="text-lg px-8 py-6 border-green-600 text-green-600 hover:bg-green-50"
-                    >
-                      {t("learnMore")}
-                    </Button>
-                  </div>
-                </div>
               </div>
             </div>
           </section>
