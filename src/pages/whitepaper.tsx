@@ -1103,6 +1103,297 @@ export default function WhitepaperPage() {
             </div>
           </section>
 
+          {/* Token Growth Timeline Chart - Interactive */}
+          <section className="mb-20">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-gradient-to-br from-violet-100 to-purple-50 rounded-2xl">
+                <LineChart className="h-8 w-8 text-violet-600" />
+              </div>
+              <h2 className="text-4xl font-bold text-neutral-900">
+                {language === "es" ? "Crecimiento de Tokens en Circulación (2025-2029)" : "Circulating Tokens Growth (2025-2029)"}
+              </h2>
+            </div>
+            
+            <Card className="bg-gradient-to-br from-neutral-50/60 to-white border-neutral-200/60 shadow-xl mb-8">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl font-bold text-neutral-900 flex items-center gap-3">
+                  <Activity className="h-7 w-7 text-violet-600" />
+                  {language === "es" ? "Evolución Temporal del Suministro Circulante" : "Temporal Evolution of Circulating Supply"}
+                </CardTitle>
+                <p className="text-neutral-600 mt-3">
+                  {language === "es" ? (
+                    "Visualización del crecimiento progresivo desde 800M tokens iniciales hasta 1,000M tokens completamente circulantes"
+                  ) : (
+                    "Visualization of progressive growth from 800M initial tokens to 1,000M fully circulating tokens"
+                  )}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Timeline Chart Visual */}
+                <div className="relative">
+                  {/* Year Labels */}
+                  <div className="flex justify-between mb-6 text-sm font-semibold text-neutral-600">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-blue-600">2025</div>
+                      <div className="text-xs">{language === "es" ? "Inicio" : "Start"}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-emerald-600">2026</div>
+                      <div className="text-xs">{language === "es" ? "Vesting Equipo" : "Team Vesting"}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-amber-600">2027</div>
+                      <div className="text-xs">{language === "es" ? "Estabilidad" : "Stability"}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-purple-600">2028</div>
+                      <div className="text-xs">{language === "es" ? "Consolidación" : "Consolidation"}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-rose-600">2029</div>
+                      <div className="text-xs">{language === "es" ? "Máximo" : "Maximum"}</div>
+                    </div>
+                  </div>
+
+                  {/* Chart Area */}
+                  <div className="relative bg-gradient-to-t from-neutral-50/40 to-white border border-neutral-200/60 rounded-2xl p-8 h-96">
+                    {/* Y-Axis Labels */}
+                    <div className="absolute left-2 top-4 bottom-8 flex flex-col justify-between text-xs text-neutral-500 font-medium">
+                      <div>1.0B</div>
+                      <div>900M</div>
+                      <div>800M</div>
+                      <div>700M</div>
+                      <div>600M</div>
+                    </div>
+
+                    {/* Chart Lines and Dots */}
+                    <div className="ml-8 h-full relative">
+                      {/* Background Grid */}
+                      <div className="absolute inset-0">
+                        <div className="h-full w-full opacity-20">
+                          <div className="h-1/5 border-b border-neutral-200"></div>
+                          <div className="h-1/5 border-b border-neutral-200"></div>
+                          <div className="h-1/5 border-b border-neutral-200"></div>
+                          <div className="h-1/5 border-b border-neutral-200"></div>
+                          <div className="h-1/5"></div>
+                        </div>
+                        <div className="absolute inset-0 grid grid-cols-5">
+                          <div className="border-r border-neutral-200 opacity-20"></div>
+                          <div className="border-r border-neutral-200 opacity-20"></div>
+                          <div className="border-r border-neutral-200 opacity-20"></div>
+                          <div className="border-r border-neutral-200 opacity-20"></div>
+                          <div></div>
+                        </div>
+                      </div>
+
+                      {/* Progressive Line Chart */}
+                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 320" preserveAspectRatio="none">
+                        {/* Chart Path */}
+                        <defs>
+                          <linearGradient id="tokenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#3b82f6" />
+                            <stop offset="25%" stopColor="#10b981" />
+                            <stop offset="50%" stopColor="#f59e0b" />
+                            <stop offset="75%" stopColor="#8b5cf6" />
+                            <stop offset="100%" stopColor="#ec4899" />
+                          </linearGradient>
+                          <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="url(#tokenGradient)" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="url(#tokenGradient)" stopOpacity="0.05" />
+                          </linearGradient>
+                        </defs>
+                        
+                        {/* Area Fill */}
+                        <path
+                          d="M 0 160 L 80 160 L 100 80 L 200 72 L 300 68 L 400 64 L 400 320 L 0 320 Z"
+                          fill="url(#areaGradient)"
+                        />
+                        
+                        {/* Main Line */}
+                        <path
+                          d="M 0 160 L 80 160 L 100 80 L 200 72 L 300 68 L 400 64"
+                          stroke="url(#tokenGradient)"
+                          strokeWidth="4"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="drop-shadow-sm"
+                        />
+                      </svg>
+
+                      {/* Data Points */}
+                      <div className="absolute inset-0">
+                        {/* 2025: 800M */}
+                        <div className="absolute" style={{ left: '0%', bottom: '50%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-blue-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-blue-600 bg-white/90 px-2 py-1 rounded shadow">
+                            800M
+                          </div>
+                        </div>
+
+                        {/* Early 2026: ~880M */}
+                        <div className="absolute" style={{ left: '20%', bottom: '50%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-emerald-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white/90 px-2 py-1 rounded shadow">
+                            880M
+                          </div>
+                        </div>
+
+                        {/* Mid 2026: ~980M */}
+                        <div className="absolute" style={{ left: '25%', bottom: '75%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-5 h-5 bg-gradient-to-r from-emerald-500 to-amber-500 rounded-full shadow-lg border-2 border-white animate-pulse"></div>
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white/90 px-2 py-1 rounded shadow">
+                            980M
+                          </div>
+                        </div>
+
+                        {/* 2027: ~990M */}
+                        <div className="absolute" style={{ left: '50%', bottom: '77.5%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-amber-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-amber-600 bg-white/90 px-2 py-1 rounded shadow">
+                            990M
+                          </div>
+                        </div>
+
+                        {/* 2028: ~997M */}
+                        <div className="absolute" style={{ left: '75%', bottom: '78.5%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-4 h-4 bg-purple-500 rounded-full shadow-lg border-2 border-white"></div>
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-purple-600 bg-white/90 px-2 py-1 rounded shadow">
+                            997M
+                          </div>
+                        </div>
+
+                        {/* 2029: 1000M */}
+                        <div className="absolute" style={{ left: '100%', bottom: '80%', transform: 'translate(-50%, 50%)' }}>
+                          <div className="w-5 h-5 bg-gradient-to-r from-purple-500 to-rose-500 rounded-full shadow-xl border-2 border-white animate-pulse"></div>
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-rose-600 bg-white/90 px-2 py-1 rounded shadow">
+                            1B
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Milestone Breakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                  <Card className="bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/60">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Clock className="h-6 w-6 text-blue-600" />
+                        <h4 className="font-semibold text-blue-900">
+                          {language === "es" ? "Inicio (2025)" : "Start (2025)"}
+                        </h4>
+                      </div>
+                      <div className="text-3xl font-bold text-blue-600 mb-2">800M</div>
+                      <p className="text-blue-700 text-sm leading-relaxed">
+                        {language === "es" ? (
+                          "Pool público (60%) + Airdrops y Marketing (20%) completamente disponibles"
+                        ) : (
+                          "Public pool (60%) + Airdrops and Marketing (20%) fully available"
+                        )}
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <TrendingUp className="h-6 w-6 text-emerald-600" />
+                        <h4 className="font-semibold text-emerald-900">
+                          {language === "es" ? "Crecimiento (2026)" : "Growth (2026)"}
+                        </h4>
+                      </div>
+                      <div className="text-3xl font-bold text-emerald-600 mb-2">+187.5M</div>
+                      <p className="text-emerald-700 text-sm leading-relaxed">
+                        {language === "es" ? (
+                          "93.75% de tokens del equipo liberados exponencialmente durante el año"
+                        ) : (
+                          "93.75% of team tokens released exponentially throughout the year"
+                        )}
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-br from-purple-50/60 to-violet-50/60 border-purple-200/60">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Target className="h-6 w-6 text-purple-600" />
+                        <h4 className="font-semibold text-purple-900">
+                          {language === "es" ? "Máximo (2029)" : "Maximum (2029)"}
+                        </h4>
+                      </div>
+                      <div className="text-3xl font-bold text-purple-600 mb-2">1B</div>
+                      <p className="text-purple-700 text-sm leading-relaxed">
+                        {language === "es" ? (
+                          "100% del suministro total en circulación, ecosistema completamente maduro"
+                        ) : (
+                          "100% of total supply in circulation, fully mature ecosystem"
+                        )}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Exponential Release Pattern Details */}
+            <Card className="bg-gradient-to-br from-rose-50/60 to-orange-50/60 border-rose-200/60 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-xl text-rose-800">
+                  <Building className="h-6 w-6" />
+                  {language === "es" ? "Detalle del Patrón Exponencial del Equipo" : "Team Exponential Pattern Details"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-white/80 rounded-xl border border-rose-200/40">
+                    <div className="text-2xl font-bold text-purple-600 mb-1">Q1 2026</div>
+                    <div className="text-sm text-neutral-600">100M tokens</div>
+                    <div className="text-xs text-purple-700 font-medium">50% del total</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/80 rounded-xl border border-rose-200/40">
+                    <div className="text-2xl font-bold text-indigo-600 mb-1">Abril 2026</div>
+                    <div className="text-sm text-neutral-600">50M tokens</div>
+                    <div className="text-xs text-indigo-700 font-medium">25% del total</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/80 rounded-xl border border-rose-200/40">
+                    <div className="text-2xl font-bold text-emerald-600 mb-1">Julio 2026</div>
+                    <div className="text-sm text-neutral-600">25M tokens</div>
+                    <div className="text-xs text-emerald-700 font-medium">12.5% del total</div>
+                  </div>
+                  <div className="text-center p-4 bg-white/80 rounded-xl border border-rose-200/40">
+                    <div className="text-2xl font-bold text-amber-600 mb-1">Oct 2026</div>
+                    <div className="text-sm text-neutral-600">12.5M tokens</div>
+                    <div className="text-xs text-amber-700 font-medium">6.25% del total</div>
+                  </div>
+                </div>
+
+                <Card className="bg-white/60 border-neutral-200/40">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-rose-100 rounded-xl">
+                        <Activity className="h-6 w-6 text-rose-600" />
+                      </div>
+                      <div>
+                        <h5 className="font-semibold text-neutral-900 mb-2">
+                          {language === "es" ? "Ventaja del Patrón Exponencial" : "Exponential Pattern Advantage"}
+                        </h5>
+                        <p className="text-neutral-600 leading-relaxed text-sm">
+                          {language === "es" ? (
+                            "El 93.75% de la dilución del equipo ocurre en 2026, creando máxima transparencia y predictibilidad. Los siguientes años muestran incrementos mínimos, permitiendo al ecosistema crecer sin presión de dilución significativa."
+                          ) : (
+                            "93.75% of team dilution occurs in 2026, creating maximum transparency and predictability. Following years show minimal increments, allowing the ecosystem to grow without significant dilution pressure."
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+          </section>
+
           {/* Conclusion Section */}
           <section className="mb-12">
             <Card className="bg-gradient-to-br from-neutral-50/60 to-gray-50/60 border-neutral-200/60 shadow-xl">
