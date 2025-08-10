@@ -675,20 +675,6 @@ export default function WhitepaperPage() {
                         </div>
                       </div>
 
-                      {/* X-Axis Labels */}
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-between text-xs text-neutral-600 font-medium px-2">
-                        <span>Q4 25</span>
-                        <span>Q1 26</span>
-                        <span>Q2 26</span>
-                        <span>Q3 26</span>
-                        <span>Q4 26</span>
-                        <span>Q1 27</span>
-                        <span>Q2 27</span>
-                        <span>Q3 27</span>
-                        <span>Q4 27</span>
-                        <span>2028</span>
-                        <span>2029</span>
-                      </div>
                     </div>
                   </div>
                 </div>
