@@ -85,6 +85,18 @@ export function Header() {
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
           
+          {/* Help button - available on all pages */}
+          <HelpModal>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="bg-white text-black border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
+            >
+              <HelpCircle className="h-4 w-4" />
+              <span>{t("help")}</span>
+            </Button>
+          </HelpModal>
+          
           {/* Show Whitepaper button only on home page */}
           {isHomePage && (
             <WhitepaperModal>
