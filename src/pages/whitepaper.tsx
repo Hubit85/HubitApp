@@ -493,6 +493,16 @@ export default function WhitepaperPage() {
 
                   {/* Chart Area - RESPONSIVE WIDTH */}
                   <div className="ml-16 mr-8 min-w-[1400px]">
+                    {/* Y-Axis Labels */}
+                    <div className="absolute left-0 h-80 flex flex-col justify-between py-1">
+                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">1000M</div>
+                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">800M</div>
+                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">600M</div>
+                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">400M</div>
+                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">200M</div>
+                      <div className="text-xs font-semibold text-neutral-600 -translate-x-2">0M</div>
+                    </div>
+                    
                     {/* Chart Grid and Content */}
                     <div className="relative h-80 bg-gradient-to-t from-neutral-50/30 to-transparent">
                       {/* Grid Lines */}
@@ -527,6 +537,8 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '240px', height: '16px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">850M</div>
                             </div>
+                            {/* Valor siempre visible encima de la barra */}
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">850M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2025</div>
                         </div>
@@ -540,6 +552,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '264px', height: '24px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">925M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">925M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2026</div>
                         </div>
@@ -553,6 +566,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '276px', height: '28px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">962M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">962M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2026</div>
                         </div>
@@ -566,6 +580,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '282px', height: '30px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">981M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">981M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2026</div>
                         </div>
@@ -579,6 +594,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '285px', height: '31px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">990M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">990M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2026</div>
                         </div>
@@ -592,6 +608,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '286px', height: '31px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">995M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">995M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2027</div>
                         </div>
@@ -605,6 +622,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">997M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">997M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2027</div>
                         </div>
@@ -618,6 +636,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">998M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">998M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2027</div>
                         </div>
@@ -631,6 +650,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white px-1 rounded shadow">999M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2027</div>
                         </div>
@@ -644,6 +664,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">999M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2028</div>
                         </div>
@@ -658,6 +679,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">999M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2028</div>
                         </div>
@@ -671,6 +693,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">999M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2028</div>
                         </div>
@@ -684,6 +707,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">999M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2028</div>
                         </div>
@@ -697,6 +721,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">999M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2029</div>
                         </div>
@@ -710,6 +735,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">999M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2029</div>
                         </div>
@@ -723,6 +749,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700 bg-white px-1 rounded shadow">999M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-700">999M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2029</div>
                         </div>
@@ -736,40 +763,13 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}>
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600 bg-white px-1 rounded shadow">1,000M</div>
                             </div>
+                            <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs font-bold text-emerald-600">1,000M</div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2029</div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* X-Axis Labels para 17 trimestres RESPONSIVE */}
-                <div className="flex justify-between px-4 mt-4">
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q4<br/>2025</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q1<br/>2026</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q2<br/>2026</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q3<br/>2026</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q4<br/>2026</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q1<br/>2027</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q2<br/>2027</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q3<br/>2027</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q4<br/>2027</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q1<br/>2028</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q2<br/>2028</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q3<br/>2028</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q4<br/>2028</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q1<br/>2029</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q2<br/>2029</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q3<br/>2029</div>
-                  <div className="text-xs font-bold text-neutral-700 text-center flex-1">Q4<br/>2029</div>
-                </div>
-
-                {/* X-Axis Title */}
-                <div className="text-center mt-4">
-                  <span className="text-sm font-bold text-neutral-700">
-                    {language === "es" ? "Trimestres (Q4 2025 - Q4 2029)" : "Quarters (Q4 2025 - Q4 2029)"}
-                  </span>
                 </div>
               </CardContent>
             </Card>
