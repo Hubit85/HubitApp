@@ -682,6 +682,193 @@ export default function WhitepaperPage() {
             </Card>
           </section>
 
+          {/* Ventajas del Vesting Logarítmico - Nueva Sección */}
+          <div className="mt-12">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-gradient-to-br from-emerald-100 to-green-50 rounded-2xl">
+                <Unlock className="h-8 w-8 text-emerald-600" />
+              </div>
+              <h2 className="text-3xl font-bold text-neutral-900">
+                {language === "es" ? "Ventajas del Vesting Logarítmico" : "Logarithmic Vesting Advantages"}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              
+              {/* Estabilidad del Precio */}
+              <Card className="bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl text-blue-700">
+                    <Activity className="h-6 w-6" />
+                    {language === "es" ? "Estabilidad del Precio" : "Price Stability"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {language === "es" ? (
+                      "La liberación decreciente reduce la presión de venta progresivamente, manteniendo el equilibrio entre oferta y demanda para una mayor estabilidad del precio del token."
+                    ) : (
+                      "The decreasing release progressively reduces selling pressure, maintaining the balance between supply and demand for greater token price stability."
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Incentivo a Largo Plazo */}
+              <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl text-emerald-700">
+                    <TrendingUp className="h-6 w-6" />
+                    {language === "es" ? "Incentivo a Largo Plazo" : "Long-Term Incentive"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {language === "es" ? (
+                      "El equipo y colaboradores mantienen un fuerte compromiso con el proyecto durante más tiempo, ya que las recompensas mayores se obtienen en las primeras etapas del vesting."
+                    ) : (
+                      "The team and collaborators maintain a strong commitment to the project for longer, as greater rewards are obtained in the early stages of vesting."
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Confianza del Inversor */}
+              <Card className="bg-gradient-to-br from-purple-50/60 to-violet-50/60 border-purple-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl text-purple-700">
+                    <Shield className="h-6 w-6" />
+                    {language === "es" ? "Confianza del Inversor" : "Investor Confidence"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {language === "es" ? (
+                      "La estructura transparente y predecible del vesting genera mayor confianza en los inversores, mostrando un enfoque responsable en la gestión de la tokenomía."
+                    ) : (
+                      "The transparent and predictable vesting structure generates greater investor confidence, showing a responsible approach to tokenomics management."
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Protección Contra Dumps */}
+              <Card className="bg-gradient-to-br from-amber-50/60 to-yellow-50/60 border-amber-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl text-amber-700">
+                    <Banknote className="h-6 w-6" />
+                    {language === "es" ? "Protección Contra Dumps" : "Dump Protection"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {language === "es" ? (
+                      "Las cantidades decrecientes impiden ventas masivas que podrían colapsar el precio, protegiendo a los holders de fluctuaciones extremas causadas por liberaciones grandes."
+                    ) : (
+                      "Decreasing amounts prevent massive sales that could collapse the price, protecting holders from extreme fluctuations caused by large releases."
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Desarrollo Sostenible */}
+              <Card className="bg-gradient-to-br from-green-50/60 to-emerald-50/60 border-green-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl text-green-700">
+                    <Rocket className="h-6 w-6" />
+                    {language === "es" ? "Desarrollo Sostenible" : "Sustainable Development"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {language === "es" ? (
+                      "Permite un crecimiento orgánico del ecosistema, donde el equipo tiene recursos iniciales suficientes para el desarrollo intensivo, seguido de financiación continua a largo plazo."
+                    ) : (
+                      "Enables organic ecosystem growth, where the team has sufficient initial resources for intensive development, followed by continuous long-term financing."
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Transparencia Matemática */}
+              <Card className="bg-gradient-to-br from-violet-50/60 to-purple-50/60 border-violet-200/60 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl text-violet-700">
+                    <BarChart3 className="h-6 w-6" />
+                    {language === "es" ? "Transparencia Matemática" : "Mathematical Transparency"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {language === "es" ? (
+                      "La fórmula logarítmica es completamente predecible y verificable, eliminando cualquier ambigüedad sobre cuándo y cuántos tokens estarán disponibles en circulación."
+                    ) : (
+                      "The logarithmic formula is completely predictable and verifiable, eliminating any ambiguity about when and how many tokens will be available in circulation."
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+
+            </div>
+
+            {/* Resumen de Beneficios */}
+            <Card className="mt-12 bg-gradient-to-br from-neutral-50/60 to-white border-neutral-200/60 shadow-xl">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl font-bold text-neutral-900 flex items-center gap-3">
+                  <CheckCircle className="h-7 w-7 text-emerald-600" />
+                  {language === "es" ? "¿Por Qué Elegimos el Vesting Logarítmico?" : "Why We Choose Logarithmic Vesting?"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-lg text-neutral-700 leading-relaxed">
+                  {language === "es" ? (
+                    "El modelo de vesting logarítmico de HuBiT representa la evolución natural de los sistemas de distribución de tokens. A diferencia de los vestings lineales tradicionales, nuestro enfoque logarítmico crea un ecosistema más equilibrado y sostenible."
+                  ) : (
+                    "HuBiT's logarithmic vesting model represents the natural evolution of token distribution systems. Unlike traditional linear vesting, our logarithmic approach creates a more balanced and sustainable ecosystem."
+                  )}
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-4 p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200/60">
+                    <div className="p-2 bg-emerald-100 rounded-xl">
+                      <Clock className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-emerald-800 mb-2">
+                        {language === "es" ? "Liberación Inteligente" : "Smart Release"}
+                      </div>
+                      <div className="text-sm text-emerald-700">
+                        {language === "es" ? (
+                          "100M → 50M → 25M → 12.5M... Cada liberación es exactamente la mitad de la anterior"
+                        ) : (
+                          "100M → 50M → 25M → 12.5M... Each release is exactly half of the previous one"
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4 p-4 bg-blue-50/60 rounded-2xl border border-blue-200/60">
+                    <div className="p-2 bg-blue-100 rounded-xl">
+                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-blue-800 mb-2">
+                        {language === "es" ? "Impacto Decreciente" : "Decreasing Impact"}
+                      </div>
+                      <div className="text-sm text-blue-700">
+                        {language === "es" ? (
+                          "Cada nueva liberación tiene menor impacto en el precio del token que la anterior"
+                        ) : (
+                          "Each new release has less impact on token price than the previous one"
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Conclusion Section */}
           <section className="mb-12">
             <Card className="bg-gradient-to-br from-neutral-50/60 to-gray-50/60 border-neutral-200/60 shadow-xl">
