@@ -51,8 +51,12 @@ export default function WhitepaperPage() {
       
       <Header />
       
-      <main className="min-h-screen bg-gradient-to-br from-neutral-50 to-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="min-h-screen bg-[url('/fondo%20whitepaper.png')] bg-cover bg-center bg-no-repeat bg-fixed relative">
+        {/* Overlay para mejorar legibilidad */}
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-sm"></div>
+        
+        {/* Contenido principal */}
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           
           {/* Hero Section */}
           <div className="text-center space-y-8 mb-16">
