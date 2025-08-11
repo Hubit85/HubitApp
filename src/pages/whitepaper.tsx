@@ -534,128 +534,128 @@ export default function WhitepaperPage() {
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2025</div>
                         </div>
 
-                        {/* Q1 2026: 875M (600M Pool + 150M Equipo + 75M Marketing + 75M Airdrops) */}
+                        {/* Q1 2026: 857.14M (600M Pool + 150M Equipo + 53.57M Marketing + 53.57M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            875M
+                            857M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '280px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '274px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '48px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '240px', height: '24px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '264px', height: '24px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '240px', height: '17px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '257px', height: '17px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2026</div>
                         </div>
 
-                        {/* Q2 2026: 912.5M (600M Pool + 175M Equipo + 87.5M Marketing + 87.5M Airdrops) */}
+                        {/* Q2 2026: 864.28M (600M Pool + 153.57M Equipo + 55.36M Marketing + 55.36M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            912M
+                            864M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '292px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '277px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '56px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '248px', height: '28px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '276px', height: '28px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '49px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '241px', height: '18px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '259px', height: '18px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2026</div>
                         </div>
 
-                        {/* Q3 2026: 931.25M (600M Pool + 187.5M Equipo + 93.75M Marketing + 93.75M Airdrops) */}
+                        {/* Q3 2026: 871.42M (600M Pool + 157.14M Equipo + 57.14M Marketing + 57.14M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            931M
+                            871M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '298px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '279px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '60px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '252px', height: '30px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '282px', height: '30px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '50px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '242px', height: '18.5px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '260.5px', height: '18.5px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2026</div>
                         </div>
 
-                        {/* Q4 2026: 940.625M (600M Pool + 193.75M Equipo + 96.875M Marketing + 96.875M Airdrops) */}
+                        {/* Q4 2026: 878.56M (600M Pool + 160.71M Equipo + 58.93M Marketing + 58.93M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            940M
+                            878M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '301px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '281px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '62px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '254px', height: '31px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '285px', height: '31px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '51px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '243px', height: '19px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '262px', height: '19px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2026</div>
                         </div>
 
-                        {/* Q1 2027: 945.31M (600M Pool + 196.875M Equipo + 98.44M Marketing + 98.44M Airdrops) */}
+                        {/* Q1 2027: 885.7M (600M Pool + 164.28M Equipo + 60.71M Marketing + 60.71M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            945M
+                            885M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '302px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '283px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '63px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '255px', height: '31px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '286px', height: '31px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '52px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '244px', height: '19.5px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '263.5px', height: '19.5px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2027</div>
                         </div>
 
-                        {/* Q2 2027: 947.66M (600M Pool + 198.44M Equipo + 99.22M Marketing + 99.22M Airdrops) */}
+                        {/* Q2 2027: 892.84M (600M Pool + 167.85M Equipo + 62.5M Marketing + 62.5M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            947M
+                            892M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '303px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '285px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '54px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '246px', height: '20px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '266px', height: '20px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2027</div>
                         </div>
 
-                        {/* Q3 2027: 948.83M (600M Pool + 199.22M Equipo + 99.61M Marketing + 99.61M Airdrops) */}
+                        {/* Q3 2027: 899.98M (600M Pool + 171.42M Equipo + 64.28M Marketing + 64.28M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            948M
+                            899M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '303.5px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '287px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '55px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '247px', height: '20.5px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '267.5px', height: '20.5px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2027</div>
                         </div>
 
-                        {/* Q4 2027: 949.41M (600M Pool + 199.61M Equipo + 99.805M Marketing + 99.805M Airdrops) */}
+                        {/* Q4 2027: 907.12M (600M Pool + 175M Equipo + 66.06M Marketing + 66.06M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            949M
+                            907M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '303.8px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '290px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '56px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '248px', height: '21px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '269px', height: '21px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2027</div>
                         </div>
 
-                        {/* 2028: 999.9M PROMEDIO (600M Pool + 199.9M Equipo + 99.95M Marketing + 99.95M Airdrops) */}
+                        {/* 2028: 950M PROMEDIO (600M Pool + 187.5M Equipo + 81.25M Marketing + 81.25M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            999.9M
+                            950M
                           </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '319.95px' }}>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '304px' }}>
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400" style={{ height: '192px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '64px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '256px', height: '32px' }}></div>
-                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '288px', height: '32px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-red-500 to-red-400" style={{ bottom: '192px', height: '60px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '252px', height: '26px' }}></div>
+                            <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '278px', height: '26px' }}></div>
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-violet-50 px-2 py-1 rounded-md whitespace-nowrap">2028</div>
                         </div>
