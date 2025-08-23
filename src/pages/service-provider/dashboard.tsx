@@ -148,23 +148,23 @@ export default function ServiceProviderDashboard() {
   useEffect(() => {
     setCompanyProfile(prev => ({
       ...prev,
-      companyName: language === "en" ? "Integral Services Madrid" : "Servicios Integrales Madrid",
-      description: language === "en" ? 
-        "Company specialized in maintenance and renovation services for communities and individuals." : 
-        "Empresa especializada en servicios de mantenimiento y reformas para comunidades y particulares.",
-      address: language === "en" ? "Alcalá Street 123, Madrid" : "Calle Alcalá 123, Madrid",
+      companyName: t("integralServicesMadrid"),
+      description: t("companySpecializedMaintenance"),
+      address: t("alcalaStreetAddress"),
       serviceAreas: ["Madrid", "Alcalá de Henares", "Getafe", "Leganés"],
-      specializations: language === "en" ? 
-        ["Comprehensive maintenance", "Renovations", "Emergency services"] : 
-        ["Mantenimiento integral", "Reformas", "Servicios urgentes"],
-      certifications: language === "en" ? 
-        ["ISO 9001", "Authorized installer certificate", "Civil liability insurance"] : 
-        ["ISO 9001", "Certificado instalador autorizado", "Seguro responsabilidad civil"],
-      workingHours: language === "en" ? 
-        "Monday to Friday: 8:00 - 18:00, Saturdays: 9:00 - 14:00" : 
-        "Lunes a Viernes: 8:00 - 18:00, Sábados: 9:00 - 14:00"
+      specializations: [
+        t("comprehensiveMaintenance"),
+        t("renovations"),
+        t("emergencyServices")
+      ],
+      certifications: [
+        t("iso9001"),
+        t("authorizedInstallerCertificate"),
+        t("civilLiabilityInsurance")
+      ],
+      workingHours: t("mondayToFridayHours")
     }));
-  }, [language]);
+  }, [language, t]);
 
   const professionalServices = [
     { id: "albañileria", name: t("masonry"), icon: Building2, description: t("constructionWork"), priceType: "m2", price: 35 },
@@ -315,6 +315,7 @@ export default function ServiceProviderDashboard() {
                           <p><strong>{t("serviceAreas")}:</strong> <span className="text-gray-600">{companyProfile.serviceAreas.join(', ')}</span></p>
                           <p><strong>{t("specializations")}:</strong> <span className="text-gray-600">{companyProfile.specializations.join(', ')}</span></p>
                           <p><strong>{t("certifications")}:</strong> <span className="text-gray-600">{companyProfile.certifications.join(', ')}</span></p>
+                          <p><strong>{t("schedule")}:</strong> <span className="text-gray-600">{companyProfile.workingHours}</span></p>
                           {companyProfile.allServices && <Badge className="bg-green-100 text-green-800"><Check className="h-4 w-4 mr-1" /> {t("offersAllServices")}</Badge>}
                         </div>
                       </div>
