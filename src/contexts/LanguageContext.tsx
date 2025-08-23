@@ -210,7 +210,7 @@ const translations = {
     forServiceCompaniesText: "We provide a digital showcase to display their professionalism, receive quote requests, and obtain verified ratings that boost their reputation.",
     forNeighbors: "For Neighbors",
     forNeighborsText: "We provide a platform where they can report incidents, track their resolution in real-time, and rate the services received with full transparency.",
-    ratingsSystem: "Rating System",
+    ratingSystem: "Rating System",
     ratingsSystemText: "We implement an evaluation system that allows neighbors to rate services, building trust and helping to make informed decisions.",
     virtuousCircle: "This integration creates a virtuous circle where all participants benefit: better services for communities, more business opportunities for providers, and more efficient management for administrators.",
     whoWeAre: "Who We Are",
@@ -426,7 +426,6 @@ const translations = {
     foundedYear: "Founded Year",
     numberOfEmployees: "Number of Employees",
     serviceAreas: "Service Areas (comma separated)",
-    specializations: "Specializations (comma separated)",
     certifications: "Certifications (comma separated)",
     offerAllServices: "I offer all services",
     additionalDetails: "Additional Details",
@@ -729,6 +728,7 @@ const translations = {
     scheduleNewMeeting: "Schedule New Meeting",
     meetingTitle: "Meeting Title",
     enterMeetingTitle: "Enter meeting title",
+    community: "Community",
     time: "Time",
     participants: "Participants",
     enterParticipantsEmails: "Enter participants' emails",
@@ -769,6 +769,7 @@ const translations = {
     type: "Type",
     amountStatus: "Amount/Status",
     action: "Action",
+    manage: "Manage",
     
     // Individual Dashboard  
     personalInformation: "Personal Information",
@@ -1123,7 +1124,7 @@ const translations = {
     // Problem & Solution
     problemStatement: "Enunciado del Problema",
     lackOfTransparency: "Falta de Transparencia",
-    transparencyProblem: "Los sistemas actuales de gestión comunitaria carecen de transparencia, dificultando que los vecinos entiendan las decisiones y costos de los servicios.",
+    transparencyProblem: "Los sistemas actuales de gestión comunitaria carecen de transparencia, dificultando que los vecinos entendan las decisiones y costos de los servicios.",
     communicationGaps: "Fallas en la Comunicación",
     communicationProblem: "La comunicación deficiente entre administradores, proveedores de servicios y vecinos genera ineficiencias y confusiones.",
     inefficientProcesses: "Procesos Ineficientes",
@@ -1234,8 +1235,10 @@ const translations = {
     serviceRequests: "Solicitudes de Servicio",
     activeBids: "Ofertas Activas",
     serviceHistory: "Historial de Servicios",
+    reviews: "Reseñas",
     earnings: "Ganancias", 
     schedule: "Horarios",
+    notifications: "Notificaciones",
     
     // Profile Management
     myCompanyProfile: "Mi Perfil de Empresa",
@@ -1252,6 +1255,7 @@ const translations = {
     foundedYear: "Año de fundación",
     numberOfEmployees: "Nº de empleados",
     serviceAreas: "Áreas de servicio (separadas por coma)",
+    specializations: "Especializaciones (separadas por coma)",
     certifications: "Certificaciones (separadas por coma)",
     offerAllServices: "Ofrezco todos los servicios",
     additionalDetails: "Detalles Adicionales",
