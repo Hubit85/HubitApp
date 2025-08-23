@@ -43,8 +43,8 @@ export function SidebarServiceProvider({ activeTab, setActiveTab }: SidebarServi
   
   const menuItems = [
     { id: "overview", label: t("overview"), icon: TrendingUp },
-    { id: "profile", label: "Mi Perfil", icon: User },
-    { id: "services", label: "Servicios Profesionales", icon: Briefcase },
+    { id: "profile", label: t("myProfile"), icon: User },
+    { id: "services", label: t("professionalServices"), icon: Briefcase },
     { id: "requests", label: t("serviceRequests"), icon: FileText },
     { id: "bids", label: t("activeBids"), icon: DollarSign },
     { id: "historial", label: t("serviceHistory"), icon: Calendar },

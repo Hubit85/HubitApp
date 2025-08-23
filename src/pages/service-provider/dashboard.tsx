@@ -225,9 +225,9 @@ export default function ServiceProviderDashboard() {
                           <p><strong>{t("taxId")}:</strong> {companyProfile.cif}</p>
                           <p><strong>{t("founded")}:</strong> {companyProfile.founded}</p>
                           <p><strong>{t("employees")}:</strong> {companyProfile.employees}</p>
-                          <p><strong>Áreas de servicio:</strong> <span className="text-gray-600">{companyProfile.serviceAreas.join(', ')}</span></p>
-                          <p><strong>Especializaciones:</strong> <span className="text-gray-600">{companyProfile.specializations.join(', ')}</span></p>
-                          <p><strong>Certificaciones:</strong> <span className="text-gray-600">{companyProfile.certifications.join(', ')}</span></p>
+                          <p><strong>{t("serviceAreas")}:</strong> <span className="text-gray-600">{companyProfile.serviceAreas.join(', ')}</span></p>
+                          <p><strong>{t("specializations")}:</strong> <span className="text-gray-600">{companyProfile.specializations.join(', ')}</span></p>
+                          <p><strong>{t("certifications")}:</strong> <span className="text-gray-600">{companyProfile.certifications.join(', ')}</span></p>
                           {companyProfile.allServices && <Badge className="bg-green-100 text-green-800"><Check className="h-4 w-4 mr-1" /> {t("offersAllServices")}</Badge>}
                         </div>
                       </div>
