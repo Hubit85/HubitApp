@@ -286,11 +286,11 @@ const translations = {
     introduction: "Introduction",
     whitepaperDescription: "Comprehensive technical documentation outlining HuBiT's vision, technology, and roadmap for revolutionizing community services",
     whitepaperIntro: "HuBiT represents a paradigm shift in how neighborhood communities manage services, enabling transparent, efficient, and decentralized coordination between residents, administrators, and service providers.",
-    visionStatement: "Vision Statement",
+    visionStatement: "Vision",
     visionText: "To create the world's most transparent and efficient ecosystem for community service management, powered by blockchain technology and driven by community governance.",
     
     // Problem & Solution
-    problemStatement: "Problem Statement",
+    problemStatement: "The Problem",
     lackOfTransparency: "Lack of Transparency",
     transparencyProblem: "Current community management systems lack transparency, making it difficult for residents to understand service decisions and costs.",
     communicationGaps: "Communication Gaps",

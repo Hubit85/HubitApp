@@ -103,19 +103,15 @@ export default function WhitepaperPage() {
                     )}
                   </p>
                 </div>
-                <Card className="bg-gradient-to-br from-emerald-50/60 to-green-50/60 border-emerald-200/60 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <Heart className="h-6 w-6 text-emerald-600" />
-                      <h3 className="text-lg font-semibold text-emerald-800">
-                        {t("socialNetworkOfTrust")}
-                      </h3>
-                    </div>
-                    <p className="text-emerald-700 leading-relaxed">
-                      {t("socialNetworkDescription")}
-                    </p>
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <p className="text-lg text-neutral-700 leading-relaxed">
+                    {language === "es" ? (
+                      "El ecosistema HuBiT se basa en la creación de valor compartido entre todos los participantes, donde la transparencia y la confianza son los pilares fundamentales para el éxito de la comunidad."
+                    ) : (
+                      "The HuBiT ecosystem is based on creating shared value among all participants, where transparency and trust are the fundamental pillars for community success."
+                    )}
+                  </p>
+                </div>
               </div>
               
               <Card className="bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/60 shadow-lg shadow-blue-900/5">
