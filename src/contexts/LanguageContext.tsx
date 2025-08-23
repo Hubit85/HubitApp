@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 type Language = "es" | "en";
@@ -13,7 +14,6 @@ export const LanguageContext = createContext<LanguageContextType | undefined>(un
 const translations = {
   en: {
     // General & Navigation
-    professionalServices: "Professional Services Hub",
     services: "Services",
     profile: "Profile",
     signOut: "Sign Out",
@@ -402,10 +402,9 @@ const translations = {
     viewOnline: "View Online",
     
     // Service Provider Dashboard Specific
-    serviceProviderDesc: "Connect with your community and manage your professional services efficiently",
+    professionalServices: "Professional Services",
     overview: "Overview",
     myProfile: "My Profile",
-    professionalServices: "Professional Services",
     serviceRequests: "Service Requests",
     activeBids: "Active Bids",
     serviceHistory: "Service History",
@@ -413,20 +412,16 @@ const translations = {
     earnings: "Earnings",
     schedule: "Schedule",
     notifications: "Notifications",
-    settings: "Settings",
-    serviceProvider: "Service Provider",
     
     // Profile Management
     myCompanyProfile: "My Company Profile",
     managePublicInfo: "Manage your company's public information",
     saveChanges: "Save Changes",
-    editProfile: "Edit Profile",
     mainInformation: "Main Information",
     businessDetails: "Business Details",
     companyName: "Company Name",
     description: "Description",
     website: "Website",
-    email: "Email",
     phone: "Phone",
     address: "Address",
     taxId: "Tax ID",
@@ -456,9 +451,6 @@ const translations = {
     
     // Service Categories (Professional Services)
     masonry: "Masonry",
-    painting: "Painting", 
-    electricity: "Electricity",
-    plumbing: "Plumbing",
     gardening: "Gardening",
     elevators: "Elevators",
     facades: "Facades",
@@ -476,7 +468,6 @@ const translations = {
     allCategories: "All Categories",
     incident: "Incident",
     assessment: "Assessment",
-    particular: "Individual",
     approximateBudget: "Approximate budget:",
     deadline: "Deadline:",
     sendQuote: "Send Quote",
@@ -491,7 +482,6 @@ const translations = {
     
     // Service History (Provider specific)
     plumbingRepair: "Plumbing Repair",
-    elevatorMaintenance: "Elevator Maintenance", 
     electricalInstallation: "Electrical Installation",
     gatesCleaning: "Gates Cleaning",
     generalCleaning: "General Cleaning",
@@ -502,7 +492,6 @@ const translations = {
   },
   es: {
     // General & Navigation
-    professionalServices: "Hub de Servicios Profesionales",
     services: "Servicios",
     profile: "Perfil",
     signOut: "Cerrar sesión",
@@ -887,10 +876,9 @@ const translations = {
     backToTop: "Volver al Inicio",
     
     // Service Provider Dashboard Specific  
-    serviceProviderDesc: "Conéctate con tu comunidad y gestiona tus servicios profesionales de manera eficiente",
+    professionalServices: "Servicios Profesionales", 
     overview: "Resumen",
     myProfile: "Mi Perfil",
-    professionalServices: "Servicios Profesionales", 
     serviceRequests: "Solicitudes de Servicio",
     activeBids: "Ofertas Activas",
     serviceHistory: "Historial de Servicios",
@@ -898,20 +886,16 @@ const translations = {
     earnings: "Ganancias", 
     schedule: "Horarios",
     notifications: "Notificaciones",
-    settings: "Configuración",
-    serviceProvider: "Proveedor de Servicios",
     
     // Profile Management
     myCompanyProfile: "Mi Perfil de Empresa",
     managePublicInfo: "Gestiona la información pública de tu empresa",
     saveChanges: "Guardar Cambios",
-    editProfile: "Editar Perfil",
     mainInformation: "Información Principal",
     businessDetails: "Detalles del Negocio",
     companyName: "Nombre de la empresa",
     description: "Descripción",
     website: "Página Web",
-    email: "Email",
     phone: "Teléfono", 
     address: "Dirección",
     taxId: "CIF",
@@ -941,9 +925,6 @@ const translations = {
     
     // Service Categories (Professional Services)
     masonry: "Albañilería",
-    painting: "Pintura",
-    electricity: "Electricidad", 
-    plumbing: "Fontanería",
     gardening: "Jardinería",
     elevators: "Ascensores",
     facades: "Fachadas",
@@ -961,7 +942,6 @@ const translations = {
     allCategories: "Todas",
     incident: "Incidencia",
     assessment: "Derrama", 
-    particular: "Particular",
     approximateBudget: "Presupuesto aprox:",
     deadline: "Fecha límite:",
     sendQuote: "Enviar Presupuesto",
@@ -976,7 +956,6 @@ const translations = {
     
     // Service History (Provider specific)
     plumbingRepair: "Reparación de Fontanería",
-    elevatorMaintenance: "Mantenimiento de Ascensores",
     electricalInstallation: "Instalación Eléctrica", 
     gatesCleaning: "Limpieza de Portales",
     generalCleaning: "Limpieza General",
