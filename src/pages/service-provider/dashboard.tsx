@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,24 +60,46 @@ export default function ServiceProviderDashboard() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [companyProfile, setCompanyProfile] = useState({
-    companyName: t("companyName") === "Company Name" ? "Integral Services Madrid" : "Servicios Integrales Madrid",
-    description: t("companyName") === "Company Name" ? "Company specialized in maintenance and renovation services for communities and individuals." : "Empresa especializada en servicios de mantenimiento y reformas para comunidades y particulares.",
+    companyName: "",
+    description: "",
     website: "www.serviciosintegrales-madrid.com",
     email: "info@serviciosintegrales-madrid.com",
     phone: "+34 91 123 45 67",
-    address: t("companyName") === "Company Name" ? "Alcalá Street 123, Madrid" : "Calle Alcalá 123, Madrid",
+    address: "",
     cif: "B12345678",
     founded: "2015",
     employees: "15-20",
-    serviceAreas: t("companyName") === "Company Name" ? ["Madrid", "Alcalá de Henares", "Getafe", "Leganés"] : ["Madrid", "Alcalá de Henares", "Getafe", "Leganés"],
-    specializations: t("companyName") === "Company Name" ? ["Comprehensive maintenance", "Renovations", "Emergency services"] : ["Mantenimiento integral", "Reformas", "Servicios urgentes"],
-    certifications: t("companyName") === "Company Name" ? ["ISO 9001", "Authorized installer certificate", "Civil liability insurance"] : ["ISO 9001", "Certificado instalador autorizado", "Seguro responsabilidad civil"],
+    serviceAreas: [] as string[],
+    specializations: [] as string[],
+    certifications: [] as string[],
     allServices: true,
-    workingHours: t("companyName") === "Company Name" ? "Monday to Friday: 8:00 - 18:00, Saturdays: 9:00 - 14:00" : "Lunes a Viernes: 8:00 - 18:00, Sábados: 9:00 - 14:00"
+    workingHours: ""
   });
+
+  // Update company profile when language changes
+  useEffect(() => {
+    setCompanyProfile(prev => ({
+      ...prev,
+      companyName: language === "en" ? "Integral Services Madrid" : "Servicios Integrales Madrid",
+      description: language === "en" ? 
+        "Company specialized in maintenance and renovation services for communities and individuals." : 
+        "Empresa especializada en servicios de mantenimiento y reformas para comunidades y particulares.",
+      address: language === "en" ? "Alcalá Street 123, Madrid" : "Calle Alcalá 123, Madrid",
+      serviceAreas: ["Madrid", "Alcalá de Henares", "Getafe", "Leganés"],
+      specializations: language === "en" ? 
+        ["Comprehensive maintenance", "Renovations", "Emergency services"] : 
+        ["Mantenimiento integral", "Reformas", "Servicios urgentes"],
+      certifications: language === "en" ? 
+        ["ISO 9001", "Authorized installer certificate", "Civil liability insurance"] : 
+        ["ISO 9001", "Certificado instalador autorizado", "Seguro responsabilidad civil"],
+      workingHours: language === "en" ? 
+        "Monday to Friday: 8:00 - 18:00, Saturdays: 9:00 - 14:00" : 
+        "Lunes a Viernes: 8:00 - 18:00, Sábados: 9:00 - 14:00"
+    }));
+  }, [language]);
 
   const professionalServices = [
     { id: "albañileria", name: t("masonry"), icon: Building2, description: t("constructionWork"), priceType: "m2", price: 35 },
