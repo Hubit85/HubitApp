@@ -9,9 +9,10 @@ type QuoteInsert = Database["public"]["Tables"]["quotes"]["Insert"];
 export class SupabaseBudgetService {
   // Budget Requests
   static async createBudgetRequest(requestData: BudgetRequestInsert) {
+    const insertData = requestData as Database["public"]["Tables"]["budget_requests"]["Insert"];
     const { data, error } = await supabase
       .from("budget_requests")
-      .insert([requestData])
+      .insert(insertData)
       .select()
       .single();
 
@@ -23,9 +24,10 @@ export class SupabaseBudgetService {
   }
 
   static async updateBudgetRequest(id: string, updates: BudgetRequestUpdate) {
+    const updateData = updates as Database["public"]["Tables"]["budget_requests"]["Update"];
     const { data, error } = await supabase
       .from("budget_requests")
-      .update(updates as any)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
@@ -121,9 +123,10 @@ export class SupabaseBudgetService {
 
   // Quotes
   static async createQuote(quoteData: QuoteInsert) {
+    const insertData = quoteData as Database["public"]["Tables"]["quotes"]["Insert"];
     const { data, error } = await supabase
       .from("quotes")
-      .insert([quoteData])
+      .insert(insertData)
       .select()
       .single();
 
@@ -186,9 +189,10 @@ export class SupabaseBudgetService {
   }
 
   static async updateQuoteStatus(id: string, status: "accepted" | "rejected" | "withdrawn") {
+    const updateData = { status } as Database["public"]["Tables"]["quotes"]["Update"];
     const { data, error } = await supabase
       .from("quotes")
-      .update({ status } as any)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();

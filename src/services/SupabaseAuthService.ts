@@ -19,13 +19,15 @@ export class SupabaseAuthService {
 
       if (data.user) {
         // Create profile
+        const profileData = {
+          id: data.user.id,
+          email: data.user.email!,
+          ...userData,
+        } as Database["public"]["Tables"]["profiles"]["Insert"];
+
         const { error: profileError } = await supabase
           .from("profiles")
-          .insert([{
-            id: data.user.id,
-            email: data.user.email!,
-            ...userData,
-          }]);
+          .insert(profileData);
 
         if (profileError) {
           throw new Error(profileError.message);
@@ -73,9 +75,10 @@ export class SupabaseAuthService {
   }
 
   static async updateProfile(userId: string, updates: Partial<Profile>) {
+    const updateData = updates as Database["public"]["Tables"]["profiles"]["Update"];
     const { data, error } = await supabase
       .from("profiles")
-      .update(updates as any)
+      .update(updateData)
       .eq("id", userId)
       .select()
       .single();

@@ -7,9 +7,10 @@ type PropertyUpdate = Database["public"]["Tables"]["properties"]["Update"];
 
 export class SupabasePropertyService {
   static async createProperty(propertyData: PropertyInsert) {
+    const insertData = propertyData as Database["public"]["Tables"]["properties"]["Insert"];
     const { data, error } = await supabase
       .from("properties")
-      .insert([propertyData])
+      .insert(insertData)
       .select()
       .single();
 
@@ -21,9 +22,10 @@ export class SupabasePropertyService {
   }
 
   static async updateProperty(id: string, updates: PropertyUpdate) {
+    const updateData = updates as Database["public"]["Tables"]["properties"]["Update"];
     const { data, error } = await supabase
       .from("properties")
-      .update(updates as any)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
