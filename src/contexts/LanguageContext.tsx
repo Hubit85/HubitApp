@@ -581,7 +581,31 @@ const translations = {
     ercillaStreet: "Ercilla Street 24, Bilbao",
     lehendakariAguirreAv: "Lehendakari Aguirre Avenue 33, Bilbao",
     granViaStreet: "Gran Vía Street 10, Bilbao",
-    moyuaSquare: "Moyúa Square 5, Bilbao"
+    moyuaSquare: "Moyúa Square 5, Bilbao",
+    
+    // Additional hardcoded content translations
+    discoverTheProcess: "Descubre el proceso",
+    knowHubit: "Conoce HuBiT",
+    acquireHbit: "Adquiere HBIT",
+    importantNote: "Importante",
+    cryptoExclusiveNote: "Los pagos con criptomonedas son exclusivamente para suscripciones y funciones premium de la aplicación. Los servicios profesionales se pagan con métodos tradicionales (EUR) según la normativa española.",
+    forProfessionalServices: "Para servicios profesionales",
+    professionalServicesNote: "Todos los servicios profesionales (limpieza, mantenimiento, reparaciones) se pagan exclusivamente en euros según la normativa española.",
+    onlyForApp: "Solo para usar la app",
+    appOnlyNote: "Las criptomonedas se utilizan únicamente para suscripciones premium, funciones avanzadas y tokens de recompensa de la plataforma.",
+    professionalServicesEur: "Servicios Profesionales (EUR)",
+    appFunctionsCrypto: "Funciones de la App (Cripto)",
+    cleaningAndMaintenance: "Limpieza y mantenimiento",
+    repairsAndWorks: "Reparaciones y obras",
+    gardeningServices: "Servicios de jardinería",
+    propertyAdministration: "Administración de fincas",
+    premiumSubscriptions: "Suscripciones premium",
+    rewardTokens: "Tokens de recompensa",
+    advancedFeatures: "Funciones avanzadas",
+    premiumRatingsAccess: "Acceso a valoraciones premium",
+    paymentSeparationByUse: "Separación de Pagos por Uso",
+    paymentSeparationDescription: "HuBiT mantiene una clara separación entre pagos para servicios profesionales (EUR) y funciones de la aplicación (cripto)",
+    nativeToken: "Token nativo para suscripciones premium, recompensas por valoraciones y acceso a funciones exclusivas de la plataforma."
   },
   es: {
     // General & Navigation
@@ -1165,7 +1189,31 @@ const translations = {
     ercillaStreet: "Calle Ercilla 24, Bilbao",
     lehendakariAguirreAv: "Avenida Lehendakari Aguirre 33, Bilbao",
     granViaStreet: "Calle Gran Vía 10, Bilbao",
-    moyuaSquare: "Plaza Moyúa 5, Bilbao"
+    moyuaSquare: "Plaza Moyúa 5, Bilbao",
+    
+    // Additional hardcoded content translations
+    discoverTheProcess: "Descubre el proceso",
+    knowHubit: "Conoce HuBiT",
+    acquireHbit: "Adquiere HBIT",
+    importantNote: "Importante",
+    cryptoExclusiveNote: "Los pagos con criptomonedas son exclusivamente para suscripciones y funciones premium de la aplicación. Los servicios profesionales se pagan con métodos tradicionales (EUR) según la normativa española.",
+    forProfessionalServices: "Para servicios profesionales",
+    professionalServicesNote: "Todos los servicios profesionales (limpieza, mantenimiento, reparaciones) se pagan exclusivamente en euros según la normativa española.",
+    onlyForApp: "Solo para usar la app",
+    appOnlyNote: "Las criptomonedas se utilizan únicamente para suscripciones premium, funciones avanzadas y tokens de recompensa de la plataforma.",
+    professionalServicesEur: "Servicios Profesionales (EUR)",
+    appFunctionsCrypto: "Funciones de la App (Cripto)",
+    cleaningAndMaintenance: "Limpieza y mantenimiento",
+    repairsAndWorks: "Reparaciones y obras",
+    gardeningServices: "Servicios de jardinería",
+    propertyAdministration: "Administración de fincas",
+    premiumSubscriptions: "Suscripciones premium",
+    rewardTokens: "Tokens de recompensa",
+    advancedFeatures: "Funciones avanzadas",
+    premiumRatingsAccess: "Acceso a valoraciones premium",
+    paymentSeparationByUse: "Separación de Pagos por Uso",
+    paymentSeparationDescription: "HuBiT mantiene una clara separación entre pagos para servicios profesionales (EUR) y funciones de la aplicación (cripto)",
+    nativeToken: "Token nativo para suscripciones premium, recompensas por valoraciones y acceso a funciones exclusivas de la plataforma."
   },
 };
 
