@@ -402,12 +402,12 @@ const translations = {
     viewOnline: "View Online",
     
     // Service Provider Dashboard Specific
-    professionalServices: "Professional Services",
     overview: "Overview",
     myProfile: "My Profile",
     serviceRequests: "Service Requests",
     activeBids: "Active Bids",
     serviceHistory: "Service History",
+    reviews: "Reviews",
     earnings: "Earnings",
     
     // Profile Management
@@ -1228,7 +1228,6 @@ const translations = {
     backToTop: "Volver al Inicio",
     
     // Service Provider Dashboard Specific  
-    professionalServices: "Servicios Profesionales", 
     overview: "Resumen",
     myProfile: "Mi Perfil",
     serviceRequests: "Solicitudes de Servicio",
@@ -1263,7 +1262,7 @@ const translations = {
     offersAllServices: "Ofrece todos los servicios",
     
     // Professional Services
-    manageProfessionalServices: "Servicios Profesionales",
+    professionalServices: "Servicios Profesionales",
     manageServicesDesc: "Gestiona los servicios que ofreces y sus tarifas",
     constructionWork: "Trabajos de construcción y reparación",
     interiorExteriorPainting: "Pintura interior y exterior",
