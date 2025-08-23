@@ -80,14 +80,14 @@ export default function ServiceProviderDashboard() {
   });
 
   const professionalServices = [
-    { id: "albañileria", name: "Albañilería", icon: Building2, description: "Trabajos de construcción y reparación.", priceType: "m2", price: 35 },
-    { id: "pintura", name: "Pintura", icon: PaintBucket, description: "Pintura interior y exterior.", priceType: "m2", price: 12 },
-    { id: "electricidad", name: "Electricidad", icon: Zap, description: "Instalaciones y reparaciones eléctricas.", priceType: "hour", price: 45 },
-    { id: "fontaneria", name: "Fontanería", icon: Droplets, description: "Instalaciones y reparaciones de fontanería.", priceType: "hour", price: 40 },
-    { id: "jardineria", name: "Jardinería", icon: TreePine, description: "Mantenimiento de jardines y zonas verdes.", priceType: "m2", price: 8 },
-    { id: "ascensores", name: "Mantenimiento de Ascensores", icon: Building, description: "Mantenimiento y reparación de ascensores.", priceType: "hour", price: 65 },
-    { id: "fachadas", name: "Rehabilitación de Fachadas", icon: Home, description: "Rehabilitación y mantenimiento de fachadas.", priceType: "m2", price: 25 },
-    { id: "tejados", name: "Reparación de Tejados", icon: Hammer, description: "Reparación y mantenimiento de cubiertas.", priceType: "m2", price: 30 }
+    { id: "albañileria", name: t("masonry"), icon: Building2, description: t("constructionWork"), priceType: "m2", price: 35 },
+    { id: "pintura", name: t("painting"), icon: PaintBucket, description: t("interiorExteriorPainting"), priceType: "m2", price: 12 },
+    { id: "electricidad", name: t("electricity"), icon: Zap, description: t("electricalInstallations"), priceType: "hour", price: 45 },
+    { id: "fontaneria", name: t("plumbing"), icon: Droplets, description: t("plumbingInstallations"), priceType: "hour", price: 40 },
+    { id: "jardineria", name: t("gardening"), icon: TreePine, description: t("gardenMaintenance"), priceType: "m2", price: 8 },
+    { id: "ascensores", name: t("elevators"), icon: Building, description: t("elevatorMaintenance"), priceType: "hour", price: 65 },
+    { id: "fachadas", name: t("facades"), icon: Home, description: t("facadeRehabilitation"), priceType: "m2", price: 25 },
+    { id: "tejados", name: t("roofs"), icon: Hammer, description: t("roofRepair"), priceType: "m2", price: 30 }
   ];
 
   const providerServiceHistory = [
@@ -101,8 +101,8 @@ export default function ServiceProviderDashboard() {
   const getActiveTabTitle = () => {
     switch (activeTab) {
       case "overview": return t("overview");
-      case "profile": return "Mi Perfil";
-      case "services": return "Servicios Profesionales";
+      case "profile": return t("myProfile");
+      case "services": return t("professionalServices");
       case "requests": return t("serviceRequests");
       case "bids": return t("activeBids");
       case "historial": return t("serviceHistory");
@@ -180,34 +180,34 @@ export default function ServiceProviderDashboard() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle>Mi Perfil de Empresa</CardTitle>
-                      <CardDescription>Gestiona la información pública de tu empresa.</CardDescription>
+                      <CardTitle>{t("myCompanyProfile")}</CardTitle>
+                      <CardDescription>{t("managePublicInfo")}</CardDescription>
                     </div>
                     <Button onClick={() => isEditingProfile ? handleSaveProfile() : setIsEditingProfile(true)}>
-                      {isEditingProfile ? <><Save className="mr-2 h-4 w-4" /> Guardar Cambios</> : <><Edit className="mr-2 h-4 w-4" /> Editar Perfil</>}
+                      {isEditingProfile ? <><Save className="mr-2 h-4 w-4" /> {t("saveChanges")}</> : <><Edit className="mr-2 h-4 w-4" /> {t("editProfile")}</>}
                     </Button>
                   </CardHeader>
                   <CardContent>
                     {isEditingProfile ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
-                          <h3 className="text-lg font-semibold">Información Principal</h3>
-                          <div><Label htmlFor="companyName">Nombre de la empresa</Label><Input id="companyName" name="companyName" value={companyProfile.companyName} onChange={handleInputChange} /></div>
-                          <div><Label htmlFor="description">Descripción</Label><Textarea id="description" name="description" value={companyProfile.description} onChange={handleInputChange} /></div>
-                          <div><Label htmlFor="website">Página Web</Label><Input id="website" name="website" value={companyProfile.website} onChange={handleInputChange} /></div>
-                          <div><Label htmlFor="email">Email</Label><Input id="email" name="email" value={companyProfile.email} onChange={handleInputChange} /></div>
-                          <div><Label htmlFor="phone">Teléfono</Label><Input id="phone" name="phone" value={companyProfile.phone} onChange={handleInputChange} /></div>
-                          <div><Label htmlFor="address">Dirección</Label><Input id="address" name="address" value={companyProfile.address} onChange={handleInputChange} /></div>
+                          <h3 className="text-lg font-semibold">{t("mainInformation")}</h3>
+                          <div><Label htmlFor="companyName">{t("companyName")}</Label><Input id="companyName" name="companyName" value={companyProfile.companyName} onChange={handleInputChange} /></div>
+                          <div><Label htmlFor="description">{t("description")}</Label><Textarea id="description" name="description" value={companyProfile.description} onChange={handleInputChange} /></div>
+                          <div><Label htmlFor="website">{t("website")}</Label><Input id="website" name="website" value={companyProfile.website} onChange={handleInputChange} /></div>
+                          <div><Label htmlFor="email">{t("email")}</Label><Input id="email" name="email" value={companyProfile.email} onChange={handleInputChange} /></div>
+                          <div><Label htmlFor="phone">{t("phone")}</Label><Input id="phone" name="phone" value={companyProfile.phone} onChange={handleInputChange} /></div>
+                          <div><Label htmlFor="address">{t("address")}</Label><Input id="address" name="address" value={companyProfile.address} onChange={handleInputChange} /></div>
                         </div>
                         <div className="space-y-4">
-                          <h3 className="text-lg font-semibold">Detalles del Negocio</h3>
-                          <div><Label htmlFor="cif">CIF</Label><Input id="cif" name="cif" value={companyProfile.cif} onChange={handleInputChange} /></div>
-                          <div><Label htmlFor="founded">Año de fundación</Label><Input id="founded" name="founded" value={companyProfile.founded} onChange={handleInputChange} /></div>
-                          <div><Label htmlFor="employees">Nº de empleados</Label><Input id="employees" name="employees" value={companyProfile.employees} onChange={handleInputChange} /></div>
-                          <div><Label htmlFor="serviceAreas">Áreas de servicio (separadas por coma)</Label><Input id="serviceAreas" value={companyProfile.serviceAreas.join(', ')} onChange={e => handleListChange('serviceAreas', e.target.value)} /></div>
-                          <div><Label htmlFor="specializations">Especializaciones (separadas por coma)</Label><Input id="specializations" value={companyProfile.specializations.join(', ')} onChange={e => handleListChange('specializations', e.target.value)} /></div>
-                          <div><Label htmlFor="certifications">Certificaciones (separadas por coma)</Label><Input id="certifications" value={companyProfile.certifications.join(', ')} onChange={e => handleListChange('certifications', e.target.value)} /></div>
-                          <div className="flex items-center space-x-2"><input type="checkbox" id="allServices" checked={companyProfile.allServices} onChange={e => setCompanyProfile(p => ({...p, allServices: e.target.checked}))} /><Label htmlFor="allServices">Ofrezco todos los servicios</Label></div>
+                          <h3 className="text-lg font-semibold">{t("businessDetails")}</h3>
+                          <div><Label htmlFor="cif">{t("taxId")}</Label><Input id="cif" name="cif" value={companyProfile.cif} onChange={handleInputChange} /></div>
+                          <div><Label htmlFor="founded">{t("foundedYear")}</Label><Input id="founded" name="founded" value={companyProfile.founded} onChange={handleInputChange} /></div>
+                          <div><Label htmlFor="employees">{t("numberOfEmployees")}</Label><Input id="employees" name="employees" value={companyProfile.employees} onChange={handleInputChange} /></div>
+                          <div><Label htmlFor="serviceAreas">{t("serviceAreas")}</Label><Input id="serviceAreas" value={companyProfile.serviceAreas.join(', ')} onChange={e => handleListChange('serviceAreas', e.target.value)} /></div>
+                          <div><Label htmlFor="specializations">{t("specializations")}</Label><Input id="specializations" value={companyProfile.specializations.join(', ')} onChange={e => handleListChange('specializations', e.target.value)} /></div>
+                          <div><Label htmlFor="certifications">{t("certifications")}</Label><Input id="certifications" value={companyProfile.certifications.join(', ')} onChange={e => handleListChange('certifications', e.target.value)} /></div>
+                          <div className="flex items-center space-x-2"><input type="checkbox" id="allServices" checked={companyProfile.allServices} onChange={e => setCompanyProfile(p => ({...p, allServices: e.target.checked}))} /><Label htmlFor="allServices">{t("offerAllServices")}</Label></div>
                         </div>
                       </div>
                     ) : (
@@ -221,14 +221,14 @@ export default function ServiceProviderDashboard() {
                           <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-gray-500" /><span>{companyProfile.address}</span></div>
                         </div>
                         <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-semibold">Detalles Adicionales</h4>
-                          <p><strong>CIF:</strong> {companyProfile.cif}</p>
-                          <p><strong>Fundación:</strong> {companyProfile.founded}</p>
-                          <p><strong>Nº Empleados:</strong> {companyProfile.employees}</p>
+                          <h4 className="font-semibold">{t("additionalDetails")}</h4>
+                          <p><strong>{t("taxId")}:</strong> {companyProfile.cif}</p>
+                          <p><strong>{t("founded")}:</strong> {companyProfile.founded}</p>
+                          <p><strong>{t("employees")}:</strong> {companyProfile.employees}</p>
                           <p><strong>Áreas de servicio:</strong> <span className="text-gray-600">{companyProfile.serviceAreas.join(', ')}</span></p>
                           <p><strong>Especializaciones:</strong> <span className="text-gray-600">{companyProfile.specializations.join(', ')}</span></p>
                           <p><strong>Certificaciones:</strong> <span className="text-gray-600">{companyProfile.certifications.join(', ')}</span></p>
-                          {companyProfile.allServices && <Badge className="bg-green-100 text-green-800"><Check className="h-4 w-4 mr-1" /> Ofrece todos los servicios</Badge>}
+                          {companyProfile.allServices && <Badge className="bg-green-100 text-green-800"><Check className="h-4 w-4 mr-1" /> {t("offersAllServices")}</Badge>}
                         </div>
                       </div>
                     )}
@@ -239,8 +239,8 @@ export default function ServiceProviderDashboard() {
               {activeTab === "services" && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Servicios Profesionales</CardTitle>
-                    <CardDescription>Gestiona los servicios que ofreces y sus tarifas.</CardDescription>
+                    <CardTitle>{t("manageProfessionalServices")}</CardTitle>
+                    <CardDescription>{t("manageServicesDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {professionalServices.map((service) => (
@@ -257,7 +257,7 @@ export default function ServiceProviderDashboard() {
                           <p className="text-gray-600 text-sm mb-4">{service.description}</p>
                           <div className="bg-gray-50 p-3 rounded-lg">
                             <p className="font-semibold text-lg text-gray-800">
-                              {service.price}€ <span className="text-sm font-normal text-gray-600">/ {service.priceType === "hour" ? "hora" : "m²"}</span>
+                              {service.price}€ <span className="text-sm font-normal text-gray-600">/ {service.priceType === "hour" ? t("hour") : "m²"}</span>
                             </p>
                           </div>
                         </CardContent>
@@ -270,25 +270,25 @@ export default function ServiceProviderDashboard() {
               {activeTab === "requests" && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Solicitudes de Servicio</CardTitle>
-                    <CardDescription>Explora y oferta en nuevas oportunidades de trabajo de comunidades, derramas y particulares.</CardDescription>
+                    <CardTitle>{t("serviceRequestsTitle")}</CardTitle>
+                    <CardDescription>{t("serviceRequestsDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-2">
                         <Filter className="h-4 w-4 text-gray-500" />
-                        <Label className="text-sm font-medium">Filtrar por origen:</Label>
+                        <Label className="text-sm font-medium">{t("filterByOrigin")}</Label>
                         <select value={requestSourceFilter} onChange={(e) => setRequestSourceFilter(e.target.value)} className="px-3 py-1 border rounded-md text-sm">
-                          <option value="all">Todos</option>
-                          <option value="community">Incidencia Comunidad</option>
-                          <option value="assessment">Derrama Importante</option>
-                          <option value="individual">Particular</option>
+                          <option value="all">{t("all")}</option>
+                          <option value="community">{t("communityIncident")}</option>
+                          <option value="assessment">{t("majorAssessment")}</option>
+                          <option value="individual">{t("individual")}</option>
                         </select>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Label className="text-sm font-medium">Filtrar por categoría:</Label>
+                        <Label className="text-sm font-medium">{t("filterByCategory")}</Label>
                         <select value={requestCategoryFilter} onChange={(e) => setRequestCategoryFilter(e.target.value)} className="px-3 py-1 border rounded-md text-sm">
-                           <option value="all">Todas</option>
+                           <option value="all">{t("allCategories")}</option>
                            {Array.from(new Set(serviceRequests.map(r => r.category))).map(cat => (
                              <option key={cat} value={cat} className="capitalize">{cat}</option>
                            ))}
@@ -306,7 +306,7 @@ export default function ServiceProviderDashboard() {
                                   <div>
                                     <CardTitle className="text-lg">{req.title}</CardTitle>
                                     <div className="flex items-center gap-2 text-sm text-gray-500">
-                                      <Badge variant="outline" className="capitalize">{req.source === 'community' ? 'Incidencia' : req.source === 'assessment' ? 'Derrama' : 'Particular'}</Badge>
+                                      <Badge variant="outline" className="capitalize">{req.source === 'community' ? t("incident") : req.source === 'assessment' ? t("assessment") : t("particular")}</Badge>
                                       <span>•</span>
                                       <span>{req.source === 'individual' ? req.customerName : req.communityName}</span>
                                     </div>
@@ -315,13 +315,13 @@ export default function ServiceProviderDashboard() {
                                 <p className="text-gray-600 mb-3">{req.description}</p>
                                 <div className="text-sm text-gray-500 space-y-1">
                                   <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {req.address}</div>
-                                  {req.budget && <div className="flex items-center gap-2"><DollarSign className="h-4 w-4" /> Presupuesto aprox: <strong>€{req.budget.toLocaleString()}</strong></div>}
-                                  {req.deadline && <div className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Fecha límite: <strong>{req.deadline}</strong></div>}
+                                  {req.budget && <div className="flex items-center gap-2"><DollarSign className="h-4 w-4" /> {t("approximateBudget")} <strong>€{req.budget.toLocaleString()}</strong></div>}
+                                  {req.deadline && <div className="flex items-center gap-2"><Calendar className="h-4 w-4" /> {t("deadline")} <strong>{req.deadline}</strong></div>}
                                 </div>
                               </div>
                               <div className="flex flex-col gap-2 shrink-0">
-                                <Button className="bg-blue-600 hover:bg-blue-700"><DollarSign className="h-4 w-4 mr-2"/> Enviar Presupuesto</Button>
-                                <Button variant="outline"><Eye className="h-4 w-4 mr-2"/> Ver Detalles</Button>
+                                <Button className="bg-blue-600 hover:bg-blue-700"><DollarSign className="h-4 w-4 mr-2"/> {t("sendQuote")}</Button>
+                                <Button variant="outline"><Eye className="h-4 w-4 mr-2"/> {t("viewDetails")}</Button>
                               </div>
                             </div>
                           </CardContent>
@@ -329,8 +329,8 @@ export default function ServiceProviderDashboard() {
                       )) : (
                         <div className="text-center py-12 text-gray-500">
                           <Info className="mx-auto h-10 w-10 mb-4" />
-                          <p className="font-semibold">No hay solicitudes de servicio</p>
-                          <p>No se encontraron solicitudes que coincidan con los filtros seleccionados.</p>
+                          <p className="font-semibold">{t("noServiceRequests")}</p>
+                          <p>{t("noMatchingRequests")}</p>
                         </div>
                       )}
                     </div>
@@ -346,8 +346,8 @@ export default function ServiceProviderDashboard() {
              
               {activeTab === "bids" && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-xl font-semibold mb-4">{t("activeBids")}</h2>
-                  <p className="text-gray-600">{companyProfile.allServices ? "Mostrando todas las ofertas disponibles." : t("noBidsInCategory")}</p>
+                  <h2 className="text-xl font-semibold mb-4">{t("activeBidsTitle")}</h2>
+                  <p className="text-gray-600">{companyProfile.allServices ? t("showingAllBids") : t("noBidsInCategory")}</p>
                 </div>
               )}
             </div>
