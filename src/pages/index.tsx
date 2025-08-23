@@ -100,7 +100,7 @@ export default function Home() {
               <div className="text-center mb-20">
                 <div className="inline-flex items-center gap-3 mb-8">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                  <span className="text-blue-600 font-semibold tracking-wider uppercase text-sm">Conoce HuBiT</span>
+                  <span className="text-blue-600 font-semibold tracking-wider uppercase text-sm">{t("knowHubit")}</span>
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse delay-300" />
                 </div>
                 <h2 className="text-5xl md:text-6xl font-black text-neutral-900 mb-8 leading-tight">
@@ -187,7 +187,7 @@ export default function Home() {
               <div className="text-center mb-20">
                 <div className="inline-flex items-center gap-3 mb-8">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="text-emerald-600 font-semibold tracking-wider uppercase text-sm">Descubre el proceso</span>
+                  <span className="text-emerald-600 font-semibold tracking-wider uppercase text-sm">{t("discoverTheProcess")}</span>
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse delay-300" />
                 </div>
                 <h2 className="text-5xl md:text-6xl font-black text-neutral-900 mb-8">
