@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 type Language = "es" | "en";
@@ -433,7 +432,7 @@ const translations = {
     employees: "Employees",
     offersAllServices: "Offers all services",
     
-    // Professional Services
+    // Professional Services Management
     manageProfessionalServices: "Professional Services",
     manageServicesDesc: "Manage the services you offer and their rates",
     constructionWork: "Construction and repair work",
