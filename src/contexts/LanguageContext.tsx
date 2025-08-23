@@ -545,7 +545,29 @@ const translations = {
     request: "Request",
     viewProfile: "View Profile",
     verified: "Verified",
-    jobs: "jobs"
+    jobs: "jobs",
+    
+    // Service Request Specific Content (Provider Dashboard)
+    waterLeakGarage: "Water leak in garage",
+    waterLeakGarageDesc: "Major leak in main garage pipe.",
+    portalLighting: "Portal lighting",
+    portalLightingDesc: "Several portal lights not working.",
+    completeFacadeRenovation: "Complete facade renovation",
+    completeFacadeRenovationDesc: "Comprehensive facade rehabilitation including thermal insulation.",
+    roofIntegralRepair: "Comprehensive roof repair",
+    roofIntegralRepairDesc: "Complete roof repair including waterproofing.",
+    paintCompleteFlat: "Paint complete apartment",
+    paintCompleteFlatDesc: "Paint 3-bedroom apartment, 80m2.",
+    changeKitchenTap: "Change kitchen tap",
+    changeKitchenTapDesc: "Kitchen tap is leaking and needs replacement.",
+    abandoCommunity: "Abando Community",
+    deustoCommunity: "Deusto Community",
+    juanPerez: "Juan Pérez",
+    luciaGomez: "Lucía Gómez",
+    ercillaStreet: "Ercilla Street 24, Bilbao",
+    lehendakariAguirreAv: "Lehendakari Aguirre Avenue 33, Bilbao",
+    granViaStreet: "Gran Vía Street 10, Bilbao",
+    moyuaSquare: "Moyúa Square 5, Bilbao"
   },
   es: {
     // General & Navigation
@@ -963,7 +985,7 @@ const translations = {
     excellentCommunityServiceComment: "Excelente servicio de mantenimiento para la comunidad, muy recomendable.",
     goodWorkComment: "Buen trabajo, instalación limpia y eficiente.",
     goodWorkStairsComment: "Buen trabajo limpiando las escaleras y zonas comunes.",
-
+    
     // Community Member Dashboard
     communityMemberDashboard: "Panel de Miembro de la Comunidad",
     myProperties: "Mis Propiedades",
@@ -1081,7 +1103,29 @@ const translations = {
     request: "Solicitar",
     viewProfile: "Ver Perfil",
     verified: "Verificado",
-    jobs: "trabajos"
+    jobs: "trabajos",
+    
+    // Service Request Specific Content (Provider Dashboard)
+    waterLeakGarage: "Fuga de agua en el garaje",
+    waterLeakGarageDesc: "Fuga importante en tubería principal del garaje.",
+    portalLighting: "Iluminación del portal",
+    portalLightingDesc: "Varias luces del portal no funcionan.",
+    completeFacadeRenovation: "Renovación completa de fachada",
+    completeFacadeRenovationDesc: "Rehabilitación integral de la fachada del edificio incluyendo aislamiento térmico.",
+    roofIntegralRepair: "Reparación integral del tejado",
+    roofIntegralRepairDesc: "Reparación completa del tejado incluyendo impermeabilización.",
+    paintCompleteFlat: "Pintar piso completo",
+    paintCompleteFlatDesc: "Pintar piso de 3 habitaciones, 80m2.",
+    changeKitchenTap: "Cambiar grifo de la cocina",
+    changeKitchenTapDesc: "El grifo de la cocina gotea y necesita ser reemplazado.",
+    abandoCommunity: "Comunidad Abando",
+    deustoCommunity: "Comunidad Deusto",
+    juanPerez: "Juan Pérez",
+    luciaGomez: "Lucía Gómez",
+    ercillaStreet: "Calle Ercilla 24, Bilbao",
+    lehendakariAguirreAv: "Avenida Lehendakari Aguirre 33, Bilbao",
+    granViaStreet: "Calle Gran Vía 10, Bilbao",
+    moyuaSquare: "Plaza Moyúa 5, Bilbao"
   },
 };
 

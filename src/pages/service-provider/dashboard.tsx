@@ -46,12 +46,76 @@ import ProviderServiceHistoryCard from "@/components/ratings/ProviderServiceHist
 import { Textarea } from "@/components/ui/textarea";
 
 const serviceRequests = [
-  { id: 'inc-1', title: "Fuga de agua en el garaje", description: "Fuga importante en tubería principal del garaje.", category: "fontaneria", source: 'community' as const, communityName: "Comunidad Abando", address: "Calle Ercilla 24, Bilbao", status: 'new' as const, date: '2025-01-15' },
-  { id: 'inc-2', title: "Iluminación del portal", description: "Varias luces del portal no funcionan.", category: "electricidad", source: 'community' as const, communityName: "Comunidad Deusto", address: "Avenida Lehendakari Aguirre 33, Bilbao", status: 'viewed' as const, date: '2025-01-20' },
-  { id: 'asm-1', title: "Renovación completa de fachada", description: "Rehabilitación integral de la fachada del edificio incluyendo aislamiento térmico.", category: "fachadas", source: 'assessment' as const, communityName: "Comunidad Abando", address: "Calle Ercilla 24, Bilbao", budget: 25000, deadline: "2025-03-15", status: 'bidding' as const, date: '2025-02-01' },
-  { id: 'asm-2', title: "Reparación integral del tejado", description: "Reparación completa del tejado incluyendo impermeabilización.", category: "tejados", source: 'assessment' as const, communityName: "Comunidad Deusto", address: "Avenida Lehendakari Aguirre 33, Bilbao", budget: 18000, deadline: "2025-03-01", status: 'new' as const, date: '2025-02-10' },
-  { id: 'ind-1', title: "Pintar piso completo", description: "Pintar piso de 3 habitaciones, 80m2.", category: "pintura", source: 'individual' as const, customerName: "Juan Pérez", address: "Calle Gran Vía 10, Bilbao", status: 'new' as const, date: '2025-02-05' },
-  { id: 'ind-2', title: "Cambiar grifo de la cocina", description: "El grifo de la cocina gotea y necesita ser reemplazado.", category: "fontaneria", source: 'individual' as const, customerName: "Lucía Gómez", address: "Plaza Moyúa 5, Bilbao", status: 'viewed' as const, date: '2025-02-08' },
+  { 
+    id: 'inc-1', 
+    title: t("waterLeakGarage"), 
+    description: t("waterLeakGarageDesc"), 
+    category: "fontaneria", 
+    source: 'community' as const, 
+    communityName: t("abandoCommunity"), 
+    address: t("ercillaStreet"), 
+    status: 'new' as const, 
+    date: '2025-01-15' 
+  },
+  { 
+    id: 'inc-2', 
+    title: t("portalLighting"), 
+    description: t("portalLightingDesc"), 
+    category: "electricidad", 
+    source: 'community' as const, 
+    communityName: t("deustoCommunity"), 
+    address: t("lehendakariAguirreAv"), 
+    status: 'viewed' as const, 
+    date: '2025-01-20' 
+  },
+  { 
+    id: 'asm-1', 
+    title: t("completeFacadeRenovation"), 
+    description: t("completeFacadeRenovationDesc"), 
+    category: "fachadas", 
+    source: 'assessment' as const, 
+    communityName: t("abandoCommunity"), 
+    address: t("ercillaStreet"), 
+    budget: 25000, 
+    deadline: "2025-03-15", 
+    status: 'bidding' as const, 
+    date: '2025-02-01' 
+  },
+  { 
+    id: 'asm-2', 
+    title: t("roofIntegralRepair"), 
+    description: t("roofIntegralRepairDesc"), 
+    category: "tejados", 
+    source: 'assessment' as const, 
+    communityName: t("deustoCommunity"), 
+    address: t("lehendakariAguirreAv"), 
+    budget: 18000, 
+    deadline: "2025-03-01", 
+    status: 'new' as const, 
+    date: '2025-02-10' 
+  },
+  { 
+    id: 'ind-1', 
+    title: t("paintCompleteFlat"), 
+    description: t("paintCompleteFlatDesc"), 
+    category: "pintura", 
+    source: 'individual' as const, 
+    customerName: t("juanPerez"), 
+    address: t("granViaStreet"), 
+    status: 'new' as const, 
+    date: '2025-02-05' 
+  },
+  { 
+    id: 'ind-2', 
+    title: t("changeKitchenTap"), 
+    description: t("changeKitchenTapDesc"), 
+    category: "fontaneria", 
+    source: 'individual' as const, 
+    customerName: t("luciaGomez"), 
+    address: t("moyuaSquare"), 
+    status: 'viewed' as const, 
+    date: '2025-02-08' 
+  },
 ];
 
 export default function ServiceProviderDashboard() {
