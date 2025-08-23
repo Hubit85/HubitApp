@@ -305,20 +305,34 @@ const translations = {
     automatedPayments: "Automated payment processing",
     qualityAssurance: "Quality assurance system",
     communityGovernance: "Community governance tools",
-    
-    // Technology
-    technologyStack: "Technology Stack",
-    blockchain: "Blockchain Infrastructure",
-    blockchainDescription: "Built on Solana for fast, low-cost transactions and smart contract functionality.",
-    webPlatform: "Web Platform",
-    webDescription: "Modern web application built with Next.js, TypeScript, and real-time capabilities.",
+    verifiedRatingSystem: "Verified rating system",
+    transparentCommunication: "Transparent communication",
+    smartAutomation: "Smart automation",
+    blockchainSecurity: "Blockchain security",
+    serviceRating: "Service Rating",
+    serviceRatingDescription: "Advanced rating system that ensures quality and transparency in all service transactions.",
+    verifiedReviews: "Verified reviews",
+    providerRanking: "Provider ranking",
+    transparentHistory: "Transparent history",
+    globalCommunity: "Global Community",
+    globalCommunityDescription: "Building a worldwide network of trusted service providers and satisfied customers.",
+    verifiedProfiles: "Verified profiles",
+    trustNetwork: "Trust network",
+    socialInteraction: "Social interaction",
     
     // Tokenomics
     tokenomics: "Tokenomics",
     totalSupply: "Total Supply",
+    publicPool: "Public Pool",
     communityRewards: "Community Rewards",
     development: "Development",
     team: "Team & Advisors",
+    airdropsRewards: "Airdrops & Rewards",
+    distributionDetails: "Distribution Details",
+    publicPoolDescription: "Tokens available for public acquisition and community rewards",
+    teamDescription2: "Reserved for team members and advisors with vesting schedule",
+    airdropsRewardsDescription: "Community airdrops and user reward programs",
+    marketingDescription: "Marketing campaigns and strategic partnerships",
     
     // Roadmap
     roadmap: "Roadmap",
@@ -850,7 +864,7 @@ const translations = {
     // Problem & Solution
     problemStatement: "Enunciado del Problema",
     lackOfTransparency: "Falta de Transparencia",
-    transparencyProblem: "Los sistemas actuales de gestión comunitaria carecen de transparencia, dificultando que los vecinos entendan las decisiones y costos de los servicios.",
+    transparencyProblem: "Los sistemas actuales de gestión comunitaria carecen de transparencia, dificultando que los vecinos entiendan las decisiones y costos de los servicios.",
     communicationGaps: "Fallas en la Comunicación",
     communicationProblem: "La comunicación deficiente entre administradores, proveedores de servicios y vecinos genera ineficiencias y confusiones.",
     inefficientProcesses: "Procesos Ineficientes",
@@ -863,6 +877,39 @@ const translations = {
     automatedPayments: "Procesamiento automático de pagos",
     qualityAssurance: "Sistema de aseguramiento de calidad",
     communityGovernance: "Herramientas de gobernanza comunitaria",
+    verifiedRatingSystem: "Sistema de valoración verificado",
+    transparentCommunication: "Comunicación transparente",
+    smartAutomation: "Automatización inteligente",
+    blockchainSecurity: "Seguridad blockchain",
+    serviceRating: "Valoración de Servicios",
+    serviceRatingDescription: "Sistema avanzado de valoración que garantiza calidad y transparencia en todas las transacciones de servicios.",
+    verifiedReviews: "Reseñas verificadas",
+    providerRanking: "Ranking de proveedores",
+    transparentHistory: "Historial transparente",
+    globalCommunity: "Comunidad Global",
+    globalCommunityDescription: "Construyendo una red mundial de proveedores de servicios confiables y clientes satisfechos.",
+    verifiedProfiles: "Perfiles verificados",
+    trustNetwork: "Red de confianza",
+    socialInteraction: "Interacción social",
+    
+    // Tokenomics
+    tokenomics: "Tokenomics",
+    totalSupply: "Suministro Total",
+    publicPool: "Pool Público",
+    communityRewards: "Recompensas Comunitarias",
+    development: "Desarrollo",
+    team: "Equipo & Asesores",
+    airdropsRewards: "Airdrops & Recompensas",
+    distributionDetails: "Detalles de Distribución",
+    publicPoolDescription: "Tokens disponibles para adquisición pública y recompensas comunitarias",
+    teamDescription2: "Reservado para miembros del equipo y asesores con cronograma de vesting",
+    airdropsRewardsDescription: "Airdrops comunitarios y programas de recompensas para usuarios",
+    marketingDescription: "Campañas de marketing y alianzas estratégicas",
+    
+    // Additional whitepaper content
+    hubFuture: "El Futuro de los Servicios Comunitarios",
+    hubFutureDescription: "HuBiT está pioneriando la próxima generación de gestión de servicios comunitarios, creando un ecosistema transparente, eficiente y descentralizado que beneficia a todos los participantes.",
+    backToTop: "Volver Arriba",
     
     // Technology
     technologyStack: "Stack Tecnológico",
@@ -870,13 +917,6 @@ const translations = {
     blockchainDescription: "Construido en Solana para transacciones rápidas y de bajo costo con funcionalidad de smart contracts.",
     webPlatform: "Plataforma Web",
     webDescription: "Aplicación web moderna construida con Next.js, TypeScript y funcionalidades en tiempo real.",
-    
-    // Tokenomics
-    tokenomics: "Tokenomics",
-    totalSupply: "Suministro Total",
-    communityRewards: "Recompensas Comunitarias",
-    development: "Desarrollo",
-    team: "Equipo & Asesores",
     
     // Roadmap
     roadmap: "Roadmap",
@@ -899,7 +939,7 @@ const translations = {
     transparency: "Transparencia",
     transparencyDesc: "Visibilidad completa en todas las operaciones de servicios comunitarios",
     blockchainDesc: "Infraestructura descentralizada garantizando seguridad y confianza",
-    communityDriven: "Comunidad Dirigida",
+    communityDriven: "Dirigido por la Comunidad",
     communityDesc: "Gobierno por vecinos con derechos de votación de tokens HBIT",
     
     // Service Provider Dashboard Specific  
