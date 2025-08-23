@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Building, Wrench, Star, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Gift, Crown, Sparkles, TrendingUp, Shield, Globe } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import Image from "next/image";
+import SupabaseStatus from "@/components/SupabaseStatus";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -85,6 +86,34 @@ export default function Home() {
                     {t("login")}
                   </Link>
                 </Button>
+              </div>
+            </div>
+          </section>
+
+          {/* Supabase Status Section */}
+          <section className="w-full py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-neutral-900 via-neutral-800 to-neutral-900 relative overflow-hidden">
+            <div className="absolute inset-0">
+              <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
+            </div>
+            
+            <div className="max-w-7xl mx-auto relative">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-3 mb-6">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                  <span className="text-emerald-400 font-semibold tracking-wider uppercase text-sm">Estado del Sistema</span>
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-300" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  Integración con Supabase
+                </h2>
+                <p className="text-neutral-300 text-lg max-w-2xl mx-auto">
+                  Monitoreo en tiempo real del estado de la base de datos y servicios backend
+                </p>
+              </div>
+              
+              <div className="flex justify-center">
+                <SupabaseStatus />
               </div>
             </div>
           </section>
