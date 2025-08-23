@@ -412,34 +412,34 @@ export default function Home() {
 
               <div className="bg-white rounded-lg p-8 shadow-lg mb-16">
                 <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">
-                  Separación de Pagos por Uso
+                  {t("paymentSeparationByUse")}
                 </h3>
                 <p className="text-gray-600 text-center mb-8">
-                  HuBiT mantiene una clara separación entre pagos para servicios profesionales (EUR) y funciones de la aplicación (cripto)
+                  {t("paymentSeparationDescription")}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-blue-50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
                       <CreditCard className="h-5 w-5 mr-2" />
-                      Servicios Profesionales (EUR)
+                      {t("professionalServicesEur")}
                     </h4>
                     <ul className="space-y-2 text-blue-700">
-                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />Limpieza y mantenimiento</li>
-                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />Reparaciones y obras</li>
-                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />Servicios de jardinería</li>
-                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />Administración de fincas</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />{t("cleaningAndMaintenance")}</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />{t("repairsAndWorks")}</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />{t("gardeningServices")}</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-blue-600" />{t("propertyAdministration")}</li>
                     </ul>
                   </div>
                   <div className="bg-purple-50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-purple-800 mb-4 flex items-center">
                       <Coins className="h-5 w-5 mr-2" />
-                      Funciones de la App (Cripto)
+                      {t("appFunctionsCrypto")}
                     </h4>
                     <ul className="space-y-2 text-purple-700">
-                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />Suscripciones premium</li>
-                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />Tokens de recompensa</li>
-                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />Funciones avanzadas</li>
-                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />Acceso a valoraciones premium</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />{t("premiumSubscriptions")}</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />{t("rewardTokens")}</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />{t("advancedFeatures")}</li>
+                      <li className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-purple-600" />{t("premiumRatingsAccess")}</li>
                     </ul>
                   </div>
                 </div>
@@ -458,7 +458,7 @@ export default function Home() {
               <div className="text-center mb-20">
                 <div className="inline-flex items-center gap-3 mb-8">
                   <Coins className="w-6 h-6 text-purple-600" />
-                  <span className="text-purple-600 font-semibold tracking-wider uppercase text-sm">Adquiere HBIT</span>
+                  <span className="text-purple-600 font-semibold tracking-wider uppercase text-sm">{t("acquireHbit")}</span>
                   <Coins className="w-6 h-6 text-purple-600" />
                 </div>
                 <h2 className="text-5xl md:text-6xl font-black text-neutral-900 mb-8">
