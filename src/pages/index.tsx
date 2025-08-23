@@ -309,7 +309,7 @@ export default function Home() {
                 </p>
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 max-w-4xl mx-auto">
                   <p className="text-amber-800 font-medium text-lg">
-                    📋 <strong>Importante:</strong> Los pagos con criptomonedas son exclusivamente para suscripciones y funciones premium de la aplicación. Los servicios profesionales se pagan con métodos tradicionales (EUR) según la normativa española.
+                    📋 <strong>{t("importantNote")}:</strong> {t("cryptoExclusiveNote")}
                   </p>
                 </div>
               </div>
@@ -324,12 +324,12 @@ export default function Home() {
                       {t("fiatCurrencies")}
                     </CardTitle>
                     <div className="text-sm font-mono bg-blue-200 text-blue-800 px-3 py-1 rounded-full inline-block mt-2">
-                      Para servicios profesionales
+                      {t("forProfessionalServices")}
                     </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      Todos los servicios profesionales (limpieza, mantenimiento, reparaciones) se pagan exclusivamente en euros según la normativa española.
+                      {t("professionalServicesNote")}
                     </p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
@@ -357,12 +357,12 @@ export default function Home() {
                       {t("cryptocurrencies")}
                     </CardTitle>
                     <div className="text-sm font-mono bg-purple-200 text-purple-800 px-3 py-1 rounded-full inline-block mt-2">
-                      Solo para usar la app
+                      {t("onlyForApp")}
                     </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      Las criptomonedas se utilizan únicamente para suscripciones premium, funciones avanzadas y tokens de recompensa de la plataforma.
+                      {t("appOnlyNote")}
                     </p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
@@ -399,7 +399,7 @@ export default function Home() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-600 text-center mb-4">
-                      Token nativo para suscripciones premium, recompensas por valoraciones y acceso a funciones exclusivas de la plataforma.
+                      {t("nativeToken")}
                     </p>
                     <div className="text-center">
                       <div className="text-sm text-green-600 font-semibold">
