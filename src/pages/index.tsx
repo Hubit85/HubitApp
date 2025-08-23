@@ -478,7 +478,7 @@ export default function Home() {
                     description: t("downloadPhantomWallet"),
                     image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
                     action: t("clickToPhantom"),
-                    color: "blue",
+                    color: "blue" as "blue" | "green" | "purple",
                     url: "https://phantom.com"
                   },
                   {
@@ -488,7 +488,7 @@ export default function Home() {
                     description: t("buySOLTokens"),
                     image: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
                     action: t("clickToLearnBuySOL"),
-                    color: "green",
+                    color: "green" as "blue" | "green" | "purple",
                     url: "https://phantom.com/learn/crypto-101/where-and-how-to-buy-solana-SOL"
                   },
                   {
@@ -498,7 +498,7 @@ export default function Home() {
                     description: t("useDecentralizedExchange"),
                     image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
                     action: t("clickToSwap"),
-                    color: "purple",
+                    color: "purple" as "blue" | "green" | "purple",
                     url: "https://gmgn.ai/trend?chain=sol"
                   }
                 ].map((step, index) => {
