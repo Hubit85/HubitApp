@@ -45,79 +45,6 @@ import ZoomableSection from "@/components/ZoomableSection";
 import ProviderServiceHistoryCard from "@/components/ratings/ProviderServiceHistoryCard";
 import { Textarea } from "@/components/ui/textarea";
 
-const serviceRequests = [
-  { 
-    id: 'inc-1', 
-    title: t("waterLeakGarage"), 
-    description: t("waterLeakGarageDesc"), 
-    category: "fontaneria", 
-    source: 'community' as const, 
-    communityName: t("abandoCommunity"), 
-    address: t("ercillaStreet"), 
-    status: 'new' as const, 
-    date: '2025-01-15' 
-  },
-  { 
-    id: 'inc-2', 
-    title: t("portalLighting"), 
-    description: t("portalLightingDesc"), 
-    category: "electricidad", 
-    source: 'community' as const, 
-    communityName: t("deustoCommunity"), 
-    address: t("lehendakariAguirreAv"), 
-    status: 'viewed' as const, 
-    date: '2025-01-20' 
-  },
-  { 
-    id: 'asm-1', 
-    title: t("completeFacadeRenovation"), 
-    description: t("completeFacadeRenovationDesc"), 
-    category: "fachadas", 
-    source: 'assessment' as const, 
-    communityName: t("abandoCommunity"), 
-    address: t("ercillaStreet"), 
-    budget: 25000, 
-    deadline: "2025-03-15", 
-    status: 'bidding' as const, 
-    date: '2025-02-01' 
-  },
-  { 
-    id: 'asm-2', 
-    title: t("roofIntegralRepair"), 
-    description: t("roofIntegralRepairDesc"), 
-    category: "tejados", 
-    source: 'assessment' as const, 
-    communityName: t("deustoCommunity"), 
-    address: t("lehendakariAguirreAv"), 
-    budget: 18000, 
-    deadline: "2025-03-01", 
-    status: 'new' as const, 
-    date: '2025-02-10' 
-  },
-  { 
-    id: 'ind-1', 
-    title: t("paintCompleteFlat"), 
-    description: t("paintCompleteFlatDesc"), 
-    category: "pintura", 
-    source: 'individual' as const, 
-    customerName: t("juanPerez"), 
-    address: t("granViaStreet"), 
-    status: 'new' as const, 
-    date: '2025-02-05' 
-  },
-  { 
-    id: 'ind-2', 
-    title: t("changeKitchenTap"), 
-    description: t("changeKitchenTapDesc"), 
-    category: "fontaneria", 
-    source: 'individual' as const, 
-    customerName: t("luciaGomez"), 
-    address: t("moyuaSquare"), 
-    status: 'viewed' as const, 
-    date: '2025-02-08' 
-  },
-];
-
 export default function ServiceProviderDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [customerTypeFilter, setCustomerTypeFilter] = useState("all");
@@ -125,6 +52,80 @@ export default function ServiceProviderDashboard() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const { t, language } = useLanguage();
+
+  // Move serviceRequests inside component to access t() function
+  const serviceRequests = [
+    { 
+      id: 'inc-1', 
+      title: t("waterLeakGarage"), 
+      description: t("waterLeakGarageDesc"), 
+      category: "fontaneria", 
+      source: 'community' as const, 
+      communityName: t("abandoCommunity"), 
+      address: t("ercillaStreet"), 
+      status: 'new' as const, 
+      date: '2025-01-15' 
+    },
+    { 
+      id: 'inc-2', 
+      title: t("portalLighting"), 
+      description: t("portalLightingDesc"), 
+      category: "electricidad", 
+      source: 'community' as const, 
+      communityName: t("deustoCommunity"), 
+      address: t("lehendakariAguirreAv"), 
+      status: 'viewed' as const, 
+      date: '2025-01-20' 
+    },
+    { 
+      id: 'asm-1', 
+      title: t("completeFacadeRenovation"), 
+      description: t("completeFacadeRenovationDesc"), 
+      category: "fachadas", 
+      source: 'assessment' as const, 
+      communityName: t("abandoCommunity"), 
+      address: t("ercillaStreet"), 
+      budget: 25000, 
+      deadline: "2025-03-15", 
+      status: 'bidding' as const, 
+      date: '2025-02-01' 
+    },
+    { 
+      id: 'asm-2', 
+      title: t("roofIntegralRepair"), 
+      description: t("roofIntegralRepairDesc"), 
+      category: "tejados", 
+      source: 'assessment' as const, 
+      communityName: t("deustoCommunity"), 
+      address: t("lehendakariAguirreAv"), 
+      budget: 18000, 
+      deadline: "2025-03-01", 
+      status: 'new' as const, 
+      date: '2025-02-10' 
+    },
+    { 
+      id: 'ind-1', 
+      title: t("paintCompleteFlat"), 
+      description: t("paintCompleteFlatDesc"), 
+      category: "pintura", 
+      source: 'individual' as const, 
+      customerName: t("juanPerez"), 
+      address: t("granViaStreet"), 
+      status: 'new' as const, 
+      date: '2025-02-05' 
+    },
+    { 
+      id: 'ind-2', 
+      title: t("changeKitchenTap"), 
+      description: t("changeKitchenTapDesc"), 
+      category: "fontaneria", 
+      source: 'individual' as const, 
+      customerName: t("luciaGomez"), 
+      address: t("moyuaSquare"), 
+      status: 'viewed' as const, 
+      date: '2025-02-08' 
+    },
+  ];
 
   const [companyProfile, setCompanyProfile] = useState({
     companyName: "",
