@@ -2,7 +2,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
-type Property = Database["public"]["Tables"]["properties"]["Row"];
 type PropertyInsert = Database["public"]["Tables"]["properties"]["Insert"];
 type PropertyUpdate = Database["public"]["Tables"]["properties"]["Update"];
 
@@ -10,7 +9,7 @@ export class SupabasePropertyService {
   static async createProperty(propertyData: PropertyInsert) {
     const { data, error } = await supabase
       .from("properties")
-      .insert(propertyData)
+      .insert([propertyData])
       .select()
       .single();
 
@@ -24,7 +23,7 @@ export class SupabasePropertyService {
   static async updateProperty(id: string, updates: PropertyUpdate) {
     const { data, error } = await supabase
       .from("properties")
-      .update(updates)
+      .update(updates as any)
       .eq("id", id)
       .select()
       .single();

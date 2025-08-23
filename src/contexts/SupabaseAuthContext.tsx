@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
 
 interface AuthContextType {
   user: User | null;
@@ -12,7 +13,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, userData: Partial<Profile>) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: string }>;
 }
@@ -92,7 +93,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, userData: Partial<Profile>) => {
+  const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -107,11 +108,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         // Create profile
         const { error: profileError } = await supabase
           .from("profiles")
-          .insert({
+          .insert([{
             id: data.user.id,
             email: data.user.email!,
             ...userData,
-          });
+          }]);
 
         if (profileError) {
           return { error: profileError.message };
@@ -137,7 +138,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update(updates)
+        .update(updates as any)
         .eq("id", user.id);
 
       if (error) {
