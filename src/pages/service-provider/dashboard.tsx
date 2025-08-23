@@ -63,20 +63,20 @@ export default function ServiceProviderDashboard() {
   const { t } = useLanguage();
 
   const [companyProfile, setCompanyProfile] = useState({
-    companyName: "Servicios Integrales Madrid",
-    description: "Empresa especializada en servicios de mantenimiento y reformas para comunidades y particulares.",
+    companyName: t("companyName") === "Company Name" ? "Integral Services Madrid" : "Servicios Integrales Madrid",
+    description: t("companyName") === "Company Name" ? "Company specialized in maintenance and renovation services for communities and individuals." : "Empresa especializada en servicios de mantenimiento y reformas para comunidades y particulares.",
     website: "www.serviciosintegrales-madrid.com",
     email: "info@serviciosintegrales-madrid.com",
     phone: "+34 91 123 45 67",
-    address: "Calle Alcalá 123, Madrid",
+    address: t("companyName") === "Company Name" ? "Alcalá Street 123, Madrid" : "Calle Alcalá 123, Madrid",
     cif: "B12345678",
     founded: "2015",
     employees: "15-20",
-    serviceAreas: ["Madrid", "Alcalá de Henares", "Getafe", "Leganés"],
-    specializations: ["Mantenimiento integral", "Reformas", "Servicios urgentes"],
-    certifications: ["ISO 9001", "Certificado instalador autorizado", "Seguro responsabilidad civil"],
+    serviceAreas: t("companyName") === "Company Name" ? ["Madrid", "Alcalá de Henares", "Getafe", "Leganés"] : ["Madrid", "Alcalá de Henares", "Getafe", "Leganés"],
+    specializations: t("companyName") === "Company Name" ? ["Comprehensive maintenance", "Renovations", "Emergency services"] : ["Mantenimiento integral", "Reformas", "Servicios urgentes"],
+    certifications: t("companyName") === "Company Name" ? ["ISO 9001", "Authorized installer certificate", "Civil liability insurance"] : ["ISO 9001", "Certificado instalador autorizado", "Seguro responsabilidad civil"],
     allServices: true,
-    workingHours: "Lunes a Viernes: 8:00 - 18:00, Sábados: 9:00 - 14:00"
+    workingHours: t("companyName") === "Company Name" ? "Monday to Friday: 8:00 - 18:00, Saturdays: 9:00 - 14:00" : "Lunes a Viernes: 8:00 - 18:00, Sábados: 9:00 - 14:00"
   });
 
   const professionalServices = [
