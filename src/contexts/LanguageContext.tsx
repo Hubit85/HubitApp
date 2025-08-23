@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 type Language = "es" | "en";
@@ -239,6 +240,8 @@ const translations = {
     accessProviderPanel: "Access Provider Panel",
     communityMemberLink: "Community Member",
     particularLink: "Individual",
+    map: "Map",
+    communities: "Communities",
     
     // Financial & Cryptocurrency
     solanaNetwork: "Solana Network",
@@ -379,7 +382,6 @@ const translations = {
     q2Description: "International expansion of the professional services hub to key markets in America, Europe, Asia and Oceania, establishing HuBiT as the global standard for real estate transparency.",
     tokenLaunchTag: "Token Launch",
     demoReady: "Demo Ready",
-    ratingSystem: "Rating System",
     completeApp: "Complete App",
     completeHub: "Complete Hub",
     hybridPayments: "Hybrid Payments",
@@ -407,10 +409,7 @@ const translations = {
     serviceRequests: "Service Requests",
     activeBids: "Active Bids",
     serviceHistory: "Service History",
-    reviews: "Reviews",
     earnings: "Earnings",
-    schedule: "Schedule",
-    notifications: "Notifications",
     
     // Profile Management
     myCompanyProfile: "My Company Profile",
@@ -463,7 +462,6 @@ const translations = {
     all: "All",
     communityIncident: "Community Incident",
     majorAssessment: "Major Assessment",
-    individual: "Individual",
     allCategories: "All Categories",
     incident: "Incident",
     assessment: "Assessment",
@@ -496,9 +494,7 @@ const translations = {
     myProperties: "My Properties",
     availableServices: "Available Services",
     communityChat: "Community Chat",
-    scheduleVideoConference: "Schedule Video Conference",
     informIssue: "Report Issue",
-    communityContracts: "Community Contracts",
     communityBudget: "Community Budget",
     contactAdministrator: "Contact Administrator",
     serviceRatings: "Service Ratings",
@@ -618,7 +614,7 @@ const translations = {
     servicesContractedDesc: "View contracts for services hired by the community",
     elevatorMaintenanceContract: "Elevator Maintenance Contract",
     cleaningService: "Cleaning Service Contract",
-    gardenMaintenance: "Garden Maintenance Contract",
+    gardenMaintenanceContract: "Garden Maintenance Contract",
     preventiveMaintenanceAndEmergencyRepairs: "Preventive maintenance and emergency repairs",
     weeklyCleaningCommonAreasPortals: "Weekly cleaning of common areas and portals",
     seasonalMaintenanceGardensGreenAreas: "Seasonal maintenance of gardens and green areas",
@@ -675,7 +671,6 @@ const translations = {
     sortBy: "Sort by",
     showingServices: "Showing",
     of: "of",
-    services: "services",
     sortedBy: "Sorted by",
     ascending: "ascending",
     descending: "descending",
@@ -715,7 +710,6 @@ const translations = {
     gatesDisinfection: "Gates Disinfection",
     verified: "Verified",
     jobs: "jobs",
-    specializations: "Specializations",
     viewProfile: "View Profile",
     request: "Request",
     noRecommendations: "No recommendations available at this time",
@@ -727,7 +721,6 @@ const translations = {
     pendingPayments: "Pending Payments",
     thisMonth: "this month",
     vsLastWeek: "vs last week",
-    recentIncidents: "Recent Incidents",
     recentBids: "Recent Bids",
     viewAllIncidents: "View All Incidents",
     viewAllBids: "View All Bids",
@@ -736,7 +729,6 @@ const translations = {
     scheduleNewMeeting: "Schedule New Meeting",
     meetingTitle: "Meeting Title",
     enterMeetingTitle: "Enter meeting title",
-    community: "Community",
     time: "Time",
     participants: "Participants",
     enterParticipantsEmails: "Enter participants' emails",
@@ -753,8 +745,6 @@ const translations = {
     communitiesOnMap: "Communities on Map",
     coordinates: "Coordinates",
     viewOnMap: "View on Map",
-    communityContracts: "Community Contracts",
-    communityBudget: "Community Budget",
     communityIncidents: "Community Incidents",
     communityBids: "Community Bids",
     title: "Title",
@@ -779,10 +769,8 @@ const translations = {
     type: "Type",
     amountStatus: "Amount/Status",
     action: "Action",
-    manage: "Manage",
     
     // Individual Dashboard  
-    individual: "Individual",
     personalInformation: "Personal Information",
     fullNameLabel: "Full Name",
     emailLabel: "Email",
@@ -805,14 +793,12 @@ const translations = {
     describeServiceNeeded: "Describe the service you need in detail...",
     requestQuotes: "Request Quotes",
     searchProviders: "Search providers...",
-    reviews: "Reviews",
     location: "Location",
     loadMoreProviders: "Load More Providers",
     noFavoriteProviders: "No favorite providers yet",
     addFavoriteProvidersDesc: "Add providers to favorites to access them quickly",
     exploreProviders: "Explore Providers",
     addProperty: "Add Property",
-    manage: "Manage",
     noPaymentHistory: "No payment history available",
     
     // Individual Recommendations and Awards
@@ -851,7 +837,9 @@ const translations = {
     noPropertySelected: "No property selected",
     propertySelected: "Property selected",
     selectAPropertyToManage: "Select a property to manage",
-    changeProperty: "Change Property"
+    changeProperty: "Change Property",
+    saveLabel: "Save",
+    editLabel: "Edit"
   },
   es: {
     // General & Navigation
@@ -1081,6 +1069,8 @@ const translations = {
     accessProviderPanel: "Acceder al Panel de Proveedor",
     communityMemberLink: "Miembro de la Comunidad",
     particularLink: "Particular",
+    map: "Mapa",
+    communities: "Comunidades",
     
     // Financial & Cryptocurrency
     solanaNetwork: "Red Solana",
@@ -1221,7 +1211,6 @@ const translations = {
     q2Description: "Expansión internacional del hub de servicios profesionales a mercados clave en América, Europa, Asia y Oceanía, estableciendo HuBiT como el estándar global de transparencia inmobiliaria.",
     tokenLaunchTag: "Token Launch",
     demoReady: "Demo Preparada",
-    ratingSystem: "Sistema de Valoración",
     completeApp: "App Completa",
     completeHub: "Hub Completo",
     hybridPayments: "Pagos Híbridos",
@@ -1245,10 +1234,8 @@ const translations = {
     serviceRequests: "Solicitudes de Servicio",
     activeBids: "Ofertas Activas",
     serviceHistory: "Historial de Servicios",
-    reviews: "Reseñas",
     earnings: "Ganancias", 
     schedule: "Horarios",
-    notifications: "Notificaciones",
     
     // Profile Management
     myCompanyProfile: "Mi Perfil de Empresa",
@@ -1265,7 +1252,6 @@ const translations = {
     foundedYear: "Año de fundación",
     numberOfEmployees: "Nº de empleados",
     serviceAreas: "Áreas de servicio (separadas por coma)",
-    specializations: "Especializaciones (separadas por coma)",
     certifications: "Certificaciones (separadas por coma)",
     offerAllServices: "Ofrezco todos los servicios",
     additionalDetails: "Detalles Adicionales",
@@ -1301,7 +1287,6 @@ const translations = {
     all: "Todos",
     communityIncident: "Incidencia Comunidad",
     majorAssessment: "Derrama Importante", 
-    individual: "Particular",
     allCategories: "Todas",
     incident: "Incidencia",
     assessment: "Derrama", 
@@ -1334,9 +1319,7 @@ const translations = {
     myProperties: "Mis Propiedades",
     availableServices: "Servicios Disponibles",
     communityChat: "Chat Comunitario",
-    scheduleVideoConference: "Programar Videoconferencia",
     informIssue: "Informar Incidencia",
-    communityContracts: "Contratos Comunitarios",
     communityBudget: "Presupuesto Comunitario",
     contactAdministrator: "Contactar Administrador",
     serviceRatings: "Valoraciones de Servicios",
@@ -1456,7 +1439,7 @@ const translations = {
     servicesContractedDesc: "Ver contratos de servicios contratados por la comunidad",
     elevatorMaintenanceContract: "Contrato de Mantenimiento de Ascensores",
     cleaningService: "Contrato de Servicio de Limpieza",
-    gardenMaintenance: "Contrato de Mantenimiento de Jardines",
+    gardenMaintenanceContract: "Contrato de Mantenimiento de Jardines",
     preventiveMaintenanceAndEmergencyRepairs: "Mantenimiento preventivo y reparaciones de emergencia",
     weeklyCleaningCommonAreasPortals: "Limpieza semanal de áreas comunes y portales",
     seasonalMaintenanceGardensGreenAreas: "Mantenimiento estacional de jardines y zonas verdes",
@@ -1504,7 +1487,6 @@ const translations = {
     serviceRatingsTitleLabel: "Valoraciones de Servicios",
     yourRatingsCommunitServicesDesc: "Tus valoraciones para los servicios de la comunidad",
     date: "Fecha",
-    service: "Servicio",
     cost: "Coste",
     provider: "Proveedor",
     status: "Estado",
@@ -1513,7 +1495,6 @@ const translations = {
     sortBy: "Ordenar por",
     showingServices: "Mostrando",
     of: "de",
-    services: "servicios",
     sortedBy: "Ordenado por",
     ascending: "ascendente",
     descending: "descendente",
@@ -1553,7 +1534,6 @@ const translations = {
     gatesDisinfection: "Desinfección de Portales",
     verified: "Verificado",
     jobs: "trabajos",
-    specializations: "Especializaciones",
     viewProfile: "Ver Perfil",
     request: "Solicitar",
     noRecommendations: "No hay recomendaciones disponibles en este momento",
@@ -1565,7 +1545,6 @@ const translations = {
     pendingPayments: "Pagos Pendientes",
     thisMonth: "este mes",
     vsLastWeek: "vs la semana pasada",
-    recentIncidents: "Incidencias Recientes",
     recentBids: "Ofertas Recientes",
     viewAllIncidents: "Ver Todas las Incidencias",
     viewAllBids: "Ver Todas las Ofertas",
@@ -1574,7 +1553,6 @@ const translations = {
     scheduleNewMeeting: "Programar Nueva Reunión",
     meetingTitle: "Título de la Reunión",
     enterMeetingTitle: "Introduce el título de la reunión",
-    community: "Comunidad",
     time: "Hora",
     participants: "Participantes",
     enterParticipantsEmails: "Introduce los emails de los participantes",
@@ -1591,8 +1569,6 @@ const translations = {
     communitiesOnMap: "Comunidades en el Mapa",
     coordinates: "Coordenadas",
     viewOnMap: "Ver en el Mapa",
-    communityContracts: "Contratos Comunitarios",
-    communityBudget: "Presupuesto Comunitario",
     communityIncidents: "Incidencias Comunitarias",
     communityBids: "Ofertas Comunitarias",
     title: "Título",
@@ -1617,10 +1593,8 @@ const translations = {
     type: "Tipo",
     amountStatus: "Importe/Estado",
     action: "Acción",
-    manage: "Gestionar",
     
     // Panel Individual/Particular
-    individual: "Individual",
     personalInformation: "Información Personal",
     fullNameLabel: "Nombre Completo",
     emailLabel: "Correo Electrónico",
@@ -1643,14 +1617,12 @@ const translations = {
     describeServiceNeeded: "Describe el servicio que necesitas en detalle...",
     requestQuotes: "Solicitar Presupuestos",
     searchProviders: "Buscar proveedores...",
-    reviews: "Reseñas",
     location: "Ubicación",
     loadMoreProviders: "Cargar Más Proveedores",
     noFavoriteProviders: "Aún no tienes proveedores favoritos",
     addFavoriteProvidersDesc: "Añade proveedores a favoritos para acceder a ellos rápidamente",
     exploreProviders: "Explorar Proveedores",
     addProperty: "Añadir Propiedad",
-    manage: "Gestionar",
     noPaymentHistory: "No hay historial de pagos disponible",
     
     // Recomendaciones y Premios del Individual
@@ -1690,8 +1662,6 @@ const translations = {
     propertySelected: "Propiedad seleccionada",
     selectAPropertyToManage: "Selecciona una propiedad para gestionar",
     changeProperty: "Cambiar Propiedad",
-
-    // Additional Labels for Community Member Dashboard
     saveLabel: "Guardar",
     editLabel: "Editar"
   },
