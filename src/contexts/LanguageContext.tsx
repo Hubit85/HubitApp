@@ -48,6 +48,26 @@ const translations = {
     about: "About",
     whitepaper: "Whitepaper",
 
+    // Service Provider Specific Translations
+    serviceProviderPortal: "Service Provider Portal",
+    dashboardTitle: "Dashboard Management",
+    dashboardDesc: "Access your complete control panel",
+    dashboardText: "Manage your services, view requests, track earnings, and monitor your reputation from a centralized dashboard.",
+    serviceProfile: "Service Profile",
+    manageOfferings: "Manage Your Offerings",
+    serviceProfileText: "Create and edit your professional profile, showcase your services, and highlight your expertise to attract more clients.",
+    editProfile: "Edit Profile",
+    openDashboard: "Open Dashboard",
+    popularCategories: "Popular Service Categories",
+    
+    // Service Categories
+    plumbing: "Plumbing",
+    electrical: "Electrical",
+    painting: "Painting",
+    flooring: "Flooring",
+    hvac: "HVAC",
+    generalRepairs: "General Repairs",
+
     // Help Center Translations
     helpCenter: "Help Center",
     helpCenterDescription: "Find answers and get support for all your HuBiT needs",
@@ -417,6 +437,26 @@ const translations = {
     contact: "Contacto",
     about: "Acerca de",
     whitepaper: "Libro Blanco",
+
+    // Service Provider Specific Translations
+    serviceProviderPortal: "Portal de Proveedor de Servicios",
+    dashboardTitle: "Gestión del Panel",
+    dashboardDesc: "Accede a tu panel de control completo",
+    dashboardText: "Gestiona tus servicios, ve las solicitudes, rastrea tus ganancias y monitorea tu reputación desde un panel centralizado.",
+    serviceProfile: "Perfil de Servicios",
+    manageOfferings: "Gestiona tus Ofertas",
+    serviceProfileText: "Crea y edita tu perfil profesional, muestra tus servicios y destaca tu experiencia para atraer más clientes.",
+    editProfile: "Editar Perfil",
+    openDashboard: "Abrir Panel",
+    popularCategories: "Categorías de Servicios Populares",
+    
+    // Service Categories
+    plumbing: "Fontanería",
+    electrical: "Electricidad",
+    painting: "Pintura",
+    flooring: "Suelos",
+    hvac: "Climatización",
+    generalRepairs: "Reparaciones Generales",
 
     // Help Center Translations
     helpCenter: "Centro de Ayuda",
