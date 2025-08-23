@@ -105,16 +105,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // Create profile
-        const profileData = {
+        // Create profile with proper typing
+        const profileData: any = {
           id: data.user.id,
           email: data.user.email!,
           ...userData,
-        } as Database["public"]["Tables"]["profiles"]["Insert"];
+        };
 
         const { error: profileError } = await supabase
           .from("profiles")
-          .insert(profileData);
+          .insert([profileData]);
 
         if (profileError) {
           return { error: profileError.message };
@@ -138,7 +138,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     if (!user) return { error: "No user logged in" };
 
     try {
-      const updateData = updates as Database["public"]["Tables"]["profiles"]["Update"];
+      const updateData: any = updates;
       const { error } = await supabase
         .from("profiles")
         .update(updateData)

@@ -18,16 +18,16 @@ export class SupabaseAuthService {
       }
 
       if (data.user) {
-        // Create profile
-        const profileData = {
+        // Create profile with proper typing
+        const profileData: any = {
           id: data.user.id,
           email: data.user.email!,
           ...userData,
-        } as Database["public"]["Tables"]["profiles"]["Insert"];
+        };
 
         const { error: profileError } = await supabase
           .from("profiles")
-          .insert(profileData);
+          .insert([profileData]);
 
         if (profileError) {
           throw new Error(profileError.message);
@@ -75,7 +75,7 @@ export class SupabaseAuthService {
   }
 
   static async updateProfile(userId: string, updates: Partial<Profile>) {
-    const updateData = updates as Database["public"]["Tables"]["profiles"]["Update"];
+    const updateData: any = updates;
     const { data, error } = await supabase
       .from("profiles")
       .update(updateData)
