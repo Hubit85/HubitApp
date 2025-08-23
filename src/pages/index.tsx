@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 export default function HomePage() {
   const { user, loading } = useSupabaseAuth();
   const router = useRouter();
+  const { t } = useLanguage();
   
   // Redirect authenticated users to dashboard
   React.useEffect(() => {
@@ -39,8 +40,6 @@ export default function HomePage() {
   if (user) {
     return null; // Will redirect to dashboard
   }
-
-  const { t } = useLanguage();
 
   return (
     <>
