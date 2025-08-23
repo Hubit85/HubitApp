@@ -341,7 +341,7 @@ const translations = {
     transparency: "Transparency",
     transparencyDesc: "Complete visibility into all community service operations",
     blockchainDesc: "Decentralized infrastructure ensuring security and trust",
-    community: "Community Driven",
+    communityDriven: "Community Driven",
     communityDesc: "Governance by residents with HBIT token voting rights",
     
     // Service Provider Dashboard Specific
@@ -877,7 +877,7 @@ const translations = {
     transparency: "Transparencia",
     transparencyDesc: "Visibilidad completa en todas las operaciones de servicios comunitarios",
     blockchainDesc: "Infraestructura descentralizada garantizando seguridad y confianza",
-    community: "Comunidad Dirigida",
+    communityDriven: "Comunidad Dirigida",
     communityDesc: "Gobierno por vecinos con derechos de votación de tokens HBIT",
     
     // Service Provider Dashboard Specific  
