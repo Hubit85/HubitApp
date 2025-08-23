@@ -1,9 +1,27 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
+interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  user_type: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
+  phone: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ProfileInsert {
+  id?: string;
+  email: string;
+  full_name?: string | null;
+  user_type: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
+  phone?: string | null;
+  avatar_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export class SupabaseAuthService {
   static async signUp(email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) {
@@ -18,8 +36,8 @@ export class SupabaseAuthService {
       }
 
       if (data.user) {
-        // Create profile with proper typing
-        const profileData: any = {
+        // Create profile
+        const profileData = {
           id: data.user.id,
           email: data.user.email!,
           ...userData,
@@ -27,7 +45,7 @@ export class SupabaseAuthService {
 
         const { error: profileError } = await supabase
           .from("profiles")
-          .insert([profileData]);
+          .insert(profileData);
 
         if (profileError) {
           throw new Error(profileError.message);
@@ -75,10 +93,9 @@ export class SupabaseAuthService {
   }
 
   static async updateProfile(userId: string, updates: Partial<Profile>) {
-    const updateData: any = updates;
     const { data, error } = await supabase
       .from("profiles")
-      .update(updateData)
+      .update(updates)
       .eq("id", userId)
       .select()
       .single();

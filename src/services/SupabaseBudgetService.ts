@@ -1,18 +1,71 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
 
-type BudgetRequestInsert = Database["public"]["Tables"]["budget_requests"]["Insert"];
-type BudgetRequestUpdate = Database["public"]["Tables"]["budget_requests"]["Update"];
-type QuoteInsert = Database["public"]["Tables"]["quotes"]["Insert"];
+interface BudgetRequest {
+  id: string;
+  title: string;
+  description: string;
+  property_id: string;
+  requester_id: string;
+  category_id: string;
+  budget_range: string | null;
+  urgency: 'low' | 'medium' | 'high';
+  status: 'draft' | 'published' | 'in_review' | 'completed' | 'cancelled';
+  images: string[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface BudgetRequestInsert {
+  id?: string;
+  title: string;
+  description: string;
+  property_id: string;
+  requester_id: string;
+  category_id: string;
+  budget_range?: string | null;
+  urgency?: 'low' | 'medium' | 'high';
+  status?: 'draft' | 'published' | 'in_review' | 'completed' | 'cancelled';
+  images?: string[] | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface BudgetRequestUpdate {
+  id?: string;
+  title?: string;
+  description?: string;
+  property_id?: string;
+  requester_id?: string;
+  category_id?: string;
+  budget_range?: string | null;
+  urgency?: 'low' | 'medium' | 'high';
+  status?: 'draft' | 'published' | 'in_review' | 'completed' | 'cancelled';
+  images?: string[] | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface QuoteInsert {
+  id?: string;
+  budget_request_id: string;
+  provider_id: string;
+  amount: number;
+  description: string;
+  estimated_duration?: string | null;
+  terms_conditions?: string | null;
+  status?: 'pending' | 'accepted' | 'rejected' | 'withdrawn';
+  valid_until: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export class SupabaseBudgetService {
   // Budget Requests
   static async createBudgetRequest(requestData: BudgetRequestInsert) {
-    const insertData: any = requestData;
     const { data, error } = await supabase
       .from("budget_requests")
-      .insert([insertData])
+      .insert(requestData)
       .select()
       .single();
 
@@ -24,10 +77,9 @@ export class SupabaseBudgetService {
   }
 
   static async updateBudgetRequest(id: string, updates: BudgetRequestUpdate) {
-    const updateData: any = updates;
     const { data, error } = await supabase
       .from("budget_requests")
-      .update(updateData)
+      .update(updates)
       .eq("id", id)
       .select()
       .single();
@@ -123,10 +175,9 @@ export class SupabaseBudgetService {
 
   // Quotes
   static async createQuote(quoteData: QuoteInsert) {
-    const insertData: any = quoteData;
     const { data, error } = await supabase
       .from("quotes")
-      .insert([insertData])
+      .insert(quoteData)
       .select()
       .single();
 
@@ -189,10 +240,9 @@ export class SupabaseBudgetService {
   }
 
   static async updateQuoteStatus(id: string, status: "accepted" | "rejected" | "withdrawn") {
-    const updateData: any = { status };
     const { data, error } = await supabase
       .from("quotes")
-      .update(updateData)
+      .update({ status })
       .eq("id", id)
       .select()
       .single();

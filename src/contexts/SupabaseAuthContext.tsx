@@ -2,10 +2,28 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
+interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  user_type: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
+  phone: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ProfileInsert {
+  id?: string;
+  email: string;
+  full_name?: string | null;
+  user_type: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
+  phone?: string | null;
+  avatar_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -67,7 +85,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error("Error fetching profile:", error);
       } else {
-        setProfile(data);
+        setProfile(data as Profile);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -105,8 +123,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // Create profile with proper typing
-        const profileData: any = {
+        // Create profile
+        const profileData = {
           id: data.user.id,
           email: data.user.email!,
           ...userData,
@@ -114,7 +132,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
         const { error: profileError } = await supabase
           .from("profiles")
-          .insert([profileData]);
+          .insert(profileData);
 
         if (profileError) {
           return { error: profileError.message };
@@ -138,10 +156,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     if (!user) return { error: "No user logged in" };
 
     try {
-      const updateData: any = updates;
       const { error } = await supabase
         .from("profiles")
-        .update(updateData)
+        .update(updates)
         .eq("id", user.id);
 
       if (error) {

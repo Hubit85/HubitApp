@@ -1,16 +1,50 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
 
-type PropertyInsert = Database["public"]["Tables"]["properties"]["Insert"];
-type PropertyUpdate = Database["public"]["Tables"]["properties"]["Update"];
+interface Property {
+  id: string;
+  name: string;
+  address: string;
+  property_type: 'apartment' | 'house' | 'commercial' | 'land';
+  total_units: number | null;
+  owner_id: string;
+  administrator_id: string | null;
+  community_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PropertyInsert {
+  id?: string;
+  name: string;
+  address: string;
+  property_type: 'apartment' | 'house' | 'commercial' | 'land';
+  total_units?: number | null;
+  owner_id: string;
+  administrator_id?: string | null;
+  community_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface PropertyUpdate {
+  id?: string;
+  name?: string;
+  address?: string;
+  property_type?: 'apartment' | 'house' | 'commercial' | 'land';
+  total_units?: number | null;
+  owner_id?: string;
+  administrator_id?: string | null;
+  community_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export class SupabasePropertyService {
   static async createProperty(propertyData: PropertyInsert) {
-    const insertData: any = propertyData;
     const { data, error } = await supabase
       .from("properties")
-      .insert([insertData])
+      .insert(propertyData)
       .select()
       .single();
 
@@ -22,10 +56,9 @@ export class SupabasePropertyService {
   }
 
   static async updateProperty(id: string, updates: PropertyUpdate) {
-    const updateData: any = updates;
     const { data, error } = await supabase
       .from("properties")
-      .update(updateData)
+      .update(updates)
       .eq("id", id)
       .select()
       .single();
