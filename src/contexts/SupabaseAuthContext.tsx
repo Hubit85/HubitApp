@@ -83,7 +83,28 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (error) {
-        console.error("Error fetching profile:", error);
+        // Check if the error is because the table doesn't exist
+        if (error.code === '42P01' || error.message.includes('relation') || error.message.includes('does not exist')) {
+          console.warn("⚠️  Database tables not configured yet. Please run the setup script in Supabase SQL Editor.");
+          console.warn("📋 Check docs/database-setup.sql for the required SQL commands.");
+          
+          // Create a temporary profile from user data
+          if (user) {
+            const tempProfile: Profile = {
+              id: userId,
+              email: user.email || '',
+              full_name: user.user_metadata?.full_name || null,
+              user_type: user.user_metadata?.user_type || 'particular',
+              phone: user.user_metadata?.phone || null,
+              avatar_url: user.user_metadata?.avatar_url || null,
+              created_at: user.created_at || new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            setProfile(tempProfile);
+          }
+        } else {
+          console.error("Error fetching profile:", error);
+        }
       } else {
         setProfile(data as Profile);
       }
@@ -116,6 +137,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: userData.full_name,
+            user_type: userData.user_type,
+            phone: userData.phone,
+          }
+        }
       });
 
       if (error) {
@@ -123,19 +151,25 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // Create profile
-        const profileData = {
-          id: data.user.id,
-          email: data.user.email!,
-          ...userData,
-        };
+        try {
+          // Try to create profile in database
+          const profileData = {
+            id: data.user.id,
+            email: data.user.email!,
+            ...userData,
+          };
 
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert(profileData);
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .insert(profileData);
 
-        if (profileError) {
-          return { error: profileError.message };
+          if (profileError && profileError.code === '42P01') {
+            console.warn("⚠️  Database tables not configured yet. User registered but profile will be temporary until database is setup.");
+          } else if (profileError) {
+            return { error: profileError.message };
+          }
+        } catch (profileError) {
+          console.warn("Could not create profile in database, but user was created successfully:", profileError);
         }
       }
 
@@ -162,6 +196,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         .eq("id", user.id);
 
       if (error) {
+        if (error.code === '42P01') {
+          return { error: "Database not configured yet. Please run the setup script." };
+        }
         return { error: error.message };
       }
 
