@@ -42,20 +42,66 @@ export default function PropertyManager() {
     }
   }, [user]);
 
+  const createProperty = async () => {
+    if (!user) return;
+
+    try {
+      const propertyData = {
+        user_id: user.id,
+        name,
+        address,
+        property_type: type as 'residential' | 'commercial' | 'mixed',
+        description: description || null,
+      };
+
+      const { data, error } = await supabase
+        .from("properties")
+        .insert(propertyData)
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === '42P01' || error.message.includes('relation') || error.message.includes('does not exist')) {
+          setError("⚠️ Base de datos no configurada. Por favor ejecuta el script SQL en Supabase.");
+          return;
+        }
+        throw error;
+      }
+
+      setProperties([...properties, data]);
+      setName("");
+      setAddress("");
+      setType("residential");
+      setDescription("");
+      setIsCreating(false);
+      
+    } catch (error) {
+      console.error("Error creating property:", error);
+      setError("Error al crear la propiedad");
+    }
+  };
+
   const fetchProperties = async () => {
+    if (!user) return;
+
     try {
       const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+        .from("properties")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42P01' || error.message.includes('relation') || error.message.includes('does not exist')) {
+          console.warn("Database tables not configured yet for properties");
+          return;
+        }
+        throw error;
+      }
+
       setProperties(data || []);
     } catch (error) {
-      console.error('Error fetching properties:', error);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching properties:", error);
     }
   };
 

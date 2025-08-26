@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -11,47 +11,47 @@ import ZoomableSection from "@/components/ZoomableSection";
 import Image from "next/image";
 import SupabaseStatus from "@/components/SupabaseStatus";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { useRouter } from "next/router";
+import DatabaseSetupNotice from "@/components/DatabaseSetupNotice";
 
 export default function HomePage() {
-  const { user, loading } = useSupabaseAuth();
-  const router = useRouter();
   const { t } = useLanguage();
-  
-  // Redirect authenticated users to dashboard
-  React.useEffect(() => {
-    if (!loading && user) {
-      router.push("/dashboard");
+  const { user, profile, loading } = useSupabaseAuth();
+  const [showDatabaseNotice, setShowDatabaseNotice] = useState(false);
+
+  // Check if we need to show database setup notice
+  useEffect(() => {
+    // Show database notice if user exists but profile fetch failed due to missing tables
+    if (user && !loading && !profile) {
+      setShowDatabaseNotice(true);
+    } else {
+      setShowDatabaseNotice(false);
     }
-  }, [user, loading, router]);
+  }, [user, profile, loading]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-neutral-600">Cargando HuBiT...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-neutral-600">Cargando...</p>
         </div>
       </div>
     );
   }
 
-  // Only show homepage if user is not authenticated
-  if (user) {
-    return null; // Will redirect to dashboard
-  }
-
   return (
-    <>
-      <Head>
-        <title>{t("homeTitle")}</title>
-        <meta name="description" content={t("homeDescription")} />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <Header />
       
-      <main className="flex flex-col items-center justify-center relative overflow-hidden">
+      <main className="container mx-auto px-4 md:px-6 lg:px-8 py-8 max-w-[2000px]">
+        
+        {/* Database Setup Notice - Show when tables don't exist */}
+        {showDatabaseNotice && (
+          <div className="mb-8">
+            <DatabaseSetupNotice />
+          </div>
+        )}
+
         <ZoomableSection className="w-full" enableZoom={true} maxScale={3} minScale={0.5}>
           {/* Hero Section with Enhanced Visual Design */}
           <section className="min-h-screen w-full flex flex-col items-center justify-center relative">
@@ -673,6 +673,6 @@ export default function HomePage() {
           </section>
         </ZoomableSection>
       </main>
-    </>
+    </div>
   );
 }
