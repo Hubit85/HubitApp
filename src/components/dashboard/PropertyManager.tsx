@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Home, MapPin, Users, Edit, Trash2, Loader2, Building } from "lucide-react";
+import { Plus, Home, MapPin, Users, Edit, Trash2, Loader2, Building, AlertCircle } from "lucide-react";
 
 interface Property {
   id: string;
@@ -26,8 +26,11 @@ export default function PropertyManager() {
   const { user } = useSupabaseAuth();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
+    id: null as string | null,
     name: "",
     address: "",
     property_type: "" as 'residential' | 'commercial' | 'mixed' | "",
@@ -36,54 +39,10 @@ export default function PropertyManager() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchProperties();
-    }
-  }, [user]);
-
-  const createProperty = async () => {
-    if (!user) return;
-
-    try {
-      const propertyData = {
-        user_id: user.id,
-        name,
-        address,
-        property_type: type as 'residential' | 'commercial' | 'mixed',
-        description: description || null,
-      };
-
-      const { data, error } = await supabase
-        .from("properties")
-        .insert(propertyData)
-        .select()
-        .single();
-
-      if (error) {
-        if (error.code === '42P01' || error.message.includes('relation') || error.message.includes('does not exist')) {
-          setError("⚠️ Base de datos no configurada. Por favor ejecuta el script SQL en Supabase.");
-          return;
-        }
-        throw error;
-      }
-
-      setProperties([...properties, data]);
-      setName("");
-      setAddress("");
-      setType("residential");
-      setDescription("");
-      setIsCreating(false);
-      
-    } catch (error) {
-      console.error("Error creating property:", error);
-      setError("Error al crear la propiedad");
-    }
-  };
-
   const fetchProperties = async () => {
     if (!user) return;
-
+    setLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase
         .from("properties")
@@ -92,55 +51,123 @@ export default function PropertyManager() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        if (error.code === '42P01' || error.message.includes('relation') || error.message.includes('does not exist')) {
-          console.warn("Database tables not configured yet for properties");
-          return;
+        if (error.code === '42P01') {
+          console.warn("Property table does not exist. Please run setup script.");
+          setError("La tabla de propiedades no existe. Por favor, completa la configuración de la base de datos.");
+          setProperties([]);
+        } else {
+          throw error;
         }
-        throw error;
+      } else {
+        setProperties(data || []);
       }
-
-      setProperties(data || []);
-    } catch (error) {
-      console.error("Error fetching properties:", error);
+    } catch (err: any) {
+      console.error("Error fetching properties:", err);
+      setError("No se pudieron cargar las propiedades.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (user) {
+      fetchProperties();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, property_type: value as any}));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      id: null,
+      name: "",
+      address: "",
+      property_type: "",
+      description: "",
+      units_count: ""
+    });
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      const { error } = await supabase
-        .from('properties')
-        .insert([
-          {
-            name: formData.name,
-            address: formData.address,
-            property_type: formData.property_type,
-            description: formData.description || null,
-            units_count: formData.units_count ? parseInt(formData.units_count) : null,
-            user_id: user?.id
-          }
-        ]);
+      const propertyData = {
+        name: formData.name,
+        address: formData.address,
+        property_type: formData.property_type as 'residential' | 'commercial' | 'mixed',
+        description: formData.description || null,
+        units_count: formData.units_count ? parseInt(formData.units_count) : null,
+        user_id: user.id
+      };
+      
+      let response;
+      if (formData.id) {
+        // Update
+        response = await supabase
+          .from('properties')
+          .update(propertyData)
+          .eq('id', formData.id)
+          .select()
+          .single();
+      } else {
+        // Insert
+        response = await supabase
+          .from('properties')
+          .insert(propertyData)
+          .select()
+          .single();
+      }
 
-      if (error) throw error;
+      if (response.error) throw response.error;
 
-      // Reset form and close dialog
-      setFormData({
-        name: "",
-        address: "",
-        property_type: "",
-        description: "",
-        units_count: ""
-      });
-      setIsDialogOpen(false);
       fetchProperties();
-    } catch (error) {
-      console.error('Error creating property:', error);
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (err: any) {
+      console.error('Error saving property:', err);
+      setError('Error al guardar la propiedad. ' + err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
+  
+  const handleEdit = (property: Property) => {
+    setFormData({
+      id: property.id,
+      name: property.name,
+      address: property.address,
+      property_type: property.property_type,
+      description: property.description || '',
+      units_count: property.units_count?.toString() || ''
+    });
+    setIsDialogOpen(true);
+  }
+  
+  const handleDelete = async (propertyId: string) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta propiedad?')) return;
+    
+    try {
+      const { error } = await supabase.from('properties').delete().eq('id', propertyId);
+      if (error) throw error;
+      fetchProperties();
+    } catch (err: any) {
+      console.error('Error deleting property:', err);
+      setError('Error al eliminar la propiedad. ' + err.message);
+    }
+  }
+
 
   const getPropertyTypeInfo = (type: string) => {
     switch (type) {
@@ -155,15 +182,6 @@ export default function PropertyManager() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <span className="ml-2 text-neutral-600">Cargando propiedades...</span>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -172,7 +190,7 @@ export default function PropertyManager() {
           <p className="text-neutral-600">Gestiona tus propiedades y comunidades</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if(!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600">
               <Plus className="h-4 w-4 mr-2" />
@@ -182,7 +200,7 @@ export default function PropertyManager() {
           
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Agregar Nueva Propiedad</DialogTitle>
+              <DialogTitle>{formData.id ? 'Editar Propiedad' : 'Agregar Nueva Propiedad'}</DialogTitle>
               <DialogDescription>
                 Completa la información de tu propiedad para comenzar a gestionarla.
               </DialogDescription>
@@ -194,7 +212,7 @@ export default function PropertyManager() {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => handleFormChange('name', e.target.value)}
                   placeholder="Ej: Edificio Central, Casa Principal..."
                   required
                 />
@@ -205,7 +223,7 @@ export default function PropertyManager() {
                 <Input
                   id="address"
                   value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  onChange={(e) => handleFormChange('address', e.target.value)}
                   placeholder="Calle, número, ciudad..."
                   required
                 />
@@ -215,7 +233,8 @@ export default function PropertyManager() {
                 <Label htmlFor="property_type">Tipo de Propiedad</Label>
                 <Select 
                   value={formData.property_type} 
-                  onValueChange={(value) => setFormData({ ...formData, property_type: value as any })}
+                  onValueChange={handleSelectChange}
+                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona el tipo" />
@@ -234,7 +253,7 @@ export default function PropertyManager() {
                   id="units_count"
                   type="number"
                   value={formData.units_count}
-                  onChange={(e) => setFormData({ ...formData, units_count: e.target.value })}
+                  onChange={(e) => handleFormChange('units_count', e.target.value)}
                   placeholder="Ej: 24 apartamentos"
                   min="1"
                 />
@@ -245,7 +264,7 @@ export default function PropertyManager() {
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => handleFormChange('description', e.target.value)}
                   placeholder="Información adicional sobre la propiedad..."
                   rows={3}
                 />
@@ -262,7 +281,7 @@ export default function PropertyManager() {
                       Guardando...
                     </>
                   ) : (
-                    'Agregar Propiedad'
+                    formData.id ? 'Guardar Cambios' : 'Agregar Propiedad'
                   )}
                 </Button>
               </DialogFooter>
@@ -271,7 +290,27 @@ export default function PropertyManager() {
         </Dialog>
       </div>
 
-      {properties.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="ml-2 text-neutral-600">Cargando propiedades...</span>
+        </div>
+      ) : error ? (
+        <Card className="text-center py-12 bg-red-50 border-red-200">
+          <CardContent>
+            <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
+              <AlertCircle className="h-10 w-10 text-red-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-red-900 mb-2">
+              Ocurrió un error
+            </h3>
+            <p className="text-red-700 mb-6">{error}</p>
+            <Button onClick={fetchProperties}>
+              Intentar de nuevo
+            </Button>
+          </CardContent>
+        </Card>
+      ) : properties.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
             <div className="mx-auto w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6">
@@ -296,7 +335,7 @@ export default function PropertyManager() {
             const TypeIcon = typeInfo.icon;
             
             return (
-              <Card key={property.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <Card key={property.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between mb-4">
                     <div className={`w-12 h-12 ${typeInfo.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
@@ -315,30 +354,32 @@ export default function PropertyManager() {
                   </CardDescription>
                 </CardHeader>
                 
-                <CardContent className="pt-0">
-                  {property.description && (
-                    <p className="text-sm text-neutral-600 mb-4 line-clamp-2">
-                      {property.description}
-                    </p>
-                  )}
+                <CardContent className="pt-0 flex-grow flex flex-col">
+                  <div className="flex-grow">
+                    {property.description && (
+                      <p className="text-sm text-neutral-600 mb-4 line-clamp-2">
+                        {property.description}
+                      </p>
+                    )}
+                    
+                    {property.units_count && (
+                      <div className="flex items-center gap-2 text-sm text-neutral-600 mb-4">
+                        <Users className="h-4 w-4" />
+                        <span>{property.units_count} unidades</span>
+                      </div>
+                    )}
+                  </div>
                   
-                  {property.units_count && (
-                    <div className="flex items-center gap-2 text-sm text-neutral-600 mb-4">
-                      <Users className="h-4 w-4" />
-                      <span>{property.units_count} unidades</span>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between text-xs text-neutral-500 mb-4">
+                  <div className="text-xs text-neutral-500 mb-4">
                     <span>Creado: {new Date(property.created_at).toLocaleDateString()}</span>
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEdit(property)}>
                       <Edit className="h-4 w-4 mr-1" />
                       Editar
                     </Button>
-                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(property.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
