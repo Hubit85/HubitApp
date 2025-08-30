@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Shield, Sparkles, UserCircle } from "lucide-react";
 
+type RegistrationState = 'idle' | 'submitting' | 'success' | 'redirecting';
+
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: "",
@@ -23,10 +25,9 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationState, setRegistrationState] = useState<RegistrationState>('idle');
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [isRedirecting, setIsRedirecting] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState({
     length: false,
     uppercase: false,
@@ -36,7 +37,6 @@ export default function RegisterPage() {
 
   const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
-  const registrationCompleted = useRef(false);
 
   // Password validation
   useEffect(() => {
@@ -48,18 +48,21 @@ export default function RegisterPage() {
     });
   }, [formData.password]);
 
-  // Redirect logic - handle authentication state changes properly
+  // Simple redirect logic - only when user becomes available after successful registration
   useEffect(() => {
-    // Only redirect if user is authenticated, not loading, and registration was completed
-    if (user && !loading && registrationCompleted.current) {
-      console.log("User authenticated after successful registration, redirecting to dashboard");
+    if (user && !loading && registrationState === 'success') {
+      console.log("User authenticated, starting redirect...");
+      setRegistrationState('redirecting');
       
-      setIsRedirecting(true);
-      
-      // Immediate redirect without delay
-      router.push("/dashboard");
+      // Direct redirect with no delay
+      router.replace("/dashboard").catch(err => {
+        console.error("Redirect failed:", err);
+        // If redirect fails, reset state so user can try again
+        setRegistrationState('idle');
+        setError("Error durante la redirección. Por favor, intenta acceder al dashboard manualmente.");
+      });
     }
-  }, [user, loading, router]);
+  }, [user, loading, registrationState, router]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -68,82 +71,79 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent double submission
-    if (isSubmitting || isRedirecting) {
-      console.log("Already submitting or redirecting, ignoring");
+    // Prevent any submission if not in idle state
+    if (registrationState !== 'idle') {
+      console.log("Not in idle state, preventing submission");
       return;
     }
     
-    setIsSubmitting(true);
+    setRegistrationState('submitting');
     setError("");
     setSuccessMessage("");
 
     try {
-      console.log("Starting registration validation...");
+      console.log("Starting registration process...");
 
       // Validation
       if (formData.password !== formData.confirmPassword) {
         setError("Las contraseñas no coinciden");
-        setIsSubmitting(false);
+        setRegistrationState('idle');
         return;
       }
 
       if (!Object.values(passwordValidation).every(Boolean)) {
         setError("La contraseña no cumple con los requisitos mínimos");
-        setIsSubmitting(false);
+        setRegistrationState('idle');
         return;
       }
 
       if (!formData.user_type) {
         setError("Por favor selecciona un tipo de usuario");
-        setIsSubmitting(false);
+        setRegistrationState('idle');
         return;
       }
 
-      console.log("Validation passed, calling signUp...");
+      console.log("Validation passed, attempting registration...");
 
-      // Use the context signUp method
       const result = await signUp(formData.email, formData.password, {
         full_name: formData.full_name,
         user_type: formData.user_type,
         phone: formData.phone,
       });
 
-      console.log("SignUp result:", result);
+      console.log("Registration result:", result);
 
-      // Handle error case first
+      // Handle different result states
       if (result?.error) {
-        console.log("Registration failed with error:", result.error);
+        console.log("Registration failed:", result.error);
         setError(result.error);
-        setIsSubmitting(false);
+        setRegistrationState('idle');
         return;
       }
 
-      // Handle email confirmation case
       if (result?.message) {
-        console.log("Registration requires email confirmation");
+        console.log("Email confirmation required");
         setSuccessMessage(result.message);
-        setIsSubmitting(false);
+        setRegistrationState('idle');
         return;
       }
 
-      // Handle success case
       if (result?.success) {
-        console.log("Registration successful! Marking as completed...");
-        registrationCompleted.current = true;
-        // Keep isSubmitting true to prevent further interactions
-        // The useEffect will handle the redirect when user state updates
+        console.log("Registration successful! Waiting for auth state change...");
+        setRegistrationState('success');
+        // The useEffect will handle the redirect
         return;
       }
 
-      // Fallback case - no error, no message, no explicit success
-      console.log("Registration completed with unclear state");
-      registrationCompleted.current = true;
+      // Fallback - no clear result
+      console.warn("Registration completed with unclear result");
+      setError("Error durante el registro. Por favor, inténtalo de nuevo.");
+      setRegistrationState('idle');
       
     } catch (err) {
       console.error("Registration exception:", err);
       setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
-      setIsSubmitting(false);
+      setRegistrationState('idle');
     }
   };
 
@@ -154,8 +154,10 @@ export default function RegisterPage() {
     { value: "property_administrator", label: "Administrador de Fincas", description: "Gestión de propiedades" }
   ];
 
+  const isWorking = registrationState === 'submitting' || registrationState === 'success' || registrationState === 'redirecting';
+
   // Show redirecting screen
-  if (isRedirecting) {
+  if (isWorking) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
         <Card className="w-full max-w-md bg-white/70 backdrop-blur-lg border-white/20 shadow-2xl">
@@ -258,7 +260,7 @@ export default function RegisterPage() {
                       placeholder="Juan Pérez"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isSubmitting}
+                      disabled={isWorking}
                     />
                   </div>
                 </div>
@@ -278,7 +280,7 @@ export default function RegisterPage() {
                       placeholder="tu@email.com"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isSubmitting}
+                      disabled={isWorking}
                     />
                   </div>
                 </div>
@@ -297,7 +299,7 @@ export default function RegisterPage() {
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                       placeholder="+34 600 000 000"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
-                      disabled={isSubmitting}
+                      disabled={isWorking}
                     />
                   </div>
                 </div>
@@ -307,7 +309,7 @@ export default function RegisterPage() {
                   <Label className="text-sm font-medium text-neutral-700">
                     Tipo de usuario
                   </Label>
-                  <Select value={formData.user_type} onValueChange={(value) => handleInputChange("user_type", value)} disabled={isSubmitting}>
+                  <Select value={formData.user_type} onValueChange={(value) => handleInputChange("user_type", value)} disabled={isWorking}>
                     <SelectTrigger className="h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20">
                       <SelectValue placeholder="Selecciona tu perfil" />
                     </SelectTrigger>
@@ -339,13 +341,13 @@ export default function RegisterPage() {
                       placeholder="••••••••"
                       className="pl-10 pr-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isSubmitting}
+                      disabled={isWorking}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                      disabled={isSubmitting}
+                      disabled={isWorking}
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -389,13 +391,13 @@ export default function RegisterPage() {
                       placeholder="••••••••"
                       className="pl-10 pr-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isSubmitting}
+                      disabled={isWorking}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                      disabled={isSubmitting}
+                      disabled={isWorking}
                     >
                       {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -407,13 +409,13 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  disabled={isSubmitting || isRedirecting || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
+                  disabled={isWorking || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
                   className="w-full h-12 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {isSubmitting || isRedirecting ? (
+                  {isWorking ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      {isRedirecting ? "Redirigiendo..." : "Creando cuenta..."}
+                      {registrationState === 'redirecting' ? "Redirigiendo..." : "Creando cuenta..."}
                     </>
                   ) : (
                     <>
