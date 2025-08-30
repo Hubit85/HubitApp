@@ -287,12 +287,14 @@ export class SupabaseServiceCategoryService {
   static async reorderCategories(categoryOrders: { id: string; sort_order: number }[]): Promise<void> {
     try {
       for (const order of categoryOrders) {
+        const updateData: { sort_order: number; updated_at: string } = {
+          sort_order: order.sort_order,
+          updated_at: new Date().toISOString()
+        };
+        
         const { error } = await supabase
           .from('service_categories')
-          .update({ 
-            sort_order: order.sort_order, 
-            updated_at: new Date().toISOString() 
-          })
+          .update(updateData)
           .eq('id', order.id);
         
         if (error) {
