@@ -1,394 +1,221 @@
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, FileText, Calendar, Clock, CheckCircle, XCircle, Loader2, Wrench } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Plus, FileText, Trash2, Edit } from "lucide-react";
+import { BudgetRequest, Property, BudgetRequestInsert, BudgetRequestUpdate } from "@/integrations/supabase/types";
 
-interface BudgetRequest {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  status: string | null;
-  budget_range_min: number | null;  // Match database type exactly
-  budget_range_max: number | null;  // Match database type exactly
-  created_at: string | null;
-  property_name?: string;
-}
+type BudgetRequestWithProperty = BudgetRequest & {
+  properties: Pick<Property, 'name' | 'address'> | null;
+};
 
 export default function BudgetRequestManager() {
   const { user } = useSupabaseAuth();
-  const [requests, setRequests] = useState<BudgetRequest[]>([]);
-  const [properties, setProperties] = useState<any[]>([]);
+  const [requests, setRequests] = useState<BudgetRequestWithProperty[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "",
-    property_id: "",
-    budget_range_min: "",
-    budget_range_max: ""
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const categories = [
-    { value: "cleaning", label: "Limpieza" },
-    { value: "plumbing", label: "Fontanería" },
-    { value: "electrical", label: "Electricidad" },
-    { value: "gardening", label: "Jardinería" },
-    { value: "painting", label: "Pintura" },
-    { value: "maintenance", label: "Mantenimiento General" },
-    { value: "security", label: "Seguridad" },
-    { value: "other", label: "Otros" }
-  ];
+  const [currentRequest, setCurrentRequest] = useState<Partial<BudgetRequest>>({});
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (user) {
-      fetchRequests();
-      fetchProperties();
+      fetchData();
     }
   }, [user]);
 
-  const fetchRequests = async () => {
+  const fetchData = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError("");
     try {
-      if (!user?.id) return;  // Add user validation
-      
-      const { data, error } = await supabase
-        .from('budget_requests')
-        .select(`
-          *,
-          properties(name)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      const [requestsRes, propertiesRes] = await Promise.all([
+        supabase
+          .from("budget_requests")
+          .select(`*, properties (name, address)`)
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("properties")
+          .select("*")
+          .eq("user_id", user.id),
+      ]);
 
-      if (error) throw error;
-      
-      const formattedData = data?.map(item => ({
-        ...item,
-        property_name: item.properties?.name || undefined
-      })) || [];
-      
-      setRequests(formattedData);
-    } catch (error) {
-      console.error('Error fetching budget requests:', error);
+      if (requestsRes.error) throw new Error(`Error fetching requests: ${requestsRes.error.message}`);
+      if (propertiesRes.error) throw new Error(`Error fetching properties: ${propertiesRes.error.message}`);
+
+      setRequests(requestsRes.data as BudgetRequestWithProperty[]);
+      setProperties(propertiesRes.data);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchProperties = async () => {
-    try {
-      if (!user?.id) return;  // Add user validation
-      
-      const { data, error } = await supabase
-        .from('properties')
-        .select('id, name')
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      setProperties(data || []);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id) return;  // Add user validation
-    
-    setIsSubmitting(true);
-
-    try {
-      const { error } = await supabase
-        .from('budget_requests')
-        .insert({
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          property_id: formData.property_id || null,
-          budget_range_min: formData.budget_range_min ? parseFloat(formData.budget_range_min) : null,
-          budget_range_max: formData.budget_range_max ? parseFloat(formData.budget_range_max) : null,
-          user_id: user.id,
-          status: 'pending'
-        });
-
-      if (error) throw error;
-
-      // Reset form and close dialog
-      setFormData({
+  const handleOpenDialog = (request: BudgetRequest | null = null) => {
+    if (request) {
+      setIsEditing(true);
+      setCurrentRequest(request);
+    } else {
+      setIsEditing(false);
+      setCurrentRequest({
         title: "",
         description: "",
         category: "",
         property_id: "",
-        budget_range_min: "",
-        budget_range_max: ""
+        status: "open",
+        budget_range_min: null,
+        budget_range_max: null,
       });
+    }
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    try {
+      const requestData = {
+        ...currentRequest,
+        user_id: user.id,
+        property_id: currentRequest.property_id || properties[0]?.id,
+        title: currentRequest.title || '',
+        description: currentRequest.description || '',
+        category: currentRequest.category || '',
+      };
+      
+      let res;
+      if (isEditing) {
+        const updateData: BudgetRequestUpdate = { ...requestData };
+        delete updateData.id;
+        res = await supabase.from("budget_requests").update(updateData).eq("id", currentRequest.id!);
+      } else {
+        const insertData: BudgetRequestInsert = { 
+          user_id: user.id,
+          property_id: requestData.property_id,
+          title: requestData.title,
+          description: requestData.description,
+          category: requestData.category,
+          status: 'open',
+          budget_range_min: requestData.budget_range_min,
+          budget_range_max: requestData.budget_range_max
+        };
+        res = await supabase.from("budget_requests").insert(insertData);
+      }
+
+      if (res.error) throw res.error;
+
       setIsDialogOpen(false);
-      fetchRequests();
-    } catch (error) {
-      console.error('Error creating budget request:', error);
-    } finally {
-      setIsSubmitting(false);
+      await fetchData();
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
-  const getStatusInfo = (status: string | null) => {
-    switch (status) {
-      case 'pending':
-        return { label: 'Pendiente', color: 'bg-yellow-500', icon: Clock };
-      case 'in_progress':
-        return { label: 'En Progreso', color: 'bg-blue-500', icon: Clock };
-      case 'completed':
-        return { label: 'Completado', color: 'bg-green-500', icon: CheckCircle };
-      case 'cancelled':
-        return { label: 'Cancelado', color: 'bg-red-500', icon: XCircle };
-      default:
-        return { label: 'Pendiente', color: 'bg-yellow-500', icon: Clock };
+  const handleDelete = async (requestId: string) => {
+    if (!confirm("¿Estás seguro de que quieres eliminar esta solicitud?")) return;
+    try {
+      const { error } = await supabase.from("budget_requests").delete().eq("id", requestId);
+      if (error) throw error;
+      await fetchData();
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
-  const getCategoryLabel = (category: string) => {
-    const found = categories.find(cat => cat.value === category);
-    return found ? found.label : category;
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <span className="ml-2 text-neutral-600">Cargando solicitudes...</span>
-      </div>
-    );
-  }
+  if (loading) return <div className="flex justify-center items-center"><Loader2 className="animate-spin mr-2" /> Cargando solicitudes...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-neutral-900">Solicitudes de Presupuesto</h2>
-          <p className="text-neutral-600">Gestiona tus solicitudes de servicios</p>
+          <CardTitle>Solicitudes de Presupuesto</CardTitle>
+          <CardDescription>Crea y gestiona tus solicitudes de servicios.</CardDescription>
         </div>
+        <Button onClick={() => handleOpenDialog()}>
+          <Plus className="mr-2 h-4 w-4" /> Nueva Solicitud
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600">
-              <Plus className="h-4 w-4 mr-2" />
-              Nueva Solicitud
-            </Button>
-          </DialogTrigger>
-          
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Nueva Solicitud de Presupuesto</DialogTitle>
-              <DialogDescription>
-                Describe el servicio que necesitas para recibir presupuestos de proveedores.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Título de la Solicitud</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Ej: Reparación de fontanería en baño principal"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoría</Label>
-                <Select 
-                  value={formData.category} 
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {properties.length > 0 && (
-                <div className="space-y-2">
-                  <Label htmlFor="property_id">Propiedad (opcional)</Label>
-                  <Select 
-                    value={formData.property_id} 
-                    onValueChange={(value) => setFormData({ ...formData, property_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una propiedad" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {properties.map((property) => (
-                        <SelectItem key={property.id} value={property.id}>
-                          {property.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="budget_min">Presupuesto Mín. (€)</Label>
-                  <Input
-                    id="budget_min"
-                    type="number"
-                    value={formData.budget_range_min}
-                    onChange={(e) => setFormData({ ...formData, budget_range_min: e.target.value })}
-                    placeholder="100"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="budget_max">Presupuesto Máx. (€)</Label>
-                  <Input
-                    id="budget_max"
-                    type="number"
-                    value={formData.budget_range_max}
-                    onChange={(e) => setFormData({ ...formData, budget_range_max: e.target.value })}
-                    placeholder="500"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Descripción Detallada</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe en detalle el trabajo que necesitas..."
-                  rows={4}
-                  required
-                />
-              </div>
-              
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creando...
-                    </>
-                  ) : (
-                    'Crear Solicitud'
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {requests.length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-              <Wrench className="h-10 w-10 text-emerald-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-              No tienes solicitudes de presupuesto
-            </h3>
-            <p className="text-neutral-600 mb-6">
-              Crea tu primera solicitud para recibir presupuestos de proveedores de servicios.
-            </p>
-            <Button onClick={() => setIsDialogOpen(true)} className="bg-gradient-to-r from-emerald-600 to-emerald-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Crear Primera Solicitud
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {requests.map((request) => {
-            const statusInfo = getStatusInfo(request.status);
-            const StatusIcon = statusInfo.icon;
-            
-            return (
-              <Card key={request.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`w-8 h-8 ${statusInfo.color} rounded-lg flex items-center justify-center`}>
-                      <StatusIcon className="h-4 w-4 text-white" />
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {getCategoryLabel(request.category)}
-                    </Badge>
+        <div className="space-y-4">
+          {requests.length > 0 ? (
+            requests.map(req => (
+              <Card key={req.id} className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold">{req.title}</h3>
+                    <p className="text-sm text-muted-foreground">{req.properties?.name || 'Propiedad no especificada'}</p>
+                    <p className="text-sm">{req.description}</p>
+                    <Badge variant={req.status === 'open' ? 'default' : 'secondary'} className="mt-2">{req.status}</Badge>
                   </div>
-                  <CardTitle className="text-lg font-semibold line-clamp-2">
-                    {request.title}
-                  </CardTitle>
-                  {request.property_name && (
-                    <CardDescription className="text-sm text-neutral-600">
-                      Propiedad: {request.property_name}
-                    </CardDescription>
-                  )}
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <p className="text-sm text-neutral-600 mb-4 line-clamp-3">
-                    {request.description}
-                  </p>
-                  
-                  {(request.budget_range_min || request.budget_range_max) && (
-                    <div className="flex items-center gap-2 text-sm text-neutral-600 mb-4">
-                      <span className="font-medium">Presupuesto:</span>
-                      {request.budget_range_min && request.budget_range_max ? (
-                        <span>{request.budget_range_min}€ - {request.budget_range_max}€</span>
-                      ) : request.budget_range_min ? (
-                        <span>Desde {request.budget_range_min}€</span>
-                      ) : (
-                        <span>Hasta {request.budget_range_max}€</span>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between mb-4">
-                    <Badge className={`${statusInfo.color} text-white text-xs`}>
-                      {statusInfo.label}
-                    </Badge>
-                    <div className="flex items-center gap-1 text-xs text-neutral-500">
-                      <Calendar className="h-3 w-3" />
-                      <span>{request.created_at ? new Date(request.created_at).toLocaleDateString() : 'Sin fecha'}</span>
-                    </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(req)}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(req.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
-                  
-                  <Button size="sm" variant="outline" className="w-full">
-                    <FileText className="h-4 w-4 mr-1" />
-                    Ver Detalles
-                  </Button>
-                </CardContent>
+                </div>
               </Card>
-            );
-          })}
+            ))
+          ) : (
+            <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <FileText className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No hay solicitudes</h3>
+              <p className="mt-1 text-sm text-gray-500">Empieza creando una nueva solicitud de presupuesto.</p>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </CardContent>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{isEditing ? "Editar" : "Nueva"} Solicitud de Presupuesto</DialogTitle>
+            <DialogDescription>
+              {isEditing ? "Modifica los detalles de tu solicitud." : "Completa los detalles para crear una nueva solicitud."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">Título</Label>
+              <Input id="title" value={currentRequest.title || ''} onChange={(e) => setCurrentRequest({...currentRequest, title: e.target.value})} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">Descripción</Label>
+              <Textarea id="description" value={currentRequest.description || ''} onChange={(e) => setCurrentRequest({...currentRequest, description: e.target.value})} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="property" className="text-right">Propiedad</Label>
+              <Select value={currentRequest.property_id} onValueChange={(value) => setCurrentRequest({...currentRequest, property_id: value})} >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecciona una propiedad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {properties.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="category" className="text-right">Categoría</Label>
+              <Input id="category" value={currentRequest.category || ''} onChange={(e) => setCurrentRequest({...currentRequest, category: e.target.value})} className="col-span-3" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSave}>{isEditing ? "Guardar Cambios" : "Crear Solicitud"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }

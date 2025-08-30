@@ -189,7 +189,7 @@ export default function UserRoleManager() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
-                    <Select value={newRoleType} onValueChange={setNewRoleType}>
+                    <Select value={newRoleType} onValueChange={(value: UserRole['role_type']) => setNewRoleType(value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un rol" />
                       </SelectTrigger>

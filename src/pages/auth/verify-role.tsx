@@ -7,7 +7,7 @@ import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleSe
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle, XCircle, Loader2, Mail, ArrowRight, User } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Mail, ArrowRight, User, Users, Building, Settings } from "lucide-react";
 
 export default function VerifyRolePage() {
   const [verificationStatus, setVerificationStatus] = useState<'loading' | 'success' | 'error'>('loading');
