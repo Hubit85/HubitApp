@@ -1,6 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Property, PropertyInsert, PropertyUpdate } from "@/integrations/supabase/types";
-import { SupabaseServiceProviderService } from "./SupabaseServiceProviderService";
 
 export class SupabasePropertyService {
   static async createProperty(propertyData: PropertyInsert): Promise<Property> {
@@ -83,7 +83,6 @@ export class SupabasePropertyService {
       .from("properties")
       .select("*")
       .eq("property_type", propertyType)
-      .eq("property_status", "active")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -98,7 +97,6 @@ export class SupabasePropertyService {
       .from("properties")
       .select("*")
       .ilike("city", `%${city}%`)
-      .eq("property_status", "active")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -113,13 +111,10 @@ export class SupabasePropertyService {
     propertyType?: string;
     minUnits?: number;
     maxUnits?: number;
-    minArea?: number;
-    maxArea?: number;
   }): Promise<Property[]> {
     let query = supabase
       .from("properties")
-      .select("*")
-      .eq("property_status", "active");
+      .select("*");
 
     if (searchParams.city) {
       query = query.ilike("city", `%${searchParams.city}%`);
@@ -135,14 +130,6 @@ export class SupabasePropertyService {
 
     if (searchParams.maxUnits) {
       query = query.lte("units_count", searchParams.maxUnits);
-    }
-
-    if (searchParams.minArea) {
-      query = query.gte("total_area", searchParams.minArea);
-    }
-
-    if (searchParams.maxArea) {
-      query = query.lte("total_area", searchParams.maxArea);
     }
 
     const { data, error } = await query.order("created_at", { ascending: false });
@@ -165,33 +152,17 @@ export class SupabasePropertyService {
     }
   }
 
-  static async updatePropertyImages(id: string, images: string[]): Promise<Property> {
-    return this.updateProperty(id, { images });
-  }
-
-  static async updatePropertyAmenities(id: string, amenities: string[]): Promise<Property> {
-    return this.updateProperty(id, { amenities });
-  }
-
-  static async setPropertyStatus(id: string, status: "active" | "inactive" | "maintenance"): Promise<Property> {
-    return this.updateProperty(id, { property_status: status });
-  }
-
   // Statistics and analytics
   static async getPropertyStats(userId: string): Promise<{
     totalProperties: number;
-    activeProperties: number;
     totalUnits: number;
-    averageArea: number;
     propertyTypes: { [key: string]: number };
   }> {
     const properties = await this.getUserProperties(userId);
     
     const stats = {
       totalProperties: properties.length,
-      activeProperties: properties.filter(p => p.property_status === "active").length,
       totalUnits: properties.reduce((sum, p) => sum + (p.units_count || 0), 0),
-      averageArea: properties.reduce((sum, p) => sum + (p.total_area || 0), 0) / properties.length || 0,
       propertyTypes: properties.reduce((acc, p) => {
         acc[p.property_type] = (acc[p.property_type] || 0) + 1;
         return acc;

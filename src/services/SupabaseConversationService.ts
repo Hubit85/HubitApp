@@ -1,14 +1,13 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Conversation, 
   ConversationInsert, 
   ConversationUpdate,
-  ConversationWithDetails,
   Message,
   MessageInsert,
   MessageUpdate
 } from "@/integrations/supabase/types";
-import { SupabaseServiceProviderService } from "./SupabaseServiceProviderService";
 
 export class SupabaseConversationService {
   // ===================== CONVERSATIONS =====================
@@ -19,8 +18,6 @@ export class SupabaseConversationService {
       .insert({
         ...conversationData,
         is_active: true,
-        unread_count_user: 0,
-        unread_count_provider: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -52,59 +49,47 @@ export class SupabaseConversationService {
     return data;
   }
 
-  static async getConversationById(conversationId: string): Promise<ConversationWithDetails | null> {
+  static async getConversation(id: string): Promise<Conversation> {
     const { data, error } = await supabase
-      .from('conversations')
-      .select(`
-        *,
-        user:profiles!conversations_user_id_fkey(*),
-        service_provider:service_providers!conversations_service_provider_id_fkey(*, profiles!service_providers_user_id_fkey(*)),
-        messages(*, profiles:profiles!messages_sender_id_fkey(*))
-      `)
-      .eq('id', conversationId)
+      .from("conversations")
+      .select("*")
+      .eq("id", id)
       .single();
-    
-    if (error) {
-      console.error('Error fetching conversation:', error);
-      return null;
-    }
-    
-    return data as unknown as ConversationWithDetails;
-  }
-
-  static async getUserConversations(userId: string, isProvider: boolean = false): Promise<ConversationWithDetails[]> {
-    let query = supabase
-      .from('conversations')
-      .select(`
-        *,
-        user:profiles!conversations_user_id_fkey(*),
-        service_provider:service_providers!conversations_service_provider_id_fkey(*, profiles!service_providers_user_id_fkey(*)),
-        messages:messages(*, profiles:profiles!messages_sender_id_fkey(*))
-      `);
-
-    if (userId) {
-      if (isProvider) {
-        const providerProfile = await SupabaseServiceProviderService.getServiceProviderByUserId(userId);
-        if (providerProfile) {
-          query = query.eq("service_provider_id", providerProfile.id);
-        } else {
-          return [];
-        }
-      } else {
-        query = query.eq("user_id", userId);
-      }
-    }
-
-    const { data, error } = await query.order("last_message_at", { ascending: false });
 
     if (error) {
       throw new Error(error.message);
     }
 
-    return (data as any[]) || [];
+    return data;
+  }
+
+  static async getUserConversations(userId: string): Promise<Conversation[]> {
+    const { data, error } = await supabase
+      .from("conversations")
+      .select("*")
+      .contains("participants", [userId])
+      .eq("is_active", true)
+      .order("last_message_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data || [];
   }
 
   static async deleteConversation(id: string): Promise<void> {
+    // First delete all messages in the conversation
+    const { error: messagesError } = await supabase
+      .from("messages")
+      .delete()
+      .eq("conversation_id", id);
+
+    if (messagesError) {
+      console.warn("Error deleting messages:", messagesError);
+    }
+
+    // Then delete the conversation
     const { error } = await supabase
       .from("conversations")
       .delete()
@@ -118,60 +103,32 @@ export class SupabaseConversationService {
   // ===================== CONVERSATION MANAGEMENT =====================
 
   static async findOrCreateConversation(
-    userId: string,
-    serviceProviderId: string,
-    relatedEntityType?: "budget_request" | "quote" | "contract",
+    participant1: string,
+    participant2: string,
+    relatedEntityType?: string,
     relatedEntityId?: string,
-    subject?: string
+    title?: string
   ): Promise<Conversation> {
-    // Try to find existing conversation
-    let query = supabase
+    // Try to find existing conversation between these participants
+    const { data: existing, error: findError } = await supabase
       .from("conversations")
       .select("*")
-      .eq("user_id", userId)
-      .eq("service_provider_id", serviceProviderId)
-      .eq("is_active", true);
+      .or(`participants.cs.{${participant1},${participant2}}`)
+      .eq("is_active", true)
+      .limit(1)
+      .single();
 
-    if (relatedEntityId) {
-      switch (relatedEntityType) {
-        case "budget_request":
-          query = query.eq("budget_request_id", relatedEntityId);
-          break;
-        case "quote":
-          query = query.eq("quote_id", relatedEntityId);
-          break;
-        case "contract":
-          query = query.eq("contract_id", relatedEntityId);
-          break;
-      }
-    }
-
-    const { data: existing } = await query.single();
-
-    if (existing) {
+    if (!findError && existing) {
       return existing;
     }
 
     // Create new conversation
     const conversationData: ConversationInsert = {
-      user_id: userId,
-      service_provider_id: serviceProviderId,
-      subject: subject || "Nueva conversación"
+      participants: [participant1, participant2],
+      title: title || "Nueva conversación",
+      related_entity_type: relatedEntityType || null,
+      related_entity_id: relatedEntityId || null
     };
-
-    if (relatedEntityId) {
-      switch (relatedEntityType) {
-        case "budget_request":
-          conversationData.budget_request_id = relatedEntityId;
-          break;
-        case "quote":
-          conversationData.quote_id = relatedEntityId;
-          break;
-        case "contract":
-          conversationData.contract_id = relatedEntityId;
-          break;
-      }
-    }
 
     return this.createConversation(conversationData);
   }
@@ -184,29 +141,11 @@ export class SupabaseConversationService {
     return this.updateConversation(id, { is_active: true });
   }
 
-  static async updateLastMessage(conversationId: string, message: string, senderId: string): Promise<void> {
-    const conversation = await this.getConversationById(conversationId);
-    
-    if (!conversation) {
-      throw new Error("Conversation not found");
-    }
-    
-    // Determine if sender is user or provider
-    const isUserSender = senderId === conversation.user_id;
-    
-    const updates: ConversationUpdate = {
+  static async updateLastMessage(conversationId: string, message: string): Promise<void> {
+    await this.updateConversation(conversationId, {
       last_message: message,
       last_message_at: new Date().toISOString()
-    };
-
-    // Increment unread count for the recipient
-    if (isUserSender) {
-      updates.unread_count_provider = (conversation.unread_count_provider || 0) + 1;
-    } else {
-      updates.unread_count_user = (conversation.unread_count_user || 0) + 1;
-    }
-
-    await this.updateConversation(conversationId, updates);
+    });
   }
 
   // ===================== MESSAGES =====================
@@ -217,7 +156,8 @@ export class SupabaseConversationService {
       .insert({
         ...messageData,
         is_read: false,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select()
       .single();
@@ -227,7 +167,7 @@ export class SupabaseConversationService {
     }
 
     // Update conversation's last message
-    await this.updateLastMessage(messageData.conversation_id, messageData.message, messageData.sender_id);
+    await this.updateLastMessage(messageData.conversation_id, messageData.message);
 
     return data;
   }
@@ -235,7 +175,10 @@ export class SupabaseConversationService {
   static async updateMessage(id: string, updates: MessageUpdate): Promise<Message> {
     const { data, error } = await supabase
       .from("messages")
-      .update(updates)
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
       .eq("id", id)
       .select()
       .single();
@@ -250,14 +193,7 @@ export class SupabaseConversationService {
   static async getMessage(id: string): Promise<Message> {
     const { data, error } = await supabase
       .from("messages")
-      .select(`
-        *,
-        profiles (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -271,14 +207,7 @@ export class SupabaseConversationService {
   static async getConversationMessages(conversationId: string, limit: number = 50, offset: number = 0): Promise<Message[]> {
     const { data, error } = await supabase
       .from("messages")
-      .select(`
-        *,
-        profiles (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
+      .select("*")
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: false })
       .limit(limit)
@@ -313,14 +242,6 @@ export class SupabaseConversationService {
   }
 
   static async markConversationAsRead(conversationId: string, userId: string): Promise<void> {
-    const conversation = await this.getConversationById(conversationId);
-    
-    if (!conversation) {
-      throw new Error("Conversation not found");
-    }
-    
-    const isUser = userId === conversation.user_id;
-
     // Mark all unread messages as read
     await supabase
       .from("messages")
@@ -331,13 +252,6 @@ export class SupabaseConversationService {
       .eq("conversation_id", conversationId)
       .eq("is_read", false)
       .neq("sender_id", userId);
-
-    // Reset unread count for the user
-    const updates: ConversationUpdate = isUser 
-      ? { unread_count_user: 0 }
-      : { unread_count_provider: 0 };
-
-    await this.updateConversation(conversationId, updates);
   }
 
   static async sendMessage(
@@ -356,45 +270,23 @@ export class SupabaseConversationService {
     });
   }
 
-  static async sendSystemMessage(
-    conversationId: string,
-    message: string
-  ): Promise<Message> {
-    // System messages use a special sender ID or can be sent without one
-    return this.createMessage({
-      conversation_id: conversationId,
-      sender_id: "system", // You might want to handle this differently
-      message,
-      message_type: "system"
-    });
-  }
-
   // ===================== SEARCH & FILTERS =====================
 
-  static async searchConversations(userId: string, query: string, isProvider: boolean = false): Promise<ConversationWithDetails[]> {
-    const conversations = await this.getUserConversations(userId, isProvider);
+  static async searchConversations(userId: string, query: string): Promise<Conversation[]> {
+    const conversations = await this.getUserConversations(userId);
     
     if (!query) return conversations;
 
     return conversations.filter(conv => 
-      conv.subject?.toLowerCase().includes(query.toLowerCase()) ||
-      conv.last_message?.toLowerCase().includes(query.toLowerCase()) ||
-      conv.user?.full_name?.toLowerCase().includes(query.toLowerCase()) ||
-      conv.service_provider?.company_name?.toLowerCase().includes(query.toLowerCase())
+      conv.title?.toLowerCase().includes(query.toLowerCase()) ||
+      conv.last_message?.toLowerCase().includes(query.toLowerCase())
     );
   }
 
   static async searchMessages(conversationId: string, query: string): Promise<Message[]> {
     const { data, error } = await supabase
       .from("messages")
-      .select(`
-        *,
-        profiles (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
+      .select("*")
       .eq("conversation_id", conversationId)
       .ilike("message", `%${query}%`)
       .order("created_at", { ascending: false })
@@ -409,34 +301,27 @@ export class SupabaseConversationService {
 
   // ===================== STATISTICS =====================
 
-  static async getConversationStats(userId: string, isProvider: boolean = false): Promise<{
+  static async getConversationStats(userId: string): Promise<{
     total: number;
     active: number;
     archived: number;
     unreadMessages: number;
-    totalMessages: number;
   }> {
-    const conversations = await this.getUserConversations(userId, isProvider);
+    const conversations = await this.getUserConversations(userId);
     
-    const stats = await SupabaseServiceProviderService.getProviderStats(userId);
-    
+    // Get unread message count
+    const { count, error } = await supabase
+      .from("messages")
+      .select("*", { count: "exact", head: true })
+      .neq("sender_id", userId)
+      .eq("is_read", false);
+
     return {
       total: conversations.length,
       active: conversations.filter(c => c.is_active).length,
       archived: conversations.filter(c => !c.is_active).length,
-      unreadMessages: conversations.reduce((sum, c) => 
-        sum + (isProvider ? (c.unread_count_provider || 0) : (c.unread_count_user || 0)), 0
-      ),
-      totalMessages: 0
+      unreadMessages: count || 0
     };
-  }
-
-  static async getUnreadCount(userId: string, isProvider: boolean = false): Promise<number> {
-    const conversations = await this.getUserConversations(userId, isProvider);
-    
-    return conversations.reduce((sum, c) => 
-      sum + (isProvider ? (c.unread_count_provider || 0) : (c.unread_count_user || 0)), 0
-    );
   }
 
   // ===================== BULK OPERATIONS =====================
@@ -505,10 +390,12 @@ export class SupabaseConversationService {
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: 'conversations',
-        filter: `user_id=eq.${userId}`
+        table: 'conversations'
       }, (payload) => {
-        callback(payload.new as Conversation);
+        const conversation = payload.new as Conversation;
+        if (conversation.participants.includes(userId)) {
+          callback(conversation);
+        }
       })
       .subscribe();
   }
@@ -516,105 +403,58 @@ export class SupabaseConversationService {
   // ===================== CONVERSATION TEMPLATES =====================
 
   static async createBudgetRequestConversation(
-    userId: string,
-    serviceProviderId: string,
+    participants: string[],
     budgetRequestId: string,
     initialMessage?: string
   ): Promise<{ conversation: Conversation; message?: Message }> {
-    const conversation = await this.findOrCreateConversation(
-      userId,
-      serviceProviderId,
-      "budget_request",
-      budgetRequestId,
-      "Consulta sobre solicitud de presupuesto"
-    );
+    const conversation = await this.createConversation({
+      participants,
+      title: "Consulta sobre solicitud de presupuesto",
+      related_entity_type: "budget_request",
+      related_entity_id: budgetRequestId
+    });
 
     let message;
-    if (initialMessage) {
-      message = await this.sendMessage(conversation.id, userId, initialMessage);
+    if (initialMessage && participants[0]) {
+      message = await this.sendMessage(conversation.id, participants[0], initialMessage);
     }
 
     return { conversation, message };
   }
 
   static async createQuoteConversation(
-    userId: string,
-    serviceProviderId: string,
+    participants: string[],
     quoteId: string,
     initialMessage?: string
   ): Promise<{ conversation: Conversation; message?: Message }> {
-    const conversation = await this.findOrCreateConversation(
-      userId,
-      serviceProviderId,
-      "quote",
-      quoteId,
-      "Conversación sobre cotización"
-    );
+    const conversation = await this.createConversation({
+      participants,
+      title: "Conversación sobre cotización",
+      related_entity_type: "quote",
+      related_entity_id: quoteId
+    });
 
     let message;
-    if (initialMessage) {
-      message = await this.sendMessage(conversation.id, userId, initialMessage);
+    if (initialMessage && participants[0]) {
+      message = await this.sendMessage(conversation.id, participants[0], initialMessage);
     }
 
     return { conversation, message };
   }
 
-  static async addMessage(conversationId: string, senderId: string, message: string, messageType: string = 'text', attachments: string[] = []) {
-    const { data, error } = await supabase
-      .from('messages')
-      .insert([{
-        conversation_id: conversationId,
-        sender_id: senderId,
-        message: message,
-        message_type: messageType,
-        attachments: attachments
-      }])
-      .select()
-      .single();
+  // ===================== UTILITIES =====================
+
+  static async getUnreadCount(userId: string): Promise<number> {
+    const { count, error } = await supabase
+      .from("messages")
+      .select("*", { count: "exact", head: true })
+      .neq("sender_id", userId)
+      .eq("is_read", false);
 
     if (error) {
-      console.error('Error adding message:', error);
-      return null;
+      throw new Error(error.message);
     }
 
-    // Update conversation's last message
-    await supabase
-      .from('conversations')
-      .update({
-        last_message: message,
-        last_message_at: new Date().toISOString()
-      })
-      .eq('id', conversationId);
-      
-    return data;
-  }
-
-  static async markAsRead(conversationId: string, userId: string) {
-    const { error } = await supabase
-        .from('messages')
-        .update({ is_read: true, read_at: new Date().toISOString() })
-        .eq('conversation_id', conversationId)
-        .neq('sender_id', userId)
-        .eq('is_read', false);
-
-    if (error) {
-        console.error('Error marking messages as read:', error);
-    }
-    return { error };
-  }
-
-  static async getConversation(conversationId: string): Promise<ConversationWithDetails | null> {
-    return this.getConversationById(conversationId);
-  }
-
-  static getParticipantDetails(conversation: ConversationWithDetails, currentUserId: string) {
-    const isUser = conversation.user_id === currentUserId;
-    const otherParticipant = isUser ? conversation.service_provider : conversation.user;
-    
-    return {
-      isUser,
-      currentUser: isUser ? conversation.user : conversation.service_provider,
-      otherParticipant,
-    };
+    return count || 0;
   }
 }

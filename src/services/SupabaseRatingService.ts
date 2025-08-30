@@ -1,6 +1,19 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { Rating, RatingInsert, RatingUpdate } from "@/integrations/supabase/types";
-import { SupabaseServiceProviderService } from "./SupabaseServiceProviderService";
+import { 
+  Rating, 
+  RatingInsert, 
+  RatingUpdate, 
+  ServiceProvider,
+  Contract,
+  Profile
+} from "@/integrations/supabase/types";
+
+type RatingWithDetails = Rating & {
+  contracts: Pick<Contract, 'title' | 'id'>;
+  profiles: Pick<Profile, 'full_name' | 'id'>;
+  service_providers: Pick<ServiceProvider, 'company_name' | 'id'>;
+};
 
 export class SupabaseRatingService {
   // ===================== RATINGS CRUD =====================
@@ -11,7 +24,6 @@ export class SupabaseRatingService {
       .insert({
         ...ratingData,
         is_verified: false,
-        helpful_votes: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -22,8 +34,8 @@ export class SupabaseRatingService {
       throw new Error(error.message);
     }
 
-    // Update service provider rating statistics
-    await SupabaseServiceProviderService.updateRatingStats(ratingData.service_provider_id);
+    // Update service provider's rating average
+    await this.updateProviderRatingStats(ratingData.service_provider_id);
 
     return data;
   }
@@ -43,11 +55,9 @@ export class SupabaseRatingService {
       throw new Error(error.message);
     }
 
-    // If the rating was updated, recalculate provider stats
-    if (updates.rating) {
-      const rating = await this.getRating(id);
-      await SupabaseServiceProviderService.updateRatingStats(rating.service_provider_id);
-    }
+    // Update service provider's rating stats
+    const rating = await this.getRating(id);
+    await this.updateProviderRatingStats(rating.service_provider_id);
 
     return data;
   }
@@ -55,21 +65,7 @@ export class SupabaseRatingService {
   static async getRating(id: string): Promise<Rating> {
     const { data, error } = await supabase
       .from("ratings")
-      .select(`
-        *,
-        profiles (
-          id,
-          full_name,
-          avatar_url
-        ),
-        service_providers (
-          id,
-          company_name,
-          profiles (
-            full_name
-          )
-        )
-      `)
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -82,7 +78,7 @@ export class SupabaseRatingService {
 
   static async deleteRating(id: string): Promise<void> {
     const rating = await this.getRating(id);
-    
+
     const { error } = await supabase
       .from("ratings")
       .delete()
@@ -92,41 +88,261 @@ export class SupabaseRatingService {
       throw new Error(error.message);
     }
 
-    // Update service provider rating statistics after deletion
-    await SupabaseServiceProviderService.updateRatingStats(rating.service_provider_id);
+    // Update service provider's rating stats
+    await this.updateProviderRatingStats(rating.service_provider_id);
   }
 
-  // ===================== RATINGS BY SERVICE PROVIDER =====================
+  // ===================== RATING QUERIES =====================
 
-  static async getServiceProviderRatings(serviceProviderId: string, filters?: {
-    verified?: boolean;
+  static async getUserRatingsGiven(userId: string): Promise<RatingWithDetails[]> {
+    const { data, error } = await supabase
+      .from("ratings")
+      .select(`
+        *,
+        contracts (title, id),
+        service_providers (company_name, id)
+      `)
+      .eq("rated_by_user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return (data || []) as RatingWithDetails[];
+  }
+
+  static async getServiceProviderRatings(serviceProviderId: string): Promise<RatingWithDetails[]> {
+    const { data, error } = await supabase
+      .from("ratings")
+      .select(`
+        *,
+        contracts (title, id),
+        profiles (full_name, id)
+      `)
+      .eq("service_provider_id", serviceProviderId)
+      .eq("is_verified", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return (data || []) as RatingWithDetails[];
+  }
+
+  static async getContractRating(contractId: string): Promise<Rating | null> {
+    const { data, error } = await supabase
+      .from("ratings")
+      .select("*")
+      .eq("contract_id", contractId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // No rating found
+      }
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
+  static async canUserRateContract(userId: string, contractId: string): Promise<boolean> {
+    // Check if contract exists and user is the client
+    const { data: contract, error } = await supabase
+      .from("contracts")
+      .select("client_id, status")
+      .eq("id", contractId)
+      .eq("client_id", userId)
+      .single();
+
+    if (error || !contract) {
+      return false;
+    }
+
+    // Check if contract is completed
+    if (contract.status !== "completed") {
+      return false;
+    }
+
+    // Check if rating already exists
+    const existingRating = await this.getContractRating(contractId);
+    return !existingRating;
+  }
+
+  // ===================== RATING MANAGEMENT =====================
+
+  static async verifyRating(ratingId: string, verified: boolean): Promise<Rating> {
+    return this.updateRating(ratingId, { is_verified: verified });
+  }
+
+  static async flagRating(ratingId: string, reason: string): Promise<void> {
+    // In a real implementation, you might have a separate table for flags
+    console.log(`Rating ${ratingId} flagged for: ${reason}`);
+  }
+
+  static async addRatingResponse(ratingId: string, response: string): Promise<Rating> {
+    return this.updateRating(ratingId, { 
+      response_from_provider: response 
+    });
+  }
+
+  static async likeRating(ratingId: string, userId: string): Promise<Rating> {
+    const rating = await this.getRating(ratingId);
+    const currentLikes = rating.helpful_votes || 0;
+    
+    return this.updateRating(ratingId, { 
+      helpful_votes: currentLikes + 1 
+    });
+  }
+
+  static async reportRating(ratingId: string, userId: string, reason: string): Promise<void> {
+    // In a real implementation, create a report record
+    console.log(`Rating ${ratingId} reported by ${userId} for: ${reason}`);
+  }
+
+  // ===================== STATISTICS & ANALYTICS =====================
+
+  static async updateProviderRatingStats(serviceProviderId: string): Promise<void> {
+    try {
+      const { data: ratings, error } = await supabase
+        .from("ratings")
+        .select("rating")
+        .eq("service_provider_id", serviceProviderId)
+        .eq("is_verified", true);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!ratings || ratings.length === 0) {
+        // Set to 0 if no ratings
+        await supabase
+          .from("service_providers")
+          .update({
+            average_rating: 0,
+            ratings_count: 0
+          })
+          .eq("id", serviceProviderId);
+        return;
+      }
+
+      const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
+      const averageRating = totalRating / ratings.length;
+
+      await supabase
+        .from("service_providers")
+        .update({
+          average_rating: Math.round(averageRating * 100) / 100, // Round to 2 decimals
+          ratings_count: ratings.length
+        })
+        .eq("id", serviceProviderId);
+
+    } catch (error) {
+      console.error("Error updating provider rating stats:", error);
+    }
+  }
+
+  static async getProviderRatingStats(serviceProviderId: string): Promise<{
+    totalRatings: number;
+    averageRating: number;
+    ratingDistribution: { [key: number]: number };
+    verificationRate: number;
+  }> {
+    const allRatings = await supabase
+      .from("ratings")
+      .select("rating, is_verified")
+      .eq("service_provider_id", serviceProviderId);
+
+    if (allRatings.error) {
+      throw new Error(allRatings.error.message);
+    }
+
+    const ratings = allRatings.data || [];
+    const verifiedRatings = ratings.filter(r => r.is_verified);
+
+    const stats = {
+      totalRatings: ratings.length,
+      averageRating: ratings.length > 0 
+        ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+        : 0,
+      ratingDistribution: ratings.reduce((acc, r) => {
+        acc[r.rating] = (acc[r.rating] || 0) + 1;
+        return acc;
+      }, {} as { [key: number]: number }),
+      verificationRate: ratings.length > 0 
+        ? (verifiedRatings.length / ratings.length) * 100 
+        : 0
+    };
+
+    return stats;
+  }
+
+  static async getDetailedRatingMetrics(serviceProviderId: string): Promise<{
+    serviceQuality: number;
+    punctuality: number;
+    communication: number;
+    valueForMoney: number;
+    cleanliness: number;
+    overallSatisfaction: number;
+    wouldRecommend: number;
+  }> {
+    const ratings = await this.getServiceProviderRatings(serviceProviderId);
+    
+    if (ratings.length === 0) {
+      return {
+        serviceQuality: 0,
+        punctuality: 0,
+        communication: 0,
+        valueForMoney: 0,
+        cleanliness: 0,
+        overallSatisfaction: 0,
+        wouldRecommend: 0
+      };
+    }
+
+    // Since detailed metrics columns don't exist in current schema,
+    // we'll return the overall rating for all metrics
+    const averageRating = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
+
+    return {
+      serviceQuality: averageRating,
+      punctuality: averageRating,
+      communication: averageRating,
+      valueForMoney: averageRating,
+      cleanliness: averageRating,
+      overallSatisfaction: averageRating,
+      wouldRecommend: averageRating >= 4 ? 85 : averageRating >= 3 ? 65 : 35
+    };
+  }
+
+  // ===================== SEARCH & FILTERS =====================
+
+  static async searchRatings(filters?: {
+    serviceProviderId?: string;
+    userId?: string;
     minRating?: number;
     maxRating?: number;
+    verified?: boolean;
+    contractId?: string;
     limit?: number;
-    offset?: number;
-  }): Promise<Rating[]> {
+  }): Promise<RatingWithDetails[]> {
     let query = supabase
       .from("ratings")
       .select(`
         *,
-        profiles (
-          id,
-          full_name,
-          avatar_url
-        ),
-        quotes (
-          id,
-          description
-        ),
-        contracts (
-          id,
-          work_description
-        )
-      `)
-      .eq("service_provider_id", serviceProviderId);
+        contracts (title, id),
+        profiles (full_name, id),
+        service_providers (company_name, id)
+      `);
 
-    if (filters?.verified !== undefined) {
-      query = query.eq("is_verified", filters.verified);
+    if (filters?.serviceProviderId) {
+      query = query.eq("service_provider_id", filters.serviceProviderId);
+    }
+
+    if (filters?.userId) {
+      query = query.eq("rated_by_user_id", filters.userId);
     }
 
     if (filters?.minRating) {
@@ -137,295 +353,111 @@ export class SupabaseRatingService {
       query = query.lte("rating", filters.maxRating);
     }
 
-    const { data, error } = await query
-      .order("created_at", { ascending: false })
-      .limit(filters?.limit || 50)
-      .range(filters?.offset || 0, (filters?.offset || 0) + (filters?.limit || 50) - 1);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data || [];
-  }
-
-  // ===================== RATINGS BY USER =====================
-
-  static async getUserRatings(userId: string): Promise<Rating[]> {
-    const { data, error } = await supabase
-      .from("ratings")
-      .select(`
-        *,
-        service_providers (
-          id,
-          company_name,
-          profiles (
-            full_name,
-            avatar_url
-          )
-        ),
-        quotes (
-          id,
-          description
-        )
-      `)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data || [];
-  }
-
-  // ===================== RATING VERIFICATION =====================
-
-  static async verifyRating(id: string): Promise<Rating> {
-    return this.updateRating(id, { is_verified: true });
-  }
-
-  static async unverifyRating(id: string): Promise<Rating> {
-    return this.updateRating(id, { is_verified: false });
-  }
-
-  // ===================== HELPFUL VOTES =====================
-
-  static async incrementHelpfulVotes(id: string): Promise<Rating> {
-    const rating = await this.getRating(id);
-    return this.updateRating(id, {
-      helpful_votes: (rating.helpful_votes || 0) + 1
-    });
-  }
-
-  static async decrementHelpfulVotes(id: string): Promise<Rating> {
-    const rating = await this.getRating(id);
-    return this.updateRating(id, {
-      helpful_votes: Math.max(0, (rating.helpful_votes || 0) - 1)
-    });
-  }
-
-  // ===================== PROVIDER RESPONSE =====================
-
-  static async addProviderResponse(id: string, response: string): Promise<Rating> {
-    return this.updateRating(id, {
-      response_from_provider: response
-    });
-  }
-
-  static async removeProviderResponse(id: string): Promise<Rating> {
-    return this.updateRating(id, {
-      response_from_provider: null
-    });
-  }
-
-  // ===================== RATING STATISTICS =====================
-
-  static async getRatingStats(serviceProviderId: string): Promise<{
-    totalRatings: number;
-    averageRating: number;
-    ratingDistribution: { [key: number]: number };
-    averageServiceQuality: number;
-    averagePunctuality: number;
-    averageCommunication: number;
-    averageValueForMoney: number;
-    averageCleanliness: number;
-    recommendationRate: number;
-    verifiedRatingsCount: number;
-  }> {
-    const ratings = await this.getServiceProviderRatings(serviceProviderId);
-
-    const stats = {
-      totalRatings: ratings.length,
-      averageRating: 0,
-      ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as { [key: number]: number },
-      averageServiceQuality: 0,
-      averagePunctuality: 0,
-      averageCommunication: 0,
-      averageValueForMoney: 0,
-      averageCleanliness: 0,
-      recommendationRate: 0,
-      verifiedRatingsCount: ratings.filter(r => r.is_verified).length
-    };
-
-    if (ratings.length === 0) {
-      return stats;
-    }
-
-    // Calculate averages
-    stats.averageRating = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
-    stats.averageServiceQuality = ratings.reduce((sum, r) => sum + (r.service_quality || 0), 0) / ratings.length;
-    stats.averagePunctuality = ratings.reduce((sum, r) => sum + (r.punctuality || 0), 0) / ratings.length;
-    stats.averageCommunication = ratings.reduce((sum, r) => sum + (r.communication || 0), 0) / ratings.length;
-    stats.averageValueForMoney = ratings.reduce((sum, r) => sum + (r.value_for_money || 0), 0) / ratings.length;
-    stats.averageCleanliness = ratings.reduce((sum, r) => sum + (r.cleanliness || 0), 0) / ratings.length;
-
-    // Calculate recommendation rate
-    const recommendedCount = ratings.filter(r => r.would_recommend === true).length;
-    stats.recommendationRate = (recommendedCount / ratings.length) * 100;
-
-    // Calculate rating distribution
-    ratings.forEach(rating => {
-      const ratingValue = rating.rating as keyof typeof stats.ratingDistribution;
-      stats.ratingDistribution[ratingValue] = (stats.ratingDistribution[ratingValue] || 0) + 1;
-    });
-
-    return stats;
-  }
-
-  // ===================== SEARCH & FILTERS =====================
-
-  static async searchRatings(filters: {
-    serviceProviderId?: string;
-    userId?: string;
-    minRating?: number;
-    maxRating?: number;
-    verified?: boolean;
-    hasComment?: boolean;
-    dateFrom?: string;
-    dateTo?: string;
-    sortBy?: 'date' | 'rating' | 'helpful';
-    sortOrder?: 'asc' | 'desc';
-    limit?: number;
-    offset?: number;
-  }): Promise<Rating[]> {
-    let query = supabase
-      .from("ratings")
-      .select(`
-        *,
-        profiles (
-          id,
-          full_name,
-          avatar_url
-        ),
-        service_providers (
-          id,
-          company_name,
-          profiles (
-            full_name
-          )
-        )
-      `);
-
-    if (filters.serviceProviderId) {
-      query = query.eq("service_provider_id", filters.serviceProviderId);
-    }
-
-    if (filters.userId) {
-      query = query.eq("user_id", filters.userId);
-    }
-
-    if (filters.minRating) {
-      query = query.gte("rating", filters.minRating);
-    }
-
-    if (filters.maxRating) {
-      query = query.lte("rating", filters.maxRating);
-    }
-
-    if (filters.verified !== undefined) {
+    if (filters?.verified !== undefined) {
       query = query.eq("is_verified", filters.verified);
     }
 
-    if (filters.hasComment) {
-      query = query.not("comment", "is", null);
-    }
-
-    if (filters.dateFrom) {
-      query = query.gte("created_at", filters.dateFrom);
-    }
-
-    if (filters.dateTo) {
-      query = query.lte("created_at", filters.dateTo);
-    }
-
-    // Apply sorting
-    const sortBy = filters.sortBy || 'date';
-    const sortOrder = filters.sortOrder || 'desc';
-    
-    switch (sortBy) {
-      case 'rating':
-        query = query.order("rating", { ascending: sortOrder === 'asc' });
-        break;
-      case 'helpful':
-        query = query.order("helpful_votes", { ascending: sortOrder === 'asc' });
-        break;
-      default:
-        query = query.order("created_at", { ascending: sortOrder === 'asc' });
+    if (filters?.contractId) {
+      query = query.eq("contract_id", filters.contractId);
     }
 
     const { data, error } = await query
-      .limit(filters.limit || 50)
-      .range(filters.offset || 0, (filters.offset || 0) + (filters.limit || 50) - 1);
+      .order("created_at", { ascending: false })
+      .limit(filters?.limit || 50);
 
     if (error) {
       throw new Error(error.message);
     }
 
-    return data || [];
+    return (data || []) as RatingWithDetails[];
   }
 
-  // ===================== RATING VALIDATION =====================
+  static async getRatingTrends(serviceProviderId: string, days: number = 30): Promise<{
+    period: string;
+    averageRating: number;
+    count: number;
+  }[]> {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
 
-  static async canUserRateProvider(userId: string, serviceProviderId: string): Promise<{
-    canRate: boolean;
-    reason?: string;
-    existingRating?: Rating;
-  }> {
-    // Check if user has already rated this provider
-    const { data: existingRating } = await supabase
+    const { data, error } = await supabase
       .from("ratings")
-      .select("*")
-      .eq("user_id", userId)
+      .select("rating, created_at")
       .eq("service_provider_id", serviceProviderId)
-      .single();
+      .eq("is_verified", true)
+      .gte("created_at", startDate.toISOString())
+      .order("created_at", { ascending: true });
 
-    if (existingRating) {
-      return {
-        canRate: false,
-        reason: "User has already rated this provider",
-        existingRating
-      };
+    if (error) {
+      throw new Error(error.message);
     }
 
-    // Check if user has completed work with this provider
-    const { data: contracts } = await supabase
-      .from("contracts")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("service_provider_id", serviceProviderId)
-      .eq("status", "completed");
+    // Group by week and calculate trends
+    const trends = (data || []).reduce((acc, rating) => {
+      const week = new Date(rating.created_at).toISOString().substring(0, 10);
+      if (!acc[week]) {
+        acc[week] = { ratings: [], count: 0 };
+      }
+      acc[week].ratings.push(rating.rating);
+      acc[week].count++;
+      return acc;
+    }, {} as { [key: string]: { ratings: number[], count: number } });
 
-    if (!contracts || contracts.length === 0) {
-      return {
-        canRate: false,
-        reason: "User must complete at least one contract with provider before rating"
-      };
+    return Object.entries(trends).map(([period, data]) => ({
+      period,
+      averageRating: data.ratings.reduce((sum, r) => sum + r, 0) / data.ratings.length,
+      count: data.count
+    }));
+  }
+
+  // ===================== VALIDATION HELPERS =====================
+
+  static async validateRatingEligibility(userId: string, contractId: string): Promise<{
+    eligible: boolean;
+    reason?: string;
+  }> {
+    try {
+      // Check if contract exists and user is the client
+      const { data: contract, error } = await supabase
+        .from("contracts")
+        .select("client_id, status, end_date")
+        .eq("id", contractId)
+        .single();
+
+      if (error) {
+        return { eligible: false, reason: "Contract not found" };
+      }
+
+      if (contract.client_id !== userId) {
+        return { eligible: false, reason: "You are not the client for this contract" };
+      }
+
+      if (contract.status !== "completed") {
+        return { eligible: false, reason: "Contract must be completed before rating" };
+      }
+
+      // Check if rating already exists
+      const existingRating = await this.getContractRating(contractId);
+      if (existingRating) {
+        return { eligible: false, reason: "Rating already exists for this contract" };
+      }
+
+      return { eligible: true };
+
+    } catch (error) {
+      return { eligible: false, reason: "Error validating rating eligibility" };
     }
-
-    return { canRate: true };
   }
 
   // ===================== BULK OPERATIONS =====================
 
-  static async bulkVerifyRatings(ratingIds: string[]): Promise<Rating[]> {
-    const { data, error } = await supabase
-      .from("ratings")
-      .update({ is_verified: true, updated_at: new Date().toISOString() })
-      .in("id", ratingIds)
-      .select();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data || [];
-  }
-
-  static async bulkDeleteRatings(ratingIds: string[]): Promise<void> {
+  static async bulkUpdateRatings(ratingIds: string[], updates: RatingUpdate): Promise<void> {
     const { error } = await supabase
       .from("ratings")
-      .delete()
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
       .in("id", ratingIds);
 
     if (error) {
@@ -433,35 +465,96 @@ export class SupabaseRatingService {
     }
   }
 
-  static async getRatingDistribution(serviceProviderId: string): Promise<{
-    average: number;
-    total: number;
-    distribution: { rating: number; count: number; percentage: number }[];
-  }> {
-    const ratings = await this.getServiceProviderRatings(serviceProviderId);
+  static async bulkVerifyRatings(ratingIds: string[], verified: boolean): Promise<void> {
+    await this.bulkUpdateRatings(ratingIds, { is_verified: verified });
+  }
 
-    const ratingCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    let totalRatings = 0;
+  // ===================== ADMIN FUNCTIONS =====================
 
-    for (const rating of ratings) {
-      if (rating.rating >= 1 && rating.rating <= 5) {
-        ratingCounts[rating.rating] = (ratingCounts[rating.rating] || 0) + 1;
-        totalRatings++;
-      }
+  static async getPendingVerificationRatings(): Promise<RatingWithDetails[]> {
+    const { data, error } = await supabase
+      .from("ratings")
+      .select(`
+        *,
+        contracts (title, id),
+        profiles (full_name, id),
+        service_providers (company_name, id)
+      `)
+      .eq("is_verified", false)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
     }
 
-    const average = totalRatings > 0 ? (ratings.reduce((acc, r) => acc + r.rating, 0) / totalRatings) : 0;
+    return (data || []) as RatingWithDetails[];
+  }
 
-    const distribution = Object.entries(ratingCounts).map(([key, value]) => ({
-      rating: parseInt(key),
-      count: value,
-      percentage: totalRatings > 0 ? (value / totalRatings) * 100 : 0
-    }));
+  static async getFlaggedRatings(): Promise<RatingWithDetails[]> {
+    // In a real implementation, you'd have a flags table
+    // For now, return empty array
+    return [];
+  }
 
-    return {
-      average: parseFloat(average.toFixed(2)),
-      total: totalRatings,
-      distribution
+  // ===================== REPORTING & ANALYTICS =====================
+
+  static async generateRatingReport(serviceProviderId: string, startDate: string, endDate: string): Promise<{
+    totalRatings: number;
+    averageRating: number;
+    ratingsByMonth: { month: string; average: number; count: number }[];
+    topComments: string[];
+  }> {
+    const { data, error } = await supabase
+      .from("ratings")
+      .select("rating, comment, created_at")
+      .eq("service_provider_id", serviceProviderId)
+      .eq("is_verified", true)
+      .gte("created_at", startDate)
+      .lte("created_at", endDate)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const ratings = data || [];
+    
+    const report = {
+      totalRatings: ratings.length,
+      averageRating: ratings.length > 0 
+        ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+        : 0,
+      ratingsByMonth: [], // Simplified for now
+      topComments: ratings
+        .filter(r => r.comment && r.comment.length > 10)
+        .slice(0, 5)
+        .map(r => r.comment!)
     };
+
+    return report;
+  }
+
+  // ===================== UTILITIES =====================
+
+  static formatRating(rating: number): string {
+    return `${rating.toFixed(1)}/5.0`;
+  }
+
+  static getRatingStars(rating: number): string {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return '★'.repeat(fullStars) + 
+           (hasHalfStar ? '☆' : '') + 
+           '☆'.repeat(emptyStars);
+  }
+
+  static categorizeRating(rating: number): 'excellent' | 'good' | 'average' | 'poor' | 'terrible' {
+    if (rating >= 4.5) return 'excellent';
+    if (rating >= 3.5) return 'good';
+    if (rating >= 2.5) return 'average';
+    if (rating >= 1.5) return 'poor';
+    return 'terrible';
   }
 }

@@ -7,9 +7,9 @@ export interface UserRole {
   role_type: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
   is_active: boolean;
   is_verified: boolean;
-  verification_token?: string;
-  verification_expires_at?: string;
-  verification_confirmed_at?: string;
+  verification_token?: string | null;
+  verification_expires_at?: string | null;
+  verification_confirmed_at?: string | null;
   role_specific_data: Record<string, any>;
   created_at: string;
   updated_at: string;
@@ -33,7 +33,7 @@ export class SupabaseUserRoleService {
       throw new Error(`Error fetching user roles: ${error.message}`);
     }
 
-    return data || [];
+    return (data || []) as UserRole[];
   }
 
   static async getActiveRole(userId: string): Promise<UserRole | null> {
@@ -51,7 +51,7 @@ export class SupabaseUserRoleService {
       throw new Error(`Error fetching active role: ${error.message}`);
     }
 
-    return data;
+    return data as UserRole;
   }
 
   static async addRole(userId: string, request: AddRoleRequest): Promise<{ success: boolean; message: string; requiresVerification?: boolean }> {
@@ -201,7 +201,7 @@ export class SupabaseUserRoleService {
       return {
         success: true,
         message: `¡Rol de ${this.getRoleDisplayName(roleData.role_type)} verificado correctamente!`,
-        role: updatedRole
+        role: updatedRole as UserRole
       };
 
     } catch (error) {

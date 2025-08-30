@@ -155,9 +155,7 @@ export class SupabaseServiceCategoryService {
     return this.updateServiceCategory(id, { icon });
   }
 
-  static async updateCategoryColor(id: string, color: string): Promise<ServiceCategory> {
-    return this.updateServiceCategory(id, { color });
-  }
+  // Note: 'color' field doesn't exist in current schema, removed methods that used it
 
   // ===================== EMERGENCY SERVICES =====================
 
@@ -226,7 +224,6 @@ export class SupabaseServiceCategoryService {
     budgetRequestsCount: number;
     serviceProvidersCount: number;
   }[]> {
-    // This would require complex joins - for now returning basic structure
     const categories = await this.getAllActiveCategories();
     
     // In a real implementation, you would join with budget_requests and service_providers tables
@@ -236,36 +233,6 @@ export class SupabaseServiceCategoryService {
       budgetRequestsCount: 0, // Would need to query budget_requests table
       serviceProvidersCount: 0 // Would need to query service_providers table
     }));
-  }
-
-  // ===================== CATEGORY INITIALIZATION =====================
-
-  static async initializeDefaultCategories(): Promise<void> {
-    try {
-      const { data, error } = await supabase.from('service_categories').select('*');
-      if (error) throw error;
-  
-      if (data && Array.isArray(data)) {
-        for (const category of data) {
-          const hasEmergencySubcategory = data.some((sub: ServiceCategory) => 
-            sub.parent_id === category.id && sub.emergency_available
-          );
-          
-          if (hasEmergencySubcategory && !category.emergency_available) {
-            const { error: updateError } = await supabase
-              .from('service_categories')
-              .update({ emergency_available: true })
-              .eq('id', category.id);
-              
-            if (updateError) {
-              console.error(`Error updating category ${category.id}:`, updateError);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error initializing default categories:", error);
-    }
   }
 
   // ===================== BULK OPERATIONS =====================
