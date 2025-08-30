@@ -352,7 +352,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `;
 
       const emailData = {
-        from: 'HuBiT <noreply@hubit-84-supabase-email-templates.softgen.ai>',
+        from: 'HuBiT <noreply@resend.dev>',
         to: userEmail,
         subject: `Verificar tu nuevo rol en HuBiT - ${roleDisplayName}`,
         html: emailHtml
