@@ -41,8 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (error) {
           connectionTest = { 
             status: 'error', 
-            message: `Error de Supabase: ${error.message}`,
-            code: error.code || 'unknown'
+            message: `Error de Supabase: ${error.message}`
           };
         } else {
           connectionTest = { 
