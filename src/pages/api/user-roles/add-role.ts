@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 interface AddRoleRequestBody {
   userId: string;
@@ -26,8 +26,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Verificar si el usuario ya tiene este rol
-    const { data: existingRole, error: checkError } = await supabase
+    // Verificar si el usuario ya tiene este rol usando supabaseServer
+    const { data: existingRole, error: checkError } = await supabaseServer
       .from('user_roles')
       .select('id, is_verified')
       .eq('user_id', userId)
@@ -65,8 +65,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('🔐 API: Generated verification token');
 
-    // Crear el nuevo rol (sin verificar)
-    const { data, error: insertError } = await supabase
+    // Crear el nuevo rol (sin verificar) usando supabaseServer
+    const { data, error: insertError } = await supabaseServer
       .from('user_roles')
       .insert({
         user_id: userId,
@@ -90,26 +90,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ API: Role created successfully:', { id: data.id, role_type: data.role_type });
 
-    // Obtener el email del usuario desde Supabase Auth
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    // Si no podemos obtener el usuario de la sesión actual, intentemos desde la base de datos
-    let userEmail = user?.email;
-    
-    if (!userEmail) {
-      console.log('⚠️ API: No user in session, trying to get email from profiles...');
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', userId)
-        .single();
+    // Obtener el email del usuario desde la base de datos usando supabaseServer
+    const { data: profileData, error: profileError } = await supabaseServer
+      .from('profiles')
+      .select('email')
+      .eq('id', userId)
+      .single();
         
-      if (profileError) {
-        console.error('❌ API: Error getting user profile:', profileError);
-      } else {
-        userEmail = profileData?.email;
-      }
+    if (profileError) {
+      console.error('❌ API: Error getting user profile:', profileError);
+      return res.status(400).json({
+        success: false,
+        message: "No se encontró el perfil del usuario para enviar la verificación"
+      });
     }
+
+    const userEmail = profileData?.email;
 
     if (!userEmail) {
       console.error('❌ API: No email found for user');
@@ -122,7 +118,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // ENVIO DE EMAIL DESDE EL SERVIDOR
     console.log('📧 API: Sending verification email...');
     try {
-      const RESEND_API_KEY = 're_HMYRvjWf_93ML8R9PbPqRHU9EP1sTJ9oS';
+      const RESEND_API_KEY = process.env.RESEND_API_KEY;
+      
+      if (!RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY not configured');
+      }
+
       const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
       
       const verificationUrl = `${SITE_URL}/auth/verify-role?token=${verificationToken}`;
@@ -239,7 +240,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       return res.status(200).json({
         success: true,
-        message: `Rol creado correctamente, pero hubo un problema al enviar el email de verificación. Puedes intentar agregar el rol nuevamente.`,
+        message: `Rol creado correctamente, pero hubo un problema al enviar el email de verificación: ${emailError instanceof Error ? emailError.message : 'Error del servidor de email'}`,
         requiresVerification: true,
         emailError: emailError instanceof Error ? emailError.message : 'Error del servidor de email'
       });
