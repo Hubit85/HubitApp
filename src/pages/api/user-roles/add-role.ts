@@ -8,25 +8,83 @@ interface AddRoleRequestBody {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  // Configurar headers para asegurar JSON response
+  res.setHeader('Content-Type', 'application/json');
+  
+  console.log('🚀 API: add-role endpoint called with method:', req.method);
 
-  console.log('🚀 API: add-role endpoint called');
+  if (req.method !== 'POST') {
+    console.log('❌ API: Method not allowed:', req.method);
+    return res.status(405).json({ 
+      success: false, 
+      error: 'Method not allowed',
+      message: 'Solo se permite método POST' 
+    });
+  }
 
   try {
     const { userId, roleType, roleSpecificData }: AddRoleRequestBody = req.body;
 
-    console.log('📋 API: Request data:', { userId, roleType });
+    console.log('📋 API: Request data received:', { 
+      userId: userId ? 'present' : 'missing', 
+      roleType, 
+      hasRoleSpecificData: !!roleSpecificData 
+    });
 
-    if (!userId || !roleType) {
+    // Validación de entrada más robusta
+    if (!userId || typeof userId !== 'string') {
+      console.log('❌ API: Invalid or missing userId');
       return res.status(400).json({ 
         success: false, 
-        message: 'Faltan datos requeridos: userId y roleType' 
+        message: 'userId es requerido y debe ser una cadena válida' 
       });
     }
 
-    // Verificar si el usuario ya tiene este rol usando supabaseServer
+    if (!roleType || typeof roleType !== 'string') {
+      console.log('❌ API: Invalid or missing roleType');
+      return res.status(400).json({ 
+        success: false, 
+        message: 'roleType es requerido y debe ser una cadena válida' 
+      });
+    }
+
+    const validRoles = ['particular', 'community_member', 'service_provider', 'property_administrator'];
+    if (!validRoles.includes(roleType)) {
+      console.log('❌ API: Invalid roleType:', roleType);
+      return res.status(400).json({
+        success: false,
+        message: `Tipo de rol inválido. Debe ser uno de: ${validRoles.join(', ')}`
+      });
+    }
+
+    // Verificar conexión a Supabase
+    console.log('🔗 API: Testing Supabase connection...');
+    
+    // Test de conexión simple
+    try {
+      const { error: connectionError } = await supabaseServer
+        .from('user_roles')
+        .select('count')
+        .limit(1);
+      
+      if (connectionError) {
+        console.error('❌ API: Supabase connection failed:', connectionError);
+        return res.status(500).json({
+          success: false,
+          message: 'Error de conexión con la base de datos'
+        });
+      }
+      console.log('✅ API: Supabase connection successful');
+    } catch (connError) {
+      console.error('❌ API: Supabase connection error:', connError);
+      return res.status(500).json({
+        success: false,
+        message: 'Error al conectar con la base de datos'
+      });
+    }
+
+    // Verificar si el usuario ya tiene este rol
+    console.log('🔍 API: Checking for existing roles...');
     const { data: existingRole, error: checkError } = await supabaseServer
       .from('user_roles')
       .select('id, is_verified')
@@ -63,9 +121,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const verificationToken = generateVerificationToken();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
 
-    console.log('🔐 API: Generated verification token');
+    console.log('🔐 API: Generated verification token, expires at:', expiresAt.toISOString());
 
-    // Crear el nuevo rol (sin verificar) usando supabaseServer
+    // Crear el nuevo rol (sin verificar)
+    console.log('💾 API: Creating new role in database...');
     const { data, error: insertError } = await supabaseServer
       .from('user_roles')
       .insert({
@@ -90,7 +149,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ API: Role created successfully:', { id: data.id, role_type: data.role_type });
 
-    // Obtener el email del usuario desde la base de datos usando supabaseServer
+    // Obtener el email del usuario
+    console.log('👤 API: Fetching user profile...');
     const { data: profileData, error: profileError } = await supabaseServer
       .from('profiles')
       .select('email')
@@ -99,9 +159,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         
     if (profileError) {
       console.error('❌ API: Error getting user profile:', profileError);
-      return res.status(400).json({
+      return res.status(500).json({
         success: false,
-        message: "No se encontró el perfil del usuario para enviar la verificación"
+        message: "No se pudo obtener la información del usuario para enviar la verificación"
       });
     }
 
@@ -109,19 +169,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!userEmail) {
       console.error('❌ API: No email found for user');
-      return res.status(400).json({
+      return res.status(500).json({
         success: false,
         message: "No se encontró el email del usuario para enviar la verificación"
       });
     }
 
-    // ENVIO DE EMAIL DESDE EL SERVIDOR
-    console.log('📧 API: Sending verification email...');
+    console.log('📧 API: User email found, proceeding with email send...');
+
+    // ENVIO DE EMAIL
     try {
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
       
       if (!RESEND_API_KEY) {
-        throw new Error('RESEND_API_KEY not configured');
+        console.error('❌ API: RESEND_API_KEY not configured');
+        return res.status(200).json({
+          success: true,
+          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: Falta configurar RESEND_API_KEY`,
+          requiresVerification: true
+        });
       }
 
       const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
@@ -206,10 +272,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         html: emailHtml
       };
 
-      console.log('📤 API: Calling Resend API...', {
-        to: emailData.to,
-        subject: emailData.subject
-      });
+      console.log('📤 API: Sending email to:', userEmail);
 
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -221,10 +284,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       const responseData = await response.json();
-      console.log('📡 API: Resend response:', { status: response.status, data: responseData });
+      console.log('📡 API: Resend response status:', response.status);
 
       if (!response.ok) {
-        throw new Error(`Resend API error: ${responseData.message || response.statusText}`);
+        console.error('❌ API: Resend API error:', responseData);
+        return res.status(200).json({
+          success: true,
+          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: ${responseData.message || 'Error del servicio de email'}`,
+          requiresVerification: true
+        });
       }
 
       console.log('✅ API: Email sent successfully');
@@ -236,26 +304,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
     } catch (emailError) {
-      console.error('❌ API: Email sending failed:', emailError);
+      console.error('❌ API: Email sending error:', emailError);
       
       return res.status(200).json({
         success: true,
-        message: `Rol creado correctamente, pero hubo un problema al enviar el email de verificación: ${emailError instanceof Error ? emailError.message : 'Error del servidor de email'}`,
-        requiresVerification: true,
-        emailError: emailError instanceof Error ? emailError.message : 'Error del servidor de email'
+        message: `Rol creado correctamente, pero hubo un problema al enviar el email de verificación: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}`,
+        requiresVerification: true
       });
     }
 
   } catch (error) {
-    console.error('❌ API: Complete endpoint error:', error);
+    console.error('❌ API: Unexpected error in handler:', error);
     
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Error interno del servidor';
-
+    // Asegurar que siempre devolvamos JSON válido
     return res.status(500).json({
       success: false,
-      message: `Error al procesar la solicitud: ${errorMessage}`
+      message: error instanceof Error ? error.message : 'Error interno del servidor'
     });
   }
 }
