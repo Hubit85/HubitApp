@@ -3,16 +3,21 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile, ProfileInsert } from "@/integrations/supabase/types";
+import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
 
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   session: Session | null;
+  userRoles: UserRole[];
+  activeRole: UserRole | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => Promise<{ error?: string; message?: string; success?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: string }>;
+  activateRole: (roleType: UserRole['role_type']) => Promise<{ success: boolean; message: string }>;
+  refreshRoles: () => Promise<void>;
   databaseConnected: boolean;
 }
 
@@ -22,6 +27,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
+  const [activeRole, setActiveRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [databaseConnected, setDatabaseConnected] = useState(false);
 
@@ -31,7 +38,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user || null);
       if (session?.user) {
-        fetchProfile(session.user.id, session.user);
+        fetchUserData(session.user.id, session.user);
       } else {
         setLoading(false);
       }
@@ -44,9 +51,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user || null);
         
         if (session?.user) {
-          await fetchProfile(session.user.id, session.user);
+          await fetchUserData(session.user.id, session.user);
         } else {
           setProfile(null);
+          setUserRoles([]);
+          setActiveRole(null);
           setLoading(false);
         }
       }
@@ -76,7 +85,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const fetchProfile = async (userId: string, userObject: User) => {
+  const fetchUserData = async (userId: string, userObject: User) => {
     try {
       const isConnected = await checkDatabaseConnection();
       
@@ -108,26 +117,50 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
+      // Fetch profile and roles in parallel
+      const [profileResult, rolesResult] = await Promise.allSettled([
+        supabase.from("profiles").select("*").eq("id", userId).single(),
+        SupabaseUserRoleService.getUserRoles(userId)
+      ]);
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Profile doesn't exist, this is normal for new users
-          console.info("Profile not found, will be created automatically");
-        } else {
-          console.error("Error fetching profile:", error);
-        }
+      // Handle profile
+      if (profileResult.status === 'fulfilled' && !profileResult.value.error) {
+        setProfile(profileResult.value.data);
       } else {
-        setProfile(data);
+        console.error("Error fetching profile:", profileResult);
       }
+
+      // Handle roles
+      if (rolesResult.status === 'fulfilled') {
+        setUserRoles(rolesResult.value);
+        
+        // Set active role
+        const activeRoleData = rolesResult.value.find(r => r.is_active) || null;
+        setActiveRole(activeRoleData);
+      } else {
+        console.error("Error fetching roles:", rolesResult);
+        setUserRoles([]);
+        setActiveRole(null);
+      }
+
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Error fetching user data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshRoles = async () => {
+    if (!user) return;
+    
+    try {
+      const roles = await SupabaseUserRoleService.getUserRoles(user.id);
+      setUserRoles(roles);
+      
+      const activeRoleData = roles.find(r => r.is_active) || null;
+      setActiveRole(activeRoleData);
+    } catch (error) {
+      console.error("Error refreshing roles:", error);
     }
   };
 
@@ -189,6 +222,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             const isConnected = await checkDatabaseConnection();
             
             if (isConnected) {
+              // Create profile
               const profileData: ProfileInsert = {
                 id: data.user.id,
                 email: data.user.email!,
@@ -201,10 +235,32 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
               if (profileError) {
                 console.warn("Could not create profile in database:", profileError);
-                // Don't fail registration if profile creation fails
               } else {
                 console.log("Profile created successfully");
               }
+
+              // Create the initial role in user_roles table
+              try {
+                const { error: roleError } = await supabase
+                  .from('user_roles')
+                  .insert({
+                    user_id: data.user.id,
+                    role_type: userData.user_type,
+                    is_active: true,
+                    is_verified: true, // First role is automatically verified
+                    verification_confirmed_at: new Date().toISOString(),
+                    role_specific_data: {}
+                  });
+
+                if (roleError) {
+                  console.warn("Could not create initial user role:", roleError);
+                } else {
+                  console.log("Initial user role created successfully");
+                }
+              } catch (roleError) {
+                console.warn("Error creating initial role:", roleError);
+              }
+
             } else {
               console.log("Database not connected, skipping profile creation");
             }
@@ -233,6 +289,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error("Error signing out:", error);
       }
+      
+      // Clear local state
+      setProfile(null);
+      setUserRoles([]);
+      setActiveRole(null);
     } catch (error) {
       console.error("Unexpected error during signOut:", error);
     }
@@ -259,10 +320,30 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Refresh profile data
-      await fetchProfile(user.id, user);
+      await fetchUserData(user.id, user);
       return {};
     } catch (error) {
       return { error: "An unexpected error occurred while updating profile" };
+    }
+  };
+
+  const activateRole = async (roleType: UserRole['role_type']) => {
+    if (!user) {
+      return { success: false, message: "Usuario no autenticado" };
+    }
+
+    try {
+      const result = await SupabaseUserRoleService.activateRole(user.id, roleType);
+      
+      if (result.success) {
+        // Refresh roles after activation
+        await refreshRoles();
+      }
+      
+      return result;
+    } catch (error) {
+      console.error("Error activating role:", error);
+      return { success: false, message: "Error al activar el rol" };
     }
   };
 
@@ -270,11 +351,15 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     user,
     profile,
     session,
+    userRoles,
+    activeRole,
     loading,
     signIn,
     signUp,
     signOut,
     updateProfile,
+    activateRole,
+    refreshRoles,
     databaseConnected,
   };
 

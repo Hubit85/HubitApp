@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, User, Mail, Phone, Calendar, Settings, LogOut, Home, Users, Wrench, Building, Shield, Crown, Star, ArrowRight, FileText, Code } from "lucide-react";
 import PropertyManager from "@/components/dashboard/PropertyManager";
 import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
+import UserRoleManager from "@/components/UserRoleManager";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading } = useSupabaseAuth();
@@ -465,8 +466,11 @@ export default function Dashboard() {
                   </Card>
                 </div>
 
-                {/* Profile Actions & Settings */}
+                {/* Profile Management */}
                 <div className="lg:col-span-2 space-y-8">
+                  {/* User Role Manager - NEW COMPONENT */}
+                  <UserRoleManager />
+
                   {/* System Configuration */}
                   <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 hover:shadow-lg transition-shadow">
                     <CardHeader>
