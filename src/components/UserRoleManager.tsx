@@ -156,6 +156,55 @@ export default function UserRoleManager() {
     }
   };
 
+  const handleClearPendingVerifications = async () => {
+    if (!user?.id) return;
+
+    try {
+      setSubmitting(true);
+      setError("");
+      setSuccessMessage("");
+
+      const result = await SupabaseUserRoleService.clearPendingVerifications(user.id);
+      
+      if (result.success) {
+        setSuccessMessage(result.message);
+        setShowClearPendingModal(false);
+        await loadUserRoles();
+      } else {
+        setError(result.message);
+      }
+    } catch (error) {
+      console.error("Error clearing pending verifications:", error);
+      setError("Error al limpiar las verificaciones pendientes");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleRemovePendingRole = async (roleType: UserRole['role_type']) => {
+    if (!user?.id) return;
+
+    try {
+      setSubmitting(true);
+      setError("");
+      setSuccessMessage("");
+
+      const result = await SupabaseUserRoleService.removePendingRole(user.id, roleType);
+      
+      if (result.success) {
+        setSuccessMessage(result.message);
+        await loadUserRoles();
+      } else {
+        setError(result.message);
+      }
+    } catch (error) {
+      console.error("Error removing pending role:", error);
+      setError("Error al eliminar la verificación pendiente");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const getRoleIcon = (roleType: UserRole['role_type']) => {
     switch (roleType) {
       case 'particular': return <User className="h-4 w-4" />;
