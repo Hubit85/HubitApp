@@ -50,6 +50,14 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Redirect effect - only when user becomes available
+  useEffect(() => {
+    if (!loading && user && !isLoading) {
+      console.log("User authenticated, redirecting to dashboard");
+      router.replace("/dashboard");
+    }
+  }, [user, loading, router, isLoading]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -98,13 +106,9 @@ export default function RegisterPage() {
         return;
       }
 
-      // Successful registration
-      setSuccessMessage("✅ Cuenta creada exitosamente. Redirigiendo al dashboard...");
-      
-      // Simple redirect without complex state management
-      setTimeout(() => {
-        router.replace("/dashboard");
-      }, 1500);
+      // Registration successful - don't set success message or timeout
+      // The useEffect above will handle the redirect when user becomes available
+      console.log("Registration completed successfully");
 
     } catch (err) {
       console.error("Registration exception:", err);
