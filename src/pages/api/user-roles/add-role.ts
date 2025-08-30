@@ -45,38 +45,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       resendKeyValid: RESEND_API_KEY ? RESEND_API_KEY.startsWith('re_') : false
     });
 
-    // TEST DE CONECTIVIDAD SIMPLE Y DIRECTO
-    console.log('🔗 API: Testing Supabase connection...');
-    
-    try {
-      // Simple connectivity test
-      const { error: healthError } = await supabaseServer
-        .from('profiles')
-        .select('id')
-        .limit(1);
-      
-      if (healthError) {
-        console.error('❌ API: Supabase connection test failed:', {
-          message: healthError.message,
-          code: healthError.code
-        });
-        
-        return res.status(500).json({
-          success: false,
-          message: 'Error de base de datos: Invalid API key'
-        });
-      }
-      
-      console.log('✅ API: Supabase connection successful');
-      
-    } catch (connError) {
-      console.error('❌ API: Supabase connection exception:', connError);
-      return res.status(500).json({
-        success: false,
-        message: 'Error de base de datos: Invalid API key'
-      });
-    }
-
     // Validar que el body existe
     if (!req.body) {
       console.log('❌ API: No request body provided');
