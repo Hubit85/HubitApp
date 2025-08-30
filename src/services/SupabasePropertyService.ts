@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Property, PropertyInsert, PropertyUpdate } from "@/integrations/supabase/types";
+import { SupabaseServiceProviderService } from "./SupabaseServiceProviderService";
 
 export class SupabasePropertyService {
   static async createProperty(propertyData: PropertyInsert): Promise<Property> {
@@ -218,13 +219,38 @@ export class SupabasePropertyService {
     acceptanceRate: number;
     completionRate: number;
   }> {
-    return {
-      totalQuotes: 0,
-      acceptedQuotes: 0, 
-      completedJobs: 0,
-      averageResponseTime: 0,
-      acceptanceRate: 0,
-      completionRate: 0
-    };
+    try {
+      // Get service provider first
+      const provider = await SupabaseServiceProviderService.getServiceProviderByUserId(userId);
+      
+      if (!provider) {
+        return {
+          totalQuotes: 0,
+          acceptedQuotes: 0,
+          completedJobs: 0,
+          averageResponseTime: 0,
+          acceptanceRate: 0,
+          completionRate: 0
+        };
+      }
+
+      return {
+        totalQuotes: 0,
+        acceptedQuotes: 0, 
+        completedJobs: provider.total_jobs_completed || 0,
+        averageResponseTime: provider.response_time_hours || 0,
+        acceptanceRate: 0,
+        completionRate: 0
+      };
+    } catch (error) {
+      return {
+        totalQuotes: 0,
+        acceptedQuotes: 0,
+        completedJobs: 0,
+        averageResponseTime: 0,
+        acceptanceRate: 0,
+        completionRate: 0
+      };
+    }
   }
 }
