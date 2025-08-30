@@ -52,14 +52,13 @@ export default function RegisterPage() {
 
   // Redirect effect - improved to prevent blocking
   useEffect(() => {
-    if (!loading && user && !isLoading) {
+    if (!loading && user) {
       console.log("User authenticated, redirecting to dashboard");
-      // Small delay to ensure state is properly updated
-      setTimeout(() => {
-        router.replace("/dashboard");
-      }, 100);
+      // Immediate redirect with proper loading reset
+      setIsLoading(false);
+      router.replace("/dashboard");
     }
-  }, [user, loading, router, isLoading]);
+  }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,16 +108,17 @@ export default function RegisterPage() {
         return;
       }
 
-      // Registration successful - don't keep loading indefinitely
-      console.log("Registration completed successfully, waiting for auth state update...");
+      // Registration successful - the auth state change will handle redirect
+      console.log("Registration completed successfully, auth state will handle redirect");
       
-      // If user doesn't get authenticated in 3 seconds, stop loading
+      // Safety timeout to prevent infinite loading
       setTimeout(() => {
-        if (!user) {
+        if (isLoading && !user) {
+          console.warn("Registration timeout - stopping loading");
           setIsLoading(false);
-          setError("El registro se completó pero hubo un problema con la autenticación. Intenta iniciar sesión.");
+          setError("El registro tardó más de lo esperado. Si tienes problemas, intenta iniciar sesión.");
         }
-      }, 3000);
+      }, 5000);
 
     } catch (err) {
       console.error("Registration exception:", err);
