@@ -137,6 +137,20 @@ BEGIN
     END IF;
 END $$;
 
+-- Verificar y añadir columna service_categories a la tabla service_providers si no existe
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'service_providers' AND column_name = 'service_categories'
+    ) THEN
+        ALTER TABLE service_providers ADD COLUMN service_categories UUID[] DEFAULT '{}';
+        RAISE NOTICE '✅ Columna service_categories añadida a la tabla service_providers';
+    ELSE
+        RAISE NOTICE '✅ La columna service_categories ya existe en la tabla service_providers';
+    END IF;
+END $$;
+
 -- Verificar todas las columnas críticas
 DO $$
 DECLARE
@@ -167,6 +181,9 @@ BEGIN
     IF table_exists THEN
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'service_providers' AND column_name = 'emergency_services') THEN
             missing_columns := missing_columns || 'service_providers.emergency_services, ';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'service_providers' AND column_name = 'service_categories') THEN
+            missing_columns := missing_columns || 'service_providers.service_categories, ';
         END IF;
     END IF;
 
