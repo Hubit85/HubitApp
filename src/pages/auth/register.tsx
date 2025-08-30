@@ -116,7 +116,7 @@ export default function RegisterPage() {
         console.log("Registration successful! Redirecting immediately...");
         setRegistrationState('redirecting');
         
-        // Direct immediate redirect - don't wait for useEffect
+        // Show redirecting message for 1 second, then redirect
         setTimeout(() => {
           router.replace("/dashboard").then(() => {
             console.log("Redirect successful");
@@ -125,7 +125,7 @@ export default function RegisterPage() {
             setRegistrationState('idle');
             setError("Error durante la redirección. Tu cuenta fue creada exitosamente. Puedes iniciar sesión en /auth/login");
           });
-        }, 500); // Small delay to show the success message
+        }, 1000); // 1 second delay to show the success message
         
         return;
       }
@@ -152,13 +152,13 @@ export default function RegisterPage() {
   const isWorking = registrationState === 'submitting' || registrationState === 'redirecting';
 
   // Show redirecting screen
-  if (isWorking) {
+  if (registrationState === 'redirecting') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
         <Card className="w-full max-w-md bg-white/70 backdrop-blur-lg border-white/20 shadow-2xl">
           <CardContent className="pt-6 text-center space-y-4">
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Sparkles className="h-8 w-8 text-white" />
+              <Sparkles className="h-8 w-8 text-white animate-pulse" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-neutral-900 mb-2">
