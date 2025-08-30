@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
+  if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ 
       success: false, 
-      message: 'Method not allowed' 
+      message: 'Method not allowed. Use GET or POST.' 
     });
   }
 
