@@ -1,17 +1,17 @@
-# 📧 Templates de Email Personalizados para HuBiT
+# 📧 Custom English Email Templates for HuBiT
 
-## Configuración en Supabase Dashboard
+## Supabase Dashboard Configuration
 
-1. Ve a tu proyecto Supabase: https://djkrzbmgzfwagmripozi.supabase.co
-2. En el panel izquierdo, haz clic en **"Authentication"**
-3. Ve a la pestaña **"Email Templates"**
-4. Personaliza cada template como se indica a continuación
+1. Go to your Supabase project: https://djkrzbmgzfwagmripozi.supabase.co
+2. In the left panel, click **"Authentication"**
+3. Go to the **"Email Templates"** tab
+4. Customize each template as indicated below
 
 ---
 
-## 1. 🎉 Confirmación de Registro (Signup Confirmation)
+## 1. 🎉 Signup Confirmation
 
-**Subject:** ¡Bienvenido a HuBiT! Confirma tu cuenta
+**Subject:** Welcome to HuBiT! Confirm your account
 
 **Body (HTML):**
 ```html
@@ -20,7 +20,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido a HuBiT</title>
+    <title>Welcome to HuBiT</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
         .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -42,18 +42,18 @@
     <div class="container">
         <div class="header">
             <h1 class="logo">HuBiT</h1>
-            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Conectando propietarios con servicios de calidad</p>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Connecting property owners with quality services</p>
         </div>
         
         <div class="content">
-            <h2 class="welcome">¡Bienvenido a HuBiT! 🎉</h2>
+            <h2 class="welcome">Welcome to HuBiT! 🎉</h2>
             <p class="message">
-                Estás a un paso de acceder a la plataforma que conecta propietarios y administradores de fincas con los mejores proveedores de servicios.
+                You're one step away from accessing the platform that connects property owners and estate administrators with the best service providers.
             </p>
             
             <div style="text-align: center;">
                 <a href="{{ .ConfirmationURL }}" class="button">
-                    ✨ Confirmar mi cuenta
+                    ✨ Confirm My Account
                 </a>
             </div>
             
@@ -61,36 +61,36 @@
                 <div class="feature">
                     <div class="feature-icon">🏢</div>
                     <div>
-                        <strong>Gestiona tus propiedades</strong><br>
-                        <span style="color: #6b7280; font-size: 14px;">Administra todas tus propiedades desde un solo lugar</span>
+                        <strong>Manage Your Properties</strong><br>
+                        <span style="color: #6b7280; font-size: 14px;">Administrate all your properties from one single place</span>
                     </div>
                 </div>
                 
                 <div class="feature">
                     <div class="feature-icon">💰</div>
                     <div>
-                        <strong>Solicita presupuestos</strong><br>
-                        <span style="color: #6b7280; font-size: 14px;">Recibe ofertas competitivas de proveedores verificados</span>
+                        <strong>Request Quotes</strong><br>
+                        <span style="color: #6b7280; font-size: 14px;">Receive competitive offers from verified service providers</span>
                     </div>
                 </div>
                 
                 <div class="feature">
                     <div class="feature-icon">⭐</div>
                     <div>
-                        <strong>Sistema de valoraciones</strong><br>
-                        <span style="color: #6b7280; font-size: 14px;">Encuentra los mejores servicios basados en reseñas reales</span>
+                        <strong>Rating System</strong><br>
+                        <span style="color: #6b7280; font-size: 14px;">Find the best services based on real reviews</span>
                     </div>
                 </div>
             </div>
             
             <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 30px;">
-                Si no creaste esta cuenta, puedes ignorar este email con total seguridad.
+                If you didn't create this account, you can safely ignore this email.
             </p>
         </div>
         
         <div class="footer">
-            <p class="footer-text"><strong>HuBiT</strong> - La evolución en gestión de propiedades</p>
-            <p class="footer-text">© 2025 HuBiT. Todos los derechos reservados.</p>
+            <p class="footer-text"><strong>HuBiT</strong> - The evolution in property management</p>
+            <p class="footer-text">© 2025 HuBiT. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -99,9 +99,9 @@
 
 ---
 
-## 2. 🔐 Recuperación de Contraseña (Password Recovery)
+## 2. 🔐 Password Recovery
 
-**Subject:** Recupera tu contraseña de HuBiT
+**Subject:** Reset your HuBiT password
 
 **Body (HTML):**
 ```html
@@ -110,7 +110,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recuperar Contraseña - HuBiT</title>
+    <title>Password Recovery - HuBiT</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
         .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -129,35 +129,35 @@
     <div class="container">
         <div class="header">
             <h1 class="logo">HuBiT</h1>
-            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Conectando propietarios con servicios de calidad</p>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Connecting property owners with quality services</p>
         </div>
         
         <div class="content">
-            <h2 class="title">🔐 Recuperar Contraseña</h2>
+            <h2 class="title">🔐 Reset Your Password</h2>
             <p class="message">
-                Hemos recibido una solicitud para restablecer la contraseña de tu cuenta HuBiT.
+                We received a request to reset the password for your HuBiT account.
             </p>
             
             <div style="text-align: center;">
                 <a href="{{ .ConfirmationURL }}" class="button">
-                    🔑 Crear Nueva Contraseña
+                    🔑 Create New Password
                 </a>
             </div>
             
             <div class="security-note">
-                <strong>🛡️ Nota de seguridad:</strong><br>
-                Este enlace expirará en 1 hora por tu seguridad. Si no solicitaste este cambio, ignora este email y tu contraseña permanecerá sin cambios.
+                <strong>🛡️ Security Note:</strong><br>
+                This link will expire in 1 hour for your security. If you didn't request this change, ignore this email and your password will remain unchanged.
             </div>
             
             <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 30px;">
-                Si tienes problemas con el enlace, copia y pega esta URL en tu navegador:<br>
+                If you're having trouble with the link, copy and paste this URL into your browser:<br>
                 <span style="word-break: break-all;">{{ .ConfirmationURL }}</span>
             </p>
         </div>
         
         <div class="footer">
-            <p class="footer-text"><strong>HuBiT</strong> - La evolución en gestión de propiedades</p>
-            <p class="footer-text">© 2025 HuBiT. Todos los derechos reservados.</p>
+            <p class="footer-text"><strong>HuBiT</strong> - The evolution in property management</p>
+            <p class="footer-text">© 2025 HuBiT. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -166,9 +166,9 @@
 
 ---
 
-## 3. ✉️ Cambio de Email (Email Change)
+## 3. ✉️ Email Change Confirmation
 
-**Subject:** Confirma tu nuevo email en HuBiT
+**Subject:** Confirm your new email address on HuBiT
 
 **Body (HTML):**
 ```html
@@ -177,7 +177,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmar Nuevo Email - HuBiT</title>
+    <title>Confirm New Email - HuBiT</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
         .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -195,29 +195,29 @@
     <div class="container">
         <div class="header">
             <h1 class="logo">HuBiT</h1>
-            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Conectando propietarios con servicios de calidad</p>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Connecting property owners with quality services</p>
         </div>
         
         <div class="content">
-            <h2 class="title">✉️ Confirmar Nuevo Email</h2>
+            <h2 class="title">✉️ Confirm New Email Address</h2>
             <p class="message">
-                Has solicitado cambiar tu dirección de email en HuBiT. Para completar el cambio, confirma tu nueva dirección.
+                You've requested to change your email address on HuBiT. To complete the change, please confirm your new address.
             </p>
             
             <div style="text-align: center;">
                 <a href="{{ .ConfirmationURL }}" class="button">
-                    ✅ Confirmar Nuevo Email
+                    ✅ Confirm New Email
                 </a>
             </div>
             
             <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 30px;">
-                Si no solicitaste este cambio, ignora este email y tu dirección actual permanecerá sin cambios.
+                If you didn't request this change, ignore this email and your current address will remain unchanged.
             </p>
         </div>
         
         <div class="footer">
-            <p class="footer-text"><strong>HuBiT</strong> - La evolución en gestión de propiedades</p>
-            <p class="footer-text">© 2025 HuBiT. Todos los derechos reservados.</p>
+            <p class="footer-text"><strong>HuBiT</strong> - The evolution in property management</p>
+            <p class="footer-text">© 2025 HuBiT. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -226,9 +226,9 @@
 
 ---
 
-## 4. 🔐 Login Mágico (Magic Link)
+## 4. 🔐 Magic Link Login
 
-**Subject:** Tu enlace de acceso a HuBiT
+**Subject:** Your HuBiT access link
 
 **Body (HTML):**
 ```html
@@ -237,7 +237,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Directo - HuBiT</title>
+    <title>Direct Access - HuBiT</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
         .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -255,29 +255,29 @@
     <div class="container">
         <div class="header">
             <h1 class="logo">HuBiT</h1>
-            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Conectando propietarios con servicios de calidad</p>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 16px;">Connecting property owners with quality services</p>
         </div>
         
         <div class="content">
-            <h2 class="title">🔐 Acceso Directo a HuBiT</h2>
+            <h2 class="title">🔐 Direct Access to HuBiT</h2>
             <p class="message">
-                Usa este enlace seguro para acceder directamente a tu cuenta sin necesidad de contraseña.
+                Use this secure link to access your account directly without needing a password.
             </p>
             
             <div style="text-align: center;">
                 <a href="{{ .ConfirmationURL }}" class="button">
-                    🚀 Acceder a HuBiT
+                    🚀 Access HuBiT
                 </a>
             </div>
             
             <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 30px;">
-                Este enlace expirará en 1 hora por tu seguridad. Si no solicitaste este acceso, ignora este email.
+                This link will expire in 1 hour for your security. If you didn't request this access, ignore this email.
             </p>
         </div>
         
         <div class="footer">
-            <p class="footer-text"><strong>HuBiT</strong> - La evolución en gestión de propiedades</p>
-            <p class="footer-text">© 2025 HuBiT. Todos los derechos reservados.</p>
+            <p class="footer-text"><strong>HuBiT</strong> - The evolution in property management</p>
+            <p class="footer-text">© 2025 HuBiT. All rights reserved.</p>
         </div>
     </div>
 </body>
@@ -286,38 +286,38 @@
 
 ---
 
-## 📋 Instrucciones de Configuración
+## 📋 Configuration Instructions
 
-### Paso 1: Acceder a Email Templates
-1. Ve a https://djkrzbmgzfwagmripozi.supabase.co
-2. Panel izquierdo → **Authentication**
-3. Pestaña → **Email Templates**
+### Step 1: Access Email Templates
+1. Go to https://djkrzbmgzfwagmripozi.supabase.co
+2. Left panel → **Authentication**
+3. Tab → **Email Templates**
 
-### Paso 2: Personalizar cada Template
-1. Selecciona **"Confirm signup"**
-   - Copia y pega el **Subject** y **Body** del template 1
-2. Selecciona **"Reset password"**
-   - Copia y pega el **Subject** y **Body** del template 2
-3. Selecciona **"Change email address"**
-   - Copia y pega el **Subject** y **Body** del template 3
-4. Selecciona **"Magic Link"**
-   - Copia y pega el **Subject** y **Body** del template 4
+### Step 2: Customize Each Template
+1. Select **"Confirm signup"**
+   - Copy and paste the **Subject** and **Body** from template 1
+2. Select **"Reset password"**
+   - Copy and paste the **Subject** and **Body** from template 2
+3. Select **"Change email address"**
+   - Copy and paste the **Subject** and **Body** from template 3
+4. Select **"Magic Link"**
+   - Copy and paste the **Subject** and **Body** from template 4
 
-### Paso 3: Guardar Cambios
-- Haz clic en **"Save"** en cada template
-- Los cambios se aplicarán inmediatamente
+### Step 3: Save Changes
+- Click **"Save"** on each template
+- Changes will be applied immediately
 
-### Paso 4: Probar
-- Registra un nuevo usuario para probar el email de confirmación
-- Los nuevos emails tendrán el branding y funcionalidad de HuBiT
+### Step 4: Test
+- Register a new user to test the confirmation email
+- The new emails will have HuBiT branding and functionality
 
 ---
 
-## ✅ Resultado Final
+## ✅ Final Result
 
-Los usuarios recibirán emails profesionales que:
-- ✨ Muestran el branding de HuBiT
-- 🏢 Explican las funcionalidades reales de la plataforma
-- 🎨 Tienen diseño moderno y responsive
-- 🔒 Mantienen toda la seguridad de Supabase
-- 📱 Se ven perfectos en móvil y desktop
+Users will receive professional emails that:
+- ✨ Display HuBiT branding
+- 🏢 Explain the platform's real functionality in English
+- 🎨 Have modern and responsive design
+- 🔒 Maintain all Supabase security features
+- 📱 Look perfect on mobile and desktop
