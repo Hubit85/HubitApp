@@ -327,17 +327,26 @@ export class SupabaseServiceCategoryService {
       const { data, error } = await supabase.from('service_categories').select('*');
       if (error) throw error;
   
-      const updates: { id: string; emergency_available: boolean; }[] = [];
-      data.forEach(category => {
-        const hasEmergencySubcategory = data.some(sub => sub.parent_id === category.id && sub.emergency_available);
-        if (hasEmergencySubcategory && !category.emergency_available) {
-          updates.push({ id: category.id, emergency_available: true });
-        }
-      });
+      const updates: Array<{ id: string; emergency_available: boolean }> = [];
+      
+      if (data && Array.isArray(data)) {
+        data.forEach(category => {
+          const hasEmergencySubcategory = data.some(sub => sub.parent_id === category.id && sub.emergency_available);
+          if (hasEmergencySubcategory && !category.emergency_available) {
+            updates.push({ id: category.id, emergency_available: true });
+          }
+        });
+      }
   
       if (updates.length > 0) {
-        const { error: updateError } = await supabase.from('service_categories').upsert(updates);
-        if (updateError) throw updateError;
+        // Use individual updates to avoid type issues
+        for (const update of updates) {
+          const { error: updateError } = await supabase
+            .from('service_categories')
+            .update({ emergency_available: update.emergency_available })
+            .eq('id', update.id);
+          if (updateError) throw updateError;
+        }
       }
     } catch (error) {
       console.error("Error initializing default categories:", error);

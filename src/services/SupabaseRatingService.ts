@@ -238,7 +238,7 @@ export class SupabaseRatingService {
     const stats = {
       totalRatings: ratings.length,
       averageRating: 0,
-      ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+      ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as { [key: number]: number },
       averageServiceQuality: 0,
       averagePunctuality: 0,
       averageCommunication: 0,
@@ -266,7 +266,8 @@ export class SupabaseRatingService {
 
     // Calculate rating distribution
     ratings.forEach(rating => {
-      stats.ratingDistribution[rating.rating] = (stats.ratingDistribution[rating.rating] || 0) + 1;
+      const ratingValue = rating.rating as keyof typeof stats.ratingDistribution;
+      stats.ratingDistribution[ratingValue] = (stats.ratingDistribution[ratingValue] || 0) + 1;
     });
 
     return stats;
@@ -439,12 +440,12 @@ export class SupabaseRatingService {
   }> {
     const ratings = await this.getServiceProviderRatings(serviceProviderId);
 
-    const ratingCounts: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const ratingCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     let totalRatings = 0;
 
     for (const rating of ratings) {
       if (rating.rating >= 1 && rating.rating <= 5) {
-        ratingCounts[rating.rating as keyof typeof ratingCounts]++;
+        ratingCounts[rating.rating] = (ratingCounts[rating.rating] || 0) + 1;
         totalRatings++;
       }
     }

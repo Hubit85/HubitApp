@@ -97,7 +97,7 @@ export class SupabaseConversationService {
       throw new Error(error.message);
     }
 
-    return data || [];
+    return (data as any[]) || [];
   }
 
   static async deleteConversation(id: string): Promise<void> {
@@ -181,7 +181,11 @@ export class SupabaseConversationService {
   }
 
   static async updateLastMessage(conversationId: string, message: string, senderId: string): Promise<void> {
-    const conversation = await this.getConversation(conversationId);
+    const conversation = await this.getConversationById(conversationId);
+    
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
     
     // Determine if sender is user or provider
     const isUserSender = senderId === conversation.user_id;
@@ -305,7 +309,12 @@ export class SupabaseConversationService {
   }
 
   static async markConversationAsRead(conversationId: string, userId: string): Promise<void> {
-    const conversation = await this.getConversation(conversationId);
+    const conversation = await this.getConversationById(conversationId);
+    
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+    
     const isUser = userId === conversation.user_id;
 
     // Mark all unread messages as read
@@ -591,9 +600,13 @@ export class SupabaseConversationService {
     return { error };
   }
 
+  static async getConversation(conversationId: string): Promise<ConversationWithDetails | null> {
+    return this.getConversationById(conversationId);
+  }
+
   static getParticipantDetails(conversation: ConversationWithDetails, currentUserId: string) {
     const isUser = conversation.user_id === currentUserId;
-    const otherParticipant = isUser ? conversation.service_provider?.profiles : conversation.user;
+    const otherParticipant = isUser ? conversation.service_provider : conversation.user;
     
     return {
       isUser,

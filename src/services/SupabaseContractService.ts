@@ -84,11 +84,8 @@ export class SupabaseContractService {
             email
           )
         ),
-        work_sessions: {
-          select: '*'
-        },
-        ratings: {
-        }
+        work_sessions (*),
+        ratings (*)
       `)
       .eq("id", id)
       .single();
@@ -97,7 +94,7 @@ export class SupabaseContractService {
       throw new Error(error.message);
     }
 
-    return data;
+    return data as ContractWithDetails;
   }
 
   static async getUserContracts(userId: string): Promise<ContractWithDetails[]> {

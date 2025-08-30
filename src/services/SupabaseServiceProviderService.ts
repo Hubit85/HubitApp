@@ -65,7 +65,7 @@ export class SupabaseServiceProviderService {
       throw new Error(error.message);
     }
 
-    return data;
+    return data as ServiceProviderWithRatings;
   }
 
   static async getServiceProviderByUserId(userId: string): Promise<ServiceProvider | null> {

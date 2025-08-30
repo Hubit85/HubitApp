@@ -56,13 +56,48 @@ export default function DatabaseSetupNotice() {
 
   const checkDatabaseStatus = async () => {
     try {
-      setChecking(true);
-      const tables = ['profiles', 'properties', 'budget_requests', 'service_categories', 'service_providers'];
-      const checks = await Promise.all(
-        tables.map(table => supabase.from(table as any).select('count').limit(1))
-      );
+      setDatabaseStatus(prev => ({ ...prev, loading: true, error: null }));
       
-      const missingTables = checks
+      // Check basic connectivity
+      const { error: connectionError } = await supabase.from('profiles').select('count').limit(1);
+      
+      if (connectionError) {
+        setDatabaseStatus({
+          isConnected: false,
+          isConfigured: false,
+          tables: expectedTables.map(table => ({ ...table, exists: false })),
+          loading: false,
+          error: connectionError.message
+        });
+        return;
+      }
+
+      // Check each table
+      const tableChecks = await Promise.allSettled(
+        expectedTables.map(async (table) => {
+          const { error } = await supabase.from(table.name as any).select('count').limit(1);
+          return { ...table, exists: !error };
+        })
+      );
+
+      const tables = tableChecks.map((result, index) => {
+        if (result.status === 'fulfilled') {
+          return result.value;
+        }
+        return { ...expectedTables[index], exists: false };
+      });
+
+      const configuredCount = tables.filter(t => t.exists).length;
+      const isConfigured = configuredCount >= expectedTables.length * 0.8; // 80% of tables must exist
+
+      setDatabaseStatus({
+        isConnected: true,
+        isConfigured,
+        tables,
+        loading: false,
+        error: null
+      });
+      
     } catch (error) {
       console.error('Database check failed:', error);
       setDatabaseStatus({

@@ -153,7 +153,7 @@ export class SupabasePropertyService {
     return data || [];
   }
 
-  static async getNearbyProperties(latitude: number, longitude: number, radius: number) {
+  static async getNearbyProperties(latitude: number, longitude: number, radius: number): Promise<Property[]> {
     try {
       const { data, error } = await supabase.rpc('properties_near_location' as any, {
         lat: latitude,
@@ -164,10 +164,10 @@ export class SupabasePropertyService {
       if (error) {
         // Fallback to simple query if RPC function doesn't exist
         console.warn("Geographic search not available, using simple query");
-        return this.getUserProperties(""); // Return empty for now
+        return [];
       }
 
-      return data || [];
+      return (data as Property[]) || [];
     } catch (error) {
       console.error("Error in getNearbyProperties:", error);
       return [];
