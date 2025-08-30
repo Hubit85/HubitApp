@@ -261,7 +261,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('❌ API: RESEND_API_KEY not configured or empty');
         return res.status(200).json({
           success: true,
-          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: Falta configurar RESEND_API_KEY`,
+          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: Missing: RESEND_API_KEY`,
+          requiresVerification: true
+        });
+      }
+
+      // Validar que la clave de Resend tenga el formato correcto
+      if (!RESEND_API_KEY.startsWith('re_')) {
+        console.error('❌ API: Invalid RESEND_API_KEY format - should start with "re_"');
+        return res.status(200).json({
+          success: true,
+          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: Invalid API key format`,
           requiresVerification: true
         });
       }
@@ -374,11 +384,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           statusText: emailResponse.statusText,
           data: responseData
         });
+
+        // Proporcionar mensajes más específicos basados en el error de Resend
+        let errorMessage = `Error ${emailResponse.status}: ${responseData.message || emailResponse.statusText}`;
+        
+        if (emailResponse.status === 401) {
+          errorMessage = "Invalid API key - La clave de Resend no es válida o ha expirado";
+        } else if (emailResponse.status === 403) {
+          errorMessage = "Forbidden - Permisos insuficientes en la API de Resend";
+        } else if (emailResponse.status === 422) {
+          errorMessage = "Validation error - Los datos del email son incorrectos";
+        } else if (responseData.message) {
+          errorMessage = responseData.message;
+        }
+
         return res.status(200).json({
           success: true,
-          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: ${responseData.message || `Error ${emailResponse.status}`}`,
+          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: ${errorMessage}`,
           requiresVerification: true,
-          emailError: responseData
+          emailError: {
+            status: emailResponse.status,
+            error: responseData
+          }
         });
       }
 
@@ -398,9 +425,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         stack: emailError instanceof Error ? emailError.stack : undefined
       });
       
+      let errorMessage = "Error desconocido";
+      if (emailError instanceof Error) {
+        if (emailError.message.includes('fetch')) {
+          errorMessage = "No se pudo conectar con el servicio de email";
+        } else {
+          errorMessage = emailError.message;
+        }
+      }
+
       return res.status(200).json({
         success: true,
-        message: `Rol creado correctamente, pero hubo un problema al enviar el email de verificación: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}`,
+        message: `Rol creado correctamente, pero hubo un problema al enviar el email de verificación: ${errorMessage}`,
         requiresVerification: true
       });
     }
