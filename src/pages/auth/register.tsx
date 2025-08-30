@@ -55,9 +55,8 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent any submission if not in idle state
-    if (registrationState !== 'idle') {
-      console.log("Not in idle state, preventing submission");
+    // Prevent multiple submissions
+    if (isWorking) {
       return;
     }
     
@@ -125,7 +124,7 @@ export default function RegisterPage() {
             setRegistrationState('idle');
             setError("Error durante la redirección. Tu cuenta fue creada exitosamente. Puedes iniciar sesión en /auth/login");
           });
-        }, 1000); // 1 second delay to show the success message
+        }, 1000);
         
         return;
       }
