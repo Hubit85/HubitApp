@@ -169,36 +169,53 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
+        setLoading(false);
         return { error: error.message };
       }
 
-      if (data.user && databaseConnected) {
-        try {
-          // Try to create profile in database
-          const profileData: ProfileInsert = {
-            id: data.user.id,
-            email: data.user.email!,
-            ...userData,
+      if (data.user) {
+        // Check if we need email confirmation
+        if (!data.session && data.user.email_confirmed_at === null) {
+          setLoading(false);
+          return { 
+            error: null, 
+            message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
           };
-
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .insert(profileData);
-
-          if (profileError) {
-            console.warn("Could not create profile in database:", profileError);
-            return { error: "Registration successful, but profile creation failed. Please contact support." };
-          }
-        } catch (profileError) {
-          console.warn("Could not create profile in database, but user was created successfully:", profileError);
         }
+
+        // If user is created and has session, try to create profile
+        if (data.session && databaseConnected) {
+          try {
+            const profileData: ProfileInsert = {
+              id: data.user.id,
+              email: data.user.email!,
+              ...userData,
+            };
+
+            const { error: profileError } = await supabase
+              .from("profiles")
+              .insert(profileData);
+
+            if (profileError) {
+              console.warn("Could not create profile in database:", profileError);
+              // Don't fail registration if profile creation fails
+              setLoading(false);
+              return { error: null };
+            }
+          } catch (profileError) {
+            console.warn("Could not create profile in database, but user was created successfully:", profileError);
+          }
+        }
+
+        setLoading(false);
+        return { error: null };
       }
 
-      return {};
-    } catch (error) {
-      return { error: "An unexpected error occurred during registration" };
-    } finally {
       setLoading(false);
+      return { error: "Error durante el registro. Por favor, inténtalo de nuevo." };
+    } catch (error) {
+      setLoading(false);
+      return { error: "Error inesperado durante el registro" };
     }
   };
 

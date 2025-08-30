@@ -38,9 +38,12 @@ export default function RegisterPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      router.push("/dashboard");
+      // Only redirect if we're not currently in the registration process
+      if (!isLoading) {
+        router.push("/dashboard");
+      }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isLoading]);
 
   // Password validation
   useEffect(() => {
@@ -89,13 +92,19 @@ export default function RegisterPage() {
       
       if (result.error) {
         setError(result.error);
+        setIsLoading(false);
       } else {
-        // Successful registration - redirect will happen via useEffect
-        router.push("/dashboard");
+        // Successful registration - show success message and redirect after a short delay
+        setError("");
+        
+        // Give user feedback about successful registration
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 1000);
       }
     } catch (err) {
-      setError("Error inesperado durante el registro");
-    } finally {
+      console.error("Registration error:", err);
+      setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
       setIsLoading(false);
     }
   };
@@ -336,12 +345,12 @@ export default function RegisterPage() {
                 <Button
                   type="submit"
                   disabled={isLoading || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
-                  className="w-full h-12 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                  className="w-full h-12 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Creando cuenta...
+                      {user ? "Redirigiendo..." : "Creando cuenta..."}
                     </>
                   ) : (
                     <>
