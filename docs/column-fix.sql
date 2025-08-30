@@ -57,6 +57,20 @@ BEGIN
     END IF;
 END $$;
 
+-- Verificar y añadir columna property_status a la tabla properties si no existe
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'properties' AND column_name = 'property_status'
+    ) THEN
+        ALTER TABLE properties ADD COLUMN property_status TEXT DEFAULT 'active' CHECK (property_status IN ('active', 'inactive', 'maintenance'));
+        RAISE NOTICE '✅ Columna property_status añadida a la tabla properties';
+    ELSE
+        RAISE NOTICE '✅ La columna property_status ya existe en la tabla properties';
+    END IF;
+END $$;
+
 -- Verificar todas las columnas críticas
 DO $$
 DECLARE
@@ -95,6 +109,14 @@ BEGIN
     IF table_exists THEN
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'service_categories' AND column_name = 'is_active') THEN
             missing_columns := missing_columns || 'service_categories.is_active, ';
+        END IF;
+    END IF;
+
+    -- Verificar tabla properties
+    SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'properties') INTO table_exists;
+    IF table_exists THEN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'properties' AND column_name = 'property_status') THEN
+            missing_columns := missing_columns || 'properties.property_status, ';
         END IF;
     END IF;
 
