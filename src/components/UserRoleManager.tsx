@@ -16,7 +16,7 @@ export default function UserRoleManager() {
   const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // ARREGLO: Iniciar sin mensaje de error
   const [successMessage, setSuccessMessage] = useState("");
   const [showAddRoleModal, setShowAddRoleModal] = useState(false);
   const [newRoleType, setNewRoleType] = useState<UserRole['role_type'] | "">("");
@@ -24,6 +24,9 @@ export default function UserRoleManager() {
 
   useEffect(() => {
     if (user) {
+      // ARREGLO: Limpiar mensajes al cargar
+      setError("");
+      setSuccessMessage("");
       loadUserRoles();
     }
   }, [user]);
