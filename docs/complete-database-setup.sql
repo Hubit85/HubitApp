@@ -394,7 +394,11 @@ CREATE TABLE notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-RAISE NOTICE '✅ Todas las tablas creadas exitosamente';
+-- Mensaje informativo sobre creación de tablas
+DO $$
+BEGIN
+    RAISE NOTICE '✅ Todas las tablas creadas exitosamente';
+END $$;
 
 -- =============================================================================
 -- PASO 3: CONFIGURAR RLS Y POLÍTICAS
@@ -418,7 +422,10 @@ ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE emergency_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
-RAISE NOTICE '🛡️ RLS habilitado en todas las tablas';
+DO $$
+BEGIN
+    RAISE NOTICE '🛡️ RLS habilitado en todas las tablas';
+END $$;
 
 -- =============================================================================
 -- PASO 4: CREAR ÍNDICES
@@ -461,7 +468,10 @@ CREATE INDEX idx_ratings_service_provider_id ON ratings(service_provider_id);
 CREATE INDEX idx_ratings_user_id ON ratings(user_id);
 CREATE INDEX idx_ratings_verified ON ratings(is_verified);
 
-RAISE NOTICE '⚡ Índices creados para óptimo rendimiento';
+DO $$
+BEGIN
+    RAISE NOTICE '⚡ Índices creados para óptimo rendimiento';
+END $$;
 
 -- =============================================================================
 -- PASO 5: INSERTAR CATEGORÍAS DE SERVICIOS
@@ -481,7 +491,10 @@ INSERT INTO service_categories (id, name, description, parent_id, icon, color, s
 ('550e8400-e29b-41d4-a716-446655440010', 'Techado', 'Reparación y mantenimiento de techos', NULL, 'Home', '#0F172A', 10, true)
 ON CONFLICT (id) DO NOTHING;
 
-RAISE NOTICE '✅ Categorías de servicios insertadas';
+DO $$
+BEGIN
+    RAISE NOTICE '✅ Categorías de servicios insertadas';
+END $$;
 
 -- =============================================================================
 -- PASO 6: CREAR FUNCIONES Y TRIGGERS
@@ -524,7 +537,10 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
-RAISE NOTICE '🔄 Funciones y triggers configurados';
+DO $$
+BEGIN
+    RAISE NOTICE '🔄 Funciones y triggers configurados';
+END $$;
 
 -- =============================================================================
 -- VERIFICACIÓN FINAL COMPLETA
@@ -533,7 +549,6 @@ RAISE NOTICE '🔄 Funciones y triggers configurados';
 DO $$
 DECLARE
     total_tables INTEGER;
-    total_columns INTEGER;
     categories_count INTEGER;
 BEGIN
     -- Contar tablas
