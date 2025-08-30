@@ -147,9 +147,6 @@ export default function RegisterPage() {
     { value: "property_administrator", label: "Administrador de Fincas", description: "Gestión de propiedades" }
   ];
 
-  // Define isWorking variable correctly
-  const isWorking = registrationState === 'submitting' || registrationState === 'redirecting';
-
   // Show redirecting screen
   if (registrationState === 'redirecting') {
     return (
@@ -254,7 +251,7 @@ export default function RegisterPage() {
                       placeholder="Juan Pérez"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isWorking}
+                      disabled={registrationState === 'submitting' || registrationState === 'redirecting'}
                     />
                   </div>
                 </div>
@@ -274,7 +271,7 @@ export default function RegisterPage() {
                       placeholder="tu@email.com"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isWorking}
+                      disabled={registrationState === 'submitting' || registrationState === 'redirecting'}
                     />
                   </div>
                 </div>
@@ -293,7 +290,7 @@ export default function RegisterPage() {
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                       placeholder="+34 600 000 000"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
-                      disabled={isWorking}
+                      disabled={registrationState === 'submitting' || registrationState === 'redirecting'}
                     />
                   </div>
                 </div>
@@ -303,7 +300,7 @@ export default function RegisterPage() {
                   <Label className="text-sm font-medium text-neutral-700">
                     Tipo de usuario
                   </Label>
-                  <Select value={formData.user_type} onValueChange={(value) => handleInputChange("user_type", value)} disabled={isWorking}>
+                  <Select value={formData.user_type} onValueChange={(value) => handleInputChange("user_type", value)} disabled={registrationState === 'submitting' || registrationState === 'redirecting'}>
                     <SelectTrigger className="h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20">
                       <SelectValue placeholder="Selecciona tu perfil" />
                     </SelectTrigger>
@@ -335,13 +332,13 @@ export default function RegisterPage() {
                       placeholder="••••••••"
                       className="pl-10 pr-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isWorking}
+                      disabled={registrationState === 'submitting' || registrationState === 'redirecting'}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                      disabled={isWorking}
+                      disabled={registrationState === 'submitting' || registrationState === 'redirecting'}
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -385,13 +382,13 @@ export default function RegisterPage() {
                       placeholder="••••••••"
                       className="pl-10 pr-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isWorking}
+                      disabled={registrationState === 'submitting' || registrationState === 'redirecting'}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                      disabled={isWorking}
+                      disabled={registrationState === 'submitting' || registrationState === 'redirecting'}
                     >
                       {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -403,7 +400,7 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  disabled={isWorking || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
+                  disabled={registrationState === 'submitting' || registrationState === 'redirecting' || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
                   className="w-full h-12 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {registrationState === 'submitting' ? (
