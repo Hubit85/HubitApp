@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +33,7 @@ export default function RegisterPage() {
     number: false
   });
 
-  const { user, loading } = useSupabaseAuth();
+  const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
 
   // Password validation
@@ -47,12 +46,18 @@ export default function RegisterPage() {
     });
   }, [formData.password]);
 
-  // Simple redirect when user is authenticated
+  // Redirect logic - simplified and more robust
   useEffect(() => {
-    if (user && !loading) {
-      router.push("/dashboard");
+    // Only redirect if we have a confirmed user and we're not in the middle of submitting
+    if (user && !loading && !isSubmitting && !error && !successMessage) {
+      console.log("User authenticated via useEffect, redirecting to dashboard");
+      const timer = setTimeout(() => {
+        router.push("/dashboard");
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-  }, [user, loading, router]);
+  }, [user, loading, isSubmitting, error, successMessage, router]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -62,13 +67,18 @@ export default function RegisterPage() {
     e.preventDefault();
     
     // Prevent double submission
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      console.log("Already submitting, ignoring");
+      return;
+    }
     
     setIsSubmitting(true);
     setError("");
     setSuccessMessage("");
 
     try {
+      console.log("Starting registration validation...");
+
       // Validation
       if (formData.password !== formData.confirmPassword) {
         setError("Las contraseñas no coinciden");
@@ -85,49 +95,51 @@ export default function RegisterPage() {
         return;
       }
 
-      console.log("Starting registration...");
+      console.log("Validation passed, calling signUp...");
 
-      // Direct registration using Supabase client
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.full_name,
-            user_type: formData.user_type,
-            phone: formData.phone,
-          }
-        }
+      // Use the context signUp method
+      const result = await signUp(formData.email, formData.password, {
+        full_name: formData.full_name,
+        user_type: formData.user_type,
+        phone: formData.phone,
       });
 
-      if (signUpError) {
-        console.error("Registration error:", signUpError);
-        setError(signUpError.message);
+      console.log("SignUp result:", result);
+
+      // Handle different result scenarios
+      if (result.error) {
+        console.log("Registration failed with error:", result.error);
+        setError(result.error);
         return;
       }
 
-      if (data.user) {
-        // Check if email confirmation is required
-        if (!data.session && !data.user.email_confirmed_at) {
-          setSuccessMessage("¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.");
-          return;
-        }
-
-        // If we have a session, registration was successful
-        if (data.session) {
-          console.log("Registration successful, user logged in");
-          // Don't set any loading state - let the auth context handle the redirect
-          return;
-        }
+      if (result.message) {
+        console.log("Registration requires email confirmation");
+        setSuccessMessage(result.message);
+        return;
       }
 
-      setError("Error durante el registro. Por favor, inténtalo de nuevo.");
+      // If we reach here, registration was successful and user should be logged in
+      console.log("Registration successful, user should be authenticated now");
+      
+      // Instead of waiting for useEffect, directly redirect after a brief delay
+      setTimeout(() => {
+        if (!error && !successMessage) {
+          console.log("Performing manual redirect to dashboard");
+          router.push("/dashboard");
+        }
+      }, 100);
       
     } catch (err) {
       console.error("Registration exception:", err);
       setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
     } finally {
-      setIsSubmitting(false);
+      // Don't set isSubmitting to false immediately if we're redirecting
+      if (!successMessage) {
+        setTimeout(() => setIsSubmitting(false), 200);
+      } else {
+        setIsSubmitting(false);
+      }
     }
   };
 
