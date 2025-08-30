@@ -1,4 +1,3 @@
-
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabaseServer } from '@/lib/supabaseServer';
 
@@ -80,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // ⚠️ VALIDACIÓN SIMPLIFICADA DE VARIABLES DE ENTORNO
+    // VALIDACIÓN ROBUSTA DE VARIABLES DE ENTORNO
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
@@ -89,33 +88,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       hasSupabaseUrl: !!SUPABASE_URL,
       hasSupabaseServiceKey: !!SUPABASE_SERVICE_KEY,
       hasResendKey: !!RESEND_API_KEY,
-      supabaseUrlFormat: SUPABASE_URL ? 'valid' : 'missing',
-      serviceKeyFormat: SUPABASE_SERVICE_KEY ? `${SUPABASE_SERVICE_KEY.substring(0, 10)}...` : 'MISSING'
+      supabaseUrlFormat: SUPABASE_URL ? 'valid' : 'missing'
     });
 
-    // Verificar configuración básica de Supabase (más permisivo)
-    if (!SUPABASE_URL) {
-      console.error('❌ API: SUPABASE_URL missing');
+    // Verificar configuración básica de Supabase
+    if (!SUPABASE_URL || !SUPABASE_URL.includes('supabase.co')) {
+      console.error('❌ API: Invalid SUPABASE_URL');
       return res.status(500).json({
         success: false,
-        message: 'Error de configuración: URL de Supabase no configurada'
+        message: 'Error de configuración: URL de Supabase no válida'
       });
     }
 
-    if (!SUPABASE_SERVICE_KEY) {
-      console.error('❌ API: SUPABASE_SERVICE_ROLE_KEY missing');
+    if (!SUPABASE_SERVICE_KEY || SUPABASE_SERVICE_KEY.length < 100) {
+      console.error('❌ API: Invalid SUPABASE_SERVICE_ROLE_KEY');
       return res.status(500).json({
         success: false,
-        message: 'Error de configuración: Clave de servicio de Supabase no configurada'
+        message: 'Error de configuración: Clave de servicio de Supabase inválida'
       });
     }
 
     // Verificar que no sean claves placeholder
-    if (SUPABASE_SERVICE_KEY.includes('invalid') || SUPABASE_SERVICE_KEY.length < 50) {
-      console.error('❌ API: SUPABASE_SERVICE_ROLE_KEY appears to be invalid or placeholder');
+    if (SUPABASE_SERVICE_KEY.includes('invalid') || SUPABASE_SERVICE_KEY.includes('your-')) {
+      console.error('❌ API: SUPABASE_SERVICE_ROLE_KEY appears to be placeholder');
       return res.status(500).json({
         success: false,
-        message: 'Error de configuración: Clave de servicio de Supabase inválida'
+        message: 'Error de configuración: Clave de servicio de Supabase es un placeholder'
       });
     }
 
@@ -127,64 +125,75 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('📧 API: Email service status:', { resendAvailable });
 
-    // Verificar conexión a Supabase
+    // CONEXIÓN SUPABASE MEJORADA - Test más simple y robusto
     console.log('🔗 API: Testing Supabase connection...');
     
     try {
-      // Probar con una consulta muy simple primero
-      const { data: testData, error: connectionError } = await supabaseServer
-        .from('profiles')
+      // Test de conectividad básico - usar una consulta que debería funcionar siempre
+      const { data: healthCheck, error: healthError } = await supabaseServer
+        .from('auth.users')
         .select('id')
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
       
-      if (connectionError) {
-        console.error('❌ API: Supabase connection test failed:', {
-          code: connectionError.code,
-          message: connectionError.message,
-          details: connectionError.details
-        });
+      // Si hay error con auth.users, intentar con una consulta aún más básica
+      if (healthError) {
+        console.log('⚠️ API: Auth users check failed, trying basic connection test');
         
-        // Proporcionar mensajes más específicos basados en el tipo de error
-        let errorMessage = 'Error de conexión con la base de datos';
+        // Test de conectividad con rpc básico
+        const { data: rpcTest, error: rpcError } = await supabaseServer.rpc('version');
         
-        if (connectionError.code === 'PGRST301') {
-          errorMessage = 'Error de autenticación con la base de datos - verifica las claves API';
-        } else if (connectionError.code === 'PGRST000') {
-          errorMessage = 'Error de conexión - servidor de base de datos no disponible';
-        } else if (connectionError.message?.includes('JWT')) {
-          errorMessage = 'Token de autenticación inválido o expirado';
-        } else {
-          errorMessage = `Error de base de datos: ${connectionError.message}`;
+        if (rpcError) {
+          console.error('❌ API: All Supabase connection tests failed:', {
+            authError: healthError.message,
+            rpcError: rpcError.message
+          });
+          
+          // Determinar tipo de error más específico
+          let errorMessage = 'Error de base de datos';
+          
+          if (rpcError.message?.includes('JWT') || rpcError.message?.includes('authorization')) {
+            errorMessage = 'Invalid API key';
+          } else if (rpcError.message?.includes('network') || rpcError.message?.includes('connection')) {
+            errorMessage = 'Error de conexión con la base de datos';
+          } else {
+            errorMessage = `Error de base de datos: ${rpcError.message}`;
+          }
+          
+          return res.status(500).json({
+            success: false,
+            message: errorMessage
+          });
         }
-        
-        return res.status(500).json({
-          success: false,
-          message: errorMessage,
-          errorCode: connectionError.code
-        });
       }
       
       console.log('✅ API: Supabase connection successful');
+      
     } catch (connError) {
       console.error('❌ API: Supabase connection exception:', connError);
       return res.status(500).json({
         success: false,
-        message: `Error crítico de conexión: ${connError instanceof Error ? connError.message : 'Error desconocido'}`,
-        type: 'connection_error'
+        message: 'Error de base de datos: Invalid API key'
       });
     }
 
-    // Verificar si el usuario existe
+    // Verificar si el usuario existe en profiles
     console.log('👤 API: Validating user exists...');
     const { data: userProfile, error: userError } = await supabaseServer
       .from('profiles')
       .select('id, email, full_name')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
-    if (userError || !userProfile) {
+    if (userError) {
       console.error('❌ API: User validation failed:', userError);
+      return res.status(400).json({
+        success: false,
+        message: `Error al validar usuario: ${userError.message}`
+      });
+    }
+
+    if (!userProfile) {
+      console.error('❌ API: User not found in profiles');
       return res.status(400).json({
         success: false,
         message: 'Usuario no encontrado en el sistema'
@@ -203,7 +212,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .select('id, is_verified, role_type')
       .eq('user_id', userId)
       .eq('role_type', roleType)
-      .maybeSingle(); // Usar maybeSingle() en lugar de single()
+      .maybeSingle();
 
     if (checkError) {
       console.error('❌ API: Error checking existing roles:', checkError);
