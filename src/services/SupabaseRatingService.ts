@@ -94,14 +94,10 @@ export class SupabaseRatingService {
 
   // ===================== RATING QUERIES =====================
 
-  static async getUserRatingsGiven(userId: string): Promise<RatingWithDetails[]> {
+  static async getUserRatingsGiven(userId: string): Promise<Rating[]> {
     const { data, error } = await supabase
       .from("ratings")
-      .select(`
-        *,
-        contracts (title, id),
-        service_providers (company_name, id)
-      `)
+      .select("*")
       .eq("rated_by_user_id", userId)
       .order("created_at", { ascending: false });
 
@@ -109,17 +105,13 @@ export class SupabaseRatingService {
       throw new Error(error.message);
     }
 
-    return (data || []) as RatingWithDetails[];
+    return data || [];
   }
 
-  static async getServiceProviderRatings(serviceProviderId: string): Promise<RatingWithDetails[]> {
+  static async getServiceProviderRatings(serviceProviderId: string): Promise<Rating[]> {
     const { data, error } = await supabase
       .from("ratings")
-      .select(`
-        *,
-        contracts (title, id),
-        profiles (full_name, id)
-      `)
+      .select("*")
       .eq("service_provider_id", serviceProviderId)
       .eq("is_verified", true)
       .order("created_at", { ascending: false });
@@ -128,7 +120,7 @@ export class SupabaseRatingService {
       throw new Error(error.message);
     }
 
-    return (data || []) as RatingWithDetails[];
+    return data || [];
   }
 
   static async getContractRating(contractId: string): Promise<Rating | null> {
@@ -182,30 +174,11 @@ export class SupabaseRatingService {
     console.log(`Rating ${ratingId} flagged for: ${reason}`);
   }
 
-  static async addRatingResponse(ratingId: string, response: string): Promise<Rating> {
-    return this.updateRating(ratingId, { 
-      response_from_provider: response 
-    });
-  }
-
-  static async likeRating(ratingId: string, userId: string): Promise<Rating> {
-    const rating = await this.getRating(ratingId);
-    const currentLikes = rating.helpful_votes || 0;
-    
-    return this.updateRating(ratingId, { 
-      helpful_votes: currentLikes + 1 
-    });
-  }
-
-  static async reportRating(ratingId: string, userId: string, reason: string): Promise<void> {
-    // In a real implementation, create a report record
-    console.log(`Rating ${ratingId} reported by ${userId} for: ${reason}`);
-  }
-
   // ===================== STATISTICS & ANALYTICS =====================
 
   static async updateProviderRatingStats(serviceProviderId: string): Promise<void> {
     try {
+      // Calculate new rating statistics
       const { data: ratings, error } = await supabase
         .from("ratings")
         .select("rating")
@@ -217,19 +190,17 @@ export class SupabaseRatingService {
       }
 
       if (!ratings || ratings.length === 0) {
-        // Set to 0 if no ratings
         await supabase
           .from("service_providers")
           .update({
             average_rating: 0,
             ratings_count: 0
           })
-          .eq("id", serviceProviderId);
+          .eq("user_id", serviceProviderId);
         return;
       }
 
-      const totalRating = ratings.reduce((sum, r) => sum + r.rating, 0);
-      const averageRating = totalRating / ratings.length;
+      const averageRating = ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length;
 
       await supabase
         .from("service_providers")
@@ -237,7 +208,7 @@ export class SupabaseRatingService {
           average_rating: Math.round(averageRating * 100) / 100, // Round to 2 decimals
           ratings_count: ratings.length
         })
-        .eq("id", serviceProviderId);
+        .eq("user_id", serviceProviderId);
 
     } catch (error) {
       console.error("Error updating provider rating stats:", error);
@@ -279,44 +250,6 @@ export class SupabaseRatingService {
     return stats;
   }
 
-  static async getDetailedRatingMetrics(serviceProviderId: string): Promise<{
-    serviceQuality: number;
-    punctuality: number;
-    communication: number;
-    valueForMoney: number;
-    cleanliness: number;
-    overallSatisfaction: number;
-    wouldRecommend: number;
-  }> {
-    const ratings = await this.getServiceProviderRatings(serviceProviderId);
-    
-    if (ratings.length === 0) {
-      return {
-        serviceQuality: 0,
-        punctuality: 0,
-        communication: 0,
-        valueForMoney: 0,
-        cleanliness: 0,
-        overallSatisfaction: 0,
-        wouldRecommend: 0
-      };
-    }
-
-    // Since detailed metrics columns don't exist in current schema,
-    // we'll return the overall rating for all metrics
-    const averageRating = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
-
-    return {
-      serviceQuality: averageRating,
-      punctuality: averageRating,
-      communication: averageRating,
-      valueForMoney: averageRating,
-      cleanliness: averageRating,
-      overallSatisfaction: averageRating,
-      wouldRecommend: averageRating >= 4 ? 85 : averageRating >= 3 ? 65 : 35
-    };
-  }
-
   // ===================== SEARCH & FILTERS =====================
 
   static async searchRatings(filters?: {
@@ -327,15 +260,10 @@ export class SupabaseRatingService {
     verified?: boolean;
     contractId?: string;
     limit?: number;
-  }): Promise<RatingWithDetails[]> {
+  }): Promise<Rating[]> {
     let query = supabase
       .from("ratings")
-      .select(`
-        *,
-        contracts (title, id),
-        profiles (full_name, id),
-        service_providers (company_name, id)
-      `);
+      .select("*");
 
     if (filters?.serviceProviderId) {
       query = query.eq("service_provider_id", filters.serviceProviderId);
@@ -369,7 +297,7 @@ export class SupabaseRatingService {
       throw new Error(error.message);
     }
 
-    return (data || []) as RatingWithDetails[];
+    return data || [];
   }
 
   static async getRatingTrends(serviceProviderId: string, days: number = 30): Promise<{
@@ -471,15 +399,10 @@ export class SupabaseRatingService {
 
   // ===================== ADMIN FUNCTIONS =====================
 
-  static async getPendingVerificationRatings(): Promise<RatingWithDetails[]> {
+  static async getPendingVerificationRatings(): Promise<Rating[]> {
     const { data, error } = await supabase
       .from("ratings")
-      .select(`
-        *,
-        contracts (title, id),
-        profiles (full_name, id),
-        service_providers (company_name, id)
-      `)
+      .select("*")
       .eq("is_verified", false)
       .order("created_at", { ascending: false });
 
@@ -487,10 +410,10 @@ export class SupabaseRatingService {
       throw new Error(error.message);
     }
 
-    return (data || []) as RatingWithDetails[];
+    return data || [];
   }
 
-  static async getFlaggedRatings(): Promise<RatingWithDetails[]> {
+  static async getFlaggedRatings(): Promise<Rating[]> {
     // In a real implementation, you'd have a flags table
     // For now, return empty array
     return [];

@@ -10,6 +10,7 @@ import {
   Profile,
   ServiceProvider
 } from "@/integrations/supabase/types";
+import { SupabaseBudgetService } from "./SupabaseBudgetService";
 
 type ContractWithProfiles = Contract & {
   clients: Pick<Profile, 'id' | 'full_name' | 'email' | 'phone'>;
@@ -56,7 +57,21 @@ export class SupabaseContractService {
     return data;
   }
 
-  static async getContract(id: string): Promise<ContractWithProfiles> {
+  static async getContract(id: string): Promise<Contract> {
+    const { data, error } = await supabase
+      .from("contracts")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
+  static async getContractWithProfiles(id: string): Promise<ContractWithProfiles | null> {
     const { data, error } = await supabase
       .from("contracts")
       .select(`
@@ -78,30 +93,25 @@ export class SupabaseContractService {
       .single();
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       throw new Error(error.message);
     }
 
-    return data as ContractWithProfiles;
+    // Transform the data to match our type
+    const contract = data as any;
+    return {
+      ...contract,
+      clients: contract.profiles,
+      providers: contract.service_providers
+    } as ContractWithProfiles;
   }
 
-  static async getUserContracts(userId: string): Promise<ContractWithProfiles[]> {
+  static async getUserContracts(userId: string): Promise<Contract[]> {
     const { data, error } = await supabase
       .from("contracts")
-      .select(`
-        *,
-        profiles!contracts_client_id_fkey (
-          id,
-          full_name,
-          email,
-          phone
-        ),
-        service_providers (
-          id,
-          company_name,
-          email,
-          phone
-        )
-      `)
+      .select("*")
       .eq("client_id", userId)
       .order("created_at", { ascending: false });
 
@@ -109,27 +119,13 @@ export class SupabaseContractService {
       throw new Error(error.message);
     }
 
-    return (data || []) as ContractWithProfiles[];
+    return data || [];
   }
 
-  static async getProviderContracts(providerId: string): Promise<ContractWithProfiles[]> {
+  static async getProviderContracts(providerId: string): Promise<Contract[]> {
     const { data, error } = await supabase
       .from("contracts")
-      .select(`
-        *,
-        profiles!contracts_client_id_fkey (
-          id,
-          full_name,
-          email,
-          phone
-        ),
-        service_providers (
-          id,
-          company_name,
-          email,
-          phone
-        )
-      `)
+      .select("*")
       .eq("provider_id", providerId)
       .order("created_at", { ascending: false });
 
@@ -137,7 +133,7 @@ export class SupabaseContractService {
       throw new Error(error.message);
     }
 
-    return (data || []) as ContractWithProfiles[];
+    return data || [];
   }
 
   static async signContract(id: string, signature: string, signerType: 'client' | 'provider'): Promise<Contract> {
@@ -348,24 +344,10 @@ export class SupabaseContractService {
     minAmount?: number;
     maxAmount?: number;
     isProvider?: boolean;
-  }): Promise<ContractWithProfiles[]> {
+  }): Promise<Contract[]> {
     let query = supabase
       .from("contracts")
-      .select(`
-        *,
-        profiles!contracts_client_id_fkey (
-          id,
-          full_name,
-          email,
-          phone
-        ),
-        service_providers (
-          id,
-          company_name,
-          email,
-          phone
-        )
-      `);
+      .select("*");
 
     if (filters?.isProvider) {
       query = query.eq("provider_id", userId);
@@ -399,7 +381,7 @@ export class SupabaseContractService {
       throw new Error(error.message);
     }
 
-    return (data || []) as ContractWithProfiles[];
+    return data || [];
   }
 
   static async generateContractFromQuote(quoteId: string): Promise<Contract> {
