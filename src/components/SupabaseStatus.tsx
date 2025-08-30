@@ -3,43 +3,73 @@ import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Loader2, Database, User, Settings } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Database, User, Settings, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function SupabaseStatus() {
   const { user, profile, session, loading } = useSupabaseAuth();
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
-  const [dbStatus, setDbStatus] = useState<'checking' | 'ready' | 'error'>('checking');
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'not_configured'>('checking');
+  const [dbStatus, setDbStatus] = useState<'checking' | 'ready' | 'error' | 'not_configured'>('checking');
+
+  // Check if Supabase is configured
+  const isSupabaseConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && 
+                              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+                              process.env.NEXT_PUBLIC_SUPABASE_URL !== "" &&
+                              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== "";
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setConnectionStatus('not_configured');
+      setDbStatus('not_configured');
+      return;
+    }
+    
     checkConnection();
     checkDatabaseTables();
-  }, []);
+  }, [isSupabaseConfigured]);
 
   const checkConnection = async () => {
+    if (!isSupabaseConfigured) {
+      setConnectionStatus('not_configured');
+      return;
+    }
+
     try {
-      const { data, error } = await supabase.from('profiles').select('count').limit(1);
+      // Simple health check
+      const { error } = await supabase.from('profiles').select('count').limit(1);
       if (error) {
+        console.warn("Supabase connection check failed:", error.message);
         setConnectionStatus('error');
       } else {
         setConnectionStatus('connected');
       }
     } catch (error) {
+      console.warn("Supabase connection check exception:", error);
       setConnectionStatus('error');
     }
   };
 
   const checkDatabaseTables = async () => {
+    if (!isSupabaseConfigured) {
+      setDbStatus('not_configured');
+      return;
+    }
+
     try {
-      // Check if main tables exist by testing specific queries
-      const profileCheck = await supabase.from('profiles').select('count').limit(1);
-      const propertiesCheck = await supabase.from('properties').select('count').limit(1);
-      const budgetCheck = await supabase.from('budget_requests').select('count').limit(1);
+      // Check if main tables exist by testing specific queries with better error handling
+      const checks = await Promise.allSettled([
+        supabase.from('profiles').select('count').limit(1),
+        supabase.from('properties').select('count').limit(1),
+        supabase.from('budget_requests').select('count').limit(1)
+      ]);
       
-      const hasErrors = [profileCheck, propertiesCheck, budgetCheck].some(check => check.error !== null);
-      setDbStatus(hasErrors ? 'error' : 'ready');
+      const hasFailures = checks.some(result => result.status === 'rejected' || 
+        (result.status === 'fulfilled' && result.value.error));
+      
+      setDbStatus(hasFailures ? 'error' : 'ready');
     } catch (error) {
+      console.warn("Database tables check exception:", error);
       setDbStatus('error');
     }
   };
@@ -50,13 +80,21 @@ export default function SupabaseStatus() {
       case 'connected': 
       case 'ready': return <CheckCircle className="h-4 w-4 text-emerald-600" />;
       case 'error': return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'not_configured': return <AlertTriangle className="h-4 w-4 text-amber-600" />;
       default: return <XCircle className="h-4 w-4 text-gray-400" />;
     }
   };
 
   const getStatusBadge = (status: string, label: string) => {
-    const variant = status === 'connected' || status === 'ready' ? 'default' : 
-                   status === 'error' ? 'destructive' : 'secondary';
+    let variant: "default" | "secondary" | "destructive" | "outline" = "secondary";
+    
+    if (status === 'connected' || status === 'ready') {
+      variant = 'default';
+    } else if (status === 'error') {
+      variant = 'destructive';
+    } else if (status === 'not_configured') {
+      variant = 'outline';
+    }
     
     return (
       <Badge variant={variant} className="flex items-center gap-2">
@@ -65,6 +103,40 @@ export default function SupabaseStatus() {
       </Badge>
     );
   };
+
+  // Show configuration notice if Supabase is not set up
+  if (!isSupabaseConfigured) {
+    return (
+      <Card className="w-full max-w-2xl bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60 shadow-lg shadow-amber-900/5">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-6 w-6 text-amber-600" />
+            <div>
+              <CardTitle className="text-xl font-semibold text-amber-900">Supabase No Configurado</CardTitle>
+              <CardDescription className="text-amber-700">Se requiere configuración para funcionalidad completa</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 bg-amber-100/50 rounded-lg border border-amber-200">
+            <p className="text-sm text-amber-800 mb-3">
+              Para habilitar la funcionalidad completa de HuBiT, necesitas conectar Supabase:
+            </p>
+            <ul className="text-xs text-amber-700 space-y-1 ml-4 list-disc">
+              <li>Haz clic en el botón "Supabase" en la barra de navegación de Softgen</li>
+              <li>Sigue las instrucciones para conectar tu proyecto</li>
+              <li>Las variables de entorno se configurarán automáticamente</li>
+            </ul>
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-amber-600">
+              Mientras tanto, la aplicación funciona con datos locales simulados
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-2xl bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
