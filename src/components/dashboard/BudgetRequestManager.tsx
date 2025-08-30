@@ -375,7 +375,7 @@ export default function BudgetRequestManager() {
                     </Badge>
                     <div className="flex items-center gap-1 text-xs text-neutral-500">
                       <Calendar className="h-3 w-3" />
-                      <span>{new Date(request.created_at).toLocaleDateString()}</span>
+                      <span>{request.created_at ? new Date(request.created_at).toLocaleDateString() : 'Sin fecha'}</span>
                     </div>
                   </div>
                   

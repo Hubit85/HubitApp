@@ -33,7 +33,7 @@ export default function PropertyManager() {
     id: null as string | null,
     name: "",
     address: "",
-    property_type: "" as 'residential' | 'commercial' | 'mixed' | "",
+    property_type: "" as string,  // Allow any string to match database
     description: "",
     units_count: ""
   });
@@ -373,7 +373,7 @@ export default function PropertyManager() {
                   </div>
                   
                   <div className="text-xs text-neutral-500 mb-4">
-                    <span>Creado: {new Date(property.created_at).toLocaleDateString()}</span>
+                    <span>Creado: {property.created_at ? new Date(property.created_at).toLocaleDateString() : 'Sin fecha'}</span>
                   </div>
                   
                   <div className="flex gap-2">
