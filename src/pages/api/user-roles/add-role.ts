@@ -1,3 +1,4 @@
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabaseServer } from '@/lib/supabaseServer';
 
@@ -11,7 +12,7 @@ interface AddRoleRequestBody {
 function setCorsHeaders(res: NextApiResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 }
 
@@ -20,10 +21,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   setCorsHeaders(res);
   
   console.log('🚀 API: add-role endpoint called with method:', req.method);
+  console.log('🔧 API: Environment check:', {
+    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    hasSupabaseServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    hasResendKey: !!process.env.RESEND_API_KEY,
+    resendKeyFormat: process.env.RESEND_API_KEY ? `${process.env.RESEND_API_KEY.substring(0, 3)}...` : 'missing'
+  });
 
   // Manejar preflight OPTIONS
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(200).json({ message: 'OK' });
   }
 
   if (req.method !== 'POST') {
@@ -102,7 +109,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     try {
       const { data: testData, error: connectionError, count } = await supabaseServer
-        .from('user_roles')
+        .from('profiles')
         .select('id', { count: 'exact' })
         .limit(1);
       
@@ -119,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
       
-      console.log('✅ API: Supabase connection successful, found', count, 'total roles');
+      console.log('✅ API: Supabase connection successful, found', count, 'total profiles');
     } catch (connError) {
       console.error('❌ API: Supabase connection error:', connError);
       return res.status(500).json({
@@ -132,7 +139,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('👤 API: Validating user exists...');
     const { data: userProfile, error: userError } = await supabaseServer
       .from('profiles')
-      .select('id, email')
+      .select('id, email, full_name')
       .eq('id', userId)
       .single();
 
@@ -154,7 +161,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ API: User validated:', { 
       userId, 
-      hasEmail: !!userProfile.email 
+      hasEmail: !!userProfile.email,
+      hasName: !!userProfile.full_name
     });
 
     // Verificar si el usuario ya tiene este rol
@@ -259,10 +267,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       if (!RESEND_API_KEY || RESEND_API_KEY.trim().length === 0) {
         console.error('❌ API: RESEND_API_KEY not configured or empty');
+        console.error('❌ API: Please set RESEND_API_KEY in your environment variables');
+        console.error('❌ API: Go to https://resend.com/api-keys to get your API key');
         return res.status(200).json({
           success: true,
-          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: Missing: RESEND_API_KEY`,
-          requiresVerification: true
+          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: RESEND_API_KEY no configurada. Ve a tu configuración del proyecto en Softgen y añade RESEND_API_KEY=tu_clave_aqui`,
+          requiresVerification: true,
+          configurationRequired: true
         });
       }
 
@@ -271,13 +282,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('❌ API: Invalid RESEND_API_KEY format - should start with "re_"');
         return res.status(200).json({
           success: true,
-          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: Invalid API key format`,
-          requiresVerification: true
+          message: `Rol creado correctamente, pero la RESEND_API_KEY no es válida. Debe empezar con 're_'. Verifica tu configuración.`,
+          requiresVerification: true,
+          configurationRequired: true
         });
       }
 
+      // Construir URL del sitio
       const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
-      
       const verificationUrl = `${SITE_URL}/auth/verify-role?token=${verificationToken}`;
       const roleDisplayName = getRoleDisplayName(roleType);
       const currentYear = new Date().getFullYear();
@@ -301,7 +313,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     <div style="margin-bottom: 35px;">
       <p style="color: #475569; font-size: 18px; line-height: 1.7; margin-bottom: 20px;">
-        ¡Hola! Has solicitado agregar un nuevo rol a tu cuenta de HuBiT.
+        ¡Hola ${userProfile.full_name || 'Usuario'}! Has solicitado agregar un nuevo rol a tu cuenta de HuBiT.
       </p>
       
       <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #3b82f6;">
@@ -321,7 +333,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     <div style="text-align: center; margin: 40px 0;">
       <a href="${verificationUrl}" 
          style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%); color: white; padding: 18px 45px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 18px; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); transition: all 0.3s ease;">
-        Verificar Rol
+        Verificar Rol Ahora
       </a>
     </div>
 
@@ -351,8 +363,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 </div>
       `;
 
+      // Usar dominio de resend.dev que funciona sin verificación para pruebas
       const emailData = {
-        from: 'HuBiT <noreply@resend.dev>',
+        from: 'HuBiT <onboarding@resend.dev>',
         to: userEmail,
         subject: `Verificar tu nuevo rol en HuBiT - ${roleDisplayName}`,
         html: emailHtml
@@ -360,6 +373,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       console.log('📤 API: Sending email to:', userEmail);
       console.log('🔑 API: Using RESEND_API_KEY (first 10 chars):', RESEND_API_KEY.substring(0, 10) + '...');
+      console.log('📧 API: Email from:', emailData.from);
 
       const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -389,11 +403,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         let errorMessage = `Error ${emailResponse.status}: ${responseData.message || emailResponse.statusText}`;
         
         if (emailResponse.status === 401) {
-          errorMessage = "Invalid API key - La clave de Resend no es válida o ha expirado";
+          errorMessage = "Invalid API key - La clave de Resend no es válida o ha expirado. Ve a https://resend.com/api-keys para generar una nueva.";
         } else if (emailResponse.status === 403) {
-          errorMessage = "Forbidden - Permisos insuficientes en la API de Resend";
+          errorMessage = "Forbidden - Permisos insuficientes en la API de Resend. Verifica que tu clave tenga permisos de envío.";
         } else if (emailResponse.status === 422) {
-          errorMessage = "Validation error - Los datos del email son incorrectos";
+          errorMessage = "Validation error - Los datos del email son incorrectos. Verifica el dominio de envío.";
         } else if (responseData.message) {
           errorMessage = responseData.message;
         }
@@ -404,7 +418,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           requiresVerification: true,
           emailError: {
             status: emailResponse.status,
-            error: responseData
+            error: responseData,
+            suggestion: "Verifica tu configuración de Resend en https://resend.com/domains"
           }
         });
       }
@@ -413,7 +428,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return res.status(200).json({
         success: true,
-        message: `¡Éxito! Se ha enviado un email de verificación para tu nuevo rol de ${roleDisplayName}. Revisa tu bandeja de entrada y spam.`,
+        message: `¡Éxito! Se ha enviado un email de verificación para tu nuevo rol de ${roleDisplayName}. Revisa tu bandeja de entrada y carpeta de spam.`,
         requiresVerification: true,
         emailId: responseData.id
       });
@@ -428,7 +443,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       let errorMessage = "Error desconocido";
       if (emailError instanceof Error) {
         if (emailError.message.includes('fetch')) {
-          errorMessage = "No se pudo conectar con el servicio de email";
+          errorMessage = "No se pudo conectar con el servicio de email de Resend";
+        } else if (emailError.message.includes('network')) {
+          errorMessage = "Error de red al conectar con Resend";
         } else {
           errorMessage = emailError.message;
         }
@@ -437,7 +454,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({
         success: true,
         message: `Rol creado correctamente, pero hubo un problema al enviar el email de verificación: ${errorMessage}`,
-        requiresVerification: true
+        requiresVerification: true,
+        suggestion: "Verifica tu conexión a internet y la configuración de Resend"
       });
     }
 
