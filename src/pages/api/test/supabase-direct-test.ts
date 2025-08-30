@@ -31,7 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const testUser = {
       id: '00000000-0000-0000-0000-000000000001',
       email: 'test@example.com',
-      full_name: 'Test User'
+      full_name: 'Test User',
+      user_type: 'particular'
     };
 
     const { data: insertTest, error: insertError } = await supabaseServer
