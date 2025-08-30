@@ -152,79 +152,7 @@ CREATE TABLE IF NOT EXISTS quotes (
     UNIQUE(budget_request_id, service_provider_id)
 );
 
--- 7. Create invoices table
-CREATE TABLE IF NOT EXISTS invoices (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    contract_id UUID REFERENCES contracts(id) ON DELETE CASCADE,
-    quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-    service_provider_id UUID REFERENCES service_providers(id) ON DELETE CASCADE NOT NULL,
-    invoice_number TEXT NOT NULL UNIQUE,
-    amount DECIMAL(10,2) NOT NULL,
-    tax_amount DECIMAL(10,2) DEFAULT 0,
-    total_amount DECIMAL(10,2) NOT NULL,
-    currency TEXT DEFAULT 'EUR',
-    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'paid', 'overdue', 'cancelled')),
-    due_date DATE NOT NULL,
-    paid_date DATE,
-    description TEXT,
-    line_items JSONB,
-    payment_method TEXT,
-    payment_reference TEXT,
-    notes TEXT,
-    pdf_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 8. Create payments table
-CREATE TABLE IF NOT EXISTS payments (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    invoice_id UUID REFERENCES invoices(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-    service_provider_id UUID REFERENCES service_providers(id) ON DELETE CASCADE NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    currency TEXT DEFAULT 'EUR',
-    payment_method TEXT NOT NULL CHECK (payment_method IN ('stripe', 'paypal', 'bank_transfer', 'cash')),
-    payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'processing', 'completed', 'failed', 'refunded', 'cancelled')),
-    payment_intent_id TEXT,
-    transaction_id TEXT,
-    reference_number TEXT,
-    payment_date TIMESTAMP WITH TIME ZONE,
-    refunded_amount DECIMAL(10,2) DEFAULT 0,
-    refund_reason TEXT,
-    processing_fee DECIMAL(10,2) DEFAULT 0,
-    net_amount DECIMAL(10,2),
-    metadata JSONB,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 9. Create ratings table
-CREATE TABLE IF NOT EXISTS ratings (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    service_provider_id UUID REFERENCES service_providers(id) ON DELETE CASCADE NOT NULL,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-    quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL,
-    contract_id UUID REFERENCES contracts(id) ON DELETE SET NULL,
-    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    comment TEXT,
-    service_quality INTEGER CHECK (service_quality >= 1 AND service_quality <= 5),
-    punctuality INTEGER CHECK (punctuality >= 1 AND punctuality <= 5),
-    communication INTEGER CHECK (communication >= 1 AND communication <= 5),
-    value_for_money INTEGER CHECK (value_for_money >= 1 AND value_for_money <= 5),
-    cleanliness INTEGER CHECK (cleanliness >= 1 AND cleanliness <= 5),
-    would_recommend BOOLEAN,
-    images TEXT[],
-    response_from_provider TEXT,
-    is_verified BOOLEAN DEFAULT FALSE,
-    helpful_votes INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(service_provider_id, user_id, quote_id)
-);
-
--- 10. Create contracts table
+-- 7. Create contracts table
 CREATE TABLE IF NOT EXISTS contracts (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     quote_id UUID REFERENCES quotes(id) ON DELETE CASCADE NOT NULL,
@@ -250,6 +178,78 @@ CREATE TABLE IF NOT EXISTS contracts (
     dispute_reason TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 8. Create invoices table
+CREATE TABLE IF NOT EXISTS invoices (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    contract_id UUID REFERENCES contracts(id) ON DELETE CASCADE,
+    quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    service_provider_id UUID REFERENCES service_providers(id) ON DELETE CASCADE NOT NULL,
+    invoice_number TEXT NOT NULL UNIQUE,
+    amount DECIMAL(10,2) NOT NULL,
+    tax_amount DECIMAL(10,2) DEFAULT 0,
+    total_amount DECIMAL(10,2) NOT NULL,
+    currency TEXT DEFAULT 'EUR',
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'paid', 'overdue', 'cancelled')),
+    due_date DATE NOT NULL,
+    paid_date DATE,
+    description TEXT,
+    line_items JSONB,
+    payment_method TEXT,
+    payment_reference TEXT,
+    notes TEXT,
+    pdf_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 9. Create payments table
+CREATE TABLE IF NOT EXISTS payments (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    invoice_id UUID REFERENCES invoices(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    service_provider_id UUID REFERENCES service_providers(id) ON DELETE CASCADE NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    currency TEXT DEFAULT 'EUR',
+    payment_method TEXT NOT NULL CHECK (payment_method IN ('stripe', 'paypal', 'bank_transfer', 'cash')),
+    payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'processing', 'completed', 'failed', 'refunded', 'cancelled')),
+    payment_intent_id TEXT,
+    transaction_id TEXT,
+    reference_number TEXT,
+    payment_date TIMESTAMP WITH TIME ZONE,
+    refunded_amount DECIMAL(10,2) DEFAULT 0,
+    refund_reason TEXT,
+    processing_fee DECIMAL(10,2) DEFAULT 0,
+    net_amount DECIMAL(10,2),
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 10. Create ratings table
+CREATE TABLE IF NOT EXISTS ratings (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    service_provider_id UUID REFERENCES service_providers(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL,
+    contract_id UUID REFERENCES contracts(id) ON DELETE SET NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    service_quality INTEGER CHECK (service_quality >= 1 AND service_quality <= 5),
+    punctuality INTEGER CHECK (punctuality >= 1 AND punctuality <= 5),
+    communication INTEGER CHECK (communication >= 1 AND communication <= 5),
+    value_for_money INTEGER CHECK (value_for_money >= 1 AND value_for_money <= 5),
+    cleanliness INTEGER CHECK (cleanliness >= 1 AND cleanliness <= 5),
+    would_recommend BOOLEAN,
+    images TEXT[],
+    response_from_provider TEXT,
+    is_verified BOOLEAN DEFAULT FALSE,
+    helpful_votes INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(service_provider_id, user_id, quote_id)
 );
 
 -- 11. Create work_sessions table
