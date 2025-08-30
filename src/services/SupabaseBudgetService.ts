@@ -498,4 +498,17 @@ export class SupabaseBudgetService {
     console.warn("searchConversations should be called from SupabaseConversationService");
     return [];
   }
+
+  static async reorderCategories(categoryOrders: { id: string; sort_order: number }[]): Promise<void> {
+    for (const { id, sort_order } of categoryOrders) {
+      const { error } = await supabase
+        .from('service_categories')
+        .update({ sort_order })
+        .eq('id', id);
+      
+      if (error) {
+        console.error(`Failed to update category order for ${id}:`, error);
+      }
+    }
+  }
 }
