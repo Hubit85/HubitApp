@@ -124,8 +124,19 @@ export class CustomEmailService {
   ): Promise<{ success: boolean; message: string; error?: string }> {
     
     try {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+      // Obtener la URL del sitio
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+      
       const verificationUrl = `${siteUrl}/auth/verify-role?token=${verificationToken}`;
+      
+      // Log de debug
+      console.log('🔗 Generating verification email:', {
+        userEmail,
+        roleType,
+        verificationUrl: verificationUrl.substring(0, 50) + '...',
+        siteUrl
+      });
       
       // Reemplazar variables en la plantilla
       const emailHtml = ROLE_VERIFICATION_TEMPLATE
@@ -135,10 +146,12 @@ export class CustomEmailService {
 
       const emailConfig: EmailConfig = {
         to: userEmail,
-        subject: `Verify Your New Role - HuBiT`,
+        subject: `Verify Your New ${ROLE_DISPLAY_NAMES[roleType]} Role - HuBiT`,
         html: emailHtml,
         from: 'HuBiT Platform <noreply@hubit.com>'
       };
+
+      console.log('📧 Sending email to:', userEmail);
 
       // Enviar email via API
       const response = await fetch('/api/email/send-custom', {
@@ -152,8 +165,14 @@ export class CustomEmailService {
       const result = await response.json();
 
       if (!response.ok) {
+        console.error('❌ Email API error:', result);
         throw new Error(result.error || 'Error sending email');
       }
+
+      console.log('✅ Email sent successfully:', {
+        to: userEmail,
+        messageId: result.messageId
+      });
 
       // Crear notificación en el sistema
       await this.createNotification(userId, roleType);
@@ -164,7 +183,7 @@ export class CustomEmailService {
       };
 
     } catch (error) {
-      console.error('Error sending role verification email:', error);
+      console.error('❌ Error sending role verification email:', error);
       return {
         success: false,
         message: 'Failed to send verification email',
@@ -178,7 +197,7 @@ export class CustomEmailService {
    */
   private static async createNotification(userId: string, roleType: string) {
     try {
-      await supabase
+      const { error } = await supabase
         .from('notifications')
         .insert({
           user_id: userId,
@@ -188,6 +207,12 @@ export class CustomEmailService {
           category: 'role_verification',
           is_read: false
         });
+
+      if (error) {
+        console.warn('Could not create notification:', error);
+      } else {
+        console.log('📬 Notification created successfully');
+      }
     } catch (error) {
       console.warn('Could not create notification:', error);
       // No lanzamos error porque la notificación es secundaria
@@ -205,6 +230,12 @@ export class CustomEmailService {
       if (!process.env[varName]) {
         missingVars.push(varName);
       }
+    });
+
+    console.log('🔧 Email config validation:', {
+      isValid: missingVars.length === 0,
+      missingVars,
+      hasResendKey: !!process.env.RESEND_API_KEY
     });
 
     return {
