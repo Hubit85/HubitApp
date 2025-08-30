@@ -39,24 +39,13 @@ export default function RegisterPage() {
   const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
 
-  // Redirect logic - only redirect if we're not in a registration flow
+  // Single, simple redirect logic - only for already authenticated users
   useEffect(() => {
+    // Only redirect if user is authenticated AND we're not in any registration process
     if (user && !loading && registrationState === 'idle' && !shouldRedirect) {
-      console.log("User already authenticated, redirecting to dashboard");
       router.push("/dashboard");
     }
-  }, [user, loading, registrationState, shouldRedirect, router]);
-
-  // Handle successful registration redirect
-  useEffect(() => {
-    if (shouldRedirect && user && !loading) {
-      console.log("Registration completed, redirecting to dashboard");
-      setRegistrationState('redirecting');
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 1500);
-    }
-  }, [shouldRedirect, user, loading, router]);
+  }, [user, loading, router]);
 
   // Password validation
   useEffect(() => {
@@ -75,7 +64,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent multiple submissions
     if (registrationState !== 'idle') {
       return;
     }
@@ -85,8 +73,6 @@ export default function RegisterPage() {
     setSuccessMessage("");
 
     try {
-      console.log("Starting registration process...");
-
       // Validation
       if (formData.password !== formData.confirmPassword) {
         setError("Las contraseñas no coinciden");
@@ -106,40 +92,36 @@ export default function RegisterPage() {
         return;
       }
 
-      console.log("Validation passed, attempting registration...");
-
       const result = await signUp(formData.email, formData.password, {
         full_name: formData.full_name,
         user_type: formData.user_type,
         phone: formData.phone,
       });
 
-      console.log("Registration result:", result);
-
-      // Handle different result states
       if (result?.error) {
-        console.log("Registration failed:", result.error);
         setError(result.error);
         setRegistrationState('idle');
         return;
       }
 
       if (result?.message) {
-        console.log("Email confirmation required");
         setSuccessMessage(result.message);
         setRegistrationState('idle');
         return;
       }
 
       if (result?.success) {
-        console.log("Registration successful! Setting up redirect...");
         setSuccessMessage("¡Cuenta creada exitosamente!");
-        setShouldRedirect(true);
+        setRegistrationState('redirecting');
+        
+        // Simple, direct redirect after success
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 2000);
         return;
       }
 
-      // Fallback - no clear result
-      console.warn("Registration completed with unclear result");
+      // Fallback
       setError("Error durante el registro. Por favor, inténtalo de nuevo.");
       setRegistrationState('idle');
       
