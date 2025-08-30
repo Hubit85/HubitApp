@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
@@ -26,6 +26,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState({
     length: false,
     uppercase: false,
@@ -35,6 +36,7 @@ export default function RegisterPage() {
 
   const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
+  const registrationCompleted = useRef(false);
 
   // Password validation
   useEffect(() => {
@@ -48,20 +50,14 @@ export default function RegisterPage() {
 
   // Redirect logic - handle authentication state changes properly
   useEffect(() => {
-    // Only redirect if user is authenticated, not loading, and we're not in the middle of submitting
-    if (user && !loading) {
-      console.log("User authenticated, preparing to redirect to dashboard");
+    // Only redirect if user is authenticated, not loading, and registration was completed
+    if (user && !loading && registrationCompleted.current) {
+      console.log("User authenticated after successful registration, redirecting to dashboard");
       
-      // Clear any submission state and redirect
-      setIsSubmitting(false);
+      setIsRedirecting(true);
       
-      // Use a small delay to ensure state is clean before redirect
-      const timeoutId = setTimeout(() => {
-        console.log("Executing redirect to dashboard");
-        router.push("/dashboard");
-      }, 100);
-
-      return () => clearTimeout(timeoutId);
+      // Immediate redirect without delay
+      router.push("/dashboard");
     }
   }, [user, loading, router]);
 
@@ -73,8 +69,8 @@ export default function RegisterPage() {
     e.preventDefault();
     
     // Prevent double submission
-    if (isSubmitting) {
-      console.log("Already submitting, ignoring");
+    if (isSubmitting || isRedirecting) {
+      console.log("Already submitting or redirecting, ignoring");
       return;
     }
     
@@ -131,10 +127,18 @@ export default function RegisterPage() {
         return;
       }
 
-      // Handle success case - let the useEffect handle the redirect
-      console.log("Registration successful! Auth state will handle redirect...");
-      // Don't set isSubmitting to false here - let the useEffect handle it
-      // This prevents conflicts between the submission state and auth state changes
+      // Handle success case
+      if (result?.success) {
+        console.log("Registration successful! Marking as completed...");
+        registrationCompleted.current = true;
+        // Keep isSubmitting true to prevent further interactions
+        // The useEffect will handle the redirect when user state updates
+        return;
+      }
+
+      // Fallback case - no error, no message, no explicit success
+      console.log("Registration completed with unclear state");
+      registrationCompleted.current = true;
       
     } catch (err) {
       console.error("Registration exception:", err);
@@ -149,6 +153,30 @@ export default function RegisterPage() {
     { value: "service_provider", label: "Proveedor de Servicios", description: "Empresa o autónomo" },
     { value: "property_administrator", label: "Administrador de Fincas", description: "Gestión de propiedades" }
   ];
+
+  // Show redirecting screen
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
+        <Card className="w-full max-w-md bg-white/70 backdrop-blur-lg border-white/20 shadow-2xl">
+          <CardContent className="pt-6 text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Sparkles className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-neutral-900 mb-2">
+                ¡Registro Exitoso!
+              </h2>
+              <p className="text-neutral-600 mb-4">
+                Redirigiendo a tu dashboard...
+              </p>
+              <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mx-auto" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Show loading screen only during initial auth check
   if (loading) {
@@ -379,13 +407,13 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  disabled={isSubmitting || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
+                  disabled={isSubmitting || isRedirecting || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
                   className="w-full h-12 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {isSubmitting ? (
+                  {isSubmitting || isRedirecting ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Creando cuenta...
+                      {isRedirecting ? "Redirigiendo..." : "Creando cuenta..."}
                     </>
                   ) : (
                     <>
