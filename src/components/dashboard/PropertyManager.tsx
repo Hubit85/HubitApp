@@ -17,9 +17,9 @@ interface Property {
   name: string;
   address: string;
   property_type: string;  // Allow any string to match database
-  description?: string;
-  units_count?: number;
-  created_at: string;
+  description: string | null;  // Match database type exactly
+  units_count: number | null;  // Match database type exactly
+  created_at: string | null;
 }
 
 export default function PropertyManager() {

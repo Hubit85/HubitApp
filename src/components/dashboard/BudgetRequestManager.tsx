@@ -17,10 +17,10 @@ interface BudgetRequest {
   title: string;
   description: string;
   category: string;
-  status: string | null;  // Allow string | null to match database
-  budget_range_min?: number;
-  budget_range_max?: number;
-  created_at: string;
+  status: string | null;
+  budget_range_min: number | null;  // Match database type exactly
+  budget_range_max: number | null;  // Match database type exactly
+  created_at: string | null;
   property_name?: string;
 }
 

@@ -1,71 +1,16 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
-interface BudgetRequest {
-  id: string;
-  title: string;
-  description: string;
-  property_id: string;
-  requester_id: string;
-  category_id: string;
-  budget_range: string | null;
-  urgency: 'low' | 'medium' | 'high';
-  status: 'draft' | 'published' | 'in_review' | 'completed' | 'cancelled';
-  images: string[] | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface BudgetRequestInsert {
-  id?: string;
-  title: string;
-  description: string;
-  property_id: string;
-  requester_id: string;
-  category_id: string;
-  budget_range?: string | null;
-  urgency?: 'low' | 'medium' | 'high';
-  status?: 'draft' | 'published' | 'in_review' | 'completed' | 'cancelled';
-  images?: string[] | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface BudgetRequestUpdate {
-  id?: string;
-  title?: string;
-  description?: string;
-  property_id?: string;
-  requester_id?: string;
-  category_id?: string;
-  budget_range?: string | null;
-  urgency?: 'low' | 'medium' | 'high';
-  status?: 'draft' | 'published' | 'in_review' | 'completed' | 'cancelled';
-  images?: string[] | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface QuoteInsert {
-  id?: string;
-  budget_request_id: string;
-  provider_id: string;
-  amount: number;
-  description: string;
-  estimated_duration?: string | null;
-  terms_conditions?: string | null;
-  status?: 'pending' | 'accepted' | 'rejected' | 'withdrawn';
-  valid_until: string;
-  created_at?: string;
-  updated_at?: string;
-}
+type BudgetRequestInsert = Database['public']['Tables']['budget_requests']['Insert'];
+type QuoteInsert = Database['public']['Tables']['quotes']['Insert'];
 
 export class SupabaseBudgetService {
   // Budget Requests
-  static async createBudgetRequest(requestData: BudgetRequestInsert) {
+  static async createBudgetRequest(requestData: Partial<BudgetRequestInsert>) {
     const { data, error } = await supabase
       .from("budget_requests")
-      .insert(requestData)
+      .insert(requestData as BudgetRequestInsert)
       .select()
       .single();
 
@@ -76,7 +21,7 @@ export class SupabaseBudgetService {
     return data;
   }
 
-  static async updateBudgetRequest(id: string, updates: BudgetRequestUpdate) {
+  static async updateBudgetRequest(id: string, updates: any) {
     const { data, error } = await supabase
       .from("budget_requests")
       .update(updates)
@@ -96,20 +41,10 @@ export class SupabaseBudgetService {
       .from("budget_requests")
       .select(`
         *,
-        properties:property_id (
+        properties!inner(
           name,
           address,
           property_type
-        ),
-        service_categories:category_id (
-          name,
-          description,
-          icon
-        ),
-        profiles:requester_id (
-          full_name,
-          email,
-          phone
         )
       `)
       .eq("id", id)
@@ -127,16 +62,12 @@ export class SupabaseBudgetService {
       .from("budget_requests")
       .select(`
         *,
-        properties:property_id (
+        properties!inner(
           name,
           address
-        ),
-        service_categories:category_id (
-          name,
-          icon
         )
       `)
-      .eq("requester_id", userId)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -151,16 +82,9 @@ export class SupabaseBudgetService {
       .from("budget_requests")
       .select(`
         *,
-        properties:property_id (
+        properties!inner(
           name,
           address
-        ),
-        service_categories:category_id (
-          name,
-          icon
-        ),
-        profiles:requester_id (
-          full_name
         )
       `)
       .eq("status", "published")
@@ -174,10 +98,10 @@ export class SupabaseBudgetService {
   }
 
   // Quotes
-  static async createQuote(quoteData: QuoteInsert) {
+  static async createQuote(quoteData: Partial<QuoteInsert>) {
     const { data, error } = await supabase
       .from("quotes")
-      .insert(quoteData)
+      .insert(quoteData as QuoteInsert)
       .select()
       .single();
 
@@ -193,15 +117,10 @@ export class SupabaseBudgetService {
       .from("quotes")
       .select(`
         *,
-        service_providers:provider_id (
-          business_name,
-          rating,
+        service_providers!inner(
+          company_name,
           verified,
-          profiles:user_id (
-            full_name,
-            phone,
-            email
-          )
+          rating_average
         )
       `)
       .eq("budget_request_id", budgetRequestId)
@@ -219,17 +138,16 @@ export class SupabaseBudgetService {
       .from("quotes")
       .select(`
         *,
-        budget_requests:budget_request_id (
+        budget_requests!inner(
           title,
           description,
-          urgency,
-          properties:property_id (
+          properties!inner(
             name,
             address
           )
         )
       `)
-      .eq("provider_id", providerId)
+      .eq("service_provider_id", providerId)
       .order("created_at", { ascending: false });
 
     if (error) {

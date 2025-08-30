@@ -1,50 +1,15 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
-interface Property {
-  id: string;
-  name: string;
-  address: string;
-  property_type: 'apartment' | 'house' | 'commercial' | 'land';
-  total_units: number | null;
-  owner_id: string;
-  administrator_id: string | null;
-  community_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-interface PropertyInsert {
-  id?: string;
-  name: string;
-  address: string;
-  property_type: 'apartment' | 'house' | 'commercial' | 'land';
-  total_units?: number | null;
-  owner_id: string;
-  administrator_id?: string | null;
-  community_id?: string | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface PropertyUpdate {
-  id?: string;
-  name?: string;
-  address?: string;
-  property_type?: 'apartment' | 'house' | 'commercial' | 'land';
-  total_units?: number | null;
-  owner_id?: string;
-  administrator_id?: string | null;
-  community_id?: string | null;
-  created_at?: string;
-  updated_at?: string;
-}
+type PropertyInsert = Database['public']['Tables']['properties']['Insert'];
+type PropertyUpdate = Database['public']['Tables']['properties']['Update'];
 
 export class SupabasePropertyService {
-  static async createProperty(propertyData: PropertyInsert) {
+  static async createProperty(propertyData: Partial<PropertyInsert>) {
     const { data, error } = await supabase
       .from("properties")
-      .insert(propertyData)
+      .insert(propertyData as PropertyInsert)
       .select()
       .single();
 
@@ -88,21 +53,7 @@ export class SupabasePropertyService {
     const { data, error } = await supabase
       .from("properties")
       .select("*")
-      .eq("owner_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data || [];
-  }
-
-  static async getPropertiesByAdministrator(adminId: string) {
-    const { data, error } = await supabase
-      .from("properties")
-      .select("*")
-      .eq("administrator_id", adminId)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
