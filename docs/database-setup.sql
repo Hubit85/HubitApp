@@ -562,7 +562,7 @@ CREATE POLICY "Service providers can view open emergency requests" ON emergency_
     status IN ('open', 'assigned') AND EXISTS (
         SELECT 1 FROM service_providers sp 
         WHERE sp.user_id = auth.uid() 
-        AND emergency_services = true
+        AND sp.emergency_services = true
         AND sp.is_active = true
     )
 );
