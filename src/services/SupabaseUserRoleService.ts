@@ -22,35 +22,88 @@ export interface AddRoleRequest {
 
 export class SupabaseUserRoleService {
   
-  static async getUserRoles(userId: string): Promise<UserRole[]> {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: true });
+  static async getUserRoles(userId: string, retries = 3): Promise<UserRole[]> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`🔍 getUserRoles attempt ${attempt}/${retries} for user:`, userId);
+        
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: true });
 
-    if (error) {
-      throw new Error(`Error fetching user roles: ${error.message}`);
+        if (error) {
+          console.warn(`getUserRoles attempt ${attempt} failed:`, error.message);
+          
+          if (attempt === retries) {
+            throw new Error(`Error fetching user roles: ${error.message}`);
+          }
+          
+          // Esperar antes del siguiente intento (backoff exponencial)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
+        }
+
+        console.log(`✅ getUserRoles successful on attempt ${attempt}`);
+        return (data || []) as UserRole[];
+        
+      } catch (networkError) {
+        console.warn(`getUserRoles attempt ${attempt} network error:`, networkError);
+        
+        if (attempt === retries) {
+          // En el último intento, devolver array vacío en lugar de lanzar error
+          console.error("All getUserRoles attempts failed, returning empty array");
+          return [];
+        }
+        
+        // Esperar antes del siguiente intento
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
     }
-
-    return (data || []) as UserRole[];
+    
+    return [];
   }
 
-  static async getActiveRole(userId: string): Promise<UserRole | null> {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .maybeSingle(); // ARREGLO: Usar maybeSingle() en lugar de limit(1) para manejar 0 o 1 resultado
+  static async getActiveRole(userId: string, retries = 3): Promise<UserRole | null> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`🎯 getActiveRole attempt ${attempt}/${retries} for user:`, userId);
+        
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('is_active', true)
+          .maybeSingle();
 
-    if (error) {
-      console.error('Error fetching active role:', error);
-      throw new Error(`Error fetching active role: ${error.message}`);
+        if (error) {
+          console.warn(`getActiveRole attempt ${attempt} failed:`, error.message);
+          
+          if (attempt === retries) {
+            throw new Error(`Error fetching active role: ${error.message}`);
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
+        }
+
+        console.log(`✅ getActiveRole successful on attempt ${attempt}`);
+        return data as UserRole | null;
+        
+      } catch (networkError) {
+        console.warn(`getActiveRole attempt ${attempt} network error:`, networkError);
+        
+        if (attempt === retries) {
+          console.error("All getActiveRole attempts failed, returning null");
+          return null;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
     }
-
-    // ARREGLO: maybeSingle() devuelve null si no encuentra nada, o el objeto si encuentra uno
-    return data as UserRole | null;
+    
+    return null;
   }
 
   static async addRole(
@@ -67,40 +120,97 @@ export class SupabaseUserRoleService {
     try {
       console.log('🚀 Frontend: Starting addRole process via API route:', { userId, roleType: request.role_type });
 
-      // Hacer la llamada a la API route que maneja todo el proceso
-      const response = await fetch('/api/user-roles/add-role', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: userId,
-          roleType: request.role_type,
-          roleSpecificData: request.role_specific_data
-        }),
-      });
+      // Crear AbortController para timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
 
-      const result = await response.json();
-      
-      console.log('📡 Frontend: API response:', {
-        status: response.status,
-        ...result
-      });
+      try {
+        // Hacer la llamada a la API route con timeout
+        const response = await fetch('/api/user-roles/add-role', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            roleType: request.role_type,
+            roleSpecificData: request.role_specific_data
+          }),
+          signal: controller.signal
+        });
 
-      if (!response.ok) {
-        // Devuelve todo el objeto de error de la API
+        clearTimeout(timeoutId);
+
+        // Intentar parsear la respuesta JSON
+        let result;
+        try {
+          result = await response.json();
+        } catch (parseError) {
+          console.error('❌ Frontend: Failed to parse response JSON:', parseError);
+          return {
+            success: false,
+            message: "Error: Respuesta del servidor no válida"
+          };
+        }
+        
+        console.log('📡 Frontend: API response:', {
+          status: response.status,
+          ...result
+        });
+
+        if (!response.ok) {
+          // Manejar errores específicos basados en el status code
+          let errorMessage = result.message || `Error del servidor: ${response.status}`;
+          
+          if (response.status === 500 && errorMessage.includes('Invalid API key')) {
+            errorMessage = "Error de configuración: Verifica las credenciales de Supabase";
+          } else if (response.status === 403) {
+            errorMessage = "Error de permisos: Solo puedes enviar emails a tu dirección verificada (borjapipaon@gmail.com)";
+          } else if (response.status >= 500) {
+            errorMessage = "Error interno del servidor. Intenta nuevamente en unos momentos.";
+          }
+          
+          return {
+            success: false,
+            message: errorMessage,
+            errorCode: response.status.toString(),
+            ...result
+          };
+        }
+
+        // Devuelve todo el objeto de éxito de la API
         return {
-          success: false,
-          message: result.message || `Error del servidor: ${response.status}`,
+          success: true,
           ...result
         };
-      }
 
-      // Devuelve todo el objeto de éxito de la API
-      return {
-        success: true,
-        ...result
-      };
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        
+        console.error("❌ Frontend: Fetch error in addRole:", fetchError);
+        
+        // Manejar diferentes tipos de errores de red
+        if (fetchError instanceof Error) {
+          if (fetchError.name === 'AbortError') {
+            return {
+              success: false,
+              message: "Error: La solicitud tardó demasiado tiempo. Verifica tu conexión e intenta nuevamente."
+            };
+          } else if (fetchError.message.includes('fetch')) {
+            return {
+              success: false,
+              message: "Error de conexión: No se pudo conectar con el servidor. Verifica tu conexión a internet."
+            };
+          } else if (fetchError.message.includes('network')) {
+            return {
+              success: false,
+              message: "Error de red: Problema de conectividad. Intenta nuevamente en unos momentos."
+            };
+          }
+        }
+        
+        throw fetchError; // Re-lanzar para el manejo en el catch principal
+      }
 
     } catch (error) {
       console.error("❌ Frontend: Complete addRole error:", error);
@@ -109,20 +219,23 @@ export class SupabaseUserRoleService {
       let errorMessage = "Error al agregar el rol. ";
       
       if (error instanceof Error) {
-        if (error.message.includes('fetch')) {
-          errorMessage = "Error de conexión: No se pudo conectar con el servidor.";
+        if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+          errorMessage = "Error de conexión: No se pudo conectar con el servidor. Verifica tu conexión a internet.";
         } else if (error.message.includes('network')) {
-          errorMessage = "Error de red: Verifica tu conexión a internet.";
+          errorMessage = "Error de red: Problema de conectividad. Intenta nuevamente.";
+        } else if (error.message.includes('timeout')) {
+          errorMessage = "Error: La operación tardó demasiado tiempo. Intenta nuevamente.";
         } else {
           errorMessage = `Error: ${error.message}`;
         }
       } else {
-        errorMessage = "Error inesperado: " + String(error);
+        errorMessage = "Error inesperado al procesar la solicitud.";
       }
 
       return {
         success: false,
-        message: errorMessage
+        message: errorMessage,
+        errorCode: 'NETWORK_ERROR'
       };
     }
   }
