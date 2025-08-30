@@ -16,6 +16,8 @@ interface Property {
   id: string;
   name: string;
   address: string;
+  city: string;
+  postal_code: string | null;
   property_type: string;  // Allow any string to match database
   description: string | null;  // Match database type exactly
   units_count: number | null;  // Match database type exactly
@@ -33,6 +35,8 @@ export default function PropertyManager() {
     id: null as string | null,
     name: "",
     address: "",
+    city: "",
+    postal_code: "",
     property_type: "" as string,  // Allow any string to match database
     description: "",
     units_count: ""
@@ -91,6 +95,8 @@ export default function PropertyManager() {
       id: null,
       name: "",
       address: "",
+      city: "",
+      postal_code: "",
       property_type: "",
       description: "",
       units_count: ""
@@ -108,6 +114,8 @@ export default function PropertyManager() {
       const propertyData = {
         name: formData.name,
         address: formData.address,
+        city: formData.city,
+        postal_code: formData.postal_code || null,
         property_type: formData.property_type,
         description: formData.description || null,
         units_count: formData.units_count ? parseInt(formData.units_count) : null,
@@ -150,6 +158,8 @@ export default function PropertyManager() {
       id: property.id,
       name: property.name,
       address: property.address,
+      city: property.city,
+      postal_code: property.postal_code || '',
       property_type: property.property_type,
       description: property.description || '',
       units_count: property.units_count?.toString() || ''
@@ -226,9 +236,31 @@ export default function PropertyManager() {
                   id="address"
                   value={formData.address}
                   onChange={(e) => handleFormChange('address', e.target.value)}
-                  placeholder="Calle, número, ciudad..."
+                  placeholder="Calle, número..."
                   required
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">Ciudad</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => handleFormChange('city', e.target.value)}
+                    placeholder="Ej: Madrid"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="postal_code">Código Postal</Label>
+                  <Input
+                    id="postal_code"
+                    value={formData.postal_code}
+                    onChange={(e) => handleFormChange('postal_code', e.target.value)}
+                    placeholder="Ej: 28001"
+                  />
+                </div>
               </div>
               
               <div className="space-y-2">
