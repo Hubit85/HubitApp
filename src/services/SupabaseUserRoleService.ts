@@ -53,7 +53,17 @@ export class SupabaseUserRoleService {
     return data as UserRole | null;
   }
 
-  static async addRole(userId: string, request: AddRoleRequest): Promise<{ success: boolean; message: string; requiresVerification?: boolean }> {
+  static async addRole(
+    userId: string, 
+    request: AddRoleRequest
+  ): Promise<{ 
+    success: boolean; 
+    message: string; 
+    requiresVerification?: boolean;
+    errorCode?: string;
+    emailError?: boolean;
+    emailErrorDetails?: string;
+  }> {
     try {
       console.log('🚀 Frontend: Starting addRole process via API route:', { userId, roleType: request.role_type });
 
@@ -74,21 +84,22 @@ export class SupabaseUserRoleService {
       
       console.log('📡 Frontend: API response:', {
         status: response.status,
-        success: result.success,
-        message: result.message
+        ...result
       });
 
-      if (!response.ok && !result.success) {
+      if (!response.ok) {
+        // Devuelve todo el objeto de error de la API
         return {
           success: false,
-          message: result.message || `Error del servidor: ${response.status}`
+          message: result.message || `Error del servidor: ${response.status}`,
+          ...result
         };
       }
 
+      // Devuelve todo el objeto de éxito de la API
       return {
-        success: result.success,
-        message: result.message,
-        requiresVerification: result.requiresVerification
+        success: true,
+        ...result
       };
 
     } catch (error) {
