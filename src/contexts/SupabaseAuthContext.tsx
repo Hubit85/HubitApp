@@ -136,28 +136,76 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Fetch profile and roles
-      const [profileResult, rolesResult] = await Promise.allSettled([
-        supabase.from("profiles").select("*").eq("id", userId).single(),
-        SupabaseUserRoleService.getUserRoles(userId)
-      ]);
+      // Fetch profile - use array query first to check if profile exists
+      const { data: profiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId);
 
-      // Handle profile
-      if (profileResult.status === 'fulfilled' && !profileResult.value.error) {
-        setProfile(profileResult.value.data);
-      } else {
-        console.error("Error fetching profile:", profileResult);
+      if (profileError) {
+        console.error("Error querying profile:", profileError);
       }
 
-      // Handle roles
-      if (rolesResult.status === 'fulfilled') {
-        setUserRoles(rolesResult.value);
+      let profileData: Profile | null = null;
+
+      if (!profiles || profiles.length === 0) {
+        // Profile doesn't exist, create one from user metadata
+        console.log("No profile found, creating from user metadata");
+        
+        const newProfileData: ProfileInsert = {
+          id: userId,
+          email: userObject.email || '',
+          full_name: userObject.user_metadata?.full_name || null,
+          user_type: (userObject.user_metadata?.user_type as Profile['user_type']) || 'particular',
+          phone: userObject.user_metadata?.phone || null,
+          avatar_url: userObject.user_metadata?.avatar_url || null,
+          country: 'Spain',
+          language: 'es',
+          timezone: 'Europe/Madrid',
+        };
+
+        const { data: createdProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert(newProfileData)
+          .select()
+          .single();
+
+        if (createError) {
+          console.error("Error creating profile:", createError);
+          // Create temporary profile as fallback
+          profileData = {
+            ...newProfileData,
+            address: null,
+            city: null,
+            postal_code: null,
+            email_notifications: true,
+            sms_notifications: false,
+            is_verified: false,
+            verification_code: null,
+            last_login: null,
+            created_at: userObject.created_at || new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          } as Profile;
+        } else {
+          profileData = createdProfile;
+        }
+      } else {
+        // Profile exists, use it
+        profileData = profiles[0];
+      }
+
+      setProfile(profileData);
+
+      // Fetch roles
+      try {
+        const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
+        setUserRoles(rolesResult);
         
         // Set active role
-        const activeRoleData = rolesResult.value.find(r => r.is_active) || null;
+        const activeRoleData = rolesResult.find(r => r.is_active) || null;
         setActiveRole(activeRoleData);
-      } else {
-        console.error("Error fetching roles:", rolesResult);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
         setUserRoles([]);
         setActiveRole(null);
       }
