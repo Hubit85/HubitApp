@@ -503,11 +503,12 @@ export class SupabaseBudgetService {
     for (const { id, sort_order } of categoryOrders) {
       const { error } = await supabase
         .from('service_categories')
-        .update({ sort_order })
+        .update({ sort_order, updated_at: new Date().toISOString() })
         .eq('id', id);
       
       if (error) {
         console.error(`Failed to update category order for ${id}:`, error);
+        throw new Error(`Failed to update category order: ${error.message}`);
       }
     }
   }

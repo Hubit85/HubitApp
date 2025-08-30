@@ -376,12 +376,11 @@ export class SupabaseConversationService {
     
     if (!query) return conversations;
 
-    // Filter conversations by subject, last message, or participant names
     return conversations.filter(conv => 
       conv.subject?.toLowerCase().includes(query.toLowerCase()) ||
       conv.last_message?.toLowerCase().includes(query.toLowerCase()) ||
-      conv.profiles?.full_name?.toLowerCase().includes(query.toLowerCase()) ||
-      conv.service_providers?.company_name?.toLowerCase().includes(query.toLowerCase())
+      conv.user?.full_name?.toLowerCase().includes(query.toLowerCase()) ||
+      conv.service_provider?.company_name?.toLowerCase().includes(query.toLowerCase())
     );
   }
 
