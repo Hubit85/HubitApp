@@ -353,6 +353,118 @@ export class SupabaseUserRoleService {
   }
 
   /**
+   * Elimina todas las verificaciones pendientes (roles no verificados)
+   */
+  static async clearPendingVerifications(userId: string): Promise<{ success: boolean; message: string; removedCount?: number }> {
+    try {
+      console.log('🧹 Starting clearPendingVerifications for user:', userId);
+
+      // Obtener todos los roles del usuario
+      const roles = await this.getUserRoles(userId);
+      const pendingRoles = roles.filter(r => !r.is_verified);
+      
+      console.log('📋 Found roles:', {
+        total: roles.length,
+        pending: pendingRoles.length,
+        verified: roles.filter(r => r.is_verified).length
+      });
+
+      if (pendingRoles.length === 0) {
+        return {
+          success: true,
+          message: "No hay verificaciones pendientes para eliminar",
+          removedCount: 0
+        };
+      }
+
+      // Eliminar todos los roles no verificados
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('is_verified', false);
+
+      if (error) {
+        console.error('❌ Error deleting pending roles:', error);
+        throw new Error(`Error al eliminar verificaciones pendientes: ${error.message}`);
+      }
+
+      console.log(`✅ Successfully removed ${pendingRoles.length} pending verifications`);
+
+      return {
+        success: true,
+        message: `Se eliminaron ${pendingRoles.length} verificación${pendingRoles.length === 1 ? '' : 'es'} pendiente${pendingRoles.length === 1 ? '' : 's'} correctamente`,
+        removedCount: pendingRoles.length
+      };
+
+    } catch (error) {
+      console.error("❌ Error clearing pending verifications:", error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Error al eliminar las verificaciones pendientes"
+      };
+    }
+  }
+
+  /**
+   * Elimina una verificación pendiente específica
+   */
+  static async removePendingRole(userId: string, roleType: UserRole['role_type']): Promise<{ success: boolean; message: string }> {
+    try {
+      console.log('🗑️ Removing pending role:', { userId, roleType });
+
+      // Verificar que el rol existe y no está verificado
+      const { data: roleData, error: fetchError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('role_type', roleType)
+        .single();
+
+      if (fetchError || !roleData) {
+        return {
+          success: false,
+          message: "Rol no encontrado"
+        };
+      }
+
+      if (roleData.is_verified) {
+        return {
+          success: false,
+          message: "No puedes eliminar un rol ya verificado. Usa la opción 'Eliminar' en su lugar."
+        };
+      }
+
+      // Eliminar el rol no verificado
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role_type', roleType)
+        .eq('is_verified', false);
+
+      if (deleteError) {
+        console.error('❌ Error deleting pending role:', deleteError);
+        throw new Error(`Error al eliminar verificación pendiente: ${deleteError.message}`);
+      }
+
+      console.log('✅ Successfully removed pending role:', roleType);
+
+      return {
+        success: true,
+        message: `Verificación pendiente de ${this.getRoleDisplayName(roleType)} eliminada correctamente`
+      };
+
+    } catch (error) {
+      console.error("❌ Error removing pending role:", error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Error al eliminar la verificación pendiente"
+      };
+    }
+  }
+
+  /**
    * Envía email de verificación de rol usando el servicio personalizado
    */
   static async sendRoleVerificationEmail(userId: string, roleType: UserRole['role_type'], verificationToken: string): Promise<{ success: boolean; message: string; error?: string }> {
