@@ -33,10 +33,21 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [databaseConnected, setDatabaseConnected] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (!mounted) return;
+      
+      if (error) {
+        console.error("Error getting session:", error);
+        setLoading(false);
+        return;
+      }
+
       setSession(session);
       setUser(session?.user || null);
+      
       if (session?.user) {
         fetchUserData(session.user.id, session.user);
       } else {
@@ -47,6 +58,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
+        console.log("Auth state change:", event, !!session);
+        
         setSession(session);
         setUser(session?.user || null);
         
@@ -61,13 +76,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkDatabaseConnection = async () => {
     try {
       const { error } = await supabase
-        .from("service_categories")
+        .from("profiles")
         .select("count(*)")
         .limit(1);
 
@@ -117,7 +135,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Fetch profile and roles in parallel
+      // Fetch profile and roles
       const [profileResult, rolesResult] = await Promise.allSettled([
         supabase.from("profiles").select("*").eq("id", userId).single(),
         SupabaseUserRoleService.getUserRoles(userId)
@@ -183,7 +201,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
     try {
-      console.log("SupabaseAuth: Starting signUp process");
+      console.log("Starting signUp process for:", email);
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -202,80 +220,87 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return { error: error.message };
       }
 
-      if (data.user) {
-        console.log("User created:", data.user.id, "Session:", !!data.session);
-        
-        // Check if we need email confirmation
-        if (!data.session && !data.user.email_confirmed_at) {
-          console.log("Email confirmation required");
-          return { 
-            message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
-          };
-        }
+      console.log("SignUp response:", {
+        hasUser: !!data.user,
+        hasSession: !!data.session,
+        emailConfirmed: data.user?.email_confirmed_at
+      });
 
-        // If we have a session, the user is immediately logged in
-        if (data.session) {
-          console.log("User immediately logged in");
-          
-          try {
-            // Check database connection first
-            const isConnected = await checkDatabaseConnection();
-            
-            if (isConnected) {
-              // Create profile
-              const profileData: ProfileInsert = {
-                id: data.user.id,
-                email: data.user.email!,
-                ...userData,
-              };
-
-              const { error: profileError } = await supabase
-                .from("profiles")
-                .insert(profileData);
-
-              if (profileError) {
-                console.warn("Could not create profile in database:", profileError);
-              } else {
-                console.log("Profile created successfully");
-              }
-
-              // Create the initial role in user_roles table
-              try {
-                const { error: roleError } = await supabase
-                  .from('user_roles')
-                  .insert({
-                    user_id: data.user.id,
-                    role_type: userData.user_type,
-                    is_active: true,
-                    is_verified: true, // First role is automatically verified
-                    verification_confirmed_at: new Date().toISOString(),
-                    role_specific_data: {}
-                  });
-
-                if (roleError) {
-                  console.warn("Could not create initial user role:", roleError);
-                } else {
-                  console.log("Initial user role created successfully");
-                }
-              } catch (roleError) {
-                console.warn("Error creating initial role:", roleError);
-              }
-
-            } else {
-              console.log("Database not connected, skipping profile creation");
-            }
-          } catch (profileError) {
-            console.warn("Profile creation failed, but user was created successfully:", profileError);
-          }
-
-          // Registration successful - return success immediately
-          console.log("Registration successful, returning success");
-          return { success: true };
-        }
+      if (!data.user) {
+        return { error: "No se pudo crear la cuenta" };
       }
 
-      console.log("Registration completed but no user/session returned");
-      return { error: "Error durante el registro. Por favor, inténtalo de nuevo." };
+      // Check if we need email confirmation
+      if (!data.session && !data.user.email_confirmed_at) {
+        console.log("Email confirmation required");
+        return { 
+          message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
+        };
+      }
+
+      // If we have a session, the user is immediately logged in
+      if (data.session) {
+        console.log("User immediately logged in, creating profile...");
+        
+        try {
+          // Check database connection first
+          const isConnected = await checkDatabaseConnection();
+          
+          if (isConnected) {
+            // Create profile
+            const profileData: ProfileInsert = {
+              id: data.user.id,
+              email: data.user.email!,
+              ...userData,
+            };
+
+            const { error: profileError } = await supabase
+              .from("profiles")
+              .insert(profileData);
+
+            if (profileError) {
+              console.warn("Could not create profile in database:", profileError);
+            } else {
+              console.log("Profile created successfully");
+            }
+
+            // Create the initial role in user_roles table
+            try {
+              const { error: roleError } = await supabase
+                .from('user_roles')
+                .insert({
+                  user_id: data.user.id,
+                  role_type: userData.user_type,
+                  is_active: true,
+                  is_verified: true, // First role is automatically verified
+                  verification_confirmed_at: new Date().toISOString(),
+                  role_specific_data: {}
+                });
+
+              if (roleError) {
+                console.warn("Could not create initial user role:", roleError);
+              } else {
+                console.log("Initial user role created successfully");
+              }
+            } catch (roleError) {
+              console.warn("Error creating initial role:", roleError);
+            }
+
+          } else {
+            console.log("Database not connected, skipping profile creation");
+          }
+        } catch (profileError) {
+          console.warn("Profile creation failed, but user was created successfully:", profileError);
+        }
+
+        // Registration successful - return success
+        return { success: true };
+      }
+
+      console.log("Registration completed but no immediate session");
+      return { 
+        message: "Cuenta creada. Por favor revisa tu email para confirmar antes de iniciar sesión." 
+      };
       
     } catch (error) {
       console.error("Unexpected signup error:", error);

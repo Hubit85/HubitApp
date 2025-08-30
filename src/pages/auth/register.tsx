@@ -12,8 +12,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Sparkles, UserCircle } from "lucide-react";
 
-type RegistrationState = 'idle' | 'submitting' | 'redirecting';
-
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: "",
@@ -25,7 +23,7 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [registrationState, setRegistrationState] = useState<RegistrationState>('idle');
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [passwordValidation, setPasswordValidation] = useState({
@@ -34,15 +32,13 @@ export default function RegisterPage() {
     lowercase: false,
     number: false
   });
-  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
 
-  // Single, simple redirect logic - only for already authenticated users
+  // Redirect if user is already authenticated
   useEffect(() => {
-    // Only redirect if user is authenticated AND we're not in any registration process
-    if (user && !loading && registrationState === 'idle' && !shouldRedirect) {
+    if (!loading && user) {
       router.push("/dashboard");
     }
   }, [user, loading, router]);
@@ -64,11 +60,9 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (registrationState !== 'idle') {
-      return;
-    }
+    if (submitting) return;
     
-    setRegistrationState('submitting');
+    setSubmitting(true);
     setError("");
     setSuccessMessage("");
 
@@ -76,19 +70,16 @@ export default function RegisterPage() {
       // Validation
       if (formData.password !== formData.confirmPassword) {
         setError("Las contraseñas no coinciden");
-        setRegistrationState('idle');
         return;
       }
 
       if (!Object.values(passwordValidation).every(Boolean)) {
         setError("La contraseña no cumple con los requisitos mínimos");
-        setRegistrationState('idle');
         return;
       }
 
       if (!formData.user_type) {
         setError("Por favor selecciona un tipo de usuario");
-        setRegistrationState('idle');
         return;
       }
 
@@ -100,21 +91,17 @@ export default function RegisterPage() {
 
       if (result?.error) {
         setError(result.error);
-        setRegistrationState('idle');
         return;
       }
 
       if (result?.message) {
         setSuccessMessage(result.message);
-        setRegistrationState('idle');
         return;
       }
 
       if (result?.success) {
-        setSuccessMessage("¡Cuenta creada exitosamente!");
-        setRegistrationState('redirecting');
-        
-        // Simple, direct redirect after success
+        setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+        // Simple redirect after a short delay
         setTimeout(() => {
           router.push("/dashboard");
         }, 2000);
@@ -123,12 +110,12 @@ export default function RegisterPage() {
 
       // Fallback
       setError("Error durante el registro. Por favor, inténtalo de nuevo.");
-      setRegistrationState('idle');
       
     } catch (err) {
       console.error("Registration exception:", err);
       setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
-      setRegistrationState('idle');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -138,30 +125,6 @@ export default function RegisterPage() {
     { value: "service_provider", label: "Proveedor de Servicios", description: "Empresa o autónomo" },
     { value: "property_administrator", label: "Administrador de Fincas", description: "Gestión de propiedades" }
   ];
-
-  // Show redirecting screen
-  if (registrationState === 'redirecting') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
-        <Card className="w-full max-w-md bg-white/70 backdrop-blur-lg border-white/20 shadow-2xl">
-          <CardContent className="pt-6 text-center space-y-4">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Sparkles className="h-8 w-8 text-white animate-pulse" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-                ¡Registro Exitoso!
-              </h2>
-              <p className="text-neutral-600 mb-4">
-                Redirigiendo a tu dashboard...
-              </p>
-              <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mx-auto" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   // Show loading screen only during initial auth check
   if (loading) {
@@ -175,7 +138,10 @@ export default function RegisterPage() {
     );
   }
 
-  const isFormDisabled = registrationState !== 'idle';
+  const isFormDisabled = submitting;
+  const allValidationsPass = Object.values(passwordValidation).every(Boolean) && 
+                             formData.password === formData.confirmPassword && 
+                             formData.user_type;
 
   return (
     <>
@@ -398,10 +364,10 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  disabled={isFormDisabled || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
+                  disabled={isFormDisabled || !allValidationsPass}
                   className="w-full h-12 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {registrationState === 'submitting' ? (
+                  {submitting ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Creando cuenta...
