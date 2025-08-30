@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Shield, Sparkles, UserCircle } from "lucide-react";
 
-type RegistrationState = 'idle' | 'submitting' | 'success' | 'redirecting';
+type RegistrationState = 'idle' | 'submitting' | 'redirecting';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -47,22 +47,6 @@ export default function RegisterPage() {
       number: /\d/.test(formData.password)
     });
   }, [formData.password]);
-
-  // Simple redirect logic - only when user becomes available after successful registration
-  useEffect(() => {
-    if (user && !loading && registrationState === 'success') {
-      console.log("User authenticated, starting redirect...");
-      setRegistrationState('redirecting');
-      
-      // Direct redirect with no delay
-      router.replace("/dashboard").catch(err => {
-        console.error("Redirect failed:", err);
-        // If redirect fails, reset state so user can try again
-        setRegistrationState('idle');
-        setError("Error durante la redirección. Por favor, intenta acceder al dashboard manualmente.");
-      });
-    }
-  }, [user, loading, registrationState, router]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -129,9 +113,20 @@ export default function RegisterPage() {
       }
 
       if (result?.success) {
-        console.log("Registration successful! Waiting for auth state change...");
-        setRegistrationState('success');
-        // The useEffect will handle the redirect
+        console.log("Registration successful! Redirecting immediately...");
+        setRegistrationState('redirecting');
+        
+        // Direct immediate redirect - don't wait for useEffect
+        setTimeout(() => {
+          router.replace("/dashboard").then(() => {
+            console.log("Redirect successful");
+          }).catch((err) => {
+            console.error("Redirect failed:", err);
+            setRegistrationState('idle');
+            setError("Error durante la redirección. Tu cuenta fue creada exitosamente. Puedes iniciar sesión en /auth/login");
+          });
+        }, 500); // Small delay to show the success message
+        
         return;
       }
 
@@ -154,7 +149,7 @@ export default function RegisterPage() {
     { value: "property_administrator", label: "Administrador de Fincas", description: "Gestión de propiedades" }
   ];
 
-  const isWorking = registrationState === 'submitting' || registrationState === 'success' || registrationState === 'redirecting';
+  const isWorking = registrationState === 'submitting' || registrationState === 'redirecting';
 
   // Show redirecting screen
   if (isWorking) {
