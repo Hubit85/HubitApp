@@ -84,22 +84,24 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const checkDatabaseConnection = async () => {
     try {
-      // CORREGIR: La sintaxis correcta para count en PostgREST
-      const { error, count } = await supabase
+      // CORREGIR: Usar una consulta simple que no espere un objeto único
+      const { data, error } = await supabase
         .from("profiles")
-        .select("*", { count: 'exact', head: true })
+        .select("id")
         .limit(1);
 
-      if (!error) {
+      if (!error && data !== null) {
         setDatabaseConnected(true);
         return true;
       }
       
       console.warn("⚠️  Database tables not configured yet. Please run the setup script in Supabase SQL Editor.");
       console.warn("📋 Check docs/complete-database-setup.sql for the required SQL commands.");
+      setDatabaseConnected(false);
       return false;
     } catch (error) {
       console.warn("Database connection check failed:", error);
+      setDatabaseConnected(false);
       return false;
     }
   };
@@ -144,6 +146,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
       if (profileError) {
         console.error("Error querying profile:", profileError);
+        // Continue with fallback profile creation instead of failing
       }
 
       let profileData: Profile | null = null;
@@ -164,15 +167,35 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           timezone: 'Europe/Madrid',
         };
 
-        const { data: createdProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert(newProfileData)
-          .select()
-          .single();
+        // Intentar crear el perfil solo si la base de datos está conectada
+        if (isConnected) {
+          const { data: createdProfile, error: createError } = await supabase
+            .from("profiles")
+            .insert(newProfileData)
+            .select()
+            .single();
 
-        if (createError) {
-          console.error("Error creating profile:", createError);
-          // Create temporary profile as fallback
+          if (createError) {
+            console.error("Error creating profile:", createError);
+            // Crear perfil temporal como fallback
+            profileData = {
+              ...newProfileData,
+              address: null,
+              city: null,
+              postal_code: null,
+              email_notifications: true,
+              sms_notifications: false,
+              is_verified: false,
+              verification_code: null,
+              last_login: null,
+              created_at: userObject.created_at || new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            } as Profile;
+          } else {
+            profileData = createdProfile;
+          }
+        } else {
+          // Base de datos no conectada, crear perfil temporal
           profileData = {
             ...newProfileData,
             address: null,
@@ -186,26 +209,29 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             created_at: userObject.created_at || new Date().toISOString(),
             updated_at: new Date().toISOString()
           } as Profile;
-        } else {
-          profileData = createdProfile;
         }
       } else {
-        // Profile exists, use it
+        // Profile exists, use the first one
         profileData = profiles[0];
       }
 
       setProfile(profileData);
 
-      // Fetch roles
-      try {
-        const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
-        setUserRoles(rolesResult);
-        
-        // Set active role
-        const activeRoleData = rolesResult.find(r => r.is_active) || null;
-        setActiveRole(activeRoleData);
-      } catch (error) {
-        console.error("Error fetching roles:", error);
+      // Fetch roles only if database is connected
+      if (isConnected) {
+        try {
+          const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
+          setUserRoles(rolesResult);
+          
+          // Set active role
+          const activeRoleData = rolesResult.find(r => r.is_active) || null;
+          setActiveRole(activeRoleData);
+        } catch (error) {
+          console.error("❌ Frontend: Error loading user roles:", error);
+          setUserRoles([]);
+          setActiveRole(null);
+        }
+      } else {
         setUserRoles([]);
         setActiveRole(null);
       }
