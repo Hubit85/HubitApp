@@ -77,16 +77,19 @@ export default function RegisterPage() {
       // Validation
       if (formData.password !== formData.confirmPassword) {
         setError("Las contraseñas no coinciden");
+        setIsSubmitting(false);
         return;
       }
 
       if (!Object.values(passwordValidation).every(Boolean)) {
         setError("La contraseña no cumple con los requisitos mínimos");
+        setIsSubmitting(false);
         return;
       }
 
       if (!formData.user_type) {
         setError("Por favor selecciona un tipo de usuario");
+        setIsSubmitting(false);
         return;
       }
 
@@ -101,36 +104,38 @@ export default function RegisterPage() {
 
       console.log("SignUp result:", result);
 
-      // Handle error case
-      if (result.error) {
+      // Handle error case first
+      if (result?.error) {
         console.log("Registration failed with error:", result.error);
         setError(result.error);
+        setIsSubmitting(false);
         return;
       }
 
       // Handle email confirmation case
-      if (result.message) {
+      if (result?.message) {
         console.log("Registration requires email confirmation");
         setSuccessMessage(result.message);
+        setIsSubmitting(false);
         return;
       }
 
-      // Handle success case
-      if (result.success) {
-        console.log("Registration successful! User should be logged in now.");
-        // The auth context will handle the redirect automatically
-        // No need for manual redirect here
+      // Handle explicit success case
+      if (result?.success) {
+        console.log("Registration explicitly successful! Redirecting...");
+        // Allow the useEffect to handle redirect when user state updates
         return;
       }
 
-      // Fallback error case
-      console.error("Unexpected registration result:", result);
-      setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
+      // Handle implicit success case (no error, no message, no explicit success)
+      // This happens when signUp completes successfully and user is logged in
+      console.log("Registration implicitly successful (no error/message)");
+      // Let the auth state change handle the redirect
+      return;
       
     } catch (err) {
       console.error("Registration exception:", err);
       setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
-    } finally {
       setIsSubmitting(false);
     }
   };
