@@ -109,6 +109,34 @@ BEGIN
     END IF;
 END $$;
 
+-- Verificar y añadir columna published_at a la tabla budget_requests si no existe
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'budget_requests' AND column_name = 'published_at'
+    ) THEN
+        ALTER TABLE budget_requests ADD COLUMN published_at TIMESTAMP WITH TIME ZONE;
+        RAISE NOTICE '✅ Columna published_at añadida a la tabla budget_requests';
+    ELSE
+        RAISE NOTICE '✅ La columna published_at ya existe en la tabla budget_requests';
+    END IF;
+END $$;
+
+-- Verificar y añadir columna expires_at a la tabla budget_requests si no existe
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'budget_requests' AND column_name = 'expires_at'
+    ) THEN
+        ALTER TABLE budget_requests ADD COLUMN expires_at TIMESTAMP WITH TIME ZONE;
+        RAISE NOTICE '✅ Columna expires_at añadida a la tabla budget_requests';
+    ELSE
+        RAISE NOTICE '✅ La columna expires_at ya existe en la tabla budget_requests';
+    END IF;
+END $$;
+
 -- Verificar todas las columnas críticas
 DO $$
 DECLARE
@@ -169,6 +197,12 @@ BEGIN
     IF table_exists THEN
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'budget_requests' AND column_name = 'urgency') THEN
             missing_columns := missing_columns || 'budget_requests.urgency, ';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'budget_requests' AND column_name = 'published_at') THEN
+            missing_columns := missing_columns || 'budget_requests.published_at, ';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'budget_requests' AND column_name = 'expires_at') THEN
+            missing_columns := missing_columns || 'budget_requests.expires_at, ';
         END IF;
     END IF;
 
