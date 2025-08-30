@@ -31,7 +31,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user || null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        fetchProfile(session.user.id, session.user);
       } else {
         setLoading(false);
       }
@@ -44,7 +44,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user || null);
         
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          await fetchProfile(session.user.id, session.user);
         } else {
           setProfile(null);
           setLoading(false);
@@ -76,36 +76,34 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, userObject: User) => {
     try {
       const isConnected = await checkDatabaseConnection();
       
       if (!isConnected) {
         // Create a temporary profile from user data
-        if (user) {
-          const tempProfile: Profile = {
-            id: userId,
-            email: user.email || '',
-            full_name: user.user_metadata?.full_name || null,
-            user_type: (user.user_metadata?.user_type as Profile['user_type']) || 'particular',
-            phone: user.user_metadata?.phone || null,
-            avatar_url: user.user_metadata?.avatar_url || null,
-            address: null,
-            city: null,
-            postal_code: null,
-            country: 'Spain',
-            language: 'es',
-            timezone: 'Europe/Madrid',
-            email_notifications: true,
-            sms_notifications: false,
-            is_verified: false,
-            verification_code: null,
-            last_login: null,
-            created_at: user.created_at || new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-          setProfile(tempProfile);
-        }
+        const tempProfile: Profile = {
+          id: userId,
+          email: userObject.email || '',
+          full_name: userObject.user_metadata?.full_name || null,
+          user_type: (userObject.user_metadata?.user_type as Profile['user_type']) || 'particular',
+          phone: userObject.user_metadata?.phone || null,
+          avatar_url: userObject.user_metadata?.avatar_url || null,
+          address: null,
+          city: null,
+          postal_code: null,
+          country: 'Spain',
+          language: 'es',
+          timezone: 'Europe/Madrid',
+          email_notifications: true,
+          sms_notifications: false,
+          is_verified: false,
+          verification_code: null,
+          last_login: null,
+          created_at: userObject.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setProfile(tempProfile);
         setLoading(false);
         return;
       }
@@ -134,7 +132,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -148,8 +145,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       return {};
     } catch (error) {
       return { error: "An unexpected error occurred during sign in" };
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -178,7 +173,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         console.log("User created:", data.user.id, "Session:", !!data.session);
         
         // Check if we need email confirmation
-        if (!data.session && data.user.email_confirmed_at === null) {
+        if (!data.session && !data.user.email_confirmed_at) {
           console.log("Email confirmation required");
           return { 
             message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
@@ -187,7 +182,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
         // If we have a session, the user is immediately logged in
         if (data.session) {
-          console.log("User immediately logged in, creating profile...");
+          console.log("User immediately logged in");
           
           try {
             // Check database connection first
@@ -217,7 +212,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.warn("Profile creation failed, but user was created successfully:", profileError);
           }
 
-          // Registration successful - return success
+          // Registration successful - return success immediately
           console.log("Registration successful, returning success");
           return { success: true };
         }
@@ -233,14 +228,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    setLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Error signing out:", error);
       }
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Unexpected error during signOut:", error);
     }
   };
 
@@ -265,7 +259,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Refresh profile data
-      await fetchProfile(user.id);
+      await fetchProfile(user.id, user);
       return {};
     } catch (error) {
       return { error: "An unexpected error occurred while updating profile" };
