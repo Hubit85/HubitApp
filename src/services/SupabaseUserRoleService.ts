@@ -42,14 +42,15 @@ export class SupabaseUserRoleService {
       .select('*')
       .eq('user_id', userId)
       .eq('is_active', true)
-      .limit(1); // ARREGLAR: Usar limit(1) en lugar de .single()
+      .maybeSingle(); // ARREGLO: Usar maybeSingle() en lugar de limit(1) para manejar 0 o 1 resultado
 
     if (error) {
+      console.error('Error fetching active role:', error);
       throw new Error(`Error fetching active role: ${error.message}`);
     }
 
-    // ARREGLAR: Manejar array en lugar de objeto único
-    return (data && data.length > 0) ? data[0] as UserRole : null;
+    // ARREGLO: maybeSingle() devuelve null si no encuentra nada, o el objeto si encuentra uno
+    return data as UserRole | null;
   }
 
   static async addRole(userId: string, request: AddRoleRequest): Promise<{ success: boolean; message: string; requiresVerification?: boolean }> {
