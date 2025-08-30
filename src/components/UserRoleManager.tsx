@@ -22,6 +22,7 @@ export default function UserRoleManager() {
   const [successMessage, setSuccessMessage] = useState("");
   const [showAddRoleModal, setShowAddRoleModal] = useState(false);
   const [newRoleType, setNewRoleType] = useState<UserRole['role_type'] | "">("");
+  const [showClearPendingModal, setShowClearPendingModal] = useState(false);
 
   useEffect(() => {
     if (user) {
