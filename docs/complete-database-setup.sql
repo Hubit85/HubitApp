@@ -1,15 +1,15 @@
--- CONFIGURACIÓN COMPLETA DE BASE DE DATOS HUBIT
--- Este script configura TODO desde cero - NO ejecutar database-setup.sql después
+-- CONFIGURACION COMPLETA DE BASE DE DATOS HUBIT
+-- Este script configura TODO desde cero - NO ejecutar database-setup.sql despues
 -- Incluye correcciones para TODOS los problemas de columnas faltantes
 
 -- =============================================================================
--- PASO 1: LIMPIAR Y RECREAR TABLAS PROBLEMÁTICAS
+-- PASO 1: LIMPIAR Y RECREAR TABLAS PROBLEMATICAS
 -- =============================================================================
 
--- Función auxiliar para limpiar tablas si existen
+-- Funcion auxiliar para limpiar tablas si existen
 DO $$ 
 BEGIN 
-    -- Eliminar tablas problemáticas si existen (en orden correcto por dependencias)
+    -- Eliminar tablas problematicas si existen (en orden correcto por dependencias)
     DROP TABLE IF EXISTS notifications CASCADE;
     DROP TABLE IF EXISTS emergency_requests CASCADE;
     DROP TABLE IF EXISTS documents CASCADE;
@@ -27,7 +27,7 @@ BEGIN
     DROP TABLE IF EXISTS properties CASCADE;
     DROP TABLE IF EXISTS profiles CASCADE;
     
-    RAISE NOTICE '🗑️ Limpieza inicial completada';
+    RAISE NOTICE 'Limpieza inicial completada';
 END $$;
 
 -- =============================================================================
@@ -394,14 +394,14 @@ CREATE TABLE notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Mensaje informativo sobre creación de tablas
+-- Mensaje informativo sobre creacion de tablas
 DO $$
 BEGIN
-    RAISE NOTICE '✅ Todas las tablas creadas exitosamente';
+    RAISE NOTICE 'Todas las tablas creadas exitosamente';
 END $$;
 
 -- =============================================================================
--- PASO 3: CONFIGURAR RLS Y POLÍTICAS
+-- PASO 3: CONFIGURAR RLS Y POLITICAS
 -- =============================================================================
 
 -- Habilitar RLS en todas las tablas
@@ -424,14 +424,14 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
 DO $$
 BEGIN
-    RAISE NOTICE '🛡️ RLS habilitado en todas las tablas';
+    RAISE NOTICE 'RLS habilitado en todas las tablas';
 END $$;
 
 -- =============================================================================
--- PASO 4: CREAR ÍNDICES
+-- PASO 4: CREAR INDICES
 -- =============================================================================
 
--- Índices principales
+-- Indices principales
 CREATE INDEX idx_profiles_user_type ON profiles(user_type);
 CREATE INDEX idx_profiles_email ON profiles(email);
 CREATE INDEX idx_profiles_is_verified ON profiles(is_verified);
@@ -470,37 +470,37 @@ CREATE INDEX idx_ratings_verified ON ratings(is_verified);
 
 DO $$
 BEGIN
-    RAISE NOTICE '⚡ Índices creados para óptimo rendimiento';
+    RAISE NOTICE 'Indices creados para optimo rendimiento';
 END $$;
 
 -- =============================================================================
--- PASO 5: INSERTAR CATEGORÍAS DE SERVICIOS
+-- PASO 5: INSERTAR CATEGORIAS DE SERVICIOS
 -- =============================================================================
 
 INSERT INTO service_categories (id, name, description, parent_id, icon, color, sort_order, emergency_available) VALUES
--- Categorías principales
-('550e8400-e29b-41d4-a716-446655440001', 'Fontanería', 'Servicios de fontanería y plomería', NULL, 'Wrench', '#3B82F6', 1, true),
-('550e8400-e29b-41d4-a716-446655440002', 'Electricidad', 'Servicios eléctricos y instalaciones', NULL, 'Zap', '#F59E0B', 2, true),
+-- Categorias principales
+('550e8400-e29b-41d4-a716-446655440001', 'Fontaneria', 'Servicios de fontaneria y plomeria', NULL, 'Wrench', '#3B82F6', 1, true),
+('550e8400-e29b-41d4-a716-446655440002', 'Electricidad', 'Servicios electricos y instalaciones', NULL, 'Zap', '#F59E0B', 2, true),
 ('550e8400-e29b-41d4-a716-446655440003', 'Limpieza', 'Servicios de limpieza y mantenimiento', NULL, 'Sparkles', '#10B981', 3, false),
-('550e8400-e29b-41d4-a716-446655440004', 'Jardinería', 'Cuidado de jardines y espacios verdes', NULL, 'Trees', '#059669', 4, false),
-('550e8400-e29b-41d4-a716-446655440005', 'Pintura', 'Servicios de pintura y decoración', NULL, 'Paintbrush', '#8B5CF6', 5, false),
-('550e8400-e29b-41d4-a716-446655440006', 'Climatización', 'HVAC, calefacción y aire acondicionado', NULL, 'Thermometer', '#EF4444', 6, true),
-('550e8400-e29b-41d4-a716-446655440007', 'Carpintería', 'Trabajos en madera y carpintería', NULL, 'Hammer', '#D97706', 7, false),
-('550e8400-e29b-41d4-a716-446655440008', 'Cerrajería', 'Servicios de cerrajería y seguridad', NULL, 'Key', '#6366F1', 8, true),
-('550e8400-e29b-41d4-a716-446655440009', 'Albañilería', 'Trabajos de construcción y reformas', NULL, 'Wrench', '#64748B', 9, false),
-('550e8400-e29b-41d4-a716-446655440010', 'Techado', 'Reparación y mantenimiento de techos', NULL, 'Home', '#0F172A', 10, true)
+('550e8400-e29b-41d4-a716-446655440004', 'Jardineria', 'Cuidado de jardines y espacios verdes', NULL, 'Trees', '#059669', 4, false),
+('550e8400-e29b-41d4-a716-446655440005', 'Pintura', 'Servicios de pintura y decoracion', NULL, 'Paintbrush', '#8B5CF6', 5, false),
+('550e8400-e29b-41d4-a716-446655440006', 'Climatizacion', 'HVAC, calefaccion y aire acondicionado', NULL, 'Thermometer', '#EF4444', 6, true),
+('550e8400-e29b-41d4-a716-446655440007', 'Carpinteria', 'Trabajos en madera y carpinteria', NULL, 'Hammer', '#D97706', 7, false),
+('550e8400-e29b-41d4-a716-446655440008', 'Cerrajeria', 'Servicios de cerrajeria y seguridad', NULL, 'Key', '#6366F1', 8, true),
+('550e8400-e29b-41d4-a716-446655440009', 'Albanileria', 'Trabajos de construccion y reformas', NULL, 'Wrench', '#64748B', 9, false),
+('550e8400-e29b-41d4-a716-446655440010', 'Techado', 'Reparacion y mantenimiento de techos', NULL, 'Home', '#0F172A', 10, true)
 ON CONFLICT (id) DO NOTHING;
 
 DO $$
 BEGIN
-    RAISE NOTICE '✅ Categorías de servicios insertadas';
+    RAISE NOTICE 'Categorias de servicios insertadas';
 END $$;
 
 -- =============================================================================
 -- PASO 6: CREAR FUNCIONES Y TRIGGERS
 -- =============================================================================
 
--- Función para updated_at
+-- Funcion para updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -515,7 +515,7 @@ CREATE TRIGGER update_properties_updated_at BEFORE UPDATE ON properties FOR EACH
 CREATE TRIGGER update_budget_requests_updated_at BEFORE UPDATE ON budget_requests FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_service_providers_updated_at BEFORE UPDATE ON service_providers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Función para manejar nuevos usuarios
+-- Funcion para manejar nuevos usuarios
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
@@ -539,11 +539,11 @@ CREATE TRIGGER on_auth_user_created
 
 DO $$
 BEGIN
-    RAISE NOTICE '🔄 Funciones y triggers configurados';
+    RAISE NOTICE 'Funciones y triggers configurados';
 END $$;
 
 -- =============================================================================
--- VERIFICACIÓN FINAL COMPLETA
+-- VERIFICACION FINAL COMPLETA
 -- =============================================================================
 
 DO $$
@@ -556,31 +556,31 @@ BEGIN
     FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
     
-    -- Contar categorías
+    -- Contar categorias
     SELECT COUNT(*) INTO categories_count FROM service_categories;
     
     RAISE NOTICE '';
-    RAISE NOTICE '🎉 =============================================';
-    RAISE NOTICE '✅ CONFIGURACIÓN COMPLETA EXITOSA';
-    RAISE NOTICE '🎉 =============================================';
+    RAISE NOTICE '=============================================';
+    RAISE NOTICE 'CONFIGURACION COMPLETA EXITOSA';
+    RAISE NOTICE '=============================================';
     RAISE NOTICE '';
-    RAISE NOTICE '📊 Estadísticas de la base de datos:';
-    RAISE NOTICE '   ├─ Tablas creadas: %', total_tables;
-    RAISE NOTICE '   ├─ Categorías de servicio: %', categories_count;
-    RAISE NOTICE '   ├─ RLS habilitado: ✅ SÍ';
-    RAISE NOTICE '   ├─ Índices creados: ✅ SÍ';
-    RAISE NOTICE '   └─ Triggers activos: ✅ SÍ';
+    RAISE NOTICE 'Estadisticas de la base de datos:';
+    RAISE NOTICE '   Tablas creadas: %', total_tables;
+    RAISE NOTICE '   Categorias de servicio: %', categories_count;
+    RAISE NOTICE '   RLS habilitado: SI';
+    RAISE NOTICE '   Indices creados: SI';
+    RAISE NOTICE '   Triggers activos: SI';
     RAISE NOTICE '';
-    RAISE NOTICE '🚀 IMPORTANTE:';
-    RAISE NOTICE '   ✅ NO ejecutes database-setup.sql';
-    RAISE NOTICE '   ✅ NO ejecutes ningún otro script';
-    RAISE NOTICE '   ✅ Tu base de datos está 100% lista';
+    RAISE NOTICE 'IMPORTANTE:';
+    RAISE NOTICE '   NO ejecutes database-setup.sql';
+    RAISE NOTICE '   NO ejecutes ningun otro script';
+    RAISE NOTICE '   Tu base de datos esta 100% lista';
     RAISE NOTICE '';
-    RAISE NOTICE '🎯 PRÓXIMOS PASOS:';
+    RAISE NOTICE 'PROXIMOS PASOS:';
     RAISE NOTICE '   1. Configurar variables de entorno';
     RAISE NOTICE '   2. Probar registro de usuarios';
-    RAISE NOTICE '   3. ¡Comenzar a desarrollar HuBiT!';
+    RAISE NOTICE '   3. Comenzar a desarrollar HuBiT!';
     RAISE NOTICE '';
-    RAISE NOTICE '💡 ¡Tu plataforma HuBiT está lista para producción!';
+    RAISE NOTICE 'Tu plataforma HuBiT esta lista para produccion!';
     
 END $$;
