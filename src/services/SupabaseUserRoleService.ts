@@ -57,15 +57,24 @@ export class SupabaseUserRoleService {
 
   static async addRole(userId: string, request: AddRoleRequest): Promise<{ success: boolean; message: string; requiresVerification?: boolean }> {
     try {
+      console.log('🚀 Starting addRole process:', { userId, roleType: request.role_type });
+
       // Verificar si el usuario ya tiene este rol
-      const { data: existingRole } = await supabase
+      const { data: existingRole, error: checkError } = await supabase
         .from('user_roles')
         .select('id, is_verified')
         .eq('user_id', userId)
         .eq('role_type', request.role_type)
         .single();
 
+      // Log para debugging
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('❌ Error checking existing roles:', checkError);
+        throw new Error(`Error al verificar roles existentes: ${checkError.message}`);
+      }
+
       if (existingRole) {
+        console.log('⚠️ Role already exists:', existingRole);
         if (existingRole.is_verified) {
           return { 
             success: false, 
@@ -83,8 +92,13 @@ export class SupabaseUserRoleService {
       const verificationToken = this.generateVerificationToken();
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
 
+      console.log('🔐 Generated verification token:', { 
+        token: verificationToken.substring(0, 8) + '...', 
+        expiresAt 
+      });
+
       // Crear el nuevo rol (sin verificar)
-      const { data, error } = await supabase
+      const { data, error: insertError } = await supabase
         .from('user_roles')
         .insert({
           user_id: userId,
@@ -98,17 +112,42 @@ export class SupabaseUserRoleService {
         .select()
         .single();
 
-      if (error) {
-        throw new Error(`Error creating role: ${error.message}`);
+      if (insertError) {
+        console.error('❌ Database insert error:', insertError);
+        throw new Error(`Error al crear el rol en la base de datos: ${insertError.message}`);
       }
 
+      console.log('✅ Role created successfully:', { id: data.id, role_type: data.role_type });
+
       // Enviar email de verificación usando el servicio personalizado
+      console.log('📧 Attempting to send verification email...');
       const emailResult = await this.sendRoleVerificationEmail(userId, request.role_type, verificationToken);
 
       if (!emailResult.success) {
-        console.warn('Failed to send verification email:', emailResult.error);
-        // Aún así consideramos exitosa la creación del rol
+        console.error('❌ Email sending failed:', emailResult);
+        // Crear notificación alternativa en caso de fallo del email
+        try {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: userId,
+              title: `Error enviando email de verificación`,
+              message: `Tu rol de ${this.getRoleDisplayName(request.role_type)} fue creado pero no pudimos enviar el email. Contacta con soporte.`,
+              type: 'error',
+              category: 'role_verification',
+              is_read: false
+            });
+        } catch (notifError) {
+          console.warn('Could not create error notification:', notifError);
+        }
+
+        return {
+          success: false,
+          message: `Rol creado pero error al enviar email de verificación: ${emailResult.error || 'Error desconocido'}`
+        };
       }
+
+      console.log('✅ Verification email sent successfully');
 
       return {
         success: true,
@@ -117,10 +156,27 @@ export class SupabaseUserRoleService {
       };
 
     } catch (error) {
-      console.error("Error adding role:", error);
+      console.error("❌ Complete addRole error:", error);
+      
+      // Proporcionar mensaje de error más específico basado en el tipo de error
+      let errorMessage = "Error desconocido al agregar el rol.";
+      
+      if (error instanceof Error) {
+        // Si es un error conocido, mostrar el mensaje específico
+        if (error.message.includes('base de datos')) {
+          errorMessage = "Error de base de datos. Por favor, inténtalo de nuevo.";
+        } else if (error.message.includes('email')) {
+          errorMessage = "Error al enviar el email de verificación. Contacta con soporte.";
+        } else if (error.message.includes('verificar roles')) {
+          errorMessage = "Error al verificar roles existentes. Inténtalo de nuevo.";
+        } else {
+          errorMessage = `Error específico: ${error.message}`;
+        }
+      }
+
       return {
         success: false,
-        message: "Error al agregar el rol. Por favor inténtalo de nuevo."
+        message: errorMessage
       };
     }
   }
