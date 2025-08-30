@@ -14,7 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const results = {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    tests: {} as Record<string, any>
+    tests: {} as Record<string, any>,
+    recommendations: [] as string[],
   };
 
   // Test 1: Check environment variables
