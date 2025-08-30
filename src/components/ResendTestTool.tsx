@@ -13,9 +13,45 @@ interface TestResult {
   responseData?: any;
 }
 
+interface ConfigStatus {
+  hasKey: boolean;
+  keyPreview?: string;
+}
+
 export default function ResendTestTool() {
   const [testing, setTesting] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
+  const [configStatus, setConfigStatus] = useState<ConfigStatus>({ hasKey: false });
+
+  const checkResendConfiguration = async () => {
+    setChecking(true);
+    
+    try {
+      const response = await fetch('/api/test/resend-test?config=true', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+      
+      setConfigStatus({
+        hasKey: data.hasResendKey || false,
+        keyPreview: data.keyPreview || 'No configurada'
+      });
+
+    } catch (error) {
+      console.error('Error checking config:', error);
+      setConfigStatus({
+        hasKey: false,
+        keyPreview: 'Error al verificar'
+      });
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const testResendAPI = async () => {
     setTesting(true);
@@ -42,6 +78,14 @@ export default function ResendTestTool() {
         responseData: data
       });
 
+      // Actualizar el estado de configuración después del test
+      if (data.hasResendKey !== undefined) {
+        setConfigStatus({
+          hasKey: data.hasResendKey,
+          keyPreview: data.keyPreview || (data.hasResendKey ? 're_***...' : 'No configurada')
+        });
+      }
+
     } catch (error) {
       setResult({
         success: false,
@@ -64,109 +108,110 @@ export default function ResendTestTool() {
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Button 
-            onClick={testResendAPI}
-            disabled={testing}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {testing ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Probando...
-              </>
-            ) : (
-              <>
-                <Mail className="h-4 w-4 mr-2" />
-                Probar Conexión API
-              </>
-            )}
-          </Button>
-          
-          <div className="text-sm text-blue-700">
-            Esto probará si la clave de API de Resend está configurada correctamente
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-medium">Estado de Configuración de Resend</h3>
+              <p className="text-sm text-neutral-600">Verificar la configuración de la API de Resend</p>
+            </div>
+            <Button 
+              onClick={checkResendConfiguration}
+              disabled={checking}
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {checking ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Verificando...
+                </>
+              ) : (
+                <>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Verificar Config
+                </>
+              )}
+            </Button>
           </div>
-        </div>
 
-        <div className="p-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-medium">Estado de Configuración de Resend</h3>
-                <p className="text-sm text-neutral-600">Verificar la configuración de la API de Resend</p>
+          {/* Configuration Status */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                configStatus.hasKey ? 'bg-emerald-500' : 'bg-red-500'
+              }`}>
+                {configStatus.hasKey ? (
+                  <CheckCircle className="h-5 w-5 text-white" />
+                ) : (
+                  <AlertTriangle className="h-5 w-5 text-white" />
+                )}
               </div>
+              <div>
+                <h4 className="font-medium text-blue-900">Estado de RESEND_API_KEY</h4>
+                <p className="text-sm text-blue-700">
+                  {configStatus.hasKey 
+                    ? "✅ Configurada correctamente" 
+                    : "❌ No configurada o inválida"
+                  }
+                </p>
+              </div>
+            </div>
+
+            {configStatus.hasKey ? (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                <p className="text-sm text-emerald-800">
+                  <strong>✅ RESEND_API_KEY encontrada:</strong> {configStatus.keyPreview}
+                </p>
+                <p className="text-xs text-emerald-600 mt-1">
+                  La clave está configurada y tiene el formato correcto.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800 mb-2">
+                  <strong>❌ RESEND_API_KEY no encontrada</strong>
+                </p>
+                <div className="space-y-2">
+                  <div className="text-xs text-red-700">
+                    <strong>Para solucionarlo:</strong>
+                  </div>
+                  <ol className="text-xs text-red-700 space-y-1 ml-4">
+                    <li>1. Ve a <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">https://resend.com/api-keys</a></li>
+                    <li>2. Crea una nueva API key (empieza con 're_')</li>
+                    <li>3. En Softgen: Settings (⚙️) → Environment → añadir:</li>
+                    <li className="ml-4 font-mono bg-red-100 px-2 py-1 rounded">RESEND_API_KEY=tu_clave_aqui</li>
+                    <li>4. Guarda y reinicia el servidor</li>
+                  </ol>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Test Section */}
+          <div className="border-t border-blue-200/50 pt-4">
+            <div className="flex items-center gap-4 mb-4">
               <Button 
-                onClick={checkResendConfiguration}
-                disabled={checking}
-                size="sm"
+                onClick={testResendAPI}
+                disabled={testing}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {checking ? (
+                {testing ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Verificando...
+                    Probando...
                   </>
                 ) : (
                   <>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Verificar Config
+                    <Mail className="h-4 w-4 mr-2" />
+                    Probar Conexión API
                   </>
                 )}
               </Button>
-            </div>
-
-            {/* Configuration Status */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                  configStatus.hasKey ? 'bg-emerald-500' : 'bg-red-500'
-                }`}>
-                  {configStatus.hasKey ? (
-                    <CheckCircle className="h-5 w-5 text-white" />
-                  ) : (
-                    <AlertTriangle className="h-5 w-5 text-white" />
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-medium text-blue-900">Estado de RESEND_API_KEY</h4>
-                  <p className="text-sm text-blue-700">
-                    {configStatus.hasKey 
-                      ? "✅ Configurada correctamente" 
-                      : "❌ No configurada o inválida"
-                    }
-                  </p>
-                </div>
+              
+              <div className="text-sm text-blue-700">
+                Esto probará si la clave de API de Resend está configurada correctamente
               </div>
-
-              {configStatus.hasKey ? (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                  <p className="text-sm text-emerald-800">
-                    <strong>✅ RESEND_API_KEY encontrada:</strong> {configStatus.keyPreview}
-                  </p>
-                  <p className="text-xs text-emerald-600 mt-1">
-                    La clave está configurada y tiene el formato correcto.
-                  </p>
-                </div>
-              ) : (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-sm text-red-800 mb-2">
-                    <strong>❌ RESEND_API_KEY no encontrada</strong>
-                  </p>
-                  <div className="space-y-2">
-                    <div className="text-xs text-red-700">
-                      <strong>Para solucionarlo:</strong>
-                    </div>
-                    <ol className="text-xs text-red-700 space-y-1 ml-4">
-                      <li>1. Ve a <a href="https://resend.com/api-keys" target="_blank" className="text-blue-600 underline">https://resend.com/api-keys</a></li>
-                      <li>2. Crea una nueva API key (empieza con 're_')</li>
-                      <li>3. En Softgen: Settings (⚙️) → Environment → añadir:</li>
-                      <li className="ml-4 font-mono bg-red-100 px-2 py-1 rounded">RESEND_API_KEY=tu_clave_aqui</li>
-                      <li>4. Guarda y reinicia el servidor</li>
-                    </ol>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Test Results */}
@@ -208,10 +253,11 @@ export default function ResendTestTool() {
                       <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                         <h5 className="font-medium text-blue-900 mb-2">💡 Posibles soluciones:</h5>
                         <ul className="text-sm text-blue-800 space-y-1">
-                          <li>• Verifica que RESEND_API_KEY esté configurada</li>
-                          <li>• La clave debe empezar con 're_'</li>
-                          <li>• Reinicia el servidor después de cambios</li>
-                          <li>• Verifica tu cuenta en Resend.com</li>
+                          <li>• Verifica que RESEND_API_KEY esté configurada correctamente</li>
+                          <li>• La clave debe empezar con 're_' y tener al menos 40 caracteres</li>
+                          <li>• Reinicia el servidor después de hacer cambios en las variables de entorno</li>
+                          <li>• Verifica que tu cuenta de Resend.com esté activa</li>
+                          <li>• Si el error es 401, la clave es inválida o expirada</li>
                         </ul>
                       </div>
                     )}
