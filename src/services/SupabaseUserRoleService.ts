@@ -159,19 +159,33 @@ export class SupabaseUserRoleService {
       console.error("❌ Complete addRole error:", error);
       
       // Proporcionar mensaje de error más específico basado en el tipo de error
-      let errorMessage = "Error desconocido al agregar el rol.";
+      let errorMessage = "Error al agregar el rol. Detalles técnicos: ";
       
       if (error instanceof Error) {
+        // Mostrar el error completo para debugging
+        console.log("📋 Full error details:", {
+          name: error.name,
+          message: error.message,
+          stack: error.stack?.substring(0, 200)
+        });
+        
         // Si es un error conocido, mostrar el mensaje específico
         if (error.message.includes('base de datos')) {
-          errorMessage = "Error de base de datos. Por favor, inténtalo de nuevo.";
-        } else if (error.message.includes('email')) {
-          errorMessage = "Error al enviar el email de verificación. Contacta con soporte.";
+          errorMessage = "Error de base de datos: " + error.message;
+        } else if (error.message.includes('email') || error.message.includes('Email')) {
+          errorMessage = "Error al enviar email de verificación: " + error.message;
         } else if (error.message.includes('verificar roles')) {
-          errorMessage = "Error al verificar roles existentes. Inténtalo de nuevo.";
+          errorMessage = "Error al verificar roles existentes: " + error.message;
+        } else if (error.message.includes('RESEND') || error.message.includes('API')) {
+          errorMessage = "Error del servicio de email. Verifica la configuración de RESEND_API_KEY.";
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = "Error de conexión. Verifica tu conectividad a internet.";
         } else {
+          // Mostrar el error completo para casos no manejados
           errorMessage = `Error específico: ${error.message}`;
         }
+      } else {
+        errorMessage = "Error desconocido al agregar el rol: " + String(error);
       }
 
       return {
