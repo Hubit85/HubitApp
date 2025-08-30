@@ -1,6 +1,18 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabaseServer } from '@/lib/supabaseServer';
 
+// FORZAR CARGA DE VARIABLES DE ENTORNO
+import { config } from 'dotenv';
+import path from 'path';
+
+// Cargar .env.local manualmente
+config({ path: path.resolve(process.cwd(), '.env.local') });
+
+console.log('🔧 ENV DEBUG: Forced loading .env.local');
+console.log('🔧 ENV DEBUG: SUPABASE_URL =', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING');
+console.log('🔧 ENV DEBUG: SERVICE_KEY =', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
+console.log('🔧 ENV DEBUG: RESEND =', process.env.RESEND_API_KEY ? 'SET' : 'MISSING');
+
 interface AddRoleRequestBody {
   userId: string;
   roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
