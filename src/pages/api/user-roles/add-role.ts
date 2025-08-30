@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import supabaseServer from '@/lib/supabaseServer';
-import type { Database } from '@/integrations/supabase/types';
 
 interface AddRoleRequestBody {
   userId: string;
@@ -8,7 +7,6 @@ interface AddRoleRequestBody {
   roleSpecificData?: Record<string, any>;
 }
 
-// Configurar CORS y headers apropiados
 function setCorsHeaders(res: NextApiResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -17,42 +15,13 @@ function setCorsHeaders(res: NextApiResponse) {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Configurar headers inmediatamente
   setCorsHeaders(res);
   
-  console.log('🚀 API: add-role endpoint called with method:', req.method);
-
-  // ===== DIAGNÓSTICO DETALLADO DE VARIABLES DE ENTORNO =====
-  console.log('🔧 API: DETAILED ENVIRONMENT CHECK...');
-  const envCheck = {
-    NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    RESEND_API_KEY: !!process.env.RESEND_API_KEY,
-    urlValue: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    serviceKeyPrefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20),
-    anonKeyPrefix: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20),
-    resendKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 10),
-    nodeEnv: process.env.NODE_ENV
-  };
-  console.log('🔧 API: Environment status:', envCheck);
-
-  // VALIDATION: Variables críticas
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('❌ API: CRITICAL - Missing Supabase environment variables');
-    return res.status(500).json({
-      success: false,
-      message: 'Error de configuración del servidor: Variables de entorno de Supabase faltantes'
-    });
-  }
-
-  // Manejar preflight OPTIONS
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ message: 'OK' });
   }
 
   if (req.method !== 'POST') {
-    console.log('❌ API: Method not allowed:', req.method);
     return res.status(405).json({ 
       success: false, 
       error: 'Method not allowed',
@@ -61,89 +30,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // ===== PRUEBA DE CONEXIÓN SIMPLE =====
-    console.log('🔗 API: Testing basic Supabase connection...');
-    try {
-      // Prueba muy simple: obtener metadata de la tabla profiles
-      const { error: testError } = await supabaseServer
-        .from('profiles')
-        .select('id')
-        .limit(0); // No queremos datos, solo probar la conexión
-        
-      if (testError) {
-        console.error('❌ API: Supabase connection test FAILED:', testError);
-        return res.status(500).json({
-          success: false,
-          message: `Error de base de datos: ${testError.message}`,
-          errorDetails: {
-            code: testError.code,
-            message: testError.message,
-            hint: testError.hint
-          }
-        });
-      }
-      console.log('✅ API: Supabase connection test PASSED');
-    } catch (connectionError) {
-      console.error('❌ API: Critical connection error:', connectionError);
-      return res.status(500).json({
-        success: false,
-        message: `Error crítico de conexión: ${connectionError instanceof Error ? connectionError.message : 'Error desconocido'}`
-      });
-    }
-
-    // VALIDACIÓN DE VARIABLES DE ENTORNO DE RESEND
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-
-    console.log('🔧 API: Resend validation:', {
-      hasResendKey: !!RESEND_API_KEY,
-      resendKeyValid: RESEND_API_KEY ? RESEND_API_KEY.startsWith('re_') : false
-    });
-
-    // Validar que el body existe
-    if (!req.body) {
-      console.log('❌ API: No request body provided');
-      return res.status(400).json({
-        success: false,
-        message: 'No se proporcionó información en la solicitud'
-      });
-    }
-
     const { userId, roleType, roleSpecificData }: AddRoleRequestBody = req.body;
 
-    console.log('📋 API: Request data received:', { 
-      userId: userId ? 'present' : 'missing', 
-      roleType, 
-      hasRoleSpecificData: !!roleSpecificData
-    });
-
-    // Validación de entrada más robusta
-    if (!userId || typeof userId !== 'string' || userId.trim().length === 0) {
-      console.log('❌ API: Invalid or missing userId:', userId);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'userId es requerido y debe ser una cadena válida no vacía' 
-      });
-    }
-
-    if (!roleType || typeof roleType !== 'string' || roleType.trim().length === 0) {
-      console.log('❌ API: Invalid or missing roleType:', roleType);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'roleType es requerido y debe ser una cadena válida no vacía' 
+    if (!userId || !roleType) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId y roleType son requeridos'
       });
     }
 
     const validRoles = ['particular', 'community_member', 'service_provider', 'property_administrator'];
     if (!validRoles.includes(roleType)) {
-      console.log('❌ API: Invalid roleType:', roleType);
       return res.status(400).json({
         success: false,
         message: `Tipo de rol inválido. Debe ser uno de: ${validRoles.join(', ')}`
       });
     }
 
-    // Verificar si el usuario existe en profiles
-    console.log('👤 API: Validating user exists...');
+    // Verificar si el usuario existe
     const { data: userProfile, error: userError } = await supabaseServer
       .from('profiles')
       .select('id, email, full_name')
@@ -151,28 +55,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .maybeSingle();
 
     if (userError) {
-      console.error('❌ API: User validation failed:', userError);
       return res.status(500).json({
         success: false,
-        message: `Error de base de datos: ${userError.message}`
+        message: `Error al validar usuario: ${userError.message}`
       });
     }
 
     if (!userProfile) {
-      console.error('❌ API: User not found in profiles');
       return res.status(400).json({
         success: false,
         message: 'Usuario no encontrado en el sistema'
       });
     }
 
-    console.log('✅ API: User validated:', { 
-      userId, 
-      hasEmail: !!userProfile.email
-    });
-
     // Verificar si el rol ya existe
-    console.log('🔍 API: Checking for existing roles...');
     const { data: existingRole, error: checkError } = await supabaseServer
       .from('user_roles')
       .select('id, is_verified, role_type')
@@ -181,15 +77,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .maybeSingle();
 
     if (checkError) {
-      console.error('❌ API: Error checking existing roles:', checkError);
       return res.status(500).json({
         success: false,
-        message: `Error de base de datos: ${checkError.message}`
+        message: `Error al verificar roles existentes: ${checkError.message}`
       });
     }
 
     if (existingRole) {
-      console.log('⚠️ API: Role already exists:', existingRole);
       const roleDisplayName = getRoleDisplayName(roleType);
       
       if (existingRole.is_verified) {
@@ -207,12 +101,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Generar token de verificación
     const verificationToken = generateVerificationToken();
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
-
-    console.log('🔐 API: Generated verification token');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     // Crear el nuevo rol
-    console.log('💾 API: Creating new role in database...');
     const { data: newRole, error: insertError } = await supabaseServer
       .from('user_roles')
       .insert({
@@ -228,44 +119,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single();
 
     if (insertError || !newRole) {
-      console.error('❌ API: Database insert error:', insertError);
       return res.status(500).json({
         success: false,
-        message: `Error de base de datos: ${insertError?.message || 'Error desconocido'}`
+        message: `Error al crear el rol: ${insertError?.message || 'Error desconocido'}`
       });
     }
 
-    console.log('✅ API: Role created successfully:', newRole.id);
-
-    // Inicializar variables de email
+    // Enviar email de verificación
     let emailSent = false;
     let emailErrorMessage = '';
-
-    // Preparar email
     const userEmail = userProfile.email;
-    if (!userEmail) {
-      console.error('❌ API: No email found for user');
-      return res.status(200).json({
-        success: true,
-        message: "Rol creado correctamente, pero no se pudo enviar email: email no encontrado",
-        requiresVerification: true
-      });
-    }
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
-    // Resend es opcional para esta operación
-    const resendAvailable = RESEND_API_KEY && 
-                           RESEND_API_KEY.trim().length > 0 && 
-                           !RESEND_API_KEY.includes('missing') && 
-                           RESEND_API_KEY.startsWith('re_');
-
-    console.log('📧 API: Email service status:', { resendAvailable });
-
-    // ENVIAR EMAIL con Resend (solo si está disponible)
-    if (resendAvailable) {
-      console.log('📧 API: Preparing to send verification email...');
-      
+    if (userEmail && RESEND_API_KEY && RESEND_API_KEY.startsWith('re_')) {
       try {
-        const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
+        const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
         const verificationUrl = `${SITE_URL}/auth/verify-role?token=${verificationToken}`;
         const roleDisplayName = getRoleDisplayName(roleType);
         const currentYear = new Date().getFullYear();
@@ -313,40 +181,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   </div>
 </div>`;
 
-        const emailData = {
-          from: 'HuBiT <onboarding@resend.dev>',
-          to: userEmail,
-          subject: `Verificar tu nuevo rol en HuBiT - ${roleDisplayName}`,
-          html: emailHtml
-        };
-
-        console.log('📤 API: Calling Resend API...');
-
         const emailResponse = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${RESEND_API_KEY}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(emailData)
-        });
-
-        const responseData = await emailResponse.json();
-        
-        console.log('📡 API: Resend response:', {
-          status: emailResponse.status,
-          success: emailResponse.ok
+          body: JSON.stringify({
+            from: 'HuBiT <onboarding@resend.dev>',
+            to: userEmail,
+            subject: `Verificar tu nuevo rol en HuBiT - ${roleDisplayName}`,
+            html: emailHtml
+          })
         });
 
         if (emailResponse.ok) {
-          console.log('✅ API: Email sent successfully');
           emailSent = true;
         } else {
-          console.error('❌ API: Resend API error:', responseData);
-          
-          if (emailResponse.status === 401) {
-            emailErrorMessage = "Clave de API de Resend inválida";
-          } else if (emailResponse.status === 403) {
+          const responseData = await emailResponse.json();
+          if (emailResponse.status === 403) {
             emailErrorMessage = "Solo puedes enviar emails a tu dirección verificada (borjapipaon@gmail.com)";
           } else {
             emailErrorMessage = `Error ${emailResponse.status}: ${responseData.message || emailResponse.statusText}`;
@@ -354,15 +207,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
       } catch (emailError) {
-        console.error('❌ API: Email sending error:', emailError);
         emailErrorMessage = `Error al enviar email: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}`;
       }
     } else {
-      console.warn('⚠️ API: Resend not available, skipping email');
       emailErrorMessage = 'Configuración de email no disponible';
     }
 
-    // Respuesta final con información sobre el estado del email
     const roleDisplayName = getRoleDisplayName(roleType);
     
     if (emailSent) {
@@ -382,21 +232,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
   } catch (error) {
-    console.error('❌ API: Unexpected error:', error);
-    
-    // Error detallado para debugging
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-    const errorStack = error instanceof Error ? error.stack : 'No stack trace';
-    
-    console.error('❌ API: Error details:', {
-      message: errorMessage,
-      stack: errorStack,
-      type: typeof error
-    });
-    
     return res.status(500).json({
       success: false,
-      message: `Error de base de datos: ${errorMessage}`
+      message: `Error interno del servidor: ${error instanceof Error ? error.message : 'Error desconocido'}`
     });
   }
 }
