@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import CustomEmailService from "@/lib/customEmailService";
 
 export interface UserRole {
   id: string;
@@ -125,10 +124,10 @@ export class SupabaseUserRoleService {
         throw new Error("Usuario no encontrado para envío de email");
       }
 
-      // IMPLEMENTACIÓN DIRECTA - LLAMAR RESEND DIRECTAMENTE DESDE AQUÍ
-      console.log('📧 Sending verification email DIRECTLY from service (no API route calls)...');
+      // ENVIO DIRECTO DE EMAIL - SIN DEPENDENCIAS EXTERNAS
+      console.log('📧 Sending verification email DIRECTLY...');
       try {
-        // HARDCODED API KEY - ELIMINANDO TODA DEPENDENCIA
+        // HARDCODED API KEY Y URL - CERO DEPENDENCIAS
         const RESEND_API_KEY = 're_HMYRvjWf_93ML8R9PbPqRHU9EP1sTJ9oS';
         const SITE_URL = 'https://hubit-84-supabase-email-templates.softgen.ai';
         
@@ -136,7 +135,7 @@ export class SupabaseUserRoleService {
         const roleDisplayName = this.getRoleDisplayName(request.role_type);
         const currentYear = new Date().getFullYear();
 
-        // Create email HTML template directly
+        // Create email HTML template directly inline
         const emailHtml = `
 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
   <div style="background-color: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); border: 1px solid rgba(186, 230, 253, 0.6);">
@@ -233,7 +232,7 @@ export class SupabaseUserRoleService {
           html: emailHtml
         };
 
-        console.log('📤 Calling Resend API DIRECTLY from service...');
+        console.log('📤 Calling Resend API DIRECTLY...');
         console.log('📋 Request details:', {
           to: emailData.to,
           subject: emailData.subject,
@@ -241,7 +240,7 @@ export class SupabaseUserRoleService {
           apiKeyValid: RESEND_API_KEY.startsWith('re_')
         });
 
-        // Send email using fetch directly - NO API ROUTE DEPENDENCY
+        // Send email using fetch directly - NO EXTERNAL DEPENDENCIES
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -260,7 +259,7 @@ export class SupabaseUserRoleService {
           throw new Error(`Resend API error: ${responseData.message || response.statusText}`);
         }
 
-        console.log('✅ Email sent successfully via direct Resend API call from service');
+        console.log('✅ Email sent successfully via direct Resend API call');
         console.log('📧 Email ID:', responseData.id);
 
         return {
@@ -579,42 +578,6 @@ export class SupabaseUserRoleService {
       return {
         success: false,
         message: error instanceof Error ? error.message : "Error al eliminar la verificación pendiente"
-      };
-    }
-  }
-
-  /**
-   * Envía email de verificación de rol usando el servicio personalizado
-   */
-  static async sendRoleVerificationEmail(userId: string, roleType: UserRole['role_type'], verificationToken: string): Promise<{ success: boolean; message: string; error?: string }> {
-    try {
-      // Obtener datos del usuario
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) {
-        throw new Error("Usuario no encontrado");
-      }
-
-      // Usar el servicio de email personalizado
-      const result = await CustomEmailService.sendRoleVerificationEmail(
-        userId,
-        user.email!,
-        roleType,
-        verificationToken
-      );
-
-      if (result.success) {
-        console.log(`📧 Email de verificación de rol enviado exitosamente a ${user.email}`);
-        console.log(`👤 Nuevo rol: ${this.getRoleDisplayName(roleType)}`);
-      }
-
-      return result;
-
-    } catch (error) {
-      console.error("Error sending verification email:", error);
-      return {
-        success: false,
-        message: 'Failed to send verification email',
-        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
