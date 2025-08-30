@@ -169,6 +169,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
+        console.error("Supabase signUp error:", error);
         setLoading(false);
         return { error: error.message };
       }
@@ -184,23 +185,26 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
 
         // If user is created and has session, try to create profile
-        if (data.session && databaseConnected) {
+        if (data.session) {
           try {
-            const profileData: ProfileInsert = {
-              id: data.user.id,
-              email: data.user.email!,
-              ...userData,
-            };
+            // Check database connection first
+            const isConnected = await checkDatabaseConnection();
+            
+            if (isConnected) {
+              const profileData: ProfileInsert = {
+                id: data.user.id,
+                email: data.user.email!,
+                ...userData,
+              };
 
-            const { error: profileError } = await supabase
-              .from("profiles")
-              .insert(profileData);
+              const { error: profileError } = await supabase
+                .from("profiles")
+                .insert(profileData);
 
-            if (profileError) {
-              console.warn("Could not create profile in database:", profileError);
-              // Don't fail registration if profile creation fails
-              setLoading(false);
-              return { error: undefined };
+              if (profileError) {
+                console.warn("Could not create profile in database:", profileError);
+                // Don't fail registration if profile creation fails
+              }
             }
           } catch (profileError) {
             console.warn("Could not create profile in database, but user was created successfully:", profileError);
@@ -214,6 +218,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return { error: "Error durante el registro. Por favor, inténtalo de nuevo." };
     } catch (error) {
+      console.error("Unexpected signup error:", error);
       setLoading(false);
       return { error: "Error inesperado durante el registro" };
     }

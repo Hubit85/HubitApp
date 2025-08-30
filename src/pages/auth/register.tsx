@@ -38,12 +38,17 @@ export default function RegisterPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      // Only redirect if we're not currently in the registration process
-      if (!isLoading) {
-        router.push("/dashboard");
+      // Only redirect if we're not currently processing a registration
+      // and if we're not already showing a success message
+      if (!isLoading && !error) {
+        const timer = setTimeout(() => {
+          router.push("/dashboard");
+        }, 500);
+        
+        return () => clearTimeout(timer);
       }
     }
-  }, [user, loading, router, isLoading]);
+  }, [user, loading, router, isLoading, error]);
 
   // Password validation
   useEffect(() => {
@@ -93,14 +98,23 @@ export default function RegisterPage() {
       if (result.error) {
         setError(result.error);
         setIsLoading(false);
-      } else {
-        // Successful registration - show success message and redirect after a short delay
+      } else if (result.message) {
+        // Email confirmation required
         setError("");
+        setIsLoading(false);
+        // Show success message without redirecting
+        setError(`✅ ${result.message}`);
+      } else {
+        // Successful registration with immediate login
+        setError("✅ Cuenta creada exitosamente. Redirigiendo al dashboard...");
         
-        // Give user feedback about successful registration
+        // Short delay before redirect to prevent conflicts
         setTimeout(() => {
-          router.push("/dashboard");
-        }, 1000);
+          if (!user) {
+            // Force a page reload to ensure auth state is properly set
+            window.location.href = "/dashboard";
+          }
+        }, 1500);
       }
     } catch (err) {
       console.error("Registration error:", err);
