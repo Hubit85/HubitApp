@@ -84,7 +84,6 @@ export class SupabaseConversationService {
 
     if (userId) {
       if (isProvider) {
-        // For service providers, find conversations where they are the service provider
         const providerProfile = await SupabaseServiceProviderService.getServiceProviderByUserId(userId);
         if (providerProfile) {
           query = query.eq("service_provider_id", providerProfile.id);
@@ -92,7 +91,6 @@ export class SupabaseConversationService {
           return [];
         }
       } else {
-        // For regular users, find conversations where they are the user
         query = query.eq("user_id", userId);
       }
     }
