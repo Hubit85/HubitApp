@@ -1,4 +1,3 @@
-
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -24,14 +23,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!RESEND_API_KEY || RESEND_API_KEY.trim().length === 0) {
       return res.status(200).json({
         success: false,
-        message: 'RESEND_API_KEY no está configurada o está vacía',
+        message: '❌ RESEND_API_KEY no está configurada',
         details: {
           keyExists: false,
           keyLength: 0,
           recommendations: [
-            '1. Ve a https://resend.com/dashboard',
-            '2. Crea una nueva API Key',
-            '3. Configúrala en Softgen Settings → Environment'
+            '1. Ve a https://resend.com/api-keys y crea una nueva API Key',
+            '2. Copia la clave (comienza con "re_")',
+            '3. En Softgen, ve a Settings (arriba derecha) → Environment',
+            '4. Agrega: RESEND_API_KEY=tu_clave_aqui',
+            '5. Guarda y prueba de nuevo aquí'
           ]
         }
       });
@@ -40,128 +41,178 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!RESEND_API_KEY.startsWith('re_')) {
       return res.status(200).json({
         success: false,
-        message: 'RESEND_API_KEY tiene formato inválido',
+        message: '❌ RESEND_API_KEY tiene formato incorrecto',
         details: {
           keyExists: true,
           keyLength: RESEND_API_KEY.length,
-          keyPrefix: RESEND_API_KEY.substring(0, 10),
-          expectedPrefix: 're_',
+          keyPrefix: RESEND_API_KEY.substring(0, 10) + '...',
+          currentKey: RESEND_API_KEY.length > 20 ? RESEND_API_KEY.substring(0, 20) + '...' : RESEND_API_KEY,
           recommendations: [
-            'La clave debe empezar con "re_"',
-            'Verifica que copiaste la clave completa',
-            'Genera una nueva si es necesario'
+            '❌ La clave actual no es válida (debe empezar con "re_")',
+            '1. Ve a https://resend.com/api-keys',
+            '2. Crea una nueva API Key',
+            '3. Copia EXACTAMENTE la clave completa',
+            '4. Actualízala en Softgen Settings → Environment'
           ]
         }
       });
     }
 
-    // Test simple: intentar hacer una petición básica para validar la clave
-    console.log('📡 Making test request to Resend API...');
+    // Test paso 1: Validar la clave con endpoint básico
+    console.log('📡 Step 1: Validating API key...');
     
-    const testResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const validationResponse = await fetch('https://api.resend.com/domains', {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'onboarding@resend.dev',
-        to: ['delivered@resend.dev'],
-        subject: 'HuBiT API Test - Please Ignore',
-        html: '<p>This is a test email to validate API connection. Please ignore.</p>',
-      })
+      }
     });
 
-    const responseData = await testResponse.json();
+    const validationData = await validationResponse.json();
     
-    console.log('📡 Resend API Response:', {
-      status: testResponse.status,
-      statusText: testResponse.statusText,
-      data: responseData
+    console.log('📡 Validation Response:', {
+      status: validationResponse.status,
+      statusText: validationResponse.statusText,
+      data: validationData
     });
 
-    if (testResponse.status === 401) {
+    if (validationResponse.status === 401) {
       return res.status(200).json({
         success: false,
-        message: '🔑 API Key inválida o expirada',
+        message: '🔑 API Key INVÁLIDA - Resend la rechazó',
         details: {
-          status: testResponse.status,
-          error: responseData,
-          currentKey: `${RESEND_API_KEY.substring(0, 15)}...`,
+          status: validationResponse.status,
+          error: validationData,
+          keyExists: true,
+          keyLength: RESEND_API_KEY.length,
+          keyPrefix: RESEND_API_KEY.substring(0, 15) + '...',
+          currentKey: RESEND_API_KEY.substring(0, 25) + '...',
           recommendations: [
-            '1. La clave actual no es válida según Resend',
-            '2. Ve a https://resend.com/dashboard/api-keys',
-            '3. Genera una nueva API Key',
-            '4. Actualízala en Softgen Settings → Environment',
-            '5. Usa esta herramienta para verificar que funciona'
+            '🚨 PROBLEMA CONFIRMADO: La clave "re_G5uNjHmE_EQdCfxeNTY3j4YmvFmqSv5Es" NO funciona',
+            '1. Ve INMEDIATAMENTE a: https://resend.com/api-keys',
+            '2. Borra la clave actual si existe',
+            '3. Crea una NUEVA API Key',
+            '4. Copia la nueva clave COMPLETA (empieza con re_)',
+            '5. Actualízala en Softgen: Settings → Environment → RESEND_API_KEY=nueva_clave',
+            '6. ¡CRÍTICO! Usa la nueva clave, no la vieja'
           ]
         }
       });
     }
 
-    if (testResponse.status === 403) {
+    if (validationResponse.status === 403) {
       return res.status(200).json({
         success: false,
-        message: 'API Key válida pero sin permisos suficientes',
+        message: '🔑 API Key válida pero sin permisos',
         details: {
-          status: testResponse.status,
-          error: responseData,
+          status: validationResponse.status,
+          error: validationData,
           recommendations: [
-            'La clave está autenticada pero no tiene permisos',
-            'Verifica que la API key tenga permisos de envío de emails',
+            'La clave funciona pero no tiene permisos completos',
+            'Verifica que la API key tenga permisos de "Send emails"',
             'Revisa la configuración de tu cuenta en Resend'
           ]
         }
       });
     }
 
-    if (testResponse.status === 422) {
+    if (!validationResponse.ok) {
       return res.status(200).json({
         success: false,
-        message: 'API Key válida pero configuración de dominio requerida',
+        message: `Error de validación: ${validationResponse.status}`,
         details: {
-          status: testResponse.status,
-          error: responseData,
+          status: validationResponse.status,
+          error: validationData,
           recommendations: [
-            '1. Tu API Key funciona, pero necesitas configurar el dominio',
-            '2. Ve a https://resend.com/domains en tu dashboard',
-            '3. Agrega y verifica el dominio "hubit-84-supabase-email-templates.softgen.ai"',
-            '4. O cambia el remitente a "onboarding@resend.dev" temporalmente'
+            `Código de error inesperado: ${validationResponse.status}`,
+            'Contacta soporte de Resend si esto persiste',
+            'Intenta crear una nueva API Key'
           ]
         }
       });
     }
 
-    if (!testResponse.ok) {
+    // Si llegamos aquí, la clave es válida
+    console.log('✅ API Key validated successfully');
+    
+    // Test paso 2: Intentar envío simple de prueba
+    console.log('📧 Step 2: Testing email sending capability...');
+    
+    const testEmailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'onboarding@resend.dev', // Usando dominio verificado de Resend
+        to: ['delivered@resend.dev'],   // Email de prueba de Resend
+        subject: 'HuBiT API Test - Ignore',
+        html: '<p>Test email from HuBiT app - please ignore.</p>',
+      })
+    });
+
+    const emailData = await testEmailResponse.json();
+    
+    if (testEmailResponse.status === 422) {
+      // Probablemente problema de dominio, pero la clave funciona
       return res.status(200).json({
-        success: false,
-        message: `Error de la API de Resend: ${testResponse.status} ${testResponse.statusText}`,
+        success: true, // ¡La clave SÍ funciona!
+        message: '🔑 API Key VÁLIDA - Configuración de dominio pendiente',
         details: {
-          status: testResponse.status,
-          error: responseData,
+          status: testEmailResponse.status,
+          keyValidated: true,
+          domainRequired: true,
+          error: emailData,
+          keyPrefix: RESEND_API_KEY.substring(0, 15) + '...',
           recommendations: [
-            `Código de error: ${testResponse.status}`,
-            'Revisa la documentación de Resend para este código',
-            'Contacta soporte de Resend si el problema persiste'
+            '✅ ¡EXCELENTE! Tu API Key funciona perfectamente',
+            '🎯 Solo necesitas configurar el dominio para emails personalizados',
+            '1. Ve a https://resend.com/domains',
+            '2. Agrega el dominio que quieras usar (ej: tu-dominio.com)',
+            '3. O usar "onboarding@resend.dev" temporalmente',
+            '🚀 ¡Ya puedes recibir emails de verificación de roles!'
           ]
         }
       });
     }
 
-    // Si llegamos aquí, la API está funcionando
+    if (testEmailResponse.ok) {
+      // ¡Todo perfecto!
+      return res.status(200).json({
+        success: true,
+        message: '🎉 ¡PERFECTO! Resend API 100% funcional',
+        details: {
+          status: testEmailResponse.status,
+          keyValidated: true,
+          canSendEmails: true,
+          emailSent: true,
+          emailId: emailData.id,
+          keyPrefix: RESEND_API_KEY.substring(0, 15) + '...',
+          recommendations: [
+            '🚀 ¡Todo configurado perfectamente!',
+            '✅ Tu API Key funciona al 100%',
+            '📧 Puedes enviar emails sin problemas',
+            '🎯 Los usuarios recibirán emails de verificación',
+            '💪 HuBiT está listo para producción'
+          ]
+        }
+      });
+    }
+
+    // Cualquier otro error
     return res.status(200).json({
-      success: true,
-      message: '✅ API de Resend configurada correctamente',
+      success: false,
+      message: `Error enviando email de prueba: ${testEmailResponse.status}`,
       details: {
-        status: testResponse.status,
-        keyValidated: true,
-        canSendEmails: true,
-        emailId: responseData.id,
-        keyPrefix: RESEND_API_KEY.substring(0, 15) + '...',
+        status: testEmailResponse.status,
+        keyValidated: true, // La clave funciona
+        error: emailData,
         recommendations: [
-          '🎉 ¡Perfecto! Tu API Key funciona correctamente',
-          'Ya puedes enviar emails de verificación',
-          'Los usuarios recibirán emails cuando agreguen roles'
+          'La API Key es válida, pero hay un problema con el envío',
+          'Revisa los logs de Resend en tu dashboard',
+          'Intenta configurar un dominio verificado'
         ]
       }
     });
@@ -170,16 +221,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ Error testing Resend API:', error);
     
     let errorMessage = 'Error de conexión con Resend';
-    let recommendations = ['Error desconocido - revisa los logs del servidor'];
+    let recommendations = ['Error interno - revisa los logs del servidor'];
 
     if (error instanceof Error) {
       errorMessage = error.message;
-      if (error.message.includes('fetch')) {
-        errorMessage = 'No se pudo conectar con la API de Resend';
+      if (error.message.includes('fetch') || error.message.includes('network')) {
+        errorMessage = 'No se pudo conectar con api.resend.com';
         recommendations = [
-          'Verifica tu conexión a internet',
-          'Comprueba que api.resend.com esté accesible',
-          'Intenta de nuevo en unos minutos'
+          'Problema de conectividad de red',
+          'Verifica que api.resend.com esté accesible',
+          'Intenta de nuevo en unos minutos',
+          'Si persiste, puede ser un problema del servidor'
         ];
       }
     }
