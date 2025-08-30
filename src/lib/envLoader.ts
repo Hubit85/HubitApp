@@ -50,7 +50,8 @@ export class EnvLoader {
       const content = fs.readFileSync(path.resolve(filePath), 'utf-8');
       const vars: Record<string, string> = {};
       
-      content.split('\n').forEach(line => {
+      content.split('
+').forEach((line: string) => {
         line = line.trim();
         if (line && !line.startsWith('#') && line.includes('=')) {
           const [key, ...valueParts] = line.split('=');
