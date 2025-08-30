@@ -21,12 +21,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   setCorsHeaders(res);
   
   console.log('🚀 API: add-role endpoint called with method:', req.method);
-  console.log('🔧 API: Environment check:', {
-    hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    hasSupabaseServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    hasResendKey: !!process.env.RESEND_API_KEY,
-    resendKeyFormat: process.env.RESEND_API_KEY ? `${process.env.RESEND_API_KEY.substring(0, 3)}...` : 'missing'
-  });
 
   // Manejar preflight OPTIONS
   if (req.method === 'OPTIONS') {
@@ -57,8 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('📋 API: Request data received:', { 
       userId: userId ? 'present' : 'missing', 
       roleType, 
-      hasRoleSpecificData: !!roleSpecificData,
-      bodyKeys: Object.keys(req.body || {})
+      hasRoleSpecificData: !!roleSpecificData
     });
 
     // Validación de entrada más robusta
@@ -87,8 +80,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Verificar variables de entorno críticas
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    // ⚠️ VALIDACIÓN CRÍTICA DE VARIABLES DE ENTORNO
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
+    console.log('🔧 API: Environment validation:', {
+      hasSupabaseUrl: !!SUPABASE_URL,
+      hasSupabaseServiceKey: !!SUPABASE_SERVICE_KEY,
+      hasResendKey: !!RESEND_API_KEY,
+      resendKeyFormat: RESEND_API_KEY ? `${RESEND_API_KEY.substring(0, 3)}...` : 'MISSING'
+    });
+
+    // Verificar configuración de Supabase
+    if (!SUPABASE_URL) {
       console.error('❌ API: NEXT_PUBLIC_SUPABASE_URL not configured');
       return res.status(500).json({
         success: false,
@@ -96,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!SUPABASE_SERVICE_KEY) {
       console.error('❌ API: SUPABASE_SERVICE_ROLE_KEY not configured');
       return res.status(500).json({
         success: false,
@@ -104,29 +109,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Verificar conexión a Supabase con mejor manejo de errores
+    // ⚠️ VERIFICACIÓN CRÍTICA DE RESEND API KEY
+    if (!RESEND_API_KEY || RESEND_API_KEY.trim().length === 0 || RESEND_API_KEY === 'missing') {
+      console.error('❌ API: RESEND_API_KEY not configured');
+      return res.status(500).json({
+        success: false,
+        message: 'Error de configuración: RESEND_API_KEY no encontrada. Ve a Settings (⚙️) → Environment en Softgen y añade: RESEND_API_KEY=tu_clave_de_resend',
+        configurationRequired: true,
+        details: {
+          missingVariable: 'RESEND_API_KEY',
+          instructions: [
+            '1. Ve a https://resend.com/api-keys',
+            '2. Crea una nueva API key (empieza con "re_")',
+            '3. En Softgen: clic en Settings (⚙️) → Environment',
+            '4. Añade: RESEND_API_KEY=tu_clave_aqui',
+            '5. Guarda y reinicia el servidor'
+          ]
+        }
+      });
+    }
+
+    // Validar formato de la clave de Resend
+    if (!RESEND_API_KEY.startsWith('re_')) {
+      console.error('❌ API: Invalid RESEND_API_KEY format');
+      return res.status(500).json({
+        success: false,
+        message: 'RESEND_API_KEY inválida: debe empezar con "re_"',
+        configurationRequired: true,
+        details: {
+          currentFormat: `Key starts with "${RESEND_API_KEY.substring(0, 3)}"`,
+          expectedFormat: 'Should start with "re_"',
+          instructions: 'Verifica tu clave en https://resend.com/api-keys'
+        }
+      });
+    }
+
+    // Verificar conexión a Supabase
     console.log('🔗 API: Testing Supabase connection...');
     
     try {
-      const { data: testData, error: connectionError, count } = await supabaseServer
+      const { error: connectionError } = await supabaseServer
         .from('profiles')
-        .select('id', { count: 'exact' })
+        .select('id')
         .limit(1);
       
       if (connectionError) {
-        console.error('❌ API: Supabase connection failed:', {
-          code: connectionError.code,
-          message: connectionError.message,
-          details: connectionError.details,
-          hint: connectionError.hint
-        });
+        console.error('❌ API: Supabase connection failed:', connectionError);
         return res.status(500).json({
           success: false,
           message: `Error de conexión con la base de datos: ${connectionError.message}`
         });
       }
       
-      console.log('✅ API: Supabase connection successful, found', count, 'total profiles');
+      console.log('✅ API: Supabase connection successful');
     } catch (connError) {
       console.error('❌ API: Supabase connection error:', connError);
       return res.status(500).json({
@@ -135,7 +170,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Verificar si el usuario existe en profiles
+    // Verificar si el usuario existe
     console.log('👤 API: Validating user exists...');
     const { data: userProfile, error: userError } = await supabaseServer
       .from('profiles')
@@ -143,16 +178,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('id', userId)
       .single();
 
-    if (userError) {
+    if (userError || !userProfile) {
       console.error('❌ API: User validation failed:', userError);
-      return res.status(400).json({
-        success: false,
-        message: `Usuario no encontrado: ${userError.message}`
-      });
-    }
-
-    if (!userProfile) {
-      console.log('❌ API: User profile not found for userId:', userId);
       return res.status(400).json({
         success: false,
         message: 'Usuario no encontrado en el sistema'
@@ -161,20 +188,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ API: User validated:', { 
       userId, 
-      hasEmail: !!userProfile.email,
-      hasName: !!userProfile.full_name
+      hasEmail: !!userProfile.email
     });
 
-    // Verificar si el usuario ya tiene este rol
+    // Verificar si el rol ya existe
     console.log('🔍 API: Checking for existing roles...');
     const { data: existingRole, error: checkError } = await supabaseServer
       .from('user_roles')
-      .select('id, is_verified, role_type, created_at')
+      .select('id, is_verified, role_type')
       .eq('user_id', userId)
       .eq('role_type', roleType)
-      .single();
+      .maybeSingle(); // Usar maybeSingle() en lugar de single()
 
-    if (checkError && checkError.code !== 'PGRST116') {
+    if (checkError) {
       console.error('❌ API: Error checking existing roles:', checkError);
       return res.status(500).json({
         success: false,
@@ -203,9 +229,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const verificationToken = generateVerificationToken();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
 
-    console.log('🔐 API: Generated verification token, expires at:', expiresAt.toISOString());
+    console.log('🔐 API: Generated verification token');
 
-    // Crear el nuevo rol (sin verificar) con mejor manejo de errores
+    // Crear el nuevo rol
     console.log('💾 API: Creating new role in database...');
     const { data: newRole, error: insertError } = await supabaseServer
       .from('user_roles')
@@ -218,152 +244,82 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         verification_expires_at: expiresAt.toISOString(),
         role_specific_data: roleSpecificData || {}
       })
-      .select('id, role_type, user_id, created_at')
+      .select('id, role_type, user_id')
       .single();
 
-    if (insertError) {
-      console.error('❌ API: Database insert error:', {
-        code: insertError.code,
-        message: insertError.message,
-        details: insertError.details,
-        hint: insertError.hint
-      });
+    if (insertError || !newRole) {
+      console.error('❌ API: Database insert error:', insertError);
       return res.status(500).json({
         success: false,
-        message: `Error al crear el rol en la base de datos: ${insertError.message}`
+        message: `Error al crear el rol en la base de datos: ${insertError?.message || 'Error desconocido'}`
       });
     }
 
-    if (!newRole) {
-      console.error('❌ API: No data returned from insert');
-      return res.status(500).json({
-        success: false,
-        message: 'Error: No se pudo crear el rol correctamente'
-      });
-    }
+    console.log('✅ API: Role created successfully:', newRole.id);
 
-    console.log('✅ API: Role created successfully:', { 
-      id: newRole.id, 
-      role_type: newRole.role_type,
-      user_id: newRole.user_id
-    });
-
+    // Preparar email
     const userEmail = userProfile.email;
-
     if (!userEmail) {
       console.error('❌ API: No email found for user');
       return res.status(200).json({
         success: true,
-        message: "Rol creado correctamente, pero no se pudo enviar el email de verificación: email no encontrado",
+        message: "Rol creado correctamente, pero no se pudo enviar email: email no encontrado",
         requiresVerification: true
       });
     }
 
-    console.log('📧 API: User email found, proceeding with email send...');
-
-    // ENVIO DE EMAIL con mejor manejo de errores
+    // ENVIAR EMAIL con Resend
+    console.log('📧 API: Sending verification email...');
+    
     try {
-      const RESEND_API_KEY = process.env.RESEND_API_KEY;
-      
-      if (!RESEND_API_KEY || RESEND_API_KEY.trim().length === 0) {
-        console.error('❌ API: RESEND_API_KEY not configured or empty');
-        console.error('❌ API: Please set RESEND_API_KEY in your environment variables');
-        console.error('❌ API: Go to https://resend.com/api-keys to get your API key');
-        return res.status(200).json({
-          success: true,
-          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: RESEND_API_KEY no configurada. Ve a tu configuración del proyecto en Softgen y añade RESEND_API_KEY=tu_clave_aqui`,
-          requiresVerification: true,
-          configurationRequired: true
-        });
-      }
-
-      // Validar que la clave de Resend tenga el formato correcto
-      if (!RESEND_API_KEY.startsWith('re_')) {
-        console.error('❌ API: Invalid RESEND_API_KEY format - should start with "re_"');
-        return res.status(200).json({
-          success: true,
-          message: `Rol creado correctamente, pero la RESEND_API_KEY no es válida. Debe empezar con 're_'. Verifica tu configuración.`,
-          requiresVerification: true,
-          configurationRequired: true
-        });
-      }
-
-      // Construir URL del sitio
       const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
       const verificationUrl = `${SITE_URL}/auth/verify-role?token=${verificationToken}`;
       const roleDisplayName = getRoleDisplayName(roleType);
       const currentYear = new Date().getFullYear();
 
-      // Create email HTML template
       const emailHtml = `
 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
-  <div style="background-color: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); border: 1px solid rgba(186, 230, 253, 0.6);">
-    
+  <div style="background-color: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
     <div style="text-align: center; margin-bottom: 35px;">
-      <div style="display: inline-block; position: relative; margin-bottom: 25px;">
-        <h1 style="color: #1e293b; font-size: 42px; margin: 0; font-weight: 800; background: linear-gradient(135deg, #0ea5e9, #0284c7, #0369a1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-          HuBiT
-        </h1>
-        <div style="position: absolute; top: -8px; right: -12px; width: 16px; height: 16px; background: linear-gradient(135deg, #06b6d4, #0891b2); border-radius: 50%;"></div>
-      </div>
-      <h2 style="color: #0f172a; font-size: 28px; margin: 0; font-weight: 600; line-height: 1.3;">
-        Verifica tu Nuevo Rol 🎯
-      </h2>
+      <h1 style="color: #1e293b; font-size: 42px; margin: 0; font-weight: 800; background: linear-gradient(135deg, #0ea5e9, #0284c7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HuBiT</h1>
+      <h2 style="color: #0f172a; font-size: 28px; margin: 15px 0 0 0; font-weight: 600;">Verifica tu Nuevo Rol 🎯</h2>
     </div>
 
-    <div style="margin-bottom: 35px;">
-      <p style="color: #475569; font-size: 18px; line-height: 1.7; margin-bottom: 20px;">
-        ¡Hola ${userProfile.full_name || 'Usuario'}! Has solicitado agregar un nuevo rol a tu cuenta de HuBiT.
-      </p>
-      
-      <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #3b82f6;">
-        <h3 style="color: #1e40af; font-size: 18px; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center;">
-          <span style="margin-right: 10px;">👤</span> Nueva Solicitud de Rol
-        </h3>
-        <p style="color: #1e40af; font-size: 16px; margin: 0; font-weight: 500;">
-          Tipo de Rol: <strong>${roleDisplayName}</strong>
-        </p>
-      </div>
-      
-      <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
-        Para verificar y activar este nuevo rol, haz clic en el botón de abajo. Esto te permitirá cambiar entre tus diferentes roles dentro de la plataforma.
-      </p>
+    <p style="color: #475569; font-size: 18px; line-height: 1.7; margin-bottom: 20px;">
+      ¡Hola ${userProfile.full_name || 'Usuario'}! Has solicitado agregar un nuevo rol a tu cuenta.
+    </p>
+    
+    <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #3b82f6;">
+      <h3 style="color: #1e40af; font-size: 18px; margin-bottom: 12px; font-weight: 600;">👤 Nueva Solicitud de Rol</h3>
+      <p style="color: #1e40af; font-size: 16px; margin: 0; font-weight: 500;">Tipo de Rol: <strong>${roleDisplayName}</strong></p>
     </div>
+    
+    <p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+      Para verificar y activar este rol, haz clic en el botón de abajo:
+    </p>
 
     <div style="text-align: center; margin: 40px 0;">
-      <a href="${verificationUrl}" 
-         style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%); color: white; padding: 18px 45px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 18px; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); transition: all 0.3s ease;">
-        Verificar Rol Ahora
-      </a>
+      <a href="${verificationUrl}" style="display: inline-block; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; padding: 18px 45px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 18px;">Verificar Rol Ahora</a>
     </div>
 
-    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); padding: 25px; border-radius: 12px; border-left: 4px solid #f59e0b; margin: 25px 0;">
-      <h3 style="color: #92400e; font-size: 16px; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center;">
-        <span style="margin-right: 8px;">⚡</span> Información Importante
-      </h3>
-      <ul style="color: #92400e; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
-        <li style="margin-bottom: 8px;">Este enlace de verificación expira en <strong>24 horas</strong> por seguridad</li>
-        <li style="margin-bottom: 8px;">Una vez verificado, puedes cambiar entre roles en tu dashboard</li>
-        <li style="margin-bottom: 8px;">Cada rol puede tener diferentes permisos y características</li>
-        <li>Si no solicitaste este rol, puedes ignorar este email</li>
+    <div style="background: #fef3c7; padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b; margin: 25px 0;">
+      <h4 style="color: #92400e; font-size: 16px; margin-bottom: 10px;">⚡ Información Importante</h4>
+      <ul style="color: #92400e; font-size: 14px; margin: 0; padding-left: 20px;">
+        <li>Este enlace expira en 24 horas</li>
+        <li>Una vez verificado, puedes cambiar entre roles en tu dashboard</li>
+        <li>Si no solicitaste esto, ignora este email</li>
       </ul>
     </div>
 
-    <div style="text-align: center; margin-top: 45px; padding-top: 30px; border-top: 2px solid #e2e8f0;">
-      <p style="color: #64748b; font-size: 14px; margin-bottom: 15px;">
-        ¿Necesitas ayuda? Contacta nuestro soporte en <a href="mailto:support@hubit.com" style="color: #0ea5e9; text-decoration: none;">support@hubit.com</a>
+    <div style="text-align: center; margin-top: 40px; padding-top: 25px; border-top: 2px solid #e2e8f0;">
+      <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">
+        ¿Necesitas ayuda? <a href="mailto:support@hubit.com" style="color: #0ea5e9;">support@hubit.com</a>
       </p>
-      <p style="color: #94a3b8; font-size: 12px; line-height: 1.6; margin: 0;">
-        © ${currentYear} HuBiT. Todos los derechos reservados.<br>
-        <strong>Potenciando múltiples identidades profesionales.</strong>
-      </p>
+      <p style="color: #94a3b8; font-size: 12px; margin: 0;">© ${currentYear} HuBiT. Todos los derechos reservados.</p>
     </div>
-
   </div>
-</div>
-      `;
+</div>`;
 
-      // Usar dominio de resend.dev que funciona sin verificación para pruebas
       const emailData = {
         from: 'HuBiT <onboarding@resend.dev>',
         to: userEmail,
@@ -371,9 +327,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         html: emailHtml
       };
 
-      console.log('📤 API: Sending email to:', userEmail);
-      console.log('🔑 API: Using RESEND_API_KEY (first 10 chars):', RESEND_API_KEY.substring(0, 10) + '...');
-      console.log('📧 API: Email from:', emailData.from);
+      console.log('📤 API: Calling Resend API...');
 
       const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -385,46 +339,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       const responseData = await emailResponse.json();
+      
       console.log('📡 API: Resend response:', {
         status: emailResponse.status,
-        statusText: emailResponse.statusText,
-        success: emailResponse.ok,
-        data: responseData
+        success: emailResponse.ok
       });
 
       if (!emailResponse.ok) {
-        console.error('❌ API: Resend API error:', {
-          status: emailResponse.status,
-          statusText: emailResponse.statusText,
-          data: responseData
-        });
+        console.error('❌ API: Resend API error:', responseData);
 
-        // Proporcionar mensajes más específicos basados en el error de Resend
         let errorMessage = `Error ${emailResponse.status}: ${responseData.message || emailResponse.statusText}`;
         
         if (emailResponse.status === 401) {
-          errorMessage = "Invalid API key - La clave de Resend no es válida o ha expirado. Ve a https://resend.com/api-keys para generar una nueva.";
+          errorMessage = "Clave de API inválida. Ve a https://resend.com/api-keys para generar una nueva";
         } else if (emailResponse.status === 403) {
-          errorMessage = "Forbidden - Permisos insuficientes en la API de Resend. Verifica que tu clave tenga permisos de envío.";
-        } else if (emailResponse.status === 422) {
-          errorMessage = "Validation error - Los datos del email son incorrectos. Verifica el dominio de envío.";
-        } else if (responseData.message) {
-          errorMessage = responseData.message;
+          errorMessage = "Permisos insuficientes en la API de Resend";
         }
 
         return res.status(200).json({
           success: true,
-          message: `Rol creado correctamente, pero no se pudo enviar el email de verificación: ${errorMessage}`,
+          message: `Rol creado correctamente, pero error al enviar email: ${errorMessage}`,
           requiresVerification: true,
-          emailError: {
-            status: emailResponse.status,
-            error: responseData,
-            suggestion: "Verifica tu configuración de Resend en https://resend.com/domains"
-          }
+          emailError: true
         });
       }
 
-      console.log('✅ API: Email sent successfully:', responseData);
+      console.log('✅ API: Email sent successfully');
 
       return res.status(200).json({
         success: true,
@@ -434,43 +374,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
     } catch (emailError) {
-      console.error('❌ API: Email sending error:', {
-        name: emailError instanceof Error ? emailError.name : 'Unknown',
-        message: emailError instanceof Error ? emailError.message : String(emailError),
-        stack: emailError instanceof Error ? emailError.stack : undefined
-      });
+      console.error('❌ API: Email sending error:', emailError);
       
-      let errorMessage = "Error desconocido";
-      if (emailError instanceof Error) {
-        if (emailError.message.includes('fetch')) {
-          errorMessage = "No se pudo conectar con el servicio de email de Resend";
-        } else if (emailError.message.includes('network')) {
-          errorMessage = "Error de red al conectar con Resend";
-        } else {
-          errorMessage = emailError.message;
-        }
-      }
-
       return res.status(200).json({
         success: true,
-        message: `Rol creado correctamente, pero hubo un problema al enviar el email de verificación: ${errorMessage}`,
+        message: `Rol creado correctamente, pero hubo un problema al enviar el email: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}`,
         requiresVerification: true,
-        suggestion: "Verifica tu conexión a internet y la configuración de Resend"
+        emailError: true
       });
     }
 
   } catch (error) {
-    console.error('❌ API: Unexpected error in handler:', {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    });
+    console.error('❌ API: Unexpected error:', error);
     
-    // Asegurar que siempre devolvamos JSON válido
     return res.status(500).json({
       success: false,
-      message: `Error interno del servidor: ${error instanceof Error ? error.message : 'Error desconocido'}`,
-      error: error instanceof Error ? error.name : 'Unknown'
+      message: `Error interno del servidor: ${error instanceof Error ? error.message : 'Error desconocido'}`
     });
   }
 }
