@@ -24,7 +24,7 @@ export default function ResendTestTool() {
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
   const [configStatus, setConfigStatus] = useState<ConfigStatus>({ hasKey: false });
-  const [testEmail, setTestEmail] = useState('borjapipan@gmail.com'); // Email por defecto del usuario
+  const [testEmail, setTestEmail] = useState('borjapipaon@gmail.com'); // Email corregido del usuario
 
   const checkResendConfiguration = async () => {
     setChecking(true);
@@ -118,7 +118,7 @@ export default function ResendTestTool() {
             <div className="space-y-2">
               <p className="font-medium text-amber-900">📧 Limitaciones de Resend en Desarrollo</p>
               <p className="text-sm text-amber-800">
-                <strong>Solo puedes enviar emails a tu propia dirección:</strong> borjapipan@gmail.com
+                <strong>Solo puedes enviar emails a tu propia dirección:</strong> borjapipaon@gmail.com
               </p>
               <p className="text-xs text-amber-700">
                 Para enviar a otras direcciones, necesitas verificar tu dominio en Resend.com
@@ -218,11 +218,11 @@ export default function ResendTestTool() {
                   type="email"
                   value={testEmail}
                   onChange={(e) => setTestEmail(e.target.value)}
-                  placeholder="borjapipan@gmail.com"
+                  placeholder="borjapipaon@gmail.com"
                   className="max-w-md"
                 />
                 <p className="text-xs text-neutral-600 mt-1">
-                  ⚠️ En desarrollo, solo funciona con: <strong>borjapipan@gmail.com</strong>
+                  ⚠️ En desarrollo, solo funciona con: <strong>borjapipaon@gmail.com</strong>
                 </p>
               </div>
 
@@ -281,11 +281,11 @@ export default function ResendTestTool() {
                         <h5 className="font-medium text-amber-900 mb-2">🚨 Error 403: Limitación de Desarrollo</h5>
                         <div className="text-sm text-amber-800 space-y-2">
                           <p><strong>Problema:</strong> Solo puedes enviar emails de prueba a tu propia dirección verificada.</p>
-                          <p><strong>Tu email verificado:</strong> borjapipan@gmail.com</p>
+                          <p><strong>Tu email verificado:</strong> borjapipaon@gmail.com</p>
                           <div>
                             <p><strong>Soluciones:</strong></p>
                             <ol className="list-decimal list-inside ml-2 space-y-1">
-                              <li>Cambia el email de prueba a: borjapipan@gmail.com</li>
+                              <li>Cambia el email de prueba a: borjapipaon@gmail.com</li>
                               <li>O verifica tu dominio en <a href="https://resend.com/domains" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Resend Domains</a></li>
                               <li>Una vez verificado el dominio, podrás enviar a cualquier dirección</li>
                             </ol>

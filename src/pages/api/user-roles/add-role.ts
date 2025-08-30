@@ -80,68 +80,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // ⚠️ VALIDACIÓN CRÍTICA DE VARIABLES DE ENTORNO
+    // ⚠️ VALIDACIÓN SIMPLIFICADA DE VARIABLES DE ENTORNO
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
     console.log('🔧 API: Environment validation:', {
       hasSupabaseUrl: !!SUPABASE_URL,
-      hasSupabaseServiceKey: !!SUPABASE_SERVICE_KEY,
-      hasResendKey: !!RESEND_API_KEY,
+      hasSupabaseServiceKey: !!SUPABASE_SERVICE_KEY && SUPABASE_SERVICE_KEY !== 'invalid_service_key',
+      hasResendKey: !!RESEND_API_KEY && RESEND_API_KEY !== 'missing',
       resendKeyFormat: RESEND_API_KEY ? `${RESEND_API_KEY.substring(0, 3)}...` : 'MISSING'
     });
 
-    // Verificar configuración de Supabase
-    if (!SUPABASE_URL) {
-      console.error('❌ API: NEXT_PUBLIC_SUPABASE_URL not configured');
+    // Verificar configuración básica de Supabase (solo las críticas)
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || SUPABASE_SERVICE_KEY === 'invalid_service_key') {
+      console.error('❌ API: Critical Supabase configuration missing');
       return res.status(500).json({
         success: false,
-        message: 'Error de configuración del servidor: URL de Supabase faltante'
+        message: 'Error de configuración del servidor: Configuración de Supabase incompleta'
       });
     }
 
-    if (!SUPABASE_SERVICE_KEY) {
-      console.error('❌ API: SUPABASE_SERVICE_ROLE_KEY not configured');
-      return res.status(500).json({
-        success: false,
-        message: 'Error de configuración del servidor: Clave de servicio de Supabase faltante'
-      });
-    }
+    // Solo validar RESEND si es realmente necesaria para esta operación
+    // No bloquear la creación del rol si Resend falla
+    const resendAvailable = RESEND_API_KEY && 
+                           RESEND_API_KEY.trim().length > 0 && 
+                           RESEND_API_KEY !== 'missing' && 
+                           RESEND_API_KEY.startsWith('re_');
 
-    // ⚠️ VERIFICACIÓN CRÍTICA DE RESEND API KEY
-    if (!RESEND_API_KEY || RESEND_API_KEY.trim().length === 0 || RESEND_API_KEY === 'missing') {
-      console.error('❌ API: RESEND_API_KEY not configured');
-      return res.status(500).json({
-        success: false,
-        message: 'Error de configuración: RESEND_API_KEY no encontrada. Ve a Settings (⚙️) → Environment en Softgen y añade: RESEND_API_KEY=tu_clave_de_resend',
-        configurationRequired: true,
-        details: {
-          missingVariable: 'RESEND_API_KEY',
-          instructions: [
-            '1. Ve a https://resend.com/api-keys',
-            '2. Crea una nueva API key (empieza con "re_")',
-            '3. En Softgen: clic en Settings (⚙️) → Environment',
-            '4. Añade: RESEND_API_KEY=tu_clave_aqui',
-            '5. Guarda y reinicia el servidor'
-          ]
-        }
-      });
-    }
-
-    // Validar formato de la clave de Resend
-    if (!RESEND_API_KEY.startsWith('re_')) {
-      console.error('❌ API: Invalid RESEND_API_KEY format');
-      return res.status(500).json({
-        success: false,
-        message: 'RESEND_API_KEY inválida: debe empezar con "re_"',
-        configurationRequired: true,
-        details: {
-          currentFormat: `Key starts with "${RESEND_API_KEY.substring(0, 3)}"`,
-          expectedFormat: 'Should start with "re_"',
-          instructions: 'Verifica tu clave en https://resend.com/api-keys'
-        }
-      });
+    if (!resendAvailable) {
+      console.warn('⚠️ API: RESEND_API_KEY not properly configured - email sending will be disabled');
     }
 
     // Verificar conexión a Supabase
@@ -268,16 +236,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // ENVIAR EMAIL con Resend
-    console.log('📧 API: Sending verification email...');
+    // ENVIAR EMAIL con Resend (solo si está disponible)
+    console.log('📧 API: Preparing to send verification email...');
     
-    try {
-      const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
-      const verificationUrl = `${SITE_URL}/auth/verify-role?token=${verificationToken}`;
-      const roleDisplayName = getRoleDisplayName(roleType);
-      const currentYear = new Date().getFullYear();
+    let emailSent = false;
+    let emailErrorMessage = '';
 
-      const emailHtml = `
+    if (!resendAvailable) {
+      console.warn('⚠️ API: Resend not available, skipping email');
+      emailErrorMessage = 'Configuración de email no disponible';
+    } else {
+      try {
+        const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
+        const verificationUrl = `${SITE_URL}/auth/verify-role?token=${verificationToken}`;
+        const roleDisplayName = getRoleDisplayName(roleType);
+        const currentYear = new Date().getFullYear();
+
+        const emailHtml = `
 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
   <div style="background-color: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
     <div style="text-align: center; margin-bottom: 35px;">
@@ -320,67 +295,68 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   </div>
 </div>`;
 
-      const emailData = {
-        from: 'HuBiT <onboarding@resend.dev>',
-        to: userEmail,
-        subject: `Verificar tu nuevo rol en HuBiT - ${roleDisplayName}`,
-        html: emailHtml
-      };
+        const emailData = {
+          from: 'HuBiT <onboarding@resend.dev>',
+          to: userEmail,
+          subject: `Verificar tu nuevo rol en HuBiT - ${roleDisplayName}`,
+          html: emailHtml
+        };
 
-      console.log('📤 API: Calling Resend API...');
+        console.log('📤 API: Calling Resend API...');
 
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emailData)
-      });
+        const emailResponse = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(emailData)
+        });
 
-      const responseData = await emailResponse.json();
-      
-      console.log('📡 API: Resend response:', {
-        status: emailResponse.status,
-        success: emailResponse.ok
-      });
-
-      if (!emailResponse.ok) {
-        console.error('❌ API: Resend API error:', responseData);
-
-        let errorMessage = `Error ${emailResponse.status}: ${responseData.message || emailResponse.statusText}`;
+        const responseData = await emailResponse.json();
         
-        if (emailResponse.status === 401) {
-          errorMessage = "Clave de API inválida. Ve a https://resend.com/api-keys para generar una nueva";
-        } else if (emailResponse.status === 403) {
-          errorMessage = "Permisos insuficientes en la API de Resend";
+        console.log('📡 API: Resend response:', {
+          status: emailResponse.status,
+          success: emailResponse.ok
+        });
+
+        if (emailResponse.ok) {
+          console.log('✅ API: Email sent successfully');
+          emailSent = true;
+        } else {
+          console.error('❌ API: Resend API error:', responseData);
+          
+          if (emailResponse.status === 401) {
+            emailErrorMessage = "Clave de API de Resend inválida";
+          } else if (emailResponse.status === 403) {
+            emailErrorMessage = "Solo puedes enviar emails a tu dirección verificada (borjapipaon@gmail.com)";
+          } else {
+            emailErrorMessage = `Error ${emailResponse.status}: ${responseData.message || emailResponse.statusText}`;
+          }
         }
 
-        return res.status(200).json({
-          success: true,
-          message: `Rol creado correctamente, pero error al enviar email: ${errorMessage}`,
-          requiresVerification: true,
-          emailError: true
-        });
+      } catch (emailError) {
+        console.error('❌ API: Email sending error:', emailError);
+        emailErrorMessage = `Error al enviar email: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}`;
       }
+    }
 
-      console.log('✅ API: Email sent successfully');
-
+    // Respuesta final con información sobre el estado del email
+    const roleDisplayName = getRoleDisplayName(roleType);
+    
+    if (emailSent) {
       return res.status(200).json({
         success: true,
         message: `¡Éxito! Se ha enviado un email de verificación para tu nuevo rol de ${roleDisplayName}. Revisa tu bandeja de entrada y carpeta de spam.`,
-        requiresVerification: true,
-        emailId: responseData.id
+        requiresVerification: true
       });
-
-    } catch (emailError) {
-      console.error('❌ API: Email sending error:', emailError);
-      
+    } else {
       return res.status(200).json({
         success: true,
-        message: `Rol creado correctamente, pero hubo un problema al enviar el email: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}`,
+        message: `Rol de ${roleDisplayName} creado correctamente. ${emailErrorMessage ? `Nota: ${emailErrorMessage}` : 'Email de verificación no disponible temporalmente.'}`,
         requiresVerification: true,
-        emailError: true
+        emailError: true,
+        emailErrorDetails: emailErrorMessage
       });
     }
 

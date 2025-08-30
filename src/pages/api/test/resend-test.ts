@@ -80,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Obtener el email del body de la request
       const { testEmail } = req.body;
-      const emailToTest = testEmail || 'borjapipan@gmail.com'; // Email del usuario por defecto
+      const emailToTest = testEmail || 'borjapipaon@gmail.com'; // Email corregido del usuario por defecto
 
       // Hacer test real con Resend API
       console.log('🧪 RESEND TEST API: Testing actual Resend connection...');
@@ -141,9 +141,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             ];
           } else if (response.status === 403) {
             // Error específico para limitaciones de desarrollo
-            errorMessage = "Solo puedes enviar emails a tu dirección verificada (borjapipan@gmail.com)";
+            errorMessage = "Solo puedes enviar emails a tu dirección verificada (borjapipaon@gmail.com)";
             suggestions = [
-              "Cambia el email de destino a: borjapipan@gmail.com",
+              "Cambia el email de destino a: borjapipaon@gmail.com",
               "O verifica tu dominio en https://resend.com/domains",
               "Una vez verificado el dominio, podrás enviar a cualquier dirección",
               "Este es el comportamiento normal de Resend en modo desarrollo"
