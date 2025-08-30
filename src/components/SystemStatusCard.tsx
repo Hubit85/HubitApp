@@ -141,7 +141,7 @@ export default function SystemStatusCard() {
     try {
       const tables = ['profiles', 'properties', 'budget_requests', 'service_categories'];
       const checks = await Promise.all(
-        tables.map(table => supabase.from(table).select('count').limit(1))
+        tables.map(table => supabase.from(table as any).select('count').limit(1))
       );
 
       const hasErrors = checks.some(check => check.error !== null);

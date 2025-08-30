@@ -84,16 +84,11 @@ export class SupabaseContractService {
             email
           )
         ),
-        work_sessions (
-          id,
-          start_time,
-          end_time,
-          duration_minutes,
-          description,
-          work_performed,
-          total_cost,
-          client_approved
-        )
+        work_sessions: {
+          select: '*'
+        },
+        ratings: {
+        }
       `)
       .eq("id", id)
       .single();

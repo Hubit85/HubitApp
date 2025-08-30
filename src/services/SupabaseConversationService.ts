@@ -51,100 +51,44 @@ export class SupabaseConversationService {
     return data;
   }
 
-  static async getConversation(id: string): Promise<ConversationWithDetails> {
+  static async getConversationById(conversationId: string): Promise<ConversationWithDetails | null> {
     const { data, error } = await supabase
-      .from("conversations")
+      .from('conversations')
       .select(`
         *,
-        profiles!conversations_user_id_fkey (
-          id,
-          full_name,
-          avatar_url,
-          email
-        ),
-        service_providers (
-          id,
-          company_name,
-          profiles (
-            id,
-            full_name,
-            avatar_url,
-            email
-          )
-        ),
-        budget_requests (
-          id,
-          title,
-          category,
-          status
-        ),
-        quotes (
-          id,
-          amount,
-          status
-        ),
-        contracts (
-          id,
-          contract_number,
-          status
-        ),
-        messages (
-          id,
-          sender_id,
-          message,
-          message_type,
-          attachments,
-          is_read,
-          created_at,
-          profiles (
-            full_name,
-            avatar_url
-          )
-        )
+        user:profiles!conversations_user_id_fkey(*),
+        service_provider:service_providers!conversations_service_provider_id_fkey(*, profiles!service_providers_user_id_fkey(*)),
+        messages(*, profiles:profiles!messages_sender_id_fkey(*))
       `)
-      .eq("id", id)
+      .eq('id', conversationId)
       .single();
-
+    
     if (error) {
-      throw new Error(error.message);
+      console.error('Error fetching conversation:', error);
+      return null;
     }
-
-    return data;
+    
+    return data as unknown as ConversationWithDetails;
   }
 
   static async getUserConversations(userId: string, isProvider: boolean = false): Promise<ConversationWithDetails[]> {
     let query = supabase
-      .from("conversations")
+      .from('conversations')
       .select(`
         *,
-        profiles!conversations_user_id_fkey (
-          id,
-          full_name,
-          avatar_url
-        ),
-        service_providers (
-          id,
-          company_name,
-          profiles (
-            id,
-            full_name,
-            avatar_url
-          )
-        ),
-        budget_requests (
-          id,
-          title,
-          category
-        )
-      `)
-      .eq("is_active", true);
+        user:profiles!conversations_user_id_fkey(*),
+        service_provider:service_providers!conversations_service_provider_id_fkey(*, profiles!service_providers_user_id_fkey(*)),
+        messages:messages(*, profiles:profiles!messages_sender_id_fkey(*))
+      `);
 
-    if (isProvider) {
-      // For service providers, find conversations where they are the service provider
-      query = query.eq("service_provider_id", userId);
-    } else {
-      // For regular users, find conversations where they are the user
-      query = query.eq("user_id", userId);
+    if (userId) {
+      if (isProvider) {
+        // For service providers, find conversations where they are the service provider
+        query = query.eq("service_provider_id", userId);
+      } else {
+        // For regular users, find conversations where they are the user
+        query = query.eq("user_id", userId);
+      }
     }
 
     const { data, error } = await query.order("last_message_at", { ascending: false });
@@ -601,5 +545,60 @@ export class SupabaseConversationService {
     }
 
     return { conversation, message };
+  }
+
+  static async addMessage(conversationId: string, senderId: string, message: string, messageType: string = 'text', attachments: string[] = []) {
+    const { data, error } = await supabase
+      .from('messages')
+      .insert([{
+        conversation_id: conversationId,
+        sender_id: senderId,
+        message: message,
+        message_type: messageType,
+        attachments: attachments
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding message:', error);
+      return null;
+    }
+
+    // Update conversation's last message
+    await supabase
+      .from('conversations')
+      .update({
+        last_message: message,
+        last_message_at: new Date().toISOString()
+      })
+      .eq('id', conversationId);
+      
+    return data;
+  }
+
+  static async markAsRead(conversationId: string, userId: string) {
+    const { error } = await supabase
+        .from('messages')
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', userId)
+        .eq('is_read', false);
+
+    if (error) {
+        console.error('Error marking messages as read:', error);
+    }
+    return { error };
+  }
+
+  static getParticipantDetails(conversation: ConversationWithDetails, currentUserId: string) {
+    const isUser = conversation.user_id === currentUserId;
+    const otherParticipant = isUser ? conversation.service_provider?.profiles : conversation.user;
+    
+    return {
+      isUser,
+      currentUser: isUser ? conversation.user : conversation.service_provider?.profiles,
+      otherParticipant,
+    };
   }
 }

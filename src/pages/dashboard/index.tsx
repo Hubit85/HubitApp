@@ -440,11 +440,11 @@ export default function Dashboard() {
                           <div>
                             <p className="text-sm text-neutral-500">Miembro desde</p>
                             <p className="font-medium">
-                              {new Date(profile.created_at).toLocaleDateString("es-ES", {
+                              {profile.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric"
-                              })}
+                              }) : 'N/A'}
                             </p>
                           </div>
                         </div>

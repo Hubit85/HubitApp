@@ -184,26 +184,28 @@ export class SupabaseBudgetService {
     });
   }
 
-  static async incrementViews(id: string): Promise<void> {
-    // Using RPC to safely increment the views counter
-    const { error } = await supabase
-      .rpc('increment_budget_request_views', { 
-        budget_request_id: id 
+  static async incrementViews(budgetId: string) {
+    try {
+      const { error } = await supabase.rpc('increment_budget_request_views' as any, {
+        request_id: budgetId,
       });
 
-    if (error) {
-      // Fallback to manual increment if RPC doesn't exist
-      const { data: current } = await supabase
-        .from("budget_requests")
-        .select("views_count")
-        .eq("id", id)
-        .single();
+      if (error) {
+        // Fallback to manual increment if RPC doesn't exist
+        const { data: current } = await supabase
+          .from("budget_requests")
+          .select("views_count")
+          .eq("id", budgetId)
+          .single();
 
-      if (current) {
-        await this.updateBudgetRequest(id, {
-          views_count: (current.views_count || 0) + 1
-        });
+        if (current) {
+          await this.updateBudgetRequest(budgetId, {
+            views_count: (current.views_count || 0) + 1
+          });
+        }
       }
+    } catch (error) {
+      console.error("Error incrementing views:", error);
     }
   }
 

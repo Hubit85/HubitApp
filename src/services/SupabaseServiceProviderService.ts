@@ -52,37 +52,13 @@ export class SupabaseServiceProviderService {
 
   static async getServiceProvider(id: string): Promise<ServiceProviderWithRatings> {
     const { data, error } = await supabase
-      .from("service_providers")
+      .from('service_providers')
       .select(`
         *,
-        profiles (
-          id,
-          full_name,
-          email,
-          phone,
-          avatar_url,
-          city,
-          country,
-          language
-        ),
-        ratings (
-          id,
-          rating,
-          comment,
-          service_quality,
-          punctuality,
-          communication,
-          value_for_money,
-          cleanliness,
-          would_recommend,
-          created_at,
-          profiles (
-            full_name,
-            avatar_url
-          )
-        )
+        profiles:profiles!service_providers_user_id_fkey(*),
+        ratings:ratings(*, profiles:profiles!ratings_user_id_fkey(*))
       `)
-      .eq("id", id)
+      .eq('id', id)
       .single();
 
     if (error) {

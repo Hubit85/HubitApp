@@ -55,52 +55,14 @@ export default function DatabaseSetupNotice() {
   ];
 
   const checkDatabaseStatus = async () => {
-    setDatabaseStatus(prev => ({ ...prev, loading: true, error: null }));
-    
     try {
-      // Test basic connection
-      const { error: connectionError } = await supabase
-        .from('profiles')
-        .select('count(*)')
-        .limit(1);
-
-      if (connectionError) {
-        throw new Error(`Conexión fallida: ${connectionError.message}`);
-      }
-
-      // Check all expected tables
-      const tableStatuses: TableStatus[] = [];
+      setChecking(true);
+      const tables = ['profiles', 'properties', 'budget_requests', 'service_categories', 'service_providers'];
+      const checks = await Promise.all(
+        tables.map(table => supabase.from(table as any).select('count').limit(1))
+      );
       
-      for (const table of expectedTables) {
-        try {
-          const { error } = await supabase
-            .from(table.name)
-            .select('count(*)')
-            .limit(1);
-          
-          tableStatuses.push({
-            ...table,
-            exists: !error
-          });
-        } catch (err) {
-          tableStatuses.push({
-            ...table,
-            exists: false
-          });
-        }
-      }
-
-      const configuredTables = tableStatuses.filter(t => t.exists).length;
-      const isFullyConfigured = configuredTables === expectedTables.length;
-
-      setDatabaseStatus({
-        isConnected: true,
-        isConfigured: isFullyConfigured,
-        tables: tableStatuses,
-        loading: false,
-        error: null
-      });
-
+      const missingTables = checks
     } catch (error) {
       console.error('Database check failed:', error);
       setDatabaseStatus({

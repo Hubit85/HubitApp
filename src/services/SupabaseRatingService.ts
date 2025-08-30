@@ -431,4 +431,36 @@ export class SupabaseRatingService {
       throw new Error(error.message);
     }
   }
+
+  static async getRatingDistribution(serviceProviderId: string): Promise<{
+    average: number;
+    total: number;
+    distribution: { rating: number; count: number; percentage: number }[];
+  }> {
+    const ratings = await this.getServiceProviderRatings(serviceProviderId);
+
+    const ratingCounts: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let totalRatings = 0;
+
+    for (const rating of ratings) {
+      if (rating.rating >= 1 && rating.rating <= 5) {
+        ratingCounts[rating.rating as keyof typeof ratingCounts]++;
+        totalRatings++;
+      }
+    }
+
+    const average = totalRatings > 0 ? (ratings.reduce((acc, r) => acc + r.rating, 0) / totalRatings) : 0;
+
+    const distribution = Object.entries(ratingCounts).map(([key, value]) => ({
+      rating: parseInt(key),
+      count: value,
+      percentage: totalRatings > 0 ? (value / totalRatings) * 100 : 0
+    }));
+
+    return {
+      average: parseFloat(average.toFixed(2)),
+      total: totalRatings,
+      distribution
+    };
+  }
 }

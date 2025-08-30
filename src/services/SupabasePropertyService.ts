@@ -153,23 +153,25 @@ export class SupabasePropertyService {
     return data || [];
   }
 
-  static async getPropertiesNearLocation(latitude: number, longitude: number, radiusKm: number = 50): Promise<Property[]> {
-    // Using PostGIS functions for geographic queries
-    // This requires PostGIS extension to be enabled in Supabase
-    const { data, error } = await supabase
-      .rpc('properties_near_location', {
+  static async getNearbyProperties(latitude: number, longitude: number, radius: number) {
+    try {
+      const { data, error } = await supabase.rpc('properties_near_location' as any, {
         lat: latitude,
         lng: longitude,
-        radius_km: radiusKm
+        radius_km: radius
       });
 
-    if (error) {
-      // Fallback to simple query if RPC function doesn't exist
-      console.warn("Geographic search not available, using simple query");
-      return this.getUserProperties(""); // Return empty for now
-    }
+      if (error) {
+        // Fallback to simple query if RPC function doesn't exist
+        console.warn("Geographic search not available, using simple query");
+        return this.getUserProperties(""); // Return empty for now
+      }
 
-    return data || [];
+      return data || [];
+    } catch (error) {
+      console.error("Error in getNearbyProperties:", error);
+      return [];
+    }
   }
 
   static async updatePropertyImages(id: string, images: string[]): Promise<Property> {

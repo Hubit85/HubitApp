@@ -324,17 +324,20 @@ export class SupabaseServiceCategoryService {
     ];
 
     try {
-      for (const category of defaultCategories) {
-        // Check if category already exists
-        const { data: existing } = await supabase
-          .from("service_categories")
-          .select("id")
-          .eq("name", category.name)
-          .single();
-
-        if (!existing) {
-          await this.createServiceCategory(category);
+      const { data, error } = await supabase.from('service_categories').select('*');
+      if (error) throw error;
+  
+      const updates: { id: string; emergency_available: boolean; }[] = [];
+      data.forEach(category => {
+        const hasEmergencySubcategory = data.some(sub => sub.parent_id === category.id && sub.emergency_available);
+        if (hasEmergencySubcategory && !category.emergency_available) {
+          updates.push({ id: category.id, emergency_available: true });
         }
+      });
+  
+      if (updates.length > 0) {
+        const { error: updateError } = await supabase.from('service_categories').upsert(updates);
+        if (updateError) throw updateError;
       }
     } catch (error) {
       console.error("Error initializing default categories:", error);
