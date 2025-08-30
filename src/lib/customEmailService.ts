@@ -124,18 +124,38 @@ export class CustomEmailService {
   ): Promise<{ success: boolean; message: string; error?: string }> {
     
     try {
+      console.log('🚀 Starting role verification email process:', {
+        userId: userId.substring(0, 8) + '...',
+        userEmail,
+        roleType,
+        hasToken: !!verificationToken
+      });
+
+      // Verificar configuración antes de continuar
+      const configCheck = this.validateEmailConfig();
+      if (!configCheck.isValid) {
+        console.error('❌ Email service not configured:', configCheck.missingVars);
+        return {
+          success: false,
+          message: 'Email service not configured properly',
+          error: `Missing: ${configCheck.missingVars.join(', ')}`
+        };
+      }
+
       // Obtener la URL del sitio
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
                      (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
       
       const verificationUrl = `${siteUrl}/auth/verify-role?token=${verificationToken}`;
       
-      // Log de debug
-      console.log('🔗 Generating verification email:', {
+      // Log de debug detallado
+      console.log('🔗 Generating verification email with details:', {
         userEmail,
         roleType,
+        roleDisplayName: ROLE_DISPLAY_NAMES[roleType],
         verificationUrl: verificationUrl.substring(0, 50) + '...',
-        siteUrl
+        siteUrl,
+        tokenLength: verificationToken.length
       });
       
       // Reemplazar variables en la plantilla
@@ -148,10 +168,16 @@ export class CustomEmailService {
         to: userEmail,
         subject: `Verify Your New ${ROLE_DISPLAY_NAMES[roleType]} Role - HuBiT`,
         html: emailHtml,
-        from: 'HuBiT Platform <noreply@hubit.com>'
+        from: 'HuBiT Platform <onboarding@resend.dev>'
       };
 
-      console.log('📧 Sending email to:', userEmail);
+      console.log('📧 Sending email with config:', {
+        to: userEmail,
+        subject: emailConfig.subject,
+        from: emailConfig.from,
+        htmlLength: emailHtml.length,
+        timestamp: new Date().toISOString()
+      });
 
       // Enviar email via API
       const response = await fetch('/api/email/send-custom', {
@@ -162,20 +188,56 @@ export class CustomEmailService {
         body: JSON.stringify(emailConfig)
       });
 
-      const result = await response.json();
+      console.log('📤 Email API response status:', response.status);
 
       if (!response.ok) {
-        console.error('❌ Email API error:', result);
-        throw new Error(result.error || 'Error sending email');
+        const errorData = await response.json();
+        console.error('❌ Email API error response:', errorData);
+        
+        // Proporcionar mensaje de error más específico
+        let errorMessage = 'Error sending email';
+        if (errorData.error) {
+          if (errorData.error.includes('API key')) {
+            errorMessage = 'Invalid or missing API key for email service';
+          } else if (errorData.error.includes('format')) {
+            errorMessage = 'Invalid email format';
+          } else if (errorData.error.includes('rate')) {
+            errorMessage = 'Email rate limit exceeded, try again later';
+          } else {
+            errorMessage = errorData.error;
+          }
+        }
+
+        return {
+          success: false,
+          message: errorMessage,
+          error: errorData.details || errorData.error
+        };
       }
 
+      const result = await response.json();
       console.log('✅ Email sent successfully:', {
         to: userEmail,
-        messageId: result.messageId
+        messageId: result.messageId,
+        success: result.success
       });
 
-      // Crear notificación en el sistema
-      await this.createNotification(userId, roleType);
+      if (!result.success) {
+        return {
+          success: false,
+          message: result.error || 'Failed to send email',
+          error: result.details
+        };
+      }
+
+      // Crear notificación en el sistema solo si el email fue exitoso
+      try {
+        await this.createNotification(userId, roleType);
+        console.log('📬 System notification created successfully');
+      } catch (notificationError) {
+        console.warn('⚠️ Could not create notification (non-critical):', notificationError);
+        // No fallar el proceso completo por esto
+      }
 
       return {
         success: true,
@@ -183,11 +245,26 @@ export class CustomEmailService {
       };
 
     } catch (error) {
-      console.error('❌ Error sending role verification email:', error);
+      console.error('❌ Critical error in sendRoleVerificationEmail:', error);
+      
+      // Manejo de errores más específico
+      let errorMessage = 'Failed to send verification email';
+      let errorDetails = 'Unknown error';
+
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = 'Network error while sending email';
+        errorDetails = 'Could not connect to email service';
+      } else if (error instanceof Error) {
+        errorMessage = error.message.includes('API') 
+          ? 'Email service API error' 
+          : 'Internal email service error';
+        errorDetails = error.message;
+      }
+
       return {
         success: false,
-        message: 'Failed to send verification email',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        message: errorMessage,
+        error: errorDetails
       };
     }
   }
@@ -227,15 +304,27 @@ export class CustomEmailService {
     const missingVars: string[] = [];
 
     requiredVars.forEach(varName => {
-      if (!process.env[varName]) {
+      const value = process.env[varName];
+      if (!value || value === 'undefined' || value.trim() === '') {
         missingVars.push(varName);
       }
     });
 
-    console.log('🔧 Email config validation:', {
+    const hasValidApiKey = process.env.RESEND_API_KEY && 
+                          process.env.RESEND_API_KEY.startsWith('re_') && 
+                          process.env.RESEND_API_KEY.length > 10;
+
+    if (!hasValidApiKey && !missingVars.includes('RESEND_API_KEY')) {
+      missingVars.push('RESEND_API_KEY');
+    }
+
+    console.log('🔧 Email config validation result:', {
       isValid: missingVars.length === 0,
       missingVars,
-      hasResendKey: !!process.env.RESEND_API_KEY
+      hasResendKey: !!process.env.RESEND_API_KEY,
+      apiKeyFormat: process.env.RESEND_API_KEY ? 
+        (process.env.RESEND_API_KEY.substring(0, 5) + '...') : 'missing',
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'not set'
     });
 
     return {
