@@ -215,6 +215,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('✅ API: Role created successfully:', newRole.id);
 
+    // Inicializar variables de email
+    let emailSent = false;
+    let emailErrorMessage = '';
+
     // Preparar email
     const userEmail = userProfile.email;
     if (!userEmail) {
@@ -235,15 +239,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('📧 API: Email service status:', { resendAvailable });
 
     // ENVIAR EMAIL con Resend (solo si está disponible)
-    console.log('📧 API: Preparing to send verification email...');
-    
-    let emailSent = false;
-    let emailErrorMessage = '';
-
-    if (!resendAvailable) {
-      console.warn('⚠️ API: Resend not available, skipping email');
-      emailErrorMessage = 'Configuración de email no disponible';
-    } else {
+    if (resendAvailable) {
+      console.log('📧 API: Preparing to send verification email...');
+      
       try {
         const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
         const verificationUrl = `${SITE_URL}/auth/verify-role?token=${verificationToken}`;
@@ -337,6 +335,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('❌ API: Email sending error:', emailError);
         emailErrorMessage = `Error al enviar email: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}`;
       }
+    } else {
+      console.warn('⚠️ API: Resend not available, skipping email');
+      emailErrorMessage = 'Configuración de email no disponible';
     }
 
     // Respuesta final con información sobre el estado del email
