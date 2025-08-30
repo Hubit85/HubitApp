@@ -181,7 +181,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         if (!data.session && data.user.email_confirmed_at === null) {
           console.log("Email confirmation required");
           return { 
-            error: undefined,
             message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
           };
         }
@@ -218,9 +217,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.warn("Profile creation failed, but user was created successfully:", profileError);
           }
 
-          // Registration successful - return success flag
+          // Registration successful - return success
           console.log("Registration successful, returning success");
-          return { error: undefined };
+          return { success: true };
         }
       }
 

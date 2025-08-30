@@ -46,18 +46,13 @@ export default function RegisterPage() {
     });
   }, [formData.password]);
 
-  // Redirect logic - simplified and more robust
+  // Simplified redirect logic - only runs when user is authenticated and not submitting
   useEffect(() => {
-    // Only redirect if we have a confirmed user and we're not in the middle of submitting
-    if (user && !loading && !isSubmitting && !error && !successMessage) {
-      console.log("User authenticated via useEffect, redirecting to dashboard");
-      const timer = setTimeout(() => {
-        router.push("/dashboard");
-      }, 100);
-      
-      return () => clearTimeout(timer);
+    if (user && !loading && !isSubmitting) {
+      console.log("User authenticated, redirecting to dashboard");
+      router.push("/dashboard");
     }
-  }, [user, loading, isSubmitting, error, successMessage, router]);
+  }, [user, loading, isSubmitting, router]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -106,40 +101,37 @@ export default function RegisterPage() {
 
       console.log("SignUp result:", result);
 
-      // Handle different result scenarios
+      // Handle error case
       if (result.error) {
         console.log("Registration failed with error:", result.error);
         setError(result.error);
         return;
       }
 
+      // Handle email confirmation case
       if (result.message) {
         console.log("Registration requires email confirmation");
         setSuccessMessage(result.message);
         return;
       }
 
-      // If we reach here, registration was successful and user should be logged in
-      console.log("Registration successful, user should be authenticated now");
-      
-      // Instead of waiting for useEffect, directly redirect after a brief delay
-      setTimeout(() => {
-        if (!error && !successMessage) {
-          console.log("Performing manual redirect to dashboard");
-          router.push("/dashboard");
-        }
-      }, 100);
+      // Handle success case
+      if (result.success) {
+        console.log("Registration successful! User should be logged in now.");
+        // The auth context will handle the redirect automatically
+        // No need for manual redirect here
+        return;
+      }
+
+      // Fallback error case
+      console.error("Unexpected registration result:", result);
+      setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
       
     } catch (err) {
       console.error("Registration exception:", err);
       setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
     } finally {
-      // Don't set isSubmitting to false immediately if we're redirecting
-      if (!successMessage) {
-        setTimeout(() => setIsSubmitting(false), 200);
-      } else {
-        setIsSubmitting(false);
-      }
+      setIsSubmitting(false);
     }
   };
 
