@@ -1,67 +1,29 @@
 
-import { EnvLoader } from './envLoader';
-
-export interface EmailConfig {
-  isValid: boolean;
-  missingVars: string[];
-}
-
-export interface EmailSendResult {
-  success: boolean;
-  message: string;
-  error?: string;
-}
-
 class CustomEmailService {
-  // Direct API key - hardcoded as fallback to ensure it works
-  private static get RESEND_API_KEY(): string {
-    // Multiple fallback strategies
-    const key = EnvLoader.getVar('RESEND_API_KEY') || 
-                process.env.RESEND_API_KEY || 
-                're_HMYRvjWf_93ML8R9PbPqRHU9EP1sTJ9oS';
-    
-    console.log('🔑 RESEND_API_KEY resolution:', {
-      fromEnvLoader: !!EnvLoader.getVar('RESEND_API_KEY'),
-      fromProcessEnv: !!process.env.RESEND_API_KEY,
-      finalKeyExists: !!key,
-      finalKeyPrefix: key.substring(0, 10),
-      finalKeyLength: key.length
-    });
-    
-    return key;
-  }
+  // Direct hardcoded API key to avoid any server-side dependencies
+  private static readonly RESEND_API_KEY = 're_HMYRvjWf_93ML8R9PbPqRHU9EP1sTJ9oS';
+  private static readonly SITE_URL = 'https://hubit-84-supabase-email-templates.softgen.ai';
   
-  private static get SITE_URL(): string {
-    return EnvLoader.getVar('NEXT_PUBLIC_SITE_URL') || 
-           process.env.NEXT_PUBLIC_SITE_URL || 
-           'https://hubit-84-supabase-email-templates.softgen.ai';
-  }
-  
-  static validateEmailConfig(): EmailConfig {
-    console.log('🔍 Validating email config with direct fallback...');
-    
-    // Force load environment variables
-    EnvLoader.loadEnvVars();
+  static validateEmailConfig(): { isValid: boolean; missingVars: string[] } {
+    console.log('🔍 Validating email config with hardcoded fallback...');
     
     const apiKey = this.RESEND_API_KEY;
     
-    console.log('📋 Final environment check:', {
+    console.log('📋 Email config check:', {
       RESEND_API_KEY_EXISTS: !!apiKey,
-      RESEND_API_KEY_LENGTH: apiKey?.length || 0,
-      RESEND_API_KEY_PREFIX: apiKey?.substring(0, 10) || 'not found',
-      RESEND_API_KEY_VALID_FORMAT: apiKey?.startsWith('re_') || false,
-      SITE_URL: this.SITE_URL,
-      FALLBACK_USED: apiKey === 're_HMYRvjWf_93ML8R9PbPqRHU9EP1sTJ9oS'
+      RESEND_API_KEY_LENGTH: apiKey.length,
+      RESEND_API_KEY_PREFIX: apiKey.substring(0, 10),
+      RESEND_API_KEY_VALID_FORMAT: apiKey.startsWith('re_'),
+      SITE_URL: this.SITE_URL
     });
 
     const missingVars: string[] = [];
     
-    // Since we have a hardcoded fallback, this should never fail
     if (!apiKey || !apiKey.startsWith('re_')) {
-      console.log('❌ Even with fallback, RESEND_API_KEY is invalid');
+      console.log('❌ RESEND_API_KEY is invalid');
       missingVars.push('RESEND_API_KEY');
     } else {
-      console.log('✅ RESEND_API_KEY is valid (including fallback)');
+      console.log('✅ RESEND_API_KEY is valid');
     }
 
     const isValid = missingVars.length === 0;
@@ -78,7 +40,7 @@ class CustomEmailService {
     userEmail: string,
     roleType: string,
     verificationToken: string
-  ): Promise<EmailSendResult> {
+  ): Promise<{ success: boolean; message: string; error?: string }> {
     console.log('📧 Starting role verification email send process...');
     console.log('📋 Email parameters:', {
       userId,
@@ -92,41 +54,31 @@ class CustomEmailService {
       const verificationUrl = `${this.SITE_URL}/auth/verify-role?token=${verificationToken}`;
       console.log('🔗 Verification URL created:', verificationUrl);
 
-      // Obtener el nombre del rol en español
       const roleDisplayName = this.getRoleDisplayName(roleType);
       console.log('🏷️ Role display name:', roleDisplayName);
 
-      // Crear el contenido HTML del email
-      const emailHtml = this.createRoleVerificationTemplate(
-        roleDisplayName,
-        verificationUrl
-      );
-
+      const emailHtml = this.createRoleVerificationTemplate(roleDisplayName, verificationUrl);
       console.log('📝 Email HTML template created (length:', emailHtml.length, ')');
 
-      // Preparar datos para Resend
       const emailData = {
-        from: 'HuBiT <noreply@resend.dev>', // Usar dominio por defecto de Resend
+        from: 'HuBiT <noreply@resend.dev>',
         to: userEmail,
         subject: `Verificar tu nuevo rol en HuBiT - ${roleDisplayName}`,
         html: emailHtml
       };
 
-      const apiKey = this.RESEND_API_KEY;
       console.log('📤 Attempting to send email via Resend API...');
       console.log('📋 Request details:', {
         to: emailData.to,
         subject: emailData.subject,
-        apiKeyPrefix: apiKey.substring(0, 10),
-        apiKeyValid: apiKey.startsWith('re_'),
-        apiKeySource: apiKey === 're_HMYRvjWf_93ML8R9PbPqRHU9EP1sTJ9oS' ? 'hardcoded_fallback' : 'env_variable'
+        apiKeyPrefix: this.RESEND_API_KEY.substring(0, 10),
+        apiKeyValid: this.RESEND_API_KEY.startsWith('re_')
       });
 
-      // Enviar usando fetch directamente
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${this.RESEND_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(emailData)
@@ -187,7 +139,6 @@ class CustomEmailService {
 <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
   <div style="background-color: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); border: 1px solid rgba(186, 230, 253, 0.6);">
     
-    <!-- Header -->
     <div style="text-align: center; margin-bottom: 35px;">
       <div style="display: inline-block; position: relative; margin-bottom: 25px;">
         <h1 style="color: #1e293b; font-size: 42px; margin: 0; font-weight: 800; background: linear-gradient(135deg, #0ea5e9, #0284c7, #0369a1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
@@ -200,7 +151,6 @@ class CustomEmailService {
       </h2>
     </div>
 
-    <!-- Main message -->
     <div style="margin-bottom: 35px;">
       <p style="color: #475569; font-size: 18px; line-height: 1.7; margin-bottom: 20px;">
         ¡Hola! Has solicitado agregar un nuevo rol a tu cuenta de HuBiT.
@@ -220,7 +170,6 @@ class CustomEmailService {
       </p>
     </div>
 
-    <!-- Verification button -->
     <div style="text-align: center; margin: 40px 0;">
       <a href="${verificationUrl}" 
          style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%); color: white; padding: 18px 45px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 18px; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); transition: all 0.3s ease;">
@@ -228,7 +177,6 @@ class CustomEmailService {
       </a>
     </div>
 
-    <!-- Security notice -->
     <div style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); padding: 25px; border-radius: 12px; border-left: 4px solid #f59e0b; margin: 25px 0;">
       <h3 style="color: #92400e; font-size: 16px; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center;">
         <span style="margin-right: 8px;">⚡</span> Información Importante
@@ -241,7 +189,6 @@ class CustomEmailService {
       </ul>
     </div>
 
-    <!-- Role benefits -->
     <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 25px; border-radius: 12px; margin: 30px 0; border-left: 4px solid #22c55e;">
       <h3 style="color: #15803d; font-size: 18px; margin-bottom: 15px; font-weight: 600; display: flex; align-items: center;">
         <span style="margin-right: 10px;">✨</span> Beneficios de Múltiples Roles
@@ -262,7 +209,6 @@ class CustomEmailService {
       </div>
     </div>
 
-    <!-- Footer -->
     <div style="text-align: center; margin-top: 45px; padding-top: 30px; border-top: 2px solid #e2e8f0;">
       <p style="color: #64748b; font-size: 14px; margin-bottom: 15px;">
         ¿Necesitas ayuda? Contacta nuestro soporte en <a href="mailto:support@hubit.com" style="color: #0ea5e9; text-decoration: none;">support@hubit.com</a>
@@ -278,25 +224,20 @@ class CustomEmailService {
     `;
   }
 
-  /**
-   * Método de prueba para verificar la configuración del servicio
-   */
-  static async testEmailService(): Promise<EmailSendResult> {
+  static async testEmailService(): Promise<{ success: boolean; message: string; error?: string }> {
     console.log('🧪 Testing email service configuration...');
     
     try {
-      const apiKey = this.RESEND_API_KEY;
-      console.log('🔑 Testing with API key:', {
-        keyExists: !!apiKey,
-        keyPrefix: apiKey.substring(0, 10),
-        keyValid: apiKey.startsWith('re_')
+      console.log('🔑 Testing with hardcoded API key:', {
+        keyExists: !!this.RESEND_API_KEY,
+        keyPrefix: this.RESEND_API_KEY.substring(0, 10),
+        keyValid: this.RESEND_API_KEY.startsWith('re_')
       });
       
-      // Hacer una petición de prueba a Resend
       const response = await fetch('https://api.resend.com/domains', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${this.RESEND_API_KEY}`,
           'Content-Type': 'application/json',
         }
       });
