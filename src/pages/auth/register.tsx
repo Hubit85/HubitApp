@@ -46,13 +46,24 @@ export default function RegisterPage() {
     });
   }, [formData.password]);
 
-  // Simplified redirect logic - only runs when user is authenticated and not submitting
+  // Redirect logic - handle authentication state changes properly
   useEffect(() => {
-    if (user && !loading && !isSubmitting) {
-      console.log("User authenticated, redirecting to dashboard");
-      router.push("/dashboard");
+    // Only redirect if user is authenticated, not loading, and we're not in the middle of submitting
+    if (user && !loading) {
+      console.log("User authenticated, preparing to redirect to dashboard");
+      
+      // Clear any submission state and redirect
+      setIsSubmitting(false);
+      
+      // Use a small delay to ensure state is clean before redirect
+      const timeoutId = setTimeout(() => {
+        console.log("Executing redirect to dashboard");
+        router.push("/dashboard");
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [user, loading, isSubmitting, router]);
+  }, [user, loading, router]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -120,18 +131,10 @@ export default function RegisterPage() {
         return;
       }
 
-      // Handle explicit success case
-      if (result?.success) {
-        console.log("Registration explicitly successful! Redirecting...");
-        // Allow the useEffect to handle redirect when user state updates
-        return;
-      }
-
-      // Handle implicit success case (no error, no message, no explicit success)
-      // This happens when signUp completes successfully and user is logged in
-      console.log("Registration implicitly successful (no error/message)");
-      // Let the auth state change handle the redirect
-      return;
+      // Handle success case - let the useEffect handle the redirect
+      console.log("Registration successful! Auth state will handle redirect...");
+      // Don't set isSubmitting to false here - let the useEffect handle it
+      // This prevents conflicts between the submission state and auth state changes
       
     } catch (err) {
       console.error("Registration exception:", err);
