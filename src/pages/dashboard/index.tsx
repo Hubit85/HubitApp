@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, User, Mail, Phone, Calendar, Settings, LogOut, Home, Users, Wrench, Building, Shield, Crown, Star, ArrowRight } from "lucide-react";
+import { Loader2, User, Mail, Phone, Calendar, Settings, LogOut, Home, Users, Wrench, Building, Shield, Crown, Star, ArrowRight, FileText, Code } from "lucide-react";
 import PropertyManager from "@/components/dashboard/PropertyManager";
 import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
 
@@ -237,6 +237,87 @@ export default function Dashboard() {
                           </div>
                         </CardContent>
                       </Card>
+
+                      <Card className="group bg-white/70 backdrop-blur-lg border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => router.push("/email-templates")}>
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                              <Mail className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-neutral-900 mb-1">
+                                Email Templates
+                              </h3>
+                              <p className="text-sm text-neutral-600">
+                                Configura plantillas de email para Supabase
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <Badge className="bg-purple-500 hover:bg-purple-600 text-white">
+                              Configuración
+                            </Badge>
+                            <ArrowRight className="w-4 h-4 text-purple-600 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Additional Tools Section */}
+                    <div>
+                      <h2 className="text-2xl font-bold text-neutral-900 mb-6">Herramientas de Administración</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <Card className="group bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => router.push("/email-templates")}>
+                          <CardContent className="p-6 text-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                              <Mail className="h-6 w-6 text-white" />
+                            </div>
+                            <h3 className="font-semibold text-neutral-900 mb-2">
+                              Email Templates
+                            </h3>
+                            <p className="text-sm text-neutral-600 mb-4">
+                              Gestiona las plantillas de email para autenticación
+                            </p>
+                            <Badge variant="outline" className="text-xs">
+                              Supabase Auth
+                            </Badge>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="group bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => window.open("https://supabase.com/dashboard/project/djkrzbmgzfwagmripozi", "_blank")}>
+                          <CardContent className="p-6 text-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                              <Settings className="h-6 w-6 text-white" />
+                            </div>
+                            <h3 className="font-semibold text-neutral-900 mb-2">
+                              Supabase Dashboard
+                            </h3>
+                            <p className="text-sm text-neutral-600 mb-4">
+                              Accede al panel de administración de Supabase
+                            </p>
+                            <Badge variant="outline" className="text-xs">
+                              Externo
+                            </Badge>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="group bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => router.push("/help")}>
+                          <CardContent className="p-6 text-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                              <FileText className="h-6 w-6 text-white" />
+                            </div>
+                            <h3 className="font-semibold text-neutral-900 mb-2">
+                              Documentación
+                            </h3>
+                            <p className="text-sm text-neutral-600 mb-4">
+                              Guías y ayuda para usar la plataforma
+                            </p>
+                            <Badge variant="outline" className="text-xs">
+                              Ayuda
+                            </Badge>
+                          </CardContent>
+                        </Card>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -386,6 +467,73 @@ export default function Dashboard() {
 
                 {/* Profile Actions & Settings */}
                 <div className="lg:col-span-2 space-y-8">
+                  {/* System Configuration */}
+                  <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold text-purple-900 flex items-center gap-2">
+                        <Code className="h-5 w-5" />
+                        Configuración del Sistema
+                      </CardTitle>
+                      <CardDescription className="text-purple-700">
+                        Herramientas avanzadas de configuración y personalización
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {[
+                        { 
+                          text: "Configurar plantillas de email", 
+                          completed: true, 
+                          action: () => router.push("/email-templates"),
+                          description: "Personaliza los emails de autenticación"
+                        },
+                        { 
+                          text: "Verificar conexión con Supabase", 
+                          completed: true, 
+                          action: () => window.open("https://supabase.com/dashboard/project/djkrzbmgzfwagmripozi", "_blank"),
+                          description: "Revisar estado de la base de datos"
+                        },
+                        { 
+                          text: "Configurar notificaciones por email", 
+                          completed: false, 
+                          description: "Personalizar alertas y comunicaciones"
+                        },
+                        { 
+                          text: "Revisar políticas de seguridad", 
+                          completed: true, 
+                          description: "Configuración RLS y permisos"
+                        }
+                      ].map((step, index) => (
+                        <div 
+                          key={index} 
+                          className={`flex items-center gap-3 p-4 rounded-lg hover:bg-purple-50/50 transition-colors ${step.action ? 'cursor-pointer' : ''} border border-purple-100/50`}
+                          onClick={step.action}
+                        >
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                            step.completed ? 'bg-emerald-500 text-white' : 'bg-purple-200 text-purple-700'
+                          }`}>
+                            {step.completed ? '✓' : index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <span className={step.completed ? 'text-neutral-700 font-medium' : 'text-neutral-900 font-medium'}>
+                              {step.text}
+                            </span>
+                            <p className="text-xs text-neutral-500 mt-1">
+                              {step.description}
+                            </p>
+                          </div>
+                          {step.completed && (
+                            <Badge variant="secondary" className="text-xs bg-emerald-100 text-emerald-700">
+                              Configurado
+                            </Badge>
+                          )}
+                          {step.action && (
+                            <ArrowRight className="w-4 h-4 text-purple-600" />
+                          )}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
                   {/* Next Steps */}
                   <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:shadow-lg transition-shadow">
                     <CardHeader>
