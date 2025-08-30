@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +24,7 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [passwordValidation, setPasswordValidation] = useState({
@@ -33,7 +34,7 @@ export default function RegisterPage() {
     number: false
   });
 
-  const { signUp, user, loading } = useSupabaseAuth();
+  const { user, loading } = useSupabaseAuth();
   const router = useRouter();
 
   // Password validation
@@ -46,84 +47,87 @@ export default function RegisterPage() {
     });
   }, [formData.password]);
 
+  // Simple redirect when user is authenticated
+  useEffect(() => {
+    if (user && !loading) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Redirect effect - improved to prevent blocking
-  useEffect(() => {
-    if (!loading && user) {
-      console.log("User authenticated, redirecting to dashboard");
-      // Immediate redirect with proper loading reset
-      setIsLoading(false);
-      router.replace("/dashboard");
-    }
-  }, [user, loading, router]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    
+    // Prevent double submission
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     setError("");
     setSuccessMessage("");
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!Object.values(passwordValidation).every(Boolean)) {
-      setError("La contraseña no cumple con los requisitos mínimos");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!formData.user_type) {
-      setError("Por favor selecciona un tipo de usuario");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      console.log("Starting registration process...");
-      
-      const result = await signUp(formData.email, formData.password, {
-        full_name: formData.full_name,
-        phone: formData.phone,
-        user_type: formData.user_type
-      });
-      
-      if (result.error) {
-        console.error("Registration error:", result.error);
-        setError(result.error);
-        setIsLoading(false);
+      // Validation
+      if (formData.password !== formData.confirmPassword) {
+        setError("Las contraseñas no coinciden");
         return;
       }
 
-      if (result.message) {
-        // Email confirmation required
-        setSuccessMessage(result.message);
-        setIsLoading(false);
+      if (!Object.values(passwordValidation).every(Boolean)) {
+        setError("La contraseña no cumple con los requisitos mínimos");
         return;
       }
 
-      // Registration successful - the auth state change will handle redirect
-      console.log("Registration completed successfully, auth state will handle redirect");
-      
-      // Safety timeout to prevent infinite loading
-      setTimeout(() => {
-        if (isLoading && !user) {
-          console.warn("Registration timeout - stopping loading");
-          setIsLoading(false);
-          setError("El registro tardó más de lo esperado. Si tienes problemas, intenta iniciar sesión.");
+      if (!formData.user_type) {
+        setError("Por favor selecciona un tipo de usuario");
+        return;
+      }
+
+      console.log("Starting registration...");
+
+      // Direct registration using Supabase client
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.full_name,
+            user_type: formData.user_type,
+            phone: formData.phone,
+          }
         }
-      }, 5000);
+      });
 
+      if (signUpError) {
+        console.error("Registration error:", signUpError);
+        setError(signUpError.message);
+        return;
+      }
+
+      if (data.user) {
+        // Check if email confirmation is required
+        if (!data.session && !data.user.email_confirmed_at) {
+          setSuccessMessage("¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta.");
+          return;
+        }
+
+        // If we have a session, registration was successful
+        if (data.session) {
+          console.log("Registration successful, user logged in");
+          // Don't set any loading state - let the auth context handle the redirect
+          return;
+        }
+      }
+
+      setError("Error durante el registro. Por favor, inténtalo de nuevo.");
+      
     } catch (err) {
       console.error("Registration exception:", err);
       setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
-      setIsLoading(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -134,6 +138,7 @@ export default function RegisterPage() {
     { value: "property_administrator", label: "Administrador de Fincas", description: "Gestión de propiedades" }
   ];
 
+  // Show loading screen only during initial auth check
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
@@ -213,7 +218,7 @@ export default function RegisterPage() {
                       placeholder="Juan Pérez"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -233,7 +238,7 @@ export default function RegisterPage() {
                       placeholder="tu@email.com"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -252,7 +257,7 @@ export default function RegisterPage() {
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                       placeholder="+34 600 000 000"
                       className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     />
                   </div>
                 </div>
@@ -262,7 +267,7 @@ export default function RegisterPage() {
                   <Label className="text-sm font-medium text-neutral-700">
                     Tipo de usuario
                   </Label>
-                  <Select value={formData.user_type} onValueChange={(value) => handleInputChange("user_type", value)} disabled={isLoading}>
+                  <Select value={formData.user_type} onValueChange={(value) => handleInputChange("user_type", value)} disabled={isSubmitting}>
                     <SelectTrigger className="h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20">
                       <SelectValue placeholder="Selecciona tu perfil" />
                     </SelectTrigger>
@@ -294,13 +299,13 @@ export default function RegisterPage() {
                       placeholder="••••••••"
                       className="pl-10 pr-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -344,13 +349,13 @@ export default function RegisterPage() {
                       placeholder="••••••••"
                       className="pl-10 pr-10 h-12 bg-white/50 border-neutral-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                       required
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                      disabled={isLoading}
+                      disabled={isSubmitting}
                     >
                       {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -362,13 +367,13 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  disabled={isLoading || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
+                  disabled={isSubmitting || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
                   className="w-full h-12 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {isLoading ? (
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      {user ? "Redirigiendo..." : "Creando cuenta..."}
+                      Creando cuenta...
                     </>
                   ) : (
                     <>
