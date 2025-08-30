@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Shield, Sparkles, UserCircle } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Sparkles, UserCircle } from "lucide-react";
 
 type RegistrationState = 'idle' | 'submitting' | 'redirecting';
 
@@ -37,6 +37,13 @@ export default function RegisterPage() {
 
   const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user && !loading) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
 
   // Password validation
   useEffect(() => {
@@ -413,11 +420,6 @@ export default function RegisterPage() {
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Creando cuenta...
-                    </>
-                  ) : registrationState === 'redirecting' ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Redirigiendo...
                     </>
                   ) : (
                     <>
