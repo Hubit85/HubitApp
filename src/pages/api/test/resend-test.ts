@@ -78,25 +78,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
+      // Obtener el email del body de la request
+      const { testEmail } = req.body;
+      const emailToTest = testEmail || 'borjapipan@gmail.com'; // Email del usuario por defecto
+
       // Hacer test real con Resend API
       console.log('🧪 RESEND TEST API: Testing actual Resend connection...');
       
       try {
         const testEmailData = {
-          from: 'HuBiT Test <onboarding@resend.dev>',
-          to: 'test@example.com',
-          subject: 'Test de Conexión HuBiT - NO ENVIAR',
+          from: 'HuBiT Test <onboarding@resend.dev>', // Email verificado de Resend para pruebas
+          to: emailToTest,
+          subject: 'Test de Conexión HuBiT - Prueba de API',
           html: `
-            <div style="font-family: Arial, sans-serif; padding: 20px;">
-              <h2>🧪 Test de Conexión</h2>
-              <p>Este es un test de conexión de HuBiT con Resend API.</p>
-              <p><strong>NO se envía ningún email real.</strong></p>
-              <p>Timestamp: ${new Date().toISOString()}</p>
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9fafb;">
+              <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 30px; border: 1px solid #e5e7eb;">
+                <h2 style="color: #1f2937; margin-bottom: 20px;">🧪 Test de Conexión HuBiT</h2>
+                <p style="color: #374151; line-height: 1.6;">Este es un email de prueba para verificar la conexión con Resend API.</p>
+                <div style="background-color: #dbeafe; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                  <p style="color: #1e40af; margin: 0;"><strong>✅ La configuración de Resend está funcionando correctamente!</strong></p>
+                </div>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                  Timestamp: ${new Date().toLocaleString('es-ES')}<br>
+                  Email de destino: ${emailToTest}
+                </p>
+              </div>
             </div>
           `
         };
 
-        console.log('📤 RESEND TEST API: Making test request to Resend API...');
+        console.log('📤 RESEND TEST API: Making test request to Resend API with email:', emailToTest);
         
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -129,16 +140,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               "Asegúrate de que la clave tenga permisos de envío"
             ];
           } else if (response.status === 403) {
-            errorMessage = "Permisos insuficientes";
+            // Error específico para limitaciones de desarrollo
+            errorMessage = "Solo puedes enviar emails a tu dirección verificada (borjapipan@gmail.com)";
             suggestions = [
-              "Verifica los permisos de tu clave API",
-              "Asegúrate de que tu cuenta esté activa"
+              "Cambia el email de destino a: borjapipan@gmail.com",
+              "O verifica tu dominio en https://resend.com/domains",
+              "Una vez verificado el dominio, podrás enviar a cualquier dirección",
+              "Este es el comportamiento normal de Resend en modo desarrollo"
             ];
           } else if (response.status === 422) {
             errorMessage = "Error de validación en los datos del email";
             suggestions = [
               "El dominio 'resend.dev' debería funcionar para pruebas",
-              "Verifica la configuración de tu dominio en Resend"
+              "Verifica la configuración de tu dominio en Resend",
+              "Asegúrate de que el email de destino sea válido"
             ];
           } else if (response.status === 429) {
             errorMessage = "Límite de rate limit alcanzado";
@@ -156,7 +171,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             details: {
               status: response.status,
               error: responseData,
-              suggestions
+              suggestions,
+              testedEmail: emailToTest
             }
           });
         }
@@ -168,11 +184,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           success: true,
           hasResendKey: true,
           keyPreview,
-          message: '✅ Conexión con Resend API exitosa! La configuración está correcta.',
+          message: `✅ Email enviado exitosamente a ${emailToTest}! La configuración está correcta.`,
           details: {
             status: response.status,
             emailId: responseData.id,
-            message: 'API key válida y funcionando correctamente'
+            message: 'API key válida y funcionando correctamente',
+            testedEmail: emailToTest
           }
         });
 

@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, CheckCircle, AlertCircle, Zap, Settings, AlertTriangle } from 'lucide-react';
+import { Loader2, Mail, CheckCircle, AlertCircle, Zap, Settings, AlertTriangle, Info } from 'lucide-react';
 
 interface TestResult {
   success: boolean;
@@ -23,6 +24,7 @@ export default function ResendTestTool() {
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
   const [configStatus, setConfigStatus] = useState<ConfigStatus>({ hasKey: false });
+  const [testEmail, setTestEmail] = useState('borjapipan@gmail.com'); // Email por defecto del usuario
 
   const checkResendConfiguration = async () => {
     setChecking(true);
@@ -64,7 +66,7 @@ export default function ResendTestTool() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          testEmail: 'test@example.com'
+          testEmail: testEmail
         })
       });
 
@@ -109,6 +111,22 @@ export default function ResendTestTool() {
       </CardHeader>
       
       <CardContent className="space-y-6">
+        {/* Información importante sobre limitaciones */}
+        <Alert className="border-amber-200 bg-amber-50">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <div className="space-y-2">
+              <p className="font-medium text-amber-900">📧 Limitaciones de Resend en Desarrollo</p>
+              <p className="text-sm text-amber-800">
+                <strong>Solo puedes enviar emails a tu propia dirección:</strong> borjapipan@gmail.com
+              </p>
+              <p className="text-xs text-amber-700">
+                Para enviar a otras direcciones, necesitas verificar tu dominio en Resend.com
+              </p>
+            </div>
+          </AlertDescription>
+        </Alert>
+
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -190,33 +208,52 @@ export default function ResendTestTool() {
 
           {/* Test Section */}
           <div className="border-t border-blue-200/50 pt-4">
-            <div className="flex items-center gap-4 mb-4">
-              <Button 
-                onClick={testResendAPI}
-                disabled={testing}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {testing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Probando...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="h-4 w-4 mr-2" />
-                    Probar Conexión API
-                  </>
-                )}
-              </Button>
-              
-              <div className="text-sm text-blue-700">
-                Esto probará si la clave de API de Resend está configurada correctamente
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="testEmail" className="block text-sm font-medium text-neutral-700 mb-2">
+                  Email para la prueba:
+                </label>
+                <Input
+                  id="testEmail"
+                  type="email"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  placeholder="borjapipan@gmail.com"
+                  className="max-w-md"
+                />
+                <p className="text-xs text-neutral-600 mt-1">
+                  ⚠️ En desarrollo, solo funciona con: <strong>borjapipan@gmail.com</strong>
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Button 
+                  onClick={testResendAPI}
+                  disabled={testing}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {testing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Probando...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Probar Conexión API
+                    </>
+                  )}
+                </Button>
+                
+                <div className="text-sm text-blue-700">
+                  Esto probará si la clave de API de Resend está configurada correctamente
+                </div>
               </div>
             </div>
 
             {/* Test Results */}
             {result && (
-              <Alert className={`border-2 ${
+              <Alert className={`mt-4 border-2 ${
                 result.success 
                   ? "border-emerald-200 bg-emerald-50" 
                   : "border-red-200 bg-red-50"
@@ -238,6 +275,25 @@ export default function ResendTestTool() {
                       {result.message}
                     </p>
 
+                    {/* Error 403 específico */}
+                    {result.details && result.details.status === 403 && (
+                      <div className="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                        <h5 className="font-medium text-amber-900 mb-2">🚨 Error 403: Limitación de Desarrollo</h5>
+                        <div className="text-sm text-amber-800 space-y-2">
+                          <p><strong>Problema:</strong> Solo puedes enviar emails de prueba a tu propia dirección verificada.</p>
+                          <p><strong>Tu email verificado:</strong> borjapipan@gmail.com</p>
+                          <div>
+                            <p><strong>Soluciones:</strong></p>
+                            <ol className="list-decimal list-inside ml-2 space-y-1">
+                              <li>Cambia el email de prueba a: borjapipan@gmail.com</li>
+                              <li>O verifica tu dominio en <a href="https://resend.com/domains" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Resend Domains</a></li>
+                              <li>Una vez verificado el dominio, podrás enviar a cualquier dirección</li>
+                            </ol>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {result.details && (
                       <details className="mt-3">
                         <summary className="cursor-pointer text-sm font-medium text-neutral-700 hover:text-neutral-900">
@@ -249,7 +305,7 @@ export default function ResendTestTool() {
                       </details>
                     )}
 
-                    {!result.success && (
+                    {!result.success && result.details?.status !== 403 && (
                       <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                         <h5 className="font-medium text-blue-900 mb-2">💡 Posibles soluciones:</h5>
                         <ul className="text-sm text-blue-800 space-y-1">
