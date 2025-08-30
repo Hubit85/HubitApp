@@ -1,217 +1,325 @@
-
-import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Database, ExternalLink, Copy, CheckCircle, Shield, Zap } from "lucide-react";
-import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle, AlertCircle, Database, Users, Mail, Zap } from "lucide-react";
+
+interface TableStatus {
+  name: string;
+  exists: boolean;
+  description: string;
+  category: 'core' | 'business' | 'messaging' | 'system';
+}
 
 export default function DatabaseSetupNotice() {
-  const [copied, setCopied] = useState(false);
+  const [databaseStatus, setDatabaseStatus] = useState<{
+    isConnected: boolean;
+    isConfigured: boolean;
+    tables: TableStatus[];
+    loading: boolean;
+    error: string | null;
+  }>({
+    isConnected: false,
+    isConfigured: false,
+    tables: [],
+    loading: true,
+    error: null
+  });
 
-  const copyToClipboard = async () => {
+  const expectedTables: Omit<TableStatus, 'exists'>[] = [
+    // Core tables
+    { name: 'profiles', description: 'Perfiles de usuario', category: 'core' },
+    { name: 'properties', description: 'Propiedades gestionadas', category: 'core' },
+    { name: 'service_categories', description: 'Categorías de servicios', category: 'core' },
+    
+    // Business logic tables
+    { name: 'budget_requests', description: 'Solicitudes de presupuesto', category: 'business' },
+    { name: 'service_providers', description: 'Proveedores de servicios', category: 'business' },
+    { name: 'quotes', description: 'Cotizaciones', category: 'business' },
+    { name: 'contracts', description: 'Contratos', category: 'business' },
+    { name: 'work_sessions', description: 'Sesiones de trabajo', category: 'business' },
+    { name: 'invoices', description: 'Facturas', category: 'business' },
+    { name: 'payments', description: 'Pagos', category: 'business' },
+    { name: 'ratings', description: 'Calificaciones y reseñas', category: 'business' },
+    { name: 'emergency_requests', description: 'Solicitudes de emergencia', category: 'business' },
+    
+    // Messaging and communication
+    { name: 'conversations', description: 'Conversaciones', category: 'messaging' },
+    { name: 'messages', description: 'Mensajes', category: 'messaging' },
+    { name: 'notifications', description: 'Notificaciones', category: 'messaging' },
+    
+    // Document management
+    { name: 'documents', description: 'Gestión de documentos', category: 'system' }
+  ];
+
+  const checkDatabaseStatus = async () => {
+    setDatabaseStatus(prev => ({ ...prev, loading: true, error: null }));
+    
     try {
-      const response = await fetch('/docs/database-setup.sql');
-      const sqlScript = await response.text();
-      await navigator.clipboard.writeText(sqlScript);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-      // Fallback - copy a basic version
-      const basicScript = `-- HuBiT Database Setup Script
--- Go to your Supabase project: https://djkrzbmgzfwagmripozi.supabase.co
--- Open SQL Editor and run this complete script
+      // Test basic connection
+      const { error: connectionError } = await supabase
+        .from('profiles')
+        .select('count(*)')
+        .limit(1);
 
--- Please visit /docs/database-setup.sql for the complete setup script`;
-      
-      try {
-        await navigator.clipboard.writeText(basicScript);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (fallbackErr) {
-        console.error('Fallback copy also failed:', fallbackErr);
+      if (connectionError) {
+        throw new Error(`Conexión fallida: ${connectionError.message}`);
       }
+
+      // Check all expected tables
+      const tableStatuses: TableStatus[] = [];
+      
+      for (const table of expectedTables) {
+        try {
+          const { error } = await supabase
+            .from(table.name)
+            .select('count(*)')
+            .limit(1);
+          
+          tableStatuses.push({
+            ...table,
+            exists: !error
+          });
+        } catch (err) {
+          tableStatuses.push({
+            ...table,
+            exists: false
+          });
+        }
+      }
+
+      const configuredTables = tableStatuses.filter(t => t.exists).length;
+      const isFullyConfigured = configuredTables === expectedTables.length;
+
+      setDatabaseStatus({
+        isConnected: true,
+        isConfigured: isFullyConfigured,
+        tables: tableStatuses,
+        loading: false,
+        error: null
+      });
+
+    } catch (error) {
+      console.error('Database check failed:', error);
+      setDatabaseStatus({
+        isConnected: false,
+        isConfigured: false,
+        tables: expectedTables.map(table => ({ ...table, exists: false })),
+        loading: false,
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
     }
   };
 
-  return (
-    <Card className="border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-50 shadow-xl">
-      <CardHeader>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <AlertTriangle className="h-6 w-6 text-white" />
+  useEffect(() => {
+    checkDatabaseStatus();
+  }, []);
+
+  const getCategoryIcon = (category: TableStatus['category']) => {
+    switch (category) {
+      case 'core': return <Users className="h-4 w-4" />;
+      case 'business': return <Database className="h-4 w-4" />;
+      case 'messaging': return <Mail className="h-4 w-4" />;
+      case 'system': return <Zap className="h-4 w-4" />;
+    }
+  };
+
+  const getCategoryColor = (category: TableStatus['category']) => {
+    switch (category) {
+      case 'core': return 'bg-blue-100 text-blue-800';
+      case 'business': return 'bg-green-100 text-green-800';
+      case 'messaging': return 'bg-purple-100 text-purple-800';
+      case 'system': return 'bg-orange-100 text-orange-800';
+    }
+  };
+
+  if (databaseStatus.loading) {
+    return (
+      <Card className="w-full max-w-4xl mx-auto">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-center space-x-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span>Verificando estado de la base de datos...</span>
           </div>
-          <div className="flex-1">
-            <CardTitle className="text-amber-900 flex items-center gap-3 text-xl">
-              🚧 Base de datos no configurada
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-300">
-                Configuración requerida
-              </Badge>
-            </CardTitle>
-            <CardDescription className="text-amber-700 text-base mt-1">
-              Para usar todas las funcionalidades de HuBiT, necesitas configurar las tablas en Supabase
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-6">
-        {/* What will be created */}
-        <div className="bg-white/80 p-5 rounded-xl border border-amber-200 shadow-sm">
-          <h3 className="font-bold text-amber-900 mb-4 flex items-center gap-2 text-lg">
-            <Database className="h-5 w-5" />
-            ¿Qué se va a crear?
-          </h3>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!databaseStatus.isConnected) {
+    return (
+      <Card className="w-full max-w-4xl mx-auto border-red-200">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2 text-red-600">
+            <AlertCircle className="h-6 w-6" />
+            <span>Error de Conexión a Supabase</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {databaseStatus.error}
+            </AlertDescription>
+          </Alert>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <h4 className="font-semibold text-amber-800 flex items-center gap-2">
-                📊 8 Tablas principales
-              </h4>
-              <ul className="text-sm text-amber-700 space-y-1 ml-6">
-                <li>• profiles (perfiles de usuario)</li>
-                <li>• properties (propiedades)</li>
-                <li>• budget_requests (solicitudes)</li>
-                <li>• service_providers (proveedores)</li>
-                <li>• quotes (presupuestos)</li>
-                <li>• ratings (valoraciones)</li>
-                <li>• contracts (contratos)</li>
-                <li>• notifications (notificaciones)</li>
-              </ul>
-            </div>
+          <div className="space-y-4">
+            <p>Por favor verifica:</p>
+            <ul className="list-disc list-inside space-y-2 text-sm">
+              <li>Las credenciales de Supabase en el archivo .env.local</li>
+              <li>Que el proyecto de Supabase esté activo</li>
+              <li>La conectividad a internet</li>
+            </ul>
             
-            <div className="space-y-3">
-              <h4 className="font-semibold text-amber-800 flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Seguridad y rendimiento
-              </h4>
-              <ul className="text-sm text-amber-700 space-y-1 ml-6">
-                <li>• Row Level Security (RLS)</li>
-                <li>• Políticas de seguridad</li>
-                <li>• Índices de rendimiento</li>
-                <li>• Triggers automáticos</li>
-                <li>• Funciones auxiliares</li>
-              </ul>
+            <Button onClick={checkDatabaseStatus} variant="outline">
+              Reintentar Conexión
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!databaseStatus.isConfigured) {
+    const configuredCount = databaseStatus.tables.filter(t => t.exists).length;
+    const totalCount = databaseStatus.tables.length;
+    const progressPercentage = Math.round((configuredCount / totalCount) * 100);
+
+    return (
+      <Card className="w-full max-w-4xl mx-auto border-amber-200">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 text-amber-600">
+              <Database className="h-6 w-6" />
+              <span>Configuración de Base de Datos Requerida</span>
             </div>
-          </div>
-        </div>
-
-        {/* Step-by-step instructions */}
-        <div className="bg-white/80 p-5 rounded-xl border border-amber-200 shadow-sm">
-          <h3 className="font-bold text-amber-900 mb-4 flex items-center gap-2 text-lg">
-            <Zap className="h-5 w-5" />
-            Pasos para configurar (5 minutos):
-          </h3>
-          
-          <ol className="space-y-3">
-            {[
-              {
-                step: 1,
-                title: "Abre tu proyecto Supabase",
-                description: "Ve a tu dashboard de Supabase",
-                icon: "🌐"
-              },
-              {
-                step: 2,
-                title: "Accede al SQL Editor",
-                description: "En la barra lateral izquierda, busca 'SQL Editor'",
-                icon: "📝"
-              },
-              {
-                step: 3,
-                title: "Copia el script completo",
-                description: "Haz clic en 'Copiar Script SQL Completo' abajo",
-                icon: "📋"
-              },
-              {
-                step: 4,
-                title: "Pega y ejecuta",
-                description: "Pega el script en el editor y haz clic en 'Run'",
-                icon: "▶️"
-              },
-              {
-                step: 5,
-                title: "¡Listo! 🎉",
-                description: "Recarga esta página para usar todas las funciones",
-                icon: "✅"
+            <Badge variant="secondary">
+              {configuredCount}/{totalCount} tablas
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Alert>
+            <Database className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Progreso:</strong> {progressPercentage}% completado. 
+              {configuredCount === 0 
+                ? " Necesitas ejecutar el script de configuración inicial."
+                : ` ${totalCount - configuredCount} tablas pendientes por configurar.`
               }
-            ].map((step, index) => (
-              <li key={index} className="flex items-start gap-3 text-sm">
-                <div className="w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-sm">
-                  {step.step}
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-amber-900 mb-1">
-                    {step.icon} {step.title}
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold">Estado de las tablas:</h3>
+            
+            {['core', 'business', 'messaging', 'system'].map(category => {
+              const categoryTables = databaseStatus.tables.filter(t => t.category === category);
+              const categoryConfigured = categoryTables.filter(t => t.exists).length;
+              
+              return (
+                <div key={category} className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    {getCategoryIcon(category as TableStatus['category'])}
+                    <h4 className="font-medium capitalize">
+                      {category === 'core' && 'Tablas Principales'}
+                      {category === 'business' && 'Lógica de Negocio'}
+                      {category === 'messaging' && 'Comunicación'}
+                      {category === 'system' && 'Sistema'}
+                    </h4>
+                    <Badge className={getCategoryColor(category as TableStatus['category'])}>
+                      {categoryConfigured}/{categoryTables.length}
+                    </Badge>
                   </div>
-                  <div className="text-amber-700">
-                    {step.description}
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 ml-6">
+                    {categoryTables.map(table => (
+                      <div key={table.name} className="flex items-center space-x-2">
+                        {table.exists ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="h-4 w-4 text-red-500" />
+                        )}
+                        <span className={`text-sm ${table.exists ? 'text-green-700' : 'text-red-700'}`}>
+                          {table.name}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            onClick={() => window.open('https://djkrzbmgzfwagmripozi.supabase.co', '_blank')}
-            className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 flex items-center gap-2 flex-1"
-          >
-            <ExternalLink className="h-4 w-4" />
-            🚀 Abrir Supabase Dashboard
-          </Button>
-          
-          <Button
-            variant="outline"
-            onClick={copyToClipboard}
-            className="border-2 border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-2 flex-1"
-          >
-            <Copy className="h-4 w-4" />
-            {copied ? (
-              <>
-                <CheckCircle className="h-4 w-4 text-emerald-600" />
-                ¡Copiado! ✨
-              </>
-            ) : (
-              "📋 Copiar Script SQL Completo"
-            )}
-          </Button>
-        </div>
-
-        {/* Additional help */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-            💡 Ayuda adicional
-          </h4>
-          <p className="text-blue-800 text-sm leading-relaxed">
-            Si tienes problemas con la configuración, puedes encontrar el archivo completo del script en{" "}
-            <code className="bg-blue-100 px-2 py-1 rounded text-xs font-mono">docs/database-setup.sql</code>{" "}
-            en tu proyecto, o contacta con soporte técnico de HuBiT.
-          </p>
-        </div>
-
-        {/* Preview of benefits */}
-        <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-4">
-          <h4 className="font-semibold text-emerald-900 mb-3 flex items-center gap-2">
-            🌟 Después de la configuración podrás:
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[
-              "✅ Gestionar propiedades",
-              "✅ Crear solicitudes de presupuesto",
-              "✅ Recibir y evaluar ofertas",
-              "✅ Sistema de valoraciones",
-              "✅ Gestión completa de contratos",
-              "✅ Notificaciones en tiempo real"
-            ].map((benefit, index) => (
-              <div key={index} className="flex items-center gap-2 text-emerald-800 text-sm">
-                {benefit}
-              </div>
-            ))}
+              );
+            })}
           </div>
+
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-medium mb-2">📋 Pasos para configurar:</h4>
+            <ol className="list-decimal list-inside space-y-2 text-sm">
+              <li>Abre el SQL Editor en tu dashboard de Supabase</li>
+              <li>Ejecuta el archivo: <code className="bg-gray-100 px-1 rounded">docs/complete-database-setup.sql</code></li>
+              <li>Ejecuta las políticas RLS: <code className="bg-gray-100 px-1 rounded">docs/basic-rls-policies.sql</code></li>
+              <li>Configura las plantillas de email siguiendo: <code className="bg-gray-100 px-1 rounded">docs/supabase-email-templates.md</code></li>
+              <li>Haz clic en "Verificar Configuración" cuando termines</li>
+            </ol>
+          </div>
+
+          <div className="flex space-x-2">
+            <Button onClick={checkDatabaseStatus} variant="outline">
+              🔄 Verificar Configuración
+            </Button>
+            <Button 
+              onClick={() => window.open('https://supabase.com/dashboard', '_blank')} 
+              variant="default"
+            >
+              🚀 Abrir Supabase Dashboard
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="w-full max-w-4xl mx-auto border-green-200">
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2 text-green-600">
+          <CheckCircle className="h-6 w-6" />
+          <span>¡Base de Datos Configurada Correctamente!</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Alert className="mb-4 border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription>
+            <strong>✅ Sistema completamente funcional:</strong> Todas las {databaseStatus.tables.length} tablas están configuradas y listas. 
+            HuBiT puede manejar propiedades, presupuestos, contratos, pagos, comunicaciones y más.
+          </AlertDescription>
+        </Alert>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">{databaseStatus.tables.filter(t => t.category === 'core').length}</div>
+            <div className="text-sm text-gray-600">Tablas Principales</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">{databaseStatus.tables.filter(t => t.category === 'business').length}</div>
+            <div className="text-sm text-gray-600">Lógica de Negocio</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-600">{databaseStatus.tables.filter(t => t.category === 'messaging').length}</div>
+            <div className="text-sm text-gray-600">Comunicación</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-orange-600">{databaseStatus.tables.filter(t => t.category === 'system').length}</div>
+            <div className="text-sm text-gray-600">Sistema</div>
+          </div>
+        </div>
+
+        <div className="flex justify-center mt-6">
+          <Button onClick={checkDatabaseStatus} variant="outline" size="sm">
+            🔄 Verificar Estado
+          </Button>
         </div>
       </CardContent>
     </Card>
