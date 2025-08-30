@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import CustomEmailService from "@/lib/customEmailService";
 
 export interface UserRole {
   id: string;
@@ -101,8 +102,13 @@ export class SupabaseUserRoleService {
         throw new Error(`Error creating role: ${error.message}`);
       }
 
-      // Enviar email de verificación
-      await this.sendRoleVerificationEmail(userId, request.role_type, verificationToken);
+      // Enviar email de verificación usando el servicio personalizado
+      const emailResult = await this.sendRoleVerificationEmail(userId, request.role_type, verificationToken);
+
+      if (!emailResult.success) {
+        console.warn('Failed to send verification email:', emailResult.error);
+        // Aún así consideramos exitosa la creación del rol
+      }
 
       return {
         success: true,
@@ -198,6 +204,22 @@ export class SupabaseUserRoleService {
         throw new Error(updateError.message);
       }
 
+      // Crear notificación de éxito
+      try {
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: roleData.user_id,
+            title: `¡Rol verificado correctamente!`,
+            message: `Tu rol de ${this.getRoleDisplayName(roleData.role_type)} ha sido verificado y activado.`,
+            type: 'success',
+            category: 'role_verification',
+            is_read: false
+          });
+      } catch (notificationError) {
+        console.warn('Could not create success notification:', notificationError);
+      }
+
       return {
         success: true,
         message: `¡Rol de ${this.getRoleDisplayName(roleData.role_type)} verificado correctamente!`,
@@ -260,34 +282,39 @@ export class SupabaseUserRoleService {
     }
   }
 
-  static async sendRoleVerificationEmail(userId: string, roleType: UserRole['role_type'], verificationToken: string) {
+  /**
+   * Envía email de verificación de rol usando el servicio personalizado
+   */
+  static async sendRoleVerificationEmail(userId: string, roleType: UserRole['role_type'], verificationToken: string): Promise<{ success: boolean; message: string; error?: string }> {
     try {
       // Obtener datos del usuario
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuario no encontrado");
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error("Usuario no encontrado");
+      }
 
-      const verificationUrl = `${window.location.origin}/auth/verify-role?token=${verificationToken}`;
+      // Usar el servicio de email personalizado
+      const result = await CustomEmailService.sendRoleVerificationEmail(
+        userId,
+        user.email!,
+        roleType,
+        verificationToken
+      );
 
-      // En un entorno real, aquí enviarías el email a través de tu servicio de email
-      // Por ahora, lo simulamos guardando la notificación
-      console.log(`📧 Email de verificación de rol enviado a ${user.email}`);
-      console.log(`🔗 URL de verificación: ${verificationUrl}`);
-      console.log(`👤 Nuevo rol: ${this.getRoleDisplayName(roleType)}`);
+      if (result.success) {
+        console.log(`📧 Email de verificación de rol enviado exitosamente a ${user.email}`);
+        console.log(`👤 Nuevo rol: ${this.getRoleDisplayName(roleType)}`);
+      }
 
-      // Crear notificación en el sistema
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: userId,
-          title: `Verificar nuevo rol: ${this.getRoleDisplayName(roleType)}`,
-          message: `Se ha enviado un email de verificación para confirmar tu nuevo rol de ${this.getRoleDisplayName(roleType)}`,
-          type: 'info',
-          category: 'role_verification'
-        });
+      return result;
 
     } catch (error) {
       console.error("Error sending verification email:", error);
-      throw error;
+      return {
+        success: false,
+        message: 'Failed to send verification email',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 
