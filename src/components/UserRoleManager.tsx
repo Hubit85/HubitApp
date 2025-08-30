@@ -284,6 +284,68 @@ export default function UserRoleManager() {
                 </DialogContent>
               </Dialog>
             )}
+            
+            {/* Botón para limpiar verificaciones pendientes */}
+            {userRoles.some(role => !role.is_verified) && (
+              <Dialog open={showClearPendingModal} onOpenChange={setShowClearPendingModal}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-amber-700 border-amber-300 hover:bg-amber-50">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Limpiar Pendientes
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Limpiar Verificaciones Pendientes</DialogTitle>
+                    <DialogDescription>
+                      Esto eliminará todos los roles que están pendientes de verificación. Esta acción no se puede deshacer.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-amber-800 mb-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span className="font-medium">Roles que se eliminarán:</span>
+                      </div>
+                      <ul className="text-sm text-amber-700 space-y-1">
+                        {userRoles
+                          .filter(role => !role.is_verified)
+                          .map(role => (
+                            <li key={role.id} className="flex items-center gap-2">
+                              {getRoleIcon(role.role_type)}
+                              {SupabaseUserRoleService.getRoleDisplayName(role.role_type)}
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowClearPendingModal(false)}
+                      disabled={submitting}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      onClick={handleClearPendingVerifications} 
+                      disabled={submitting}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Eliminando...
+                        </>
+                      ) : (
+                        "Eliminar Todas"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </CardHeader>
 
@@ -386,6 +448,16 @@ export default function UserRoleManager() {
                           <div className="flex items-center gap-2">
                             <Mail className="h-4 w-4 text-amber-500" />
                             <span className="text-xs text-amber-600">Revisa tu email</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemovePendingRole(role.role_type)}
+                              disabled={submitting}
+                              className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 ml-2"
+                              title="Eliminar verificación pendiente"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
                           </div>
                         )}
                         
@@ -395,6 +467,7 @@ export default function UserRoleManager() {
                           onClick={() => handleRemoveRole(role.role_type)}
                           disabled={submitting || (userRoles.filter(r => r.is_verified).length <= 1 && role.is_verified)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title={role.is_verified ? "Eliminar rol verificado" : "Eliminar rol"}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -403,9 +476,21 @@ export default function UserRoleManager() {
 
                     {!role.is_verified && (
                       <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                        <div className="flex items-center gap-2 text-amber-800">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-sm font-medium">Verificación Pendiente</span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-amber-800">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span className="text-sm font-medium">Verificación Pendiente</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemovePendingRole(role.role_type)}
+                            disabled={submitting}
+                            className="text-amber-700 hover:text-amber-800 hover:bg-amber-100"
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Eliminar
+                          </Button>
                         </div>
                         <p className="text-xs text-amber-700 mt-1">
                           Se ha enviado un email de verificación. El enlace expira en 24 horas.
