@@ -503,7 +503,10 @@ export class SupabaseBudgetService {
     for (const order of categoryOrders) {
       const { error } = await supabase
         .from('service_categories')
-        .update({ sort_order: order.sort_order, updated_at: new Date().toISOString() })
+        .update({ 
+          sort_order: order.sort_order, 
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', order.id);
       
       if (error) {

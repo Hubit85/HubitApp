@@ -285,16 +285,24 @@ export class SupabaseServiceCategoryService {
   }
 
   static async reorderCategories(categoryOrders: { id: string; sort_order: number }[]): Promise<void> {
-    for (const order of categoryOrders) {
-      const { error } = await supabase
-        .from('service_categories')
-        .update({ sort_order: order.sort_order, updated_at: new Date().toISOString() })
-        .eq('id', order.id);
-      
-      if (error) {
-        console.error(`Failed to update category order for ${order.id}:`, error);
-        throw new Error(`Failed to update category order: ${error.message}`);
+    try {
+      for (const order of categoryOrders) {
+        const { error } = await supabase
+          .from('service_categories')
+          .update({ 
+            sort_order: order.sort_order, 
+            updated_at: new Date().toISOString() 
+          })
+          .eq('id', order.id);
+        
+        if (error) {
+          console.error(`Failed to update category order for ${order.id}:`, error);
+          throw new Error(`Failed to update category order: ${error.message}`);
+        }
       }
+    } catch (error) {
+      console.error('Error in reorderCategories:', error);
+      throw error;
     }
   }
 }
