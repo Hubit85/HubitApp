@@ -34,16 +34,29 @@ export default function RegisterPage() {
     lowercase: false,
     number: false
   });
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
 
-  // Redirect if already authenticated
+  // Redirect logic - only redirect if we're not in a registration flow
   useEffect(() => {
-    if (user && !loading) {
+    if (user && !loading && registrationState === 'idle' && !shouldRedirect) {
+      console.log("User already authenticated, redirecting to dashboard");
       router.push("/dashboard");
     }
-  }, [user, loading, router]);
+  }, [user, loading, registrationState, shouldRedirect, router]);
+
+  // Handle successful registration redirect
+  useEffect(() => {
+    if (shouldRedirect && user && !loading) {
+      console.log("Registration completed, redirecting to dashboard");
+      setRegistrationState('redirecting');
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
+    }
+  }, [shouldRedirect, user, loading, router]);
 
   // Password validation
   useEffect(() => {
@@ -119,19 +132,9 @@ export default function RegisterPage() {
       }
 
       if (result?.success) {
-        console.log("Registration successful! Redirecting...");
-        setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
-        setRegistrationState('redirecting');
-        
-        // Redirect after a brief delay to show success message
-        setTimeout(() => {
-          router.push("/dashboard").catch((err) => {
-            console.error("Redirect failed:", err);
-            setRegistrationState('idle');
-            setError("Tu cuenta fue creada exitosamente. Puedes acceder manualmente a /dashboard");
-          });
-        }, 2000);
-        
+        console.log("Registration successful! Setting up redirect...");
+        setSuccessMessage("¡Cuenta creada exitosamente!");
+        setShouldRedirect(true);
         return;
       }
 
