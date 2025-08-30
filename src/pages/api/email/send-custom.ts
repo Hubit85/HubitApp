@@ -27,8 +27,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<EmailResponse>
 ) {
+  console.log('📧 Email API called with method:', req.method);
+  
   // Solo permitir método POST
   if (req.method !== 'POST') {
+    console.log('❌ Method not allowed:', req.method);
     return res.status(405).json({
       success: false,
       error: 'Method not allowed'
@@ -36,91 +39,185 @@ export default async function handler(
   }
 
   // Verificar configuración de API
-  if (!process.env.RESEND_API_KEY || !resend) {
-    console.error('❌ RESEND_API_KEY not configured');
+  if (!process.env.RESEND_API_KEY) {
+    console.error('❌ RESEND_API_KEY environment variable not set');
     return res.status(500).json({
       success: false,
-      error: 'Email service not configured. Please set RESEND_API_KEY environment variable.'
+      error: 'Email service not configured. RESEND_API_KEY environment variable is missing.'
+    });
+  }
+
+  if (!resend) {
+    console.error('❌ Resend client not initialized');
+    return res.status(500).json({
+      success: false,
+      error: 'Email service initialization failed. Check API key format.'
+    });
+  }
+
+  // Validar que la API key tenga el formato correcto
+  if (!process.env.RESEND_API_KEY.startsWith('re_')) {
+    console.error('❌ Invalid RESEND_API_KEY format. Must start with "re_"');
+    return res.status(500).json({
+      success: false,
+      error: 'Invalid Resend API key format. Key must start with "re_".'
     });
   }
 
   try {
     const { to, subject, html, from } = req.body as EmailRequest;
 
-    // Validar campos requeridos
-    if (!to || !subject || !html) {
-      console.error('❌ Missing required fields:', { to: !!to, subject: !!subject, html: !!html });
+    console.log('📧 Processing email request:', {
+      to: to ? to.substring(0, 5) + '***' : 'missing',
+      subject: subject || 'missing',
+      hasHtml: !!html,
+      htmlLength: html ? html.length : 0,
+      from: from || 'default'
+    });
+
+    // Validar campos requeridos con mensajes específicos
+    const missingFields: string[] = [];
+    if (!to) missingFields.push('to');
+    if (!subject) missingFields.push('subject');  
+    if (!html) missingFields.push('html');
+
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields);
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: to, subject, html'
+        error: `Missing required fields: ${missingFields.join(', ')}`
       });
     }
 
-    // Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Validar formato de email con regex más estricto
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
     if (!emailRegex.test(to)) {
       console.error('❌ Invalid email format:', to);
       return res.status(400).json({
         success: false,
-        error: 'Invalid email format'
+        error: `Invalid email format: ${to}`
+      });
+    }
+
+    // Validar longitud del HTML (evitar emails demasiado grandes)
+    if (html.length > 500000) { // 500KB limit
+      console.error('❌ HTML content too large:', html.length);
+      return res.status(400).json({
+        success: false,
+        error: 'Email content too large. Maximum size is 500KB.'
       });
     }
 
     // Configurar el from address - usar el dominio verificado de Resend
     const fromAddress = from || 'HuBiT Platform <onboarding@resend.dev>';
 
-    console.log('📤 Attempting to send email:', {
+    console.log('📤 Sending email via Resend API:', {
       to,
       subject,
       from: fromAddress,
-      htmlLength: html.length
+      htmlLength: html.length,
+      timestamp: new Date().toISOString()
     });
 
-    // Enviar email via Resend
-    const emailResult = await resend.emails.send({
+    // Enviar email via Resend con timeout
+    const emailPromise = resend.emails.send({
       from: fromAddress,
       to: [to],
       subject: subject,
       html: html
     });
 
-    console.log('📧 Resend response:', emailResult);
+    // Implementar timeout de 30 segundos para evitar requests colgados
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Email sending timeout')), 30000)
+    );
+
+    const emailResult = await Promise.race([emailPromise, timeoutPromise]) as any;
+
+    console.log('📧 Resend API response received:', {
+      hasData: !!emailResult.data,
+      hasError: !!emailResult.error,
+      messageId: emailResult.data?.id,
+      timestamp: new Date().toISOString()
+    });
 
     if (emailResult.error) {
-      console.error('❌ Resend API error:', emailResult.error);
+      console.error('❌ Resend API returned error:', {
+        errorType: emailResult.error.name || 'Unknown',
+        errorMessage: emailResult.error.message || 'No message',
+        errorDetails: emailResult.error
+      });
+      
+      // Proporcionar mensajes de error más específicos basados en el tipo de error
+      let userFriendlyMessage = 'Failed to send email';
+      if (emailResult.error.message?.includes('API key')) {
+        userFriendlyMessage = 'Invalid API key configuration';
+      } else if (emailResult.error.message?.includes('rate')) {
+        userFriendlyMessage = 'Rate limit exceeded, please try again later';
+      } else if (emailResult.error.message?.includes('domain')) {
+        userFriendlyMessage = 'Email domain not verified';
+      } else if (emailResult.error.message?.includes('invalid')) {
+        userFriendlyMessage = 'Invalid email address or content';
+      }
+
       return res.status(500).json({
         success: false,
-        error: 'Failed to send email via Resend',
-        details: emailResult.error
+        error: userFriendlyMessage,
+        details: emailResult.error.message || 'Unknown error from email service'
+      });
+    }
+
+    if (!emailResult.data || !emailResult.data.id) {
+      console.error('❌ Resend API succeeded but no message ID returned');
+      return res.status(500).json({
+        success: false,
+        error: 'Email service returned success but no confirmation ID'
       });
     }
 
     console.log('✅ Email sent successfully:', {
       to,
       subject,
-      messageId: emailResult.data?.id
+      messageId: emailResult.data.id,
+      timestamp: new Date().toISOString()
     });
 
     return res.status(200).json({
       success: true,
-      messageId: emailResult.data?.id
+      messageId: emailResult.data.id
     });
 
   } catch (error) {
-    console.error('❌ Email sending error:', error);
+    console.error('❌ Unexpected email sending error:', {
+      errorName: error instanceof Error ? error.name : 'Unknown',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack?.substring(0, 500) : 'No stack',
+      timestamp: new Date().toISOString()
+    });
     
-    // Manejo específico de errores de Resend
-    if (error && typeof error === 'object' && 'message' in error) {
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to send email',
-        details: error.message
-      });
+    // Manejo específico de errores conocidos
+    let errorMessage = 'Internal server error while sending email';
+    let statusCode = 500;
+
+    if (error instanceof Error) {
+      if (error.message.includes('timeout')) {
+        errorMessage = 'Email sending timeout. Please try again.';
+        statusCode = 408;
+      } else if (error.message.includes('network')) {
+        errorMessage = 'Network error while connecting to email service';
+        statusCode = 503;
+      } else if (error.message.includes('API key')) {
+        errorMessage = 'Invalid API key configuration';
+        statusCode = 500;
+      } else if (error.message.toLowerCase().includes('fetch')) {
+        errorMessage = 'Failed to connect to email service';
+        statusCode = 503;
+      }
     }
     
-    return res.status(500).json({
+    return res.status(statusCode).json({
       success: false,
-      error: 'Internal server error while sending email',
+      error: errorMessage,
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
