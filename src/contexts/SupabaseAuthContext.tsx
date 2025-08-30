@@ -154,8 +154,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
-    setLoading(true);
-    
     try {
       console.log("SupabaseAuth: Starting signUp process");
       
@@ -173,7 +171,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error("Supabase signUp error:", error);
-        setLoading(false);
         return { error: error.message };
       }
 
@@ -183,7 +180,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         // Check if we need email confirmation
         if (!data.session && data.user.email_confirmed_at === null) {
           console.log("Email confirmation required");
-          setLoading(false);
           return { 
             error: undefined,
             message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
@@ -222,19 +218,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.warn("Profile creation failed, but user was created successfully:", profileError);
           }
 
-          // Don't set loading to false here - let the auth state change handle it
+          // Registration successful - let the auth state change handle the redirect
           console.log("Registration successful, auth state will update");
           return { error: undefined };
         }
       }
 
       console.log("Registration completed but no user/session returned");
-      setLoading(false);
       return { error: "Error durante el registro. Por favor, inténtalo de nuevo." };
       
     } catch (error) {
       console.error("Unexpected signup error:", error);
-      setLoading(false);
       return { error: "Error inesperado durante el registro" };
     }
   };

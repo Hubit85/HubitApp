@@ -25,6 +25,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [passwordValidation, setPasswordValidation] = useState({
     length: false,
     uppercase: false,
@@ -34,20 +35,6 @@ export default function RegisterPage() {
 
   const { signUp, user, loading } = useSupabaseAuth();
   const router = useRouter();
-
-  // Redirect if already logged in - FIXED VERSION
-  useEffect(() => {
-    // Only redirect if user is authenticated AND we're not in the middle of a registration process
-    if (!loading && user && !isLoading) {
-      // Add a delay to prevent conflicts with the registration flow
-      const redirectTimer = setTimeout(() => {
-        // Use window.location for immediate redirect without state conflicts
-        window.location.href = "/dashboard";
-      }, 2000);
-
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [user, loading, isLoading]);
 
   // Password validation
   useEffect(() => {
@@ -67,9 +54,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
-    // Clear any existing error states
-    setError("");
+    setSuccessMessage("");
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
@@ -107,21 +92,19 @@ export default function RegisterPage() {
       }
 
       if (result.message) {
-        // Email confirmation required - stay on page
-        setError("");
+        // Email confirmation required
+        setSuccessMessage(result.message);
         setIsLoading(false);
-        setError(`✅ ${result.message}`);
         return;
       }
 
-      // Successful registration - show success and redirect
-      setError("✅ Cuenta creada exitosamente. Accediendo al dashboard...");
+      // Successful registration
+      setSuccessMessage("✅ Cuenta creada exitosamente. Redirigiendo al dashboard...");
       
-      // Give time for the auth state to update before redirecting
+      // Simple redirect without complex state management
       setTimeout(() => {
-        console.log("Redirecting to dashboard...");
-        window.location.replace("/dashboard");
-      }, 2500);
+        router.replace("/dashboard");
+      }, 1500);
 
     } catch (err) {
       console.error("Registration exception:", err);
@@ -192,10 +175,10 @@ export default function RegisterPage() {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {error && (
-                <Alert className="border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-800">
-                    {error}
+              {(error || successMessage) && (
+                <Alert className={error ? "border-red-200 bg-red-50" : "border-emerald-200 bg-emerald-50"}>
+                  <AlertDescription className={error ? "text-red-800" : "text-emerald-800"}>
+                    {error || successMessage}
                   </AlertDescription>
                 </Alert>
               )}

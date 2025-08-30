@@ -186,23 +186,17 @@ export class SupabaseBudgetService {
 
   static async incrementViews(budgetId: string) {
     try {
-      const { error } = await supabase.rpc('increment_budget_request_views' as any, {
-        request_id: budgetId,
-      });
+      // Manual increment without RPC function to avoid type errors
+      const { data: current } = await supabase
+        .from("budget_requests")
+        .select("views_count")
+        .eq("id", budgetId)
+        .single();
 
-      if (error) {
-        // Fallback to manual increment if RPC doesn't exist
-        const { data: current } = await supabase
-          .from("budget_requests")
-          .select("views_count")
-          .eq("id", budgetId)
-          .single();
-
-        if (current) {
-          await this.updateBudgetRequest(budgetId, {
-            views_count: (current.views_count || 0) + 1
-          });
-        }
+      if (current) {
+        await this.updateBudgetRequest(budgetId, {
+          views_count: (current.views_count || 0) + 1
+        });
       }
     } catch (error) {
       console.error("Error incrementing views:", error);
@@ -490,29 +484,5 @@ export class SupabaseBudgetService {
     }
 
     return data || [];
-  }
-
-  static async searchConversations(userId: string, query: string, isProvider: boolean = false): Promise<any[]> {
-    // Note: This method should be moved to SupabaseConversationService
-    // For now, returning empty array to prevent errors
-    console.warn("searchConversations should be called from SupabaseConversationService");
-    return [];
-  }
-
-  static async reorderCategories(categoryOrders: { id: string; sort_order: number }[]): Promise<void> {
-    for (const order of categoryOrders) {
-      const { error } = await supabase
-        .from('service_categories')
-        .update({ 
-          sort_order: order.sort_order, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('id', order.id);
-      
-      if (error) {
-        console.error(`Failed to update category order for ${order.id}:`, error);
-        throw new Error(`Failed to update category order: ${error.message}`);
-      }
-    }
   }
 }
