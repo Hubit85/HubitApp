@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { SupabaseUserRoleService, UserRole, AddRoleRequest } from "@/services/SupabaseUserRoleService";
-import CustomEmailService from "@/lib/customEmailService";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +9,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CheckCircle, Plus, UserCheck, Mail, Clock, Trash2, User, Users, Building, Settings, AlertTriangle, Loader2 } from "lucide-react";
-import EmailConfigurationStatus from "@/components/EmailConfigurationStatus";
 
 export default function UserRoleManager() {
   const { user, profile } = useSupabaseAuth();
@@ -43,12 +41,6 @@ export default function UserRoleManager() {
       const activeRole = await SupabaseUserRoleService.getActiveRole(user.id);
       setCurrentRole(activeRole);
 
-      // Verificar configuración de email
-      const emailConfig = CustomEmailService.validateEmailConfig();
-      if (!emailConfig.isValid) {
-        console.warn('Email service not fully configured:', emailConfig.missingVars);
-      }
-
     } catch (err) {
       console.error("Error loading user roles:", err);
       setError("Error al cargar los roles del usuario");
@@ -79,15 +71,6 @@ export default function UserRoleManager() {
         
         // Recargar roles después de agregar
         await loadUserRoles();
-        
-        // Mostrar mensaje adicional sobre email de verificación
-        if (result.requiresVerification) {
-          setTimeout(() => {
-            setSuccessMessage(
-              result.message + " Revisa tu bandeja de entrada y spam."
-            );
-          }, 2000);
-        }
       } else {
         setError(result.message);
       }
@@ -305,143 +288,6 @@ export default function UserRoleManager() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Email Configuration Status */}
-          <EmailConfigurationStatus />
-
-          {/* Clear Pending Verifications Section - Show if there are pending roles */}
-          {userRoles.filter(r => !r.is_verified).length > 0 && (
-            <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-amber-900">
-                      Verificaciones Pendientes ({userRoles.filter(r => !r.is_verified).length})
-                    </h3>
-                    <p className="text-sm text-amber-700">
-                      Tienes roles pendientes de confirmación que pueden bloquear las pruebas
-                    </p>
-                  </div>
-                </div>
-                <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300">
-                  {userRoles.filter(r => !r.is_verified).length} Pendientes
-                </Badge>
-              </div>
-
-              {/* Individual pending roles */}
-              <div className="space-y-2 mb-4">
-                {userRoles.filter(r => !r.is_verified).map((role) => (
-                  <div key={role.id} className="flex items-center justify-between p-3 bg-white/60 rounded-lg border border-amber-200">
-                    <div className="flex items-center gap-2">
-                      {getRoleIcon(role.role_type)}
-                      <span className="font-medium text-amber-900">
-                        {SupabaseUserRoleService.getRoleDisplayName(role.role_type)}
-                      </span>
-                      <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
-                        Pendiente
-                      </Badge>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemovePendingRole(role.role_type)}
-                      disabled={submitting}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Eliminar verificación pendiente</span>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Clear all button */}
-              <div className="flex items-center gap-3 pt-3 border-t border-amber-200">
-                <Dialog open={showClearPendingModal} onOpenChange={setShowClearPendingModal}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      variant="destructive"
-                      size="sm"
-                      disabled={submitting}
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Limpiar Todas las Verificaciones
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-amber-600" />
-                        Confirmar Limpieza
-                      </DialogTitle>
-                      <DialogDescription>
-                        ¿Estás seguro de que quieres eliminar todas las verificaciones pendientes?
-                        <br />
-                        <strong>Se eliminarán {userRoles.filter(r => !r.is_verified).length} verificaciones pendientes.</strong>
-                      </DialogDescription>
-                    </DialogHeader>
-                    
-                    <div className="py-4">
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <h4 className="font-medium text-yellow-800 mb-2 flex items-center gap-2">
-                          <AlertTriangle className="h-4 w-4" />
-                          Roles que se eliminarán:
-                        </h4>
-                        <ul className="text-sm text-yellow-700 space-y-1">
-                          {userRoles.filter(r => !r.is_verified).map((role) => (
-                            <li key={role.id} className="flex items-center gap-2">
-                              {getRoleIcon(role.role_type)}
-                              {SupabaseUserRoleService.getRoleDisplayName(role.role_type)}
-                            </li>
-                          ))}
-                        </ul>
-                        <p className="text-xs text-yellow-600 mt-3">
-                          💡 Esta acción no afectará tus roles ya verificados.
-                        </p>
-                      </div>
-                    </div>
-
-                    <DialogFooter>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setShowClearPendingModal(false)}
-                        disabled={submitting}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button 
-                        variant="destructive"
-                        onClick={handleClearPendingVerifications} 
-                        disabled={submitting}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        {submitting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Eliminando...
-                          </>
-                        ) : (
-                          <>
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Eliminar Todas
-                          </>
-                        )}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-
-                <div className="text-xs text-amber-600 flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" />
-                  Esto liberará tu cuenta para hacer pruebas
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Success/Error Messages */}
           {(error || successMessage) && (
             <Alert className={`border-2 ${

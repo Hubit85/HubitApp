@@ -125,8 +125,8 @@ export class SupabaseUserRoleService {
         throw new Error("Usuario no encontrado para envío de email");
       }
 
-      // Enviar email usando la API route
-      console.log('📧 Sending verification email via API route...');
+      // ENVIAR EMAIL DIRECTAMENTE - SIN VALIDACIONES
+      console.log('📧 Sending verification email via API route (NO VALIDATION)...');
       try {
         const response = await fetch('/api/email/send-custom', {
           method: 'POST',
@@ -147,22 +147,6 @@ export class SupabaseUserRoleService {
         if (!response.ok || !emailResult.success) {
           console.error('❌ Email API failed:', emailResult);
           
-          // Crear notificación de error
-          try {
-            await supabase
-              .from('notifications')
-              .insert({
-                user_id: userId,
-                title: `Error enviando email de verificación`,
-                message: `Tu rol de ${this.getRoleDisplayName(request.role_type)} fue creado pero no pudimos enviar el email. Error: ${emailResult.error || 'Error desconocido'}`,
-                type: 'error',
-                category: 'role_verification',
-                is_read: false
-              });
-          } catch (notifError) {
-            console.warn('Could not create error notification:', notifError);
-          }
-
           return {
             success: false,
             message: `Rol creado pero error al enviar email de verificación: ${emailResult.error || 'Error del servidor de email'}`
@@ -171,25 +155,9 @@ export class SupabaseUserRoleService {
 
         console.log('✅ Verification email sent successfully via API route');
 
-        // Crear notificación de éxito
-        try {
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: userId,
-              title: `Email de verificación enviado`,
-              message: `Se ha enviado un email de verificación para tu nuevo rol de ${this.getRoleDisplayName(request.role_type)}. Revisa tu bandeja de entrada.`,
-              type: 'info',
-              category: 'role_verification',
-              is_read: false
-            });
-        } catch (notifError) {
-          console.warn('Could not create success notification:', notifError);
-        }
-
         return {
           success: true,
-          message: `Se ha enviado un email de confirmación para verificar tu nuevo rol de ${this.getRoleDisplayName(request.role_type)}`,
+          message: `¡Éxito! Se ha enviado un email de verificación para tu nuevo rol de ${this.getRoleDisplayName(request.role_type)}. Revisa tu bandeja de entrada y spam.`,
           requiresVerification: true
         };
 
