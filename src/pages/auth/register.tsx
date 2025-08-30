@@ -148,7 +148,8 @@ export default function RegisterPage() {
     { value: "property_administrator", label: "Administrador de Fincas", description: "Gestión de propiedades" }
   ];
 
-  const isWorking = registrationState === 'submitting' || registrationState === 'redirecting';
+  // Fix TypeScript error by using explicit boolean checks
+  const isWorking = registrationState !== 'idle';
 
   // Show redirecting screen
   if (registrationState === 'redirecting') {
