@@ -84,9 +84,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const checkDatabaseConnection = async () => {
     try {
-      const { error } = await supabase
+      // CORREGIR: La sintaxis correcta para count en PostgREST
+      const { error, count } = await supabase
         .from("profiles")
-        .select("count(*)")
+        .select("*", { count: 'exact', head: true })
         .limit(1);
 
       if (!error) {
