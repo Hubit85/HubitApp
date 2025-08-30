@@ -330,8 +330,10 @@ export class SupabaseServiceCategoryService {
       const updates: Array<{ id: string; emergency_available: boolean }> = [];
       
       if (data && Array.isArray(data)) {
-        data.forEach(category => {
-          const hasEmergencySubcategory = data.some(sub => sub.parent_id === category.id && sub.emergency_available);
+        data.forEach((category: ServiceCategory) => {
+          const hasEmergencySubcategory = data.some((sub: ServiceCategory) => 
+            sub.parent_id === category.id && sub.emergency_available
+          );
           if (hasEmergencySubcategory && !category.emergency_available) {
             updates.push({ id: category.id, emergency_available: true });
           }

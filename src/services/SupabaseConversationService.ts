@@ -8,6 +8,7 @@ import {
   MessageInsert,
   MessageUpdate
 } from "@/integrations/supabase/types";
+import { SupabaseServiceProviderService } from "./SupabaseServiceProviderService";
 
 export class SupabaseConversationService {
   // ===================== CONVERSATIONS =====================
@@ -415,17 +416,17 @@ export class SupabaseConversationService {
   }> {
     const conversations = await this.getUserConversations(userId, isProvider);
     
-    const stats = {
+    const stats = await SupabaseServiceProviderService.getProviderStats(userId);
+    
+    return {
       total: conversations.length,
       active: conversations.filter(c => c.is_active).length,
       archived: conversations.filter(c => !c.is_active).length,
       unreadMessages: conversations.reduce((sum, c) => 
         sum + (isProvider ? (c.unread_count_provider || 0) : (c.unread_count_user || 0)), 0
       ),
-      totalMessages: 0 // Would need to count messages across all conversations
+      totalMessages: 0
     };
-
-    return stats;
   }
 
   static async getUnreadCount(userId: string, isProvider: boolean = false): Promise<number> {

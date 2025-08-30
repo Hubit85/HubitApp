@@ -491,4 +491,16 @@ export class SupabaseBudgetService {
 
     return data || [];
   }
+
+  static async searchConversations(userId: string, query: string, isProvider: boolean = false): Promise<ConversationWithDetails[]> {
+    const conversations = await this.getUserConversations(userId, isProvider);
+    
+    if (!query) return conversations;
+
+    // Filter conversations by subject, last message, or participant names
+    return conversations.filter((conv: ConversationWithDetails) => 
+      conv.subject?.toLowerCase().includes(query.toLowerCase()) ||
+      conv.last_message?.toLowerCase().includes(query.toLowerCase())
+    );
+  }
 }

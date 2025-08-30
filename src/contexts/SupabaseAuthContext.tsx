@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => Promise<{ error?: string; message?: string }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: string }>;
   databaseConnected: boolean;
@@ -178,7 +178,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         if (!data.session && data.user.email_confirmed_at === null) {
           setLoading(false);
           return { 
-            error: null, 
+            error: undefined,
             message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
           };
         }
@@ -200,7 +200,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               console.warn("Could not create profile in database:", profileError);
               // Don't fail registration if profile creation fails
               setLoading(false);
-              return { error: null };
+              return { error: undefined };
             }
           } catch (profileError) {
             console.warn("Could not create profile in database, but user was created successfully:", profileError);
@@ -208,7 +208,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
 
         setLoading(false);
-        return { error: null };
+        return { error: undefined };
       }
 
       setLoading(false);
