@@ -797,20 +797,89 @@ CREATE TRIGGER update_service_provider_rating_trigger
     FOR EACH ROW EXECUTE FUNCTION update_service_provider_rating();
 
 -- =============================================================================
--- SETUP COMPLETE!
+-- STEP 6: INSERT INITIAL DATA
 -- =============================================================================
 
--- Verify the setup
+-- Insert main service categories with hierarchical structure
+INSERT INTO service_categories (id, name, description, parent_id, icon, color, sort_order, emergency_available) VALUES
+-- Main categories
+('550e8400-e29b-41d4-a716-446655440001', 'Fontanería', 'Servicios de fontanería y plomería', NULL, 'Wrench', '#3B82F6', 1, true),
+('550e8400-e29b-41d4-a716-446655440002', 'Electricidad', 'Servicios eléctricos y instalaciones', NULL, 'Zap', '#F59E0B', 2, true),
+('550e8400-e29b-41d4-a716-446655440003', 'Limpieza', 'Servicios de limpieza y mantenimiento', NULL, 'Sparkles', '#10B981', 3, false),
+('550e8400-e29b-41d4-a716-446655440004', 'Jardinería', 'Cuidado de jardines y espacios verdes', NULL, 'Trees', '#059669', 4, false),
+('550e8400-e29b-41d4-a716-446655440005', 'Pintura', 'Servicios de pintura y decoración', NULL, 'Paintbrush', '#8B5CF6', 5, false),
+('550e8400-e29b-41d4-a716-446655440006', 'Climatización', 'HVAC, calefacción y aire acondicionado', NULL, 'Thermometer', '#EF4444', 6, true),
+('550e8400-e29b-41d4-a716-446655440007', 'Carpintería', 'Trabajos en madera y carpintería', NULL, 'Hammer', '#D97706', 7, false),
+('550e8400-e29b-41d4-a716-446655440008', 'Cerrajería', 'Servicios de cerrajería y seguridad', NULL, 'Key', '#6366F1', 8, true),
+('550e8400-e29b-41d4-a716-446655440009', 'Albañilería', 'Trabajos de construcción y reformas', NULL, 'Wrench', '#64748B', 9, false),
+('550e8400-e29b-41d4-a716-446655440010', 'Techado', 'Reparación y mantenimiento de techos', NULL, 'Home', '#0F172A', 10, true),
+('550e8400-e29b-41d4-a716-446655440011', 'Vidriería', 'Instalación y reparación de cristales', NULL, 'Square', '#06B6D4', 11, true),
+('550e8400-e29b-41d4-a716-446655440012', 'Seguridad', 'Sistemas de seguridad y alarmas', NULL, 'Shield', '#DC2626', 12, false),
+('550e8400-e29b-41d4-a716-446655440013', 'Electrodomésticos', 'Reparación de electrodomésticos', NULL, 'Zap', '#7C3AED', 13, false),
+('550e8400-e29b-41d4-a716-446655440014', 'Piscinas', 'Mantenimiento y reparación de piscinas', NULL, 'Waves', '#0EA5E9', 14, false),
+('550e8400-e29b-41d4-a716-446655440015', 'Mudanzas', 'Servicios de mudanza y transporte', NULL, 'Truck', '#F97316', 15, false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert subcategories for Fontanería
+INSERT INTO service_categories (id, name, description, parent_id, icon, color, sort_order, emergency_available) VALUES
+('550e8400-e29b-41d4-a716-446655440101', 'Reparación de fugas', 'Reparación de fugas de agua', '550e8400-e29b-41d4-a716-446655440001', 'Droplets', '#3B82F6', 1, true),
+('550e8400-e29b-41d4-a716-446655440102', 'Desatascos', 'Desatasco de tuberías y desagües', '550e8400-e29b-41d4-a716-446655440001', 'AlertCircle', '#DC2626', 2, true),
+('550e8400-e29b-41d4-a716-446655440103', 'Instalación sanitaria', 'Instalación de baños y cocinas', '550e8400-e29b-41d4-a716-446655440001', 'Wrench', '#3B82F6', 3, false),
+('550e8400-e29b-41d4-a716-446655440104', 'Calentadores', 'Reparación e instalación de calentadores', '550e8400-e29b-41d4-a716-446655440001', 'Flame', '#F59E0B', 4, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert subcategories for Electricidad
+INSERT INTO service_categories (id, name, description, parent_id, icon, color, sort_order, emergency_available) VALUES
+('550e8400-e29b-41d4-a716-446655440201', 'Instalaciones eléctricas', 'Nuevas instalaciones eléctricas', '550e8400-e29b-41d4-a716-446655440002', 'Zap', '#F59E0B', 1, false),
+('550e8400-e29b-41d4-a716-446655440202', 'Reparaciones urgentes', 'Averías eléctricas urgentes', '550e8400-e29b-41d4-a716-446655440002', 'AlertTriangle', '#DC2626', 2, true),
+('550e8400-e29b-41d4-a716-446655440203', 'Iluminación', 'Instalación de sistemas de iluminación', '550e8400-e29b-41d4-a716-446655440002', 'Lightbulb', '#FCD34D', 3, false),
+('550e8400-e29b-41d4-a716-446655440204', 'Domótica', 'Sistemas inteligentes del hogar', '550e8400-e29b-41d4-a716-446655440002', 'Smartphone', '#8B5CF6', 4, false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert subcategories for Limpieza
+INSERT INTO service_categories (id, name, description, parent_id, icon, color, sort_order, emergency_available) VALUES
+('550e8400-e29b-41d4-a716-446655440301', 'Limpieza general', 'Limpieza general de viviendas', '550e8400-e29b-41d4-a716-446655440003', 'Sparkles', '#10B981', 1, false),
+('550e8400-e29b-41d4-a716-446655440302', 'Limpieza de obras', 'Limpieza después de reformas', '550e8400-e29b-41d4-a716-446655440003', 'HardHat', '#64748B', 2, false),
+('550e8400-e29b-41d4-a716-446655440303', 'Limpieza de cristales', 'Limpieza de ventanas y cristales', '550e8400-e29b-41d4-a716-446655440003', 'Square', '#06B6D4', 3, false),
+('550e8400-e29b-41d4-a716-446655440304', 'Limpieza de comunidades', 'Limpieza de espacios comunes', '550e8400-e29b-41d4-a716-446655440003', 'Building', '#10B981', 4, false)
+ON CONFLICT (id) DO NOTHING;
+
+-- Show completion message
 DO $$
+DECLARE
+    table_count INTEGER;
+    category_count INTEGER;
 BEGIN
-    RAISE NOTICE '✅ HuBiT Database Setup Complete!';
-    RAISE NOTICE '📊 Tables created: profiles, properties, budget_requests, service_providers, quotes, ratings, contracts, notifications';
-    RAISE NOTICE '🔒 Row Level Security enabled on all tables';
-    RAISE NOTICE '🛡️  Security policies created';
-    RAISE NOTICE '⚡ Performance indexes created';
-    RAISE NOTICE '🔄 Automatic triggers configured';
+    SELECT COUNT(*) INTO table_count FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
+    SELECT COUNT(*) INTO category_count FROM service_categories WHERE parent_id IS NULL;
+    
     RAISE NOTICE '';
-    RAISE NOTICE '🚀 Your HuBiT application is now ready to use!';
-    RAISE NOTICE '💡 You can now register users and start using all features.';
+    RAISE NOTICE '🎉 ============================================';
+    RAISE NOTICE '✅ HuBiT Database Setup COMPLETED Successfully!';
+    RAISE NOTICE '🎉 ============================================';
+    RAISE NOTICE '';
+    RAISE NOTICE '📊 Database Statistics:';
+    RAISE NOTICE '   └─ Tables created: %', table_count;
+    RAISE NOTICE '   └─ Service categories: % main + subcategories', category_count;
+    RAISE NOTICE '';
+    RAISE NOTICE '🛡️  Security Configuration:';
+    RAISE NOTICE '   ├─ Row Level Security: ✅ Enabled';
+    RAISE NOTICE '   ├─ Security Policies: ✅ Configured';
+    RAISE NOTICE '   └─ User Triggers: ✅ Active';
+    RAISE NOTICE '';
+    RAISE NOTICE '⚡ Performance Optimization:';
+    RAISE NOTICE '   ├─ Database Indexes: ✅ Created';
+    RAISE NOTICE '   ├─ Query Optimization: ✅ Ready';
+    RAISE NOTICE '   └─ Auto-updates: ✅ Configured';
+    RAISE NOTICE '';
+    RAISE NOTICE '🚀 NEXT STEPS:';
+    RAISE NOTICE '   1. Update your application environment variables';
+    RAISE NOTICE '   2. Configure email templates (see docs/)';
+    RAISE NOTICE '   3. Test user registration and authentication';
+    RAISE NOTICE '   4. Deploy your HuBiT application!';
+    RAISE NOTICE '';
+    RAISE NOTICE '💡 Your HuBiT platform is now ready for production use!';
+    RAISE NOTICE '   Database URL: https://djkrzbmgzfwagmripozi.supabase.co';
+    RAISE NOTICE '';
 END;
 $$;
