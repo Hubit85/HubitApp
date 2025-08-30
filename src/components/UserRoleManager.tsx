@@ -50,17 +50,21 @@ export default function UserRoleManager() {
     } catch (err) {
       console.error("❌ Frontend: Error loading user roles:", err);
       
-      // Manejo más específico de errores
+      // Manejo más específico de errores de carga
       if (err instanceof Error) {
-        if (err.message.includes('fetch')) {
-          setError("Error de conexión. Verifica tu conexión a internet.");
+        if (err.message.includes('NetworkError') || err.message.includes('fetch')) {
+          setError("Error de conexión: No se pudieron cargar los roles. Verifica tu conexión a internet.");
         } else if (err.message.includes('401') || err.message.includes('403')) {
-          setError("Sesión expirada. Por favor inicia sesión nuevamente.");
+          setError("Sesión expirada: Por favor cierra sesión y vuelve a iniciar sesión.");
+        } else if (err.message.includes('500')) {
+          setError("Error del servidor: Problema temporal con la base de datos. Intenta recargar la página.");
+        } else if (err.message.includes('PGRST')) {
+          setError("Error de base de datos: Problema con la consulta de datos. El equipo técnico ha sido notificado.");
         } else {
           setError(`Error al cargar roles: ${err.message}`);
         }
       } else {
-        setError("Error al cargar los roles del usuario");
+        setError("Error desconocido al cargar los roles. Intenta recargar la página.");
       }
     } finally {
       setLoading(false);
@@ -94,23 +98,38 @@ export default function UserRoleManager() {
         await loadUserRoles();
       } else {
         // Mostrar el mensaje de error específico de la API
-        setError(result.message || "Error al agregar el rol");
+        setError(result.message || "Error desconocido al agregar el rol");
+        
+        // Si hay detalles adicionales del error, agregarlos
+        if (result.errorCode) {
+          console.error(`❌ Frontend: API Error Code: ${result.errorCode}`);
+        }
+        
+        if (result.emailError && result.emailErrorDetails) {
+          setError(`${result.message} - ${result.emailErrorDetails}`);
+        }
       }
 
     } catch (err) {
       console.error("❌ Frontend: Error adding role:", err);
       
-      // Mostrar error más específico basado en el tipo de error
+      // Manejo de errores más específico para diferentes tipos de fallas
       if (err instanceof Error) {
-        if (err.message.includes('fetch')) {
-          setError("Error de conexión con el servidor. Verifica tu conexión a internet.");
+        if (err.message.includes('NetworkError') || err.message.includes('fetch')) {
+          setError("Error de red: No se pudo conectar con el servidor. Verifica tu conexión a internet.");
+        } else if (err.message.includes('500')) {
+          setError("Error interno del servidor. El equipo técnico ha sido notificado.");
         } else if (err.message.includes('401') || err.message.includes('403')) {
-          setError("Error de autorización. Verifica tu sesión e intenta nuevamente.");
+          setError("Error de autorización: Tu sesión puede haber expirado. Intenta cerrar sesión y volver a iniciar.");
+        } else if (err.message.includes('400')) {
+          setError("Datos de solicitud inválidos. Verifica la información e intenta nuevamente.");
+        } else if (err.message.includes('timeout')) {
+          setError("La solicitud tardó demasiado tiempo. Intenta nuevamente en unos momentos.");
         } else {
-          setError(`Error: ${err.message}`);
+          setError(`Error técnico: ${err.message}`);
         }
       } else {
-        setError("Error inesperado al agregar el rol. Por favor inténtalo de nuevo.");
+        setError("Error inesperado. Si el problema persiste, contacta al soporte técnico.");
       }
     } finally {
       setSubmitting(false);
