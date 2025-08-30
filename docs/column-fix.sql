@@ -151,6 +151,20 @@ BEGIN
     END IF;
 END $$;
 
+-- Verificar y añadir columna category a la tabla budget_requests si no existe
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'budget_requests' AND column_name = 'category'
+    ) THEN
+        ALTER TABLE budget_requests ADD COLUMN category TEXT NOT NULL DEFAULT 'other' CHECK (category IN ('cleaning', 'plumbing', 'electrical', 'gardening', 'painting', 'maintenance', 'security', 'hvac', 'carpentry', 'emergency', 'other'));
+        RAISE NOTICE '✅ Columna category añadida a la tabla budget_requests';
+    ELSE
+        RAISE NOTICE '✅ La columna category ya existe en la tabla budget_requests';
+    END IF;
+END $$;
+
 -- Verificar todas las columnas críticas
 DO $$
 DECLARE
@@ -220,6 +234,9 @@ BEGIN
         END IF;
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'budget_requests' AND column_name = 'expires_at') THEN
             missing_columns := missing_columns || 'budget_requests.expires_at, ';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'budget_requests' AND column_name = 'category') THEN
+            missing_columns := missing_columns || 'budget_requests.category, ';
         END IF;
     END IF;
 
