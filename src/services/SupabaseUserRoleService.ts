@@ -119,73 +119,116 @@ export class SupabaseUserRoleService {
 
       console.log('✅ Role created successfully:', { id: data.id, role_type: data.role_type });
 
-      // Enviar email de verificación usando el servicio personalizado
-      console.log('📧 Attempting to send verification email...');
-      const emailResult = await this.sendRoleVerificationEmail(userId, request.role_type, verificationToken);
+      // Obtener el usuario actual para el email
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error("Usuario no encontrado para envío de email");
+      }
 
-      if (!emailResult.success) {
-        console.error('❌ Email sending failed:', emailResult);
-        // Crear notificación alternativa en caso de fallo del email
+      // Enviar email usando la API route
+      console.log('📧 Sending verification email via API route...');
+      try {
+        const response = await fetch('/api/email/send-custom', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            userEmail: user.email!,
+            roleType: request.role_type,
+            verificationToken: verificationToken
+          })
+        });
+
+        const emailResult = await response.json();
+        console.log('📧 API route response:', { status: response.status, result: emailResult });
+
+        if (!response.ok || !emailResult.success) {
+          console.error('❌ Email API failed:', emailResult);
+          
+          // Crear notificación de error
+          try {
+            await supabase
+              .from('notifications')
+              .insert({
+                user_id: userId,
+                title: `Error enviando email de verificación`,
+                message: `Tu rol de ${this.getRoleDisplayName(request.role_type)} fue creado pero no pudimos enviar el email. Error: ${emailResult.error || 'Error desconocido'}`,
+                type: 'error',
+                category: 'role_verification',
+                is_read: false
+              });
+          } catch (notifError) {
+            console.warn('Could not create error notification:', notifError);
+          }
+
+          return {
+            success: false,
+            message: `Rol creado pero error al enviar email de verificación: ${emailResult.error || 'Error del servidor de email'}`
+          };
+        }
+
+        console.log('✅ Verification email sent successfully via API route');
+
+        // Crear notificación de éxito
         try {
           await supabase
             .from('notifications')
             .insert({
               user_id: userId,
-              title: `Error enviando email de verificación`,
-              message: `Tu rol de ${this.getRoleDisplayName(request.role_type)} fue creado pero no pudimos enviar el email. Contacta con soporte.`,
-              type: 'error',
+              title: `Email de verificación enviado`,
+              message: `Se ha enviado un email de verificación para tu nuevo rol de ${this.getRoleDisplayName(request.role_type)}. Revisa tu bandeja de entrada.`,
+              type: 'info',
               category: 'role_verification',
               is_read: false
             });
         } catch (notifError) {
-          console.warn('Could not create error notification:', notifError);
+          console.warn('Could not create success notification:', notifError);
         }
 
         return {
+          success: true,
+          message: `Se ha enviado un email de confirmación para verificar tu nuevo rol de ${this.getRoleDisplayName(request.role_type)}`,
+          requiresVerification: true
+        };
+
+      } catch (fetchError) {
+        console.error('❌ Network error calling email API:', fetchError);
+        
+        return {
           success: false,
-          message: `Rol creado pero error al enviar email de verificación: ${emailResult.error || 'Error desconocido'}`
+          message: `Rol creado pero error de red al enviar email: ${fetchError instanceof Error ? fetchError.message : 'Error de conexión'}`
         };
       }
-
-      console.log('✅ Verification email sent successfully');
-
-      return {
-        success: true,
-        message: `Se ha enviado un email de confirmación para verificar tu nuevo rol de ${this.getRoleDisplayName(request.role_type)}`,
-        requiresVerification: true
-      };
 
     } catch (error) {
       console.error("❌ Complete addRole error:", error);
       
       // Proporcionar mensaje de error más específico basado en el tipo de error
-      let errorMessage = "Error al agregar el rol. Detalles técnicos: ";
+      let errorMessage = "Error al agregar el rol. ";
       
       if (error instanceof Error) {
-        // Mostrar el error completo para debugging
         console.log("📋 Full error details:", {
           name: error.name,
           message: error.message,
           stack: error.stack?.substring(0, 200)
         });
         
-        // Si es un error conocido, mostrar el mensaje específico
+        // Mensajes de error más específicos y útiles
         if (error.message.includes('base de datos')) {
           errorMessage = "Error de base de datos: " + error.message;
-        } else if (error.message.includes('email') || error.message.includes('Email')) {
-          errorMessage = "Error al enviar email de verificación: " + error.message;
-        } else if (error.message.includes('verificar roles')) {
-          errorMessage = "Error al verificar roles existentes: " + error.message;
-        } else if (error.message.includes('RESEND') || error.message.includes('API')) {
-          errorMessage = "Error del servicio de email. Verifica la configuración de RESEND_API_KEY.";
+        } else if (error.message.includes('Usuario no encontrado')) {
+          errorMessage = "Error de autenticación: " + error.message;
+        } else if (error.message.includes('verificar roles existentes')) {
+          errorMessage = "Error al verificar roles: " + error.message;
         } else if (error.message.includes('network') || error.message.includes('fetch')) {
-          errorMessage = "Error de conexión. Verifica tu conectividad a internet.";
+          errorMessage = "Error de conectividad: Verifica tu conexión a internet.";
         } else {
-          // Mostrar el error completo para casos no manejados
-          errorMessage = `Error específico: ${error.message}`;
+          errorMessage = `${error.message}`;
         }
       } else {
-        errorMessage = "Error desconocido al agregar el rol: " + String(error);
+        errorMessage = "Error inesperado: " + String(error);
       }
 
       return {
