@@ -22,6 +22,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   
   console.log('🚀 API: add-role endpoint called with method:', req.method);
 
+  // ===== DIAGNÓSTICO DETALLADO DE VARIABLES DE ENTORNO =====
+  console.log('🔧 API: DETAILED ENVIRONMENT CHECK...');
+  const envCheck = {
+    NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+    urlValue: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    serviceKeyPrefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20),
+    anonKeyPrefix: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20),
+    resendKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 10),
+    nodeEnv: process.env.NODE_ENV
+  };
+  console.log('🔧 API: Environment status:', envCheck);
+
+  // VALIDATION: Variables críticas
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ API: CRITICAL - Missing Supabase environment variables');
+    return res.status(500).json({
+      success: false,
+      message: 'Error de configuración del servidor: Variables de entorno de Supabase faltantes'
+    });
+  }
+
   // Manejar preflight OPTIONS
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ message: 'OK' });
@@ -37,10 +61,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // VALIDACIÓN DE VARIABLES DE ENTORNO
+    // ===== PRUEBA DE CONEXIÓN SIMPLE =====
+    console.log('🔗 API: Testing basic Supabase connection...');
+    try {
+      // Prueba muy simple: obtener metadata de la tabla profiles
+      const { error: testError } = await supabaseServer
+        .from('profiles')
+        .select('id')
+        .limit(0); // No queremos datos, solo probar la conexión
+        
+      if (testError) {
+        console.error('❌ API: Supabase connection test FAILED:', testError);
+        return res.status(500).json({
+          success: false,
+          message: `Error de base de datos: ${testError.message}`,
+          errorDetails: {
+            code: testError.code,
+            message: testError.message,
+            hint: testError.hint
+          }
+        });
+      }
+      console.log('✅ API: Supabase connection test PASSED');
+    } catch (connectionError) {
+      console.error('❌ API: Critical connection error:', connectionError);
+      return res.status(500).json({
+        success: false,
+        message: `Error crítico de conexión: ${connectionError instanceof Error ? connectionError.message : 'Error desconocido'}`
+      });
+    }
+
+    // VALIDACIÓN DE VARIABLES DE ENTORNO DE RESEND
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
-    console.log('🔧 API: Environment validation:', {
+    console.log('🔧 API: Resend validation:', {
       hasResendKey: !!RESEND_API_KEY,
       resendKeyValid: RESEND_API_KEY ? RESEND_API_KEY.startsWith('re_') : false
     });
@@ -98,9 +152,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (userError) {
       console.error('❌ API: User validation failed:', userError);
-      return res.status(400).json({
+      return res.status(500).json({
         success: false,
-        message: `Error al validar usuario: ${userError.message}`
+        message: `Error de base de datos: ${userError.message}`
       });
     }
 
@@ -130,7 +184,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('❌ API: Error checking existing roles:', checkError);
       return res.status(500).json({
         success: false,
-        message: `Error al verificar roles existentes: ${checkError.message}`
+        message: `Error de base de datos: ${checkError.message}`
       });
     }
 
@@ -177,7 +231,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('❌ API: Database insert error:', insertError);
       return res.status(500).json({
         success: false,
-        message: `Error al crear el rol en la base de datos: ${insertError?.message || 'Error desconocido'}`
+        message: `Error de base de datos: ${insertError?.message || 'Error desconocido'}`
       });
     }
 
@@ -330,9 +384,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('❌ API: Unexpected error:', error);
     
+    // Error detallado para debugging
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace';
+    
+    console.error('❌ API: Error details:', {
+      message: errorMessage,
+      stack: errorStack,
+      type: typeof error
+    });
+    
     return res.status(500).json({
       success: false,
-      message: `Error interno del servidor: ${error instanceof Error ? error.message : 'Error desconocido'}`
+      message: `Error de base de datos: ${errorMessage}`
     });
   }
 }
