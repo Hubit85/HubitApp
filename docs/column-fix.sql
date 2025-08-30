@@ -95,6 +95,20 @@ BEGIN
     END IF;
 END $$;
 
+-- Verificar y añadir columna urgency a la tabla budget_requests si no existe
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'budget_requests' AND column_name = 'urgency'
+    ) THEN
+        ALTER TABLE budget_requests ADD COLUMN urgency TEXT DEFAULT 'normal' CHECK (urgency IN ('low', 'normal', 'high', 'emergency'));
+        RAISE NOTICE '✅ Columna urgency añadida a la tabla budget_requests';
+    ELSE
+        RAISE NOTICE '✅ La columna urgency ya existe en la tabla budget_requests';
+    END IF;
+END $$;
+
 -- Verificar todas las columnas críticas
 DO $$
 DECLARE
@@ -147,6 +161,14 @@ BEGIN
         END IF;
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'properties' AND column_name = 'longitude') THEN
             missing_columns := missing_columns || 'properties.longitude, ';
+        END IF;
+    END IF;
+
+    -- Verificar tabla budget_requests
+    SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'budget_requests') INTO table_exists;
+    IF table_exists THEN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'budget_requests' AND column_name = 'urgency') THEN
+            missing_columns := missing_columns || 'budget_requests.urgency, ';
         END IF;
     END IF;
 
