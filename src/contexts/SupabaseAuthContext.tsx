@@ -155,7 +155,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
     setLoading(true);
+    
     try {
+      console.log("SupabaseAuth: Starting signUp process");
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -175,8 +178,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
+        console.log("User created:", data.user.id, "Session:", !!data.session);
+        
         // Check if we need email confirmation
         if (!data.session && data.user.email_confirmed_at === null) {
+          console.log("Email confirmation required");
           setLoading(false);
           return { 
             error: undefined,
@@ -184,8 +190,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           };
         }
 
-        // If user is created and has session, try to create profile
+        // If we have a session, the user is immediately logged in
         if (data.session) {
+          console.log("User immediately logged in, creating profile...");
+          
           try {
             // Check database connection first
             const isConnected = await checkDatabaseConnection();
@@ -204,19 +212,26 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               if (profileError) {
                 console.warn("Could not create profile in database:", profileError);
                 // Don't fail registration if profile creation fails
+              } else {
+                console.log("Profile created successfully");
               }
+            } else {
+              console.log("Database not connected, skipping profile creation");
             }
           } catch (profileError) {
-            console.warn("Could not create profile in database, but user was created successfully:", profileError);
+            console.warn("Profile creation failed, but user was created successfully:", profileError);
           }
-        }
 
-        setLoading(false);
-        return { error: undefined };
+          // Don't set loading to false here - let the auth state change handle it
+          console.log("Registration successful, auth state will update");
+          return { error: undefined };
+        }
       }
 
+      console.log("Registration completed but no user/session returned");
       setLoading(false);
       return { error: "Error durante el registro. Por favor, inténtalo de nuevo." };
+      
     } catch (error) {
       console.error("Unexpected signup error:", error);
       setLoading(false);

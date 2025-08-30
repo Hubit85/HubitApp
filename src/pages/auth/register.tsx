@@ -35,20 +35,19 @@ export default function RegisterPage() {
   const { signUp, user, loading } = useSupabaseAuth();
   const router = useRouter();
 
-  // Redirect if already logged in
+  // Redirect if already logged in - FIXED VERSION
   useEffect(() => {
-    if (!loading && user) {
-      // Only redirect if we're not currently processing a registration
-      // and if we're not already showing a success message
-      if (!isLoading && !error) {
-        const timer = setTimeout(() => {
-          router.push("/dashboard");
-        }, 500);
-        
-        return () => clearTimeout(timer);
-      }
+    // Only redirect if user is authenticated AND we're not in the middle of a registration process
+    if (!loading && user && !isLoading) {
+      // Add a delay to prevent conflicts with the registration flow
+      const redirectTimer = setTimeout(() => {
+        // Use window.location for immediate redirect without state conflicts
+        window.location.href = "/dashboard";
+      }, 2000);
+
+      return () => clearTimeout(redirectTimer);
     }
-  }, [user, loading, router, isLoading, error]);
+  }, [user, loading, isLoading]);
 
   // Password validation
   useEffect(() => {
@@ -67,6 +66,9 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
+
+    // Clear any existing error states
     setError("");
 
     // Validation
@@ -89,6 +91,8 @@ export default function RegisterPage() {
     }
 
     try {
+      console.log("Starting registration process...");
+      
       const result = await signUp(formData.email, formData.password, {
         full_name: formData.full_name,
         phone: formData.phone,
@@ -96,28 +100,31 @@ export default function RegisterPage() {
       });
       
       if (result.error) {
+        console.error("Registration error:", result.error);
         setError(result.error);
         setIsLoading(false);
-      } else if (result.message) {
-        // Email confirmation required
+        return;
+      }
+
+      if (result.message) {
+        // Email confirmation required - stay on page
         setError("");
         setIsLoading(false);
-        // Show success message without redirecting
         setError(`✅ ${result.message}`);
-      } else {
-        // Successful registration with immediate login
-        setError("✅ Cuenta creada exitosamente. Redirigiendo al dashboard...");
-        
-        // Short delay before redirect to prevent conflicts
-        setTimeout(() => {
-          if (!user) {
-            // Force a page reload to ensure auth state is properly set
-            window.location.href = "/dashboard";
-          }
-        }, 1500);
+        return;
       }
+
+      // Successful registration - show success and redirect
+      setError("✅ Cuenta creada exitosamente. Accediendo al dashboard...");
+      
+      // Give time for the auth state to update before redirecting
+      setTimeout(() => {
+        console.log("Redirecting to dashboard...");
+        window.location.replace("/dashboard");
+      }, 2500);
+
     } catch (err) {
-      console.error("Registration error:", err);
+      console.error("Registration exception:", err);
       setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
       setIsLoading(false);
     }
