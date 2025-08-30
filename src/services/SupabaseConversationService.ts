@@ -613,7 +613,7 @@ export class SupabaseConversationService {
     
     return {
       isUser,
-      currentUser: isUser ? conversation.user : conversation.service_provider?.profiles,
+      currentUser: isUser ? conversation.user : conversation.service_provider,
       otherParticipant,
     };
   }
