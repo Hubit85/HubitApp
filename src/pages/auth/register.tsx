@@ -50,11 +50,14 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Redirect effect - only when user becomes available
+  // Redirect effect - improved to prevent blocking
   useEffect(() => {
     if (!loading && user && !isLoading) {
       console.log("User authenticated, redirecting to dashboard");
-      router.replace("/dashboard");
+      // Small delay to ensure state is properly updated
+      setTimeout(() => {
+        router.replace("/dashboard");
+      }, 100);
     }
   }, [user, loading, router, isLoading]);
 
@@ -106,9 +109,16 @@ export default function RegisterPage() {
         return;
       }
 
-      // Registration successful - don't set success message or timeout
-      // The useEffect above will handle the redirect when user becomes available
-      console.log("Registration completed successfully");
+      // Registration successful - don't keep loading indefinitely
+      console.log("Registration completed successfully, waiting for auth state update...");
+      
+      // If user doesn't get authenticated in 3 seconds, stop loading
+      setTimeout(() => {
+        if (!user) {
+          setIsLoading(false);
+          setError("El registro se completó pero hubo un problema con la autenticación. Intenta iniciar sesión.");
+        }
+      }, 3000);
 
     } catch (err) {
       console.error("Registration exception:", err);

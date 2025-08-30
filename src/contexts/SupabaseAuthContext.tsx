@@ -218,9 +218,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.warn("Profile creation failed, but user was created successfully:", profileError);
           }
 
-          // Registration successful - let the auth state change handle the redirect
-          console.log("Registration successful, auth state will update");
-          return { error: undefined };
+          // Registration successful - return immediately without delay
+          console.log("Registration successful, returning success");
+          return { error: undefined, success: true };
         }
       }
 

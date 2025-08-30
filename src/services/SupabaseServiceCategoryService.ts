@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceCategory, ServiceCategoryInsert, ServiceCategoryUpdate } from "@/integrations/supabase/types";
 
@@ -269,10 +270,10 @@ export class SupabaseServiceCategoryService {
 
   // ===================== BULK OPERATIONS =====================
 
-  static async bulkUpdateCategories(updates: { id: string; updates: ServiceCategoryUpdate }[]): Promise<ServiceCategory[]> {
+  static async bulkUpdateCategories(categoryUpdates: { id: string; updates: ServiceCategoryUpdate }[]): Promise<ServiceCategory[]> {
     const results: ServiceCategory[] = [];
 
-    for (const { id, updates } of updates) {
+    for (const { id, updates } of categoryUpdates) {
       try {
         const updated = await this.updateServiceCategory(id, updates);
         results.push(updated);
