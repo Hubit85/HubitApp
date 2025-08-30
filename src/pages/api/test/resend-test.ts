@@ -28,7 +28,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         details: {
           keyExists: false,
           keyLength: 0,
-          recommendation: 'Configura RESEND_API_KEY en las variables de entorno'
+          recommendations: [
+            '1. Ve a https://resend.com/dashboard',
+            '2. Crea una nueva API Key',
+            '3. Configúrala en Softgen Settings → Environment'
+          ]
         }
       });
     }
@@ -42,7 +46,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           keyLength: RESEND_API_KEY.length,
           keyPrefix: RESEND_API_KEY.substring(0, 10),
           expectedPrefix: 're_',
-          recommendation: 'La clave debe empezar con "re_"'
+          recommendations: [
+            'La clave debe empezar con "re_"',
+            'Verifica que copiaste la clave completa',
+            'Genera una nueva si es necesario'
+          ]
         }
       });
     }
@@ -69,7 +77,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('📡 Resend API Response:', {
       status: testResponse.status,
       statusText: testResponse.statusText,
-      headers: Object.fromEntries(testResponse.headers.entries()),
       data: responseData
     });
 
@@ -80,7 +87,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         details: {
           status: testResponse.status,
           error: responseData,
-          recommendation: 'La clave "re_HMYRvjWf_93ML8R9PbPqRHU9EP1sTJ9oS" no es válida. Genera una nueva desde tu dashboard de Resend.'
+          currentKey: `${RESEND_API_KEY.substring(0, 15)}...`,
+          recommendations: [
+            '1. La clave actual no es válida según Resend',
+            '2. Ve a https://resend.com/dashboard/api-keys',
+            '3. Genera una nueva API Key',
+            '4. Actualízala en Softgen Settings → Environment',
+            '5. Usa esta herramienta para verificar que funciona'
+          ]
         }
       });
     }
@@ -92,7 +106,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         details: {
           status: testResponse.status,
           error: responseData,
-          recommendation: 'Verifica que la API key tenga permisos de envío de emails'
+          recommendations: [
+            'La clave está autenticada pero no tiene permisos',
+            'Verifica que la API key tenga permisos de envío de emails',
+            'Revisa la configuración de tu cuenta en Resend'
+          ]
         }
       });
     }
@@ -100,11 +118,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (testResponse.status === 422) {
       return res.status(200).json({
         success: false,
-        message: 'API Key válida pero dominio no verificado',
+        message: 'API Key válida pero configuración de dominio requerida',
         details: {
           status: testResponse.status,
           error: responseData,
-          recommendation: 'Necesitas verificar el dominio "hubit-84-supabase-email-templates.softgen.ai" en Resend o usar onboarding@resend.dev como remitente'
+          recommendations: [
+            '1. Tu API Key funciona, pero necesitas configurar el dominio',
+            '2. Ve a https://resend.com/domains en tu dashboard',
+            '3. Agrega y verifica el dominio "hubit-84-supabase-email-templates.softgen.ai"',
+            '4. O cambia el remitente a "onboarding@resend.dev" temporalmente'
+          ]
         }
       });
     }
@@ -116,7 +139,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         details: {
           status: testResponse.status,
           error: responseData,
-          recommendation: 'Revisa la documentación de Resend para este código de error'
+          recommendations: [
+            `Código de error: ${testResponse.status}`,
+            'Revisa la documentación de Resend para este código',
+            'Contacta soporte de Resend si el problema persiste'
+          ]
         }
       });
     }
@@ -129,8 +156,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         status: testResponse.status,
         keyValidated: true,
         canSendEmails: true,
-        response: responseData,
-        keyPrefix: RESEND_API_KEY.substring(0, 10) + '...'
+        emailId: responseData.id,
+        keyPrefix: RESEND_API_KEY.substring(0, 15) + '...',
+        recommendations: [
+          '🎉 ¡Perfecto! Tu API Key funciona correctamente',
+          'Ya puedes enviar emails de verificación',
+          'Los usuarios recibirán emails cuando agreguen roles'
+        ]
       }
     });
 
@@ -138,20 +170,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('❌ Error testing Resend API:', error);
     
     let errorMessage = 'Error de conexión con Resend';
-    let errorDetails: any = { error: String(error) };
+    let recommendations = ['Error desconocido - revisa los logs del servidor'];
 
     if (error instanceof Error) {
       errorMessage = error.message;
       if (error.message.includes('fetch')) {
-        errorMessage = 'No se pudo conectar con la API de Resend - Verifica tu conexión';
-        errorDetails.recommendation = 'Verifica tu conexión a internet y que api.resend.com esté accesible';
+        errorMessage = 'No se pudo conectar con la API de Resend';
+        recommendations = [
+          'Verifica tu conexión a internet',
+          'Comprueba que api.resend.com esté accesible',
+          'Intenta de nuevo en unos minutos'
+        ];
       }
     }
 
     return res.status(500).json({
       success: false,
       message: errorMessage,
-      details: errorDetails
+      details: {
+        error: String(error),
+        recommendations
+      }
     });
   }
 }
