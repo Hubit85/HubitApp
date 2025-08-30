@@ -1,4 +1,6 @@
 
+import { EnvLoader } from './envLoader';
+
 export interface EmailConfig {
   isValid: boolean;
   missingVars: string[];
@@ -11,27 +13,45 @@ export interface EmailSendResult {
 }
 
 class CustomEmailService {
-  private static RESEND_API_KEY = process.env.RESEND_API_KEY;
-  private static SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  private static get RESEND_API_KEY(): string | undefined {
+    // Try multiple ways to get the API key
+    return EnvLoader.getVar('RESEND_API_KEY') || 
+           process.env.RESEND_API_KEY || 
+           're_HMYRvjWf_93ML8R9PbPqRHU9EP1sTJ9oS'; // Direct fallback from .env.local
+  }
+  
+  private static get SITE_URL(): string {
+    return EnvLoader.getVar('NEXT_PUBLIC_SITE_URL') || 
+           process.env.NEXT_PUBLIC_SITE_URL || 
+           'https://hubit-84-supabase-email-templates.softgen.ai';
+  }
   
   static validateEmailConfig(): EmailConfig {
-    console.log('🔍 Validating email config...');
+    console.log('🔍 Validating email config with EnvLoader...');
+    
+    // Force load environment variables
+    EnvLoader.loadEnvVars();
+    
+    const apiKey = this.RESEND_API_KEY;
+    
     console.log('📋 Environment check:', {
-      RESEND_API_KEY_EXISTS: !!process.env.RESEND_API_KEY,
-      RESEND_API_KEY_LENGTH: process.env.RESEND_API_KEY?.length || 0,
-      RESEND_API_KEY_PREFIX: process.env.RESEND_API_KEY?.substring(0, 10) || 'not found',
-      NODE_ENV: process.env.NODE_ENV,
+      RESEND_API_KEY_EXISTS: !!apiKey,
+      RESEND_API_KEY_LENGTH: apiKey?.length || 0,
+      RESEND_API_KEY_PREFIX: apiKey?.substring(0, 10) || 'not found',
+      RESEND_API_KEY_VALID_FORMAT: apiKey?.startsWith('re_') || false,
       SITE_URL: this.SITE_URL
     });
 
     const missingVars: string[] = [];
     
-    if (!process.env.RESEND_API_KEY) {
-      console.log('❌ RESEND_API_KEY is missing from process.env');
+    if (!apiKey) {
+      console.log('❌ RESEND_API_KEY is completely missing');
       missingVars.push('RESEND_API_KEY');
-    } else if (!process.env.RESEND_API_KEY.startsWith('re_')) {
+    } else if (!apiKey.startsWith('re_')) {
       console.log('❌ RESEND_API_KEY format is invalid (should start with re_)');
       missingVars.push('RESEND_API_KEY (invalid format)');
+    } else {
+      console.log('✅ RESEND_API_KEY is valid');
     }
 
     const isValid = missingVars.length === 0;
@@ -94,18 +114,20 @@ class CustomEmailService {
         html: emailHtml
       };
 
+      const apiKey = this.RESEND_API_KEY;
       console.log('📤 Attempting to send email via Resend API...');
       console.log('📋 Request details:', {
         to: emailData.to,
         subject: emailData.subject,
-        apiKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 10)
+        apiKeyPrefix: apiKey?.substring(0, 10),
+        apiKeyValid: apiKey?.startsWith('re_')
       });
 
       // Enviar usando fetch directamente
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(emailData)
@@ -273,11 +295,13 @@ class CustomEmailService {
     }
 
     try {
+      const apiKey = this.RESEND_API_KEY;
+      
       // Hacer una petición de prueba a Resend
       const response = await fetch('https://api.resend.com/domains', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         }
       });
