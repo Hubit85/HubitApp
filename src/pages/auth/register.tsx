@@ -406,23 +406,31 @@ export default function RegisterPage() {
                   disabled={isWorking || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword || !formData.user_type}
                   className="w-full h-12 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {registrationState === 'submitting' ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Creando cuenta...
-                    </>
-                  ) : registrationState === 'redirecting' ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Redirigiendo...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Crear Cuenta
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
+                  {(() => {
+                    if (registrationState === 'submitting') {
+                      return (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Creando cuenta...
+                        </>
+                      );
+                    }
+                    if (registrationState === 'redirecting') {
+                      return (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Redirigiendo...
+                        </>
+                      );
+                    }
+                    return (
+                      <>
+                        <Sparkles className="w-5 h-5 mr-2" />
+                        Crear Cuenta
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </>
+                    );
+                  })()}
                 </Button>
               </form>
 
