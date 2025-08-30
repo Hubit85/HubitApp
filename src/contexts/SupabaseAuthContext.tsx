@@ -82,35 +82,54 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const checkDatabaseConnection = async () => {
-    try {
-      // CORREGIR: Usar una consulta simple que no espere un objeto único
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id")
-        .limit(1);
+  const checkDatabaseConnection = async (retries = 3) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`🔗 Database connection attempt ${attempt}/${retries}`);
+        
+        // Test simple con timeout
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id")
+          .limit(1);
 
-      if (!error && data !== null) {
-        setDatabaseConnected(true);
-        return true;
+        if (!error && data !== null) {
+          console.log("✅ Database connection successful");
+          setDatabaseConnected(true);
+          return true;
+        }
+        
+        if (error) {
+          console.warn(`⚠️  Database connection attempt ${attempt} failed:`, error.message);
+        }
+        
+      } catch (error) {
+        console.warn(`🔄 Connection attempt ${attempt} failed:`, error);
+        
+        // Si es el último intento, marcar como desconectado
+        if (attempt === retries) {
+          console.warn("⚠️  Database tables not configured yet. Please run the setup script in Supabase SQL Editor.");
+          console.warn("📋 Check docs/complete-database-setup.sql for the required SQL commands.");
+          setDatabaseConnected(false);
+          return false;
+        }
+        
+        // Esperar antes del siguiente intento (backoff exponencial)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
       }
-      
-      console.warn("⚠️  Database tables not configured yet. Please run the setup script in Supabase SQL Editor.");
-      console.warn("📋 Check docs/complete-database-setup.sql for the required SQL commands.");
-      setDatabaseConnected(false);
-      return false;
-    } catch (error) {
-      console.warn("Database connection check failed:", error);
-      setDatabaseConnected(false);
-      return false;
     }
+    
+    setDatabaseConnected(false);
+    return false;
   };
 
-  const fetchUserData = async (userId: string, userObject: User) => {
+  const fetchUserData = async (userId: string, userObject: User, retries = 2) => {
     try {
+      console.log("🔄 Fetching user data with retry logic...");
       const isConnected = await checkDatabaseConnection();
       
       if (!isConnected) {
+        console.log("📱 Creating temporary profile - database offline");
         // Create a temporary profile from user data
         const tempProfile: Profile = {
           id: userId,
@@ -134,26 +153,55 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           updated_at: new Date().toISOString()
         };
         setProfile(tempProfile);
+        setUserRoles([]);
+        setActiveRole(null);
         setLoading(false);
         return;
       }
 
-      // Fetch profile - use array query first to check if profile exists
-      const { data: profiles, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId);
-
-      if (profileError) {
-        console.error("Error querying profile:", profileError);
-        // Continue with fallback profile creation instead of failing
-      }
-
+      // Fetch profile with retry logic
       let profileData: Profile | null = null;
+      let profiles: Profile[] = [];
+      
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          console.log(`🔍 Profile fetch attempt ${attempt}/${retries}`);
+          
+          const { data: profilesData, error: profileError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", userId);
+
+          if (!profileError && profilesData) {
+            profiles = profilesData;
+            break;
+          }
+          
+          if (profileError) {
+            console.warn(`Profile fetch attempt ${attempt} failed:`, profileError.message);
+            
+            if (attempt === retries) {
+              console.error("All profile fetch attempts failed, continuing with fallback");
+            } else {
+              // Esperar antes del siguiente intento
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
+          }
+          
+        } catch (fetchError) {
+          console.warn(`Profile fetch attempt ${attempt} exception:`, fetchError);
+          
+          if (attempt === retries) {
+            console.error("All profile fetch attempts failed with exceptions");
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          }
+        }
+      }
 
       if (!profiles || profiles.length === 0) {
         // Profile doesn't exist, create one from user metadata
-        console.log("No profile found, creating from user metadata");
+        console.log("📝 No profile found, creating from user metadata");
         
         const newProfileData: ProfileInsert = {
           id: userId,
@@ -167,8 +215,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           timezone: 'Europe/Madrid',
         };
 
-        // Intentar crear el perfil solo si la base de datos está conectada
-        if (isConnected) {
+        try {
           const { data: createdProfile, error: createError } = await supabase
             .from("profiles")
             .insert(newProfileData)
@@ -176,7 +223,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             .single();
 
           if (createError) {
-            console.error("Error creating profile:", createError);
+            console.error("Profile creation failed:", createError);
             // Crear perfil temporal como fallback
             profileData = {
               ...newProfileData,
@@ -193,9 +240,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             } as Profile;
           } else {
             profileData = createdProfile;
+            console.log("✅ Profile created successfully");
           }
-        } else {
-          // Base de datos no conectada, crear perfil temporal
+        } catch (createException) {
+          console.error("Profile creation exception:", createException);
+          // Fallback a perfil temporal
           profileData = {
             ...newProfileData,
             address: null,
@@ -213,31 +262,56 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       } else {
         // Profile exists, use the first one
         profileData = profiles[0];
+        console.log("✅ Profile found and loaded");
       }
 
       setProfile(profileData);
 
-      // Fetch roles only if database is connected
-      if (isConnected) {
-        try {
-          const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
-          setUserRoles(rolesResult);
-          
-          // Set active role
-          const activeRoleData = rolesResult.find(r => r.is_active) || null;
-          setActiveRole(activeRoleData);
-        } catch (error) {
-          console.error("❌ Frontend: Error loading user roles:", error);
-          setUserRoles([]);
-          setActiveRole(null);
-        }
-      } else {
+      // Fetch roles with retry logic
+      try {
+        console.log("🎭 Loading user roles...");
+        const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
+        setUserRoles(rolesResult);
+        
+        // Set active role
+        const activeRoleData = rolesResult.find(r => r.is_active) || null;
+        setActiveRole(activeRoleData);
+        console.log("✅ User roles loaded successfully");
+      } catch (error) {
+        console.error("❌ Frontend: Error loading user roles:", error);
         setUserRoles([]);
         setActiveRole(null);
       }
 
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("❌ Critical error in fetchUserData:", error);
+      
+      // Create emergency fallback profile
+      const emergencyProfile: Profile = {
+        id: userId,
+        email: userObject.email || '',
+        full_name: userObject.user_metadata?.full_name || null,
+        user_type: 'particular',
+        phone: null,
+        avatar_url: null,
+        address: null,
+        city: null,
+        postal_code: null,
+        country: 'Spain',
+        language: 'es',
+        timezone: 'Europe/Madrid',
+        email_notifications: true,
+        sms_notifications: false,
+        is_verified: false,
+        verification_code: null,
+        last_login: null,
+        created_at: userObject.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      setProfile(emergencyProfile);
+      setUserRoles([]);
+      setActiveRole(null);
     } finally {
       setLoading(false);
     }
