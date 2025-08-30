@@ -129,41 +129,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('🔗 API: Testing Supabase connection...');
     
     try {
-      // Test de conectividad básico - usar una consulta que debería funcionar siempre
+      // Test de conectividad básico - usar una consulta simple que debería funcionar siempre
       const { data: healthCheck, error: healthError } = await supabaseServer
-        .from('auth.users')
+        .from('profiles')
         .select('id')
         .limit(1);
       
-      // Si hay error con auth.users, intentar con una consulta aún más básica
+      // Si hay error con profiles, es probable que sea un problema de configuración
       if (healthError) {
-        console.log('⚠️ API: Auth users check failed, trying basic connection test');
+        console.error('❌ API: Supabase connection test failed:', healthError.message);
         
-        // Test de conectividad con rpc básico
-        const { data: rpcTest, error: rpcError } = await supabaseServer.rpc('version');
+        // Determinar tipo de error más específico
+        let errorMessage = 'Error de base de datos';
         
-        if (rpcError) {
-          console.error('❌ API: All Supabase connection tests failed:', {
-            authError: healthError.message,
-            rpcError: rpcError.message
-          });
-          
-          // Determinar tipo de error más específico
-          let errorMessage = 'Error de base de datos';
-          
-          if (rpcError.message?.includes('JWT') || rpcError.message?.includes('authorization')) {
-            errorMessage = 'Invalid API key';
-          } else if (rpcError.message?.includes('network') || rpcError.message?.includes('connection')) {
-            errorMessage = 'Error de conexión con la base de datos';
-          } else {
-            errorMessage = `Error de base de datos: ${rpcError.message}`;
-          }
-          
-          return res.status(500).json({
-            success: false,
-            message: errorMessage
-          });
+        if (healthError.message?.includes('JWT') || healthError.message?.includes('authorization')) {
+          errorMessage = 'Invalid API key';
+        } else if (healthError.message?.includes('network') || healthError.message?.includes('connection')) {
+          errorMessage = 'Error de conexión con la base de datos';
+        } else {
+          errorMessage = `Error de base de datos: ${healthError.message}`;
         }
+        
+        return res.status(500).json({
+          success: false,
+          message: errorMessage
+        });
       }
       
       console.log('✅ API: Supabase connection successful');
