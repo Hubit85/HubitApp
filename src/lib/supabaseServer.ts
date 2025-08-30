@@ -1,6 +1,38 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Función para cargar manualmente las variables del .env.local
+function loadEnvFile() {
+  try {
+    const envPath = path.join(process.cwd(), '.env.local');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf8');
+      const envLines = envContent.split('
+');
+      
+      envLines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine && !trimmedLine.startsWith('#') && trimmedLine.includes('=')) {
+          const [key, ...valueParts] = trimmedLine.split('=');
+          const value = valueParts.join('=');
+          if (key && value && !process.env[key]) {
+            process.env[key] = value;
+          }
+        }
+      });
+      
+      console.log('✅ Variables cargadas manualmente desde .env.local');
+    }
+  } catch (error) {
+    console.warn('⚠️ No se pudo cargar .env.local manualmente:', error);
+  }
+}
+
+// Cargar variables manualmente primero
+loadEnvFile();
 
 // Logging detallado para debugging
 console.log('🔧 Iniciando configuración Supabase Server...');
@@ -9,6 +41,7 @@ console.log('📍 Total env vars:', Object.keys(process.env).length);
 console.log('📍 SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...');
 console.log('📍 SERVICE KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 console.log('📍 SERVICE KEY length:', process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0);
+console.log('📍 SERVICE KEY first chars:', process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) + '...');
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
