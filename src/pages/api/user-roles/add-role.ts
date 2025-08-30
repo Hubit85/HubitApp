@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import supabaseServer from '@/lib/supabaseServer';
 import type { Database } from '@/integrations/supabase/types';
 
 interface AddRoleRequestBody {
@@ -37,89 +37,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // VALIDACIÓN MEJORADA DE VARIABLES DE ENTORNO
-    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // VALIDACIÓN DE VARIABLES DE ENTORNO
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
     console.log('🔧 API: Environment validation:', {
-      hasSupabaseUrl: !!SUPABASE_URL,
-      hasSupabaseServiceKey: !!SUPABASE_SERVICE_KEY,
       hasResendKey: !!RESEND_API_KEY,
-      supabaseUrlFormat: SUPABASE_URL ? (SUPABASE_URL.includes('supabase.co') ? 'valid' : 'invalid') : 'missing'
+      resendKeyValid: RESEND_API_KEY ? RESEND_API_KEY.startsWith('re_') : false
     });
 
-    // Verificar configuración básica de Supabase
-    if (!SUPABASE_URL || !SUPABASE_URL.includes('supabase.co')) {
-      console.error('❌ API: Invalid SUPABASE_URL:', SUPABASE_URL);
-      return res.status(500).json({
-        success: false,
-        message: 'Error de configuración: URL de Supabase no válida'
-      });
-    }
-
-    if (!SUPABASE_SERVICE_KEY || SUPABASE_SERVICE_KEY.length < 100) {
-      console.error('❌ API: Invalid SUPABASE_SERVICE_ROLE_KEY length:', SUPABASE_SERVICE_KEY?.length);
-      return res.status(500).json({
-        success: false,
-        message: 'Error de configuración: Clave de servicio de Supabase inválida'
-      });
-    }
-
-    // Verificar que no sean claves placeholder
-    if (SUPABASE_SERVICE_KEY.includes('invalid') || SUPABASE_SERVICE_KEY.includes('your-')) {
-      console.error('❌ API: SUPABASE_SERVICE_ROLE_KEY appears to be placeholder');
-      return res.status(500).json({
-        success: false,
-        message: 'Error de configuración: Clave de servicio de Supabase es un placeholder'
-      });
-    }
-
-    // CREAR CLIENTE SUPABASE DIRECTAMENTE CON VALIDACIÓN
-    console.log('🔧 API: Creating Supabase server client...');
-    
-    const supabaseServer = createClient<Database>(
-      SUPABASE_URL,
-      SUPABASE_SERVICE_KEY,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
-
-    // TEST DE CONECTIVIDAD MEJORADO
+    // TEST DE CONECTIVIDAD SIMPLE Y DIRECTO
     console.log('🔗 API: Testing Supabase connection...');
     
     try {
-      // Test de conectividad básico usando SELECT 1
-      const { data: healthCheck, error: healthError } = await supabaseServer
+      // Simple connectivity test
+      const { error: healthError } = await supabaseServer
         .from('profiles')
-        .select('count')
+        .select('id')
         .limit(1);
       
       if (healthError) {
         console.error('❌ API: Supabase connection test failed:', {
           message: healthError.message,
-          code: healthError.code,
-          details: healthError.details
+          code: healthError.code
         });
-        
-        // Determinar tipo de error más específico
-        let errorMessage = 'Error de base de datos';
-        
-        if (healthError.message?.includes('JWT') || healthError.code === 'PGRST301') {
-          errorMessage = 'Invalid API key';
-        } else if (healthError.message?.includes('network') || healthError.message?.includes('connection')) {
-          errorMessage = 'Error de conexión con la base de datos';
-        } else {
-          errorMessage = `Error de base de datos: ${healthError.message}`;
-        }
         
         return res.status(500).json({
           success: false,
-          message: errorMessage
+          message: 'Error de base de datos: Invalid API key'
         });
       }
       
