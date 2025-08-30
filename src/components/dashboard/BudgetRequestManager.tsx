@@ -17,7 +17,7 @@ interface BudgetRequest {
   title: string;
   description: string;
   category: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  status: string | null;  // Allow string | null to match database
   budget_range_min?: number;
   budget_range_max?: number;
   created_at: string;
@@ -60,20 +60,22 @@ export default function BudgetRequestManager() {
 
   const fetchRequests = async () => {
     try {
+      if (!user?.id) return;  // Add user validation
+      
       const { data, error } = await supabase
         .from('budget_requests')
         .select(`
           *,
           properties(name)
         `)
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
       const formattedData = data?.map(item => ({
         ...item,
-        property_name: item.properties?.name
+        property_name: item.properties?.name || undefined
       })) || [];
       
       setRequests(formattedData);
@@ -86,10 +88,12 @@ export default function BudgetRequestManager() {
 
   const fetchProperties = async () => {
     try {
+      if (!user?.id) return;  // Add user validation
+      
       const { data, error } = await supabase
         .from('properties')
         .select('id, name')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
       setProperties(data || []);
@@ -100,23 +104,23 @@ export default function BudgetRequestManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.id) return;  // Add user validation
+    
     setIsSubmitting(true);
 
     try {
       const { error } = await supabase
         .from('budget_requests')
-        .insert([
-          {
-            title: formData.title,
-            description: formData.description,
-            category: formData.category,
-            property_id: formData.property_id || null,
-            budget_range_min: formData.budget_range_min ? parseFloat(formData.budget_range_min) : null,
-            budget_range_max: formData.budget_range_max ? parseFloat(formData.budget_range_max) : null,
-            user_id: user?.id,
-            status: 'pending'
-          }
-        ]);
+        .insert({
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          property_id: formData.property_id || null,
+          budget_range_min: formData.budget_range_min ? parseFloat(formData.budget_range_min) : null,
+          budget_range_max: formData.budget_range_max ? parseFloat(formData.budget_range_max) : null,
+          user_id: user.id,
+          status: 'pending'
+        });
 
       if (error) throw error;
 
@@ -138,7 +142,7 @@ export default function BudgetRequestManager() {
     }
   };
 
-  const getStatusInfo = (status: string) => {
+  const getStatusInfo = (status: string | null) => {
     switch (status) {
       case 'pending':
         return { label: 'Pendiente', color: 'bg-yellow-500', icon: Clock };
@@ -149,7 +153,7 @@ export default function BudgetRequestManager() {
       case 'cancelled':
         return { label: 'Cancelado', color: 'bg-red-500', icon: XCircle };
       default:
-        return { label: 'Desconocido', color: 'bg-neutral-500', icon: Clock };
+        return { label: 'Pendiente', color: 'bg-yellow-500', icon: Clock };
     }
   };
 

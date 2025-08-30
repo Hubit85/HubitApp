@@ -32,15 +32,12 @@ export default function SupabaseStatus() {
 
   const checkDatabaseTables = async () => {
     try {
-      // Check if main tables exist by querying them
-      const tables = ['profiles', 'properties', 'budget_requests', 'service_categories'];
-      const checks = await Promise.all(
-        tables.map(table => 
-          supabase.from(table).select('count').limit(1)
-        )
-      );
+      // Check if main tables exist by testing specific queries
+      const profileCheck = await supabase.from('profiles').select('count').limit(1);
+      const propertiesCheck = await supabase.from('properties').select('count').limit(1);
+      const budgetCheck = await supabase.from('budget_requests').select('count').limit(1);
       
-      const hasErrors = checks.some(check => check.error !== null);
+      const hasErrors = [profileCheck, propertiesCheck, budgetCheck].some(check => check.error !== null);
       setDbStatus(hasErrors ? 'error' : 'ready');
     } catch (error) {
       setDbStatus('error');

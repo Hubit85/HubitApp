@@ -16,7 +16,7 @@ interface Property {
   id: string;
   name: string;
   address: string;
-  property_type: 'residential' | 'commercial' | 'mixed';
+  property_type: string;  // Allow any string to match database
   description?: string;
   units_count?: number;
   created_at: string;
@@ -40,7 +40,8 @@ export default function PropertyManager() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchProperties = async () => {
-    if (!user) return;
+    if (!user?.id) return;  // Add user validation
+    
     setLoading(true);
     setError(null);
     try {
@@ -98,7 +99,8 @@ export default function PropertyManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user?.id) return;  // Add user validation
+    
     setIsSubmitting(true);
     setError(null);
 
@@ -106,7 +108,7 @@ export default function PropertyManager() {
       const propertyData = {
         name: formData.name,
         address: formData.address,
-        property_type: formData.property_type as 'residential' | 'commercial' | 'mixed',
+        property_type: formData.property_type,
         description: formData.description || null,
         units_count: formData.units_count ? parseInt(formData.units_count) : null,
         user_id: user.id
