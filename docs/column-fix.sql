@@ -71,6 +71,30 @@ BEGIN
     END IF;
 END $$;
 
+-- Verificar y añadir columnas de geolocalización a la tabla properties si no existen
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'properties' AND column_name = 'latitude'
+    ) THEN
+        ALTER TABLE properties ADD COLUMN latitude DECIMAL(10, 8);
+        RAISE NOTICE '✅ Columna latitude añadida a la tabla properties';
+    ELSE
+        RAISE NOTICE '✅ La columna latitude ya existe en la tabla properties';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'properties' AND column_name = 'longitude'
+    ) THEN
+        ALTER TABLE properties ADD COLUMN longitude DECIMAL(11, 8);
+        RAISE NOTICE '✅ Columna longitude añadida a la tabla properties';
+    ELSE
+        RAISE NOTICE '✅ La columna longitude ya existe en la tabla properties';
+    END IF;
+END $$;
+
 -- Verificar todas las columnas críticas
 DO $$
 DECLARE
@@ -117,6 +141,12 @@ BEGIN
     IF table_exists THEN
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'properties' AND column_name = 'property_status') THEN
             missing_columns := missing_columns || 'properties.property_status, ';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'properties' AND column_name = 'latitude') THEN
+            missing_columns := missing_columns || 'properties.latitude, ';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'properties' AND column_name = 'longitude') THEN
+            missing_columns := missing_columns || 'properties.longitude, ';
         END IF;
     END IF;
 
