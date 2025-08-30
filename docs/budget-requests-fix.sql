@@ -86,19 +86,6 @@ BEGIN
     CREATE POLICY "Users can update own budget requests" ON budget_requests FOR UPDATE USING (auth.uid() = user_id);
     CREATE POLICY "Users can delete own budget requests" ON budget_requests FOR DELETE USING (auth.uid() = user_id);
     
-    -- Crear trigger para updated_at
-    CREATE OR REPLACE FUNCTION update_updated_at_column()
-    RETURNS TRIGGER AS $$
-    BEGIN
-        NEW.updated_at = NOW();
-        RETURN NEW;
-    END;
-    $$ language 'plpgsql';
-    
-    CREATE TRIGGER update_budget_requests_updated_at 
-        BEFORE UPDATE ON budget_requests 
-        FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    
     RAISE NOTICE '🛡️ RLS, políticas e índices configurados correctamente';
     
     RAISE NOTICE '';
@@ -113,7 +100,26 @@ BEGIN
     RAISE NOTICE '   ✅ expires_at (timestamp)';
     RAISE NOTICE '   ✅ Todas las demás columnas estándar';
     RAISE NOTICE '';
+    
+END $$;
+
+-- Crear la función para updated_at por separado (fuera del bloque DO)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Crear el trigger para updated_at
+CREATE TRIGGER update_budget_requests_updated_at 
+    BEFORE UPDATE ON budget_requests 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Mensaje final
+DO $$
+BEGIN
     RAISE NOTICE '🚀 AHORA PUEDES EJECUTAR database-setup.sql SIN ERRORES';
     RAISE NOTICE '';
-    
 END $$;
