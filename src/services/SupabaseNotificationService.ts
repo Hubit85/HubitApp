@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Notification, NotificationInsert, NotificationUpdate } from "@/integrations/supabase/types";
 
@@ -10,7 +11,6 @@ export class SupabaseNotificationService {
       .insert({
         ...notificationData,
         read: false,
-        priority: notificationData.priority || 1,
         created_at: new Date().toISOString()
       })
       .select()
@@ -89,9 +89,6 @@ export class SupabaseNotificationService {
       query = query.eq("category", filters.category);
     }
 
-    // Filter out expired notifications
-    query = query.or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
-
     const { data, error } = await query
       .order("created_at", { ascending: false })
       .limit(filters?.limit || 50)
@@ -109,8 +106,7 @@ export class SupabaseNotificationService {
       .from("notifications")
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId)
-      .eq("read", false)
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+      .eq("read", false);
 
     if (error) {
       throw new Error(error.message);
@@ -166,10 +162,7 @@ export class SupabaseNotificationService {
       type: "info",
       category: "budget_request",
       related_entity_type: "budget_request",
-      related_entity_id: budgetRequestId,
-      action_url: `/dashboard/budget-requests/${budgetRequestId}`,
-      action_label: "Ver solicitud",
-      priority: type === "new_quote" ? 2 : 1
+      related_entity_id: budgetRequestId
     });
   }
 
@@ -187,10 +180,7 @@ export class SupabaseNotificationService {
       type: type === "quote_accepted" ? "success" : "info",
       category: "quote",
       related_entity_type: "quote",
-      related_entity_id: quoteId,
-      action_url: `/dashboard/quotes/${quoteId}`,
-      action_label: "Ver cotización",
-      priority: type === "quote_accepted" ? 3 : 2
+      related_entity_id: quoteId
     });
   }
 
@@ -208,10 +198,7 @@ export class SupabaseNotificationService {
       type: type === "contract_completed" ? "success" : type === "contract_cancelled" ? "warning" : "info",
       category: "contract",
       related_entity_type: "contract",
-      related_entity_id: contractId,
-      action_url: `/dashboard/contracts/${contractId}`,
-      action_label: "Ver contrato",
-      priority: type === "contract_signed" || type === "contract_completed" ? 3 : 2
+      related_entity_id: contractId
     });
   }
 
@@ -229,10 +216,7 @@ export class SupabaseNotificationService {
       type: type === "payment_received" || type === "refund_processed" ? "success" : "error",
       category: "payment",
       related_entity_type: "payment",
-      related_entity_id: paymentId,
-      action_url: `/dashboard/payments/${paymentId}`,
-      action_label: "Ver pago",
-      priority: 3
+      related_entity_id: paymentId
     });
   }
 
@@ -249,26 +233,21 @@ export class SupabaseNotificationService {
       type: "info",
       category: "rating",
       related_entity_type: "rating",
-      related_entity_id: ratingId,
-      action_url: `/dashboard/ratings/${ratingId}`,
-      action_label: "Ver calificación",
-      priority: 1
+      related_entity_id: ratingId
     });
   }
 
   static async createSystemNotification(
     userId: string,
     title: string,
-    message: string,
-    priority: number = 1
+    message: string
   ): Promise<Notification> {
     return this.createNotification({
       user_id: userId,
       title,
       message,
       type: "system",
-      category: "system",
-      priority
+      category: "system"
     });
   }
 
@@ -285,11 +264,7 @@ export class SupabaseNotificationService {
       type: "error",
       category: "system",
       related_entity_type: "emergency_request",
-      related_entity_id: emergencyRequestId,
-      action_url: `/dashboard/emergency/${emergencyRequestId}`,
-      action_label: "Ver emergencia",
-      priority: 5, // Highest priority
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // Expires in 24 hours
+      related_entity_id: emergencyRequestId
     });
   }
 
@@ -301,7 +276,6 @@ export class SupabaseNotificationService {
       .insert(notifications.map(notification => ({
         ...notification,
         read: false,
-        priority: notification.priority || 1,
         created_at: new Date().toISOString()
       })))
       .select();
@@ -339,18 +313,6 @@ export class SupabaseNotificationService {
   }
 
   // ===================== CLEANUP & MAINTENANCE =====================
-
-  static async deleteExpiredNotifications(): Promise<void> {
-    const { error } = await supabase
-      .from("notifications")
-      .delete()
-      .not("expires_at", "is", null)
-      .lt("expires_at", new Date().toISOString());
-
-    if (error) {
-      throw new Error(error.message);
-    }
-  }
 
   static async deleteOldNotifications(daysOld: number = 30): Promise<void> {
     const cutoffDate = new Date();
@@ -395,7 +357,6 @@ export class SupabaseNotificationService {
   // ===================== PREFERENCES =====================
 
   static async shouldSendEmailNotification(userId: string, category: string): Promise<boolean> {
-    // Check user preferences in profile
     const { data: profile } = await supabase
       .from("profiles")
       .select("email_notifications")
@@ -406,7 +367,6 @@ export class SupabaseNotificationService {
   }
 
   static async shouldSendSMSNotification(userId: string, category: string): Promise<boolean> {
-    // Check user preferences in profile
     const { data: profile } = await supabase
       .from("profiles")
       .select("sms_notifications")

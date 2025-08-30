@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Document, DocumentInsert, DocumentUpdate } from "@/integrations/supabase/types";
 
@@ -10,7 +11,8 @@ export class SupabaseDocumentService {
       .insert({
         ...documentData,
         is_public: documentData.is_public || false,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select()
       .single();
@@ -25,7 +27,10 @@ export class SupabaseDocumentService {
   static async updateDocument(id: string, updates: DocumentUpdate): Promise<Document> {
     const { data, error } = await supabase
       .from("documents")
-      .update(updates)
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
       .eq("id", id)
       .select()
       .single();
@@ -53,9 +58,13 @@ export class SupabaseDocumentService {
 
   static async deleteDocument(id: string): Promise<void> {
     // First, try to delete the physical file from storage
-    const document = await this.getDocument(id);
-    if (document.file_path) {
-      await this.deleteFileFromStorage(document.file_path);
+    try {
+      const document = await this.getDocument(id);
+      if (document.file_path) {
+        await this.deleteFileFromStorage(document.file_path);
+      }
+    } catch (error) {
+      console.warn("Could not delete file from storage:", error);
     }
 
     // Then delete the document record
@@ -187,7 +196,7 @@ export class SupabaseDocumentService {
 
   static async uploadAndCreateDocument(
     file: File,
-    documentData: Omit<DocumentInsert, "file_path" | "file_size" | "mime_type">
+    documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
     // Upload file to storage
     const filePath = await this.uploadFile(file, `${documentData.document_type}s`);
@@ -196,8 +205,7 @@ export class SupabaseDocumentService {
     const fullDocumentData: DocumentInsert = {
       ...documentData,
       file_path: filePath,
-      file_size: file.size,
-      mime_type: file.type
+      file_size: file.size
     };
 
     return this.createDocument(fullDocumentData);
@@ -218,7 +226,6 @@ export class SupabaseDocumentService {
     return this.updateDocument(documentId, {
       file_path: newFilePath,
       file_size: newFile.size,
-      mime_type: newFile.type,
       name: newFile.name
     });
   }
@@ -280,8 +287,6 @@ export class SupabaseDocumentService {
       return true;
     }
 
-    // Check if user has access through related entities
-    // This would depend on your business logic
     return false;
   }
 
@@ -307,7 +312,7 @@ export class SupabaseDocumentService {
 
     if (query) {
       supabaseQuery = supabaseQuery.or(
-        `name.ilike.%${query}%,description.ilike.%${query}%`
+        `name.ilike.%${query}%`
       );
     }
 
@@ -363,50 +368,6 @@ export class SupabaseDocumentService {
     return stats;
   }
 
-  // ===================== BULK OPERATIONS =====================
-
-  static async bulkDeleteDocuments(documentIds: string[]): Promise<void> {
-    // Get all documents to delete their files
-    const { data: documents } = await supabase
-      .from("documents")
-      .select("file_path")
-      .in("id", documentIds);
-
-    // Delete files from storage
-    if (documents) {
-      const filePaths = documents.map(doc => doc.file_path).filter(Boolean);
-      if (filePaths.length > 0) {
-        await supabase.storage
-          .from("documents")
-          .remove(filePaths);
-      }
-    }
-
-    // Delete document records
-    const { error } = await supabase
-      .from("documents")
-      .delete()
-      .in("id", documentIds);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-  }
-
-  static async bulkUpdateDocumentVisibility(documentIds: string[], isPublic: boolean): Promise<Document[]> {
-    const { data, error } = await supabase
-      .from("documents")
-      .update({ is_public: isPublic })
-      .in("id", documentIds)
-      .select();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data || [];
-  }
-
   // ===================== FILE TYPE VALIDATION =====================
 
   static isValidFileType(file: File, allowedTypes: string[]): boolean {
@@ -428,60 +389,5 @@ export class SupabaseDocumentService {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  }
-
-  // ===================== DOCUMENT TEMPLATES =====================
-
-  static getDocumentTypeConfig() {
-    return {
-      contract: {
-        name: "Contrato",
-        allowedTypes: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
-        maxSizeInMB: 10,
-        icon: "📄"
-      },
-      invoice: {
-        name: "Factura",
-        allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
-        maxSizeInMB: 5,
-        icon: "🧾"
-      },
-      certificate: {
-        name: "Certificado",
-        allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
-        maxSizeInMB: 5,
-        icon: "🏅"
-      },
-      license: {
-        name: "Licencia",
-        allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
-        maxSizeInMB: 5,
-        icon: "📜"
-      },
-      insurance: {
-        name: "Seguro",
-        allowedTypes: ["application/pdf", "image/jpeg", "image/png"],
-        maxSizeInMB: 5,
-        icon: "🛡️"
-      },
-      photo: {
-        name: "Foto",
-        allowedTypes: ["image/jpeg", "image/png", "image/webp"],
-        maxSizeInMB: 10,
-        icon: "📸"
-      },
-      blueprint: {
-        name: "Plano",
-        allowedTypes: ["application/pdf", "image/jpeg", "image/png", "application/vnd.ms-visio"],
-        maxSizeInMB: 20,
-        icon: "📐"
-      },
-      other: {
-        name: "Otro",
-        allowedTypes: ["*"],
-        maxSizeInMB: 25,
-        icon: "📎"
-      }
-    };
   }
 }

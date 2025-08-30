@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { 
   BudgetRequest, 
@@ -5,9 +6,12 @@ import {
   BudgetRequestUpdate, 
   Quote, 
   QuoteInsert, 
-  QuoteUpdate,
-  BudgetRequestWithDetails 
+  QuoteUpdate
 } from "@/integrations/supabase/types";
+
+type BudgetRequestWithProperty = BudgetRequest & {
+  properties: { id: string; name: string; address: string; city: string } | null;
+};
 
 export class SupabaseBudgetService {
   // ===================== BUDGET REQUESTS =====================
@@ -49,38 +53,7 @@ export class SupabaseBudgetService {
     return data;
   }
 
-  static async getBudgetRequest(id: string): Promise<BudgetRequestWithDetails> {
-    const { data, error } = await supabase
-      .from("budget_requests")
-      .select(`
-        *,
-        properties (
-          id,
-          name,
-          address,
-          city,
-          property_type,
-          latitude,
-          longitude
-        ),
-        service_categories (
-          id,
-          name,
-          icon,
-          color
-        )
-      `)
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  }
-
-  static async getUserBudgetRequests(userId: string): Promise<BudgetRequestWithDetails[]> {
+  static async getBudgetRequest(id: string): Promise<BudgetRequestWithProperty> {
     const { data, error } = await supabase
       .from("budget_requests")
       .select(`
@@ -90,11 +63,28 @@ export class SupabaseBudgetService {
           name,
           address,
           city
-        ),
-        service_categories (
+        )
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data as BudgetRequestWithProperty;
+  }
+
+  static async getUserBudgetRequests(userId: string): Promise<BudgetRequestWithProperty[]> {
+    const { data, error } = await supabase
+      .from("budget_requests")
+      .select(`
+        *,
+        properties (
           id,
           name,
-          icon
+          address,
+          city
         )
       `)
       .eq("user_id", userId)
@@ -104,16 +94,15 @@ export class SupabaseBudgetService {
       throw new Error(error.message);
     }
 
-    return data || [];
+    return (data || []) as BudgetRequestWithProperty[];
   }
 
   static async getPublishedBudgetRequests(filters?: {
     category?: string;
     city?: string;
-    urgency?: string;
     maxBudget?: number;
     minBudget?: number;
-  }): Promise<BudgetRequestWithDetails[]> {
+  }): Promise<BudgetRequestWithProperty[]> {
     let query = supabase
       .from("budget_requests")
       .select(`
@@ -122,30 +111,13 @@ export class SupabaseBudgetService {
           id,
           name,
           address,
-          city,
-          latitude,
-          longitude
-        ),
-        service_categories (
-          id,
-          name,
-          icon,
-          color
+          city
         )
       `)
-      .eq("status", "published")
-      .gt("expires_at", new Date().toISOString());
+      .eq("status", "open");
 
     if (filters?.category) {
       query = query.eq("category", filters.category);
-    }
-
-    if (filters?.city) {
-      query = query.eq("properties.city", filters.city);
-    }
-
-    if (filters?.urgency) {
-      query = query.eq("urgency", filters.urgency);
     }
 
     if (filters?.minBudget) {
@@ -162,45 +134,7 @@ export class SupabaseBudgetService {
       throw new Error(error.message);
     }
 
-    return data || [];
-  }
-
-  static async publishBudgetRequest(id: string, expiresInDays: number = 30): Promise<BudgetRequest> {
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
-
-    return this.updateBudgetRequest(id, {
-      status: "published",
-      published_at: new Date().toISOString(),
-      expires_at: expiresAt.toISOString()
-    });
-  }
-
-  static async unpublishBudgetRequest(id: string): Promise<BudgetRequest> {
-    return this.updateBudgetRequest(id, {
-      status: "pending",
-      published_at: null,
-      expires_at: null
-    });
-  }
-
-  static async incrementViews(budgetId: string) {
-    try {
-      // Manual increment without RPC function to avoid type errors
-      const { data: current } = await supabase
-        .from("budget_requests")
-        .select("views_count")
-        .eq("id", budgetId)
-        .single();
-
-      if (current) {
-        await this.updateBudgetRequest(budgetId, {
-          views_count: (current.views_count || 0) + 1
-        });
-      }
-    } catch (error) {
-      console.error("Error incrementing views:", error);
-    }
+    return (data || []) as BudgetRequestWithProperty[];
   }
 
   static async deleteBudgetRequest(id: string): Promise<void> {
@@ -231,9 +165,6 @@ export class SupabaseBudgetService {
     if (error) {
       throw new Error(error.message);
     }
-
-    // Increment quotes count on budget request
-    await this.incrementQuotesCount(quoteData.budget_request_id);
 
     return data;
   }
@@ -273,19 +204,7 @@ export class SupabaseBudgetService {
   static async getBudgetRequestQuotes(budgetRequestId: string): Promise<Quote[]> {
     const { data, error } = await supabase
       .from("quotes")
-      .select(`
-        *,
-        service_providers (
-          id,
-          company_name,
-          verified,
-          rating_average,
-          rating_count,
-          response_time_hours,
-          emergency_services,
-          portfolio_images
-        )
-      `)
+      .select("*")
       .eq("budget_request_id", budgetRequestId)
       .order("created_at", { ascending: false });
 
@@ -299,23 +218,7 @@ export class SupabaseBudgetService {
   static async getProviderQuotes(providerId: string): Promise<Quote[]> {
     const { data, error } = await supabase
       .from("quotes")
-      .select(`
-        *,
-        budget_requests (
-          id,
-          title,
-          description,
-          category,
-          urgency,
-          status,
-          properties (
-            id,
-            name,
-            address,
-            city
-          )
-        )
-      `)
+      .select("*")
       .eq("service_provider_id", providerId)
       .order("created_at", { ascending: false });
 
@@ -327,7 +230,6 @@ export class SupabaseBudgetService {
   }
 
   static async acceptQuote(id: string): Promise<Quote> {
-    // Mark quote as accepted and reject others for the same budget request
     const quote = await this.getQuote(id);
     
     // First, reject all other quotes for this budget request
@@ -342,8 +244,7 @@ export class SupabaseBudgetService {
 
     // Then accept this quote
     const acceptedQuote = await this.updateQuote(id, {
-      status: "accepted",
-      viewed_by_client: true
+      status: "accepted"
     });
 
     // Update budget request status
@@ -356,8 +257,7 @@ export class SupabaseBudgetService {
 
   static async rejectQuote(id: string): Promise<Quote> {
     return this.updateQuote(id, {
-      status: "rejected",
-      viewed_by_client: true
+      status: "rejected"
     });
   }
 
@@ -367,49 +267,21 @@ export class SupabaseBudgetService {
     });
   }
 
-  static async markQuoteAsViewed(id: string): Promise<Quote> {
-    return this.updateQuote(id, {
-      viewed_by_client: true
-    });
-  }
-
-  // ===================== HELPER METHODS =====================
-
-  private static async incrementQuotesCount(budgetRequestId: string): Promise<void> {
-    const { data: current } = await supabase
-      .from("budget_requests")
-      .select("quotes_count")
-      .eq("id", budgetRequestId)
-      .single();
-
-    if (current) {
-      await this.updateBudgetRequest(budgetRequestId, {
-        quotes_count: (current.quotes_count || 0) + 1
-      });
-    }
-  }
-
   // ===================== STATISTICS =====================
 
   static async getBudgetRequestStats(userId: string): Promise<{
     total: number;
-    published: number;
+    open: number;
     inProgress: number;
     completed: number;
-    totalQuotes: number;
-    averageQuotesPerRequest: number;
   }> {
     const requests = await this.getUserBudgetRequests(userId);
     
     const stats = {
       total: requests.length,
-      published: requests.filter(r => r.status === "published").length,
+      open: requests.filter(r => r.status === "open").length,
       inProgress: requests.filter(r => r.status === "in_progress").length,
-      completed: requests.filter(r => r.status === "completed").length,
-      totalQuotes: requests.reduce((sum, r) => sum + (r.quotes_count || 0), 0),
-      averageQuotesPerRequest: requests.length > 0 
-        ? requests.reduce((sum, r) => sum + (r.quotes_count || 0), 0) / requests.length 
-        : 0
+      completed: requests.filter(r => r.status === "completed").length
     };
 
     return stats;
@@ -442,8 +314,7 @@ export class SupabaseBudgetService {
   static async searchBudgetRequests(query: string, filters?: {
     category?: string;
     city?: string;
-    urgency?: string;
-  }): Promise<BudgetRequestWithDetails[]> {
+  }): Promise<BudgetRequestWithProperty[]> {
     let supabaseQuery = supabase
       .from("budget_requests")
       .select(`
@@ -453,15 +324,9 @@ export class SupabaseBudgetService {
           name,
           address,
           city
-        ),
-        service_categories (
-          id,
-          name,
-          icon
         )
       `)
-      .eq("status", "published")
-      .gt("expires_at", new Date().toISOString());
+      .eq("status", "open");
 
     if (query) {
       supabaseQuery = supabaseQuery.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
@@ -469,10 +334,6 @@ export class SupabaseBudgetService {
 
     if (filters?.category) {
       supabaseQuery = supabaseQuery.eq("category", filters.category);
-    }
-
-    if (filters?.urgency) {
-      supabaseQuery = supabaseQuery.eq("urgency", filters.urgency);
     }
 
     const { data, error } = await supabaseQuery
@@ -483,6 +344,6 @@ export class SupabaseBudgetService {
       throw new Error(error.message);
     }
 
-    return data || [];
+    return (data || []) as BudgetRequestWithProperty[];
   }
 }
