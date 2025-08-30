@@ -4,7 +4,7 @@ import type { Database } from '@/integrations/supabase/types';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Función para cargar manualmente las variables del .env.local
+// Función mejorada para cargar manualmente las variables del .env.local
 function loadEnvFile() {
   try {
     const envPath = path.join(process.cwd(), '.env.local');
@@ -13,49 +13,66 @@ function loadEnvFile() {
       const envLines = envContent.split('
 ');
       
+      let loadedCount = 0;
       envLines.forEach(line => {
         const trimmedLine = line.trim();
         if (trimmedLine && !trimmedLine.startsWith('#') && trimmedLine.includes('=')) {
-          const [key, ...valueParts] = trimmedLine.split('=');
-          const value = valueParts.join('=');
-          if (key && value && !process.env[key]) {
+          const equalIndex = trimmedLine.indexOf('=');
+          const key = trimmedLine.substring(0, equalIndex).trim();
+          const value = trimmedLine.substring(equalIndex + 1).trim();
+          
+          if (key && value) {
+            // Forzar la actualización incluso si ya existe
             process.env[key] = value;
+            loadedCount++;
+            
+            if (key.includes('SUPABASE') || key.includes('RESEND')) {
+              console.log(`🔄 Variable actualizada: ${key} = ${value.substring(0, 20)}...`);
+            }
           }
         }
       });
       
-      console.log('✅ Variables cargadas manualmente desde .env.local');
+      console.log(`✅ ${loadedCount} variables cargadas/actualizadas desde .env.local`);
+    } else {
+      console.warn('⚠️ Archivo .env.local no encontrado en:', envPath);
     }
   } catch (error) {
-    console.warn('⚠️ No se pudo cargar .env.local manualmente:', error);
+    console.error('❌ Error cargando .env.local:', error);
   }
 }
 
-// Cargar variables manualmente primero
+// Cargar variables manualmente primero - SIEMPRE
 loadEnvFile();
 
 // Logging detallado para debugging
 console.log('🔧 Iniciando configuración Supabase Server...');
 console.log('📍 NODE_ENV:', process.env.NODE_ENV);
-console.log('📍 Total env vars:', Object.keys(process.env).length);
 console.log('📍 SUPABASE URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...');
 console.log('📍 SERVICE KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 console.log('📍 SERVICE KEY length:', process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0);
-console.log('📍 SERVICE KEY first chars:', process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) + '...');
+console.log('📍 SERVICE KEY tipo:', typeof process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   console.error('❌ Missing Supabase environment variables');
-  console.error('SUPABASE_URL:', SUPABASE_URL ? 'SET' : 'NOT SET');
-  console.error('SUPABASE_SERVICE_KEY:', SUPABASE_SERVICE_KEY ? 'SET' : 'NOT SET');
+  console.error('SUPABASE_URL present:', !!SUPABASE_URL);
+  console.error('SUPABASE_SERVICE_KEY present:', !!SUPABASE_SERVICE_KEY);
+  console.error('SUPABASE_SERVICE_KEY value preview:', SUPABASE_SERVICE_KEY?.substring(0, 50));
   
-  // Lista todas las variables que empiecen con SUPABASE
-  const supabaseVars = Object.keys(process.env).filter(key => key.includes('SUPABASE'));
-  console.error('Available SUPABASE vars:', supabaseVars);
+  // Intentar recargar una vez más
+  console.log('🔄 Intentando recargar variables...');
+  loadEnvFile();
   
-  throw new Error('Missing required Supabase environment variables');
+  throw new Error('Missing required Supabase environment variables after reload attempt');
+}
+
+// Validación adicional del formato JWT
+if (!SUPABASE_SERVICE_KEY.startsWith('eyJ')) {
+  console.error('❌ SUPABASE_SERVICE_KEY no parece ser un JWT válido');
+  console.error('Valor actual:', SUPABASE_SERVICE_KEY.substring(0, 50));
 }
 
 const supabaseServer = createClient<Database>(
@@ -69,6 +86,6 @@ const supabaseServer = createClient<Database>(
   }
 );
 
-console.log('✅ Supabase Server configurado correctamente');
+console.log('✅ Supabase Server configurado con claves actualizadas');
 
 export default supabaseServer;
