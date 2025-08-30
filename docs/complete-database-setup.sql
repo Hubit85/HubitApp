@@ -6,29 +6,23 @@
 -- PASO 1: LIMPIAR Y RECREAR TABLAS PROBLEMATICAS
 -- =============================================================================
 
--- Funcion auxiliar para limpiar tablas si existen
-DO $$ 
-BEGIN 
-    -- Eliminar tablas problematicas si existen (en orden correcto por dependencias)
-    DROP TABLE IF EXISTS notifications CASCADE;
-    DROP TABLE IF EXISTS emergency_requests CASCADE;
-    DROP TABLE IF EXISTS documents CASCADE;
-    DROP TABLE IF EXISTS messages CASCADE;
-    DROP TABLE IF EXISTS conversations CASCADE;
-    DROP TABLE IF EXISTS work_sessions CASCADE;
-    DROP TABLE IF EXISTS ratings CASCADE;
-    DROP TABLE IF EXISTS payments CASCADE;
-    DROP TABLE IF EXISTS invoices CASCADE;
-    DROP TABLE IF EXISTS contracts CASCADE;
-    DROP TABLE IF EXISTS quotes CASCADE;
-    DROP TABLE IF EXISTS service_providers CASCADE;
-    DROP TABLE IF EXISTS budget_requests CASCADE;
-    DROP TABLE IF EXISTS service_categories CASCADE;
-    DROP TABLE IF EXISTS properties CASCADE;
-    DROP TABLE IF EXISTS profiles CASCADE;
-    
-    RAISE NOTICE 'Limpieza inicial completada';
-END $$;
+-- Eliminar tablas problematicas si existen (en orden correcto por dependencias)
+DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS emergency_requests CASCADE;
+DROP TABLE IF EXISTS documents CASCADE;
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS conversations CASCADE;
+DROP TABLE IF EXISTS work_sessions CASCADE;
+DROP TABLE IF EXISTS ratings CASCADE;
+DROP TABLE IF EXISTS payments CASCADE;
+DROP TABLE IF EXISTS invoices CASCADE;
+DROP TABLE IF EXISTS contracts CASCADE;
+DROP TABLE IF EXISTS quotes CASCADE;
+DROP TABLE IF EXISTS service_providers CASCADE;
+DROP TABLE IF EXISTS budget_requests CASCADE;
+DROP TABLE IF EXISTS service_categories CASCADE;
+DROP TABLE IF EXISTS properties CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
 
 -- =============================================================================
 -- PASO 2: CREAR TODAS LAS TABLAS CON COLUMNAS CORRECTAS
@@ -394,12 +388,6 @@ CREATE TABLE notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Mensaje informativo sobre creacion de tablas
-DO $$
-BEGIN
-    RAISE NOTICE 'Todas las tablas creadas exitosamente';
-END $$;
-
 -- =============================================================================
 -- PASO 3: CONFIGURAR RLS Y POLITICAS
 -- =============================================================================
@@ -421,11 +409,6 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE emergency_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
-
-DO $$
-BEGIN
-    RAISE NOTICE 'RLS habilitado en todas las tablas';
-END $$;
 
 -- =============================================================================
 -- PASO 4: CREAR INDICES
@@ -468,11 +451,6 @@ CREATE INDEX idx_ratings_service_provider_id ON ratings(service_provider_id);
 CREATE INDEX idx_ratings_user_id ON ratings(user_id);
 CREATE INDEX idx_ratings_verified ON ratings(is_verified);
 
-DO $$
-BEGIN
-    RAISE NOTICE 'Indices creados para optimo rendimiento';
-END $$;
-
 -- =============================================================================
 -- PASO 5: INSERTAR CATEGORIAS DE SERVICIOS
 -- =============================================================================
@@ -490,11 +468,6 @@ INSERT INTO service_categories (id, name, description, parent_id, icon, color, s
 ('550e8400-e29b-41d4-a716-446655440009', 'Albanileria', 'Trabajos de construccion y reformas', NULL, 'Wrench', '#64748B', 9, false),
 ('550e8400-e29b-41d4-a716-446655440010', 'Techado', 'Reparacion y mantenimiento de techos', NULL, 'Home', '#0F172A', 10, true)
 ON CONFLICT (id) DO NOTHING;
-
-DO $$
-BEGIN
-    RAISE NOTICE 'Categorias de servicios insertadas';
-END $$;
 
 -- =============================================================================
 -- PASO 6: CREAR FUNCIONES Y TRIGGERS
@@ -537,11 +510,6 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
-DO $$
-BEGIN
-    RAISE NOTICE 'Funciones y triggers configurados';
-END $$;
-
 -- =============================================================================
 -- VERIFICACION FINAL COMPLETA
 -- =============================================================================
@@ -559,28 +527,10 @@ BEGIN
     -- Contar categorias
     SELECT COUNT(*) INTO categories_count FROM service_categories;
     
-    RAISE NOTICE '';
-    RAISE NOTICE '=============================================';
-    RAISE NOTICE 'CONFIGURACION COMPLETA EXITOSA';
-    RAISE NOTICE '=============================================';
-    RAISE NOTICE '';
-    RAISE NOTICE 'Estadisticas de la base de datos:';
-    RAISE NOTICE '   Tablas creadas: %', total_tables;
-    RAISE NOTICE '   Categorias de servicio: %', categories_count;
-    RAISE NOTICE '   RLS habilitado: SI';
-    RAISE NOTICE '   Indices creados: SI';
-    RAISE NOTICE '   Triggers activos: SI';
-    RAISE NOTICE '';
-    RAISE NOTICE 'IMPORTANTE:';
-    RAISE NOTICE '   NO ejecutes database-setup.sql';
-    RAISE NOTICE '   NO ejecutes ningun otro script';
-    RAISE NOTICE '   Tu base de datos esta 100% lista';
-    RAISE NOTICE '';
-    RAISE NOTICE 'PROXIMOS PASOS:';
-    RAISE NOTICE '   1. Configurar variables de entorno';
-    RAISE NOTICE '   2. Probar registro de usuarios';
-    RAISE NOTICE '   3. Comenzar a desarrollar HuBiT!';
-    RAISE NOTICE '';
-    RAISE NOTICE 'Tu plataforma HuBiT esta lista para produccion!';
+    -- Mensajes de confirmacion sin problemas de formato
+    RAISE INFO 'CONFIGURACION COMPLETA EXITOSA';
+    RAISE INFO 'Tablas creadas: %', total_tables;
+    RAISE INFO 'Categorias de servicio: %', categories_count;
+    RAISE INFO 'Tu plataforma HuBiT esta lista para produccion';
     
 END $$;
