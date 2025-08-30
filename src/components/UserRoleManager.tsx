@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { SupabaseUserRoleService, UserRole, AddRoleRequest } from "@/services/SupabaseUserRoleService";
+import CustomEmailService from "@/lib/customEmailService";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,16 +10,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CheckCircle, Plus, UserCheck, Mail, Clock, Trash2, User, Users, Building, Settings, AlertTriangle } from "lucide-react";
+import EmailConfigurationStatus from "@/components/EmailConfigurationStatus";
 
 export default function UserRoleManager() {
   const { user, profile } = useSupabaseAuth();
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
-  const [activeRole, setActiveRole] = useState<UserRole | null>(null);
+  const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [showAddRoleDialog, setShowAddRoleDialog] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showAddRoleModal, setShowAddRoleModal] = useState(false);
   const [newRoleType, setNewRoleType] = useState<UserRole['role_type'] | "">("");
 
   useEffect(() => {
@@ -28,19 +30,26 @@ export default function UserRoleManager() {
   }, [user]);
 
   const loadUserRoles = async () => {
-    if (!user) return;
-    
+    if (!user?.id) return;
+
     try {
       setLoading(true);
-      const [roles, active] = await Promise.all([
-        SupabaseUserRoleService.getUserRoles(user.id),
-        SupabaseUserRoleService.getActiveRole(user.id)
-      ]);
+      setError("");
       
+      const roles = await SupabaseUserRoleService.getUserRoles(user.id);
       setUserRoles(roles);
-      setActiveRole(active);
-    } catch (error) {
-      console.error("Error loading user roles:", error);
+      
+      const activeRole = await SupabaseUserRoleService.getActiveRole(user.id);
+      setCurrentRole(activeRole);
+
+      // Verificar configuración de email
+      const emailConfig = CustomEmailService.validateEmailConfig();
+      if (!emailConfig.isValid) {
+        console.warn('Email service not fully configured:', emailConfig.missingVars);
+      }
+
+    } catch (err) {
+      console.error("Error loading user roles:", err);
       setError("Error al cargar los roles del usuario");
     } finally {
       setLoading(false);
@@ -48,30 +57,45 @@ export default function UserRoleManager() {
   };
 
   const handleAddRole = async () => {
-    if (!user || !newRoleType) return;
+    if (!user?.id || !newRoleType) return;
 
     try {
-      setActionLoading(true);
+      setSubmitting(true);
       setError("");
-      setMessage("");
+      setSuccessMessage("");
 
-      const result = await SupabaseUserRoleService.addRole(user.id, {
-        role_type: newRoleType as UserRole['role_type']
-      });
+      const request: AddRoleRequest = {
+        role_type: newRoleType,
+        role_specific_data: {}
+      };
 
+      const result = await SupabaseUserRoleService.addRole(user.id, request);
+      
       if (result.success) {
-        setMessage(result.message);
-        setShowAddRoleDialog(false);
+        setSuccessMessage(result.message);
         setNewRoleType("");
+        setShowAddRoleModal(false);
+        
+        // Recargar roles después de agregar
         await loadUserRoles();
+        
+        // Mostrar mensaje adicional sobre email de verificación
+        if (result.requiresVerification) {
+          setTimeout(() => {
+            setSuccessMessage(
+              result.message + " Revisa tu bandeja de entrada y spam."
+            );
+          }, 2000);
+        }
       } else {
         setError(result.message);
       }
-    } catch (error) {
-      console.error("Error adding role:", error);
-      setError("Error al agregar el rol");
+
+    } catch (err) {
+      console.error("Error adding role:", err);
+      setError("Error al agregar el rol. Por favor inténtalo de nuevo.");
     } finally {
-      setActionLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -79,14 +103,14 @@ export default function UserRoleManager() {
     if (!user) return;
 
     try {
-      setActionLoading(true);
+      setSubmitting(true);
       setError("");
-      setMessage("");
+      setSuccessMessage("");
 
       const result = await SupabaseUserRoleService.activateRole(user.id, roleType);
 
       if (result.success) {
-        setMessage(result.message);
+        setSuccessMessage(result.message);
         await loadUserRoles();
         // Recargar la página para actualizar la interfaz con el nuevo rol
         setTimeout(() => {
@@ -99,7 +123,7 @@ export default function UserRoleManager() {
       console.error("Error activating role:", error);
       setError("Error al activar el rol");
     } finally {
-      setActionLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -111,14 +135,14 @@ export default function UserRoleManager() {
     }
 
     try {
-      setActionLoading(true);
+      setSubmitting(true);
       setError("");
-      setMessage("");
+      setSuccessMessage("");
 
       const result = await SupabaseUserRoleService.removeRole(user.id, roleType);
 
       if (result.success) {
-        setMessage(result.message);
+        setSuccessMessage(result.message);
         await loadUserRoles();
       } else {
         setError(result.message);
@@ -127,7 +151,7 @@ export default function UserRoleManager() {
       console.error("Error removing role:", error);
       setError("Error al eliminar el rol");
     } finally {
-      setActionLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -174,7 +198,7 @@ export default function UserRoleManager() {
             </div>
             
             {getAvailableRoles().length > 0 && (
-              <Dialog open={showAddRoleDialog} onOpenChange={setShowAddRoleDialog}>
+              <Dialog open={showAddRoleModal} onOpenChange={setShowAddRoleModal}>
                 <DialogTrigger asChild>
                   <Button className="bg-emerald-600 hover:bg-emerald-700" size="sm">
                     <Plus className="h-4 w-4 mr-2" />
@@ -211,17 +235,17 @@ export default function UserRoleManager() {
                   <DialogFooter>
                     <Button 
                       variant="outline" 
-                      onClick={() => setShowAddRoleDialog(false)}
-                      disabled={actionLoading}
+                      onClick={() => setShowAddRoleModal(false)}
+                      disabled={submitting}
                     >
                       Cancelar
                     </Button>
                     <Button 
                       onClick={handleAddRole} 
-                      disabled={!newRoleType || actionLoading}
+                      disabled={!newRoleType || submitting}
                       className="bg-emerald-600 hover:bg-emerald-700"
                     >
-                      {actionLoading ? "Agregando..." : "Agregar Rol"}
+                      {submitting ? "Agregando..." : "Agregar Rol"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -231,11 +255,25 @@ export default function UserRoleManager() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Messages */}
-          {(error || message) && (
-            <Alert className={error ? "border-red-200 bg-red-50" : "border-emerald-200 bg-emerald-50"}>
-              <AlertDescription className={error ? "text-red-800" : "text-emerald-800"}>
-                {error || message}
+          {/* Email Configuration Status */}
+          <EmailConfigurationStatus />
+
+          {/* Success/Error Messages */}
+          {(error || successMessage) && (
+            <Alert className={`border-2 ${
+              error 
+                ? "border-red-200 bg-red-50" 
+                : "border-green-200 bg-green-50"
+            }`}>
+              <AlertDescription className={`font-medium ${
+                error ? "text-red-800" : "text-green-800"
+              }`}>
+                {error || successMessage}
+                {successMessage && successMessage.includes("verificación") && (
+                  <div className="mt-2 text-sm text-green-700">
+                    💡 Si no recibes el email en unos minutos, revisa tu carpeta de spam.
+                  </div>
+                )}
               </AlertDescription>
             </Alert>
           )}
@@ -307,7 +345,7 @@ export default function UserRoleManager() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleActivateRole(role.role_type)}
-                            disabled={actionLoading}
+                            disabled={submitting}
                             className="bg-transparent hover:bg-emerald-50"
                           >
                             Activar
@@ -325,7 +363,7 @@ export default function UserRoleManager() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveRole(role.role_type)}
-                          disabled={actionLoading || (userRoles.filter(r => r.is_verified).length <= 1 && role.is_verified)}
+                          disabled={submitting || (userRoles.filter(r => r.is_verified).length <= 1 && role.is_verified)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -363,7 +401,7 @@ export default function UserRoleManager() {
                       variant={role.is_active ? "default" : "outline"}
                       size="sm"
                       onClick={() => !role.is_active && handleActivateRole(role.role_type)}
-                      disabled={role.is_active || actionLoading}
+                      disabled={role.is_active || submitting}
                       className={role.is_active 
                         ? "bg-emerald-600 hover:bg-emerald-700" 
                         : "bg-transparent hover:bg-emerald-50"
