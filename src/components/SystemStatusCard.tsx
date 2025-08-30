@@ -14,11 +14,13 @@ import {
   RefreshCw,
   AlertTriangle,
   Settings,
-  Code
+  Code,
+  Send
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import SupabaseEmailService from "@/services/SupabaseEmailService";
+import ResendKeyTester from "./ResendKeyTester";
 
 interface SystemCheck {
   id: string;
@@ -405,6 +407,15 @@ export default function SystemStatusCard() {
               Email Templates
             </a>
           </Button>
+        </div>
+
+        {/* Resend API Diagnostics */}
+        <div className="pt-4 border-t border-neutral-200">
+          <h4 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+            <Send className="h-4 w-4" />
+            Diagnóstico de Resend API
+          </h4>
+          <ResendKeyTester />
         </div>
       </CardContent>
     </Card>
