@@ -35,15 +35,30 @@ export default function UserRoleManager() {
       setLoading(true);
       setError("");
       
+      console.log('🔄 Frontend: Loading user roles...');
       const roles = await SupabaseUserRoleService.getUserRoles(user.id);
       setUserRoles(roles);
       
       const activeRole = await SupabaseUserRoleService.getActiveRole(user.id);
       setCurrentRole(activeRole);
 
+      console.log('✅ Frontend: Roles loaded successfully:', roles.length);
+
     } catch (err) {
-      console.error("Error loading user roles:", err);
-      setError("Error al cargar los roles del usuario");
+      console.error("❌ Frontend: Error loading user roles:", err);
+      
+      // Manejo más específico de errores
+      if (err instanceof Error) {
+        if (err.message.includes('fetch')) {
+          setError("Error de conexión. Verifica tu conexión a internet.");
+        } else if (err.message.includes('401') || err.message.includes('403')) {
+          setError("Sesión expirada. Por favor inicia sesión nuevamente.");
+        } else {
+          setError(`Error al cargar roles: ${err.message}`);
+        }
+      } else {
+        setError("Error al cargar los roles del usuario");
+      }
     } finally {
       setLoading(false);
     }
@@ -62,7 +77,10 @@ export default function UserRoleManager() {
         role_specific_data: {}
       };
 
+      console.log('🔄 Frontend: Calling addRole service...');
       const result = await SupabaseUserRoleService.addRole(user.id, request);
+      
+      console.log('📡 Frontend: Service response:', result);
       
       if (result.success) {
         setSuccessMessage(result.message);
@@ -72,12 +90,25 @@ export default function UserRoleManager() {
         // Recargar roles después de agregar
         await loadUserRoles();
       } else {
-        setError(result.message);
+        // Mostrar el mensaje de error específico de la API
+        setError(result.message || "Error al agregar el rol");
       }
 
     } catch (err) {
-      console.error("Error adding role:", err);
-      setError("Error al agregar el rol. Por favor inténtalo de nuevo.");
+      console.error("❌ Frontend: Error adding role:", err);
+      
+      // Mostrar error más específico basado en el tipo de error
+      if (err instanceof Error) {
+        if (err.message.includes('fetch')) {
+          setError("Error de conexión con el servidor. Verifica tu conexión a internet.");
+        } else if (err.message.includes('401') || err.message.includes('403')) {
+          setError("Error de autorización. Verifica tu sesión e intenta nuevamente.");
+        } else {
+          setError(`Error: ${err.message}`);
+        }
+      } else {
+        setError("Error inesperado al agregar el rol. Por favor inténtalo de nuevo.");
+      }
     } finally {
       setSubmitting(false);
     }
