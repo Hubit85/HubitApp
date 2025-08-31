@@ -46,7 +46,7 @@ export default function UserRoleManager() {
       console.log('🔄 Frontend: Loading user roles...');
       
       // Esperar un poco para que la sincronización automática del contexto termine
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       const roles = await SupabaseUserRoleService.getUserRoles(user.id);
       setUserRoles(roles);
@@ -56,14 +56,29 @@ export default function UserRoleManager() {
 
       console.log('✅ Frontend: Roles loaded successfully:', roles.length);
       
-      // Si no hay roles pero hay user_type en profile, mostrar mensaje informativo
-      if (roles.length === 0 && profile?.user_type) {
-        setSuccessMessage(`🔄 Sistema sincronizando tu rol "${profile.user_type}"... Recargando automáticamente.`);
+      // Mensaje de éxito cuando los roles se han cargado correctamente
+      if (roles.length > 0) {
+        const verifiedRoles = roles.filter(r => r.is_verified);
+        const pendingRoles = roles.filter(r => !r.is_verified);
         
-        // Recargar después de un momento para permitir que la sincronización termine
+        if (verifiedRoles.length > 0 && pendingRoles.length === 0) {
+          setSuccessMessage(`✅ Roles cargados correctamente. Tienes ${verifiedRoles.length} rol(es) verificado(s).`);
+        } else if (pendingRoles.length > 0) {
+          setSuccessMessage(`🔄 ${verifiedRoles.length} rol(es) verificado(s), ${pendingRoles.length} pendiente(s) de verificación.`);
+        }
+        
+        // Limpiar mensaje después de unos segundos
         setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+          setSuccessMessage("");
+        }, 5000);
+      } else if (profile?.user_type) {
+        // Solo mostrar mensaje de sincronización si realmente no hay roles
+        setSuccessMessage(`🔄 Sincronizando tu rol "${profile.user_type}"... Un momento.`);
+        
+        // Intentar recargar después de un momento
+        setTimeout(() => {
+          loadUserRoles();
+        }, 3000);
       }
 
     } catch (err) {
