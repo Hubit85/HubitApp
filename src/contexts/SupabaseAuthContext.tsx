@@ -31,8 +31,8 @@ const diagnoseConnectivityIssues = async () => {
   
   // 1. Verificar configuración básica
   try {
-    const url = supabase.supabaseUrl;
-    const key = supabase.supabaseKey;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     if (!url || url === 'invalid_supabase_url' || url.includes('invalid')) {
       issues.push("Invalid Supabase URL configuration");
@@ -43,8 +43,8 @@ const diagnoseConnectivityIssues = async () => {
     }
     
     console.log("📍 Supabase config check:", { 
-      hasValidUrl: url && !url.includes('invalid'),
-      hasValidKey: key && !key.includes('invalid'),
+      hasValidUrl: !!(url && !url.includes('invalid')),
+      hasValidKey: !!(key && !key.includes('invalid')),
       urlPreview: url ? url.substring(0, 30) + '...' : 'missing'
     });
     
@@ -67,7 +67,7 @@ const diagnoseConnectivityIssues = async () => {
   
   // 3. Test específico de Supabase con múltiples métodos
   try {
-    const supabaseUrl = supabase.supabaseUrl;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     
     // Método 1: Ping directo al dominio
     if (supabaseUrl && !supabaseUrl.includes('invalid')) {
@@ -92,7 +92,7 @@ const diagnoseConnectivityIssues = async () => {
 };
 
 // Función para intentar reconectar con Supabase
-const attemptReconnection = async (maxAttempts = 3) => {
+const attemptReconnection = async (setDatabaseConnected: (connected: boolean) => void, maxAttempts = 3) => {
   console.log("🔄 Attempting Supabase reconnection...");
   
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -255,7 +255,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             // Si es el primer intento de fetch fallido, intentar reconexión
             if (attempt === 1) {
               console.log("🔄 Attempting automatic reconnection...");
-              const reconnected = await attemptReconnection(2);
+              const reconnected = await attemptReconnection(setDatabaseConnected, 2);
               if (reconnected) {
                 continue; // Retry the connection check
               }
