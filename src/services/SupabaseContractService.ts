@@ -14,7 +14,7 @@ import { SupabaseBudgetService } from "./SupabaseBudgetService";
 
 type ContractWithProfiles = Contract & {
   clients: Pick<Profile, 'id' | 'full_name' | 'email' | 'phone'>;
-  providers: Pick<ServiceProvider, 'id' | 'company_name' | 'email' | 'phone'>;
+  providers: Pick<ServiceProvider, 'id' | 'company_name'>;
 };
 
 export class SupabaseContractService {
@@ -261,8 +261,12 @@ export class SupabaseContractService {
   }
 
   static async startWorkSession(contractId: string, description?: string): Promise<WorkSession> {
+    // Get the contract to extract service_provider_id
+    const contract = await this.getContract(contractId);
+    
     return this.createWorkSession({
       contract_id: contractId,
+      service_provider_id: contract.service_provider_id,
       start_time: new Date().toISOString(),
       end_time: new Date().toISOString(),
       description: description || "Work session started"
@@ -448,10 +452,10 @@ export class SupabaseContractService {
     return `CON-${timestamp}-${random}`;
   }
 
-  static async getServiceProviderInfo(providerId: string): Promise<ServiceProvider | null> {
+  static async getServiceProviderInfo(providerId: string): Promise<Pick<ServiceProvider, 'id' | 'company_name'> | null> {
     const { data, error } = await supabase
       .from("service_providers")
-      .select("id, user_id, company_name")
+      .select("id, company_name")
       .eq("user_id", providerId)
       .single();
 
@@ -462,7 +466,10 @@ export class SupabaseContractService {
       throw new Error(error.message);
     }
 
-    return data;
+    return {
+      id: data.id,
+      company_name: data.company_name
+    };
   }
 }
 

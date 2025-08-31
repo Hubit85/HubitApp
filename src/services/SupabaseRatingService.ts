@@ -303,12 +303,15 @@ export class SupabaseRatingService {
 
     // Group by week and calculate trends
     const trends = (data || []).reduce((acc, rating) => {
-      const week = new Date(rating.created_at).toISOString().substring(0, 10);
-      if (!acc[week]) {
-        acc[week] = { ratings: [], count: 0 };
+      // Add null check for created_at
+      if (rating.created_at) {
+        const week = new Date(rating.created_at).toISOString().substring(0, 10);
+        if (!acc[week]) {
+          acc[week] = { ratings: [], count: 0 };
+        }
+        acc[week].ratings.push(rating.rating);
+        acc[week].count++;
       }
-      acc[week].ratings.push(rating.rating);
-      acc[week].count++;
       return acc;
     }, {} as { [key: string]: { ratings: number[], count: number } });
 
