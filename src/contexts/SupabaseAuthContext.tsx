@@ -87,11 +87,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       try {
         console.log(`🔗 Database connection attempt ${attempt}/${retries}`);
         
-        // Test with a simple query that doesn't require auth
+        // Intentar una consulta simple que no requiere autenticación
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos timeout
+        
         const { data, error } = await supabase
           .from("service_categories")
           .select("id")
-          .limit(1);
+          .limit(1)
+          .abortSignal(controller.signal);
+
+        clearTimeout(timeoutId);
 
         if (!error && data !== null) {
           console.log("✅ Database connection successful");
@@ -101,21 +107,36 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         
         if (error) {
           console.warn(`⚠️ Database connection attempt ${attempt} failed:`, error.message);
+          
+          // Si es un error de red, puede ser temporal
+          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            console.log(`🔄 Network error detected, will retry...`);
+          } else if (error.message.includes('PGRST116')) {
+            console.warn("📋 Table 'service_categories' doesn't exist - database needs setup");
+            setDatabaseConnected(false);
+            return false;
+          }
         }
         
       } catch (error) {
-        console.warn(`🔄 Connection attempt ${attempt} failed:`, error);
+        console.warn(`🔄 Connection attempt ${attempt} exception:`, error);
+        
+        // Manejar timeout específicamente
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.warn(`⏱️ Connection attempt ${attempt} timed out`);
+        }
         
         // Si es el último intento, marcar como desconectado
         if (attempt === retries) {
-          console.warn("⚠️ Database tables not configured yet. Please run the setup script in Supabase SQL Editor.");
-          console.warn("📋 Check docs/complete-database-setup.sql for the required SQL commands.");
+          console.warn("⚠️ Database connection failed after all retries");
           setDatabaseConnected(false);
           return false;
         }
         
         // Esperar antes del siguiente intento (backoff exponencial)
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        const delayMs = Math.min(Math.pow(2, attempt) * 1000, 5000); // Max 5 segundos
+        console.log(`⏸️ Waiting ${delayMs}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
       }
     }
     
@@ -125,14 +146,14 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserData = async (userId: string, userObject: User, retries = 2) => {
     try {
-      console.log("🔄 Fetching user data with retry logic...");
+      console.log("🔄 Fetching user data with enhanced error handling...");
       
-      // First check database connection with a non-auth query
-      const isConnected = await checkDatabaseConnection();
+      // Verificar conectividad de base de datos con timeout más corto
+      const isConnected = await checkDatabaseConnection(2);
       
       if (!isConnected) {
-        console.log("📱 Creating temporary profile - database offline");
-        // Create a temporary profile from user data
+        console.log("📱 Database offline - creating temporary profile");
+        // Crear perfil temporal desde datos del usuario
         const tempProfile: Profile = {
           id: userId,
           email: userObject.email || '',
@@ -161,21 +182,28 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Wait a moment for auth session to be fully established
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Aguardar un momento para que la sesión de auth se establezca completamente
+      await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Fetch profile with retry logic - using authenticated queries
+      // Obtener perfil con lógica de reintentos mejorada
       let profileData: Profile | null = null;
       
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
           console.log(`🔍 Profile fetch attempt ${attempt}/${retries} for user ID: ${userId}`);
           
+          // Crear timeout controller para cada intento
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 segundos timeout
+          
           const { data: profilesData, error: profileError } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", userId)
+            .abortSignal(controller.signal)
             .single();
+
+          clearTimeout(timeoutId);
 
           if (!profileError && profilesData) {
             profileData = profilesData;
@@ -186,33 +214,47 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           if (profileError) {
             console.warn(`Profile fetch attempt ${attempt} failed:`, profileError.message);
             
-            // If it's an auth error, stop trying
-            if (profileError.message.includes('JWT') || profileError.message.includes('Invalid API key')) {
-              console.error("Authentication error detected, stopping profile fetch");
+            // Errores que no vale la pena reintentar
+            if (profileError.message.includes('JWT') || 
+                profileError.message.includes('Invalid API key') ||
+                profileError.message.includes('invalid_api_key')) {
+              console.error("🔑 Authentication error detected, stopping profile fetch");
               break;
+            }
+            
+            // Para errores de red, continuar reintentando
+            if (attempt < retries && 
+                (profileError.message.includes('Failed to fetch') || 
+                 profileError.message.includes('NetworkError'))) {
+              console.log(`🔄 Network error, will retry in ${attempt * 1000}ms...`);
+              await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+              continue;
             }
             
             if (attempt === retries) {
               console.error("All profile fetch attempts failed, will create new profile");
-            } else {
-              // Esperar antes del siguiente intento
-              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
             }
           }
           
-        } catch (fetchError) {
-          console.warn(`Profile fetch attempt ${attempt} exception:`, fetchError);
+        } catch (fetchException) {
+          console.warn(`Profile fetch attempt ${attempt} exception:`, fetchException);
           
-          if (attempt === retries) {
-            console.error("All profile fetch attempts failed with exceptions");
+          // Manejar timeout específicamente
+          if (fetchException instanceof Error && fetchException.name === 'AbortError') {
+            console.warn(`⏱️ Profile fetch attempt ${attempt} timed out`);
+          }
+          
+          if (attempt < retries) {
+            console.log(`🔄 Exception occurred, will retry in ${attempt * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
           } else {
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            console.error("All profile fetch attempts failed with exceptions");
           }
         }
       }
 
       if (!profileData) {
-        // Profile doesn't exist, create one from user metadata
+        // El perfil no existe, crear uno desde metadatos del usuario
         console.log("📝 No profile found, creating from user metadata");
         
         const newProfileData: ProfileInsert = {
@@ -228,11 +270,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         };
 
         try {
+          // Intentar crear el perfil con timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+
           const { data: createdProfile, error: createError } = await supabase
             .from("profiles")
             .insert(newProfileData)
             .select()
+            .abortSignal(controller.signal)
             .single();
+
+          clearTimeout(timeoutId);
 
           if (createError) {
             console.error("Profile creation failed:", createError);
@@ -256,7 +305,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           }
         } catch (createException) {
           console.error("Profile creation exception:", createException);
-          // Fallback a perfil temporal
+          // Crear perfil temporal como último recurso
           profileData = {
             ...newProfileData,
             address: null,
@@ -275,11 +324,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
       setProfile(profileData);
 
-      // Fetch roles with retry logic - only after successful profile fetch
+      // Cargar roles con manejo de errores mejorado
       try {
-        console.log("🎭 Loading user roles...");
-        // Give a bit more time for the session to stabilize
-        await new Promise(resolve => setTimeout(resolve, 200));
+        console.log("🎭 Loading user roles with enhanced error handling...");
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
         
@@ -288,32 +336,43 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           console.log(`🔄 No roles found but user_type is "${profileData.user_type}". Creating missing role...`);
           
           try {
+            // Crear rol con timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
             const { error: createRoleError } = await supabase
               .from('user_roles')
               .insert({
                 user_id: userId,
                 role_type: profileData.user_type,
                 is_active: true,
-                is_verified: true, // Auto-verified since it comes from existing profile
+                is_verified: true, // Auto-verificado al venir de perfil existente
                 verification_confirmed_at: new Date().toISOString(),
                 role_specific_data: {}
-              });
+              })
+              .abortSignal(controller.signal);
+
+            clearTimeout(timeoutId);
 
             if (createRoleError) {
               console.error("❌ Error creating missing role:", createRoleError);
             } else {
               console.log(`✅ Successfully created missing "${profileData.user_type}" role`);
               
-              // Reload roles after creating the missing one
-              const updatedRoles = await SupabaseUserRoleService.getUserRoles(userId);
-              setUserRoles(updatedRoles);
-              
-              // Set the newly created role as active
-              const activeRoleData = updatedRoles.find(r => r.is_active) || null;
-              setActiveRole(activeRoleData);
-              
-              console.log("✅ Roles synchronized successfully");
-              return; // Exit early since we've already set the roles
+              // Recargar roles después de crear el faltante
+              try {
+                const updatedRoles = await SupabaseUserRoleService.getUserRoles(userId);
+                setUserRoles(updatedRoles);
+                
+                // Establecer el rol recién creado como activo
+                const activeRoleData = updatedRoles.find(r => r.is_active) || null;
+                setActiveRole(activeRoleData);
+                
+                console.log("✅ Roles synchronized successfully");
+                return; // Salir temprano ya que hemos establecido los roles
+              } catch (reloadError) {
+                console.warn("⚠️ Could not reload roles after creation:", reloadError);
+              }
             }
           } catch (syncError) {
             console.error("❌ Error in role synchronization:", syncError);
@@ -322,20 +381,26 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         
         setUserRoles(rolesResult);
         
-        // Set active role
+        // Establecer rol activo
         const activeRoleData = rolesResult.find(r => r.is_active) || null;
         setActiveRole(activeRoleData);
         console.log("✅ User roles loaded successfully:", rolesResult.length, "roles found");
-      } catch (error) {
-        console.error("❌ Frontend: Error loading user roles:", error);
+      } catch (rolesError) {
+        console.error("❌ Error loading user roles:", rolesError);
         setUserRoles([]);
         setActiveRole(null);
+        
+        // Si hay errores de red, no fallar completamente
+        if (rolesError instanceof Error && 
+            (rolesError.message.includes('Failed to fetch') || rolesError.message.includes('NetworkError'))) {
+          console.warn("🌐 Network error loading roles, continuing with empty roles");
+        }
       }
 
     } catch (error) {
       console.error("❌ Critical error in fetchUserData:", error);
       
-      // Create emergency fallback profile
+      // Crear perfil de emergencia
       const emergencyProfile: Profile = {
         id: userId,
         email: userObject.email || '',
