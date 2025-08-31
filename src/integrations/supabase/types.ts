@@ -1321,6 +1321,50 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          role_specific_data: Json | null
+          role_type: string
+          updated_at: string | null
+          user_id: string
+          verification_expires_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          role_specific_data?: Json | null
+          role_type: string
+          updated_at?: string | null
+          user_id: string
+          verification_expires_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          role_specific_data?: Json | null
+          role_type?: string
+          updated_at?: string | null
+          user_id?: string
+          verification_expires_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1419,3 +1463,60 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
     ? Database["public"]["Enums"][PublicEnumNameOrOptions]
     : never
+
+// Convenient type exports that services expect
+export type Profile = Tables<'profiles'>
+export type ProfileInsert = TablesInsert<'profiles'>
+export type ProfileUpdate = TablesUpdate<'profiles'>
+
+export type Property = Tables<'properties'>
+export type PropertyInsert = TablesInsert<'properties'>
+export type PropertyUpdate = TablesUpdate<'properties'>
+
+export type BudgetRequest = Tables<'budget_requests'>
+export type BudgetRequestInsert = TablesInsert<'budget_requests'>
+export type BudgetRequestUpdate = TablesUpdate<'budget_requests'>
+
+export type Quote = Tables<'quotes'>
+export type QuoteInsert = TablesInsert<'quotes'>
+export type QuoteUpdate = TablesUpdate<'quotes'>
+
+export type Contract = Tables<'contracts'>
+export type ContractInsert = TablesInsert<'contracts'>
+export type ContractUpdate = TablesUpdate<'contracts'>
+
+export type WorkSession = Tables<'work_sessions'>
+export type WorkSessionInsert = TablesInsert<'work_sessions'>
+export type WorkSessionUpdate = TablesUpdate<'work_sessions'>
+
+export type ServiceProvider = Tables<'service_providers'>
+export type ServiceProviderInsert = TablesInsert<'service_providers'>
+export type ServiceProviderUpdate = TablesUpdate<'service_providers'>
+
+export type Conversation = Tables<'conversations'>
+export type ConversationInsert = TablesInsert<'conversations'>
+export type ConversationUpdate = TablesUpdate<'conversations'>
+
+export type Message = Tables<'messages'>
+export type MessageInsert = TablesInsert<'messages'>
+export type MessageUpdate = TablesUpdate<'messages'>
+
+export type Document = Tables<'documents'>
+export type DocumentInsert = TablesInsert<'documents'>
+export type DocumentUpdate = TablesUpdate<'documents'>
+
+export type Notification = Tables<'notifications'>
+export type NotificationInsert = TablesInsert<'notifications'>
+export type NotificationUpdate = TablesUpdate<'notifications'>
+
+export type Rating = Tables<'ratings'>
+export type RatingInsert = TablesInsert<'ratings'>
+export type RatingUpdate = TablesUpdate<'ratings'>
+
+export type ServiceCategory = Tables<'service_categories'>
+export type ServiceCategoryInsert = TablesInsert<'service_categories'>
+export type ServiceCategoryUpdate = TablesUpdate<'service_categories'>
+
+export type UserRole = Tables<'user_roles'>
+export type UserRoleInsert = TablesInsert<'user_roles'>
+export type UserRoleUpdate = TablesUpdate<'user_roles'>
