@@ -412,7 +412,7 @@ export class SupabaseContractService {
   static async createContractFromQuote(quote: any) {
     try {
       const clientId = quote.user_id || quote.client_id;
-      const contractNumber = this.generateContractNumber();
+      const contractNumber = `CON-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       
       const contractData: ContractInsert = {
         quote_id: quote.id,
