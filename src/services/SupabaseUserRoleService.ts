@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UserRole {
@@ -532,20 +531,11 @@ export class SupabaseUserRoleService {
     ];
   }
 
-  static async addUserRole(userId: string, roleType: string, roleData?: any) {
+  static async addUserRole(userId: string, roleType: UserRole['role_type'], roleData?: any) {
     try {
-      // Ensure roleType is one of the valid values
-      const validRoles: UserRole['role_type'][] = ['service_provider', 'particular', 'community_member', 'property_administrator'];
-      
-      if (!validRoles.includes(roleType as UserRole['role_type'])) {
-        return { success: false, error: `Invalid role type: ${roleType}` };
-      }
-
-      const roleTypeTyped = roleType as UserRole['role_type'];
-
       const roleRecord = {
         user_id: userId,
-        role_type: roleTypeTyped,
+        role_type: roleType,
         is_verified: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -567,16 +557,8 @@ export class SupabaseUserRoleService {
     }
   }
 
-  static async verifyUserRole(userId: string, roleType: string) {
+  static async verifyUserRole(userId: string, roleType: UserRole['role_type']) {
     try {
-      const validRoles: UserRole['role_type'][] = ['service_provider', 'particular', 'community_member', 'property_administrator'];
-      
-      if (!validRoles.includes(roleType as UserRole['role_type'])) {
-        return { success: false, error: `Invalid role type: ${roleType}` };
-      }
-
-      const roleTypeTyped = roleType as UserRole['role_type'];
-
       const { data, error } = await supabase
         .from("user_roles")
         .update({ 
@@ -584,7 +566,7 @@ export class SupabaseUserRoleService {
           updated_at: new Date().toISOString()
         })
         .eq("user_id", userId)
-        .eq("role_type", roleTypeTyped)
+        .eq("role_type", roleType)
         .select()
         .single();
 

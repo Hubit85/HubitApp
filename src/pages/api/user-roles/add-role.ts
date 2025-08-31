@@ -1,9 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import supabaseServer from '@/lib/supabaseServer';
 
+type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
+
 interface AddRoleRequestBody {
   userId: string;
-  roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
+  roleType: RoleType;
   roleSpecificData?: Record<string, any>;
 }
 
@@ -39,13 +41,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const validRoles = ['particular', 'community_member', 'service_provider', 'property_administrator'];
-    if (!validRoles.includes(roleType)) {
+    const validRoles: RoleType[] = ['particular', 'community_member', 'service_provider', 'property_administrator'];
+    if (!validRoles.includes(roleType as RoleType)) {
       return res.status(400).json({
         success: false,
         message: `Tipo de rol inválido. Debe ser uno de: ${validRoles.join(', ')}`
       });
     }
+
+    // Ensure roleType is properly typed
+    const typedRoleType = roleType as RoleType;
 
     // Verificar si el usuario existe
     const { data: userProfile, error: userError } = await supabaseServer
@@ -73,7 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('user_roles')
       .select('id, is_verified, role_type')
       .eq('user_id', userId)
-      .eq('role_type', roleType)
+      .eq('role_type', typedRoleType)
       .maybeSingle();
 
     if (checkError) {
@@ -84,7 +89,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (existingRole) {
-      const roleDisplayName = getRoleDisplayName(roleType);
+      const roleDisplayName = getRoleDisplayName(typedRoleType);
       
       if (existingRole.is_verified) {
         return res.status(400).json({
@@ -108,7 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('user_roles')
       .insert({
         user_id: userId,
-        role_type: roleType,
+        role_type: typedRoleType,
         is_active: false,
         is_verified: false,
         verification_token: verificationToken,
@@ -135,7 +140,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://hubit-84-supabase-email-templates.softgen.ai';
         const verificationUrl = `${SITE_URL}/auth/verify-role?token=${verificationToken}`;
-        const roleDisplayName = getRoleDisplayName(roleType);
+        const roleDisplayName = getRoleDisplayName(typedRoleType);
         const currentYear = new Date().getFullYear();
 
         const emailHtml = `
@@ -213,7 +218,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       emailErrorMessage = 'Configuración de email no disponible';
     }
 
-    const roleDisplayName = getRoleDisplayName(roleType);
+    const roleDisplayName = getRoleDisplayName(typedRoleType);
     
     if (emailSent) {
       return res.status(200).json({
@@ -239,14 +244,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-function getRoleDisplayName(roleType: string): string {
-  const roleNames = {
+function getRoleDisplayName(roleType: RoleType): string {
+  const roleNames: Record<RoleType, string> = {
     'particular': 'Particular',
     'community_member': 'Miembro de Comunidad',
     'service_provider': 'Proveedor de Servicios',
     'property_administrator': 'Administrador de Fincas'
   };
-  return roleNames[roleType as keyof typeof roleNames] || roleType;
+  return roleNames[roleType] || roleType;
 }
 
 function generateVerificationToken(): string {
