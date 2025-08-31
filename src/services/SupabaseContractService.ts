@@ -408,34 +408,25 @@ export class SupabaseContractService {
     return { success: false, error: "Time logging not available" };
   }
 
-  // Fix the createContractFromQuote method to use correct status type casting
+  // Fix the createContractFromQuote method to use the createContract method properly
   static async createContractFromQuote(quote: any) {
     try {
       const clientId = quote.user_id || quote.client_id;
       const contractNumber = this.generateContractNumber();
       
-      const contractData = {
+      const contractData: ContractInsert = {
         quote_id: quote.id,
         user_id: clientId,
         service_provider_id: quote.service_provider_id,
         contract_number: contractNumber,
-        status: "pending",
         total_amount: quote.amount,
         work_description: quote.description,
-        payment_schedule: quote.payment_terms || "Net 30",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        payment_schedule: quote.payment_terms || "Net 30"
       };
 
-      const { data, error } = await supabase
-        .from("contracts")
-        .insert(contractData)
-        .select()
-        .single();
+      const contract = await this.createContract(contractData);
 
-      if (error) throw error;
-
-      return { success: true, contract: data };
+      return { success: true, contract };
     } catch (error: any) {
       console.error("Error creating contract:", error);
       return { success: false, error: error.message };

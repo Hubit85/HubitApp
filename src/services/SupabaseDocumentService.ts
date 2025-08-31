@@ -199,8 +199,7 @@ export class SupabaseDocumentService {
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
     // Create appropriate folder name based on document type
-    const docType = documentData.document_type;
-    const folderMap: Record<string, string> = {
+    const folderMap = {
       "contract": "contracts",
       "invoice": "invoices", 
       "receipt": "receipts",
@@ -213,7 +212,7 @@ export class SupabaseDocumentService {
       "other": "documents"
     };
     
-    const folder = folderMap[docType] || "documents";
+    const folder = folderMap[documentData.document_type as keyof typeof folderMap] || "documents";
     const filePath = await this.uploadFile(file, folder);
     
     // Create document record
@@ -234,9 +233,8 @@ export class SupabaseDocumentService {
       await this.deleteFileFromStorage(document.file_path);
     }
 
-    // Create appropriate folder name based on document type
-    const docType = document.document_type;
-    const folderMap: Record<string, string> = {
+    // Create appropriate folder name based on related entity type
+    const folderMap = {
       "contract": "contracts",
       "invoice": "invoices",
       "receipt": "receipts", 
@@ -246,10 +244,14 @@ export class SupabaseDocumentService {
       "photo": "photos",
       "blueprint": "blueprints",
       "permit": "permits",
-      "other": "documents"
+      "other": "documents",
+      "budget_request": "budget-requests",
+      "quote": "quotes",
+      "profile": "profiles",
+      "property": "properties"
     };
     
-    const folder = folderMap[docType] || "documents";
+    const folder = folderMap[document.related_entity_type as keyof typeof folderMap] || "documents";
     const newFilePath = await this.uploadFile(newFile, folder);
     
     // Update document record
