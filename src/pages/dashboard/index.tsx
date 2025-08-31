@@ -176,12 +176,22 @@ Si el problema persiste, por favor:
     }
   };
 
-  const getRoleOptions = () => [
-    { value: "particular", label: "Particular", icon: User },
-    { value: "community_member", label: "Miembro de la comunidad", icon: Users },
-    { value: "service_provider", label: "Proveedor de servicios", icon: Wrench },
-    { value: "property_administrator", label: "Administrador de fincas", icon: Building },
-  ];
+  const getRoleOptions = () => {
+    // Filtrar solo los roles que el usuario tiene verificados
+    const availableRoles = [
+      { value: "particular", label: "Particular", icon: User },
+      { value: "community_member", label: "Miembro de la comunidad", icon: Users },
+      { value: "service_provider", label: "Proveedor de servicios", icon: Wrench },
+      { value: "property_administrator", label: "Administrador de fincas", icon: Building },
+    ];
+
+    // Mostrar solo los roles que el usuario tiene verificados
+    return availableRoles.filter(roleOption => 
+      userRoles.some(userRole => 
+        userRole.role_type === roleOption.value && userRole.is_verified
+      )
+    );
+  };
 
   // Base navigation items that are common
   const baseNavItems = [
@@ -313,21 +323,41 @@ Si el problema persiste, por favor:
                   <SelectContent className="bg-gray-700 border-gray-600">
                     {getRoleOptions().map((role) => {
                       const RoleIcon = role.icon;
+                      const isCurrentRole = selectedRole === role.value;
                       return (
                         <SelectItem 
                           key={role.value} 
                           value={role.value}
-                          className="text-white hover:bg-gray-600 focus:bg-gray-600 transition-colors duration-200"
+                          className={`text-white transition-colors duration-200 ${
+                            isCurrentRole 
+                              ? "bg-gray-600 text-white focus:bg-gray-600" 
+                              : "hover:bg-gray-600 focus:bg-gray-600"
+                          }`}
                         >
                           <div className="flex items-center gap-2">
                             <RoleIcon className="h-4 w-4" />
                             <span>{role.label}</span>
+                            {isCurrentRole && <CheckCircle className="h-3 w-3 ml-1 text-green-400" />}
                           </div>
                         </SelectItem>
                       );
                     })}
                   </SelectContent>
                 </Select>
+                
+                {/* Mostrar información sobre roles disponibles */}
+                {getRoleOptions().length > 1 && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    {getRoleOptions().length} roles disponibles
+                  </p>
+                )}
+                
+                {/* Mostrar si no hay otros roles disponibles */}
+                {getRoleOptions().length <= 1 && userRoles.length > 1 && (
+                  <p className="text-xs text-amber-400 mt-1">
+                    Otros roles pendientes de verificación
+                  </p>
+                )}
               </div>
             </div>
 
