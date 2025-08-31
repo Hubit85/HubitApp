@@ -198,7 +198,7 @@ export class SupabaseDocumentService {
     file: File,
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
-    // Create appropriate folder name based on document type
+    // Create appropriate folder name based on document type with explicit casting
     const folderMap = {
       "contract": "contracts",
       "invoice": "invoices", 
@@ -233,7 +233,7 @@ export class SupabaseDocumentService {
       await this.deleteFileFromStorage(document.file_path);
     }
 
-    // Create appropriate folder name based on related entity type
+    // Create appropriate folder name based on related entity type with explicit casting
     const folderMap = {
       "contract": "contracts",
       "invoice": "invoices",
