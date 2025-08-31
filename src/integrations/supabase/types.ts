@@ -1417,6 +1417,67 @@ export interface Database {
           }
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_verified: boolean
+          role_specific_data: Json | null
+          role_type: 
+            | "particular"
+            | "community_member"
+            | "service_provider"
+            | "property_administrator"
+          updated_at: string
+          user_id: string
+          verification_confirmed_at: string | null
+          verification_expires_at: string | null
+          verification_token: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          role_specific_data?: Json | null
+          role_type: 
+            | "particular"
+            | "community_member"
+            | "service_provider"
+            | "property_administrator"
+          updated_at?: string
+          user_id: string
+          verification_confirmed_at?: string | null
+          verification_expires_at?: string | null
+          verification_token?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          role_specific_data?: Json | null
+          role_type?: 
+            | "particular"
+            | "community_member"
+            | "service_provider"
+            | "property_administrator"
+          updated_at?: string
+          user_id?: string
+          verification_confirmed_at?: string | null
+          verification_expires_at?: string | null
+          verification_token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1499,6 +1560,11 @@ export interface Database {
       property_status: "active" | "inactive" | "maintenance"
       property_type: "residential" | "commercial" | "mixed"
       quote_status: "pending" | "accepted" | "rejected" | "expired" | "cancelled"
+      role_type:
+        | "particular"
+        | "community_member"
+        | "service_provider"
+        | "property_administrator"
       user_type:
         | "particular"
         | "community_member"
@@ -1578,3 +1644,7 @@ export type EmergencyRequestUpdate = Database["public"]["Tables"]["emergency_req
 export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
 export type NotificationInsert = Database["public"]["Tables"]["notifications"]["Insert"];
 export type NotificationUpdate = Database["public"]["Tables"]["notifications"]["Update"];
+
+export type UserRole = Database["public"]["Tables"]["user_roles"]["Row"];
+export type UserRoleInsert = Database["public"]["Tables"]["user_roles"]["Insert"];
+export type UserRoleUpdate = Database["public"]["Tables"]["user_roles"]["Update"];
