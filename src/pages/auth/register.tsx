@@ -270,7 +270,7 @@ export default function RegisterPage() {
         full_name: formData.role === 'service_provider' || formData.role === 'property_administrator' 
           ? formData.company_name 
           : formData.full_name,
-        user_type: formData.role as string,
+        user_type: formData.role as "particular" | "community_member" | "service_provider" | "property_administrator",
         phone: formData.role === 'service_provider' || formData.role === 'property_administrator' 
           ? formData.business_phone 
           : formData.phone

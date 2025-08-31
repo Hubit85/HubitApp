@@ -418,10 +418,12 @@ export class SupabaseContractService {
         user_id: clientId,
         service_provider_id: quote.service_provider_id,
         contract_number: contractNumber,
-        status: "pending" as const,
+        status: "pending",
         total_amount: quote.amount,
         work_description: quote.description,
         payment_schedule: quote.payment_terms || "Net 30",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
       const { data, error } = await supabase
