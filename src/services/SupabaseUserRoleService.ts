@@ -1,18 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
 
-export interface UserRole {
-  id: string;
-  user_id: string;
-  role_type: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
-  is_active: boolean;
-  is_verified: boolean;
-  verification_token?: string | null;
-  verification_expires_at?: string | null;
-  verification_confirmed_at?: string | null;
-  role_specific_data: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
+import { supabase } from "@/integrations/supabase/client";
+import { UserRole, UserRoleInsert, UserRoleUpdate } from "@/integrations/supabase/types";
 
 export interface AddRoleRequest {
   role_type: UserRole['role_type'];
@@ -318,7 +306,7 @@ export class SupabaseUserRoleService {
         throw new Error(updateError.message);
       }
 
-      // Crear notificación de éxito
+      // Crear notificación de éxito con tipos correctos
       try {
         await supabase
           .from('notifications')
@@ -326,9 +314,9 @@ export class SupabaseUserRoleService {
             user_id: roleData.user_id,
             title: `¡Rol verificado correctamente!`,
             message: `Tu rol de ${this.getRoleDisplayName(roleData.role_type)} ha sido verificado y activado.`,
-            type: 'success',
-            category: 'role_verification',
-            is_read: false
+            type: 'success' as const,
+            category: 'system' as const,
+            read: false
           });
       } catch (notificationError) {
         console.warn('Could not create success notification:', notificationError);
@@ -533,12 +521,11 @@ export class SupabaseUserRoleService {
 
   static async addUserRole(userId: string, roleType: UserRole['role_type'], roleData?: any) {
     try {
-      const roleRecord = {
+      const roleRecord: UserRoleInsert = {
         user_id: userId,
         role_type: roleType,
         is_verified: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        is_active: false,
         role_specific_data: roleData || {}
       };
 
@@ -559,12 +546,14 @@ export class SupabaseUserRoleService {
 
   static async verifyUserRole(userId: string, roleType: UserRole['role_type']) {
     try {
+      const updateData: UserRoleUpdate = { 
+        is_verified: true,
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from("user_roles")
-        .update({ 
-          is_verified: true,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq("user_id", userId)
         .eq("role_type", roleType)
         .select()
@@ -579,3 +568,6 @@ export class SupabaseUserRoleService {
     }
   }
 }
+
+// Re-export UserRole type for convenience
+export { UserRole };
