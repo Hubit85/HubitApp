@@ -114,27 +114,6 @@ export function Header() {
           {/* Show additional navigation when in dashboard pages */}
           {isDashboardPage && (
             <>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-neutral-600 hover:text-neutral-900 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
-                asChild
-              >
-                <Link href="/email-templates">
-                  <Mail className="h-4 w-4" />
-                  <span className="hidden md:inline">Templates</span>
-                </Link>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-neutral-600 hover:text-neutral-900 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2"
-                onClick={() => window.open("https://supabase.com/dashboard/project/djkrzbmgzfwagmripozi", "_blank")}
-              >
-                <SettingsIcon className="h-4 w-4" />
-                <span className="hidden md:inline">Supabase</span>
-              </Button>
             </>
           )}
           
