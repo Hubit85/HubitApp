@@ -420,13 +420,18 @@ export class SupabaseConversationService {
   static async createQuoteConversation(
     userId: string,
     quoteId: string,
+    serviceProviderId: string,
     initialMessage?: string
   ): Promise<{ conversation: Conversation; message?: Message }> {
-    const conversation = await this.createConversation({
+    const conversationData: ConversationInsert = {
       user_id: userId,
-      related_entity_type: "quote",
-      related_entity_id: quoteId
-    });
+      service_provider_id: serviceProviderId,
+      quote_id: quoteId,
+      subject: `Conversación sobre presupuesto`,
+      is_active: true,
+    };
+
+    const conversation = await this.createConversation(conversationData);
 
     let message;
     if (initialMessage) {

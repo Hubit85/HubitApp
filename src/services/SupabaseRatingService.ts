@@ -10,7 +10,7 @@ import {
 } from "@/integrations/supabase/types";
 
 type RatingWithDetails = Rating & {
-  contracts: Pick<Contract, 'title' | 'id'>;
+  contracts: Pick<Contract, 'id' | 'user_id'>;
   profiles: Pick<Profile, 'full_name' | 'id'>;
   service_providers: Pick<ServiceProvider, 'company_name' | 'id'>;
 };
