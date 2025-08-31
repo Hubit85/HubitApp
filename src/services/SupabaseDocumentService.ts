@@ -236,15 +236,7 @@ export class SupabaseDocumentService {
     // Create appropriate folder name based on related entity type with correct enum casting
     const folderMap: Record<Database["public"]["Enums"]["document_related_entity_type"], string> = {
       "contract": "contracts",
-      "invoice": "invoices",
-      "receipt": "receipts", 
-      "certificate": "certificates",
-      "license": "licenses",
-      "insurance": "insurance",
-      "photo": "photos",
-      "blueprint": "blueprints",
-      "permit": "permits",
-      "other": "documents",
+      "invoice": "invoices", 
       "budget_request": "budget-requests",
       "quote": "quotes",
       "profile": "profiles",
