@@ -358,7 +358,7 @@ export class SupabaseContractService {
     }
 
     if (filters?.status) {
-      query = query.eq("status", filters.status);
+      query = query.eq("status", filters.status as Database["public"]["Enums"]["contract_status"]);
     }
 
     if (filters?.dateFrom) {

@@ -199,7 +199,7 @@ export class SupabaseDocumentService {
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
     // Create appropriate folder name based on document type with explicit casting
-    const folderMap = {
+    const folderMap: Record<Database["public"]["Enums"]["document_type"], string> = {
       "contract": "contracts",
       "invoice": "invoices", 
       "receipt": "receipts",
@@ -212,7 +212,7 @@ export class SupabaseDocumentService {
       "other": "documents"
     };
     
-    const folder = folderMap[documentData.document_type as keyof typeof folderMap] || "documents";
+    const folder = folderMap[documentData.document_type] || "documents";
     const filePath = await this.uploadFile(file, folder);
     
     // Create document record
@@ -234,7 +234,7 @@ export class SupabaseDocumentService {
     }
 
     // Create appropriate folder name based on related entity type with explicit casting
-    const folderMap = {
+    const folderMap: Record<Database["public"]["Enums"]["document_related_entity_type"], string> = {
       "contract": "contracts",
       "invoice": "invoices",
       "receipt": "receipts", 
@@ -251,7 +251,7 @@ export class SupabaseDocumentService {
       "property": "properties"
     };
     
-    const folder = folderMap[document.related_entity_type as keyof typeof folderMap] || "documents";
+    const folder = folderMap[document.related_entity_type] || "documents";
     const newFilePath = await this.uploadFile(newFile, folder);
     
     // Update document record
