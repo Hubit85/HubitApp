@@ -18,6 +18,15 @@ type BudgetRequestWithProperty = BudgetRequest & {
   properties: Pick<Property, 'name' | 'address'> | null;
 };
 
+const CATEGORIES = [
+  "cleaning", "plumbing", "electrical", "gardening", "painting", 
+  "maintenance", "security", "hvac", "carpentry", "emergency", "other"
+] as const;
+
+const STATUS_OPTIONS = [
+  "pending", "published", "in_progress", "completed", "cancelled", "expired"
+] as const;
+
 export default function BudgetRequestManager() {
   const { user } = useSupabaseAuth();
   const [requests, setRequests] = useState<BudgetRequestWithProperty[]>([]);
@@ -72,9 +81,9 @@ export default function BudgetRequestManager() {
       setCurrentRequest({
         title: "",
         description: "",
-        category: "",
+        category: "maintenance",
         property_id: "",
-        status: "open",
+        status: "pending",
         budget_range_min: null,
         budget_range_max: null,
       });
@@ -91,13 +100,19 @@ export default function BudgetRequestManager() {
         property_id: currentRequest.property_id || properties[0]?.id,
         title: currentRequest.title || '',
         description: currentRequest.description || '',
-        category: currentRequest.category || '',
+        category: currentRequest.category as typeof CATEGORIES[number] || 'maintenance',
       };
       
       let res;
       if (isEditing) {
-        const updateData: BudgetRequestUpdate = { ...requestData };
-        delete updateData.id;
+        const updateData: BudgetRequestUpdate = { 
+          title: requestData.title,
+          description: requestData.description,
+          category: requestData.category,
+          property_id: requestData.property_id,
+          budget_range_min: requestData.budget_range_min,
+          budget_range_max: requestData.budget_range_max
+        };
         res = await supabase.from("budget_requests").update(updateData).eq("id", currentRequest.id!);
       } else {
         const insertData: BudgetRequestInsert = { 
@@ -106,7 +121,7 @@ export default function BudgetRequestManager() {
           title: requestData.title,
           description: requestData.description,
           category: requestData.category,
-          status: 'open',
+          status: 'pending',
           budget_range_min: requestData.budget_range_min,
           budget_range_max: requestData.budget_range_max
         };
@@ -130,6 +145,21 @@ export default function BudgetRequestManager() {
       await fetchData();
     } catch (err: any) {
       setError(err.message);
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'default';
+      case 'published':
+        return 'secondary';
+      case 'in_progress':
+        return 'secondary';
+      case 'completed':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
@@ -158,7 +188,7 @@ export default function BudgetRequestManager() {
                     <h3 className="font-semibold">{req.title}</h3>
                     <p className="text-sm text-muted-foreground">{req.properties?.name || 'Propiedad no especificada'}</p>
                     <p className="text-sm">{req.description}</p>
-                    <Badge variant={req.status === 'open' ? 'default' : 'secondary'} className="mt-2">{req.status}</Badge>
+                    <Badge variant={getStatusBadgeVariant(req.status)} className="mt-2">{req.status}</Badge>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleOpenDialog(req)}><Edit className="h-4 w-4" /></Button>
@@ -207,7 +237,18 @@ export default function BudgetRequestManager() {
             </div>
              <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="category" className="text-right">Categoría</Label>
-              <Input id="category" value={currentRequest.category || ''} onChange={(e) => setCurrentRequest({...currentRequest, category: e.target.value})} className="col-span-3" />
+              <Select value={currentRequest.category || undefined} onValueChange={(value) => setCurrentRequest({...currentRequest, category: value as typeof CATEGORIES[number]})}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecciona una categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
