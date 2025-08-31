@@ -282,6 +282,44 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         await new Promise(resolve => setTimeout(resolve, 200));
         
         const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
+        
+        // 🔄 SINCRONIZACIÓN AUTOMÁTICA: Si no hay roles pero hay user_type, crear el rol
+        if (rolesResult.length === 0 && profileData && profileData.user_type) {
+          console.log(`🔄 No roles found but user_type is "${profileData.user_type}". Creating missing role...`);
+          
+          try {
+            const { error: createRoleError } = await supabase
+              .from('user_roles')
+              .insert({
+                user_id: userId,
+                role_type: profileData.user_type,
+                is_active: true,
+                is_verified: true, // Auto-verified since it comes from existing profile
+                verification_confirmed_at: new Date().toISOString(),
+                role_specific_data: {}
+              });
+
+            if (createRoleError) {
+              console.error("❌ Error creating missing role:", createRoleError);
+            } else {
+              console.log(`✅ Successfully created missing "${profileData.user_type}" role`);
+              
+              // Reload roles after creating the missing one
+              const updatedRoles = await SupabaseUserRoleService.getUserRoles(userId);
+              setUserRoles(updatedRoles);
+              
+              // Set the newly created role as active
+              const activeRoleData = updatedRoles.find(r => r.is_active) || null;
+              setActiveRole(activeRoleData);
+              
+              console.log("✅ Roles synchronized successfully");
+              return; // Exit early since we've already set the roles
+            }
+          } catch (syncError) {
+            console.error("❌ Error in role synchronization:", syncError);
+          }
+        }
+        
         setUserRoles(rolesResult);
         
         // Set active role
