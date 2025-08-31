@@ -408,7 +408,7 @@ export class SupabaseContractService {
     return { success: false, error: "Time logging not available" };
   }
 
-  // Fix the createContractFromQuote method to use correct status type
+  // Fix the createContractFromQuote method to use correct status type casting
   static async createContractFromQuote(quote: any) {
     try {
       const clientId = quote.user_id || quote.client_id;
@@ -419,7 +419,7 @@ export class SupabaseContractService {
         user_id: clientId,
         service_provider_id: quote.service_provider_id,
         contract_number: contractNumber,
-        status: "pending",
+        status: "pending" as Database["public"]["Enums"]["contract_status"],
         total_amount: quote.amount,
         work_description: quote.description,
         payment_schedule: quote.payment_terms || "Net 30",
