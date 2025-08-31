@@ -213,14 +213,12 @@ export class SupabaseDocumentService {
       "other": "documents"
     };
     
-    const folder = folderMap[docType as string] || "documents";
+    const folder = folderMap[docType] || "documents";
     const filePath = await this.uploadFile(file, folder);
     
     // Create document record
     const fullDocumentData: DocumentInsert = {
       ...documentData,
-      document_type: docType as Database["public"]["Enums"]["document_type"],
-      related_entity_type: documentData.related_entity_type as Database["public"]["Enums"]["document_related_entity_type"],
       file_path: filePath,
       file_size: file.size
     };
@@ -251,7 +249,7 @@ export class SupabaseDocumentService {
       "other": "documents"
     };
     
-    const folder = folderMap[docType as string] || "documents";
+    const folder = folderMap[docType] || "documents";
     const newFilePath = await this.uploadFile(newFile, folder);
     
     // Update document record

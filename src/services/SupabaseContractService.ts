@@ -414,12 +414,12 @@ export class SupabaseContractService {
       const clientId = quote.user_id || quote.client_id;
       const contractNumber = this.generateContractNumber();
       
-      const contractData: ContractInsert = {
+      const contractData = {
         quote_id: quote.id,
         user_id: clientId,
         service_provider_id: quote.service_provider_id,
         contract_number: contractNumber,
-        status: "pending" as Database["public"]["Enums"]["contract_status"],
+        status: "pending",
         total_amount: quote.amount,
         work_description: quote.description,
         payment_schedule: quote.payment_terms || "Net 30",
@@ -429,10 +429,7 @@ export class SupabaseContractService {
 
       const { data, error } = await supabase
         .from("contracts")
-        .insert({
-          ...contractData,
-          status: "pending" as Database["public"]["Enums"]["contract_status"]
-        })
+        .insert(contractData)
         .select()
         .single();
 
