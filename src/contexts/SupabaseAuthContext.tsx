@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { User, Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { User, Session, AuthError } from "@supabase/supabase-js";
+import { supabase, handleConnectionRecovery } from "@/integrations/supabase/client";
 import { Profile, ProfileInsert } from "@/integrations/supabase/types";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
 
@@ -12,12 +12,14 @@ interface AuthContextType {
   userRoles: UserRole[];
   activeRole: UserRole | null;
   loading: boolean;
+  connectionStatus: 'connected' | 'disconnected' | 'reconnecting';
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => Promise<{ error?: string; message?: string; success?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: string }>;
   activateRole: (roleType: UserRole['role_type']) => Promise<{ success: boolean; message: string }>;
   refreshRoles: () => Promise<void>;
+  retryConnection: () => Promise<void>;
   databaseConnected: boolean;
 }
 
@@ -26,7 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Función mejorada para verificar conectividad básica con timeout
 const checkBasicConnection = async (): Promise<boolean> => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos timeout
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos timeout
 
   try {
     console.log("🔗 Checking basic Supabase connection...");
@@ -61,47 +63,93 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [activeRole, setActiveRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [databaseConnected, setDatabaseConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('reconnecting');
+
+  // Función para intentar recuperar la conexión
+  const retryConnection = async () => {
+    setConnectionStatus('reconnecting');
+    console.log('🔄 Manual connection retry initiated...');
+    
+    try {
+      await handleConnectionRecovery();
+      const isConnected = await checkBasicConnection();
+      
+      setDatabaseConnected(isConnected);
+      setConnectionStatus(isConnected ? 'connected' : 'disconnected');
+      
+      if (isConnected && user) {
+        await fetchUserData(user);
+      }
+      
+      return isConnected;
+    } catch (error) {
+      console.error('❌ Connection retry failed:', error);
+      setConnectionStatus('disconnected');
+      return false;
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
 
-    // Initialize auth
+    // Initialize auth con manejo mejorado de errores
     const initializeAuth = async () => {
       try {
         console.log("🚀 Initializing Supabase Auth...");
+        setConnectionStatus('reconnecting');
         
         // Check database connectivity first
         const isConnected = await checkBasicConnection();
         setDatabaseConnected(isConnected);
+        setConnectionStatus(isConnected ? 'connected' : 'disconnected');
         
-        // Get current session with timeout
+        // Get current session con timeout extendido
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
         
-        const { data: { session }, error } = await supabase.auth.getSession();
-        clearTimeout(timeoutId);
-        
-        if (!mounted) return;
-        
-        if (error) {
-          console.error("❌ Error getting session:", error);
-          setLoading(false);
-          return;
-        }
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          clearTimeout(timeoutId);
+          
+          if (!mounted) return;
+          
+          if (error) {
+            console.error("❌ Error getting session:", error);
+            
+            // Si es un error de red, intentar recuperación
+            if (error.message.includes('fetch') || error.message.includes('network')) {
+              console.log('🔄 Network error detected, attempting recovery...');
+              setTimeout(retryConnection, 2000); // Retry after 2 seconds
+            }
+            
+            setLoading(false);
+            return;
+          }
 
-        console.log("📱 Session status:", !!session);
-        setSession(session);
-        setUser(session?.user || null);
-        
-        if (session?.user) {
-          await fetchUserData(session.user);
-        } else {
-          setLoading(false);
+          console.log("📱 Session status:", !!session);
+          setSession(session);
+          setUser(session?.user || null);
+          
+          if (session?.user) {
+            await fetchUserData(session.user);
+          } else {
+            setLoading(false);
+          }
+          
+        } catch (sessionError) {
+          clearTimeout(timeoutId);
+          console.error("❌ Session fetch error:", sessionError);
+          
+          if (mounted) {
+            setConnectionStatus('disconnected');
+            setLoading(false);
+          }
         }
         
       } catch (error) {
         console.error("❌ Error initializing auth:", error);
         if (mounted) {
+          setConnectionStatus('disconnected');
           setLoading(false);
         }
       }
@@ -109,12 +157,23 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
     initializeAuth();
 
-    // Listen for auth changes
+    // Listen for auth changes con manejo mejorado de errores
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
         
         console.log("🔄 Auth state changed:", event, !!session?.user);
+        
+        // Manejar eventos específicos de error de token
+        if (event === 'TOKEN_REFRESHED') {
+          console.log("✅ Token refreshed successfully");
+          setConnectionStatus('connected');
+        }
+        
+        if (event === 'SIGNED_OUT') {
+          console.log("👋 User signed out");
+          setConnectionStatus('disconnected');
+        }
         
         setSession(session);
         setUser(session?.user || null);
@@ -130,9 +189,33 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
+    // Manejo de errores de autenticación a nivel global
+    const handleAuthErrors = (error: AuthError) => {
+      console.log("🚨 Auth error detected:", error.message);
+      
+      if (error.message.includes('refresh_token') || error.message.includes('Failed to fetch')) {
+        console.log("🔄 Token refresh error - attempting recovery...");
+        setConnectionStatus('reconnecting');
+        setTimeout(retryConnection, 1000);
+      }
+    };
+
+    // Monitoreo de conectividad periódico
+    const connectivityInterval = setInterval(async () => {
+      if (connectionStatus === 'connected') {
+        const isStillConnected = await checkBasicConnection();
+        if (!isStillConnected && mounted) {
+          console.log("🔗 Connection lost, updating status...");
+          setConnectionStatus('disconnected');
+          setDatabaseConnected(false);
+        }
+      }
+    }, 30000); // Check every 30 seconds
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      clearInterval(connectivityInterval);
     };
   }, []);
 
@@ -143,6 +226,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       // Check basic connectivity first
       const isConnected = await checkBasicConnection();
       setDatabaseConnected(isConnected);
+      setConnectionStatus(isConnected ? 'connected' : 'disconnected');
       
       if (!isConnected) {
         console.log("📱 Database offline - creating temporary profile");
@@ -180,7 +264,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       // Try to fetch profile from database with timeout
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 segundos
         
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
@@ -216,7 +300,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           try {
             const createController = new AbortController();
-            const createTimeoutId = setTimeout(() => createController.abort(), 10000);
+            const createTimeoutId = setTimeout(() => createController.abort(), 12000);
             
             const { data: createdProfile, error: createError } = await supabase
               .from("profiles")
@@ -274,7 +358,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         try {
           console.log("🎭 Loading user roles...");
           const rolesController = new AbortController();
-          const rolesTimeoutId = setTimeout(() => rolesController.abort(), 10000);
+          const rolesTimeoutId = setTimeout(() => rolesController.abort(), 12000);
           
           const roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
           
@@ -560,12 +644,14 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     userRoles,
     activeRole,
     loading,
+    connectionStatus,
     signIn,
     signUp,
     signOut,
     updateProfile,
     activateRole,
     refreshRoles,
+    retryConnection,
     databaseConnected,
   };
 
