@@ -75,6 +75,7 @@ export default function Dashboard() {
   };
 
   const getRoleOptions = () => [
+    { value: "particular", label: "Particular", icon: User },
     { value: "community_member", label: "Miembro de la comunidad", icon: Users },
     { value: "service_provider", label: "Proveedor de servicios", icon: Wrench },
     { value: "property_administrator", label: "Administrador de fincas", icon: Building },
