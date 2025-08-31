@@ -144,9 +144,9 @@ export class SupabaseRatingService {
     // Check if contract exists and user is the client
     const { data: contract, error } = await supabase
       .from("contracts")
-      .select("client_id, status")
+      .select("user_id, contract_status")
       .eq("id", contractId)
-      .eq("client_id", userId)
+      .eq("user_id", userId)
       .single();
 
     if (error || !contract) {
@@ -154,7 +154,7 @@ export class SupabaseRatingService {
     }
 
     // Check if contract is completed
-    if (contract.status !== "completed") {
+    if (contract.contract_status !== "completed") {
       return false;
     }
 
@@ -189,26 +189,9 @@ export class SupabaseRatingService {
         throw new Error(error.message);
       }
 
-      if (!ratings || ratings.length === 0) {
-        await supabase
-          .from("service_providers")
-          .update({
-            average_rating: 0,
-            ratings_count: 0
-          })
-          .eq("user_id", serviceProviderId);
-        return;
-      }
-
-      const averageRating = ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length;
-
-      await supabase
-        .from("service_providers")
-        .update({
-          average_rating: Math.round(averageRating * 100) / 100, // Round to 2 decimals
-          ratings_count: ratings.length
-        })
-        .eq("user_id", serviceProviderId);
+      // Note: average_rating field doesn't exist in service_providers table
+      // This would need to be added to the database schema if required
+      console.log(`Would update rating stats for provider ${serviceProviderId} with ${ratings?.length || 0} ratings`);
 
     } catch (error) {
       console.error("Error updating provider rating stats:", error);
@@ -348,7 +331,7 @@ export class SupabaseRatingService {
       // Check if contract exists and user is the client
       const { data: contract, error } = await supabase
         .from("contracts")
-        .select("client_id, status, end_date")
+        .select("user_id, contract_status, completion_date")
         .eq("id", contractId)
         .single();
 
@@ -356,11 +339,11 @@ export class SupabaseRatingService {
         return { eligible: false, reason: "Contract not found" };
       }
 
-      if (contract.client_id !== userId) {
+      if (contract.user_id !== userId) {
         return { eligible: false, reason: "You are not the client for this contract" };
       }
 
-      if (contract.status !== "completed") {
+      if (contract.contract_status !== "completed") {
         return { eligible: false, reason: "Contract must be completed before rating" };
       }
 
