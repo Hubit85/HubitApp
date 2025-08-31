@@ -12,7 +12,7 @@ import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
 import UserRoleManager from "@/components/UserRoleManager";
 import ResendTestTool from "@/components/ResendTestTool";
 import ZoomableSection from "@/components/ZoomableSection";
-import Header from "@/components/layout/Header";
+import { Header } from "@/components/layout/Header";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading } = useSupabaseAuth();
