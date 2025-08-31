@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'offline'>('checking');
   const [retryAttempt, setRetryAttempt] = useState(0);
 
-  const { signIn, user, loading, databaseConnected } = useSupabaseAuth();
+  const { signIn, user, loading } = useSupabaseAuth();
   const router = useRouter();
 
   // Check connection status

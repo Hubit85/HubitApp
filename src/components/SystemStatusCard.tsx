@@ -36,14 +36,14 @@ interface SystemCheck {
 }
 
 export default function SystemStatusCard() {
-  const { user, databaseConnected } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const [checks, setChecks] = useState<SystemCheck[]>([]);
   const [loading, setLoading] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
 
   useEffect(() => {
     performSystemChecks();
-  }, [user, databaseConnected]);
+  }, [user]);
 
   const performSystemChecks = async () => {
     setLoading(true);
@@ -190,19 +190,19 @@ export default function SystemStatusCard() {
         };
       }
 
-      if (user && databaseConnected) {
+      if (user) {
         return {
           status: 'success',
-          message: 'Usuario autenticado con base de datos'
+          message: 'Usuario autenticado correctamente'
         };
       }
 
       return {
         status: 'warning',
-        message: user ? 'Usuario autenticado (sin DB)' : 'No autenticado',
+        message: 'No autenticado',
         action: {
-          label: user ? 'Ver Perfil' : 'Iniciar Sesión',
-          href: user ? '/dashboard' : '/auth/login'
+          label: 'Iniciar Sesión',
+          href: '/auth/login'
         }
       };
     } catch (error) {
