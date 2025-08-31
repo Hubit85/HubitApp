@@ -49,13 +49,33 @@ export default function Dashboard() {
       const result = await activateRole(newRole as any);
       if (result.success) {
         setSelectedRole(newRole);
-        // You might want to refresh the page or update UI based on new role
+        
+        // Redirigir al dashboard específico del rol
+        switch (newRole) {
+          case "particular":
+            router.push("/dashboard_particular");
+            break;
+          case "community_member":
+            router.push("/dashboard_miembro");
+            break;
+          case "service_provider":
+            router.push("/dashboard_proveedor");
+            break;
+          case "property_administrator":
+            router.push("/dashboard_administrador");
+            break;
+          default:
+            // Si por algún motivo el rol no coincide, mantener en dashboard principal
+            break;
+        }
       } else {
         console.error("Failed to change role:", result.message);
-        // Could show a toast notification here
+        // Mostrar mensaje de error al usuario
+        alert(`Error al cambiar el rol: ${result.message}`);
       }
     } catch (error) {
       console.error("Error changing role:", error);
+      alert("Error inesperado al cambiar el rol. Por favor, inténtalo de nuevo.");
     }
   };
 
