@@ -30,7 +30,7 @@ export class SupabaseServiceProviderService {
     return data;
   }
 
-  static async updateServiceProvider(id: string, updates: ServiceProviderUpdate): Promise<ServiceProvider> {
+  static async updateServiceProvider(id: string, updates: Partial<ServiceProvider>): Promise<ServiceProvider> {
     const { data, error } = await supabase
       .from("service_providers")
       .update({
@@ -148,8 +148,8 @@ export class SupabaseServiceProviderService {
   // ===================== VERIFICATION & STATUS =====================
 
   static async verifyServiceProvider(id: string): Promise<ServiceProvider> {
-    return this.updateServiceProvider(id, {
-      is_verified: true
+    return this.updateServiceProvider(id, { 
+      verified: true // using 'verified' instead of 'is_verified'
     });
   }
 
@@ -212,9 +212,9 @@ export class SupabaseServiceProviderService {
 
   // ===================== SERVICE AREAS & CATEGORIES =====================
 
-  static async updateServiceAreas(id: string, areas: string[]): Promise<ServiceProvider> {
-    return this.updateServiceProvider(id, {
-      service_areas: areas
+  static async updateServiceArea(id: string, serviceArea: string[]): Promise<ServiceProvider> {
+    return this.updateServiceProvider(id, { 
+      service_area: serviceArea // using 'service_area' instead of 'service_areas'
     });
   }
 

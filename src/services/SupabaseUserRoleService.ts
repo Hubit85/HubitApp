@@ -531,4 +531,52 @@ export class SupabaseUserRoleService {
       { value: "property_administrator", label: "Administrador de Fincas", description: "Gestión de propiedades" }
     ];
   }
+
+  static async createUserRole(
+    userId: string, 
+    role: "particular" | "community_member" | "service_provider" | "property_administrator",
+    isVerified: boolean = false
+  ): Promise<any> {
+    const roleData = {
+      user_id: userId,
+      role: role,
+      is_verified: isVerified,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from("user_roles")
+      .insert(roleData)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
+  static async verifyUserRole(
+    userId: string, 
+    role: "particular" | "community_member" | "service_provider" | "property_administrator"
+  ): Promise<any> {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .update({ 
+        is_verified: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq("user_id", userId)
+      .eq("role", role)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
 }
