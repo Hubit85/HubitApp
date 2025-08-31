@@ -198,8 +198,9 @@ export class SupabaseDocumentService {
     file: File,
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
-    // Upload file to storage
-    const filePath = await this.uploadFile(file, `${documentData.document_type}s`);
+    // Upload file to storage based on document type
+    const validDocumentType = documentData.document_type || "other";
+    const filePath = await this.uploadFile(file, `${validDocumentType}s`);
     
     // Create document record
     const fullDocumentData: DocumentInsert = {
@@ -219,8 +220,9 @@ export class SupabaseDocumentService {
       await this.deleteFileFromStorage(document.file_path);
     }
 
-    // Upload new file
-    const newFilePath = await this.uploadFile(newFile, document.document_type);
+    // Upload new file with proper type
+    const documentType = document.document_type || "other";
+    const newFilePath = await this.uploadFile(newFile, documentType);
     
     // Update document record
     return this.updateDocument(documentId, {
