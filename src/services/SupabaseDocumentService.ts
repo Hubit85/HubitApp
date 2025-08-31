@@ -212,7 +212,7 @@ export class SupabaseDocumentService {
       "other": "documents"
     };
     
-    const folder = folderMap[documentData.document_type] || "documents";
+    const folder = folderMap[documentData.document_type as Database["public"]["Enums"]["document_type"]] || "documents";
     const filePath = await this.uploadFile(file, folder);
     
     // Create document record
@@ -233,7 +233,7 @@ export class SupabaseDocumentService {
       await this.deleteFileFromStorage(document.file_path);
     }
 
-    // Create appropriate folder name based on related entity type with explicit casting
+    // Create appropriate folder name based on related entity type with correct enum casting
     const folderMap: Record<Database["public"]["Enums"]["document_related_entity_type"], string> = {
       "contract": "contracts",
       "invoice": "invoices",
@@ -349,11 +349,11 @@ export class SupabaseDocumentService {
     }
 
     if (filters?.documentType) {
-      supabaseQuery = supabaseQuery.eq("document_type", filters.documentType);
+      supabaseQuery = supabaseQuery.eq("document_type", filters.documentType as Database["public"]["Enums"]["document_type"]);
     }
 
     if (filters?.entityType) {
-      supabaseQuery = supabaseQuery.eq("related_entity_type", filters.entityType);
+      supabaseQuery = supabaseQuery.eq("related_entity_type", filters.entityType as Database["public"]["Enums"]["document_related_entity_type"]);
     }
 
     if (filters?.dateFrom) {
