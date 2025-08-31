@@ -201,11 +201,13 @@ export class SupabaseDocumentService {
     // Upload file to storage
     const filePath = await this.uploadFile(file, `${documentData.document_type}s`);
     
-    // Create document record
+    // Create document record with proper type assertions
     const fullDocumentData: DocumentInsert = {
       ...documentData,
       file_path: filePath,
-      file_size: file.size
+      file_size: file.size,
+      document_type: documentData.document_type as DocumentInsert['document_type'],
+      related_entity_type: documentData.related_entity_type as DocumentInsert['related_entity_type']
     };
 
     return this.createDocument(fullDocumentData);
