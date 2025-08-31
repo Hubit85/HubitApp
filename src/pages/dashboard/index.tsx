@@ -8,9 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  Loader2, User, Crown, Star, LogOut, Settings, CheckCircle, ArrowRight, ChevronDown, 
+  Loader2, User, Crown, Star, LogOut, Settings, CheckCircle, ArrowRight, ChevronDown, ChevronRight,
   Shield, Home, Wrench, FileText, Mail, Phone, Calendar, Users, Building, Store, Bell, 
-  CreditCard, ThumbsUp, Award, StarIcon
+  CreditCard, ThumbsUp, Award, StarIcon, Heart, Clock, Package, MapPin, Briefcase,
+  AlertTriangle, Video, Calculator, BarChart3, Eye, DollarSign, TrendingUp, Target,
+  PieChart, ClipboardList
 } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import { Header } from "@/components/layout/Header";
@@ -45,119 +47,27 @@ export default function Dashboard() {
   const handleRoleChange = async (newRole: string) => {
     if (!user || newRole === selectedRole) return;
     
-    console.log("🔄 Attempting role change:", { from: selectedRole, to: newRole, user: user.id });
+    console.log("🔄 Changing role to:", newRole);
     
     try {
-      // Mostrar indicador de carga visual temporal
-      const originalValue = selectedRole;
       setSelectedRole(newRole);
       
-      // Activar el rol usando el servicio
-      console.log("📞 Calling activateRole service...");
       const result = await activateRole(newRole as any);
       
-      console.log("📡 activateRole result:", result);
-      
       if (result.success) {
-        console.log("✅ Role activated successfully, preparing redirect...");
-        
-        // Aguardar un momento para que el estado se actualice
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Forzar refresh del contexto de autenticación
-        try {
-          await refreshRoles();
-          console.log("🔄 Roles refreshed after activation");
-        } catch (refreshError) {
-          console.warn("⚠️ Could not refresh roles, but continuing with redirect:", refreshError);
-        }
-        
-        // Determinar la ruta de destino según el rol
-        let targetRoute = "/dashboard";
-        switch (newRole) {
-          case "particular":
-            targetRoute = "/dashboard_particular";
-            console.log("🏠 Redirecting to dashboard_particular");
-            break;
-          case "community_member":
-            targetRoute = "/dashboard_miembro";
-            console.log("🏘️ Redirecting to dashboard_miembro");
-            break;
-          case "service_provider":
-            targetRoute = "/dashboard_proveedor";
-            console.log("🔧 Redirecting to dashboard_proveedor");
-            break;
-          case "property_administrator":
-            targetRoute = "/dashboard_administrador";
-            console.log("🏢 Redirecting to dashboard_administrador");
-            break;
-          default:
-            console.warn("⚠️ Unknown role type, staying on main dashboard:", newRole);
-            targetRoute = "/dashboard";
-            break;
-        }
-        
-        // Hacer la redirección
-        console.log("🚀 Executing redirect to:", targetRoute);
-        
-        // Usar replace en lugar de push para evitar problemas de historial
-        await router.replace(targetRoute);
-        
-        // Si la redirección no funciona inmediatamente, forzarla
-        setTimeout(() => {
-          if (router.pathname === '/dashboard') {
-            console.log("🔄 Forcing redirect as backup...");
-            window.location.href = targetRoute;
-          }
-        }, 2000);
-        
+        console.log("✅ Role changed successfully");
+        await refreshRoles();
+        // Reset to overview tab when changing roles
+        setActiveTab("overview");
       } else {
         console.error("❌ Failed to change role:", result.message);
-        
-        // Revertir el selector al rol anterior
-        setSelectedRole(originalValue);
-        
-        // Mostrar mensaje de error más específico
-        let errorMessage = result.message;
-        if (result.message.includes('verified')) {
-          errorMessage = "Este rol no está verificado. Por favor, verifica tu email o contacta al administrador.";
-        } else if (result.message.includes('exists')) {
-          errorMessage = "Este rol no está disponible para tu cuenta. Contacta al administrador para obtener acceso.";
-        } else if (result.message.includes('network') || result.message.includes('fetch')) {
-          errorMessage = "Error de conexión. Verifica tu internet e inténtalo de nuevo.";
-        } else if (result.message.includes('expired') || result.message.includes('token')) {
-          errorMessage = "Tu sesión ha expirado. Por favor, cierra sesión y vuelve a iniciar sesión.";
-        }
-        
-        // Mostrar alerta con el error
-        alert(`Error al cambiar el rol: ${errorMessage}`);
+        setSelectedRole(selectedRole);
+        alert(`Error al cambiar el rol: ${result.message}`);
       }
     } catch (error) {
       console.error("💥 Error in handleRoleChange:", error);
-      
-      // Revertir el selector al rol anterior
       setSelectedRole(selectedRole);
-      
-      // Mostrar mensaje de error apropiado
-      let errorMessage = "Error inesperado al cambiar el rol.";
-      if (error instanceof Error) {
-        if (error.message.includes('fetch') || error.message.includes('network')) {
-          errorMessage = "Error de conexión. Verifica tu internet y vuelve a intentarlo.";
-        } else if (error.message.includes('timeout')) {
-          errorMessage = "La operación tardó demasiado tiempo. Inténtalo de nuevo.";
-        } else if (error.message.includes('401') || error.message.includes('403')) {
-          errorMessage = "Error de autorización. Tu sesión puede haber expirado.";
-        } else {
-          errorMessage = `Error técnico: ${error.message}`;
-        }
-      }
-      
-      alert(`${errorMessage}
-
-Si el problema persiste, por favor:
-1. Recarga la página
-2. Cierra sesión y vuelve a iniciar sesión
-3. Contacta al soporte técnico`);
+      alert(`Error inesperado al cambiar el rol: ${error instanceof Error ? error.message : "Error desconocido"}`);
     }
   };
 
@@ -177,7 +87,6 @@ Si el problema persiste, por favor:
   };
 
   const getRoleOptions = () => {
-    // Filtrar solo los roles que el usuario tiene verificados
     const availableRoles = [
       { value: "particular", label: "Particular", icon: User },
       { value: "community_member", label: "Miembro de Comunidad", icon: Users },
@@ -185,19 +94,11 @@ Si el problema persiste, por favor:
       { value: "property_administrator", label: "Administrador de Fincas", icon: Building },
     ];
 
-    console.log("🔍 Debug - User roles:", userRoles);
-    console.log("🔍 Debug - Available roles:", availableRoles);
-
-    // Mostrar solo los roles que el usuario tiene verificados
-    const filteredRoles = availableRoles.filter(roleOption => 
+    return availableRoles.filter(roleOption => 
       userRoles.some(userRole => 
         userRole.role_type === roleOption.value && userRole.is_verified
       )
     );
-
-    console.log("🔍 Debug - Filtered roles for user:", filteredRoles);
-    
-    return filteredRoles;
   };
 
   // Base navigation items that are common
@@ -209,53 +110,1182 @@ Si el problema persiste, por favor:
   // Role-specific navigation items
   const getRoleSpecificNavItems = (roleType: string) => {
     switch (roleType) {
+      case "particular":
+        return [
+          { id: "propiedades", label: "Mis Propiedades", icon: Home },
+          { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
+          { id: "proveedores", label: "Proveedores de Servicios", icon: Wrench },
+          { id: "favoritos", label: "Mis Favoritos", icon: Heart },
+          { id: "historial", label: "Historial de Servicios", icon: Clock },
+          { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+          { id: "notificaciones", label: "Notificaciones", icon: Bell },
+          { id: "pagos", label: "Mis Pagos", icon: CreditCard },
+          { id: "configuracion", label: "Configuración", icon: Settings },
+        ];
       case "community_member":
         return [
+          { id: "comunidad", label: "Mi Comunidad", icon: Home },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
-          { id: "proveedores", label: "Proveedores de Servicios", icon: Store },
-          { id: "favoritos", label: "Mis Favoritos", icon: Star },
-          { id: "propiedades", label: "Mi Comunidad", icon: Home },
-          { id: "historial", label: "Historial de Servicios", icon: FileText },
+          { id: "proveedores", label: "Proveedores Verificados", icon: Store },
+          { id: "favoritos", label: "Mis Favoritos", icon: Heart },
+          { id: "historial", label: "Historial de Servicios", icon: Clock },
           { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+          { id: "incidencias", label: "Reportar Incidencias", icon: Shield },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
           { id: "pagos", label: "Mis Pagos", icon: CreditCard },
           { id: "configuracion", label: "Configuración", icon: Settings },
         ];
       case "service_provider":
         return [
-          { id: "servicios", label: "Mis Servicios", icon: Wrench },
+          { id: "servicios", label: "Mis Servicios", icon: Store },
           { id: "presupuestos", label: "Gestionar Presupuestos", icon: FileText },
           { id: "clientes", label: "Mis Clientes", icon: Users },
           { id: "calendario", label: "Calendario", icon: Calendar },
-          { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+          { id: "contratos", label: "Contratos Activos", icon: ClipboardList },
+          { id: "evaluacion", label: "Evaluaciones Recibidas", icon: StarIcon },
           { id: "facturacion", label: "Facturación", icon: CreditCard },
+          { id: "estadisticas", label: "Estadísticas", icon: TrendingUp },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
           { id: "configuracion", label: "Configuración", icon: Settings },
         ];
       case "property_administrator":
         return [
-          { id: "propiedades", label: "Gestionar Propiedades", icon: Building },
-          { id: "comunidades", label: "Comunidades", icon: Users },
+          { id: "comunidades", label: "Comunidades Gestionadas", icon: Users },
+          { id: "propiedades", label: "Gestión de Propiedades", icon: Home },
           { id: "presupuestos", label: "Presupuestos y Contratos", icon: FileText },
           { id: "proveedores", label: "Proveedores Autorizados", icon: Store },
+          { id: "incidencias", label: "Gestión de Incidencias", icon: AlertTriangle },
+          { id: "juntas", label: "Juntas y Reuniones", icon: Video },
           { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
-          { id: "informes", label: "Informes y Reportes", icon: FileText },
+          { id: "informes", label: "Informes y Reportes", icon: BarChart3 },
           { id: "facturacion", label: "Facturación", icon: CreditCard },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
           { id: "configuracion", label: "Configuración", icon: Settings },
         ];
       default:
         return [
+          { id: "propiedades", label: "Mis Propiedades", icon: Home },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores de Servicios", icon: Store },
           { id: "favoritos", label: "Mis Favoritos", icon: Star },
-          { id: "propiedades", label: "Mis Propiedades", icon: Home },
           { id: "historial", label: "Historial de Servicios", icon: FileText },
           { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
           { id: "pagos", label: "Mis Pagos", icon: CreditCard },
           { id: "configuracion", label: "Configuración", icon: Settings },
         ];
+    }
+  };
+
+  // Role-specific overview content
+  const renderRoleOverview = (roleType: string) => {
+    const userTypeInfo = getUserTypeInfo(roleType);
+    const UserTypeIcon = userTypeInfo.icon;
+
+    switch (roleType) {
+      case "particular":
+        return (
+          <div className="space-y-8">
+            {/* Status Cards for Particular */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <Home className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Mis Propiedades</h3>
+                      <p className="text-stone-600 text-sm">Gestiona tus inmuebles</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Servicios Solicitados</h3>
+                      <p className="text-stone-600 text-sm">Presupuestos y contrataciones</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                      <Heart className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Proveedores Favoritos</h3>
+                      <p className="text-stone-600 text-sm">Tus profesionales de confianza</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Quick Actions */}
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                <Package className="h-8 w-8 text-stone-600" />
+                Acciones Rápidas
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("presupuesto")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-700 transition-colors">
+                      <FileText className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Solicitar Presupuesto</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Obtén presupuestos de profesionales para tus proyectos
+                    </p>
+                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("proveedores")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-700 transition-colors">
+                      <Wrench className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Buscar Proveedores</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Encuentra profesionales calificados cerca de ti
+                    </p>
+                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("historial")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-700 transition-colors">
+                      <Clock className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Historial de Servicios</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Revisa todos los servicios contratados
+                    </p>
+                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "community_member":
+        return (
+          <div className="space-y-8">
+            {/* Status Cards for Community Member */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <Home className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Mi Comunidad</h3>
+                      <p className="text-stone-600 text-sm">Residencial Los Olivos</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                      <Shield className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Incidencias Activas</h3>
+                      <p className="text-stone-600 text-sm">2 incidencias reportadas</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                      <Store className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Proveedores Verificados</h3>
+                      <p className="text-stone-600 text-sm">12 proveedores disponibles</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Community Updates */}
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                <Bell className="h-8 w-8 text-stone-600" />
+                Actualizaciones de la Comunidad
+              </h2>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <Card className="border-l-4 border-l-blue-500">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold text-lg text-blue-900">Junta Extraordinaria Programada</h4>
+                        <p className="text-stone-600 mb-2">Se ha convocado una junta extraordinaria para aprobar las obras de la fachada.</p>
+                        <div className="flex items-center gap-2 text-sm text-stone-500">
+                          <Calendar className="h-4 w-4" />
+                          <span>25 de Febrero, 2025 - 19:00</span>
+                        </div>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800">Importante</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-green-500">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold text-lg text-green-900">Nuevos Proveedores Verificados</h4>
+                        <p className="text-stone-600 mb-2">Se han añadido 3 nuevos proveedores de servicios verificados para la comunidad.</p>
+                        <div className="flex items-center gap-2 text-sm text-stone-500">
+                          <Store className="h-4 w-4" />
+                          <span>Fontanería, Electricidad, Jardinería</span>
+                        </div>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Nuevo</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-orange-500">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold text-lg text-orange-900">Mantenimiento del Ascensor</h4>
+                        <p className="text-stone-600 mb-2">El ascensor principal estará fuera de servicio el próximo martes para mantenimiento.</p>
+                        <div className="flex items-center gap-2 text-sm text-stone-500">
+                          <Clock className="h-4 w-4" />
+                          <span>Martes 28 de Febrero - 09:00 a 17:00</span>
+                        </div>
+                      </div>
+                      <Badge className="bg-orange-100 text-orange-800">Aviso</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                <Package className="h-8 w-8 text-stone-600" />
+                Acciones Rápidas
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("incidencias")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-700 transition-colors">
+                      <Shield className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Reportar Incidencia</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Informa sobre problemas en tu comunidad
+                    </p>
+                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("presupuesto")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-700 transition-colors">
+                      <FileText className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Solicitar Servicio</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Obtén presupuestos de proveedores verificados
+                    </p>
+                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("proveedores")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-700 transition-colors">
+                      <Store className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Proveedores Verificados</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Encuentra profesionales de confianza
+                    </p>
+                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "service_provider":
+        return (
+          <div className="space-y-8">
+            {/* Business Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Presupuestos Activos</h3>
+                      <p className="text-2xl font-bold text-blue-600">12</p>
+                      <p className="text-stone-600 text-sm">+3 esta semana</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                      <DollarSign className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Ingresos del Mes</h3>
+                      <p className="text-2xl font-bold text-green-600">€3,450</p>
+                      <p className="text-stone-600 text-sm">+15% vs mes anterior</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                      <Users className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Clientes Activos</h3>
+                      <p className="text-2xl font-bold text-purple-600">28</p>
+                      <p className="text-stone-600 text-sm">+5 nuevos clientes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center">
+                      <Star className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Calificación Promedio</h3>
+                      <p className="text-2xl font-bold text-amber-600">4.8</p>
+                      <div className="flex items-center">
+                        {[1,2,3,4,5].map((star) => (
+                          <Star key={star} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                <Clock className="h-8 w-8 text-stone-600" />
+                Actividad Reciente
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Nuevas Solicitudes</CardTitle>
+                    <CardDescription>Presupuestos pendientes de respuesta</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-blue-900">Reparación de Fontanería</h4>
+                        <p className="text-sm text-blue-700">Comunidad Los Olivos</p>
+                        <p className="text-xs text-blue-600">Hace 2 horas</p>
+                      </div>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        Responder
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-green-900">Instalación Eléctrica</h4>
+                        <p className="text-sm text-green-700">Residencial Madrid</p>
+                        <p className="text-xs text-green-600">Hace 5 horas</p>
+                      </div>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                        Responder
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-orange-900">Pintura de Fachada</h4>
+                        <p className="text-sm text-orange-700">Villa Santa Clara</p>
+                        <p className="text-xs text-orange-600">Hace 1 día</p>
+                      </div>
+                      <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
+                        Responder
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Trabajos Próximos</CardTitle>
+                    <CardDescription>Servicios programados esta semana</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-purple-900">Mantenimiento de Calefacción</h4>
+                        <p className="text-sm text-purple-700">Cliente: María García</p>
+                        <p className="text-xs text-purple-600">Mañana 10:00 AM</p>
+                      </div>
+                      <Badge className="bg-purple-100 text-purple-800">Mañana</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-indigo-900">Revisión de Ascensor</h4>
+                        <p className="text-sm text-indigo-700">Cliente: Comunidad Centro</p>
+                        <p className="text-xs text-indigo-600">Viernes 9:00 AM</p>
+                      </div>
+                      <Badge className="bg-indigo-100 text-indigo-800">Viernes</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-teal-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-teal-900">Instalación de Jardín</h4>
+                        <p className="text-sm text-teal-700">Cliente: José Rodríguez</p>
+                        <p className="text-xs text-teal-600">Sábado 8:00 AM</p>
+                      </div>
+                      <Badge className="bg-teal-100 text-teal-800">Sábado</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                <Package className="h-8 w-8 text-stone-600" />
+                Acciones Rápidas
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("presupuestos")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-700 transition-colors">
+                      <FileText className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Crear Presupuesto</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Responde a nuevas solicitudes
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("servicios")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-700 transition-colors">
+                      <Store className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Gestionar Servicios</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Actualiza tu catálogo
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("calendario")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-700 transition-colors">
+                      <Calendar className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Programar Cita</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Organiza tus trabajos
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("facturacion")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-amber-700 transition-colors">
+                      <CreditCard className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Generar Factura</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Facturación y pagos
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "property_administrator":
+        return (
+          <div className="space-y-8">
+            {/* Management Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <Building className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Comunidades Gestionadas</h3>
+                      <p className="text-2xl font-bold text-blue-600">10</p>
+                      <p className="text-stone-600 text-sm">+2 este mes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                      <DollarSign className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Presupuesto Total</h3>
+                      <p className="text-2xl font-bold text-green-600">€245,000</p>
+                      <p className="text-stone-600 text-sm">Administración mensual</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center">
+                      <AlertTriangle className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Incidencias Activas</h3>
+                      <p className="text-2xl font-bold text-orange-600">23</p>
+                      <p className="text-stone-600 text-sm">-5 vs semana anterior</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                      <ClipboardList className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">Contratos Activos</h3>
+                      <p className="text-2xl font-bold text-purple-600">47</p>
+                      <p className="text-stone-600 text-sm">Proveedores y servicios</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Management Activity */}
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                <Clock className="h-8 w-8 text-stone-600" />
+                Actividad de Gestión
+              </h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Incidencias Recientes</CardTitle>
+                    <CardDescription>Reportes de las comunidades</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-red-900">Fuga de agua - Garaje</h4>
+                        <p className="text-sm text-red-700">Comunidad Abando</p>
+                        <p className="text-xs text-red-600">Urgente - Hace 1 hora</p>
+                      </div>
+                      <Button size="sm" className="bg-red-600 hover:bg-red-700">
+                        Gestionar
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-orange-900">Ascensor averiado</h4>
+                        <p className="text-sm text-orange-700">Residencial Los Olivos</p>
+                        <p className="text-xs text-orange-600">Alta - Hace 3 horas</p>
+                      </div>
+                      <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
+                        Gestionar
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-yellow-900">Iluminación portal</h4>
+                        <p className="text-sm text-yellow-700">Comunidad Indautxu</p>
+                        <p className="text-xs text-yellow-600">Media - Hace 1 día</p>
+                      </div>
+                      <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700">
+                        Gestionar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Próximas Juntas</CardTitle>
+                    <CardDescription>Reuniones programadas</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-blue-900">Junta Extraordinaria</h4>
+                        <p className="text-sm text-blue-700">Comunidad Abando - Obras fachada</p>
+                        <p className="text-xs text-blue-600">15 Mayo 2025 - 19:00</p>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800">Programada</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-green-900">Reunión Presupuestos</h4>
+                        <p className="text-sm text-green-700">Urbide 25 - Presupuesto anual</p>
+                        <p className="text-xs text-green-600">22 Mayo 2025 - 18:30</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Confirmada</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                      <div>
+                        <h4 className="font-semibold text-purple-900">Asamblea General</h4>
+                        <p className="text-sm text-purple-700">Residencial Los Olivos</p>
+                        <p className="text-xs text-purple-600">28 Mayo 2025 - 20:00</p>
+                      </div>
+                      <Badge className="bg-purple-100 text-purple-800">Pendiente</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Quick Management Actions */}
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                <Package className="h-8 w-8 text-stone-600" />
+                Herramientas de Gestión
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("incidencias")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-700 transition-colors">
+                      <AlertTriangle className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Gestionar Incidencias</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Administra reportes y urgencias
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("presupuestos")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-700 transition-colors">
+                      <FileText className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Licitar Presupuestos</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Gestiona contratos y licitaciones
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("juntas")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-700 transition-colors">
+                      <Video className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Programar Juntas</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Organiza reuniones de comunidad
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("informes")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-700 transition-colors">
+                      <BarChart3 className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Generar Informes</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Reportes y análisis financiero
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Financial Summary */}
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                <TrendingUp className="h-8 w-8 text-stone-600" />
+                Resumen Financiero
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-lg">Ingresos Mensuales</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-3xl font-bold text-green-600 mb-2">€28,450</p>
+                    <p className="text-sm text-stone-600">Cuotas de administración</p>
+                    <Badge className="bg-green-100 text-green-800 mt-2">+12% vs mes anterior</Badge>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-lg">Gastos Pendientes</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-3xl font-bold text-orange-600 mb-2">€8,450</p>
+                    <p className="text-sm text-stone-600">Facturas por pagar</p>
+                    <Badge className="bg-orange-100 text-orange-800 mt-2">-€1,200 vs anterior</Badge>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-lg">Morosidad</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-3xl font-bold text-red-600 mb-2">€2,180</p>
+                    <p className="text-sm text-stone-600">Cuotas impagadas</p>
+                    <Badge className="bg-red-100 text-red-800 mt-2">3 propietarios</Badge>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 ${userTypeInfo.color} rounded-full flex items-center justify-center`}>
+                      <UserTypeIcon className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1 flex items-center gap-2">
+                        Rol Activo: {userTypeInfo.label}
+                        <Badge className="bg-stone-100 text-stone-700 text-xs">✓ Activo</Badge>
+                      </h3>
+                      <p className="text-stone-600 text-sm">
+                        {userTypeInfo.description}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                      <Shield className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">
+                        Sistema Configurado 🎉
+                      </h3>
+                      <p className="text-stone-600 text-sm">
+                        Base de datos • Roles • Email • Todo listo
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                      <User className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-stone-900 mb-1">
+                        Perfil Completo
+                      </h3>
+                      <p className="text-stone-600 text-sm">
+                        Todas las funcionalidades disponibles
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  // Role-specific tab content renderer
+  const renderRoleSpecificContent = (tabId: string, roleType: string) => {
+    switch (tabId) {
+      case "propiedades":
+        return (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2">
+              {roleType === "community_member" ? "Mi Comunidad" : 
+               roleType === "property_administrator" ? "Gestionar Propiedades" : 
+               "Mis Propiedades"}
+            </h1>
+            <p className="text-stone-600">
+              {roleType === "community_member" ? "Información y gestión de tu comunidad" : 
+               roleType === "property_administrator" ? "Administra múltiples propiedades y comunidades" : 
+               "Gestiona tus propiedades residenciales"}
+            </p>
+            <div className="mt-6">
+              <PropertyManager />
+            </div>
+          </div>
+        );
+
+      case "comunidad":
+        return (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2">Mi Comunidad</h1>
+            <p className="text-stone-600">Información y gestión de tu comunidad</p>
+            
+            <div className="mt-6 space-y-6">
+              <Card className="border-stone-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Home className="h-6 w-6 text-stone-600" />
+                    Residencial Los Olivos
+                  </CardTitle>
+                  <CardDescription>
+                    Av. Los Olivos 123, Madrid - Administrada por García & Asociados S.L.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <h3 className="font-bold text-blue-900 text-2xl">24</h3>
+                      <p className="text-blue-700 text-sm">Viviendas</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <h3 className="font-bold text-green-900 text-2xl">3</h3>
+                      <p className="text-green-700 text-sm">Edificios</p>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <h3 className="font-bold text-purple-900 text-2xl">2</h3>
+                      <p className="text-purple-700 text-sm">Áreas Comunes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Próximas Juntas</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-semibold text-blue-900">Junta Extraordinaria</p>
+                        <p className="text-sm text-blue-700">25 Feb 2025 - 19:00</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <Calendar className="h-5 w-5 text-gray-600" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Junta Ordinaria</p>
+                        <p className="text-sm text-gray-700">15 Mar 2025 - 18:30</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-stone-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Contactos Importantes</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                      <Phone className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="font-semibold text-green-900">Administrador</p>
+                        <p className="text-sm text-green-700">García & Asociados - 91 123 45 67</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                      <Phone className="h-5 w-5 text-orange-600" />
+                      <div>
+                        <p className="font-semibold text-orange-900">Emergencias</p>
+                        <p className="text-sm text-orange-700">Conserje - 91 765 43 21</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "presupuesto":
+      case "presupuestos":
+        return (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2">
+              {roleType === "service_provider" ? "Gestionar Presupuestos" : "Solicitar Presupuesto"}
+            </h1>
+            <p className="text-stone-600">
+              {roleType === "service_provider" 
+                ? "Gestiona y responde a solicitudes de presupuestos" 
+                : "Obtén presupuestos profesionales para tus proyectos"}
+            </p>
+            <div className="mt-6">
+              <BudgetRequestManager />
+            </div>
+          </div>
+        );
+
+      case "evaluacion":
+        return (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2">
+              {roleType === "service_provider" ? "Evaluaciones Recibidas" : "Evaluación de Servicios"}
+            </h1>
+            <p className="text-stone-600">
+              {roleType === "service_provider" 
+                ? "Revisa las calificaciones y comentarios de tus clientes"
+                : "Califica los servicios recibidos"}
+            </p>
+            
+            <Card className="border-stone-200 shadow-lg mt-6">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <StarIcon className="h-8 w-8 text-amber-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-2">
+                  Sistema de Evaluaciones{roleType === "service_provider" ? " - Recibidas" : ""}
+                </h3>
+                <p className="text-stone-600 mb-6">
+                  {roleType === "service_provider"
+                    ? "Aquí podrás ver todas las evaluaciones que tus clientes han dejado sobre tus servicios, tanto calificaciones como comentarios detallados."
+                    : "Aquí podrás calificar los servicios que has recibido, ayudando a otros usuarios a encontrar los mejores proveedores."}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 bg-stone-50 rounded-lg">
+                    <div className="flex items-center justify-center mb-2">
+                      {[1,2,3,4,5].map((star) => (
+                        <Star key={star} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-sm font-medium text-stone-900">
+                      {roleType === "service_provider" ? "Promedio General" : "Calificación"}
+                    </p>
+                    <p className="text-xs text-stone-600">
+                      {roleType === "service_provider" ? "4.8/5.0" : "Puntúa del 1 al 5"}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-stone-50 rounded-lg">
+                    {roleType === "service_provider" ? (
+                      <>
+                        <Award className="h-6 w-6 text-stone-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">Servicios Completados</p>
+                        <p className="text-xs text-stone-600">47 trabajos</p>
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="h-6 w-6 text-stone-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">Comentarios</p>
+                        <p className="text-xs text-stone-600">Comparte tu experiencia</p>
+                      </>
+                    )}
+                  </div>
+                  <div className="p-4 bg-stone-50 rounded-lg">
+                    {roleType === "service_provider" ? (
+                      <>
+                        <Target className="h-6 w-6 text-stone-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">Tasa de Satisfacción</p>
+                        <p className="text-xs text-stone-600">96%</p>
+                      </>
+                    ) : (
+                      <>
+                        <ThumbsUp className="h-6 w-6 text-stone-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">Recomendación</p>
+                        <p className="text-xs text-stone-600">¿Lo recomendarías?</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                  Próximamente disponible
+                </Badge>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case "incidencias":
+        return (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2">
+              {roleType === "property_administrator" ? "Gestión de Incidencias" : "Reportar Incidencias"}
+            </h1>
+            <p className="text-stone-600">
+              {roleType === "property_administrator" 
+                ? "Administra incidencias reportadas por las comunidades"
+                : "Informa sobre problemas o averías en tu comunidad"}
+            </p>
+            
+            <Card className="border-stone-200 shadow-lg mt-6">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  {roleType === "property_administrator" ? (
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                  ) : (
+                    <Shield className="h-8 w-8 text-red-600" />
+                  )}
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-2">
+                  Sistema de {roleType === "property_administrator" ? "Gestión de " : ""}Incidencias
+                </h3>
+                <p className="text-stone-600 mb-6">
+                  {roleType === "property_administrator"
+                    ? "Centraliza todas las incidencias reportadas por miembros de las comunidades, priorízalas y gestiona su resolución con proveedores especializados."
+                    : "Aquí podrás reportar incidencias, averías o problemas en las zonas comunes de tu comunidad. El administrador de fincas recibirá la notificación inmediatamente."}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  {roleType === "property_administrator" ? (
+                    <>
+                      <div className="p-4 bg-stone-50 rounded-lg">
+                        <AlertTriangle className="h-6 w-6 text-red-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">23 Activas</p>
+                        <p className="text-xs text-stone-600">Incidencias</p>
+                      </div>
+                      <div className="p-4 bg-stone-50 rounded-lg">
+                        <Clock className="h-6 w-6 text-orange-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">8 Urgentes</p>
+                        <p className="text-xs text-stone-600">Requieren atención</p>
+                      </div>
+                      <div className="p-4 bg-stone-50 rounded-lg">
+                        <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">15 Resueltas</p>
+                        <p className="text-xs text-stone-600">Esta semana</p>
+                      </div>
+                      <div className="p-4 bg-stone-50 rounded-lg">
+                        <Store className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">12 Proveedores</p>
+                        <p className="text-xs text-stone-600">Asignados</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-4 bg-stone-50 rounded-lg">
+                        <Shield className="h-6 w-6 text-stone-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">Reportar</p>
+                        <p className="text-xs text-stone-600">Describe el problema</p>
+                      </div>
+                      <div className="p-4 bg-stone-50 rounded-lg">
+                        <Bell className="h-6 w-6 text-stone-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">Notificar</p>
+                        <p className="text-xs text-stone-600">Al administrador</p>
+                      </div>
+                      <div className="p-4 bg-stone-50 rounded-lg">
+                        <CheckCircle className="h-6 w-6 text-stone-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium text-stone-900">Resolver</p>
+                        <p className="text-xs text-stone-600">Seguimiento automático</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                  {roleType === "property_administrator" 
+                    ? "Integrado con sistema de presupuestos automáticos"
+                    : "Próximamente disponible"}
+                </Badge>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      default:
+        return (
+          <Card className="border-stone-200 shadow-lg">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Settings className="h-8 w-8 text-stone-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-2">
+                Funcionalidad en Desarrollo
+              </h3>
+              <p className="text-stone-600">
+                Esta sección estará disponible próximamente.
+              </p>
+              <Badge className="bg-stone-100 text-stone-700 mt-4">
+                Próximamente
+              </Badge>
+            </CardContent>
+          </Card>
+        );
     }
   };
 
@@ -411,196 +1441,28 @@ Si el problema persiste, por favor:
                 <ZoomableSection>
                   <div className="mb-8">
                     <h1 className="text-4xl font-bold text-black mb-2">
-                      ¡Bienvenido de vuelta! 👋
+                      {currentRole === "particular" && "¡Bienvenido! 🏠"}
+                      {currentRole === "community_member" && "¡Bienvenido a tu Comunidad! 🏘️"}
+                      {currentRole === "service_provider" && "¡Tu Negocio en Marcha! 🔧"}
+                      {currentRole === "property_administrator" && "Panel de Control Administrativo 🏢"}
+                      {!["particular", "community_member", "service_provider", "property_administrator"].includes(currentRole) && "¡Bienvenido de vuelta! 👋"}
                     </h1>
                     <p className="text-stone-600 text-lg">
                       {profile.full_name || "Usuario"} • <span className="text-stone-800 font-semibold">{userTypeInfo.label}</span>
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <CheckCircle className="h-5 w-5 text-green-600" />
-                      <span className="text-green-600 font-medium">Sistema completamente configurado</span>
+                      <span className="text-green-600 font-medium">
+                        {currentRole === "particular" && "Cuenta configurada correctamente"}
+                        {currentRole === "community_member" && "Conectado con tu comunidad"}
+                        {currentRole === "service_provider" && "Perfil verificado y activo"}
+                        {currentRole === "property_administrator" && "Sistema de administración activo"}
+                        {!["particular", "community_member", "service_provider", "property_administrator"].includes(currentRole) && "Sistema completamente configurado"}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
-                    {/* Main Content Area */}
-                    <div className="space-y-8">
-                      {/* Status Cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                          <CardContent className="p-6">
-                            <div className="flex items-center gap-4">
-                              <div className={`w-12 h-12 ${userTypeInfo.color} rounded-full flex items-center justify-center`}>
-                                <UserTypeIcon className="h-6 w-6 text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-bold text-stone-900 mb-1 flex items-center gap-2">
-                                  Rol Activo: {userTypeInfo.label}
-                                  <Badge className="bg-stone-100 text-stone-700 text-xs">✓ Activo</Badge>
-                                </h3>
-                                <p className="text-stone-600 text-sm">
-                                  {userTypeInfo.description}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                          <CardContent className="p-6">
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                                <Shield className="h-6 w-6 text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-bold text-stone-900 mb-1">
-                                  Sistema Configurado 🎉
-                                </h3>
-                                <p className="text-stone-600 text-sm">
-                                  Base de datos • Roles • Email • Todo listo
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                          <CardContent className="p-6">
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                                <User className="h-6 w-6 text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-bold text-stone-900 mb-1">
-                                  Perfil Completo
-                                </h3>
-                                <p className="text-stone-600 text-sm">
-                                  Todas las funcionalidades disponibles
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {/* Role-specific functionality preview */}
-                      {currentRole && (
-                        <div>
-                          <div className="mb-6">
-                            <h2 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
-                              <UserTypeIcon className="h-8 w-8 text-stone-600" />
-                              Funcionalidades para {userTypeInfo.label}
-                            </h2>
-                            <p className="text-stone-600 text-lg">
-                              {currentRole === "community_member" && "Gestiona tu vida en la comunidad y solicita servicios"}
-                              {currentRole === "service_provider" && "Ofrece tus servicios profesionales y gestiona clientes"}
-                              {currentRole === "property_administrator" && "Administra propiedades y comunidades de forma eficiente"}
-                              {!["community_member", "service_provider", "property_administrator"].includes(currentRole) && "Gestiona tus propiedades y servicios domésticos"}
-                            </p>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {getRoleSpecificNavItems(currentRole).slice(0, 6).map((item, index) => (
-                              <Card key={item.id} className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab(item.id)}>
-                                <CardContent className="p-6">
-                                  <div className="flex items-start gap-4 mb-4">
-                                    <div className={`w-12 h-12 ${index % 2 === 0 ? 'bg-stone-600' : 'bg-stone-700'} rounded-full flex items-center justify-center group-hover:bg-stone-800 transition-colors`}>
-                                      <item.icon className="h-6 w-6 text-white" />
-                                    </div>
-                                    <div className="flex-1">
-                                      <h3 className="text-lg font-bold text-black mb-2">
-                                        {item.label}
-                                      </h3>
-                                      <p className="text-stone-600 text-sm">
-                                        {item.id === "evaluacion" && "Califica y comenta los servicios recibidos"}
-                                        {item.id === "propiedades" && "Gestiona tus propiedades y espacios"}
-                                        {item.id === "presupuesto" && "Solicita presupuestos personalizados"}
-                                        {item.id === "proveedores" && "Encuentra profesionales de confianza"}
-                                        {item.id === "servicios" && "Gestiona tu catálogo de servicios"}
-                                        {item.id === "clientes" && "Administra tu cartera de clientes"}
-                                        {item.id === "comunidades" && "Supervisa múltiples comunidades"}
-                                        {!["evaluacion", "propiedades", "presupuesto", "proveedores", "servicios", "clientes", "comunidades"].includes(item.id) && "Funcionalidad disponible"}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <Badge className="bg-stone-100 text-stone-700">
-                                      ✓ Disponible
-                                    </Badge>
-                                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300" />
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Herramientas de Sistema */}
-                      <div className="mt-12">
-                        <div className="mb-6">
-                          <h2 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
-                            <Settings className="h-8 w-8 text-stone-600" />
-                            Herramientas de Sistema
-                          </h2>
-                          <p className="text-stone-600 text-lg">Configuración avanzada y administración</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => router.push("/email-templates")}>
-                            <CardContent className="p-6 text-center">
-                              <div className="w-16 h-16 bg-stone-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-stone-700 transition-colors">
-                                <Mail className="h-8 w-8 text-white" />
-                              </div>
-                              <h3 className="text-lg font-bold text-black mb-3">
-                                Email Templates
-                              </h3>
-                              <p className="text-sm text-stone-600 mb-4">
-                                Gestiona plantillas de autenticación
-                              </p>
-                              <Badge variant="outline" className="text-xs border-stone-300 text-stone-600">
-                                Supabase Auth
-                              </Badge>
-                            </CardContent>
-                          </Card>
-
-                          <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => window.open("https://supabase.com/dashboard/project/djkrzbmgzfwagmripozi", "_blank")}>
-                            <CardContent className="p-6 text-center">
-                              <div className="w-16 h-16 bg-stone-700 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-stone-800 transition-colors">
-                                <Settings className="h-8 w-8 text-white" />
-                              </div>
-                              <h3 className="text-lg font-bold text-black mb-3">
-                                Supabase Dashboard
-                              </h3>
-                              <p className="text-sm text-stone-600 mb-4">
-                                Panel de administración de base de datos
-                              </p>
-                              <Badge variant="outline" className="text-xs border-stone-300 text-stone-600">
-                                Externo
-                              </Badge>
-                            </CardContent>
-                          </Card>
-
-                          <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => router.push("/help")}>
-                            <CardContent className="p-6 text-center">
-                              <div className="w-16 h-16 bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-stone-900 transition-colors">
-                                <FileText className="h-8 w-8 text-white" />
-                              </div>
-                              <h3 className="text-lg font-bold text-black mb-3">
-                                Documentación
-                              </h3>
-                              <p className="text-sm text-stone-600 mb-4">
-                                Guías completas y ayuda
-                              </p>
-                              <Badge variant="outline" className="text-xs border-stone-300 text-stone-600">
-                                Ayuda
-                              </Badge>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  {renderRoleOverview(currentRole)}
                 </ZoomableSection>
               )}
 
@@ -608,8 +1470,17 @@ Si el problema persiste, por favor:
               {activeTab === "perfil" && (
                 <ZoomableSection>
                   <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-black mb-2">Mi Perfil</h1>
-                    <p className="text-stone-600">Gestiona tu información personal y roles del sistema</p>
+                    <h1 className="text-3xl font-bold text-black mb-2">
+                      {currentRole === "service_provider" ? "Mi Perfil Profesional" : 
+                       currentRole === "property_administrator" ? "Mi Perfil Administrativo" : 
+                       "Mi Perfil"}
+                    </h1>
+                    <p className="text-stone-600">
+                      {currentRole === "service_provider" ? "Gestiona tu información de proveedor de servicios" : 
+                       currentRole === "property_administrator" ? "Gestiona tu información de administrador de fincas" : 
+                       currentRole === "community_member" ? "Gestiona tu información como miembro de comunidad" :
+                       "Gestiona tu información personal y roles del sistema"}
+                    </p>
                   </div>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -621,19 +1492,29 @@ Si el problema persiste, por favor:
                             <UserTypeIcon className="h-12 w-12 text-white" />
                           </div>
                           <CardTitle className="text-2xl font-bold text-black">
-                            Información del Perfil
+                            {currentRole === "service_provider" ? "Proveedor de Servicios" : 
+                             currentRole === "property_administrator" ? "Administrador de Fincas" : 
+                             currentRole === "community_member" ? "Miembro de Comunidad" :
+                             "Información del Perfil"}
                           </CardTitle>
                           <CardDescription className="text-stone-600 font-medium">
-                            Detalles de tu cuenta
+                            {currentRole === "service_provider" ? "Profesional verificado" : 
+                             currentRole === "property_administrator" ? "Profesional colegiado" : 
+                             currentRole === "community_member" ? "Residencial Los Olivos" :
+                             "Detalles de tu cuenta"}
                           </CardDescription>
                         </CardHeader>
 
                         <CardContent className="space-y-4">
                           <div className="space-y-3">
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
-                              <User className="h-5 w-5 text-stone-500" />
+                              <UserTypeIcon className="h-5 w-5 text-stone-500" />
                               <div>
-                                <p className="text-sm text-stone-500 font-medium">Nombre</p>
+                                <p className="text-sm text-stone-500 font-medium">
+                                  {currentRole === "service_provider" ? "Empresa" : 
+                                   currentRole === "property_administrator" ? "Empresa" : 
+                                   "Nombre"}
+                                </p>
                                 <p className="font-semibold text-black">{profile.full_name || "No especificado"}</p>
                               </div>
                             </div>
@@ -646,6 +1527,36 @@ Si el problema persiste, por favor:
                               </div>
                             </div>
 
+                            {currentRole === "community_member" && (
+                              <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
+                                <Home className="h-5 w-5 text-stone-500" />
+                                <div>
+                                  <p className="text-sm text-stone-500 font-medium">Vivienda</p>
+                                  <p className="font-semibold text-black">Edificio A - Portal 3 - 2ºB</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {currentRole === "service_provider" && (
+                              <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
+                                <Store className="h-5 w-5 text-stone-500" />
+                                <div>
+                                  <p className="text-sm text-stone-500 font-medium">Especialidad</p>
+                                  <p className="font-semibold text-black">Fontanería y Electricidad</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {currentRole === "property_administrator" && (
+                              <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
+                                <Briefcase className="h-5 w-5 text-stone-500" />
+                                <div>
+                                  <p className="text-sm text-stone-500 font-medium">Número de Colegiado</p>
+                                  <p className="font-semibold text-black">CAF-MAD-2847</p>
+                                </div>
+                              </div>
+                            )}
+
                             {profile.phone && (
                               <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
                                 <Phone className="h-5 w-5 text-stone-500" />
@@ -656,10 +1567,26 @@ Si el problema persiste, por favor:
                               </div>
                             )}
 
+                            {(currentRole === "service_provider" || currentRole === "property_administrator") && (
+                              <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
+                                <MapPin className="h-5 w-5 text-stone-500" />
+                                <div>
+                                  <p className="text-sm text-stone-500 font-medium">
+                                    {currentRole === "service_provider" ? "Zona de Trabajo" : "Zona de Actuación"}
+                                  </p>
+                                  <p className="font-semibold text-black">Madrid y {currentRole === "property_administrator" ? "área metropolitana" : "alrededores"}</p>
+                                </div>
+                              </div>
+                            )}
+
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
                               <Calendar className="h-5 w-5 text-stone-500" />
                               <div>
-                                <p className="text-sm text-stone-500 font-medium">Miembro desde</p>
+                                <p className="text-sm text-stone-500 font-medium">
+                                  {currentRole === "community_member" ? "Miembro desde" : 
+                                   (currentRole === "service_provider" || currentRole === "property_administrator") ? "En la plataforma desde" :
+                                   "Miembro desde"}
+                                </p>
                                 <p className="font-semibold text-black">
                                   {profile.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", {
                                     year: "numeric",
@@ -733,103 +1660,10 @@ Si el problema persiste, por favor:
                 </ZoomableSection>
               )}
 
-              {/* Properties Tab */}
-              {activeTab === "propiedades" && (
+              {/* Role-specific tabs */}
+              {activeTab !== "overview" && activeTab !== "perfil" && (
                 <ZoomableSection>
-                  <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-black mb-2">
-                      {currentRole === "community_member" ? "Mi Comunidad" : 
-                       currentRole === "property_administrator" ? "Gestionar Propiedades" : 
-                       "Mis Propiedades"}
-                    </h1>
-                    <p className="text-stone-600">
-                      {currentRole === "community_member" ? "Información y gestión de tu comunidad" : 
-                       currentRole === "property_administrator" ? "Administra múltiples propiedades y comunidades" : 
-                       "Gestiona tus propiedades residenciales"}
-                    </p>
-                  </div>
-                  <PropertyManager />
-                </ZoomableSection>
-              )}
-
-              {/* Budget Requests Tab */}
-              {activeTab === "presupuesto" && (
-                <ZoomableSection>
-                  <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-black mb-2">Solicitar Presupuesto</h1>
-                    <p className="text-stone-600">Crear nuevas solicitudes de servicios</p>
-                  </div>
-                  <BudgetRequestManager />
-                </ZoomableSection>
-              )}
-
-              {/* Service Evaluation Tab */}
-              {activeTab === "evaluacion" && (
-                <ZoomableSection>
-                  <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-black mb-2">Evaluación de Servicios</h1>
-                    <p className="text-stone-600">Califica y comenta los servicios recibidos</p>
-                  </div>
-                  
-                  <Card className="border-stone-200 shadow-lg">
-                    <CardContent className="p-8 text-center">
-                      <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <StarIcon className="h-8 w-8 text-amber-600" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-black mb-2">
-                        Sistema de Evaluaciones
-                      </h3>
-                      <p className="text-stone-600 mb-6">
-                        Aquí podrás calificar los servicios que has recibido, ayudando a otros usuarios a encontrar los mejores proveedores.
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <div className="flex items-center justify-center mb-2">
-                            {[1,2,3,4,5].map((star) => (
-                              <Star key={star} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                            ))}
-                          </div>
-                          <p className="text-sm font-medium text-stone-900">Calificación</p>
-                          <p className="text-xs text-stone-600">Puntúa del 1 al 5</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <FileText className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">Comentarios</p>
-                          <p className="text-xs text-stone-600">Comparte tu experiencia</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <ThumbsUp className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">Recomendación</p>
-                          <p className="text-xs text-stone-600">¿Lo recomendarías?</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-amber-100 text-amber-800 border-amber-200">
-                        Próximamente disponible
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                </ZoomableSection>
-              )}
-
-              {/* Other tabs placeholder */}
-              {!["overview", "propiedades", "presupuesto", "perfil", "evaluacion"].includes(activeTab) && (
-                <ZoomableSection>
-                  <Card className="border-stone-200 shadow-lg">
-                    <CardContent className="p-8 text-center">
-                      <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Settings className="h-8 w-8 text-stone-600" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-black mb-2">
-                        Funcionalidad en Desarrollo
-                      </h3>
-                      <p className="text-stone-600">
-                        Esta sección estará disponible próximamente. Mientras tanto, puedes explorar las otras funcionalidades del dashboard.
-                      </p>
-                      <Badge className="bg-stone-100 text-stone-700 mt-4">
-                        Próximamente
-                      </Badge>
-                    </CardContent>
-                  </Card>
+                  {renderRoleSpecificContent(activeTab, currentRole)}
                 </ZoomableSection>
               )}
             </div>
