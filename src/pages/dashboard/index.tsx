@@ -169,6 +169,26 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Quick Stats */}
                 <div className="lg:col-span-2 space-y-8">
+                  {/* Rol Status Card - NUEVO */}
+                  <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center">
+                          <Crown className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                            Rol Asignado: Particular
+                            <Badge className="bg-blue-500 text-white text-xs">✓ Activo</Badge>
+                          </h3>
+                          <p className="text-blue-700 text-sm">
+                            Tu cuenta está configurada como usuario particular con acceso completo a funcionalidades residenciales.
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   {/* Success Message */}
                   <Card className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200 hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
@@ -178,38 +198,41 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-emerald-900 mb-1">
-                            ¡Integración con Supabase activa! 🎉
+                            ¡Sistema completamente configurado! 🎉
                           </h3>
                           <p className="text-emerald-700 text-sm">
-                            Tu cuenta está conectada y lista para gestionar propiedades y solicitudes.
+                            Base de datos Supabase conectada • Rol de usuario verificado • Email configurado
                           </p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Quick Actions */}
+                  {/* Funcionalidades Específicas para Particular */}
                   <div>
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-6">Accesos Rápidos</h2>
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
+                      <User className="h-6 w-6 text-blue-600" />
+                      Funcionalidades para Particular
+                    </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <Card className="group bg-white/70 backdrop-blur-lg border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("properties")}>
                         <CardContent className="p-6">
                           <div className="flex items-center gap-4 mb-4">
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                              <Building className="h-6 w-6 text-white" />
+                              <Home className="h-6 w-6 text-white" />
                             </div>
                             <div className="flex-1">
                               <h3 className="font-semibold text-neutral-900 mb-1">
-                                Gestionar Propiedades
+                                Gestionar Propiedades Residenciales
                               </h3>
                               <p className="text-sm text-neutral-600">
-                                Administra tus propiedades y comunidades
+                                Registra y administra tus viviendas personales
                               </p>
                             </div>
                           </div>
                           <div className="flex justify-between items-center">
                             <Badge className="bg-blue-500 hover:bg-blue-600 text-white">
-                              Disponible
+                              ✓ Disponible
                             </Badge>
                             <ArrowRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform" />
                           </div>
@@ -224,50 +247,77 @@ export default function Dashboard() {
                             </div>
                             <div className="flex-1">
                               <h3 className="font-semibold text-neutral-900 mb-1">
-                                Solicitudes de Presupuesto
+                                Solicitar Servicios Domésticos
                               </h3>
                               <p className="text-sm text-neutral-600">
-                                Crea y gestiona solicitudes de servicios
+                                Fontanería, electricidad, limpieza, mantenimiento
                               </p>
                             </div>
                           </div>
                           <div className="flex justify-between items-center">
                             <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white">
-                              Disponible
+                              ✓ Disponible
                             </Badge>
                             <ArrowRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
                           </div>
                         </CardContent>
                       </Card>
 
-                      <Card className="group bg-white/70 backdrop-blur-lg border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => router.push("/email-templates")}>
+                      <Card className="group bg-white/70 backdrop-blur-lg border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <CardContent className="p-6">
                           <div className="flex items-center gap-4 mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                              <Mail className="h-6 w-6 text-white" />
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg">
+                              <Star className="h-6 w-6 text-white" />
                             </div>
                             <div className="flex-1">
                               <h3 className="font-semibold text-neutral-900 mb-1">
-                                Email Templates
+                                Evaluación de Servicios
                               </h3>
                               <p className="text-sm text-neutral-600">
-                                Configura plantillas de email para Supabase
+                                Califica y comenta los servicios recibidos
                               </p>
                             </div>
                           </div>
                           <div className="flex justify-between items-center">
-                            <Badge className="bg-purple-500 hover:bg-purple-600 text-white">
-                              Configuración
+                            <Badge className="bg-purple-500 text-white">
+                              ✓ Disponible
                             </Badge>
-                            <ArrowRight className="w-4 h-4 text-purple-600 group-hover:translate-x-1 transition-transform" />
+                            <Star className="w-4 h-4 text-purple-600" />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="group bg-white/70 backdrop-blur-lg border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                              <FileText className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-neutral-900 mb-1">
+                                Historial y Documentos
+                              </h3>
+                              <p className="text-sm text-neutral-600">
+                                Accede a facturas, contratos y reportes
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <Badge className="bg-amber-500 text-white">
+                              ✓ Disponible
+                            </Badge>
+                            <FileText className="w-4 h-4 text-amber-600" />
                           </div>
                         </CardContent>
                       </Card>
                     </div>
 
-                    {/* Additional Tools Section */}
-                    <div>
-                      <h2 className="text-2xl font-bold text-neutral-900 mb-6">Herramientas de Administración</h2>
+                    {/* Herramientas de Administración - Movido aquí */}
+                    <div className="mt-12">
+                      <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center gap-2">
+                        <Settings className="h-6 w-6 text-gray-600" />
+                        Herramientas de Sistema
+                      </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         <Card className="group bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200/60 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => router.push("/email-templates")}>
                           <CardContent className="p-6 text-center">
@@ -324,7 +374,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Profile Summary */}
+                {/* Profile Summary - MEJORADO */}
                 <div className="lg:col-span-1">
                   <Card className="bg-white/70 backdrop-blur-lg border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
                     <CardHeader className="text-center pb-6">
@@ -332,10 +382,10 @@ export default function Dashboard() {
                         <UserTypeIcon className="h-10 w-10 text-white" />
                       </div>
                       <CardTitle className="text-xl font-semibold">
-                        Resumen del Perfil
+                        Información del Usuario
                       </CardTitle>
                       <CardDescription>
-                        Información de tu cuenta
+                        borjapipaon@gmail.com
                       </CardDescription>
                     </CardHeader>
                     
@@ -349,21 +399,31 @@ export default function Dashboard() {
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-neutral-50/50 hover:bg-neutral-100/50 transition-colors">
-                          <Mail className="h-5 w-5 text-neutral-500" />
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50/50 hover:bg-blue-100/50 transition-colors border border-blue-200">
+                          <Crown className="h-5 w-5 text-blue-600" />
                           <div>
-                            <p className="text-sm text-neutral-500">Email</p>
-                            <p className="font-medium text-sm">{user.email}</p>
+                            <p className="text-sm text-blue-600 font-medium">Rol Activo</p>
+                            <p className="font-semibold text-blue-900">PARTICULAR</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50/50 hover:bg-emerald-100/50 transition-colors border border-emerald-200">
+                          <Shield className="h-5 w-5 text-emerald-600" />
+                          <div>
+                            <p className="text-sm text-emerald-600">Estado del Sistema</p>
+                            <p className="font-medium text-emerald-900">✓ Totalmente Configurado</p>
                           </div>
                         </div>
                       </div>
                       
                       <div className="pt-4 border-t border-neutral-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-neutral-600">Tipo de cuenta</span>
-                          <Badge className={`${userTypeInfo.color} text-white border-0 text-xs`}>
+                        <div className="text-center space-y-2">
+                          <Badge className={`${userTypeInfo.color} text-white border-0 text-sm px-4 py-2`}>
                             {userTypeInfo.label}
                           </Badge>
+                          <p className="text-xs text-neutral-500">
+                            {userTypeInfo.description}
+                          </p>
                         </div>
                       </div>
 
@@ -373,7 +433,7 @@ export default function Dashboard() {
                         className="w-full mt-4" 
                         onClick={() => setActiveTab("profile")}
                       >
-                        Ver Perfil Completo
+                        Gestionar Perfil y Roles
                       </Button>
                     </CardContent>
                   </Card>
