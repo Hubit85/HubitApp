@@ -201,13 +201,11 @@ export class SupabaseDocumentService {
     // Upload file to storage
     const filePath = await this.uploadFile(file, `${documentData.document_type}s`);
     
-    // Create document record with valid enum types
+    // Create document record
     const fullDocumentData: DocumentInsert = {
       ...documentData,
       file_path: filePath,
-      file_size: file.size,
-      document_type: documentData.document_type as "contract" | "invoice" | "receipt" | "certificate" | "license" | "insurance" | "photo" | "blueprint" | "permit" | "other",
-      related_entity_type: documentData.related_entity_type as "budget_request" | "quote" | "contract" | "invoice" | "profile" | "property"
+      file_size: file.size
     };
 
     return this.createDocument(fullDocumentData);
