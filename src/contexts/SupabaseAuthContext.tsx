@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile, ProfileInsert } from "@/integrations/supabase/types";
@@ -25,32 +25,79 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Función mejorada para verificar conectividad básica con timeout
-const checkBasicConnection = async (): Promise<boolean> => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos timeout
+// Circuit breaker para evitar reconexiones excesivas
+class CircuitBreaker {
+  private failures = 0;
+  private lastFailureTime = 0;
+  private state: 'closed' | 'open' | 'half-open' = 'closed';
+  
+  private readonly maxFailures = 3;
+  private readonly resetTimeout = 30000; // 30 segundos
+  private readonly failureTimeout = 10000; // 10 segundos
 
-  try {
-    console.log("🔗 Checking basic Supabase connection...");
-    
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("count", { count: 'exact' })
-      .limit(0)
-      .abortSignal(controller.signal);
-
-    clearTimeout(timeoutId);
-
-    if (!error) {
-      console.log("✅ Basic Supabase connection successful");
-      return true;
+  async call<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.state === 'open') {
+      if (Date.now() - this.lastFailureTime > this.resetTimeout) {
+        this.state = 'half-open';
+      } else {
+        throw new Error('Circuit breaker is open');
+      }
     }
+
+    try {
+      const result = await fn();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+
+  private onSuccess() {
+    this.failures = 0;
+    this.state = 'closed';
+  }
+
+  private onFailure() {
+    this.failures++;
+    this.lastFailureTime = Date.now();
     
-    console.warn("⚠️ Connection test failed:", error.message);
-    return false;
+    if (this.failures >= this.maxFailures) {
+      this.state = 'open';
+    }
+  }
+
+  isOpen() {
+    return this.state === 'open';
+  }
+}
+
+const connectionCircuitBreaker = new CircuitBreaker();
+
+// Función optimizada para verificar conectividad
+const checkBasicConnection = async (): Promise<boolean> => {
+  try {
+    return await connectionCircuitBreaker.call(async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos timeout
+
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .select("count", { count: 'exact' })
+          .limit(0)
+          .abortSignal(controller.signal);
+
+        clearTimeout(timeoutId);
+        return !error;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
+    });
   } catch (error) {
-    clearTimeout(timeoutId);
-    console.warn("⚠️ Connection test error:", error);
+    console.warn("⚠️ Connection check failed:", error instanceof Error ? error.message : error);
     return false;
   }
 };
@@ -65,10 +112,21 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [databaseConnected, setDatabaseConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('reconnecting');
 
-  // Función para intentar recuperar la conexión
+  // Referencias para evitar efectos duplicados
+  const initializationRef = useRef(false);
+  const userDataFetchRef = useRef<string | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const connectivityIntervalRef = useRef<NodeJS.Timeout>();
+
+  // Función para intentar recuperar la conexión con throttling
   const retryConnection = async (): Promise<boolean> => {
+    if (connectionCircuitBreaker.isOpen()) {
+      console.log('🚫 Circuit breaker is open, skipping connection retry');
+      return false;
+    }
+
     setConnectionStatus('reconnecting');
-    console.log('🔄 Manual connection retry initiated...');
+    console.log('🔄 Connection retry initiated...');
     
     try {
       const isConnected = await checkBasicConnection();
@@ -76,7 +134,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setDatabaseConnected(isConnected);
       setConnectionStatus(isConnected ? 'connected' : 'disconnected');
       
-      if (isConnected && user) {
+      if (isConnected && user && userDataFetchRef.current !== user.id) {
         await fetchUserData(user);
       }
       
@@ -89,9 +147,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Evitar inicialización múltiple
+    if (initializationRef.current) return;
+    initializationRef.current = true;
+
     let mounted = true;
 
-    // Initialize auth con manejo mejorado de errores
     const initializeAuth = async () => {
       try {
         console.log("🚀 Initializing Supabase Auth...");
@@ -102,9 +163,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setDatabaseConnected(isConnected);
         setConnectionStatus(isConnected ? 'connected' : 'disconnected');
         
-        // Get current session con timeout extendido
+        // Get current session con timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
         
         try {
           const { data: { session }, error } = await supabase.auth.getSession();
@@ -114,13 +175,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           
           if (error) {
             console.error("❌ Error getting session:", error);
-            
-            // Si es un error de red, intentar recuperación
-            if (error.message.includes('fetch') || error.message.includes('network')) {
-              console.log('🔄 Network error detected, attempting recovery...');
-              setTimeout(retryConnection, 2000); // Retry after 2 seconds
-            }
-            
             setLoading(false);
             return;
           }
@@ -156,23 +210,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
     initializeAuth();
 
-    // Listen for auth changes con manejo mejorado de errores
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
         
         console.log("🔄 Auth state changed:", event, !!session?.user);
-        
-        // Manejar eventos específicos de error de token
-        if (event === 'TOKEN_REFRESHED') {
-          console.log("✅ Token refreshed successfully");
-          setConnectionStatus('connected');
-        }
-        
-        if (event === 'SIGNED_OUT') {
-          console.log("👋 User signed out");
-          setConnectionStatus('disconnected');
-        }
         
         setSession(session);
         setUser(session?.user || null);
@@ -184,45 +227,61 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           setUserRoles([]);
           setActiveRole(null);
           setLoading(false);
+          userDataFetchRef.current = null;
         }
       }
     );
 
-    // Manejo de errores de autenticación a nivel global
-    const handleAuthErrors = (error: AuthError) => {
-      console.log("🚨 Auth error detected:", error.message);
-      
-      if (error.message.includes('refresh_token') || error.message.includes('Failed to fetch')) {
-        console.log("🔄 Token refresh error - attempting recovery...");
-        setConnectionStatus('reconnecting');
-        setTimeout(retryConnection, 1000);
-      }
-    };
-
-    // Monitoreo de conectividad periódico
-    const connectivityInterval = setInterval(async () => {
-      if (connectionStatus === 'connected') {
+    // Monitoreo de conectividad con throttling
+    connectivityIntervalRef.current = setInterval(async () => {
+      if (connectionStatus === 'connected' && !connectionCircuitBreaker.isOpen()) {
         const isStillConnected = await checkBasicConnection();
         if (!isStillConnected && mounted) {
           console.log("🔗 Connection lost, updating status...");
           setConnectionStatus('disconnected');
           setDatabaseConnected(false);
+          
+          // Intentar reconectar después de un delay
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+          }
+          
+          reconnectTimeoutRef.current = setTimeout(() => {
+            if (mounted) {
+              retryConnection();
+            }
+          }, 5000);
         }
       }
-    }, 30000); // Check every 30 seconds
+    }, 45000); // Check cada 45 segundos (menos frecuente)
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
-      clearInterval(connectivityInterval);
+      
+      if (connectivityIntervalRef.current) {
+        clearInterval(connectivityIntervalRef.current);
+      }
+      
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, []);
 
   const fetchUserData = async (userObject: User) => {
+    // Evitar fetches duplicados
+    if (userDataFetchRef.current === userObject.id) {
+      console.log("⏭️ Skipping duplicate user data fetch for:", userObject.id);
+      return;
+    }
+    
+    userDataFetchRef.current = userObject.id;
+
     try {
       console.log("👤 Fetching user data for:", userObject.id);
       
-      // Check basic connectivity first
+      // Check connectivity first
       const isConnected = await checkBasicConnection();
       setDatabaseConnected(isConnected);
       setConnectionStatus(isConnected ? 'connected' : 'disconnected');
@@ -260,17 +319,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Try to fetch profile from database with timeout
+      // Try to fetch profile from database
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 segundos
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos
         
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", userObject.id)
           .abortSignal(controller.signal)
-          .single();
+          .maybeSingle();
 
         clearTimeout(timeoutId);
 
@@ -299,7 +358,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           try {
             const createController = new AbortController();
-            const createTimeoutId = setTimeout(() => createController.abort(), 12000);
+            const createTimeoutId = setTimeout(() => createController.abort(), 8000);
             
             const { data: createdProfile, error: createError } = await supabase
               .from("profiles")
@@ -353,15 +412,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        // Load user roles with timeout
+        // Load user roles with throttling
         try {
           console.log("🎭 Loading user roles...");
-          const rolesController = new AbortController();
-          const rolesTimeoutId = setTimeout(() => rolesController.abort(), 12000);
-          
           const roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
           
-          clearTimeout(rolesTimeoutId);
           setUserRoles(roles);
           
           const activeRoleData = roles.find(r => r.is_active) || null;
@@ -439,7 +494,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
+      const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 segundos timeout
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -493,7 +548,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -581,6 +636,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       setUserRoles([]);
       setActiveRole(null);
+      userDataFetchRef.current = null;
     } catch (error) {
       console.error("❌ Sign out error:", error);
     }
