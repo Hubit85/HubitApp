@@ -150,7 +150,7 @@ export class SupabaseContractService {
 
     const contract = await this.updateContract(id, updates);
 
-    // If both signatures are present, activate the contract
+    // If both signatures are present, activate the contract with explicit type casting
     if (contract.client_signature && contract.provider_signature) {
       return this.updateContract(id, {
         status: "active" as Database["public"]["Enums"]["contract_status"],
