@@ -90,10 +90,10 @@ export default function PropertyManager() {
             name: propertyData.name,
             address: propertyData.address,
             city: propertyData.city,
-            postal_code: propertyData.postal_code || '',
-            property_type: propertyData.property_type,
-            description: propertyData.description,
-            units_count: propertyData.units_count
+            postal_code: propertyData.postal_code,
+            property_type: propertyData.property_type || 'residential',
+            description: propertyData.description || '',
+            units_count: propertyData.units_count || 1
         };
         res = await supabase.from("properties").insert(insertData);
       }
