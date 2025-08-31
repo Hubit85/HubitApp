@@ -67,7 +67,7 @@ export class SupabaseConversationService {
     const { data, error } = await supabase
       .from("conversations")
       .select("*")
-      .contains("participants", [userId])
+      .eq("user_id", userId)
       .eq("is_active", true)
       .order("last_message_at", { ascending: false });
 
@@ -106,14 +106,13 @@ export class SupabaseConversationService {
     participant1: string,
     participant2: string,
     relatedEntityType?: string,
-    relatedEntityId?: string,
-    title?: string
+    relatedEntityId?: string
   ): Promise<Conversation> {
     // Try to find existing conversation between these participants
     const { data: existing, error: findError } = await supabase
       .from("conversations")
       .select("*")
-      .or(`participants.cs.{${participant1},${participant2}}`)
+      .eq("user_id", participant1)
       .eq("is_active", true)
       .limit(1)
       .single();
@@ -124,8 +123,7 @@ export class SupabaseConversationService {
 
     // Create new conversation
     const conversationData: ConversationInsert = {
-      participants: [participant1, participant2],
-      title: title || "Nueva conversación",
+      user_id: participant1,
       related_entity_type: relatedEntityType || null,
       related_entity_id: relatedEntityId || null
     };
@@ -278,7 +276,6 @@ export class SupabaseConversationService {
     if (!query) return conversations;
 
     return conversations.filter(conv => 
-      conv.title?.toLowerCase().includes(query.toLowerCase()) ||
       conv.last_message?.toLowerCase().includes(query.toLowerCase())
     );
   }
@@ -390,12 +387,11 @@ export class SupabaseConversationService {
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: 'conversations'
+        table: 'conversations',
+        filter: `user_id=eq.${userId}`
       }, (payload) => {
         const conversation = payload.new as Conversation;
-        if (conversation.participants.includes(userId)) {
-          callback(conversation);
-        }
+        callback(conversation);
       })
       .subscribe();
   }
@@ -403,40 +399,38 @@ export class SupabaseConversationService {
   // ===================== CONVERSATION TEMPLATES =====================
 
   static async createBudgetRequestConversation(
-    participants: string[],
+    userId: string,
     budgetRequestId: string,
     initialMessage?: string
   ): Promise<{ conversation: Conversation; message?: Message }> {
     const conversation = await this.createConversation({
-      participants,
-      title: "Consulta sobre solicitud de presupuesto",
+      user_id: userId,
       related_entity_type: "budget_request",
       related_entity_id: budgetRequestId
     });
 
     let message;
-    if (initialMessage && participants[0]) {
-      message = await this.sendMessage(conversation.id, participants[0], initialMessage);
+    if (initialMessage) {
+      message = await this.sendMessage(conversation.id, userId, initialMessage);
     }
 
     return { conversation, message };
   }
 
   static async createQuoteConversation(
-    participants: string[],
+    userId: string,
     quoteId: string,
     initialMessage?: string
   ): Promise<{ conversation: Conversation; message?: Message }> {
     const conversation = await this.createConversation({
-      participants,
-      title: "Conversación sobre cotización",
+      user_id: userId,
       related_entity_type: "quote",
       related_entity_id: quoteId
     });
 
     let message;
-    if (initialMessage && participants[0]) {
-      message = await this.sendMessage(conversation.id, participants[0], initialMessage);
+    if (initialMessage) {
+      message = await this.sendMessage(conversation.id, userId, initialMessage);
     }
 
     return { conversation, message };
