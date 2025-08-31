@@ -61,13 +61,16 @@ export default function RegisterPage() {
     professional_number: "",
     community_code: ""
   });
-  
+
+  // State variables for form control and validation
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [cifValidating, setCifValidating] = useState(false);
+  
+  // Fix boolean type issues - ensure these are properly typed
+  const [cifValidating, setCifValidating] = useState<boolean>(false);
   const [cifValid, setCifValid] = useState<boolean | null>(null);
   
   const [passwordValidation, setPasswordValidation] = useState({
@@ -158,24 +161,24 @@ export default function RegisterPage() {
       case 1:
         return !!formData.role;
       case 2:
-        const baseValid = formData.full_name && formData.address && formData.email && formData.phone;
+        const baseValid = !!(formData.full_name && formData.address && formData.email && formData.phone);
         
         if (formData.role === 'service_provider') {
-          return baseValid && formData.company_name && formData.company_address && 
-                 formData.cif && formData.business_email && formData.business_phone && cifValid === true;
+          return baseValid && !!(formData.company_name && formData.company_address && 
+                 formData.cif && formData.business_email && formData.business_phone) && cifValid === true;
         }
         
         if (formData.role === 'property_administrator') {
-          return baseValid && formData.company_name && formData.company_address && 
+          return baseValid && !!(formData.company_name && formData.company_address && 
                  formData.cif && formData.professional_number && formData.business_email && 
-                 formData.business_phone && cifValid === true;
+                 formData.business_phone) && cifValid === true;
         }
         
         return baseValid;
       case 3:
-        return formData.password && formData.confirmPassword && 
+        return !!(formData.password && formData.confirmPassword && 
                formData.password === formData.confirmPassword &&
-               Object.values(passwordValidation).every(Boolean);
+               Object.values(passwordValidation).every(Boolean));
       default:
         return false;
     }
