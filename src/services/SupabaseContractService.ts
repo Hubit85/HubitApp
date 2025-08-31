@@ -143,10 +143,8 @@ export class SupabaseContractService {
 
     if (signerType === 'client') {
       updates.client_signature = signature;
-      updates.client_signed_at = new Date().toISOString();
     } else {
       updates.provider_signature = signature;
-      updates.provider_signed_at = new Date().toISOString();
     }
 
     const contract = await this.updateContract(id, updates);
@@ -257,8 +255,7 @@ export class SupabaseContractService {
       contract_id: contractId,
       start_time: new Date().toISOString(),
       end_time: new Date().toISOString(),
-      description: description || "Work session started",
-      status: "active"
+      description: description || "Work session started"
     });
   }
 
@@ -269,15 +266,13 @@ export class SupabaseContractService {
 
     return this.updateWorkSession(id, {
       end_time: endTime.toISOString(),
-      status: "completed",
       description: workPerformed || session.description
     });
   }
 
   static async approveWorkSession(id: string, approved: boolean): Promise<WorkSession> {
     return this.updateWorkSession(id, {
-      approved_by_client: approved,
-      status: approved ? "approved" : "rejected"
+      client_approved: approved
     });
   }
 
@@ -288,8 +283,6 @@ export class SupabaseContractService {
     active: number;
     completed: number;
     cancelled: number;
-    totalValue: number;
-    averageValue: number;
     completionRate: number;
   }> {
     const contracts = isProvider 
@@ -301,10 +294,6 @@ export class SupabaseContractService {
       active: contracts.filter(c => c.status === "active").length,
       completed: contracts.filter(c => c.status === "completed").length,
       cancelled: contracts.filter(c => c.status === "cancelled").length,
-      totalValue: contracts.reduce((sum, c) => sum + (c.amount || 0), 0),
-      averageValue: contracts.length > 0 
-        ? contracts.reduce((sum, c) => sum + (c.amount || 0), 0) / contracts.length 
-        : 0,
       completionRate: contracts.length > 0
         ? (contracts.filter(c => c.status === "completed").length / contracts.length) * 100
         : 0
@@ -329,7 +318,7 @@ export class SupabaseContractService {
         }
         return sum;
       }, 0),
-      approvedSessions: sessions.filter(s => s.approved_by_client === true).length
+      approvedSessions: sessions.filter(s => s.client_approved === true).length
     };
 
     return stats;
@@ -341,8 +330,6 @@ export class SupabaseContractService {
     status?: string;
     dateFrom?: string;
     dateTo?: string;
-    minAmount?: number;
-    maxAmount?: number;
     isProvider?: boolean;
   }): Promise<Contract[]> {
     let query = supabase
@@ -350,9 +337,9 @@ export class SupabaseContractService {
       .select("*");
 
     if (filters?.isProvider) {
-      query = query.eq("provider_id", userId);
+      query = query.eq("service_provider_id", userId);
     } else {
-      query = query.eq("client_id", userId);
+      query = query.eq("user_id", userId);
     }
 
     if (filters?.status) {
@@ -365,14 +352,6 @@ export class SupabaseContractService {
 
     if (filters?.dateTo) {
       query = query.lte("created_at", filters.dateTo);
-    }
-
-    if (filters?.minAmount) {
-      query = query.gte("amount", filters.minAmount);
-    }
-
-    if (filters?.maxAmount) {
-      query = query.lte("amount", filters.maxAmount);
     }
 
     const { data, error } = await query.order("created_at", { ascending: false });
@@ -389,12 +368,10 @@ export class SupabaseContractService {
 
     const contractData: ContractInsert = {
       quote_id: quoteId,
-      client_id: "", // Will be set from quote data
-      provider_id: quote.service_provider_id,
-      amount: quote.amount,
+      user_id: quote.user_id, // Using user_id instead of client_id
+      service_provider_id: quote.service_provider_id,
       title: `Contract for Quote ${quoteId}`,
       description: quote.description,
-      payment_terms: quote.payment_terms,
       terms_and_conditions: quote.terms_and_conditions
     };
 
