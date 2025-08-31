@@ -198,13 +198,29 @@ export class SupabaseDocumentService {
     file: File,
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
-    // Upload file to storage - use document type directly without explicit casting
-    const folder = documentData.document_type === "other" ? "documents" : `${documentData.document_type}s`;
+    // Create appropriate folder name based on document type
+    const docType = documentData.document_type;
+    const folderMap: Record<string, string> = {
+      "contract": "contracts",
+      "invoice": "invoices", 
+      "receipt": "receipts",
+      "certificate": "certificates",
+      "license": "licenses",
+      "insurance": "insurance",
+      "photo": "photos",
+      "blueprint": "blueprints", 
+      "permit": "permits",
+      "other": "documents"
+    };
+    
+    const folder = folderMap[docType as string] || "documents";
     const filePath = await this.uploadFile(file, folder);
     
     // Create document record
     const fullDocumentData: DocumentInsert = {
       ...documentData,
+      document_type: docType as Database["public"]["Enums"]["document_type"],
+      related_entity_type: documentData.related_entity_type as Database["public"]["Enums"]["document_related_entity_type"],
       file_path: filePath,
       file_size: file.size
     };
@@ -220,8 +236,22 @@ export class SupabaseDocumentService {
       await this.deleteFileFromStorage(document.file_path);
     }
 
-    // Upload new file - use document type directly without explicit casting
-    const folder = document.document_type === "other" ? "documents" : `${document.document_type}s`;
+    // Create appropriate folder name based on document type
+    const docType = document.document_type;
+    const folderMap: Record<string, string> = {
+      "contract": "contracts",
+      "invoice": "invoices",
+      "receipt": "receipts", 
+      "certificate": "certificates",
+      "license": "licenses",
+      "insurance": "insurance",
+      "photo": "photos",
+      "blueprint": "blueprints",
+      "permit": "permits",
+      "other": "documents"
+    };
+    
+    const folder = folderMap[docType as string] || "documents";
     const newFilePath = await this.uploadFile(newFile, folder);
     
     // Update document record
