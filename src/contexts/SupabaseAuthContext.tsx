@@ -552,21 +552,74 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const activateRole = async (roleType: UserRole['role_type']) => {
     if (!user) {
+      console.error("❌ activateRole: No user authenticated");
       return { success: false, message: "Usuario no autenticado" };
     }
 
+    console.log("🔄 SupabaseAuthContext: Starting activateRole", { userId: user.id, roleType });
+
     try {
+      // Llamar al servicio de roles con mejores logs
+      console.log("📞 Calling SupabaseUserRoleService.activateRole...");
       const result = await SupabaseUserRoleService.activateRole(user.id, roleType);
       
+      console.log("📡 SupabaseUserRoleService.activateRole result:", result);
+      
       if (result.success) {
-        // Refresh roles after activation
-        await refreshRoles();
+        console.log("✅ Role activated successfully, refreshing roles...");
+        
+        // Refresh roles after activation - with retry logic
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait a bit for DB to update
+            await refreshRoles();
+            
+            // Verify the role was actually activated
+            const activeRoleData = userRoles.find(r => r.is_active && r.role_type === roleType);
+            if (activeRoleData || retryCount === maxRetries - 1) {
+              console.log("✅ Roles refreshed successfully");
+              break;
+            }
+            
+            retryCount++;
+            console.log(`🔄 Retry ${retryCount}/${maxRetries} - roles not updated yet`);
+            
+          } catch (refreshError) {
+            console.warn(`⚠️ Retry ${retryCount + 1} failed:`, refreshError);
+            retryCount++;
+            
+            if (retryCount >= maxRetries) {
+              console.error("❌ Max retries exceeded for refreshRoles");
+              break;
+            }
+          }
+        }
+        
+        return { success: true, message: result.message };
+      } else {
+        console.error("❌ Failed to activate role:", result.message);
+        return { success: false, message: result.message };
+      }
+    } catch (error) {
+      console.error("❌ Error in activateRole:", error);
+      
+      let errorMessage = "Error al activar el rol";
+      if (error instanceof Error) {
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = "Error de conexión al activar el rol. Verifica tu internet.";
+        } else if (error.message.includes('timeout')) {
+          errorMessage = "La operación tardó demasiado tiempo. Inténtalo de nuevo.";
+        } else if (error.message.includes('401') || error.message.includes('403')) {
+          errorMessage = "Error de permisos. Tu sesión puede haber expirado.";
+        } else {
+          errorMessage = `Error al activar el rol: ${error.message}`;
+        }
       }
       
-      return result;
-    } catch (error) {
-      console.error("Error activating role:", error);
-      return { success: false, message: "Error al activar el rol" };
+      return { success: false, message: errorMessage };
     }
   };
 
