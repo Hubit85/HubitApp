@@ -579,4 +579,63 @@ export class SupabaseUserRoleService {
 
     return data;
   }
+
+  static async addUserRole(userId: string, roleType: string, roleData?: any) {
+    try {
+      // Ensure roleType is one of the valid values
+      const validRoles = ['service_provider', 'particular', 'community_member', 'property_administrator'];
+      if (!validRoles.includes(roleType)) {
+        return { success: false, error: `Invalid role type: ${roleType}` };
+      }
+
+      const roleRecord = {
+        user_id: userId,
+        role_type: roleType,
+        is_verified: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        role_specific_data: roleData || {}
+      };
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .insert(roleRecord)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error("Error adding user role:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  static async verifyRole(userId: string, roleType: string) {
+    try {
+      const validRoles = ['service_provider', 'particular', 'community_member', 'property_administrator'];
+      if (!validRoles.includes(roleType)) {
+        return { success: false, error: `Invalid role type: ${roleType}` };
+      }
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .update({ 
+          is_verified: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", userId)
+        .eq("role_type", roleType)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error: any) {
+      console.error("Error verifying role:", error);
+      return { success: false, error: error.message };
+    }
+  }
 }

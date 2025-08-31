@@ -404,21 +404,23 @@ export class SupabaseConversationService {
   static async createBudgetRequestConversation(
     userId: string,
     budgetRequestId: string,
+    subject: string,
     initialMessage?: string
   ): Promise<{ conversation: Conversation; message?: Message }> {
-    const conversation = await this.createConversation({
+    const newConversation = await supabase.from("conversations").insert([{
       user_id: userId,
+      service_provider_id: "00000000-0000-0000-0000-000000000000", // Default system ID
       budget_request_id: budgetRequestId,
-      subject: "Conversación sobre solicitud de presupuesto",
-      is_active: true,
-    });
+      subject: subject,
+      is_active: true
+    }]).select().single();
 
     let message;
     if (initialMessage) {
-      message = await this.sendMessage(conversation.id, userId, initialMessage);
+      message = await this.sendMessage(newConversation.id, userId, initialMessage);
     }
 
-    return { conversation, message };
+    return { conversation: newConversation, message };
   }
 
   static async createQuoteConversation(

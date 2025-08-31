@@ -373,39 +373,88 @@ export class SupabaseContractService {
     return data || [];
   }
 
-  static async createFromQuote(quoteId: string): Promise<Contract> {
-    // Get quote details
-    const { data: quote, error: quoteError } = await supabase
-      .from("quotes")
-      .select("*")
-      .eq("id", quoteId)
+  // Fix service provider selection fields
+  private static async getServiceProviderForContract(serviceProviderId: string) {
+    const { data, error } = await supabase
+      .from("service_providers")
+      .select(`
+        id,
+        company_name,
+        phone
+      `)
+      .eq("id", serviceProviderId)
       .single();
-
-    if (quoteError) {
-      throw new Error(quoteError.message);
+      
+    if (error) {
+      console.error("Error fetching service provider:", error);
+      return null;
     }
 
-    // Create contract with correct field mapping
-    const contractData = {
-      quote_id: quoteId,
-      user_id: quote.user_id,
-      service_provider_id: quote.service_provider_id,
-      contract_number: this.generateContractNumber(),
-      contract_status: "pending" as const,
-      total_amount: quote.amount,
-      description: quote.description,
-      estimated_duration: quote.estimated_duration,
-      estimated_start_date: quote.estimated_start_date,
-      warranty_period: quote.warranty_period,
-      terms_and_conditions: quote.terms_and_conditions,
-      payment_terms: quote.payment_terms,
-      deliverables: quote.deliverables,
-      project_timeline: quote.project_timeline,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    return data;
+  }
 
-    return this.createContract(contractData);
+  static async logTimeEntry(timeEntry: { 
+    contract_id: string; 
+    service_provider_id: string;
+    start_time: string; 
+    end_time: string; 
+    description: string; 
+  }) {
+    const { data, error } = await supabase
+      .from("time_logs")
+      .insert([timeEntry]);
+
+    if (error) {
+      console.error("Error logging time entry:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  }
+
+  static async createContractFromQuote(quote: any) {
+    try {
+      const clientId = quote.user_id || quote.client_id;
+      const contractNumber = this.generateContractNumber();
+      
+      const contractData = {
+        quote_id: quote.id,
+        client_id: clientId,
+        service_provider_id: quote.service_provider_id,
+        contract_number: contractNumber,
+        status: "pending",
+        total_amount: quote.amount,
+        work_description: quote.description,
+        estimated_duration: quote.estimated_duration,
+        estimated_start_date: quote.estimated_start_date,
+        estimated_completion_date: quote.estimated_completion_date,
+        payment_terms: quote.payment_terms || "Net 30",
+        deliverables: quote.deliverables || [],
+        project_timeline: quote.project_timeline || "",
+        warranty_period: quote.warranty_period,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from("contracts")
+        .insert([contractData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, contract: data };
+    } catch (error: any) {
+      console.error("Error creating contract:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  private static generateContractNumber(): string {
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    return `CON-${timestamp}-${random}`;
   }
 
   static async getServiceProviderInfo(providerId: string): Promise<ServiceProvider | null> {

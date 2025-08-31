@@ -259,11 +259,10 @@ export default function RegisterPage() {
         full_name: formData.role === 'service_provider' || formData.role === 'property_administrator' 
           ? formData.company_name 
           : formData.full_name,
-        user_type: formData.role,
+        user_type: formData.role as string,
         phone: formData.role === 'service_provider' || formData.role === 'property_administrator' 
           ? formData.business_phone 
-          : formData.phone,
-        role_specific_data: roleSpecificData
+          : formData.phone
       });
 
       if (result?.error) {

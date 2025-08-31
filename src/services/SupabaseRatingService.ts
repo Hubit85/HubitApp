@@ -463,4 +463,26 @@ export class SupabaseRatingService {
     if (rating >= 1.5) return 'poor';
     return 'terrible';
   }
+
+  private static async getContractDetails(contractId: string) {
+    const { data, error } = await supabase
+      .from("contracts")
+      .select(`
+        id,
+        client_id,
+        service_provider_id,
+        status,
+        total_amount,
+        work_description
+      `)
+      .eq("id", contractId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching contract:", error);
+      return null;
+    }
+
+    return data;
+  }
 }

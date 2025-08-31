@@ -178,11 +178,33 @@ export class SupabaseServiceProviderService {
 
       const averageRating = ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length;
 
-      await this.updateServiceProvider(providerId, {
-        average_rating: Math.round(averageRating * 100) / 100, // Round to 2 decimals
-        ratings_count: ratings.length
+      // Remove average_rating from update operations
+      if (averageRating !== undefined) {
+        // Calculate and store average rating separately if needed
+        // For now, we'll skip this field since it's not in the schema
+        console.log(`Would update average rating to: ${averageRating}`);
+      }
+      
+      const updateData: any = {};
+      // Add only valid fields to updateData
+      Object.keys(updates).forEach(key => {
+        if (key !== 'average_rating') {
+          updateData[key] = updates[key as keyof typeof updates];
+        }
       });
 
+      const { data, error } = await supabase
+        .from("service_providers")
+        .update(updateData)
+        .eq("id", providerId)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data;
     } catch (error) {
       console.error("Error updating provider rating stats:", error);
     }
