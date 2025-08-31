@@ -45,37 +45,85 @@ export default function Dashboard() {
   const handleRoleChange = async (newRole: string) => {
     if (!user || newRole === selectedRole) return;
     
+    console.log("🔄 Attempting role change:", { from: selectedRole, to: newRole, user: user.id });
+    
     try {
+      setSelectedRole(newRole);
+      
+      // Activar el rol usando el servicio
+      console.log("📞 Calling activateRole service...");
       const result = await activateRole(newRole as any);
+      
+      console.log("📡 activateRole result:", result);
+      
       if (result.success) {
-        setSelectedRole(newRole);
+        console.log("✅ Role activated successfully, redirecting...");
+        
+        // Pequeña pausa para mostrar el cambio visualmente
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Redirigir al dashboard específico del rol
         switch (newRole) {
           case "particular":
+            console.log("🏠 Redirecting to dashboard_particular");
             router.push("/dashboard_particular");
             break;
           case "community_member":
+            console.log("🏘️ Redirecting to dashboard_miembro");
             router.push("/dashboard_miembro");
             break;
           case "service_provider":
+            console.log("🔧 Redirecting to dashboard_proveedor");
             router.push("/dashboard_proveedor");
             break;
           case "property_administrator":
+            console.log("🏢 Redirecting to dashboard_administrador");
             router.push("/dashboard_administrador");
             break;
           default:
-            // Si por algún motivo el rol no coincide, mantener en dashboard principal
+            console.warn("⚠️ Unknown role type:", newRole);
+            alert(`Rol no reconocido: ${newRole}. Por favor, contacta al soporte.`);
             break;
         }
       } else {
-        console.error("Failed to change role:", result.message);
-        // Mostrar mensaje de error al usuario
-        alert(`Error al cambiar el rol: ${result.message}`);
+        console.error("❌ Failed to change role:", result.message);
+        
+        // Revertir el selector al rol anterior
+        setSelectedRole(selectedRole);
+        
+        // Mostrar mensaje de error más específico
+        let errorMessage = result.message;
+        if (result.message.includes('verified')) {
+          errorMessage = "Este rol no está verificado. Por favor, verifica tu email o contacta al administrador.";
+        } else if (result.message.includes('exists')) {
+          errorMessage = "Este rol no está disponible para tu cuenta. Contacta al administrador.";
+        } else if (result.message.includes('network')) {
+          errorMessage = "Error de conexión. Verifica tu internet e inténtalo de nuevo.";
+        }
+        
+        alert(`Error al cambiar el rol: ${errorMessage}`);
       }
     } catch (error) {
-      console.error("Error changing role:", error);
-      alert("Error inesperado al cambiar el rol. Por favor, inténtalo de nuevo.");
+      console.error("💥 Error in handleRoleChange:", error);
+      
+      // Revertir el selector al rol anterior
+      setSelectedRole(selectedRole);
+      
+      // Mostrar mensaje de error apropiado
+      let errorMessage = "Error inesperado al cambiar el rol.";
+      if (error instanceof Error) {
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          errorMessage = "Error de conexión. Verifica tu internet y vuelve a intentarlo.";
+        } else if (error.message.includes('timeout')) {
+          errorMessage = "La operación tardó demasiado tiempo. Inténtalo de nuevo.";
+        } else {
+          errorMessage = `Error técnico: ${error.message}`;
+        }
+      }
+      
+      alert(`${errorMessage}
+
+Si el problema persiste, por favor recarga la página o contacta al soporte.`);
     }
   };
 
