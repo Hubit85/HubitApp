@@ -98,7 +98,7 @@ export class SupabaseBudgetService {
   }
 
   static async getPublishedBudgetRequests(filters?: {
-    category?: string;
+    category?: BudgetRequest['category'];
     city?: string;
     maxBudget?: number;
     minBudget?: number;
@@ -114,7 +114,7 @@ export class SupabaseBudgetService {
           city
         )
       `)
-      .eq("status", "open");
+      .eq("status", "published");
 
     if (filters?.category) {
       query = query.eq("category", filters.category);
@@ -263,7 +263,7 @@ export class SupabaseBudgetService {
 
   static async withdrawQuote(id: string): Promise<Quote> {
     return this.updateQuote(id, {
-      status: "withdrawn"
+      status: "cancelled"
     });
   }
 
@@ -271,7 +271,7 @@ export class SupabaseBudgetService {
 
   static async getBudgetRequestStats(userId: string): Promise<{
     total: number;
-    open: number;
+    published: number;
     inProgress: number;
     completed: number;
   }> {
@@ -279,7 +279,7 @@ export class SupabaseBudgetService {
     
     const stats = {
       total: requests.length,
-      open: requests.filter(r => r.status === "open").length,
+      published: requests.filter(r => r.status === "published").length,
       inProgress: requests.filter(r => r.status === "in_progress").length,
       completed: requests.filter(r => r.status === "completed").length
     };
@@ -312,7 +312,7 @@ export class SupabaseBudgetService {
   // ===================== SEARCH & FILTERS =====================
 
   static async searchBudgetRequests(query: string, filters?: {
-    category?: string;
+    category?: BudgetRequest['category'];
     city?: string;
   }): Promise<BudgetRequestWithProperty[]> {
     let supabaseQuery = supabase
@@ -326,7 +326,7 @@ export class SupabaseBudgetService {
           city
         )
       `)
-      .eq("status", "open");
+      .eq("status", "published");
 
     if (query) {
       supabaseQuery = supabaseQuery.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
