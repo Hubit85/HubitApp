@@ -536,11 +536,12 @@ export class SupabaseUserRoleService {
     try {
       // Ensure roleType is one of the valid values
       const validRoles: UserRole['role_type'][] = ['service_provider', 'particular', 'community_member', 'property_administrator'];
-      const roleTypeTyped = roleType as UserRole['role_type'];
       
-      if (!validRoles.includes(roleTypeTyped)) {
+      if (!validRoles.includes(roleType as UserRole['role_type'])) {
         return { success: false, error: `Invalid role type: ${roleType}` };
       }
+
+      const roleTypeTyped = roleType as UserRole['role_type'];
 
       const roleRecord = {
         user_id: userId,
@@ -569,11 +570,12 @@ export class SupabaseUserRoleService {
   static async verifyUserRole(userId: string, roleType: string) {
     try {
       const validRoles: UserRole['role_type'][] = ['service_provider', 'particular', 'community_member', 'property_administrator'];
-      const roleTypeTyped = roleType as UserRole['role_type'];
       
-      if (!validRoles.includes(roleTypeTyped)) {
+      if (!validRoles.includes(roleType as UserRole['role_type'])) {
         return { success: false, error: `Invalid role type: ${roleType}` };
       }
+
+      const roleTypeTyped = roleType as UserRole['role_type'];
 
       const { data, error } = await supabase
         .from("user_roles")
