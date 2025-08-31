@@ -105,8 +105,9 @@ export class SupabaseConversationService {
   static async findOrCreateConversation(
     participant1: string,
     participant2: string,
-    relatedEntityType?: string,
-    relatedEntityId?: string
+    budgetRequestId?: string,
+    contractId?: string,
+    quoteId?: string
   ): Promise<Conversation> {
     // Try to find existing conversation between these participants
     const { data: existing, error: findError } = await supabase
@@ -124,8 +125,10 @@ export class SupabaseConversationService {
     // Create new conversation
     const conversationData: ConversationInsert = {
       user_id: participant1,
-      related_entity_type: relatedEntityType || null,
-      related_entity_id: relatedEntityId || null
+      service_provider_id: participant2,
+      budget_request_id: budgetRequestId || null,
+      contract_id: contractId || null,
+      quote_id: quoteId || null,
     };
 
     return this.createConversation(conversationData);
@@ -405,8 +408,9 @@ export class SupabaseConversationService {
   ): Promise<{ conversation: Conversation; message?: Message }> {
     const conversation = await this.createConversation({
       user_id: userId,
-      related_entity_type: "budget_request",
-      related_entity_id: budgetRequestId
+      budget_request_id: budgetRequestId,
+      subject: "Conversación sobre solicitud de presupuesto",
+      is_active: true,
     });
 
     let message;
