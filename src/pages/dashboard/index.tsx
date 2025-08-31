@@ -20,7 +20,7 @@ import UserRoleManager from "@/components/UserRoleManager";
 import ResendTestTool from "@/components/ResendTestTool";
 
 export default function Dashboard() {
-  const { user, profile, signOut, loading, userRoles, activeRole, activateRole } = useSupabaseAuth();
+  const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedRole, setSelectedRole] = useState<string>("");
@@ -48,6 +48,8 @@ export default function Dashboard() {
     console.log("🔄 Attempting role change:", { from: selectedRole, to: newRole, user: user.id });
     
     try {
+      // Mostrar indicador de carga visual temporal
+      const originalValue = selectedRole;
       setSelectedRole(newRole);
       
       // Activar el rol usando el servicio
@@ -57,50 +59,77 @@ export default function Dashboard() {
       console.log("📡 activateRole result:", result);
       
       if (result.success) {
-        console.log("✅ Role activated successfully, redirecting...");
+        console.log("✅ Role activated successfully, preparing redirect...");
         
-        // Pequeña pausa para mostrar el cambio visualmente
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Aguardar un momento para que el estado se actualice
+        await new Promise(resolve => setTimeout(resolve, 800));
         
-        // Redirigir al dashboard específico del rol
+        // Forzar refresh del contexto de autenticación
+        try {
+          await refreshRoles();
+          console.log("🔄 Roles refreshed after activation");
+        } catch (refreshError) {
+          console.warn("⚠️ Could not refresh roles, but continuing with redirect:", refreshError);
+        }
+        
+        // Determinar la ruta de destino según el rol
+        let targetRoute = "/dashboard";
         switch (newRole) {
           case "particular":
+            targetRoute = "/dashboard_particular";
             console.log("🏠 Redirecting to dashboard_particular");
-            router.push("/dashboard_particular");
             break;
           case "community_member":
+            targetRoute = "/dashboard_miembro";
             console.log("🏘️ Redirecting to dashboard_miembro");
-            router.push("/dashboard_miembro");
             break;
           case "service_provider":
+            targetRoute = "/dashboard_proveedor";
             console.log("🔧 Redirecting to dashboard_proveedor");
-            router.push("/dashboard_proveedor");
             break;
           case "property_administrator":
+            targetRoute = "/dashboard_administrador";
             console.log("🏢 Redirecting to dashboard_administrador");
-            router.push("/dashboard_administrador");
             break;
           default:
-            console.warn("⚠️ Unknown role type:", newRole);
-            alert(`Rol no reconocido: ${newRole}. Por favor, contacta al soporte.`);
+            console.warn("⚠️ Unknown role type, staying on main dashboard:", newRole);
+            targetRoute = "/dashboard";
             break;
         }
+        
+        // Hacer la redirección
+        console.log("🚀 Executing redirect to:", targetRoute);
+        
+        // Usar replace en lugar de push para evitar problemas de historial
+        await router.replace(targetRoute);
+        
+        // Si la redirección no funciona inmediatamente, forzarla
+        setTimeout(() => {
+          if (router.pathname === '/dashboard') {
+            console.log("🔄 Forcing redirect as backup...");
+            window.location.href = targetRoute;
+          }
+        }, 2000);
+        
       } else {
         console.error("❌ Failed to change role:", result.message);
         
         // Revertir el selector al rol anterior
-        setSelectedRole(selectedRole);
+        setSelectedRole(originalValue);
         
         // Mostrar mensaje de error más específico
         let errorMessage = result.message;
         if (result.message.includes('verified')) {
           errorMessage = "Este rol no está verificado. Por favor, verifica tu email o contacta al administrador.";
         } else if (result.message.includes('exists')) {
-          errorMessage = "Este rol no está disponible para tu cuenta. Contacta al administrador.";
-        } else if (result.message.includes('network')) {
+          errorMessage = "Este rol no está disponible para tu cuenta. Contacta al administrador para obtener acceso.";
+        } else if (result.message.includes('network') || result.message.includes('fetch')) {
           errorMessage = "Error de conexión. Verifica tu internet e inténtalo de nuevo.";
+        } else if (result.message.includes('expired') || result.message.includes('token')) {
+          errorMessage = "Tu sesión ha expirado. Por favor, cierra sesión y vuelve a iniciar sesión.";
         }
         
+        // Mostrar alerta con el error
         alert(`Error al cambiar el rol: ${errorMessage}`);
       }
     } catch (error) {
@@ -116,6 +145,8 @@ export default function Dashboard() {
           errorMessage = "Error de conexión. Verifica tu internet y vuelve a intentarlo.";
         } else if (error.message.includes('timeout')) {
           errorMessage = "La operación tardó demasiado tiempo. Inténtalo de nuevo.";
+        } else if (error.message.includes('401') || error.message.includes('403')) {
+          errorMessage = "Error de autorización. Tu sesión puede haber expirado.";
         } else {
           errorMessage = `Error técnico: ${error.message}`;
         }
@@ -123,7 +154,10 @@ export default function Dashboard() {
       
       alert(`${errorMessage}
 
-Si el problema persiste, por favor recarga la página o contacta al soporte.`);
+Si el problema persiste, por favor:
+1. Recarga la página
+2. Cierra sesión y vuelve a iniciar sesión
+3. Contacta al soporte técnico`);
     }
   };
 
