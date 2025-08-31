@@ -94,11 +94,11 @@ export class SupabaseDocumentService {
     return data || [];
   }
 
-  static async getDocumentsByEntity(entityType: Document['related_entity_type'], entityId: string): Promise<Document[]> {
+  static async getDocumentsByEntity(entityType: Database["public"]["Enums"]["document_related_entity_type"], entityId: string): Promise<Document[]> {
     const { data, error } = await supabase
       .from("documents")
       .select("*")
-      .eq("related_entity_type", entityType as Database["public"]["Enums"]["document_related_entity_type"])
+      .eq("related_entity_type", entityType)
       .eq("related_entity_id", entityId)
       .order("created_at", { ascending: false });
 
@@ -109,7 +109,7 @@ export class SupabaseDocumentService {
     return data || [];
   }
 
-  static async getDocumentsByType(documentType: Document['document_type'], userId?: string): Promise<Document[]> {
+  static async getDocumentsByType(documentType: Database["public"]["Enums"]["document_type"], userId?: string): Promise<Document[]> {
     let query = supabase
       .from("documents")
       .select("*")

@@ -26,7 +26,7 @@ export class SupabaseContractService {
       .from("contracts")
       .insert({
         ...contractData,
-        status: "pending",
+        status: "pending" as Database["public"]["Enums"]["contract_status"],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -153,7 +153,7 @@ export class SupabaseContractService {
     // If both signatures are present, activate the contract
     if (contract.client_signature && contract.provider_signature) {
       return this.updateContract(id, {
-        status: "active",
+        status: "active" as Database["public"]["Enums"]["contract_status"],
         start_date: new Date().toISOString()
       });
     }
@@ -163,14 +163,14 @@ export class SupabaseContractService {
 
   static async completeContract(id: string): Promise<Contract> {
     return this.updateContract(id, {
-      status: "completed",
+      status: "completed" as Database["public"]["Enums"]["contract_status"],
       end_date: new Date().toISOString()
     });
   }
 
   static async cancelContract(id: string, reason?: string): Promise<Contract> {
     return this.updateContract(id, {
-      status: "cancelled"
+      status: "cancelled" as Database["public"]["Enums"]["contract_status"]
     });
   }
 
