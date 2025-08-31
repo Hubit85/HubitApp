@@ -379,8 +379,7 @@ export class SupabaseContractService {
       .from("service_providers")
       .select(`
         id,
-        company_name,
-        phone
+        company_name
       `)
       .eq("id", serviceProviderId)
       .single();
@@ -400,16 +399,8 @@ export class SupabaseContractService {
     end_time: string; 
     description: string; 
   }) {
-    const { data, error } = await supabase
-      .from("time_logs")
-      .insert([timeEntry]);
-
-    if (error) {
-      console.error("Error logging time entry:", error);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true, data };
+    console.log("Time logging not implemented - table doesn't exist");
+    return { success: false, error: "Time logging not available" };
   }
 
   static async createContractFromQuote(quote: any) {
@@ -430,15 +421,15 @@ export class SupabaseContractService {
         estimated_completion_date: quote.estimated_completion_date,
         payment_terms: quote.payment_terms || "Net 30",
         deliverables: quote.deliverables || [],
-        project_timeline: quote.project_timeline || "",
         warranty_period: quote.warranty_period,
+        user_id: clientId,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
       const { data, error } = await supabase
         .from("contracts")
-        .insert([contractData])
+        .insert(contractData)
         .select()
         .single();
 
@@ -460,7 +451,7 @@ export class SupabaseContractService {
   static async getServiceProviderInfo(providerId: string): Promise<ServiceProvider | null> {
     const { data, error } = await supabase
       .from("service_providers")
-      .select("id, user_id, company_name, phone")
+      .select("id, user_id, company_name")
       .eq("user_id", providerId)
       .single();
 

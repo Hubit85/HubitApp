@@ -532,54 +532,6 @@ export class SupabaseUserRoleService {
     ];
   }
 
-  static async createUserRole(
-    userId: string, 
-    role: "particular" | "community_member" | "service_provider" | "property_administrator",
-    isVerified: boolean = false
-  ): Promise<any> {
-    const roleData = {
-      user_id: userId,
-      role: role,
-      is_verified: isVerified,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    const { data, error } = await supabase
-      .from("user_roles")
-      .insert(roleData)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  }
-
-  static async verifyUserRole(
-    userId: string, 
-    role: "particular" | "community_member" | "service_provider" | "property_administrator"
-  ): Promise<any> {
-    const { data, error } = await supabase
-      .from("user_roles")
-      .update({ 
-        is_verified: true,
-        updated_at: new Date().toISOString()
-      })
-      .eq("user_id", userId)
-      .eq("role", role)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  }
-
   static async addUserRole(userId: string, roleType: string, roleData?: any) {
     try {
       // Ensure roleType is one of the valid values
@@ -590,7 +542,7 @@ export class SupabaseUserRoleService {
 
       const roleRecord = {
         user_id: userId,
-        role_type: roleType,
+        role_type: roleType as 'service_provider' | 'particular' | 'community_member' | 'property_administrator',
         is_verified: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -612,7 +564,7 @@ export class SupabaseUserRoleService {
     }
   }
 
-  static async verifyRole(userId: string, roleType: string) {
+  static async verifyUserRole(userId: string, roleType: string) {
     try {
       const validRoles = ['service_provider', 'particular', 'community_member', 'property_administrator'];
       if (!validRoles.includes(roleType)) {
@@ -626,7 +578,7 @@ export class SupabaseUserRoleService {
           updated_at: new Date().toISOString()
         })
         .eq("user_id", userId)
-        .eq("role_type", roleType)
+        .eq("role_type", roleType as 'service_provider' | 'particular' | 'community_member' | 'property_administrator')
         .select()
         .single();
 

@@ -406,17 +406,25 @@ export class SupabaseConversationService {
     budgetRequestId: string,
     subject: string,
     initialMessage?: string
-  ): Promise<{ conversation: Conversation; message?: Message }> {
-    const newConversation = await supabase.from("conversations").insert([{
-      user_id: userId,
-      service_provider_id: "00000000-0000-0000-0000-000000000000", // Default system ID
-      budget_request_id: budgetRequestId,
-      subject: subject,
-      is_active: true
-    }]).select().single();
+  ): Promise<{ conversation: any; message?: Message }> {
+    const { data: newConversation, error } = await supabase
+      .from("conversations")
+      .insert([{
+        user_id: userId,
+        service_provider_id: "00000000-0000-0000-0000-000000000000", // Default system ID
+        budget_request_id: budgetRequestId,
+        subject: subject,
+        is_active: true
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
 
     let message;
-    if (initialMessage) {
+    if (initialMessage && newConversation) {
       message = await this.sendMessage(newConversation.id, userId, initialMessage);
     }
 

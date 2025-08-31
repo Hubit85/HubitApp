@@ -52,7 +52,14 @@ export default function RegisterPage() {
     full_name: "",
     phone: "",
     address: "",
-    role: ""
+    role: "",
+    company_name: "",
+    company_address: "",
+    cif: "",
+    business_email: "",
+    business_phone: "",
+    professional_number: "",
+    community_code: ""
   });
   
   const [showPassword, setShowPassword] = useState(false);

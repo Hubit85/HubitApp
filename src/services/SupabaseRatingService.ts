@@ -142,19 +142,17 @@ export class SupabaseRatingService {
 
   static async canUserRateContract(userId: string, contractId: string): Promise<boolean> {
     // Check if contract exists and user is the client
-    const { data: contract, error } = await supabase
-      .from("contracts")
-      .select("user_id, contract_status")
-      .eq("id", contractId)
-      .eq("user_id", userId)
-      .single();
+    const contractDetails = await this.getContractDetails(contractId);
+    if (!contractDetails) {
+      return false;
+    }
 
-    if (error || !contract) {
+    if (contractDetails.user_id !== userId) {
       return false;
     }
 
     // Check if contract is completed
-    if (contract.contract_status !== "completed") {
+    if (contractDetails.status !== "completed") {
       return false;
     }
 
@@ -329,21 +327,16 @@ export class SupabaseRatingService {
   }> {
     try {
       // Check if contract exists and user is the client
-      const { data: contract, error } = await supabase
-        .from("contracts")
-        .select("user_id, contract_status, completion_date")
-        .eq("id", contractId)
-        .single();
-
-      if (error) {
+      const contractDetails = await this.getContractDetails(contractId);
+      if (!contractDetails) {
         return { eligible: false, reason: "Contract not found" };
       }
 
-      if (contract.user_id !== userId) {
+      if (contractDetails.user_id !== userId) {
         return { eligible: false, reason: "You are not the client for this contract" };
       }
 
-      if (contract.contract_status !== "completed") {
+      if (contractDetails.status !== "completed") {
         return { eligible: false, reason: "Contract must be completed before rating" };
       }
 
@@ -469,7 +462,7 @@ export class SupabaseRatingService {
       .from("contracts")
       .select(`
         id,
-        client_id,
+        user_id,
         service_provider_id,
         status,
         total_amount,

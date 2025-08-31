@@ -31,10 +31,19 @@ export class SupabaseServiceProviderService {
   }
 
   static async updateServiceProvider(id: string, updates: Partial<ServiceProvider>): Promise<ServiceProvider> {
+    // Remove fields that don't exist in the schema
+    const sanitizedUpdates = { ...updates };
+    if ('average_rating' in sanitizedUpdates) {
+      delete sanitizedUpdates.average_rating;
+    }
+    if ('ratings_count' in sanitizedUpdates) {
+      delete (sanitizedUpdates as any).ratings_count;
+    }
+
     const { data, error } = await supabase
       .from("service_providers")
       .update({
-        ...updates,
+        ...sanitizedUpdates,
         updated_at: new Date().toISOString()
       })
       .eq("id", id)
@@ -169,44 +178,21 @@ export class SupabaseServiceProviderService {
       }
 
       if (!ratings || ratings.length === 0) {
-        await this.updateServiceProvider(providerId, {
-          average_rating: 0,
-          ratings_count: 0
-        });
+        // Only update rating_count if it exists in schema
+        console.log(`Provider ${providerId} has no ratings`);
         return;
       }
 
       const averageRating = ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length;
 
-      // Remove average_rating from update operations
-      if (averageRating !== undefined) {
-        // Calculate and store average rating separately if needed
-        // For now, we'll skip this field since it's not in the schema
-        console.log(`Would update average rating to: ${averageRating}`);
-      }
-      
-      const updateData: any = {};
-      // Add only valid fields to updateData
-      Object.keys(updates).forEach(key => {
-        if (key !== 'average_rating') {
-          updateData[key] = updates[key as keyof typeof updates];
-        }
+      // Log the statistics that would be stored
+      console.log(`Provider ${providerId} statistics:`, {
+        ratingsCount: ratings.length,
+        averageRating: averageRating.toFixed(2)
       });
 
-      const { data, error } = await supabase
-        .from("service_providers")
-        .update(updateData)
-        .eq("id", providerId)
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Error updating provider rating stats:", error);
+    } catch (updateError) {
+      console.error("Error calculating provider rating stats:", updateError);
     }
   }
 
