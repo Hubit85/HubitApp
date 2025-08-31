@@ -23,6 +23,111 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Función de diagnóstico mejorada para detectar problemas de conectividad
+const diagnoseConnectivityIssues = async () => {
+  console.log("🔍 Running comprehensive connectivity diagnosis...");
+  
+  const issues = [];
+  
+  // 1. Verificar configuración básica
+  try {
+    const url = supabase.supabaseUrl;
+    const key = supabase.supabaseKey;
+    
+    if (!url || url === 'invalid_supabase_url' || url.includes('invalid')) {
+      issues.push("Invalid Supabase URL configuration");
+    }
+    
+    if (!key || key === 'invalid_anon_key' || key.includes('invalid')) {
+      issues.push("Invalid Supabase anon key configuration");
+    }
+    
+    console.log("📍 Supabase config check:", { 
+      hasValidUrl: url && !url.includes('invalid'),
+      hasValidKey: key && !key.includes('invalid'),
+      urlPreview: url ? url.substring(0, 30) + '...' : 'missing'
+    });
+    
+  } catch (configError) {
+    console.error("Config check failed:", configError);
+    issues.push("Supabase client configuration error");
+  }
+  
+  // 2. Test básico de conectividad de red
+  try {
+    const networkTest = await fetch('https://www.google.com/favicon.ico', {
+      method: 'HEAD',
+      mode: 'no-cors'
+    });
+    console.log("🌐 Basic network connectivity: OK");
+  } catch (networkError) {
+    console.error("❌ Network connectivity failed:", networkError);
+    issues.push("No internet connectivity");
+  }
+  
+  // 3. Test específico de Supabase con múltiples métodos
+  try {
+    const supabaseUrl = supabase.supabaseUrl;
+    
+    // Método 1: Ping directo al dominio
+    if (supabaseUrl && !supabaseUrl.includes('invalid')) {
+      try {
+        const pingTest = await fetch(supabaseUrl + '/rest/v1/', {
+          method: 'HEAD',
+          mode: 'no-cors'
+        });
+        console.log("🏓 Supabase domain ping: OK");
+      } catch (pingError) {
+        console.warn("⚠️ Supabase domain unreachable:", pingError);
+        issues.push("Supabase server unreachable");
+      }
+    }
+    
+  } catch (supabaseError) {
+    console.error("❌ Supabase connectivity test failed:", supabaseError);
+    issues.push("Supabase connectivity issues");
+  }
+  
+  return issues;
+};
+
+// Función para intentar reconectar con Supabase
+const attemptReconnection = async (maxAttempts = 3) => {
+  console.log("🔄 Attempting Supabase reconnection...");
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(`🔄 Reconnection attempt ${attempt}/${maxAttempts}`);
+      
+      // Intentar una consulta muy básica
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .limit(1);
+      
+      if (!error) {
+        console.log("✅ Reconnection successful!");
+        setDatabaseConnected(true);
+        return true;
+      } else {
+        console.warn(`Reconnection attempt ${attempt} failed:`, error.message);
+      }
+      
+    } catch (reconnectError) {
+      console.warn(`Reconnection attempt ${attempt} exception:`, reconnectError);
+    }
+    
+    if (attempt < maxAttempts) {
+      const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+      console.log(`⏳ Waiting ${delay}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  console.error("❌ All reconnection attempts failed");
+  return false;
+};
+
 export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -83,13 +188,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkDatabaseConnection = async (retries = 3) => {
+    console.log(`🔗 Enhanced database connection check starting (${retries} retries)`);
+    
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        console.log(`🔗 Database connection attempt ${attempt}/${retries}`);
+        console.log(`🔄 Connection attempt ${attempt}/${retries}`);
         
-        // Intentar una consulta simple que no requiere autenticación
+        // Crear un timeout más corto para detectar problemas rápidamente
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos timeout
+        const timeoutId = setTimeout(() => {
+          console.warn(`⏱️ Connection attempt ${attempt} timed out`);
+          controller.abort();
+        }, 6000); // 6 segundos timeout
         
         const { data, error } = await supabase
           .from("service_categories")
@@ -106,54 +216,83 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
         
         if (error) {
-          console.warn(`⚠️ Database connection attempt ${attempt} failed:`, error.message);
+          console.warn(`⚠️ Connection attempt ${attempt} error:`, error.message);
           
-          // Si es un error de red, puede ser temporal
-          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            console.log(`🔄 Network error detected, will retry...`);
+          // Análisis específico de errores
+          if (error.message.includes('Failed to fetch')) {
+            console.log("🚨 Network fetch failure detected");
+            
+            if (attempt === 1) {
+              // En el primer intento, ejecutar diagnóstico
+              const issues = await diagnoseConnectivityIssues();
+              if (issues.length > 0) {
+                console.error("🚨 Connectivity issues detected:", issues);
+              }
+            }
           } else if (error.message.includes('PGRST116')) {
-            console.warn("📋 Table 'service_categories' doesn't exist - database needs setup");
+            console.warn("📋 Table 'service_categories' doesn't exist - database setup needed");
+            setDatabaseConnected(false);
+            return false;
+          } else if (error.message.includes('401') || error.message.includes('403')) {
+            console.error("🔑 Authentication/authorization error");
             setDatabaseConnected(false);
             return false;
           }
         }
         
-      } catch (error) {
-        console.warn(`🔄 Connection attempt ${attempt} exception:`, error);
+      } catch (connectionError) {
+        console.warn(`🔄 Connection attempt ${attempt} exception:`, connectionError);
         
-        // Manejar timeout específicamente
-        if (error instanceof Error && error.name === 'AbortError') {
-          console.warn(`⏱️ Connection attempt ${attempt} timed out`);
+        // Manejo específico de diferentes tipos de excepciones
+        if (connectionError instanceof Error) {
+          if (connectionError.name === 'AbortError') {
+            console.warn(`⏱️ Connection attempt ${attempt} was aborted (timeout)`);
+          } else if (connectionError.message.includes('NetworkError')) {
+            console.warn(`🌐 Network error on attempt ${attempt}`);
+          } else if (connectionError.message.includes('Failed to fetch')) {
+            console.warn(`🚨 Fetch failed on attempt ${attempt}`);
+            
+            // Si es el primer intento de fetch fallido, intentar reconexión
+            if (attempt === 1) {
+              console.log("🔄 Attempting automatic reconnection...");
+              const reconnected = await attemptReconnection(2);
+              if (reconnected) {
+                continue; // Retry the connection check
+              }
+            }
+          }
         }
         
         // Si es el último intento, marcar como desconectado
         if (attempt === retries) {
-          console.warn("⚠️ Database connection failed after all retries");
+          console.error("❌ All database connection attempts exhausted");
           setDatabaseConnected(false);
           return false;
         }
         
-        // Esperar antes del siguiente intento (backoff exponencial)
-        const delayMs = Math.min(Math.pow(2, attempt) * 1000, 5000); // Max 5 segundos
-        console.log(`⏸️ Waiting ${delayMs}ms before retry...`);
+        // Calcular delay con backoff exponencial, máximo 8 segundos
+        const delayMs = Math.min(Math.pow(2, attempt) * 1000, 8000);
+        console.log(`⏸️ Waiting ${delayMs}ms before next attempt...`);
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
     }
     
+    console.error("❌ Database connection check completed - all attempts failed");
     setDatabaseConnected(false);
     return false;
   };
 
   const fetchUserData = async (userId: string, userObject: User, retries = 2) => {
     try {
-      console.log("🔄 Fetching user data with enhanced error handling...");
+      console.log("🔄 Enhanced fetchUserData starting...");
       
-      // Verificar conectividad de base de datos con timeout más corto
+      // Verificar conectividad con diagnóstico rápido
       const isConnected = await checkDatabaseConnection(2);
       
       if (!isConnected) {
-        console.log("📱 Database offline - creating temporary profile");
-        // Crear perfil temporal desde datos del usuario
+        console.log("📱 Database offline - creating enhanced temporary profile");
+        
+        // Crear perfil temporal más robusto desde datos del usuario
         const tempProfile: Profile = {
           id: userId,
           email: userObject.email || '',
@@ -175,26 +314,32 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           created_at: userObject.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
+        
         setProfile(tempProfile);
         setUserRoles([]);
         setActiveRole(null);
         setLoading(false);
+        
+        console.log("📱 Temporary profile created successfully");
         return;
       }
 
-      // Aguardar un momento para que la sesión de auth se establezca completamente
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Dar tiempo para que las conexiones se estabilicen
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Obtener perfil con lógica de reintentos mejorada
       let profileData: Profile | null = null;
       
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          console.log(`🔍 Profile fetch attempt ${attempt}/${retries} for user ID: ${userId}`);
+          console.log(`🔍 Enhanced profile fetch attempt ${attempt}/${retries} for user ID: ${userId}`);
           
-          // Crear timeout controller para cada intento
+          // Timeout más conservador para perfiles
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 segundos timeout
+          const timeoutId = setTimeout(() => {
+            console.warn(`Profile fetch attempt ${attempt} timeout`);
+            controller.abort();
+          }, 8000); // 8 segundos
           
           const { data: profilesData, error: profileError } = await supabase
             .from("profiles")
@@ -207,14 +352,14 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           if (!profileError && profilesData) {
             profileData = profilesData;
-            console.log("✅ Profile found and loaded successfully");
+            console.log("✅ Profile loaded successfully");
             break;
           }
           
           if (profileError) {
             console.warn(`Profile fetch attempt ${attempt} failed:`, profileError.message);
             
-            // Errores que no vale la pena reintentar
+            // Análisis de errores específicos
             if (profileError.message.includes('JWT') || 
                 profileError.message.includes('Invalid API key') ||
                 profileError.message.includes('invalid_api_key')) {
@@ -222,31 +367,35 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               break;
             }
             
-            // Para errores de red, continuar reintentando
-            if (attempt < retries && 
-                (profileError.message.includes('Failed to fetch') || 
-                 profileError.message.includes('NetworkError'))) {
-              console.log(`🔄 Network error, will retry in ${attempt * 1000}ms...`);
-              await new Promise(resolve => setTimeout(resolve, attempt * 1000));
-              continue;
+            if (profileError.message.includes('Failed to fetch') || 
+                profileError.message.includes('NetworkError')) {
+              console.log(`🌐 Network error on attempt ${attempt}, will retry...`);
+              
+              if (attempt < retries) {
+                await new Promise(resolve => setTimeout(resolve, attempt * 1500));
+                continue;
+              }
             }
             
             if (attempt === retries) {
-              console.error("All profile fetch attempts failed, will create new profile");
+              console.warn("All profile fetch attempts failed, will create new profile");
             }
           }
           
         } catch (fetchException) {
           console.warn(`Profile fetch attempt ${attempt} exception:`, fetchException);
           
-          // Manejar timeout específicamente
-          if (fetchException instanceof Error && fetchException.name === 'AbortError') {
-            console.warn(`⏱️ Profile fetch attempt ${attempt} timed out`);
+          if (fetchException instanceof Error) {
+            if (fetchException.name === 'AbortError') {
+              console.warn(`⏱️ Profile fetch attempt ${attempt} timed out`);
+            } else if (fetchException.message.includes('Failed to fetch')) {
+              console.warn(`🚨 Network fetch failed on attempt ${attempt}`);
+            }
           }
           
           if (attempt < retries) {
-            console.log(`🔄 Exception occurred, will retry in ${attempt * 1000}ms...`);
-            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+            console.log(`🔄 Will retry profile fetch in ${attempt * 1500}ms...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 1500));
           } else {
             console.error("All profile fetch attempts failed with exceptions");
           }
@@ -254,8 +403,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!profileData) {
-        // El perfil no existe, crear uno desde metadatos del usuario
-        console.log("📝 No profile found, creating from user metadata");
+        console.log("📝 Creating new profile from user metadata with enhanced data");
         
         const newProfileData: ProfileInsert = {
           id: userId,
@@ -270,9 +418,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         };
 
         try {
-          // Intentar crear el perfil con timeout
+          console.log("🔧 Attempting to create profile in database...");
+          
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
 
           const { data: createdProfile, error: createError } = await supabase
             .from("profiles")
@@ -285,7 +434,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           if (createError) {
             console.error("Profile creation failed:", createError);
-            // Crear perfil temporal como fallback
+            // Fallback con perfil más completo
             profileData = {
               ...newProfileData,
               address: null,
@@ -299,13 +448,15 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               created_at: userObject.created_at || new Date().toISOString(),
               updated_at: new Date().toISOString()
             } as Profile;
+            console.log("📱 Using enhanced fallback profile");
           } else {
             profileData = createdProfile;
-            console.log("✅ Profile created successfully");
+            console.log("✅ Profile created successfully in database");
           }
         } catch (createException) {
           console.error("Profile creation exception:", createException);
-          // Crear perfil temporal como último recurso
+          
+          // Crear perfil temporal robusto como último recurso
           profileData = {
             ...newProfileData,
             address: null,
@@ -319,26 +470,26 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             created_at: userObject.created_at || new Date().toISOString(),
             updated_at: new Date().toISOString()
           } as Profile;
+          console.log("📱 Using emergency profile as last resort");
         }
       }
 
       setProfile(profileData);
 
-      // Cargar roles con manejo de errores mejorado
+      // Cargar roles con manejo de errores ultra-robusto
       try {
         console.log("🎭 Loading user roles with enhanced error handling...");
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 700));
         
         const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
         
-        // 🔄 SINCRONIZACIÓN AUTOMÁTICA: Si no hay roles pero hay user_type, crear el rol
+        // Sincronización automática mejorada con validación
         if (rolesResult.length === 0 && profileData && profileData.user_type) {
-          console.log(`🔄 No roles found but user_type is "${profileData.user_type}". Creating missing role...`);
+          console.log(`🔄 No roles found but user_type is "${profileData.user_type}". Auto-creating role...`);
           
           try {
-            // Crear rol con timeout
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
 
             const { error: createRoleError } = await supabase
               .from('user_roles')
@@ -346,7 +497,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 user_id: userId,
                 role_type: profileData.user_type,
                 is_active: true,
-                is_verified: true, // Auto-verificado al venir de perfil existente
+                is_verified: true,
                 verification_confirmed_at: new Date().toISOString(),
                 role_specific_data: {}
               })
@@ -355,52 +506,47 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             clearTimeout(timeoutId);
 
             if (createRoleError) {
-              console.error("❌ Error creating missing role:", createRoleError);
+              console.error("❌ Auto role creation failed:", createRoleError);
             } else {
-              console.log(`✅ Successfully created missing "${profileData.user_type}" role`);
+              console.log(`✅ Auto-created "${profileData.user_type}" role successfully`);
               
-              // Recargar roles después de crear el faltante
               try {
                 const updatedRoles = await SupabaseUserRoleService.getUserRoles(userId);
                 setUserRoles(updatedRoles);
-                
-                // Establecer el rol recién creado como activo
                 const activeRoleData = updatedRoles.find(r => r.is_active) || null;
                 setActiveRole(activeRoleData);
-                
-                console.log("✅ Roles synchronized successfully");
-                return; // Salir temprano ya que hemos establecido los roles
+                console.log("✅ Roles synchronized and loaded successfully");
+                return;
               } catch (reloadError) {
-                console.warn("⚠️ Could not reload roles after creation:", reloadError);
+                console.warn("⚠️ Could not reload roles after auto-creation:", reloadError);
               }
             }
           } catch (syncError) {
-            console.error("❌ Error in role synchronization:", syncError);
+            console.error("❌ Error in auto role synchronization:", syncError);
           }
         }
         
         setUserRoles(rolesResult);
-        
-        // Establecer rol activo
         const activeRoleData = rolesResult.find(r => r.is_active) || null;
         setActiveRole(activeRoleData);
         console.log("✅ User roles loaded successfully:", rolesResult.length, "roles found");
+        
       } catch (rolesError) {
         console.error("❌ Error loading user roles:", rolesError);
         setUserRoles([]);
         setActiveRole(null);
         
-        // Si hay errores de red, no fallar completamente
         if (rolesError instanceof Error && 
-            (rolesError.message.includes('Failed to fetch') || rolesError.message.includes('NetworkError'))) {
-          console.warn("🌐 Network error loading roles, continuing with empty roles");
+            (rolesError.message.includes('Failed to fetch') || 
+             rolesError.message.includes('NetworkError'))) {
+          console.warn("🌐 Network error loading roles - continuing with empty roles");
         }
       }
 
     } catch (error) {
-      console.error("❌ Critical error in fetchUserData:", error);
+      console.error("❌ Critical error in enhanced fetchUserData:", error);
       
-      // Crear perfil de emergencia
+      // Crear perfil de emergencia ultra-robusto
       const emergencyProfile: Profile = {
         id: userId,
         email: userObject.email || '',
@@ -426,6 +572,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setProfile(emergencyProfile);
       setUserRoles([]);
       setActiveRole(null);
+      console.log("📱 Emergency profile created due to critical error");
     } finally {
       setLoading(false);
     }
