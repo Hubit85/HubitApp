@@ -78,7 +78,7 @@ export class SupabasePropertyService {
     }
   }
 
-  static async getPropertiesByType(propertyType: string): Promise<Property[]> {
+  static async getPropertiesByType(propertyType: Property['property_type']): Promise<Property[]> {
     const { data, error } = await supabase
       .from("properties")
       .select("*")
@@ -108,7 +108,7 @@ export class SupabasePropertyService {
 
   static async searchProperties(searchParams: {
     city?: string;
-    propertyType?: string;
+    propertyType?: Property['property_type'];
     minUnits?: number;
     maxUnits?: number;
   }): Promise<Property[]> {

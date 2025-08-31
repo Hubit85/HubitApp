@@ -94,7 +94,7 @@ export class SupabaseDocumentService {
     return data || [];
   }
 
-  static async getDocumentsByEntity(entityType: string, entityId: string): Promise<Document[]> {
+  static async getDocumentsByEntity(entityType: Document['related_entity_type'], entityId: string): Promise<Document[]> {
     const { data, error } = await supabase
       .from("documents")
       .select("*")
@@ -109,7 +109,7 @@ export class SupabaseDocumentService {
     return data || [];
   }
 
-  static async getDocumentsByType(documentType: string, userId?: string): Promise<Document[]> {
+  static async getDocumentsByType(documentType: Document['document_type'], userId?: string): Promise<Document[]> {
     let query = supabase
       .from("documents")
       .select("*")

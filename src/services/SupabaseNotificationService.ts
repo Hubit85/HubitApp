@@ -23,52 +23,10 @@ export class SupabaseNotificationService {
     return data;
   }
 
-  static async updateNotification(id: string, updates: NotificationUpdate): Promise<Notification> {
-    const { data, error } = await supabase
-      .from("notifications")
-      .update(updates)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  }
-
-  static async getNotification(id: string): Promise<Notification> {
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  }
-
-  static async deleteNotification(id: string): Promise<void> {
-    const { error } = await supabase
-      .from("notifications")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-  }
-
-  // ===================== USER NOTIFICATIONS =====================
-
   static async getUserNotifications(userId: string, filters?: {
     read?: boolean;
-    type?: string;
-    category?: string;
+    type?: Notification['type'];
+    category?: Notification['category'];
     limit?: number;
     offset?: number;
   }): Promise<Notification[]> {
