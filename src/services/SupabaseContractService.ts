@@ -186,11 +186,21 @@ export class SupabaseContractService {
 
   // ===================== WORK SESSIONS =====================
 
-  static async createWorkSession(sessionData: WorkSessionInsert): Promise<WorkSession> {
+  static async createWorkSession(workSessionData: {
+    contract_id: string;
+    service_provider_id: string;
+    start_time: string;
+    end_time: string;
+    description: string;
+  }): Promise<any> {
     const { data, error } = await supabase
       .from("work_sessions")
       .insert({
-        ...sessionData,
+        contract_id: workSessionData.contract_id,
+        service_provider_id: workSessionData.service_provider_id,
+        start_time: workSessionData.start_time,
+        end_time: workSessionData.end_time,
+        description: workSessionData.description,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -363,19 +373,56 @@ export class SupabaseContractService {
     return data || [];
   }
 
-  static async generateContractFromQuote(quoteId: string): Promise<Contract> {
-    const quote = await SupabaseBudgetService.getQuote(quoteId);
+  static async createFromQuote(quoteId: string): Promise<Contract> {
+    // Get quote details
+    const { data: quote, error: quoteError } = await supabase
+      .from("quotes")
+      .select("*")
+      .eq("id", quoteId)
+      .single();
 
-    const contractData: ContractInsert = {
+    if (quoteError) {
+      throw new Error(quoteError.message);
+    }
+
+    // Create contract with correct field mapping
+    const contractData = {
       quote_id: quoteId,
-      user_id: quote.user_id, // Using user_id instead of client_id
+      user_id: quote.user_id,
       service_provider_id: quote.service_provider_id,
-      title: `Contract for Quote ${quoteId}`,
+      contract_number: this.generateContractNumber(),
+      contract_status: "pending" as const,
+      total_amount: quote.amount,
       description: quote.description,
-      terms_and_conditions: quote.terms_and_conditions
+      estimated_duration: quote.estimated_duration,
+      estimated_start_date: quote.estimated_start_date,
+      warranty_period: quote.warranty_period,
+      terms_and_conditions: quote.terms_and_conditions,
+      payment_terms: quote.payment_terms,
+      deliverables: quote.deliverables,
+      project_timeline: quote.project_timeline,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     return this.createContract(contractData);
+  }
+
+  static async getServiceProviderInfo(providerId: string): Promise<ServiceProvider | null> {
+    const { data, error } = await supabase
+      .from("service_providers")
+      .select("id, user_id, company_name, phone")
+      .eq("user_id", providerId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw new Error(error.message);
+    }
+
+    return data;
   }
 }
 
