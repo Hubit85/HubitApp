@@ -180,17 +180,24 @@ Si el problema persiste, por favor:
     // Filtrar solo los roles que el usuario tiene verificados
     const availableRoles = [
       { value: "particular", label: "Particular", icon: User },
-      { value: "community_member", label: "Miembro de la comunidad", icon: Users },
-      { value: "service_provider", label: "Proveedor de servicios", icon: Wrench },
-      { value: "property_administrator", label: "Administrador de fincas", icon: Building },
+      { value: "community_member", label: "Miembro de Comunidad", icon: Users },
+      { value: "service_provider", label: "Proveedor de Servicios", icon: Wrench },
+      { value: "property_administrator", label: "Administrador de Fincas", icon: Building },
     ];
 
+    console.log("🔍 Debug - User roles:", userRoles);
+    console.log("🔍 Debug - Available roles:", availableRoles);
+
     // Mostrar solo los roles que el usuario tiene verificados
-    return availableRoles.filter(roleOption => 
+    const filteredRoles = availableRoles.filter(roleOption => 
       userRoles.some(userRole => 
         userRole.role_type === roleOption.value && userRole.is_verified
       )
     );
+
+    console.log("🔍 Debug - Filtered roles for user:", filteredRoles);
+    
+    return filteredRoles;
   };
 
   // Base navigation items that are common
