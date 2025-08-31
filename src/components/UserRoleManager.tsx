@@ -27,9 +27,14 @@ export default function UserRoleManager() {
       // ARREGLO: Limpiar mensajes al cargar
       setError("");
       setSuccessMessage("");
+      
+      // Mostrar mensaje informativo sobre sincronización automática
+      console.log('🎭 UserRoleManager: Loading roles for user', user.id);
+      console.log('👤 Profile user_type:', profile?.user_type);
+      
       loadUserRoles();
     }
-  }, [user]);
+  }, [user, profile]); // Incluir profile en las dependencias
 
   const loadUserRoles = async () => {
     if (!user?.id) return;
@@ -39,6 +44,10 @@ export default function UserRoleManager() {
       setError("");
       
       console.log('🔄 Frontend: Loading user roles...');
+      
+      // Esperar un poco para que la sincronización automática del contexto termine
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const roles = await SupabaseUserRoleService.getUserRoles(user.id);
       setUserRoles(roles);
       
@@ -46,6 +55,16 @@ export default function UserRoleManager() {
       setCurrentRole(activeRole);
 
       console.log('✅ Frontend: Roles loaded successfully:', roles.length);
+      
+      // Si no hay roles pero hay user_type en profile, mostrar mensaje informativo
+      if (roles.length === 0 && profile?.user_type) {
+        setSuccessMessage(`🔄 Sistema sincronizando tu rol "${profile.user_type}"... Recargando automáticamente.`);
+        
+        // Recargar después de un momento para permitir que la sincronización termine
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
 
     } catch (err) {
       console.error("❌ Frontend: Error loading user roles:", err);
