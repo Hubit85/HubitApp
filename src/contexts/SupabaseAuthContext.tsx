@@ -23,16 +23,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Función simplificada para verificar conectividad básica
+// Función mejorada para verificar conectividad básica con timeout
 const checkBasicConnection = async (): Promise<boolean> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos timeout
+
   try {
     console.log("🔗 Checking basic Supabase connection...");
     
-    // Test muy básico - solo verificar que el cliente está configurado
     const { data, error } = await supabase
       .from("profiles")
       .select("count", { count: 'exact' })
-      .limit(0);
+      .limit(0)
+      .abortSignal(controller.signal);
+
+    clearTimeout(timeoutId);
 
     if (!error) {
       console.log("✅ Basic Supabase connection successful");
@@ -42,6 +47,7 @@ const checkBasicConnection = async (): Promise<boolean> => {
     console.warn("⚠️ Connection test failed:", error.message);
     return false;
   } catch (error) {
+    clearTimeout(timeoutId);
     console.warn("⚠️ Connection test error:", error);
     return false;
   }
@@ -64,8 +70,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       try {
         console.log("🚀 Initializing Supabase Auth...");
         
-        // Get current session
+        // Check database connectivity first
+        const isConnected = await checkBasicConnection();
+        setDatabaseConnected(isConnected);
+        
+        // Get current session with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
         const { data: { session }, error } = await supabase.auth.getSession();
+        clearTimeout(timeoutId);
         
         if (!mounted) return;
         
@@ -163,13 +177,19 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Try to fetch profile from database
+      // Try to fetch profile from database with timeout
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", userObject.id)
+          .abortSignal(controller.signal)
           .single();
+
+        clearTimeout(timeoutId);
 
         if (profileError && profileError.code !== 'PGRST116') {
           console.warn("⚠️ Profile fetch error:", profileError.message);
@@ -195,11 +215,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           };
 
           try {
+            const createController = new AbortController();
+            const createTimeoutId = setTimeout(() => createController.abort(), 10000);
+            
             const { data: createdProfile, error: createError } = await supabase
               .from("profiles")
               .insert(newProfileData)
               .select()
+              .abortSignal(createController.signal)
               .single();
+
+            clearTimeout(createTimeoutId);
 
             if (!createError && createdProfile) {
               setProfile(createdProfile);
@@ -244,10 +270,15 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        // Load user roles
+        // Load user roles with timeout
         try {
           console.log("🎭 Loading user roles...");
+          const rolesController = new AbortController();
+          const rolesTimeoutId = setTimeout(() => rolesController.abort(), 10000);
+          
           const roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
+          
+          clearTimeout(rolesTimeoutId);
           setUserRoles(roles);
           
           const activeRoleData = roles.find(r => r.is_active) || null;
@@ -316,10 +347,23 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log("🔑 Starting sign in process...");
       
+      // Check connectivity first
+      const isConnected = await checkBasicConnection();
+      if (!isConnected) {
+        return { 
+          error: "No se puede conectar con el servidor. Verifica tu conexión a internet e intenta nuevamente." 
+        };
+      }
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
+      clearTimeout(timeoutId);
 
       if (error) {
         console.error("❌ Sign in error:", error.message);
@@ -332,7 +376,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           userMessage = "Por favor confirma tu email antes de iniciar sesión.";
         } else if (error.message.includes('Too many requests')) {
           userMessage = "Demasiados intentos. Espera unos minutos antes de intentar de nuevo.";
-        } else if (error.message.includes('Network request failed')) {
+        } else if (error.message.includes('Network request failed') || error.message.includes('fetch')) {
           userMessage = "Error de conexión. Verifica tu internet e intenta nuevamente.";
         }
         
@@ -344,6 +388,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
     } catch (error) {
       console.error("❌ Sign in exception:", error);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        return { error: "La conexión tardó demasiado tiempo. Intenta nuevamente." };
+      }
+      
       return { error: "Error de conexión. Por favor intenta nuevamente." };
     }
   };
@@ -351,6 +400,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
     try {
       console.log("📝 Starting sign up process...");
+      
+      // Check connectivity first
+      const isConnected = await checkBasicConnection();
+      if (!isConnected) {
+        return { 
+          error: "No se puede conectar con el servidor. Verifica tu conexión a internet e intenta nuevamente." 
+        };
+      }
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -363,6 +423,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           }
         }
       });
+
+      clearTimeout(timeoutId);
 
       if (error) {
         console.error("❌ Sign up error:", error);
@@ -384,8 +446,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         console.log("✅ Sign up successful with immediate session");
         
         // Try to create profile if database is connected
-        const isConnected = await checkBasicConnection();
-        if (isConnected) {
+        const isStillConnected = await checkBasicConnection();
+        if (isStillConnected) {
           try {
             const profileData: ProfileInsert = {
               id: data.user.id,
@@ -420,6 +482,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       
     } catch (error) {
       console.error("❌ Sign up exception:", error);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        return { error: "La conexión tardó demasiado tiempo. Intenta nuevamente." };
+      }
+      
       return { error: "Error inesperado durante el registro" };
     }
   };
@@ -466,6 +533,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const activateRole = async (roleType: UserRole['role_type']) => {
     if (!user) {
       return { success: false, message: "Usuario no autenticado" };
+    }
+
+    if (!databaseConnected) {
+      return { success: false, message: "Base de datos no disponible. Intenta más tarde." };
     }
 
     try {
