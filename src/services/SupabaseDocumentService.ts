@@ -198,14 +198,15 @@ export class SupabaseDocumentService {
     file: File,
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
-    // Upload file to storage based on document type with proper type casting
+    // Upload file to storage based on document type with explicit enum casting
     const validDocumentType = (documentData.document_type || "other") as Database["public"]["Enums"]["document_type"];
     const filePath = await this.uploadFile(file, `${validDocumentType}s`);
     
-    // Create document record
+    // Create document record with proper type casting
     const fullDocumentData: DocumentInsert = {
       ...documentData,
       document_type: validDocumentType,
+      related_entity_type: documentData.related_entity_type as Database["public"]["Enums"]["related_entity_type"],
       file_path: filePath,
       file_size: file.size
     };
@@ -221,7 +222,7 @@ export class SupabaseDocumentService {
       await this.deleteFileFromStorage(document.file_path);
     }
 
-    // Upload new file with proper type casting
+    // Upload new file with explicit type casting
     const documentType = (document.document_type || "other") as Database["public"]["Enums"]["document_type"];
     const newFilePath = await this.uploadFile(newFile, documentType);
     

@@ -81,6 +81,51 @@ export default function RegisterPage() {
     number: false
   });
 
+  const router = useRouter();
+
+  // Create a wrapper component that uses the auth context
+  return <RegisterPageContent />;
+}
+
+// Separate component that uses the auth context
+function RegisterPageContent() {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<RoleFormData>({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    full_name: "",
+    phone: "",
+    address: "",
+    role: "",
+    company_name: "",
+    company_address: "",
+    cif: "",
+    business_email: "",
+    business_phone: "",
+    professional_number: "",
+    community_code: ""
+  });
+
+  // State variables for form control and validation
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  
+  // Fix boolean type issues - ensure these are properly typed
+  const [cifValidating, setCifValidating] = useState<boolean>(false);
+  const [cifValid, setCifValid] = useState<boolean | null>(null);
+  
+  const [passwordValidation, setPasswordValidation] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false
+  });
+
+  // Now we can safely use the hook inside the provider
   const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
 
