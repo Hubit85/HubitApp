@@ -178,28 +178,28 @@ export default function Dashboard() {
 
         <div className="flex">
           {/* Sidebar */}
-          <div className="w-72 bg-gradient-to-br from-neutral-900 via-stone-900 to-neutral-800 text-white shadow-2xl flex flex-col min-h-screen border-r border-stone-700/50">
-            <div className="p-6 border-b border-stone-700/60 bg-gradient-to-r from-stone-800/40 to-neutral-800/40">
+          <div className="w-72 bg-gray-800 text-white shadow-lg flex flex-col min-h-screen">
+            <div className="p-6 border-b border-gray-700">
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-12 h-12 ${userTypeInfo.color} rounded-xl flex items-center justify-center shadow-lg ring-2 ring-white/10`}>
+                <div className={`w-12 h-12 ${userTypeInfo.color} rounded-xl flex items-center justify-center shadow-lg`}>
                   <UserTypeIcon className="h-6 w-6 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{profile.full_name || "Usuario"}</h3>
-                  <p className="text-stone-300 text-sm">{user.email}</p>
+                  <p className="text-gray-300 text-sm">{user.email}</p>
                 </div>
               </div>
               
               {/* Role Selector */}
               <div className="space-y-2">
-                <label className="text-xs text-stone-400 font-medium uppercase tracking-wide">
+                <label className="text-xs text-gray-400 font-medium uppercase tracking-wide">
                   Rol Activo
                 </label>
                 <Select
                   value={selectedRole}
                   onValueChange={handleRoleChange}
                 >
-                  <SelectTrigger className="w-full bg-stone-800/60 border-stone-600/40 text-white hover:bg-stone-700/80 transition-all duration-300 rounded-lg backdrop-blur-sm shadow-lg">
+                  <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600 transition-all duration-300 rounded-lg">
                     <SelectValue>
                       <div className="flex items-center gap-2">
                         <UserTypeIcon className="h-4 w-4" />
@@ -207,14 +207,14 @@ export default function Dashboard() {
                       </div>
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="bg-stone-800/95 border-stone-600/40 backdrop-blur-md shadow-2xl">
+                  <SelectContent className="bg-gray-700 border-gray-600">
                     {getRoleOptions().map((role) => {
                       const RoleIcon = role.icon;
                       return (
                         <SelectItem 
                           key={role.value} 
                           value={role.value}
-                          className="text-white hover:bg-stone-700/80 focus:bg-stone-700/80 transition-colors duration-200"
+                          className="text-white hover:bg-gray-600 focus:bg-gray-600 transition-colors duration-200"
                         >
                           <div className="flex items-center gap-2">
                             <RoleIcon className="h-4 w-4" />
@@ -228,21 +228,21 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="flex-1 p-4 bg-gradient-to-b from-transparent to-stone-900/20">
-              <nav className="space-y-1">
+            <div className="flex-1 p-4">
+              <nav className="space-y-2">
                 {navItems.map((item, index) => (
                   <Button
                     key={item.id}
-                    variant={activeTab === item.id ? "secondary" : "ghost"}
-                    className={`w-full justify-start text-left rounded-lg transition-all duration-300 group ${
+                    variant={activeTab === item.id ? "default" : "ghost"}
+                    className={`w-full justify-start text-left transition-all duration-300 ${
                       activeTab === item.id 
-                        ? "bg-gradient-to-r from-stone-700/80 to-stone-600/80 text-white hover:from-stone-600/90 hover:to-stone-500/90 shadow-lg ring-1 ring-white/10 backdrop-blur-sm" 
-                        : "text-stone-300 hover:text-white hover:bg-stone-800/60 backdrop-blur-sm"
+                        ? "bg-gray-700 text-white hover:bg-gray-600" 
+                        : "text-gray-300 hover:text-white hover:bg-gray-700"
                     }`}
                     onClick={() => setActiveTab(item.id)}
                   >
                     <item.icon className={`mr-3 h-4 w-4 transition-colors duration-300 ${
-                      activeTab === item.id ? "text-white" : "text-stone-400 group-hover:text-white"
+                      activeTab === item.id ? "text-white" : "text-gray-400"
                     }`} />
                     <span className="font-medium">{item.label}</span>
                   </Button>
@@ -251,13 +251,13 @@ export default function Dashboard() {
             </div>
 
             {/* Sign Out Button at Bottom */}
-            <div className="p-4 border-t border-stone-700/60 bg-gradient-to-r from-stone-800/30 to-neutral-800/30">
+            <div className="p-4 border-t border-gray-700">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/30 transition-all duration-300 rounded-lg backdrop-blur-sm group"
+                className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/30 transition-all duration-300"
                 onClick={handleSignOut}
               >
-                <LogOut className="mr-3 h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
+                <LogOut className="mr-3 h-4 w-4" />
                 <span className="font-medium">Cerrar Sesión</span>
               </Button>
             </div>
