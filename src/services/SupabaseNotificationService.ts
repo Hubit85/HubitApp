@@ -333,4 +333,19 @@ export class SupabaseNotificationService {
 
     return profile?.sms_notifications || false;
   }
+
+  static async updateNotification(id: string, updates: NotificationUpdate): Promise<Notification> {
+    const { data, error } = await supabase
+      .from("notifications")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
 }

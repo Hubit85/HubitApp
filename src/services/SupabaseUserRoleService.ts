@@ -570,4 +570,4 @@ export class SupabaseUserRoleService {
 }
 
 // Re-export UserRole type for convenience
-export { UserRole };
+export type { UserRole };
