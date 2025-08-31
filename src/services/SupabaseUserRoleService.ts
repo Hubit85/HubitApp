@@ -536,13 +536,15 @@ export class SupabaseUserRoleService {
     try {
       // Ensure roleType is one of the valid values
       const validRoles: UserRole['role_type'][] = ['service_provider', 'particular', 'community_member', 'property_administrator'];
-      if (!validRoles.includes(roleType as UserRole['role_type'])) {
+      const roleTypeTyped = roleType as UserRole['role_type'];
+      
+      if (!validRoles.includes(roleTypeTyped)) {
         return { success: false, error: `Invalid role type: ${roleType}` };
       }
 
       const roleRecord = {
         user_id: userId,
-        role_type: roleType as UserRole['role_type'],
+        role_type: roleTypeTyped,
         is_verified: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -567,7 +569,9 @@ export class SupabaseUserRoleService {
   static async verifyUserRole(userId: string, roleType: string) {
     try {
       const validRoles: UserRole['role_type'][] = ['service_provider', 'particular', 'community_member', 'property_administrator'];
-      if (!validRoles.includes(roleType as UserRole['role_type'])) {
+      const roleTypeTyped = roleType as UserRole['role_type'];
+      
+      if (!validRoles.includes(roleTypeTyped)) {
         return { success: false, error: `Invalid role type: ${roleType}` };
       }
 
@@ -578,7 +582,7 @@ export class SupabaseUserRoleService {
           updated_at: new Date().toISOString()
         })
         .eq("user_id", userId)
-        .eq("role_type", roleType as UserRole['role_type'])
+        .eq("role_type", roleTypeTyped)
         .select()
         .single();
 
