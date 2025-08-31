@@ -196,7 +196,7 @@ export default function BudgetRequestManager() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="property" className="text-right">Propiedad</Label>
-              <Select value={currentRequest.property_id} onValueChange={(value) => setCurrentRequest({...currentRequest, property_id: value})} >
+              <Select value={currentRequest.property_id || undefined} onValueChange={(value) => setCurrentRequest({...currentRequest, property_id: value})} >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Selecciona una propiedad" />
                 </SelectTrigger>

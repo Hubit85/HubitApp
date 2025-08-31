@@ -90,7 +90,7 @@ export default function PropertyManager() {
             name: propertyData.name,
             address: propertyData.address,
             city: propertyData.city,
-            postal_code: propertyData.postal_code,
+            postal_code: propertyData.postal_code || '',
             property_type: propertyData.property_type,
             description: propertyData.description,
             units_count: propertyData.units_count
