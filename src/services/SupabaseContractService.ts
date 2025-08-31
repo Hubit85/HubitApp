@@ -419,7 +419,7 @@ export class SupabaseContractService {
         user_id: clientId,
         service_provider_id: quote.service_provider_id,
         contract_number: contractNumber,
-        status: "pending" as Database["public"]["Enums"]["contract_status"],
+        status: "pending",
         total_amount: quote.amount,
         work_description: quote.description,
         payment_schedule: quote.payment_terms || "Net 30",

@@ -199,7 +199,7 @@ export class SupabaseDocumentService {
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
     // Upload file to storage based on document type with proper type casting
-    const validDocumentType = (documentData.document_type || "other") as Database["public"]["Enums"]["document_type"];
+    const validDocumentType = documentData.document_type || "other";
     const filePath = await this.uploadFile(file, `${validDocumentType}s`);
     
     // Create document record
@@ -222,7 +222,7 @@ export class SupabaseDocumentService {
     }
 
     // Upload new file with proper type casting
-    const documentType = (document.document_type || "other") as Database["public"]["Enums"]["document_type"];
+    const documentType = document.document_type || "other";
     const newFilePath = await this.uploadFile(newFile, documentType);
     
     // Update document record
