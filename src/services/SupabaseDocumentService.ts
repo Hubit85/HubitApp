@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Document, DocumentInsert, DocumentUpdate } from "@/integrations/supabase/types";
+import { Document, DocumentInsert, DocumentUpdate, Database } from "@/integrations/supabase/types";
 
 export class SupabaseDocumentService {
   // ===================== DOCUMENTS CRUD =====================
@@ -98,7 +98,7 @@ export class SupabaseDocumentService {
     const { data, error } = await supabase
       .from("documents")
       .select("*")
-      .eq("related_entity_type", entityType)
+      .eq("related_entity_type", entityType as Database["public"]["Enums"]["document_related_entity_type"])
       .eq("related_entity_id", entityId)
       .order("created_at", { ascending: false });
 
@@ -198,13 +198,14 @@ export class SupabaseDocumentService {
     file: File,
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
-    // Upload file to storage based on document type
-    const validDocumentType = documentData.document_type || "other";
+    // Upload file to storage based on document type with proper type casting
+    const validDocumentType = (documentData.document_type || "other") as Database["public"]["Enums"]["document_type"];
     const filePath = await this.uploadFile(file, `${validDocumentType}s`);
     
     // Create document record
     const fullDocumentData: DocumentInsert = {
       ...documentData,
+      document_type: validDocumentType,
       file_path: filePath,
       file_size: file.size
     };
@@ -220,8 +221,8 @@ export class SupabaseDocumentService {
       await this.deleteFileFromStorage(document.file_path);
     }
 
-    // Upload new file with proper type
-    const documentType = document.document_type || "other";
+    // Upload new file with proper type casting
+    const documentType = (document.document_type || "other") as Database["public"]["Enums"]["document_type"];
     const newFilePath = await this.uploadFile(newFile, documentType);
     
     // Update document record
