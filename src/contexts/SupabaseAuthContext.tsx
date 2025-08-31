@@ -87,9 +87,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       try {
         console.log(`🔗 Database connection attempt ${attempt}/${retries}`);
         
-        // Test simple con timeout
+        // Test with a simple query that doesn't require auth
         const { data, error } = await supabase
-          .from("profiles")
+          .from("service_categories")
           .select("id")
           .limit(1);
 
@@ -100,7 +100,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
         
         if (error) {
-          console.warn(`⚠️  Database connection attempt ${attempt} failed:`, error.message);
+          console.warn(`⚠️ Database connection attempt ${attempt} failed:`, error.message);
         }
         
       } catch (error) {
@@ -108,7 +108,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         
         // Si es el último intento, marcar como desconectado
         if (attempt === retries) {
-          console.warn("⚠️  Database tables not configured yet. Please run the setup script in Supabase SQL Editor.");
+          console.warn("⚠️ Database tables not configured yet. Please run the setup script in Supabase SQL Editor.");
           console.warn("📋 Check docs/complete-database-setup.sql for the required SQL commands.");
           setDatabaseConnected(false);
           return false;
@@ -126,6 +126,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string, userObject: User, retries = 2) => {
     try {
       console.log("🔄 Fetching user data with retry logic...");
+      
+      // First check database connection with a non-auth query
       const isConnected = await checkDatabaseConnection();
       
       if (!isConnected) {
@@ -159,29 +161,39 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Fetch profile with retry logic
+      // Wait a moment for auth session to be fully established
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Fetch profile with retry logic - using authenticated queries
       let profileData: Profile | null = null;
-      let profiles: Profile[] = [];
       
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          console.log(`🔍 Profile fetch attempt ${attempt}/${retries}`);
+          console.log(`🔍 Profile fetch attempt ${attempt}/${retries} for user ID: ${userId}`);
           
           const { data: profilesData, error: profileError } = await supabase
             .from("profiles")
             .select("*")
-            .eq("id", userId);
+            .eq("id", userId)
+            .single();
 
           if (!profileError && profilesData) {
-            profiles = profilesData;
+            profileData = profilesData;
+            console.log("✅ Profile found and loaded successfully");
             break;
           }
           
           if (profileError) {
             console.warn(`Profile fetch attempt ${attempt} failed:`, profileError.message);
             
+            // If it's an auth error, stop trying
+            if (profileError.message.includes('JWT') || profileError.message.includes('Invalid API key')) {
+              console.error("Authentication error detected, stopping profile fetch");
+              break;
+            }
+            
             if (attempt === retries) {
-              console.error("All profile fetch attempts failed, continuing with fallback");
+              console.error("All profile fetch attempts failed, will create new profile");
             } else {
               // Esperar antes del siguiente intento
               await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
@@ -199,7 +211,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (!profiles || profiles.length === 0) {
+      if (!profileData) {
         // Profile doesn't exist, create one from user metadata
         console.log("📝 No profile found, creating from user metadata");
         
@@ -259,24 +271,23 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             updated_at: new Date().toISOString()
           } as Profile;
         }
-      } else {
-        // Profile exists, use the first one
-        profileData = profiles[0];
-        console.log("✅ Profile found and loaded");
       }
 
       setProfile(profileData);
 
-      // Fetch roles with retry logic
+      // Fetch roles with retry logic - only after successful profile fetch
       try {
         console.log("🎭 Loading user roles...");
+        // Give a bit more time for the session to stabilize
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
         const rolesResult = await SupabaseUserRoleService.getUserRoles(userId);
         setUserRoles(rolesResult);
         
         // Set active role
         const activeRoleData = rolesResult.find(r => r.is_active) || null;
         setActiveRole(activeRoleData);
-        console.log("✅ User roles loaded successfully");
+        console.log("✅ User roles loaded successfully:", rolesResult.length, "roles found");
       } catch (error) {
         console.error("❌ Frontend: Error loading user roles:", error);
         setUserRoles([]);
