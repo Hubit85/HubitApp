@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
-import { supabase, handleConnectionRecovery } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { Profile, ProfileInsert } from "@/integrations/supabase/types";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
 
@@ -19,7 +19,7 @@ interface AuthContextType {
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: string }>;
   activateRole: (roleType: UserRole['role_type']) => Promise<{ success: boolean; message: string }>;
   refreshRoles: () => Promise<void>;
-  retryConnection: () => Promise<void>;
+  retryConnection: () => Promise<boolean>;
   databaseConnected: boolean;
 }
 
@@ -66,12 +66,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('reconnecting');
 
   // Función para intentar recuperar la conexión
-  const retryConnection = async () => {
+  const retryConnection = async (): Promise<boolean> => {
     setConnectionStatus('reconnecting');
     console.log('🔄 Manual connection retry initiated...');
     
     try {
-      await handleConnectionRecovery();
       const isConnected = await checkBasicConnection();
       
       setDatabaseConnected(isConnected);
