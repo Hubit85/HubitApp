@@ -7,9 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, User, Crown, Star, LogOut, Settings, CheckCircle, ArrowRight, ChevronDown } from "lucide-react";
+import { 
+  Loader2, User, Crown, Star, LogOut, Settings, CheckCircle, ArrowRight, ChevronDown, 
+  Shield, Home, Wrench, FileText, Mail, Phone, Calendar, Users, Building, Store, Bell, 
+  CreditCard, ThumbsUp, Award 
+} from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import { Header } from "@/components/layout/Header";
+import PropertyManager from "@/components/dashboard/PropertyManager";
+import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
+import UserRoleManager from "@/components/UserRoleManager";
+import ResendTestTool from "@/components/ResendTestTool";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading } = useSupabaseAuth();
