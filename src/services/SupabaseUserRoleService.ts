@@ -251,27 +251,29 @@ export class SupabaseUserRoleService {
       try {
         console.log('🔄 Activating role:', { userId, roleType });
 
-        // Use transaction-like approach with proper error handling
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        // Use timeout approach instead of abortSignal
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Operation timeout')), 10000);
+        });
 
         try {
           // First, deactivate all roles
-          const { error: deactivateError } = await supabase
+          const deactivatePromise = supabase
             .from('user_roles')
             .update({ 
               is_active: false, 
               updated_at: new Date().toISOString() 
             })
-            .eq('user_id', userId)
-            .abortSignal(controller.signal);
+            .eq('user_id', userId);
+
+          const { error: deactivateError } = await Promise.race([deactivatePromise, timeoutPromise]);
 
           if (deactivateError) {
             throw new Error(`Error deactivating roles: ${deactivateError.message}`);
           }
 
           // Then activate the selected role
-          const { error: activateError } = await supabase
+          const activatePromise = supabase
             .from('user_roles')
             .update({ 
               is_active: true, 
@@ -279,10 +281,9 @@ export class SupabaseUserRoleService {
             })
             .eq('user_id', userId)
             .eq('role_type', roleType)
-            .eq('is_verified', true)
-            .abortSignal(controller.signal);
+            .eq('is_verified', true);
 
-          clearTimeout(timeoutId);
+          const { error: activateError } = await Promise.race([activatePromise, timeoutPromise]);
 
           if (activateError) {
             throw new Error(`Error activating role: ${activateError.message}`);
@@ -296,7 +297,6 @@ export class SupabaseUserRoleService {
           };
 
         } catch (dbError) {
-          clearTimeout(timeoutId);
           throw dbError;
         }
 
@@ -304,7 +304,7 @@ export class SupabaseUserRoleService {
         console.error("❌ Error activating role:", error);
         
         let message = "Error al activar el rol";
-        if (error instanceof Error && error.name === 'AbortError') {
+        if (error instanceof Error && error.message === 'Operation timeout') {
           message = "Error: La operación tardó demasiado tiempo";
         } else if (error instanceof Error && error.message.includes('no rows')) {
           message = "El rol seleccionado no existe o no está verificado";
@@ -321,20 +321,21 @@ export class SupabaseUserRoleService {
   static async verifyRole(verificationToken: string): Promise<{ success: boolean; message: string; role?: UserRole }> {
     return ConnectionManager.executeWithLimit(async () => {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second timeout
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Operation timeout')), 12000);
+        });
 
         try {
           // Find the role with this token
-          const { data: roleData, error: fetchError } = await supabase
+          const fetchPromise = supabase
             .from('user_roles')
             .select('*')
             .eq('verification_token', verificationToken)
-            .single()
-            .abortSignal(controller.signal);
+            .single();
+
+          const { data: roleData, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]);
 
           if (fetchError || !roleData) {
-            clearTimeout(timeoutId);
             return {
               success: false,
               message: "Token de verificación inválido o expirado"
@@ -343,7 +344,6 @@ export class SupabaseUserRoleService {
 
           // Check if token hasn't expired
           if (roleData.verification_expires_at && new Date() > new Date(roleData.verification_expires_at)) {
-            clearTimeout(timeoutId);
             return {
               success: false,
               message: "El token de verificación ha expirado"
@@ -351,7 +351,7 @@ export class SupabaseUserRoleService {
           }
 
           // Mark as verified
-          const { data: updatedRole, error: updateError } = await supabase
+          const updatePromise = supabase
             .from('user_roles')
             .update({
               is_verified: true,
@@ -362,10 +362,9 @@ export class SupabaseUserRoleService {
             })
             .eq('id', roleData.id)
             .select()
-            .single()
-            .abortSignal(controller.signal);
+            .single();
 
-          clearTimeout(timeoutId);
+          const { data: updatedRole, error: updateError } = await Promise.race([updatePromise, timeoutPromise]);
 
           if (updateError) {
             throw new Error(updateError.message);
@@ -395,7 +394,6 @@ export class SupabaseUserRoleService {
           };
 
         } catch (dbError) {
-          clearTimeout(timeoutId);
           throw dbError;
         }
 
@@ -403,7 +401,7 @@ export class SupabaseUserRoleService {
         console.error("❌ Error verifying role:", error);
         
         let message = "Error al verificar el rol";
-        if (error instanceof Error && error.name === 'AbortError') {
+        if (error instanceof Error && error.message === 'Operation timeout') {
           message = "Error: La verificación tardó demasiado tiempo";
         }
         
