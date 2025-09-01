@@ -50,18 +50,11 @@ export class SupabaseUserRoleService {
       try {
         console.log(`🔍 getUserRoles for user:`, userId);
         
-        // Use AbortController for timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
-
         const { data, error } = await supabase
           .from('user_roles')
           .select('*')
           .eq('user_id', userId)
-          .order('created_at', { ascending: true })
-          .abortSignal(controller.signal);
-
-        clearTimeout(timeoutId);
+          .order('created_at', { ascending: true });
 
         if (error) {
           console.warn(`getUserRoles failed:`, error.message);
@@ -82,12 +75,7 @@ export class SupabaseUserRoleService {
         console.warn(`getUserRoles network error:`, networkError);
         
         // For network errors, return empty array to prevent app breaking
-        if (networkError instanceof Error && networkError.name === 'AbortError') {
-          console.log('⏰ getUserRoles timeout, returning empty array');
-        } else {
-          console.error("getUserRoles failed completely, returning empty array");
-        }
-        
+        console.error("getUserRoles failed completely, returning empty array");
         return [];
       }
     });
@@ -98,18 +86,12 @@ export class SupabaseUserRoleService {
       try {
         console.log(`🎯 getActiveRole for user:`, userId);
         
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout
-
         const { data, error } = await supabase
           .from('user_roles')
           .select('*')
           .eq('user_id', userId)
           .eq('is_active', true)
-          .maybeSingle()
-          .abortSignal(controller.signal);
-
-        clearTimeout(timeoutId);
+          .maybeSingle();
 
         if (error) {
           console.warn(`getActiveRole failed:`, error.message);
@@ -127,13 +109,7 @@ export class SupabaseUserRoleService {
         
       } catch (networkError) {
         console.warn(`getActiveRole network error:`, networkError);
-        
-        if (networkError instanceof Error && networkError.name === 'AbortError') {
-          console.log('⏰ getActiveRole timeout, returning null');
-        } else {
-          console.error("getActiveRole failed completely, returning null");
-        }
-        
+        console.error("getActiveRole failed completely, returning null");
         return null;
       }
     });
