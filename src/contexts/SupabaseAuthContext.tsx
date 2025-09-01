@@ -35,16 +35,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const checkConnection = async (): Promise<boolean> => {
     try {
       // Use a simple query that doesn't depend on RLS
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-      
       const { error } = await supabase
         .from("profiles")
         .select("id")
-        .limit(0)
-        .abortSignal(controller.signal);
-      
-      clearTimeout(timeoutId);
+        .limit(0);
       
       const connected = !error || error.code === 'PGRST116'; // PGRST116 is "no rows found" which is fine
       setIsConnected(connected);
@@ -128,18 +122,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Try to fetch profile from database with timeout
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-        
+      try {        
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", userObject.id)
-          .maybeSingle()
-          .abortSignal(controller.signal);
-
-        clearTimeout(timeoutId);
+          .maybeSingle();
 
         if (profileError && profileError.code !== 'PGRST116') {
           console.warn("⚠️ Profile fetch error:", profileError.message);
@@ -271,12 +259,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         await checkConnection();
         
         // Get current session with timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
-        
         const { data: { session }, error } = await supabase.auth.getSession();
-        
-        clearTimeout(timeoutId);
         
         if (!mounted) return;
         
