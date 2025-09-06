@@ -346,34 +346,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Step 3: Prepare role data with automatic community code generation
-    let processedRoleData: Record<string, any> = {};
+    const processedRoleData: Record<string, any> = {};
     
-    // CRITICAL FIX: Ensure roleSpecificData is properly processed without spread type issues
+    // CRITICAL FIX: Direct property assignment to avoid spread type issues completely
     if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData) && roleSpecificData !== null) {
       try {
-        // Safely process the roleSpecificData object
-        const safeRoleData = roleSpecificData as Record<string, any>;
+        // Safely copy properties one by one to avoid spread type errors
+        const sourceData = roleSpecificData as Record<string, any>;
         
-        // Create a clean object by copying valid properties one by one
-        processedRoleData = {};
-        
-        for (const key in safeRoleData) {
-          if (safeRoleData.hasOwnProperty(key)) {
-            const value = safeRoleData[key];
-            if (typeof key === 'string' && key.length > 0 && value !== undefined && value !== null) {
+        // Copy all valid properties directly
+        Object.keys(sourceData).forEach(key => {
+          if (typeof key === 'string' && key.length > 0) {
+            const value = sourceData[key];
+            if (value !== undefined && value !== null) {
               processedRoleData[key] = value;
             }
           }
-        }
+        });
         
         console.log('✅ API: Successfully processed role-specific data with', Object.keys(processedRoleData).length, 'valid fields');
       } catch (processingError) {
         console.warn('⚠️ API: Error processing role-specific data:', processingError);
-        processedRoleData = {};
+        // processedRoleData is already initialized as empty object
       }
     } else {
       console.warn('⚠️ API: Invalid roleSpecificData format, using empty object');
-      processedRoleData = {};
+      // processedRoleData is already initialized as empty object
     }
     
     if (roleType === 'community_member') {
