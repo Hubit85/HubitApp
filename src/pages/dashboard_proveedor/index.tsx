@@ -26,9 +26,20 @@ import SystemStatusCard from "@/components/SystemStatusCard";
 import UserRoleManager from "@/components/UserRoleManager";
 
 export default function DashboardProveedor() {
-  const { user, profile, signOut, loading } = useSupabaseAuth();
+  const { user, profile, userRoles, activeRole, signOut, loading } = useSupabaseAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Get company name from the service provider role data
+  const getCompanyName = () => {
+    const serviceProviderRole = userRoles.find(role => role.role_type === 'service_provider');
+    if (serviceProviderRole?.role_specific_data?.company_name) {
+      return serviceProviderRole.role_specific_data.company_name;
+    }
+    return profile?.full_name || "Empresa no especificada";
+  };
+
+  const companyName = getCompanyName();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -96,7 +107,7 @@ export default function DashboardProveedor() {
                   <Wrench className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white">{profile.full_name || "Usuario"}</h3>
+                  <h3 className="font-bold text-white">{companyName}</h3>
                   <p className="text-gray-300 text-sm">{user.email}</p>
                 </div>
               </div>
@@ -157,7 +168,7 @@ export default function DashboardProveedor() {
                       ¡Tu Negocio en Marcha! 🔧
                     </h1>
                     <p className="text-stone-600 text-lg">
-                      {profile.full_name || "Usuario"} • <span className="text-stone-800 font-semibold">Proveedor de Servicios</span>
+                      {companyName} • <span className="text-stone-800 font-semibold">Proveedor de Servicios</span>
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <CheckCircle className="h-5 w-5 text-green-600" />
@@ -411,7 +422,7 @@ export default function DashboardProveedor() {
                               <Wrench className="h-5 w-5 text-stone-500" />
                               <div>
                                 <p className="text-sm text-stone-500 font-medium">Empresa</p>
-                                <p className="font-semibold text-black">{profile.full_name || "No especificado"}</p>
+                                <p className="font-semibold text-black">{companyName}</p>
                               </div>
                             </div>
 
