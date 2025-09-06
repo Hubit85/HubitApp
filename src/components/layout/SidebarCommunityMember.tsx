@@ -1,95 +1,63 @@
+
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/router";
-import { 
-  User, 
-  FileText, 
-  Store, 
-  Star, 
-  Home, 
-  Settings, 
-  Bell, 
+import {
+  User,
   MessageSquare,
-  Calendar,
-  CreditCard,
-  ThumbsUp,
-  Award,
-  LogOut,
   Video,
   AlertTriangle,
   FileCheck,
-  UserCheck
+  FileText,
+  Bell,
+  Calendar,
+  ThumbsUp,
+  Star,
+  Settings,
+  Store,
+  Mail,
+  Home
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { Button } from "../ui/button";
 
 interface SidebarCommunityMemberProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+    activeTab: string;
+    setActiveTab: (tab: string) => void;
 }
 
 export function SidebarCommunityMember({ activeTab, setActiveTab }: SidebarCommunityMemberProps) {
-  const { t } = useLanguage();
-  const router = useRouter();
-  const { signOut } = useSupabaseAuth();
+    const { t } = useLanguage();
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.push('/');
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-      alert("Error al cerrar sesión. Por favor, inténtalo de nuevo.");
-    }
-  };
+    const navItems = [
+        { id: "perfil", label: t("myProfile"), icon: User },
+        { id: "mis-propiedades", label: t("myProperties"), icon: Home },
+        { id: "servicios", label: t("availableServices"), icon: Store },
+        { id: "chat", label: t("communityChat"), icon: MessageSquare },
+        { id: "videoconferencia", label: t("scheduleVideoConference"), icon: Video },
+        { id: "incidencias", label: t("informIssue"), icon: AlertTriangle },
+        { id: "contratos", label: t("communityContracts"), icon: FileCheck },
+        { id: "presupuesto", label: t("communityBudget"), icon: FileText },
+        { id: "administrador", label: t("contactAdministrator"), icon: Mail },
+        { id: "historial", label: t("serviceHistory"), icon: Calendar },
+        { id: "recomendaciones", label: t("recommendations"), icon: ThumbsUp },
+        { id: "valoraciones", label: t("serviceRatings"), icon: Star },
+        { id: "configuracion", label: t("configuration"), icon: Settings },
+    ];
 
-  const navItems = [
-    { id: 'dashboard', label: t('dashboard'), icon: Home },
-    { id: "perfil", label: "myProfile", icon: User },
-    { id: "mis-propiedades", label: "myProperties", icon: Home },
-    { id: "servicios", label: "availableServices", icon: Store },
-    { id: "chat", label: "communityChat", icon: MessageSquare },
-    { id: "videoconferencia", label: "scheduleVideoConference", icon: Video },
-    { id: "incidencias", label: "informIssue", icon: AlertTriangle },
-    { id: "contratos", label: "communityContracts", icon: FileCheck },
-    { id: "presupuesto", label: "communityBudget", icon: FileText },
-    { id: "administrador", label: "contactAdministrator", icon: Bell },
-    { id: "historial", label: "serviceHistory", icon: Calendar },
-    { id: "recomendaciones", label: "recommendations", icon: ThumbsUp },
-    { id: "valoraciones", label: "serviceRatings", icon: Star },
-    { id: "configuracion", label: "configuration", icon: Settings },
-  ];
-
-  return (
-    <div className="w-64 bg-gray-800 text-white shadow-lg flex flex-col h-full">
-      <div className="p-4 flex-1">
-        <h2 className="text-2xl font-bold mb-6">{t("communityMemberDashboard")}</h2>
-        <nav className="space-y-2">
-          {navItems.map((item) => (
-            <Button 
-              key={item.id}
-              variant={activeTab === item.id ? "default" : "ghost"} 
-              className="w-full justify-start text-sm"
-              onClick={() => setActiveTab(item.id)}
-            >
-              <item.icon className="mr-2 h-4 w-4" />
-              {t(item.label)}
-            </Button>
-          ))}
-        </nav>
-      </div>
-      
-      {/* Sign Out Button at Bottom */}
-      <div className="p-4 border-t border-gray-700">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-all duration-200 text-sm"
-          onClick={handleSignOut}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          {t("signOut")}
-        </Button>
-      </div>
-    </div>
-  );
+    return (
+        <div className="w-64 bg-gray-50 p-4 border-r border-gray-200 overflow-y-auto">
+            <nav className="flex flex-col gap-1">
+                {navItems.map((item) => (
+                    <Button
+                        key={item.id}
+                        variant={activeTab === item.id ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                        onClick={() => setActiveTab(item.id)}
+                    >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {item.label}
+                    </Button>
+                ))}
+            </nav>
+        </div>
+    );
 }
