@@ -51,7 +51,10 @@ export default function UserRoleManager() {
   }, [user, profile]); // Incluir profile en las dependencias
 
   const loadUserRoles = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.warn('⚠️ UserRoleManager: No user ID available');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -62,112 +65,209 @@ export default function UserRoleManager() {
         userEmail: user.email
       });
       
-      // Para usuarios específicos, agregar debugging extra
-      if (user.email === 'ddayanacastro10@gmail.com') {
-        console.log('🎯 DIRECT DATABASE CHECK for ddayanacastro10@gmail.com:');
+      // CRITICAL FIX: Multi-layered approach to role loading
+      let roles: UserRole[] = [];
+      let loadingMethod = '';
+      
+      // Method 1: Try service first (normal path)
+      try {
+        console.log('🔄 METHOD 1: Using SupabaseUserRoleService...');
+        roles = await SupabaseUserRoleService.getUserRoles(user.id);
+        loadingMethod = 'service';
         
-        // Hacer una consulta directa para ver qué está pasando
+        console.log('📊 Service result:', {
+          rolesCount: roles.length,
+          roles: roles.map(r => r.role_type)
+        });
+        
+      } catch (serviceError) {
+        console.warn('❌ Service method failed:', serviceError);
+        
+        // Method 2: Direct database fallback
         try {
-          const { data: directCheck, error: directError } = await supabase
+          console.log('🔄 METHOD 2: Direct database query fallback...');
+          const { data: directRoles, error: directError } = await supabase
             .from('user_roles')
-            .select('*')
-            .eq('user_id', user.id);
-            
-          console.log('📊 DIRECT DATABASE RESULT:', {
-            userId: user.id,
-            rolesFound: directCheck?.length || 0,
-            roles: directCheck,
-            error: directError?.message || 'none'
-          });
+            .select(`
+              id,
+              user_id,
+              role_type,
+              is_verified,
+              is_active,
+              role_specific_data,
+              verification_token,
+              verification_expires_at,
+              verification_confirmed_at,
+              created_at,
+              updated_at
+            `)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true });
           
           if (directError) {
-            console.error('❌ DIRECT DATABASE ERROR:', directError);
+            throw directError;
           }
-        } catch (directQueryError) {
-          console.error('❌ DIRECT QUERY EXCEPTION:', directQueryError);
+          
+          roles = (directRoles || []) as UserRole[];
+          loadingMethod = 'direct';
+          
+          console.log('📊 Direct database result:', {
+            rolesCount: roles.length,
+            roles: roles.map(r => r.role_type)
+          });
+          
+        } catch (directError) {
+          console.error('❌ Direct database method also failed:', directError);
+          
+          // Method 3: Email-based lookup as last resort
+          if (user.email === 'ddayanacastro10@gmail.com') {
+            try {
+              console.log('🔄 METHOD 3: Email-based recovery for known problematic user...');
+              
+              // First get the correct user ID by email
+              const { data: profileByEmail, error: emailError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', user.email)
+                .single();
+              
+              if (emailError || !profileByEmail) {
+                throw new Error('Could not find profile by email');
+              }
+              
+              console.log('🔍 Found profile by email:', {
+                foundId: profileByEmail.id,
+                currentId: user.id,
+                idsMatch: profileByEmail.id === user.id
+              });
+              
+              // Try with the email-found ID
+              const { data: emailBasedRoles, error: emailRoleError } = await supabase
+                .from('user_roles')
+                .select(`
+                  id,
+                  user_id,
+                  role_type,
+                  is_verified,
+                  is_active,
+                  role_specific_data,
+                  verification_token,
+                  verification_expires_at,
+                  verification_confirmed_at,
+                  created_at,
+                  updated_at
+                `)
+                .eq('user_id', profileByEmail.id)
+                .order('created_at', { ascending: true });
+              
+              if (!emailRoleError && emailBasedRoles && emailBasedRoles.length > 0) {
+                roles = emailBasedRoles as UserRole[];
+                loadingMethod = 'email-recovery';
+                
+                console.log('✅ EMAIL RECOVERY SUCCESSFUL:', {
+                  rolesCount: roles.length,
+                  roles: roles.map(r => r.role_type),
+                  correctUserId: profileByEmail.id
+                });
+                
+                // Add a warning that there's an ID mismatch
+                setError(`⚠️ Advertencia: Se detectó un desajuste de ID de usuario. Se cargaron ${roles.length} roles usando recuperación por email.`);
+                
+              } else {
+                throw new Error('No roles found even with email recovery');
+              }
+              
+            } catch (emailRecoveryError) {
+              console.error('❌ Email recovery also failed:', emailRecoveryError);
+              throw emailRecoveryError;
+            }
+          } else {
+            throw directError;
+          }
         }
       }
       
-      // Esperar un poco para que la sincronización automática del contexto termine
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const roles = await SupabaseUserRoleService.getUserRoles(user.id);
+      // Set the roles we found
       setUserRoles(roles);
       
-      console.log('📋 UserRoleManager: Roles loaded result:', {
-        userId: user.id.substring(0, 8) + '...',
-        userEmail: user.email,
+      // Find and set current active role
+      const activeRole = roles.find(r => r.is_active) || null;
+      setCurrentRole(activeRole);
+      
+      console.log(`✅ UserRoleManager: Roles loaded successfully via ${loadingMethod}:`, {
         rolesCount: roles.length,
-        roles: roles.map(r => ({
-          role_type: r.role_type,
-          is_verified: r.is_verified,
-          is_active: r.is_active,
-          id: r.id.substring(0, 8) + '...'
-        }))
+        activeRole: activeRole?.role_type || 'none',
+        method: loadingMethod
       });
       
-      const activeRole = await SupabaseUserRoleService.getActiveRole(user.id);
-      setCurrentRole(activeRole);
-
-      console.log('✅ Frontend UserRoleManager: Roles loaded successfully:', roles.length);
-      
-      // Mensaje de éxito cuando los roles se han cargado correctamente
+      // Success messaging
       if (roles.length > 0) {
         const verifiedRoles = roles.filter(r => r.is_verified);
         const pendingRoles = roles.filter(r => !r.is_verified);
         
-        if (verifiedRoles.length > 0 && pendingRoles.length === 0) {
-          setSuccessMessage(`✅ Roles cargados correctamente. Tienes ${verifiedRoles.length} rol(es) verificado(s).`);
-        } else if (pendingRoles.length > 0) {
-          setSuccessMessage(`🔄 ${verifiedRoles.length} rol(es) verificado(s), ${pendingRoles.length} pendiente(s) de verificación.`);
+        let message = `✅ ${roles.length} rol(es) cargado(s) correctamente`;
+        if (loadingMethod !== 'service') {
+          message += ` (método: ${loadingMethod})`;
         }
         
-        // Limpiar mensaje después de unos segundos
+        if (verifiedRoles.length > 0 && pendingRoles.length === 0) {
+          message += `. Todos verificados.`;
+        } else if (pendingRoles.length > 0) {
+          message += `. ${verifiedRoles.length} verificado(s), ${pendingRoles.length} pendiente(s).`;
+        }
+        
+        setSuccessMessage(message);
+        
+        // Clear success message after 5 seconds
         setTimeout(() => {
           setSuccessMessage("");
-        }, 5000);
+        }, 8000);
+        
       } else {
-        // Problema detectado: No se encontraron roles
-        console.warn('⚠️ NO ROLES FOUND - This is the problem!', {
+        // Still no roles found after all methods
+        console.warn('⚠️ NO ROLES FOUND after all recovery attempts', {
           userId: user.id,
           userEmail: user.email,
-          profileUserType: profile?.user_type
+          profileUserType: profile?.user_type,
+          methodsAttempted: ['service', 'direct', user.email === 'ddayanacastro10@gmail.com' ? 'email-recovery' : 'n/a'].filter(m => m !== 'n/a')
         });
         
-        if (user.email === 'ddayanacastro10@gmail.com') {
-          setError(`🔍 DEBUG: No se encontraron roles para ${user.email} (User ID: ${user.id.substring(0, 8)}...). Los datos deben existir en la base de datos según las consultas manuales.`);
-        } else if (profile?.user_type) {
-          // Solo mostrar mensaje de sincronización si realmente no hay roles
-          setSuccessMessage(`🔄 Sincronizando tu rol "${profile.user_type}"... Un momento.`);
-          
-          // Intentar recargar después de un momento
-          setTimeout(() => {
-            loadUserRoles();
-          }, 3000);
+        if (profile?.user_type) {
+          setError(`🔄 No se encontraron roles, pero tienes el tipo "${profile.user_type}" en tu perfil. Puede haber un problema de sincronización. Intenta cerrar sesión y volver a entrar.`);
         } else {
-          setError("No se encontraron roles. Si acabas de registrarte, los roles pueden tardar unos minutos en aparecer.");
+          setError("No se encontraron roles. Si acabas de registrarte, puede que los roles no se hayan sincronizado correctamente. Intenta recargar la página o contacta con soporte.");
         }
       }
 
     } catch (err) {
       console.error("❌ Frontend UserRoleManager: Error loading user roles:", err);
       
-      // Manejo más específico de errores de carga
+      // Enhanced error handling with specific guidance
+      let errorMessage = "Error al cargar roles: ";
+      
       if (err instanceof Error) {
         if (err.message.includes('NetworkError') || err.message.includes('fetch')) {
-          setError("Error de conexión: No se pudieron cargar los roles. Verifica tu conexión a internet.");
+          errorMessage += "Problema de conexión. Verifica tu internet y recarga la página.";
         } else if (err.message.includes('401') || err.message.includes('403')) {
-          setError("Sesión expirada: Por favor cierra sesión y vuelve a iniciar sesión.");
+          errorMessage += "Sesión expirada. Cierra sesión y vuelve a iniciar sesión.";
         } else if (err.message.includes('500')) {
-          setError("Error del servidor: Problema temporal con la base de datos. Intenta recargar la página.");
+          errorMessage += "Error del servidor. Intenta recargar la página en unos momentos.";
         } else if (err.message.includes('PGRST')) {
-          setError("Error de base de datos: Problema con la consulta de datos. El equipo técnico ha sido notificado.");
+          errorMessage += "Error de base de datos. Contacta con soporte técnico si persiste.";
         } else {
-          setError(`Error al cargar roles: ${err.message}`);
+          errorMessage += err.message;
         }
       } else {
-        setError("Error desconocido al cargar los roles. Intenta recargar la página.");
+        errorMessage += "Error desconocido. Intenta recargar la página.";
       }
+      
+      setError(errorMessage);
+      
+      // For the specific problematic user, add debugging info
+      if (user.email === 'ddayanacastro10@gmail.com') {
+        setError(errorMessage + ` [DEBUG INFO: User ID=${user.id.substring(0, 8)}..., Email=${user.email}]`);
+      }
+      
     } finally {
       setLoading(false);
     }
