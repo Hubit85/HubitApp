@@ -634,7 +634,10 @@ function RegisterPageContent() {
               <>
                 <CardHeader className="text-center space-y-4 pb-6">
                   <div className="mx-auto w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center shadow-lg">
-                    {getRoleInfo(currentRole).icon({ className: "h-8 w-8 text-white" })}
+                    {(() => {
+                      const IconComponent = getRoleInfo(currentRole).icon;
+                      return <IconComponent className="h-8 w-8 text-white" />;
+                    })()}
                   </div>
                   <div>
                     <CardTitle className="text-2xl font-bold text-black">
