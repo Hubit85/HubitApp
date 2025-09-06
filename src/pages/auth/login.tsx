@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Sparkles, AlertTriangle, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Sparkles, AlertTriangle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,49 +17,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'offline'>('checking');
-  const [retryAttempt, setRetryAttempt] = useState(0);
 
-  const { signIn, user, loading } = useSupabaseAuth();
+  const { signIn, user, loading, isConnected } = useSupabaseAuth();
   const router = useRouter();
-
-  // Check connection status
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        setConnectionStatus('checking');
-        
-        // Simple connectivity test
-        const response = await fetch(process.env.NEXT_PUBLIC_SUPABASE_URL + '/rest/v1/', {
-          method: 'GET',
-          headers: {
-            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok || response.status === 404) {
-          setConnectionStatus('connected');
-        } else {
-          setConnectionStatus('error');
-        }
-      } catch (error) {
-        console.warn('Connection check failed:', error);
-        setConnectionStatus('offline');
-      }
-    };
-
-    checkConnection();
-    
-    // Recheck every 30 seconds if there's a connection issue
-    const interval = setInterval(() => {
-      if (connectionStatus === 'error' || connectionStatus === 'offline') {
-        checkConnection();
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [connectionStatus, retryAttempt]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -68,23 +28,10 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
 
-  const handleRetryConnection = () => {
-    setRetryAttempt(prev => prev + 1);
-    setError("");
-    setConnectionStatus('checking');
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
-    // Check if we have basic connectivity
-    if (connectionStatus === 'offline' || connectionStatus === 'error') {
-      setError("Sin conexión a internet o problemas con el servidor. Verifica tu conexión e intenta nuevamente.");
-      setIsLoading(false);
-      return;
-    }
 
     try {
       console.log("🔑 Starting login attempt...");
@@ -93,11 +40,6 @@ export default function LoginPage() {
       if (result.error) {
         console.error("❌ Login failed:", result.error);
         setError(result.error);
-        
-        // Specific error handling
-        if (result.error.includes("conexión") || result.error.includes("internet")) {
-          setConnectionStatus('error');
-        }
       } else {
         console.log("✅ Login successful, redirecting...");
         // Successful login - redirect will happen via useEffect
@@ -111,7 +53,6 @@ export default function LoginPage() {
       if (err instanceof Error) {
         if (err.message.includes('fetch') || err.message.includes('network')) {
           errorMessage = "Error de conexión. Verifica tu internet e intenta nuevamente.";
-          setConnectionStatus('error');
         } else if (err.message.includes('timeout')) {
           errorMessage = "La conexión tardó demasiado tiempo. Intenta nuevamente.";
         } else {
@@ -122,36 +63,6 @@ export default function LoginPage() {
       setError(errorMessage);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getConnectionStatusIcon = () => {
-    switch (connectionStatus) {
-      case 'checking':
-        return <Loader2 className="h-4 w-4 animate-spin text-yellow-600" />;
-      case 'connected':
-        return <Wifi className="h-4 w-4 text-green-600" />;
-      case 'error':
-        return <AlertTriangle className="h-4 w-4 text-red-600" />;
-      case 'offline':
-        return <WifiOff className="h-4 w-4 text-red-600" />;
-      default:
-        return null;
-    }
-  };
-
-  const getConnectionStatusText = () => {
-    switch (connectionStatus) {
-      case 'checking':
-        return "Verificando conexión...";
-      case 'connected':
-        return "Conectado";
-      case 'error':
-        return "Error de servidor";
-      case 'offline':
-        return "Sin conexión";
-      default:
-        return "";
     }
   };
 
@@ -193,19 +104,15 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Connection Status */}
-          <div className="mb-4">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
-              connectionStatus === 'connected' 
-                ? 'bg-green-100 text-green-800' 
-                : connectionStatus === 'checking'
-                ? 'bg-yellow-100 text-yellow-800'
-                : 'bg-red-100 text-red-800'
-            }`}>
-              {getConnectionStatusIcon()}
-              {getConnectionStatusText()}
+          {/* Connection Status Indicator - Only show if there are connection issues */}
+          {!isConnected && (
+            <div className="mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                <AlertTriangle className="h-4 w-4" />
+                Conectividad limitada
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Login Card */}
           <Card className="w-full max-w-md bg-white/70 backdrop-blur-lg border-white/20 shadow-2xl shadow-neutral-900/10">
@@ -224,50 +131,12 @@ export default function LoginPage() {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {/* Connection Error Alert */}
-              {(connectionStatus === 'error' || connectionStatus === 'offline') && (
-                <Alert className="border-amber-200 bg-amber-50">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-amber-800">
-                    <div className="flex items-center justify-between">
-                      <span>
-                        {connectionStatus === 'offline' 
-                          ? "Sin conexión a internet. Verifica tu conexión." 
-                          : "Problemas de conectividad con el servidor."
-                        }
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRetryConnection}
-                        className="text-amber-700 hover:text-amber-800"
-                      >
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Reintentar
-                      </Button>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              )}
-
               {/* Login Error Alert */}
               {error && (
                 <Alert className="border-red-200 bg-red-50">
+                  <AlertTriangle className="h-4 w-4" />
                   <AlertDescription className="text-red-800">
                     {error}
-                    {error.includes("conexión") && (
-                      <div className="mt-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleRetryConnection}
-                          className="text-red-700 hover:text-red-800"
-                        >
-                          <RefreshCw className="h-3 w-3 mr-1" />
-                          Verificar conexión
-                        </Button>
-                      </div>
-                    )}
                   </AlertDescription>
                 </Alert>
               )}
@@ -321,22 +190,13 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  disabled={isLoading || connectionStatus === 'offline' || connectionStatus === 'error'}
-                  className={`w-full h-12 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 ${
-                    connectionStatus === 'connected'
-                      ? "bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:via-blue-600 hover:to-blue-700"
-                      : "bg-gray-400 cursor-not-allowed"
-                  }`}
+                  disabled={isLoading}
+                  className="w-full h-12 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:via-blue-600 hover:to-blue-700"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Iniciando sesión...
-                    </>
-                  ) : connectionStatus !== 'connected' ? (
-                    <>
-                      <WifiOff className="w-5 h-5 mr-2" />
-                      Sin conexión
                     </>
                   ) : (
                     <>
@@ -348,15 +208,15 @@ export default function LoginPage() {
                 </Button>
               </form>
 
-              {/* Diagnostic Info for Connection Issues */}
-              {(connectionStatus === 'error' || connectionStatus === 'offline') && (
+              {/* Connection notice for offline mode */}
+              {!isConnected && (
                 <div className="text-center">
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-medium text-blue-900 mb-2">¿Problemas para conectarte?</h4>
+                    <h4 className="font-medium text-blue-900 mb-2">Modo de conectividad limitada</h4>
                     <div className="text-sm text-blue-800 space-y-1">
-                      <p>• Verifica tu conexión a internet</p>
-                      <p>• Intenta recargar la página</p>
-                      <p>• Si el problema persiste, contacta al soporte</p>
+                      <p>• La aplicación funciona con datos locales</p>
+                      <p>• Algunas funciones pueden estar limitadas</p>
+                      <p>• La conectividad se restaurará automáticamente</p>
                     </div>
                   </div>
                 </div>
