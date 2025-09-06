@@ -423,6 +423,7 @@ function RegisterPageContent() {
         };
       }
 
+      // Paso 1: Crear la cuenta con el rol principal
       const result = await signUp(formData.email, formData.password, userData);
 
       if (result?.error) {
@@ -436,10 +437,89 @@ function RegisterPageContent() {
       }
 
       if (result?.success) {
-        setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+        // Paso 2: Si hay más de un rol seleccionado, crear los roles adicionales
+        const orderedRoles = getOrderedRoles(formData.roles);
+        const additionalRoles = orderedRoles.slice(1); // Todos menos el primero
+        
+        if (additionalRoles.length > 0) {
+          setSuccessMessage("¡Cuenta creada! Configurando roles adicionales...");
+          
+          // Esperar un momento para que la cuenta se complete
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Crear cada rol adicional
+          let rolesCreatedSuccessfully = 0;
+          let roleErrors: string[] = [];
+          
+          for (const additionalRole of additionalRoles) {
+            try {
+              // Preparar datos específicos del rol
+              let roleSpecificData: any = {};
+              
+              if (additionalRole === 'particular') {
+                roleSpecificData = formData.particular;
+              } else if (additionalRole === 'community_member') {
+                roleSpecificData = {
+                  ...formData.community_member,
+                  community_code: formData.community_member.community_code || 
+                                 generateCommunityCode(formData.community_member.address)
+                };
+              } else if (additionalRole === 'service_provider') {
+                roleSpecificData = formData.service_provider;
+              } else if (additionalRole === 'property_administrator') {
+                roleSpecificData = formData.property_administrator;
+              }
+              
+              // Llamar al API para agregar el rol
+              const roleResponse = await fetch('/api/user-roles/add-role', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  userId: user?.id, // Usar el ID del usuario recién creado
+                  roleType: additionalRole,
+                  roleSpecificData: roleSpecificData
+                })
+              });
+              
+              const roleResult = await roleResponse.json();
+              
+              if (roleResult.success) {
+                rolesCreatedSuccessfully++;
+                console.log(`✅ Rol adicional creado: ${additionalRole}`);
+              } else {
+                roleErrors.push(`${additionalRole}: ${roleResult.message}`);
+                console.error(`❌ Error creando rol ${additionalRole}:`, roleResult.message);
+              }
+              
+            } catch (roleError) {
+              roleErrors.push(`${additionalRole}: Error de conexión`);
+              console.error(`❌ Error creando rol ${additionalRole}:`, roleError);
+            }
+          }
+          
+          // Mostrar resultado final
+          if (rolesCreatedSuccessfully === additionalRoles.length) {
+            setSuccessMessage(`¡Cuenta creada exitosamente con ${orderedRoles.length} roles! Redirigiendo...`);
+          } else if (rolesCreatedSuccessfully > 0) {
+            setSuccessMessage(`Cuenta creada. ${rolesCreatedSuccessfully} de ${additionalRoles.length} roles adicionales configurados. Los roles pendientes recibirán verificación por email.`);
+          } else {
+            setSuccessMessage(`Cuenta creada con rol principal. Los roles adicionales se pueden agregar desde tu dashboard.`);
+          }
+          
+          // Mostrar errores específicos si los hay (solo para debugging, no asustar al usuario)
+          if (roleErrors.length > 0) {
+            console.warn('Errores en roles adicionales:', roleErrors);
+          }
+        } else {
+          setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+        }
+        
+        // Redirigir después de un momento
         setTimeout(() => {
           router.push("/dashboard");
-        }, 2000);
+        }, 3000);
         return;
       }
 
