@@ -515,19 +515,7 @@ export default function WhitepaperPage() {
                       {/* Stacked Bar Chart - BARRAS CENTRADAS EN EL GRID */}
                       <div className="absolute inset-0 flex items-end justify-between px-2">
                         
-                        {/* Q4 2025: 0M (Sin liberación inicial) */}
-                        <div className="group flex flex-col items-center flex-1 relative">
-                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
-                            0M
-                          </div>
-                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '16px' }}>
-                            {/* Sin tokens en circulación */}
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-neutral-300 to-neutral-200 rounded-t-lg" style={{ height: '16px' }}></div>
-                          </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-neutral-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2025</div>
-                        </div>
-                        
-                        {/* Q1 2026: 600M (Pool Público completo) - FECHA CORREGIDA */}
+                        {/* Q1 2026: 600M (Pool Público completo) - PRIMERA BARRA */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           {/* Valor de tokens circulantes encima de la barra */}
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
@@ -540,7 +528,7 @@ export default function WhitepaperPage() {
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2026</div>
                         </div>
 
-                        {/* Q2 2026: 800M (600M Pool + 100M Equipo + 50M Marketing + 50M Airdrops) - FECHA CORREGIDA */}
+                        {/* Q2 2026: 800M (600M Pool + 100M Equipo + 50M Marketing + 50M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           {/* Valor de tokens circulantes encima de la barra */}
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
