@@ -86,6 +86,8 @@ export function BudgetRequestManager() {
       setLoading(true);
       setError("");
 
+      console.log("🔍 Loading service provider data for user:", user.id.substring(0, 8) + '...');
+
       // Get service provider record
       const { data: providerData, error: providerError } = await supabase
         .from('service_providers')
@@ -94,8 +96,15 @@ export function BudgetRequestManager() {
         .single();
 
       if (providerError) {
+        console.error("❌ Error loading service provider:", providerError);
         throw new Error(`Error cargando perfil de proveedor: ${providerError.message}`);
       }
+
+      console.log("✅ Service provider loaded:", {
+        providerId: providerData.id.substring(0, 8) + '...',
+        companyName: providerData.company_name,
+        serviceCategories: providerData.service_categories
+      });
 
       setServiceProvider(providerData);
 
@@ -107,14 +116,19 @@ export function BudgetRequestManager() {
 
       if (requestsResult.success) {
         setBudgetRequests(requestsResult.data);
+        console.log("✅ Budget requests loaded:", requestsResult.data.length);
+      } else {
+        console.warn("⚠️ Failed to load budget requests:", requestsResult.message);
+        setError(requestsResult.message || "Error al cargar solicitudes");
       }
 
       if (quotesResult.success) {
         setMyQuotes(quotesResult.data);
+        console.log("✅ My quotes loaded:", quotesResult.data.length);
       }
 
     } catch (err) {
-      console.error("Error loading service provider data:", err);
+      console.error("❌ Error loading service provider data:", err);
       setError(err instanceof Error ? err.message : "Error al cargar datos del proveedor");
     } finally {
       setLoading(false);
@@ -123,7 +137,9 @@ export function BudgetRequestManager() {
 
   const loadAvailableBudgetRequests = async (provider: any) => {
     try {
-      // Build query based on service provider's categories and service area
+      console.log("🔍 Loading available budget requests...");
+
+      // FIXED QUERY: More permissive approach - get all published requests first
       let query = supabase
         .from('budget_requests')
         .select(`
@@ -141,57 +157,118 @@ export function BudgetRequestManager() {
         .eq('status', 'published')
         .gte('expires_at', new Date().toISOString());
 
-      // Filter by service categories if provider has them
-      if (provider.service_categories && provider.service_categories.length > 0) {
-        query = query.in('category', provider.service_categories);
-      }
+      console.log("📋 Query constraints:", {
+        status: 'published',
+        expires_after: new Date().toISOString(),
+        provider_categories: provider.service_categories
+      });
 
-      // Filter by service area if defined
-      if (provider.service_area && provider.service_area.length > 0) {
-        // For now, we'll use a simple city match - can be enhanced with radius later
-        // This would need a more sophisticated geolocation query in production
-      }
-
-      const { data, error } = await query
+      // Execute the base query first to get all published requests
+      const { data: allRequests, error } = await query
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(100);
 
       if (error) {
+        console.error("❌ Database query error:", error);
         throw error;
+      }
+
+      console.log("📊 Raw query results:", {
+        total_requests: allRequests?.length || 0,
+        sample_titles: allRequests?.slice(0, 3).map(r => r.title) || []
+      });
+
+      if (!allRequests || allRequests.length === 0) {
+        console.log("⚠️ No published budget requests found in database");
+        return { success: true, data: [], message: "No hay solicitudes publicadas disponibles" };
+      }
+
+      // FIXED FILTERING: Apply service category filter more permissively
+      let filteredRequests = allRequests;
+
+      // Only filter by categories if provider has specific categories AND they're valid
+      if (provider.service_categories && 
+          Array.isArray(provider.service_categories) && 
+          provider.service_categories.length > 0) {
+        
+        const validCategories = provider.service_categories.filter((cat: any) => 
+          typeof cat === 'string' && cat.trim().length > 0
+        );
+
+        console.log("🔧 Provider service categories:", validCategories);
+
+        if (validCategories.length > 0) {
+          // Apply category filter
+          const categoryFiltered = allRequests.filter(request => 
+            validCategories.some(cat => 
+              cat.toLowerCase() === request.category.toLowerCase()
+            )
+          );
+
+          console.log("📋 Category filtering results:", {
+            before_filter: allRequests.length,
+            after_filter: categoryFiltered.length,
+            filtered_titles: categoryFiltered.map(r => `${r.title} (${r.category})`)
+          });
+
+          // If category filtering removes everything, show all requests with a warning
+          if (categoryFiltered.length === 0) {
+            console.log("⚠️ Category filter too restrictive, showing all requests");
+            filteredRequests = allRequests;
+          } else {
+            filteredRequests = categoryFiltered;
+          }
+        }
+      } else {
+        console.log("📋 No specific service categories defined, showing all requests");
       }
 
       // Enhance data with additional information
       const enhancedRequests = await Promise.all(
-        (data || []).map(async (request: any) => {
+        filteredRequests.map(async (request: any) => {
           // Check if we already have a quote for this request
           const { data: existingQuote } = await supabase
             .from('quotes')
             .select('*')
             .eq('budget_request_id', request.id)
             .eq('service_provider_id', provider.id)
-            .single();
+            .maybeSingle();
 
-          return {
+          const enhanced = {
             ...request,
             user_name: request.profiles?.full_name || 'Usuario',
             property_name: request.properties?.name || 'Propiedad',
-            property_address: request.properties?.address || '',
+            property_address: request.properties?.address || request.work_location || '',
             my_quote: existingQuote || null,
             quote_count: 0 // This would need a separate query for accuracy
           };
+
+          return enhanced;
         })
       );
+
+      console.log("✅ Enhanced requests prepared:", {
+        total: enhancedRequests.length,
+        with_existing_quotes: enhancedRequests.filter(r => r.my_quote).length,
+        categories: [...new Set(enhancedRequests.map(r => r.category))]
+      });
 
       return { success: true, data: enhancedRequests };
 
     } catch (error) {
-      console.error("Error loading budget requests:", error);
-      return { success: false, data: [] };
+      console.error("❌ Error loading budget requests:", error);
+      return { 
+        success: false, 
+        data: [], 
+        message: error instanceof Error ? error.message : "Error al cargar solicitudes de presupuesto"
+      };
     }
   };
 
   const loadMyQuotes = async (providerId: string) => {
     try {
+      console.log("💰 Loading my quotes for provider:", providerId.substring(0, 8) + '...');
+
       const { data, error } = await supabase
         .from('quotes')
         .select(`
@@ -214,13 +291,22 @@ export function BudgetRequestManager() {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error("❌ Error loading quotes:", error);
         throw error;
       }
+
+      console.log("✅ Quotes loaded successfully:", {
+        total_quotes: data?.length || 0,
+        by_status: data?.reduce((acc: any, quote) => {
+          acc[quote.status] = (acc[quote.status] || 0) + 1;
+          return acc;
+        }, {}) || {}
+      });
 
       return { success: true, data: data || [] };
 
     } catch (error) {
-      console.error("Error loading my quotes:", error);
+      console.error("❌ Error loading my quotes:", error);
       return { success: false, data: [] };
     }
   };
@@ -231,6 +317,8 @@ export function BudgetRequestManager() {
     try {
       setSubmitting(true);
       setError("");
+
+      console.log("📝 Creating quote for request:", selectedRequest.title);
 
       // Validate form
       if (!quoteForm.amount || !quoteForm.description) {
@@ -264,24 +352,32 @@ export function BudgetRequestManager() {
         .single();
 
       if (createError) {
+        console.error("❌ Error creating quote:", createError);
         throw createError;
       }
 
+      console.log("✅ Quote created successfully:", newQuote.id);
+
       // Create notification for the client
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: selectedRequest.user_id,
-          title: 'Nueva cotización recibida',
-          message: `Has recibido una nueva cotización para "${selectedRequest.title}" por €${quoteForm.amount}`,
-          type: 'info' as const,
-          category: 'quote' as const,
-          related_entity_type: 'quote',
-          related_entity_id: newQuote.id,
-          action_url: `/dashboard?quote=${newQuote.id}`,
-          action_label: 'Ver Cotización',
-          read: false
-        });
+      try {
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: selectedRequest.user_id,
+            title: 'Nueva cotización recibida',
+            message: `Has recibido una nueva cotización para "${selectedRequest.title}" por €${quoteForm.amount}`,
+            type: 'info' as const,
+            category: 'quote' as const,
+            related_entity_type: 'quote',
+            related_entity_id: newQuote.id,
+            action_url: `/dashboard?quote=${newQuote.id}`,
+            action_label: 'Ver Cotización',
+            read: false
+          });
+        console.log("📧 Notification sent to client");
+      } catch (notifError) {
+        console.warn("⚠️ Failed to send notification:", notifError);
+      }
 
       setSuccessMessage("¡Cotización enviada exitosamente!");
       setShowQuoteDialog(false);
@@ -294,7 +390,7 @@ export function BudgetRequestManager() {
       setTimeout(() => setSuccessMessage(""), 5000);
 
     } catch (err) {
-      console.error("Error creating quote:", err);
+      console.error("❌ Error creating quote:", err);
       setError(err instanceof Error ? err.message : "Error al crear la cotización");
     } finally {
       setSubmitting(false);
@@ -567,7 +663,7 @@ export function BudgetRequestManager() {
                   <p className="text-sm text-neutral-500">
                     {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' 
                       ? "Ajusta los filtros para ver más resultados"
-                      : "No hay solicitudes de presupuesto en tu área de servicio en este momento"
+                      : "No hay solicitudes de presupuesto disponibles en este momento"
                     }
                   </p>
                 </Card>
