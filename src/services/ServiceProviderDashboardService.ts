@@ -307,7 +307,7 @@ export class ServiceProviderDashboardService {
         switch (quote.status) {
           case 'accepted':
             type = 'quote_accepted';
-            description = `Tu cotización ha sido aceptada por ${(quote as any).budget_requests?.profiles?.full_name || 'el cliente'}`;
+            description = `Tu cotización ha sido aceptada por ${quote.budget_requests?.profiles?.full_name || 'el cliente'}`;
             break;
           case 'rejected':
             type = 'quote_rejected';
@@ -321,7 +321,7 @@ export class ServiceProviderDashboardService {
         return {
           id: quote.id,
           type,
-          title: (quote as any).budget_requests?.title || 'Solicitud de presupuesto',
+          title: quote.budget_requests?.title || 'Solicitud de presupuesto',
           description,
           timestamp: quote.updated_at,
           status: quote.status,
@@ -340,7 +340,7 @@ export class ServiceProviderDashboardService {
   /**
    * Gets service categories available in the system
    */
-  static async getServiceCategories(): Promise<Array<{ id: string; name: string; icon?: string }>> {
+  static async getServiceCategories(): Promise<Array<{ id: string; name: string; icon?: string | undefined }>> {
     try {
       const { data, error } = await supabase
         .from('service_categories')
@@ -352,22 +352,31 @@ export class ServiceProviderDashboardService {
         console.warn("Error fetching service categories:", error);
       }
 
-      // Return default categories if database query fails
-      const defaultCategories = [
-        { id: 'cleaning', name: 'Limpieza', icon: '🧽' },
-        { id: 'plumbing', name: 'Fontanería', icon: '🔧' },
-        { id: 'electrical', name: 'Electricidad', icon: '⚡' },
-        { id: 'gardening', name: 'Jardinería', icon: '🌱' },
-        { id: 'painting', name: 'Pintura', icon: '🎨' },
-        { id: 'maintenance', name: 'Mantenimiento', icon: '🛠️' },
-        { id: 'security', name: 'Seguridad', icon: '🛡️' },
-        { id: 'hvac', name: 'Climatización', icon: '🌡️' },
-        { id: 'carpentry', name: 'Carpintería', icon: '🪵' },
-        { id: 'emergency', name: 'Emergencias', icon: '🚨' },
-        { id: 'other', name: 'Otros', icon: '📋' }
-      ];
+      // Transform data to handle null values properly
+      const transformedData = (data || []).map(category => ({
+        id: category.id,
+        name: category.name,
+        icon: category.icon || undefined
+      }));
 
-      return data && data.length > 0 ? data : defaultCategories;
+      // Return default categories if database query fails or returns empty
+      if (!transformedData || transformedData.length === 0) {
+        return [
+          { id: 'cleaning', name: 'Limpieza', icon: '🧽' },
+          { id: 'plumbing', name: 'Fontanería', icon: '🔧' },
+          { id: 'electrical', name: 'Electricidad', icon: '⚡' },
+          { id: 'gardening', name: 'Jardinería', icon: '🌱' },
+          { id: 'painting', name: 'Pintura', icon: '🎨' },
+          { id: 'maintenance', name: 'Mantenimiento', icon: '🛠️' },
+          { id: 'security', name: 'Seguridad', icon: '🛡️' },
+          { id: 'hvac', name: 'Climatización', icon: '🌡️' },
+          { id: 'carpentry', name: 'Carpintería', icon: '🪵' },
+          { id: 'emergency', name: 'Emergencias', icon: '🚨' },
+          { id: 'other', name: 'Otros', icon: '📋' }
+        ];
+      }
+
+      return transformedData;
 
     } catch (error) {
       console.error("Error getting service categories:", error);

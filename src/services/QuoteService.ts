@@ -12,11 +12,11 @@ export interface ExtendedQuote extends Quote {
     properties?: {
       name: string;
       address: string;
-    };
+    } | undefined;
     profiles?: {
       full_name: string;
     };
-  };
+  } | undefined;
 }
 
 export class QuoteService {
@@ -87,7 +87,16 @@ export class QuoteService {
         throw error;
       }
 
-      return data || [];
+      // Transform data to match ExtendedQuote interface
+      const transformedData = (data || []).map(quote => ({
+        ...quote,
+        budget_requests: quote.budget_requests ? {
+          ...quote.budget_requests,
+          properties: quote.budget_requests.properties || undefined
+        } : undefined
+      })) as ExtendedQuote[];
+
+      return transformedData;
 
     } catch (error) {
       console.error("Error fetching provider quotes:", error);
@@ -262,16 +271,28 @@ export class QuoteService {
 
       // Apply provider's service categories filter if available
       if (provider?.service_categories && Array.isArray(provider.service_categories) && provider.service_categories.length > 0) {
-        query = query.in('category', provider.service_categories);
+        // Type assertion for service categories to satisfy TypeScript
+        const validCategories = provider.service_categories.filter((cat: any) => 
+          typeof cat === 'string' && [
+            'cleaning', 'plumbing', 'electrical', 'gardening', 'painting', 
+            'maintenance', 'security', 'hvac', 'carpentry', 'emergency', 'other'
+          ].includes(cat)
+        ) as ('cleaning' | 'plumbing' | 'electrical' | 'gardening' | 'painting' | 'maintenance' | 'security' | 'hvac' | 'carpentry' | 'emergency' | 'other')[];
+        
+        if (validCategories.length > 0) {
+          query = query.in('category', validCategories);
+        }
       }
 
       // Apply additional filters if provided
       if (filters?.category) {
-        query = query.eq('category', filters.category);
+        const validCategory = filters.category as 'cleaning' | 'plumbing' | 'electrical' | 'gardening' | 'painting' | 'maintenance' | 'security' | 'hvac' | 'carpentry' | 'emergency' | 'other';
+        query = query.eq('category', validCategory);
       }
 
       if (filters?.urgency) {
-        query = query.eq('urgency', filters.urgency);
+        const validUrgency = filters.urgency as 'emergency' | 'low' | 'normal' | 'high';
+        query = query.eq('urgency', validUrgency);
       }
 
       // Execute query
@@ -362,7 +383,16 @@ export class QuoteService {
         throw error;
       }
 
-      return data || [];
+      // Transform data to match ExtendedQuote interface
+      const transformedData = (data || []).map(quote => ({
+        ...quote,
+        budget_requests: quote.budget_requests ? {
+          ...quote.budget_requests,
+          properties: quote.budget_requests.properties || undefined
+        } : undefined
+      })) as ExtendedQuote[];
+
+      return transformedData;
 
     } catch (error) {
       console.error("Error fetching recent activity:", error);
