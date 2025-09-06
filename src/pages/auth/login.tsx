@@ -19,15 +19,20 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { signIn, user, loading, isConnected } = useSupabaseAuth();
+  const { signIn, user, session, loading, isConnected } = useSupabaseAuth();
   const router = useRouter();
 
   // Redirect if already logged in
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && session) {
+      console.log("🔄 User detected in login page, redirecting to dashboard...", {
+        userId: user.id,
+        email: user.email,
+        hasSession: !!session
+      });
       router.push("/dashboard");
     }
-  }, [user, loading, router]);
+  }, [user, session, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

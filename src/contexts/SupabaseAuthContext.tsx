@@ -458,13 +458,56 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      console.log("🚪 Starting sign out process...");
       
+      // Clear all auth state first to prevent redirect loops
+      setUser(null);
       setProfile(null);
+      setSession(null);
       setUserRoles([]);
       setActiveRole(null);
+      setLoading(true);
+      
+      // Call Supabase sign out
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("❌ Supabase sign out error:", error);
+        // Still continue with local cleanup even if there's an error
+      } else {
+        console.log("✅ Supabase sign out successful");
+      }
+      
+      // Clear any localStorage items that might retain user data
+      if (typeof window !== 'undefined') {
+        try {
+          // Clear Supabase session from localStorage
+          localStorage.removeItem('sb-' + (process.env.NEXT_PUBLIC_SUPABASE_URL?.split('://')[1] || 'hubit') + '-auth-token');
+          localStorage.removeItem('supabase.auth.token');
+          
+          // Clear other user-related data
+          localStorage.removeItem('selectedProperty');
+          localStorage.removeItem('user_profile');
+          localStorage.removeItem('user_preferences');
+          
+          console.log("🧹 Local storage cleaned");
+        } catch (storageError) {
+          console.warn("⚠️ Error clearing localStorage:", storageError);
+        }
+      }
+      
     } catch (error) {
-      console.error("❌ Sign out error:", error);
+      console.error("❌ Sign out exception:", error);
+      
+      // Even if there's an error, clear the local state
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      setUserRoles([]);
+      setActiveRole(null);
+    } finally {
+      setLoading(false);
+      console.log("✅ Sign out process completed");
     }
   };
 

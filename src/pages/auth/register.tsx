@@ -177,10 +177,15 @@ function RegisterPageContent() {
 
   // Redirect if user is already authenticated
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && session) {
+      console.log("🔄 User detected in register page, redirecting to dashboard...", {
+        userId: user.id,
+        email: user.email,
+        hasSession: !!session
+      });
       router.push("/dashboard");
     }
-  }, [user, loading, router]);
+  }, [user, session, loading, router]);
 
   const DynamicServiceIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
     const iconProps = { className: className || "h-6 w-6 text-white" };
