@@ -17,7 +17,7 @@ import {
   Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Sparkles, UserCircle,
   Home, Users, Wrench, Building, MapPin, FileText, AlertCircle, CheckCircle, Shield,
   ArrowLeft, Clock, Star,
-  DollarSign, AlertTriangle, Zap, Trees, Paintbrush, Thermometer, Hammer, Key
+  DollarSign, AlertTriangle, Zap, Trees, Paintbrush, Thermometer, Hammer, Key, Truck, Settings
 } from "lucide-react";
 
 type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
@@ -82,18 +82,140 @@ interface RoleFormData {
 // Orden específico de los roles según requerimiento
 const ROLE_ORDER: RoleType[] = ['particular', 'community_member', 'service_provider', 'property_administrator'];
 
-// Service categories with costs (in EUR)
+// Service categories with costs (in EUR) - UPDATED PRICING
 const SERVICE_CATEGORIES = [
-  { id: '550e8400-e29b-41d4-a716-446655440001', name: 'Fontanería', icon: 'Wrench', cost: 29.99, description: 'Servicios de fontanería y plomería' },
-  { id: '550e8400-e29b-41d4-a716-446655440002', name: 'Electricidad', icon: 'Zap', cost: 34.99, description: 'Servicios eléctricos e instalaciones' },
-  { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Limpieza', icon: 'Sparkles', cost: 19.99, description: 'Servicios de limpieza y mantenimiento' },
-  { id: '550e8400-e29b-41d4-a716-446655440004', name: 'Jardinería', icon: 'Trees', cost: 24.99, description: 'Cuidado de jardines y espacios verdes' },
-  { id: '550e8400-e29b-41d4-a716-446655440005', name: 'Pintura', icon: 'Paintbrush', cost: 27.99, description: 'Servicios de pintura y decoración' },
-  { id: '550e8400-e29b-41d4-a716-446655440006', name: 'Climatización', icon: 'Thermometer', cost: 39.99, description: 'HVAC, calefacción y aire acondicionado' },
-  { id: '550e8400-e29b-41d4-a716-446655440007', name: 'Carpintería', icon: 'Hammer', cost: 32.99, description: 'Trabajos en madera y carpintería' },
-  { id: '550e8400-e29b-41d4-a716-446655440008', name: 'Cerrajería', icon: 'Key', cost: 25.99, description: 'Servicios de cerrajería y seguridad' },
-  { id: '550e8400-e29b-41d4-a716-446655440009', name: 'Albañilería', icon: 'Wrench', cost: 35.99, description: 'Trabajos de construcción y reformas' },
-  { id: '550e8400-e29b-41d4-a716-446655440010', name: 'Techado', icon: 'Home', cost: 42.99, description: 'Reparación y mantenimiento de techos' },
+  // Servicio Integral - Puede realizar cualquier servicio (200€/mes)
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440000', 
+    name: 'Servicio Integral', 
+    icon: 'Star', 
+    cost: 200, 
+    description: 'Acceso completo a todos los servicios de la plataforma',
+    isIntegral: true,
+    coinRequirement: 1000
+  },
+  
+  // Servicios específicos (20€/mes cada uno)
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440001', 
+    name: 'Fontanería', 
+    icon: 'Wrench', 
+    cost: 20, 
+    description: 'Servicios de fontanería y plomería',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440002', 
+    name: 'Electricidad', 
+    icon: 'Zap', 
+    cost: 20, 
+    description: 'Servicios eléctricos e instalaciones',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440003', 
+    name: 'Limpieza', 
+    icon: 'Sparkles', 
+    cost: 20, 
+    description: 'Servicios de limpieza y mantenimiento',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440004', 
+    name: 'Jardinería', 
+    icon: 'Trees', 
+    cost: 20, 
+    description: 'Cuidado de jardines y espacios verdes',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440005', 
+    name: 'Pintura', 
+    icon: 'Paintbrush', 
+    cost: 20, 
+    description: 'Servicios de pintura y decoración',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440006', 
+    name: 'Climatización', 
+    icon: 'Thermometer', 
+    cost: 20, 
+    description: 'HVAC, calefacción y aire acondicionado',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440007', 
+    name: 'Carpintería', 
+    icon: 'Hammer', 
+    cost: 20, 
+    description: 'Trabajos en madera y carpintería',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440008', 
+    name: 'Cerrajería', 
+    icon: 'Key', 
+    cost: 20, 
+    description: 'Servicios de cerrajería y seguridad',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440009', 
+    name: 'Albañilería', 
+    icon: 'Wrench', 
+    cost: 20, 
+    description: 'Trabajos de construcción y reformas',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440010', 
+    name: 'Techado', 
+    icon: 'Home', 
+    cost: 20, 
+    description: 'Reparación y mantenimiento de techos',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440011', 
+    name: 'Mudanzas', 
+    icon: 'Truck', 
+    cost: 20, 
+    description: 'Servicios de mudanza y transporte',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440012', 
+    name: 'Seguridad', 
+    icon: 'Shield', 
+    cost: 20, 
+    description: 'Sistemas de seguridad y vigilancia',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440013', 
+    name: 'Instalaciones', 
+    icon: 'Settings', 
+    cost: 20, 
+    description: 'Instalación de equipos y sistemas',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440014', 
+    name: 'Reparaciones Generales', 
+    icon: 'Wrench', 
+    cost: 20, 
+    description: 'Reparaciones menores y mantenimiento general',
+    coinRequirement: 1000
+  },
+  { 
+    id: '550e8400-e29b-41d4-a716-446655440015', 
+    name: 'Consultoría Técnica', 
+    icon: 'Users', 
+    cost: 20, 
+    description: 'Asesoramiento técnico especializado',
+    coinRequirement: 1000
+  }
 ];
 
 export default function RegisterPage() {
@@ -245,6 +367,7 @@ function RegisterPageContent() {
   const DynamicServiceIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
     const iconProps = { className: className || "h-6 w-6 text-white" };
     switch (iconName) {
+      case "Star": return <Star {...iconProps} />;
       case "Wrench": return <Wrench {...iconProps} />;
       case "Zap": return <Zap {...iconProps} />;
       case "Sparkles": return <Sparkles {...iconProps} />;
@@ -254,6 +377,10 @@ function RegisterPageContent() {
       case "Hammer": return <Hammer {...iconProps} />;
       case "Key": return <Key {...iconProps} />;
       case "Home": return <Home {...iconProps} />;
+      case "Truck": return <Truck {...iconProps} />;
+      case "Shield": return <Shield {...iconProps} />;
+      case "Settings": return <Settings {...iconProps} />;
+      case "Users": return <Users {...iconProps} />;
       default: return <Wrench {...iconProps} />;
     }
   };
@@ -839,9 +966,6 @@ function RegisterPageContent() {
                 <h1 className="text-5xl md:text-6xl font-bold text-black tracking-wide">
                   HuBiT
                 </h1>
-                <p className="text-lg text-stone-600 font-medium">
-                  Hub de servicios comunitarios
-                </p>
               </div>
             </div>
             <p className="text-xl text-stone-600 font-light">
@@ -1867,7 +1991,7 @@ function RegisterPageContent() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-stone-200" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase {
+              <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-gray-50 px-2 text-stone-500">¿Ya tienes cuenta?</span>
               </div>
             </div>
