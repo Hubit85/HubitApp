@@ -515,7 +515,19 @@ export default function WhitepaperPage() {
                       {/* Stacked Bar Chart - BARRAS CENTRADAS EN EL GRID */}
                       <div className="absolute inset-0 flex items-end justify-between px-2">
                         
-                        {/* Q4 2025: 600M (Pool Público completo) - Etiqueta actualizada */}
+                        {/* Q4 2025: 0M (Sin liberación inicial) */}
+                        <div className="group flex flex-col items-center flex-1 relative">
+                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
+                            0M
+                          </div>
+                          <div className="relative w-6 bg-neutral-100 rounded-t-lg shadow-lg border border-neutral-200/60" style={{ height: '16px' }}>
+                            {/* Sin tokens en circulación */}
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-neutral-300 to-neutral-200 rounded-t-lg" style={{ height: '16px' }}></div>
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-neutral-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2025</div>
+                        </div>
+                        
+                        {/* Q1 2026: 600M (Pool Público completo) - FECHA CORREGIDA */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           {/* Valor de tokens circulantes encima de la barra */}
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
@@ -525,10 +537,10 @@ export default function WhitepaperPage() {
                             {/* Pool Público: 600M = 192px - Solo azul */}
                             <div className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg" style={{ height: '192px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2025</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2026</div>
                         </div>
-                        
-                        {/* Q1 2026: 800M (600M Pool + 100M Equipo + 50M Marketing + 50M Airdrops) */}
+
+                        {/* Q2 2026: 800M (600M Pool + 100M Equipo + 50M Marketing + 50M Airdrops) - FECHA CORREGIDA */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           {/* Valor de tokens circulantes encima de la barra */}
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
@@ -544,10 +556,10 @@ export default function WhitepaperPage() {
                             {/* Airdrops: 50M = 16px */}
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '240px', height: '16px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2026</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-blue-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2026</div>
                         </div>
 
-                        {/* Q2 2026: 900M (600M Pool + 150M Equipo + 75M Marketing + 75M Airdrops) */}
+                        {/* Q3 2026: 900M (600M Pool + 150M Equipo + 75M Marketing + 75M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
                             900M
@@ -558,10 +570,10 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '240px', height: '24px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '264px', height: '24px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2026</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2026</div>
                         </div>
 
-                        {/* Q3 2026: 950M (600M Pool + 175M Equipo + 87.5M Marketing + 87.5M Airdrops) */}
+                        {/* Q4 2026: 950M (600M Pool + 175M Equipo + 87.5M Marketing + 87.5M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
                             950M
@@ -572,10 +584,10 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '248px', height: '28px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '276px', height: '28px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2026</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2026</div>
                         </div>
 
-                        {/* Q4 2026: 975M (600M Pool + 187.5M Equipo + 93.75M Marketing + 93.75M Airdrops) */}
+                        {/* Q1 2027: 975M (600M Pool + 187.5M Equipo + 93.75M Marketing + 93.75M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
                             975M
@@ -586,10 +598,10 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '252px', height: '30px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '282px', height: '30px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2026</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2027</div>
                         </div>
 
-                        {/* Q1 2027: 987.5M (600M Pool + 193.75M Equipo + 96.875M Marketing + 96.875M Airdrops) */}
+                        {/* Q2 2027: 987.5M (600M Pool + 193.75M Equipo + 96.875M Marketing + 96.875M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
                             987M
@@ -600,10 +612,10 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '254px', height: '31px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '285px', height: '31px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2027</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2027</div>
                         </div>
 
-                        {/* Q2 2027: 993.75M (600M Pool + 196.875M Equipo + 98.44M Marketing + 98.44M Airdrops) */}
+                        {/* Q3 2027: 993.75M (600M Pool + 196.875M Equipo + 98.44M Marketing + 98.44M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
                             993M
@@ -614,10 +626,10 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '255px', height: '31.5px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '286.5px', height: '31.5px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2027</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2027</div>
                         </div>
 
-                        {/* Q3 2027: 996.875M (600M Pool + 198.44M Equipo + 99.22M Marketing + 99.22M Airdrops) */}
+                        {/* Q4 2027: 996.875M (600M Pool + 198.44M Equipo + 99.22M Marketing + 99.22M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
                             996M
@@ -628,10 +640,10 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '255.5px', height: '31.75px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '287.25px', height: '31.75px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q3 2027</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2027</div>
                         </div>
 
-                        {/* Q4 2027: 998.44M (600M Pool + 199.22M Equipo + 99.61M Marketing + 99.61M Airdrops) */}
+                        {/* Q1 2028: 998.44M (600M Pool + 199.22M Equipo + 99.61M Marketing + 99.61M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
                             998M
@@ -642,10 +654,10 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '255.75px', height: '31.87px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '287.62px', height: '31.87px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q4 2027</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2028</div>
                         </div>
 
-                        {/* Q1 2028: 999.22M (600M Pool + 199.61M Equipo + 99.805M Marketing + 99.805M Airdrops) */}
+                        {/* Q2 2028: 999.22M (600M Pool + 199.61M Equipo + 99.805M Marketing + 99.805M Airdrops) */}
                         <div className="group flex flex-col items-center flex-1 relative">
                           <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-neutral-800 bg-white/90 px-2 py-1 rounded shadow">
                             999M
@@ -656,7 +668,7 @@ export default function WhitepaperPage() {
                             <div className="absolute w-full bg-gradient-to-t from-yellow-500 to-yellow-400" style={{ bottom: '255.87px', height: '31.94px' }}></div>
                             <div className="absolute w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t-lg" style={{ bottom: '287.81px', height: '31.94px' }}></div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q1 2028</div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs font-semibold text-neutral-600 bg-emerald-50 px-2 py-1 rounded-md whitespace-nowrap">Q2 2028</div>
                         </div>
 
                         {/* 2029: 999.8M PROMEDIO (600M Pool + 199.9M Equipo + 99.95M Marketing + 99.95M Airdrops) */}
