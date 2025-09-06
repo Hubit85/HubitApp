@@ -32,18 +32,30 @@ interface RoleFormData {
     full_name: string;
     phone: string;
     address: string;
+    postal_code: string;
+    city: string;
+    province: string;
+    country: string;
   };
   
   community_member: {
     full_name: string;
     phone: string;
     address: string;
+    postal_code: string;
+    city: string;
+    province: string;
+    country: string;
     community_code?: string;
   };
   
   service_provider: {
     company_name: string;
     company_address: string;
+    company_postal_code: string;
+    company_city: string;
+    company_province: string;
+    company_country: string;
     cif: string;
     business_email: string;
     business_phone: string;
@@ -52,6 +64,10 @@ interface RoleFormData {
   property_administrator: {
     company_name: string;
     company_address: string;
+    company_postal_code: string;
+    company_city: string;
+    company_province: string;
+    company_country: string;
     cif: string;
     business_email: string;
     business_phone: string;
@@ -80,16 +96,28 @@ function RegisterPageContent() {
       full_name: "",
       phone: "",
       address: "",
+      postal_code: "",
+      city: "",
+      province: "",
+      country: "España",
     },
     community_member: {
       full_name: "",
       phone: "",
       address: "",
+      postal_code: "",
+      city: "",
+      province: "",
+      country: "España",
       community_code: "",
     },
     service_provider: {
       company_name: "",
       company_address: "",
+      company_postal_code: "",
+      company_city: "",
+      company_province: "",
+      company_country: "España",
       cif: "",
       business_email: "",
       business_phone: "",
@@ -97,6 +125,10 @@ function RegisterPageContent() {
     property_administrator: {
       company_name: "",
       company_address: "",
+      company_postal_code: "",
+      company_city: "",
+      company_province: "",
+      company_country: "España",
       cif: "",
       business_email: "",
       business_phone: "",
@@ -239,24 +271,28 @@ function RegisterPageContent() {
     switch (currentRole) {
       case 'particular': {
         const data = roleData as typeof formData.particular;
-        return !!(data.full_name && data.phone && data.address);
+        return !!(data.full_name && data.phone && data.address && 
+                 data.postal_code && data.city && data.province && data.country);
       }
       
       case 'community_member': {
         const data = roleData as typeof formData.community_member;
-        return !!(data.full_name && data.phone && data.address);
+        return !!(data.full_name && data.phone && data.address && 
+                 data.postal_code && data.city && data.province && data.country);
       }
       
       case 'service_provider': {
         const data = roleData as typeof formData.service_provider;
-        return !!(data.company_name && data.company_address && 
+        return !!(data.company_name && data.company_address && data.company_postal_code && 
+                 data.company_city && data.company_province && data.company_country &&
                  data.cif && data.business_email && data.business_phone && 
                  cifValid === true);
       }
       
       case 'property_administrator': {
         const data = roleData as typeof formData.property_administrator;
-        return !!(data.company_name && data.company_address && 
+        return !!(data.company_name && data.company_address && data.company_postal_code && 
+                 data.company_city && data.company_province && data.company_country &&
                  data.cif && data.business_email && data.business_phone && 
                  data.professional_number && cifValid === true);
       }
@@ -718,18 +754,101 @@ function RegisterPageContent() {
 
                         <div className="space-y-2 md:col-span-2">
                           <Label className="text-sm font-medium text-stone-700">
-                            Domicilio *
+                            Domicilio completo *
                           </Label>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                            <Input
-                              type="text"
-                              value={roleData.address}
-                              onChange={(e) => updateCurrentRoleData("address", e.target.value)}
-                              placeholder="Calle Mayor 123, Madrid"
-                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                              required
-                            />
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Dirección */}
+                            <div className="md:col-span-2">
+                              <Label className="text-xs text-stone-600 mb-1">
+                                Dirección (Calle y número) *
+                              </Label>
+                              <div className="relative">
+                                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+                                <Input
+                                  type="text"
+                                  value={roleData.address || ""}
+                                  onChange={(e) => updateCurrentRoleData("address", e.target.value)}
+                                  placeholder="Calle Mayor, 123, 2º B"
+                                  className="pl-9 h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                  required
+                                />
+                              </div>
+                            </div>
+
+                            {/* Código Postal */}
+                            <div>
+                              <Label className="text-xs text-stone-600 mb-1">
+                                Código Postal *
+                              </Label>
+                              <Input
+                                type="text"
+                                value={(roleData as any).postal_code || ""}
+                                onChange={(e) => updateCurrentRoleData("postal_code", e.target.value)}
+                                placeholder="28001"
+                                className="h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                pattern="[0-9]{5}"
+                                maxLength={5}
+                                required
+                              />
+                            </div>
+
+                            {/* Ciudad */}
+                            <div>
+                              <Label className="text-xs text-stone-600 mb-1">
+                                Ciudad *
+                              </Label>
+                              <Input
+                                type="text"
+                                value={(roleData as any).city || ""}
+                                onChange={(e) => updateCurrentRoleData("city", e.target.value)}
+                                placeholder="Madrid"
+                                className="h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                required
+                              />
+                            </div>
+
+                            {/* Provincia */}
+                            <div>
+                              <Label className="text-xs text-stone-600 mb-1">
+                                Provincia/Estado *
+                              </Label>
+                              <Input
+                                type="text"
+                                value={(roleData as any).province || ""}
+                                onChange={(e) => updateCurrentRoleData("province", e.target.value)}
+                                placeholder="Madrid"
+                                className="h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                required
+                              />
+                            </div>
+
+                            {/* País */}
+                            <div>
+                              <Label className="text-xs text-stone-600 mb-1">
+                                País *
+                              </Label>
+                              <Select
+                                value={(roleData as any).country || "España"}
+                                onValueChange={(value) => updateCurrentRoleData("country", value)}
+                              >
+                                <SelectTrigger className="h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20">
+                                  <SelectValue placeholder="Seleccionar país" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="España">España</SelectItem>
+                                  <SelectItem value="Portugal">Portugal</SelectItem>
+                                  <SelectItem value="Francia">Francia</SelectItem>
+                                  <SelectItem value="Italia">Italia</SelectItem>
+                                  <SelectItem value="Alemania">Alemania</SelectItem>
+                                  <SelectItem value="Reino Unido">Reino Unido</SelectItem>
+                                  <SelectItem value="Países Bajos">Países Bajos</SelectItem>
+                                  <SelectItem value="Bélgica">Bélgica</SelectItem>
+                                  <SelectItem value="Suiza">Suiza</SelectItem>
+                                  <SelectItem value="Austria">Austria</SelectItem>
+                                  <SelectItem value="Otros">Otros</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                         </div>
 
@@ -812,16 +931,99 @@ function RegisterPageContent() {
                           <Label className="text-sm font-medium text-stone-700">
                             Domicilio de la empresa *
                           </Label>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                            <Input
-                              type="text"
-                              value={roleData.company_address}
-                              onChange={(e) => updateCurrentRoleData("company_address", e.target.value)}
-                              placeholder="Calle Industria 456, Madrid"
-                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                              required
-                            />
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Dirección de la empresa */}
+                            <div className="md:col-span-2">
+                              <Label className="text-xs text-stone-600 mb-1">
+                                Dirección (Calle y número) *
+                              </Label>
+                              <div className="relative">
+                                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+                                <Input
+                                  type="text"
+                                  value={roleData.company_address}
+                                  onChange={(e) => updateCurrentRoleData("company_address", e.target.value)}
+                                  placeholder="Calle Industria, 456, Planta 3"
+                                  className="pl-9 h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                  required
+                                />
+                              </div>
+                            </div>
+
+                            {/* Código Postal empresa */}
+                            <div>
+                              <Label className="text-xs text-stone-600 mb-1">
+                                Código Postal *
+                              </Label>
+                              <Input
+                                type="text"
+                                value={(roleData as any).company_postal_code || ""}
+                                onChange={(e) => updateCurrentRoleData("company_postal_code", e.target.value)}
+                                placeholder="28046"
+                                className="h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                pattern="[0-9]{5}"
+                                maxLength={5}
+                                required
+                              />
+                            </div>
+
+                            {/* Ciudad empresa */}
+                            <div>
+                              <Label className="text-xs text-stone-600 mb-1">
+                                Ciudad *
+                              </Label>
+                              <Input
+                                type="text"
+                                value={(roleData as any).company_city || ""}
+                                onChange={(e) => updateCurrentRoleData("company_city", e.target.value)}
+                                placeholder="Madrid"
+                                className="h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                required
+                              />
+                            </div>
+
+                            {/* Provincia empresa */}
+                            <div>
+                              <Label className="text-xs text-stone-600 mb-1">
+                                Provincia/Estado *
+                              </Label>
+                              <Input
+                                type="text"
+                                value={(roleData as any).company_province || ""}
+                                onChange={(e) => updateCurrentRoleData("company_province", e.target.value)}
+                                placeholder="Madrid"
+                                className="h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                required
+                              />
+                            </div>
+
+                            {/* País empresa */}
+                            <div>
+                              <Label className="text-xs text-stone-600 mb-1">
+                                País *
+                              </Label>
+                              <Select
+                                value={(roleData as any).company_country || "España"}
+                                onValueChange={(value) => updateCurrentRoleData("company_country", value)}
+                              >
+                                <SelectTrigger className="h-11 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20">
+                                  <SelectValue placeholder="Seleccionar país" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="España">España</SelectItem>
+                                  <SelectItem value="Portugal">Portugal</SelectItem>
+                                  <SelectItem value="Francia">Francia</SelectItem>
+                                  <SelectItem value="Italia">Italia</SelectItem>
+                                  <SelectItem value="Alemania">Alemania</SelectItem>
+                                  <SelectItem value="Reino Unido">Reino Unido</SelectItem>
+                                  <SelectItem value="Países Bajos">Países Bajos</SelectItem>
+                                  <SelectItem value="Bélgica">Bélgica</SelectItem>
+                                  <SelectItem value="Suiza">Suiza</SelectItem>
+                                  <SelectItem value="Austria">Austria</SelectItem>
+                                  <SelectItem value="Otros">Otros</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
                         </div>
 
