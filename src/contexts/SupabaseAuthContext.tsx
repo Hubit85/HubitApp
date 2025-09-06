@@ -59,21 +59,69 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     
     roleRefreshTimeout = setTimeout(async () => {
       try {
-        console.log("🎭 Loading user roles...");
+        console.log("🎭 CONTEXT: Loading user roles for", userId.substring(0, 8) + '...');
+        
+        // CRITICAL FIX: Direct service call with better error handling
         const roles = await SupabaseUserRoleService.getUserRoles(userId);
+        
+        console.log("🎭 CONTEXT: Roles loaded successfully:", {
+          userId: userId.substring(0, 8) + '...',
+          rolesCount: roles.length,
+          roles: roles.map(r => ({
+            role_type: r.role_type,
+            is_verified: r.is_verified,
+            is_active: r.is_active
+          }))
+        });
         
         setUserRoles(roles);
         
-        const activeRoleData = roles.find(r => r.is_active) || null;
-        setActiveRole(activeRoleData);
+        // Find active role or set the first verified role as active
+        let activeRoleData = roles.find(r => r.is_active);
+        if (!activeRoleData && roles.length > 0) {
+          // If no active role but we have verified roles, activate the first one
+          const verifiedRoles = roles.filter(r => r.is_verified);
+          if (verifiedRoles.length > 0) {
+            console.log("🎭 CONTEXT: No active role found, activating first verified role:", verifiedRoles[0].role_type);
+            
+            // Try to activate the first verified role
+            try {
+              const activateResult = await SupabaseUserRoleService.activateRole(userId, verifiedRoles[0].role_type);
+              if (activateResult.success) {
+                // Reload roles to get updated state
+                const updatedRoles = await SupabaseUserRoleService.getUserRoles(userId);
+                setUserRoles(updatedRoles);
+                activeRoleData = updatedRoles.find(r => r.is_active);
+                console.log("🎭 CONTEXT: First verified role activated successfully");
+              }
+            } catch (activateError) {
+              console.warn("🎭 CONTEXT: Could not auto-activate first verified role:", activateError);
+              activeRoleData = verifiedRoles[0]; // Use first verified role without activation
+            }
+          }
+        }
         
-        console.log("✅ User roles loaded:", roles.length);
+        setActiveRole(activeRoleData || null);
+        
+        console.log("✅ CONTEXT: User roles loaded and synced successfully");
+        
       } catch (rolesError) {
-        console.warn("⚠️ Error loading roles:", rolesError);
+        console.error("❌ CONTEXT: Error loading roles:", rolesError);
+        
+        // Set empty state but don't completely fail
         setUserRoles([]);
         setActiveRole(null);
+        
+        // For specific debugging user, provide more info
+        if (userId === 'f9192183-4d0f-43f4-98e0-37b1ae77cadc') { // ddayanacastro10@gmail.com
+          console.error("🚨 CONTEXT: Critical error for target user ddayanacastro10@gmail.com:", {
+            userId,
+            error: rolesError instanceof Error ? rolesError.message : String(rolesError),
+            stack: rolesError instanceof Error ? rolesError.stack : 'No stack trace'
+          });
+        }
       }
-    }, 500); // 500ms debounce
+    }, 300); // Reduced debounce time for faster response
   };
 
   const fetchUserData = async (userObject: User) => {
