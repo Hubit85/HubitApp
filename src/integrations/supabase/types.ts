@@ -884,7 +884,7 @@ export interface Database {
           sms_notifications: boolean
           timezone: string
           updated_at: string
-          user_type: Database["public"]["Enums"]["user_type_enum"]
+          user_type: Database["public"]["Enums"]["user_type"]
           verification_code: string | null
         }
         Insert: {
@@ -906,7 +906,7 @@ export interface Database {
           sms_notifications?: boolean
           timezone?: string
           updated_at?: string
-          user_type?: Database["public"]["Enums"]["user_type_enum"]
+          user_type?: Database["public"]["Enums"]["user_type"]
           verification_code?: string | null
         }
         Update: {
@@ -928,7 +928,7 @@ export interface Database {
           sms_notifications?: boolean
           timezone?: string
           updated_at?: string
-          user_type?: Database["public"]["Enums"]["user_type_enum"]
+          user_type?: Database["public"]["Enums"]["user_type"]
           verification_code?: string | null
         }
         Relationships: [

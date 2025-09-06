@@ -371,17 +371,71 @@ export class CrossRoleDataService {
    */
   private static async getServiceProviderProperties(userId: string): Promise<string[]> {
     try {
-      const { data, error } = await supabase
-        .from('contracts')
-        .select('property_id')
-        .eq('service_provider_id', userId)
-        .not('property_id', 'is', null);
+      // First, get the service provider record
+      const { data: providerData, error: providerError } = await supabase
+        .from('service_providers')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
 
-      if (error) {
-        throw error;
+      if (providerError) {
+        console.error('Error finding service provider:', providerError);
+        return [];
       }
 
-      const propertyIds = data?.map((contract: { property_id: string | null }) => contract.property_id).filter(Boolean) as string[] || [];
+      // Then get contracts using the service provider ID
+      const { data, error } = await supabase
+        .from('contracts')
+        .select('quote_id')
+        .eq('service_provider_id', providerData.id);
+
+      if (error) {
+        console.error('Error fetching service provider contracts:', error);
+        return [];
+      }
+
+      // Get unique property IDs from the quotes
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      const quoteIds = data.map(contract => contract.quote_id).filter(Boolean);
+      
+      if (quoteIds.length === 0) {
+        return [];
+      }
+
+      // Get properties from budget requests associated with these quotes
+      const { data: quotes, error: quotesError } = await supabase
+        .from('quotes')
+        .select('budget_request_id')
+        .in('id', quoteIds);
+
+      if (quotesError || !quotes) {
+        console.error('Error fetching quotes for property mapping:', quotesError);
+        return [];
+      }
+
+      const budgetRequestIds = quotes.map(quote => quote.budget_request_id).filter(Boolean);
+
+      if (budgetRequestIds.length === 0) {
+        return [];
+      }
+
+      const { data: budgetRequests, error: budgetError } = await supabase
+        .from('budget_requests')
+        .select('property_id')
+        .in('id', budgetRequestIds);
+
+      if (budgetError || !budgetRequests) {
+        console.error('Error fetching budget requests for properties:', budgetError);
+        return [];
+      }
+
+      const propertyIds = budgetRequests
+        .map(request => request.property_id)
+        .filter(Boolean) as string[];
+
       return Array.from(new Set(propertyIds));
 
     } catch (error) {

@@ -348,8 +348,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Step 3: Prepare role data with automatic community code generation
     let processedRoleData: Record<string, any> = {};
     
+    // CRITICAL FIX: Ensure roleSpecificData is a proper object before spreading
     if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData)) {
-      processedRoleData = { ...roleSpecificData };
+      // Create a safe copy without any potential non-object properties
+      processedRoleData = Object.fromEntries(
+        Object.entries(roleSpecificData).filter(([key, value]) => 
+          typeof key === 'string' && value !== undefined
+        )
+      );
     } else {
       processedRoleData = {};
     }
