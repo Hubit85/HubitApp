@@ -443,7 +443,8 @@ export class SupabaseUserRoleService {
           .eq('user_id', userId)
           .eq('role_type', roleType);
 
-        const { error } = await Promise.race([deletePromise, timeoutPromise]);
+        const result = await Promise.race([deletePromise, timeoutPromise]) as any;
+        const { error } = result;
 
         if (error) {
           throw new Error(error.message);
