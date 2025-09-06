@@ -128,108 +128,217 @@ export class SupabaseUserRoleService {
   }> {
     return ConnectionManager.executeWithLimit(async () => {
       try {
-        console.log('🚀 Frontend: Starting addRole process via API route:', { userId, roleType: request.role_type });
+        console.log('🚀 Frontend: Starting addRole process via API route:', { userId: userId.substring(0, 8) + '...', roleType: request.role_type });
 
-        // Create AbortController with longer timeout for API calls
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 seconds timeout
-
+        // Enhanced session validation before making API call
         try {
-          const response = await fetch('/api/user-roles/add-role', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId: userId,
-              roleType: request.role_type,
-              roleSpecificData: request.role_specific_data
-            }),
-            signal: controller.signal
-          });
-
-          clearTimeout(timeoutId);
-
-          let result;
-          try {
-            result = await response.json();
-          } catch (parseError) {
-            console.error('❌ Frontend: Failed to parse response JSON:', parseError);
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError || !user) {
+            console.error('❌ Frontend: Session validation failed:', userError);
             return {
               success: false,
-              message: "Error: Respuesta del servidor no válida"
+              message: "Sesión expirada. Por favor, inicia sesión nuevamente.",
+              errorCode: 'SESSION_EXPIRED'
             };
           }
           
-          console.log('📡 Frontend: API response:', {
-            status: response.status,
-            ...result
-          });
-
-          if (!response.ok) {
-            let errorMessage = result.message || `Error del servidor: ${response.status}`;
-            
-            if (response.status === 500 && errorMessage.includes('Invalid API key')) {
-              errorMessage = "Error de configuración: Verifica las credenciales de Supabase";
-            } else if (response.status === 403) {
-              errorMessage = "Error de permisos: Solo puedes enviar emails a tu dirección verificada";
-            } else if (response.status >= 500) {
-              errorMessage = "Error interno del servidor. Intenta nuevamente en unos momentos.";
-            } else if (response.status === 409) {
-              errorMessage = "Ya tienes una solicitud pendiente para este rol";
-            } else if (response.status === 429) {
-              errorMessage = "Demasiadas solicitudes. Espera un momento antes de intentar de nuevo.";
-            }
-            
+          if (user.id !== userId) {
+            console.error('❌ Frontend: User ID mismatch in session');
             return {
               success: false,
-              message: errorMessage,
-              errorCode: response.status.toString(),
-              ...result
+              message: "Error de autorización. ID de usuario no coincide con la sesión.",
+              errorCode: 'AUTH_MISMATCH'
             };
           }
-
+          
+          console.log('✅ Frontend: Session validation passed');
+        } catch (sessionError) {
+          console.warn('⚠️ Frontend: Session validation error:', sessionError);
           return {
-            success: true,
-            ...result
+            success: false,
+            message: "Error de validación de sesión. Por favor, recarga la página e intenta nuevamente.",
+            errorCode: 'SESSION_ERROR'
+          };
+        }
+
+        // Create AbortController with longer timeout for API calls
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout for role creation
+
+        try {
+          // Add retry logic for network issues
+          let attempts = 0;
+          const maxAttempts = 2;
+          let lastError: any = null;
+          
+          while (attempts < maxAttempts) {
+            try {
+              console.log(`📡 Frontend: Making API call (attempt ${attempts + 1}/${maxAttempts})`);
+              
+              const response = await fetch('/api/user-roles/add-role', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  userId: userId,
+                  roleType: request.role_type,
+                  roleSpecificData: request.role_specific_data
+                }),
+                signal: controller.signal
+              });
+
+              let result;
+              try {
+                result = await response.json();
+              } catch (parseError) {
+                console.error('❌ Frontend: Failed to parse response JSON:', parseError);
+                throw new Error("Respuesta del servidor no válida");
+              }
+              
+              console.log('📡 Frontend: API response:', {
+                status: response.status,
+                success: result?.success,
+                message: result?.message?.substring(0, 100) + (result?.message?.length > 100 ? '...' : ''),
+                processingTime: result?.processingTime
+              });
+
+              if (!response.ok) {
+                let errorMessage = result.message || `Error del servidor: ${response.status}`;
+                
+                // Enhanced error handling with user-friendly messages
+                if (response.status === 400) {
+                  if (errorMessage.includes('Datos incompletos')) {
+                    errorMessage = `Faltan datos requeridos para el rol ${this.getRoleDisplayName(request.role_type)}: ${result.message}`;
+                  } else if (errorMessage.includes('inválido')) {
+                    errorMessage = "Los datos proporcionados no son válidos. Verifica la información e intenta nuevamente.";
+                  } else {
+                    errorMessage = "Solicitud inválida: " + errorMessage;
+                  }
+                } else if (response.status === 401) {
+                  errorMessage = "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.";
+                } else if (response.status === 403) {
+                  errorMessage = "No tienes permisos para realizar esta acción.";
+                } else if (response.status === 404) {
+                  errorMessage = "Usuario no encontrado. Verifica que tu cuenta esté creada correctamente.";
+                } else if (response.status === 409) {
+                  if (errorMessage.includes('verificado')) {
+                    errorMessage = `Ya tienes el rol de ${this.getRoleDisplayName(request.role_type)} verificado.`;
+                  } else if (errorMessage.includes('pendiente')) {
+                    errorMessage = `Ya tienes una verificación pendiente para el rol de ${this.getRoleDisplayName(request.role_type)}.`;
+                  } else {
+                    errorMessage = "Ya existe un registro para este rol.";
+                  }
+                } else if (response.status === 408) {
+                  errorMessage = "La operación tardó demasiado tiempo. Intenta nuevamente.";
+                } else if (response.status === 429) {
+                  errorMessage = "Demasiadas solicitudes. Espera un momento antes de intentar de nuevo.";
+                } else if (response.status >= 500) {
+                  errorMessage = "Error interno del servidor. Intenta nuevamente en unos momentos.";
+                  
+                  // For 500 errors, might be worth retrying
+                  if (attempts < maxAttempts - 1) {
+                    console.log(`⚠️ Frontend: Server error, will retry in ${(attempts + 1) * 2000}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, (attempts + 1) * 2000));
+                    attempts++;
+                    continue;
+                  }
+                }
+                
+                return {
+                  success: false,
+                  message: errorMessage,
+                  errorCode: response.status.toString(),
+                  ...result
+                };
+              }
+
+              // Success case
+              clearTimeout(timeoutId);
+              return {
+                success: true,
+                ...result
+              };
+
+            } catch (fetchError: any) {
+              lastError = fetchError;
+              attempts++;
+              
+              console.error(`❌ Frontend: Fetch error (attempt ${attempts}):`, fetchError.message);
+              
+              if (fetchError.name === 'AbortError') {
+                return {
+                  success: false,
+                  message: "Error: La operación tardó demasiado tiempo. Verifica tu conexión e intenta nuevamente.",
+                  errorCode: 'TIMEOUT'
+                };
+              }
+              
+              // For network errors, retry once
+              if (attempts < maxAttempts && (fetchError.message.includes('fetch') || fetchError.message.includes('Failed to fetch'))) {
+                console.log(`🔄 Frontend: Network error, retrying in ${attempts * 1000}ms...`);
+                await new Promise(resolve => setTimeout(resolve, attempts * 1000));
+                continue;
+              }
+              
+              break; // Exit retry loop for non-network errors
+            }
+          }
+          
+          // If we get here, all attempts failed
+          clearTimeout(timeoutId);
+          
+          if (lastError) {
+            console.error("❌ Frontend: All attempts failed with error:", lastError);
+            
+            if (lastError.message.includes('fetch') || lastError.message.includes('Failed to fetch')) {
+              return {
+                success: false,
+                message: "Error de conexión: No se pudo conectar con el servidor. Verifica tu conexión a internet e intenta nuevamente.",
+                errorCode: 'CONNECTION_ERROR'
+              };
+            } else if (lastError.message.includes('network')) {
+              return {
+                success: false,
+                message: "Error de red: Problema de conectividad. Verifica tu conexión e intenta nuevamente.",
+                errorCode: 'NETWORK_ERROR'
+              };
+            }
+            
+            throw lastError;
+          }
+          
+          // Fallback error
+          return {
+            success: false,
+            message: "Error inesperado durante la comunicación con el servidor.",
+            errorCode: 'UNKNOWN_FETCH_ERROR'
           };
 
         } catch (fetchError) {
           clearTimeout(timeoutId);
-          
-          console.error("❌ Frontend: Fetch error in addRole:", fetchError);
-          
-          if (fetchError instanceof Error) {
-            if (fetchError.name === 'AbortError') {
-              return {
-                success: false,
-                message: "Error: La solicitud tardó demasiado tiempo. Verifica tu conexión e intenta nuevamente.",
-                errorCode: 'TIMEOUT'
-              };
-            } else if (fetchError.message.includes('fetch') || fetchError.message.includes('Failed to fetch')) {
-              return {
-                success: false,
-                message: "Error de conexión: No se pudo conectar con el servidor. Verifica tu conexión a internet.",
-                errorCode: 'CONNECTION_ERROR'
-              };
-            }
-          }
-          
-          throw fetchError;
+          throw fetchError; // Will be handled by outer catch
         }
 
       } catch (error) {
         console.error("❌ Frontend: Complete addRole error:", error);
         
         let errorMessage = "Error al agregar el rol. ";
+        let errorCode = 'UNKNOWN_ERROR';
         
         if (error instanceof Error) {
           if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
             errorMessage = "Error de conexión: No se pudo conectar con el servidor. Verifica tu conexión a internet.";
+            errorCode = 'CONNECTION_ERROR';
           } else if (error.message.includes('network')) {
             errorMessage = "Error de red: Problema de conectividad. Intenta nuevamente.";
+            errorCode = 'NETWORK_ERROR';
           } else if (error.message.includes('timeout')) {
             errorMessage = "Error: La operación tardó demasiado tiempo. Intenta nuevamente.";
+            errorCode = 'TIMEOUT';
+          } else if (error.message.includes('Sesión expirada') || error.message.includes('autorización')) {
+            errorMessage = error.message; // Use the session-specific message
+            errorCode = 'AUTH_ERROR';
           } else {
             errorMessage = `Error: ${error.message}`;
           }
@@ -240,7 +349,7 @@ export class SupabaseUserRoleService {
         return {
           success: false,
           message: errorMessage,
-          errorCode: 'NETWORK_ERROR'
+          errorCode
         };
       }
     });
