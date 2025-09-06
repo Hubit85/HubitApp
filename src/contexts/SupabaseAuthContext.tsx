@@ -266,8 +266,157 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setProfile(emergencyProfile);
       }
 
-      // Load user roles with debounced refresh
-      await debouncedRoleRefresh(userObject.id);
+      // CRITICAL FIX: Enhanced role loading with multiple retry attempts and better error handling
+      try {
+        console.log("🎭 CONTEXT: Starting enhanced role loading process...");
+        
+        // CRITICAL: Give a small delay to ensure profile is set
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        let rolesLoaded = false;
+        let roles: UserRole[] = [];
+        let attempts = 0;
+        const maxAttempts = 5;
+        
+        // Special handling for target user
+        if (userObject.email === 'ddayanacastro10@gmail.com') {
+          console.log("🎯 SPECIAL ENHANCED HANDLING for ddayanacastro10@gmail.com");
+        }
+        
+        while (!rolesLoaded && attempts < maxAttempts) {
+          try {
+            attempts++;
+            console.log(`🔄 CONTEXT: Role loading attempt ${attempts}/${maxAttempts} for user ${userObject.id.substring(0, 8)}...`);
+            
+            // Add a progressive delay for retries
+            if (attempts > 1) {
+              const delay = Math.min(1000 * attempts, 3000); // Max 3 second delay
+              console.log(`⏳ CONTEXT: Waiting ${delay}ms before retry...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            
+            // Use direct database query for more reliable results
+            const { data: rolesData, error: rolesError } = await supabase
+              .from('user_roles')
+              .select(`
+                id,
+                user_id,
+                role_type,
+                is_verified,
+                is_active,
+                role_specific_data,
+                verification_token,
+                verification_expires_at,
+                verification_confirmed_at,
+                created_at,
+                updated_at
+              `)
+              .eq('user_id', userObject.id)
+              .order('created_at', { ascending: true });
+            
+            if (rolesError) {
+              console.warn(`❌ CONTEXT: Direct database query error (attempt ${attempts}):`, rolesError);
+              
+              if (rolesError.code === 'PGRST116') {
+                // No rows found - this is actually OK
+                console.log('✅ CONTEXT: No roles found - empty result confirmed');
+                roles = [];
+                rolesLoaded = true;
+              } else if (attempts >= maxAttempts) {
+                // Final attempt failed
+                console.error('❌ CONTEXT: All role loading attempts exhausted');
+                roles = [];
+                rolesLoaded = true; // Stop trying
+              } else {
+                // Retry on next iteration
+                continue;
+              }
+            } else {
+              // Success
+              roles = (rolesData || []) as UserRole[];
+              rolesLoaded = true;
+              
+              console.log(`✅ CONTEXT: Successfully loaded ${roles.length} roles on attempt ${attempts}:`, {
+                userId: userObject.id.substring(0, 8) + '...',
+                userEmail: userObject.email,
+                roles: roles.map(r => ({
+                  role_type: r.role_type,
+                  is_verified: r.is_verified,
+                  is_active: r.is_active,
+                  created: r.created_at?.substring(0, 10)
+                }))
+              });
+            }
+          } catch (attemptError) {
+            console.error(`❌ CONTEXT: Role loading attempt ${attempts} failed:`, attemptError);
+            
+            if (attempts >= maxAttempts) {
+              // All attempts failed
+              console.error('❌ CONTEXT: All role loading attempts failed with errors');
+              roles = [];
+              rolesLoaded = true; // Stop trying
+            }
+            // Otherwise continue to next attempt
+          }
+        }
+        
+        // Set the roles
+        setUserRoles(roles);
+        console.log(`📋 CONTEXT: Set ${roles.length} roles in context state`);
+        
+        // Handle active role logic
+        let activeRoleData = roles.find(r => r.is_active);
+        
+        if (!activeRoleData && roles.length > 0) {
+          // If no active role but we have verified roles, try to activate the first one
+          const verifiedRoles = roles.filter(r => r.is_verified);
+          
+          if (verifiedRoles.length > 0) {
+            console.log("🎭 CONTEXT: No active role found, trying to activate first verified role:", verifiedRoles[0].role_type);
+            
+            try {
+              const activateResult = await SupabaseUserRoleService.activateRole(userObject.id, verifiedRoles[0].role_type);
+              if (activateResult.success) {
+                console.log("✅ CONTEXT: First verified role activated successfully");
+                // Update the local state to reflect activation
+                const updatedRoles = roles.map(r => ({
+                  ...r,
+                  is_active: r.role_type === verifiedRoles[0].role_type
+                }));
+                setUserRoles(updatedRoles);
+                activeRoleData = updatedRoles.find(r => r.is_active);
+              } else {
+                console.warn("⚠️ CONTEXT: Failed to auto-activate first verified role:", activateResult.message);
+                activeRoleData = verifiedRoles[0]; // Use without activation
+              }
+            } catch (activateError) {
+              console.warn("⚠️ CONTEXT: Exception during auto-activation:", activateError);
+              activeRoleData = verifiedRoles[0]; // Use without activation
+            }
+          }
+        }
+        
+        setActiveRole(activeRoleData || null);
+        console.log("🎯 CONTEXT: Active role set:", activeRoleData?.role_type || 'none');
+        
+        // Special debugging for target user
+        if (userObject.email === 'ddayanacastro10@gmail.com') {
+          console.log("🔍 FINAL DEBUG STATE for ddayanacastro10@gmail.com:", {
+            userId: userObject.id,
+            rolesCount: roles.length,
+            activeRole: activeRoleData?.role_type || 'none',
+            roles: roles.map(r => r.role_type),
+            contextStateSynced: true
+          });
+        }
+        
+      } catch (roleLoadError) {
+        console.error("❌ CONTEXT: Critical role loading error:", roleLoadError);
+        
+        // Set empty state on critical error
+        setUserRoles([]);
+        setActiveRole(null);
+      }
 
     } catch (error) {
       console.error("❌ Error fetching user data:", error);
