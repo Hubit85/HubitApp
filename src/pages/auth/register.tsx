@@ -177,14 +177,33 @@ function RegisterPageContent() {
 
   // Redirect if user is already authenticated
   useEffect(() => {
-    if (!loading && user && session) {
-      console.log("🔄 User detected in register page, redirecting to dashboard...", {
-        userId: user.id,
-        email: user.email,
-        hasSession: !!session
-      });
-      router.push("/dashboard");
-    }
+    // Add delay to ensure signOut cleanup is complete
+    const checkAuthState = async () => {
+      if (loading) return; // Still loading, wait
+      
+      if (user && session) {
+        console.log("🔄 User detected in register page, checking session validity...", {
+          userId: user.id,
+          email: user.email,
+          hasSession: !!session,
+          sessionValid: session.expires_at ? new Date(session.expires_at * 1000) > new Date() : false
+        });
+        
+        // Check if session is actually valid (not expired)
+        if (session.expires_at && new Date(session.expires_at * 1000) > new Date()) {
+          console.log("✅ Valid session found, redirecting to dashboard...");
+          router.push("/dashboard");
+        } else {
+          console.log("⚠️ Expired session found, clearing state...");
+          // If session is expired, don't redirect
+        }
+      }
+    };
+
+    // Add small delay to let signOut complete its cleanup
+    const timeoutId = setTimeout(checkAuthState, 500);
+    
+    return () => clearTimeout(timeoutId);
   }, [user, session, loading, router]);
 
   const DynamicServiceIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
