@@ -191,7 +191,7 @@ export function BudgetRequestManager() {
           Array.isArray(provider.service_categories) && 
           provider.service_categories.length > 0) {
         
-        const validCategories = provider.service_categories.filter((cat: any) => 
+        const validCategories = provider.service_categories.filter((cat: string) => 
           typeof cat === 'string' && cat.trim().length > 0
         );
 
@@ -250,7 +250,7 @@ export function BudgetRequestManager() {
       console.log("✅ Enhanced requests prepared:", {
         total: enhancedRequests.length,
         with_existing_quotes: enhancedRequests.filter(r => r.my_quote).length,
-        categories: [...new Set(enhancedRequests.map(r => r.category))]
+        categories: Array.from(new Set(enhancedRequests.map(r => r.category)))
       });
 
       return { success: true, data: enhancedRequests };
