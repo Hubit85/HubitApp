@@ -17,10 +17,11 @@ import {
   LogOut,
   Video,
   AlertTriangle,
-  FileCheck
+  FileCheck,
+  UserCheck
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { authService } from "@/services/AuthService";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 interface SidebarCommunityMemberProps {
   activeTab: string;
@@ -30,20 +31,20 @@ interface SidebarCommunityMemberProps {
 export function SidebarCommunityMember({ activeTab, setActiveTab }: SidebarCommunityMemberProps) {
   const { t } = useLanguage();
   const router = useRouter();
+  const { signOut } = useSupabaseAuth();
 
   const handleSignOut = async () => {
     try {
-      await authService.logout();
-      setTimeout(() => {
-        router.push('/');
-      }, 300);
+      await signOut();
+      router.push('/');
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       alert("Error al cerrar sesión. Por favor, inténtalo de nuevo.");
     }
   };
-  
+
   const navItems = [
+    { id: 'dashboard', label: t('dashboard'), icon: Home },
     { id: "perfil", label: "myProfile", icon: User },
     { id: "mis-propiedades", label: "myProperties", icon: Home },
     { id: "servicios", label: "availableServices", icon: Store },

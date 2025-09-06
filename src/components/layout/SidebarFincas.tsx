@@ -1,8 +1,9 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
-import { MapPin, Calendar, ClipboardList, Building, Wrench, User, ThumbsUp, Award, CreditCard, LogOut, FileText } from "lucide-react";
-import { authService } from "@/services/AuthService";
+import { MapPin, Calendar, ClipboardList, Building, Wrench, User, ThumbsUp, Award, CreditCard, LogOut, FileText, Home } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 interface SidebarFincasProps {
   activeTab: string;
@@ -10,105 +11,50 @@ interface SidebarFincasProps {
 }
 
 export function SidebarFincas({ activeTab, setActiveTab }: SidebarFincasProps) {
+  const { t } = useLanguage();
   const router = useRouter();
+  const { signOut } = useSupabaseAuth();
 
   const handleSignOut = async () => {
     try {
-      await authService.logout();
-      setTimeout(() => {
-        router.push('/');
-      }, 300);
+      await signOut();
+      router.push('/');
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       alert("Error al cerrar sesión. Por favor, inténtalo de nuevo.");
     }
   };
 
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'mapa', label: 'Mapa', icon: MapPin },
+    { id: 'activos', label: 'Activos', icon: Building },
+    { id: 'servicios', label: 'Servicios Actuales', icon: Wrench },
+    { id: 'solicitar-presupuesto', label: 'Solicitar Presupuesto', icon: FileText },
+    { id: 'juntas', label: 'Juntas', icon: Calendar },
+    { id: 'pendientes', label: 'Temas Pendientes', icon: ClipboardList },
+    { id: 'usuarios', label: 'Usuarios', icon: User },
+    { id: 'aprobaciones', label: 'Aprobaciones', icon: ThumbsUp },
+    { id: 'premios', label: 'Premios', icon: Award },
+    { id: 'pagos', label: 'Pagos', icon: CreditCard },
+  ];
+
   return (
     <div className="w-64 bg-gray-800 text-white shadow-lg flex flex-col h-full">
       <div className="p-4 flex-1">
         <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
         <nav className="space-y-2">
-          <Button 
-            variant={activeTab === "mapa" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("mapa")}
-          >
-            <MapPin className="mr-2 h-5 w-5" />
-            Mapa
-          </Button>
-          <Button 
-            variant={activeTab === "activos" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("activos")}
-          >
-            <Building className="mr-2 h-5 w-5" />
-            Activos
-          </Button>
-          <Button 
-            variant={activeTab === "servicios" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("servicios")}
-          >
-            <Wrench className='mr-2 h-5 w-5' />
-            Servicios Actuales
-          </Button>
-          <Button 
-            variant={activeTab === "solicitar-presupuesto" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("solicitar-presupuesto")}
-          >
-            <FileText className="mr-2 h-5 w-5" />
-            Solicitar Presupuesto
-          </Button>
-          <Button 
-            variant={activeTab === "juntas" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("juntas")}
-          >
-            <Calendar className="mr-2 h-5 w-5" />
-            Juntas
-          </Button>
-          <Button 
-            variant={activeTab === "pendientes" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("pendientes")}
-          >
-            <ClipboardList className="mr-2 h-5 w-5" />
-            Temas Pendientes
-          </Button>
-          <Button 
-            variant={activeTab === "usuarios" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("usuarios")}
-          >
-            <User className="mr-2 h-5 w-5" />
-            Usuarios
-          </Button>
-          <Button 
-            variant={activeTab === "aprobaciones" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("aprobaciones")}
-          >
-            <ThumbsUp className="mr-2 h-5 w-5" />
-            Aprobaciones
-          </Button>
-          <Button 
-            variant={activeTab === "premios" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("premios")}
-          >
-            <Award className="mr-2 h-5 w-5" />
-            Premios
-          </Button>
-          <Button 
-            variant={activeTab === "pagos" ? "default" : "ghost"} 
-            className="w-full justify-start"
-            onClick={() => setActiveTab("pagos")}
-          >
-            <CreditCard className="mr-2 h-5 w-5" />
-            Pagos
-          </Button>
+          {navItems.map((item) => (
+            <Button 
+              key={item.id}
+              variant={activeTab === item.id ? "default" : "ghost"} 
+              className="w-full justify-start"
+              onClick={() => setActiveTab(item.id)}
+            >
+              <item.icon className="mr-2 h-5 w-5" />
+              {item.label}
+            </Button>
+          ))}
         </nav>
       </div>
       

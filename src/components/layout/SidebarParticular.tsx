@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { User, FileText, Store, Star, Home, Settings, Bell, CreditCard, ThumbsUp, Award, LogOut, UserCheck } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { authService } from "@/services/AuthService";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 interface SidebarParticularProps {
   activeTab: string;
@@ -13,13 +13,12 @@ interface SidebarParticularProps {
 export function SidebarParticular({ activeTab, setActiveTab }: SidebarParticularProps) {
   const { t } = useLanguage();
   const router = useRouter();
+  const { signOut } = useSupabaseAuth();
 
   const handleSignOut = async () => {
     try {
-      await authService.logout();
-      setTimeout(() => {
-        router.push('/');
-      }, 300);
+      await signOut();
+      router.push('/');
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       alert("Error al cerrar sesión. Por favor, inténtalo de nuevo.");

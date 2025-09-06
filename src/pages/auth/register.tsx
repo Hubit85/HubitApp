@@ -172,7 +172,7 @@ function RegisterPageContent() {
     number: false
   });
 
-  const { user, loading, signUp } = useSupabaseAuth();
+  const { user, session, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
 
   // Redirect if user is already authenticated
