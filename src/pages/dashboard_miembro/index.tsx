@@ -1,22 +1,25 @@
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import React, { useState } from "react";
 import Head from "next/head";
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { 
-  Loader2, Users, LogOut, Settings, CheckCircle, ArrowRight, 
-  Home, Wrench, FileText, StarIcon, Bell, CreditCard, Heart, 
-  Clock, Package, Calendar, Phone, Mail, Star, MapPin, Shield, Store
-} from "lucide-react";
-import ZoomableSection from "@/components/ZoomableSection";
+  User, Users, Home, TrendingUp, AlertTriangle, Calendar, 
+  Shield, Store, Star, Search, Filter, Plus, Edit, Eye, 
+  CheckCircle, Clock, MapPin, Phone, Mail, Settings, Bell,
+  FileText
+} from 'lucide-react';
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
-import PropertyManager from "@/components/dashboard/PropertyManager";
-import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
-import UserRoleManager from "@/components/UserRoleManager";
-import ResendTestTool from "@/components/ResendTestTool";
+import { SidebarCommunityMember } from "@/components/layout/SidebarCommunityMember";
+import PropertySelector from "@/components/PropertySelector";
+import ZoomableSection from "@/components/ZoomableSection";
+import SupabaseStatus from "@/components/SupabaseStatus";
+import SystemStatusCard from "@/components/SystemStatusCard";
 
 export default function DashboardMiembro() {
   const { user, profile, signOut, loading } = useSupabaseAuth();

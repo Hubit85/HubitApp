@@ -1,22 +1,25 @@
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { 
-  Loader2, Building, LogOut, Settings, CheckCircle, ArrowRight, 
-  Home, Users, FileText, StarIcon, Bell, CreditCard, Calendar, 
-  Clock, Package, Phone, Mail, Star, MapPin, Shield, Store, 
-  TrendingUp, DollarSign, AlertTriangle, PieChart, Briefcase, 
-  ClipboardList, ChevronRight, Video, Calculator, BarChart3, Eye
-} from "lucide-react";
-import ZoomableSection from "@/components/ZoomableSection";
+  User, Users, Building, TrendingUp, AlertTriangle, Calendar, 
+  DollarSign, FileText, Settings, Bell, Star, Search, Filter,
+  Plus, Edit, Trash2, Eye, CheckCircle, Clock, MapPin, Phone,
+  Mail, Shield, Home, BarChart3
+} from 'lucide-react';
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
-import UserRoleManager from "@/components/UserRoleManager";
-import ResendTestTool from "@/components/ResendTestTool";
+import { SidebarFincas } from "@/components/layout/SidebarFincas";
+import PropertySelector from "@/components/PropertySelector";
+import ZoomableSection from "@/components/ZoomableSection";
+import SupabaseStatus from "@/components/SupabaseStatus";
+import SystemStatusCard from "@/components/SystemStatusCard";
 
 export default function DashboardAdministrador() {
   const { user, profile, signOut, loading } = useSupabaseAuth();

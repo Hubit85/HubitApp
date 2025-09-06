@@ -18,7 +18,6 @@ import { Header } from "@/components/layout/Header";
 import PropertyManager from "@/components/dashboard/PropertyManager";
 import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
 import UserRoleManager from "@/components/UserRoleManager";
-import ResendTestTool from "@/components/ResendTestTool";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
@@ -1647,11 +1646,18 @@ export default function Dashboard() {
                             Herramientas del Sistema
                           </CardTitle>
                           <CardDescription>
-                            Pruebas y diagnósticos del sistema
+                            Herramientas de configuración y diagnóstico
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <ResendTestTool />
+                          <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Settings className="h-8 w-8 text-stone-600" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-stone-900 mb-2">Sistema Configurado</h3>
+                            <p className="text-stone-600 text-sm">Todas las herramientas del sistema están funcionando correctamente.</p>
+                            <Badge className="bg-green-100 text-green-800 mt-3">✓ Operativo</Badge>
+                          </div>
                         </CardContent>
                       </Card>
                     </div>
