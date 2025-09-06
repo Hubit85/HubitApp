@@ -122,15 +122,21 @@ export default function Dashboard() {
         ];
       case "community_member":
         return [
-          { id: "comunidad", label: "Mi Comunidad", icon: Home },
+          { id: "propiedades", label: "Mis Propiedades", icon: Home },
+          { id: "comunidad", label: "Mi Comunidad", icon: Users },
+          { id: "servicios", label: "Servicios Disponibles", icon: Store },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores Verificados", icon: Store },
           { id: "favoritos", label: "Mis Favoritos", icon: Heart },
           { id: "historial", label: "Historial de Servicios", icon: Clock },
           { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
           { id: "incidencias", label: "Reportar Incidencias", icon: Shield },
+          { id: "chat", label: "Chat Comunitario", icon: MessageSquare },
+          { id: "videoconferencia", label: "Videoconferencias", icon: Video },
+          { id: "contratos", label: "Contratos Comunidad", icon: FileCheck },
+          { id: "presupuesto-comunidad", label: "Presupuesto Comunidad", icon: Calculator },
+          { id: "administrador", label: "Contactar Administrador", icon: Mail },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
-          { id: "pagos", label: "Mis Pagos", icon: CreditCard },
           { id: "configuracion", label: "Configuración", icon: Settings },
         ];
       case "service_provider":
