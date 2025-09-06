@@ -346,32 +346,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Step 3: Prepare role data with automatic community code generation
-    const processedRoleData: Record<string, any> = {};
+    console.log('🔧 API: Processing role-specific data safely...');
     
-    // FINAL FIX: Explicit object construction without any spread operations
-    if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData) && roleSpecificData !== null) {
+    // Initialize with empty object using the safest approach
+    const processedRoleData: Record<string, any> = Object.create(null);
+    
+    // Safe processing of role-specific data
+    if (roleSpecificData !== null && roleSpecificData !== undefined && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData)) {
       try {
-        const sourceKeys = Object.keys(roleSpecificData);
-        console.log('🔧 API: Processing', sourceKeys.length, 'role-specific data fields');
+        // Get keys safely and process one by one
+        const dataKeys = Object.keys(roleSpecificData);
+        console.log('🔧 API: Found', dataKeys.length, 'role-specific data fields to process');
         
-        // Explicitly copy each valid property
-        sourceKeys.forEach(key => {
-          if (key && typeof key === 'string' && key.length > 0) {
-            const value = (roleSpecificData as any)[key];
+        for (let i = 0; i < dataKeys.length; i++) {
+          const key = dataKeys[i];
+          if (typeof key === 'string' && key.length > 0) {
+            const value = (roleSpecificData as Record<string, any>)[key];
             if (value !== undefined && value !== null) {
               processedRoleData[key] = value;
             }
           }
-        });
+        }
         
-        console.log('✅ API: Successfully processed role-specific data with', Object.keys(processedRoleData).length, 'valid fields');
+        console.log('✅ API: Successfully processed', Object.keys(processedRoleData).length, 'valid role-specific data fields');
       } catch (processingError) {
         console.warn('⚠️ API: Error processing role-specific data:', processingError);
-        // processedRoleData already initialized as empty object above
+        // processedRoleData is already initialized as empty object
       }
     } else {
-      console.warn('⚠️ API: Invalid roleSpecificData format, using empty object');
-      // processedRoleData already initialized as empty object above
+      console.warn('⚠️ API: Invalid or empty roleSpecificData, using empty object');
     }
     
     if (roleType === 'community_member') {
