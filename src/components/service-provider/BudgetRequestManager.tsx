@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -139,8 +138,8 @@ export function BudgetRequestManager() {
     try {
       console.log("🔍 Loading available budget requests...");
 
-      // FIXED QUERY: More permissive approach - get all published requests first
-      let query = supabase
+      // IMPROVED QUERY: First get all published requests without category filtering
+      const { data: allRequests, error } = await supabase
         .from('budget_requests')
         .select(`
           *,
@@ -155,38 +154,43 @@ export function BudgetRequestManager() {
           )
         `)
         .eq('status', 'published')
-        .gte('expires_at', new Date().toISOString());
-
-      console.log("📋 Query constraints:", {
-        status: 'published',
-        expires_after: new Date().toISOString(),
-        provider_categories: provider.service_categories
-      });
-
-      // Execute the base query first to get all published requests
-      const { data: allRequests, error } = await query
         .order('created_at', { ascending: false })
         .limit(100);
+
+      console.log("📊 Raw query results:", {
+        total_requests: allRequests?.length || 0,
+        sample_data: allRequests?.slice(0, 2).map(r => ({
+          title: r.title,
+          category: r.category,
+          status: r.status,
+          created: r.created_at?.substring(0, 10)
+        })) || [],
+        query_error: error?.message || 'none'
+      });
 
       if (error) {
         console.error("❌ Database query error:", error);
         throw error;
       }
 
-      console.log("📊 Raw query results:", {
-        total_requests: allRequests?.length || 0,
-        sample_titles: allRequests?.slice(0, 3).map(r => r.title) || []
-      });
-
       if (!allRequests || allRequests.length === 0) {
         console.log("⚠️ No published budget requests found in database");
         return { success: true, data: [], message: "No hay solicitudes publicadas disponibles" };
       }
 
-      // FIXED FILTERING: Apply service category filter more permissively
+      // APPLY FILTERING ONLY AFTER SUCCESSFUL QUERY
       let filteredRequests = allRequests;
 
-      // Only filter by categories if provider has specific categories AND they're valid
+      // Remove expired requests
+      const now = new Date();
+      filteredRequests = filteredRequests.filter(request => {
+        if (!request.expires_at) return true; // No expiration = always valid
+        return new Date(request.expires_at) > now;
+      });
+
+      console.log("⏰ After expiration filter:", filteredRequests.length, "requests remaining");
+
+      // OPTIONAL: Apply service category filter only if provider has specific categories
       if (provider.service_categories && 
           Array.isArray(provider.service_categories) && 
           provider.service_categories.length > 0) {
@@ -198,23 +202,21 @@ export function BudgetRequestManager() {
         console.log("🔧 Provider service categories:", validCategories);
 
         if (validCategories.length > 0) {
-          // Apply category filter
-          const categoryFiltered = allRequests.filter(request => 
+          const categoryFiltered = filteredRequests.filter(request => 
             validCategories.some((cat: string) => 
               cat.toLowerCase() === request.category.toLowerCase()
             )
           );
 
           console.log("📋 Category filtering results:", {
-            before_filter: allRequests.length,
+            before_filter: filteredRequests.length,
             after_filter: categoryFiltered.length,
-            filtered_titles: categoryFiltered.map(r => `${r.title} (${r.category})`)
+            showing_all: categoryFiltered.length === 0 ? "YES - too restrictive" : "NO"
           });
 
-          // If category filtering removes everything, show all requests with a warning
+          // If category filtering is too restrictive, show all valid requests
           if (categoryFiltered.length === 0) {
-            console.log("⚠️ Category filter too restrictive, showing all requests");
-            filteredRequests = allRequests;
+            console.log("⚠️ Category filter too restrictive, showing all valid requests");
           } else {
             filteredRequests = categoryFiltered;
           }
@@ -223,34 +225,49 @@ export function BudgetRequestManager() {
         console.log("📋 No specific service categories defined, showing all requests");
       }
 
-      // Enhance data with additional information
+      // Enhance requests with additional data
       const enhancedRequests = await Promise.all(
         filteredRequests.map(async (request: any) => {
-          // Check if we already have a quote for this request
-          const { data: existingQuote } = await supabase
-            .from('quotes')
-            .select('*')
-            .eq('budget_request_id', request.id)
-            .eq('service_provider_id', provider.id)
-            .maybeSingle();
+          try {
+            // Check for existing quote from this provider
+            const { data: existingQuote, error: quoteError } = await supabase
+              .from('quotes')
+              .select('*')
+              .eq('budget_request_id', request.id)
+              .eq('service_provider_id', provider.id)
+              .maybeSingle();
 
-          const enhanced = {
-            ...request,
-            user_name: request.profiles?.full_name || 'Usuario',
-            property_name: request.properties?.name || 'Propiedad',
-            property_address: request.properties?.address || request.work_location || '',
-            my_quote: existingQuote || null,
-            quote_count: 0 // This would need a separate query for accuracy
-          };
+            if (quoteError && quoteError.code !== 'PGRST116') {
+              console.warn(`⚠️ Error checking quote for request ${request.id}:`, quoteError.message);
+            }
 
-          return enhanced;
+            return {
+              ...request,
+              user_name: request.profiles?.full_name || 'Usuario',
+              property_name: request.properties?.name || 'Propiedad',
+              property_address: request.properties?.address || request.work_location || '',
+              my_quote: existingQuote || null,
+              quote_count: 0
+            };
+          } catch (enhanceError) {
+            console.warn(`⚠️ Error enhancing request ${request.id}:`, enhanceError);
+            return {
+              ...request,
+              user_name: 'Usuario',
+              property_name: 'Propiedad',
+              property_address: request.work_location || '',
+              my_quote: null,
+              quote_count: 0
+            };
+          }
         })
       );
 
       console.log("✅ Enhanced requests prepared:", {
         total: enhancedRequests.length,
         with_existing_quotes: enhancedRequests.filter(r => r.my_quote).length,
-        categories: Array.from(new Set(enhancedRequests.map(r => r.category)))
+        categories: Array.from(new Set(enhancedRequests.map(r => r.category))),
+        titles: enhancedRequests.slice(0, 3).map(r => r.title)
       });
 
       return { success: true, data: enhancedRequests };
