@@ -51,6 +51,12 @@ export class SupabaseUserRoleService {
         console.log(`🔍 getUserRoles STARTING for user:`, userId);
         console.log(`🔍 Full userId:`, userId);
         
+        // CRITICAL FIX: Verify user ID consistency first
+        if (userId === 'ddayanacastro10@gmail.com' || userId.includes('@')) {
+          console.error('❌ CRITICAL ERROR: Email passed instead of User ID!', { receivedValue: userId });
+          throw new Error('Invalid user ID format: received email instead of UUID');
+        }
+        
         // Add connection test first
         const { data: connectionTest, error: connectionError } = await supabase
           .from('profiles')
@@ -63,6 +69,34 @@ export class SupabaseUserRoleService {
         }
         
         console.log('✅ Connection test passed');
+        
+        // ENHANCED: Verify the user ID exists and get email for cross-reference
+        const { data: userProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .eq('id', userId)
+          .maybeSingle();
+        
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.warn('❌ Profile lookup failed:', profileError);
+        }
+        
+        if (userProfile) {
+          console.log('✅ User profile found:', {
+            userId: userProfile.id.substring(0, 8) + '...',
+            email: userProfile.email
+          });
+          
+          // Special handling for the problematic user
+          if (userProfile.email === 'ddayanacastro10@gmail.com') {
+            console.log('🎯 SPECIAL HANDLING for ddayanacastro10@gmail.com');
+            
+            // Direct query with explicit logging
+            console.log('🔍 EXECUTING DIRECT QUERY with exact userId:', userProfile.id);
+          }
+        } else {
+          console.warn('⚠️ No profile found for userId:', userId);
+        }
         
         const { data, error } = await supabase
           .from('user_roles')
@@ -84,6 +118,7 @@ export class SupabaseUserRoleService {
 
         console.log(`🔍 getUserRoles QUERY RESULT:`, {
           userId: userId.substring(0, 8) + '...',
+          userEmail: userProfile?.email || 'unknown',
           dataLength: data?.length || 0,
           error: error?.message || 'none',
           errorCode: error?.code || 'none',
@@ -118,6 +153,18 @@ export class SupabaseUserRoleService {
           roles.map(r => `${r.role_type}(${r.is_verified ? 'verified' : 'pending'}${r.is_active ? ', active' : ''})`).join(', ')
         );
         
+        // CRITICAL: If we expected roles but got none, attempt recovery
+        if (roles.length === 0 && userProfile?.email === 'ddayanacastro10@gmail.com') {
+          console.log('🚨 ZERO ROLES DETECTED FOR KNOWN USER - Attempting recovery...');
+          
+          // Attempt ID recovery by email lookup
+          const recoveryResult = await this.attemptIdRecovery(userProfile.email, userId);
+          if (recoveryResult.recovered) {
+            console.log('✅ ID Recovery successful, re-running query...');
+            return this.getUserRoles(recoveryResult.correctedId!);
+          }
+        }
+        
         return roles;
         
       } catch (networkError) {
@@ -132,6 +179,71 @@ export class SupabaseUserRoleService {
         return [];
       }
     });
+  }
+  
+  // NEW METHOD: Attempt to recover correct user ID when there's a mismatch
+  static async attemptIdRecovery(email: string, providedUserId: string): Promise<{
+    recovered: boolean;
+    correctedId?: string;
+    issue?: string;
+  }> {
+    try {
+      console.log('🔧 ATTEMPTING ID RECOVERY for:', { email, providedUserId: providedUserId.substring(0, 8) + '...' });
+      
+      // Step 1: Look up user by email in profiles
+      const { data: profileByEmail, error: emailError } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .eq('email', email)
+        .maybeSingle();
+      
+      if (emailError || !profileByEmail) {
+        console.log('❌ No profile found by email:', email);
+        return { recovered: false, issue: 'No profile found by email' };
+      }
+      
+      console.log('📧 Profile found by email:', {
+        foundId: profileByEmail.id.substring(0, 8) + '...',
+        providedId: providedUserId.substring(0, 8) + '...',
+        idsMatch: profileByEmail.id === providedUserId
+      });
+      
+      if (profileByEmail.id === providedUserId) {
+        console.log('✅ IDs already match - this is not an ID mismatch issue');
+        return { recovered: false, issue: 'IDs match but no roles found' };
+      }
+      
+      // Step 2: Check if the correct ID has roles
+      const { data: rolesWithCorrectId, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('id, role_type, is_verified')
+        .eq('user_id', profileByEmail.id);
+      
+      if (rolesError) {
+        console.log('❌ Error checking roles with correct ID:', rolesError);
+        return { recovered: false, issue: 'Error checking roles with correct ID' };
+      }
+      
+      if (rolesWithCorrectId && rolesWithCorrectId.length > 0) {
+        console.log('🎯 FOUND ROLES WITH CORRECT ID:', {
+          correctId: profileByEmail.id.substring(0, 8) + '...',
+          rolesFound: rolesWithCorrectId.length,
+          roles: rolesWithCorrectId.map(r => r.role_type)
+        });
+        
+        return {
+          recovered: true,
+          correctedId: profileByEmail.id
+        };
+      }
+      
+      console.log('❌ No roles found even with correct ID');
+      return { recovered: false, issue: 'No roles found with any ID' };
+      
+    } catch (recoveryError) {
+      console.error('❌ ID recovery failed:', recoveryError);
+      return { recovered: false, issue: 'Recovery process failed' };
+    }
   }
 
   static async getActiveRole(userId: string): Promise<UserRole | null> {
