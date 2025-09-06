@@ -299,6 +299,32 @@ export default function ParticularDashboard() {
                                 <Input id="location" value="Madrid, España" readOnly className="bg-gray-50 transition-all duration-200 focus:bg-white" />
                               </div>
                             </div>
+
+                            <div className="mt-8 pt-6 border-t border-gray-200">
+                              <h3 className="text-lg font-semibold text-gray-800 mb-4">{t("accountSettings")}</h3>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label className="text-gray-700">{t("language")}</Label>
+                                  <select className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-blue-500">
+                                    <option>{t("languageEs")}</option>
+                                    <option>{t("languageEn")}</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <Label className="text-gray-700">{t("notifications")}</Label>
+                                  <div className="mt-2 space-y-2">
+                                    <div className="flex items-center">
+                                      <input type="checkbox" id="email-notifications" defaultChecked className="h-4 w-4 text-blue-600 transition-all duration-200" />
+                                      <Label htmlFor="email-notifications" className="ml-2 text-sm text-gray-700">{t("emailNotifications")}</Label>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <input type="checkbox" id="push-notifications" className="h-4 w-4 text-blue-600 transition-all duration-200" />
+                                      <Label htmlFor="push-notifications" className="ml-2 text-sm text-gray-700">{t("pushNotifications")}</Label>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
