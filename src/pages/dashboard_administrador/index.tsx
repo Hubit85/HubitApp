@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +13,8 @@ import {
   User, Users, Building, TrendingUp, AlertTriangle, Calendar, 
   DollarSign, FileText, Settings, Bell, Star, Search, Filter,
   Plus, Edit, Trash2, Eye, CheckCircle, Clock, MapPin, Phone,
-  Mail, Shield, Home, BarChart3
+  Mail, Shield, Home, BarChart3, Loader2, LogOut, ClipboardList,
+  Package, ChevronRight, Video, Briefcase, Store, StarIcon, CreditCard
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
@@ -20,6 +23,7 @@ import PropertySelector from "@/components/PropertySelector";
 import ZoomableSection from "@/components/ZoomableSection";
 import SupabaseStatus from "@/components/SupabaseStatus";
 import SystemStatusCard from "@/components/SystemStatusCard";
+import UserRoleManager from "@/components/UserRoleManager";
 
 export default function DashboardAdministrador() {
   const { user, profile, signOut, loading } = useSupabaseAuth();
@@ -520,7 +524,7 @@ export default function DashboardAdministrador() {
                           <CardDescription>Pruebas y diagnósticos</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <ResendTestTool />
+                          <SystemStatusCard />
                         </CardContent>
                       </Card>
                     </div>

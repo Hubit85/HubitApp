@@ -1,6 +1,8 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +13,7 @@ import {
   User, Home, TrendingUp, AlertTriangle, Calendar, 
   Shield, Store, Star, Search, Filter, Plus, Edit, Eye, 
   CheckCircle, Clock, MapPin, Phone, Mail, Settings, Bell,
-  FileText, Users
+  FileText, Users, Loader2, LogOut, Heart, Package, ArrowRight, Wrench, StarIcon, CreditCard
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
@@ -20,6 +22,9 @@ import PropertySelector from "@/components/PropertySelector";
 import ZoomableSection from "@/components/ZoomableSection";
 import SupabaseStatus from "@/components/SupabaseStatus";
 import SystemStatusCard from "@/components/SystemStatusCard";
+import UserRoleManager from "@/components/UserRoleManager";
+import PropertyManager from "@/components/dashboard/PropertyManager";
+import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
 
 export default function DashboardParticular() {
   const { user, profile, signOut, loading } = useSupabaseAuth();
@@ -348,7 +353,7 @@ export default function DashboardParticular() {
                           <CardDescription>Pruebas y diagnósticos</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <ResendTestTool />
+                          <SystemStatusCard />
                         </CardContent>
                       </Card>
                     </div>
