@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,10 +69,10 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-neutral-600">Verificando sesión...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-stone-600 mx-auto mb-4" />
+          <p className="text-stone-600">Verificando sesión...</p>
         </div>
       </div>
     );
@@ -84,22 +85,30 @@ export default function LoginPage() {
         <meta name="description" content="Inicia sesión en HuBiT para acceder a tu cuenta" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
-        {/* Floating background elements */}
-        <div className="absolute top-20 left-10 w-40 h-40 bg-blue-200/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-60 h-60 bg-purple-200/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-emerald-200/20 rounded-full blur-2xl animate-pulse delay-500" />
-
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-          {/* Logo/Brand Section */}
+      <div className="min-h-screen bg-gray-50 relative overflow-hidden">
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
+          {/* Header with HuBiT Logo matching register page */}
           <div className="text-center mb-8">
-            <div className="relative inline-block mb-6">
-              <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 tracking-tight">
-                HuBiT
-              </h1>
-              <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-bounce" />
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="relative w-16 h-16 transition-transform duration-200 hover:scale-105 overflow-hidden">
+                <Image
+                  src="/HuBiT logo.png"
+                  alt="HuBiT Logo"
+                  fill
+                  className="object-cover object-left"
+                  priority
+                />
+              </div>
+              <div className="flex flex-col items-start">
+                <h1 className="text-4xl md:text-5xl font-bold text-black tracking-wide">
+                  HuBiT
+                </h1>
+                <p className="text-lg text-stone-600 font-medium">
+                  Hub de servicios comunitarios
+                </p>
+              </div>
             </div>
-            <p className="text-xl text-neutral-600 font-light">
+            <p className="text-xl text-stone-600 font-light">
               Bienvenido de vuelta
             </p>
           </div>
@@ -114,17 +123,17 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Login Card */}
-          <Card className="w-full max-w-md bg-white/70 backdrop-blur-lg border-white/20 shadow-2xl shadow-neutral-900/10">
+          {/* Login Card - matching register design exactly */}
+          <Card className="w-full max-w-2xl bg-white border-stone-200 shadow-2xl shadow-stone-900/10">
             <CardHeader className="text-center space-y-4 pb-6">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div className="mx-auto w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center shadow-lg">
                 <Shield className="h-8 w-8 text-white" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold text-neutral-900">
+                <CardTitle className="text-2xl font-bold text-black">
                   Iniciar Sesión
                 </CardTitle>
-                <CardDescription className="text-neutral-600">
+                <CardDescription className="text-stone-600">
                   Accede a tu cuenta de HuBiT
                 </CardDescription>
               </div>
@@ -143,18 +152,18 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-neutral-700">
-                    Correo electrónico
+                  <Label htmlFor="email" className="text-sm font-medium text-stone-700">
+                    Correo electrónico *
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="tu@email.com"
-                      className="pl-10 h-12 bg-white/50 border-neutral-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                       required
                       disabled={isLoading}
                     />
@@ -162,25 +171,25 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-neutral-700">
-                    Contraseña
+                  <Label htmlFor="password" className="text-sm font-medium text-stone-700">
+                    Contraseña *
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="pl-10 pr-10 h-12 bg-white/50 border-neutral-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      className="pl-10 pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                       required
                       disabled={isLoading}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
                       disabled={isLoading}
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -191,7 +200,7 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:via-blue-600 hover:to-blue-700"
+                  className="w-full bg-stone-800 hover:bg-stone-900 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none h-12"
                 >
                   {isLoading ? (
                     <>
@@ -221,39 +230,37 @@ export default function LoginPage() {
                   </div>
                 </div>
               )}
-
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-neutral-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-neutral-500">¿Nuevo en HuBiT?</span>
-                </div>
-              </div>
-
-              {/* Register Link */}
-              <div className="text-center">
-                <Link 
-                  href="/auth/register"
-                  className="group inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
-                >
-                  Crear una cuenta
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
             </CardContent>
           </Card>
 
-          {/* Footer */}
+          {/* Register Link - matching register page format */}
           <div className="mt-8 text-center">
-            <p className="text-sm text-neutral-500">
+            <div className="relative mb-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-stone-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-gray-50 px-2 text-stone-500">¿Nuevo en HuBiT?</span>
+              </div>
+            </div>
+            <Link 
+              href="/auth/register"
+              className="group inline-flex items-center text-stone-800 hover:text-black font-medium transition-colors"
+            >
+              Crear una cuenta
+              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+
+          {/* Footer - exactly matching register page */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-stone-500 max-w-md">
               Al iniciar sesión, aceptas nuestros{" "}
-              <Link href="/terms" className="text-blue-600 hover:underline">
+              <Link href="/terms" className="text-stone-800 hover:underline">
                 Términos de Servicio
               </Link>{" "}
               y{" "}
-              <Link href="/privacy" className="text-blue-600 hover:underline">
+              <Link href="/privacy" className="text-stone-800 hover:underline">
                 Política de Privacidad
               </Link>
             </p>
