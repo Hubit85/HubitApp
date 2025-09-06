@@ -966,6 +966,48 @@ export class SupabaseUserRoleService {
       }
     });
   }
+
+  static async updateRoleSpecificData(
+    userId: string,
+    roleType: UserRole['role_type'],
+    data: Record<string, any>
+  ): Promise<{ success: boolean; message: string }> {
+    return ConnectionManager.executeWithLimit(async () => {
+      try {
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Operation timeout')), 10000);
+        });
+
+        const updatePromise = supabase
+          .from('user_roles')
+          .update({
+            role_specific_data: data,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+          .eq('role_type', roleType);
+
+        const result = await Promise.race([updatePromise, timeoutPromise]) as any;
+        const { error } = result;
+
+        if (error) {
+          throw new Error(`Failed to update role data: ${error.message}`);
+        }
+
+        return {
+          success: true,
+          message: "Datos del rol actualizados correctamente"
+        };
+
+      } catch (error) {
+        console.error("❌ Error updating role specific data:", error);
+        return {
+          success: false,
+          message: error instanceof Error ? error.message : "Error al actualizar datos del rol"
+        };
+      }
+    });
+  }
 }
 
 // Re-export UserRole type for convenience
