@@ -127,14 +127,119 @@ export class PropertyAutoService {
         throw new Error(`Error fetching user properties: ${fetchError.message}`);
       }
 
-      console.log(`✅ PropertyAutoService: Found ${userProperties?.length || 0} properties for user`);
+      // Obtener todos los roles del usuario para entender qué sincronizaciones hacer
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role_type, role_specific_data, is_verified')
+        .eq('user_id', userId)
+        .eq('is_verified', true);
 
-      // Aquí se pueden implementar lógicas adicionales de sincronización
-      // Por ejemplo, asegurar que cada rol tenga acceso a las propiedades relevantes
+      if (rolesError) {
+        throw new Error(`Error fetching user roles: ${rolesError.message}`);
+      }
+
+      console.log(`✅ PropertyAutoService: Found ${userProperties?.length || 0} properties and ${userRoles?.length || 0} roles for user`);
+
+      // CRUCE DE INFORMACIÓN: Sincronizar datos entre propiedades y roles
+      if (userProperties && userProperties.length > 0 && userRoles && userRoles.length > 0) {
+        
+        // Buscar roles con información de dirección
+        const rolesWithAddress = userRoles.filter(role => {
+          const data = role.role_specific_data as any;
+          return data && (data.address || data.company_address);
+        });
+
+        if (rolesWithAddress.length > 0) {
+          console.log(`🏗️ PropertyAutoService: Found ${rolesWithAddress.length} roles with address data for cross-sync`);
+
+          // Actualizar propiedades existentes con información de roles
+          const updatePromises = userProperties.map(async (property) => {
+            let needsUpdate = false;
+            const updateFields: any = {};
+
+            // Buscar información complementaria en los roles
+            for (const role of rolesWithAddress) {
+              const roleData = role.role_specific_data as any;
+              
+              // Si la propiedad no tiene información completa, completarla desde los roles
+              if (!property.community_info && role.role_type === 'community_member') {
+                if (roleData.community_name || roleData.portal_number || roleData.apartment_number) {
+                  updateFields.community_info = {
+                    community_name: roleData.community_name || property.community_info?.community_name || '',
+                    portal_number: roleData.portal_number || property.community_info?.portal_number || '',
+                    apartment_number: roleData.apartment_number || property.community_info?.apartment_number || '',
+                    management_company: property.community_info?.management_company || null,
+                    total_units: property.community_info?.total_units || null
+                  };
+                  needsUpdate = true;
+                }
+              }
+
+              // Actualizar información de la propiedad si está incompleta
+              if (!property.description && roleData.full_name) {
+                updateFields.description = `Propiedad de ${roleData.full_name}`;
+                needsUpdate = true;
+              }
+            }
+
+            // Aplicar actualizaciones si las hay
+            if (needsUpdate) {
+              updateFields.updated_at = new Date().toISOString();
+
+              const { error: updateError } = await supabase
+                .from('properties')
+                .update(updateFields)
+                .eq('id', property.id);
+
+              if (updateError) {
+                console.error(`❌ Error updating property ${property.id}:`, updateError);
+              } else {
+                console.log(`✅ Updated property ${property.id.substring(0, 8)}... with cross-role data`);
+              }
+            }
+          });
+
+          await Promise.all(updatePromises);
+        }
+
+        // CREAR PROPIEDADES FALTANTES basadas en roles con direcciones diferentes
+        for (const role of rolesWithAddress) {
+          const roleData = role.role_specific_data as any;
+          const roleAddress = roleData.address || roleData.company_address;
+          
+          if (!roleAddress) continue;
+
+          // Verificar si ya existe una propiedad con esta dirección
+          const existingProperty = userProperties.find(prop => 
+            prop.address?.toLowerCase().includes(roleAddress.toLowerCase()) ||
+            roleAddress.toLowerCase().includes(prop.address?.toLowerCase() || '')
+          );
+
+          if (!existingProperty) {
+            console.log(`🏠 PropertyAutoService: Creating missing property from ${role.role_type} role data`);
+            
+            // Crear nueva propiedad basada en el rol
+            const newPropertyData: UserPropertyData = {
+              full_name: roleData.full_name || roleData.company_name || 'Usuario',
+              address: roleAddress,
+              city: roleData.city || roleData.company_city || '',
+              postal_code: roleData.postal_code || roleData.company_postal_code || '',
+              province: roleData.province || roleData.company_province || '',
+              country: roleData.country || roleData.company_country || 'España',
+              community_name: roleData.community_name || '',
+              portal_number: roleData.portal_number || '',
+              apartment_number: roleData.apartment_number || '',
+              user_type: role.role_type
+            };
+
+            await this.createDefaultProperty(userId, newPropertyData);
+          }
+        }
+      }
 
       return {
         success: true,
-        message: `${userProperties?.length || 0} propiedades sincronizadas correctamente`
+        message: `${userProperties?.length || 0} propiedades sincronizadas y cruzadas correctamente con ${userRoles?.length || 0} roles`
       };
 
     } catch (error) {
@@ -144,6 +249,98 @@ export class PropertyAutoService {
         message: error instanceof Error ? error.message : "Error desconocido en la sincronización"
       };
     }
+  }
+
+  /**
+   * NUEVA FUNCIÓN: Obtener propiedades con información cruzada de roles
+   */
+  static async getPropertiesWithCrossRoleInfo(userId: string): Promise<{ 
+    success: boolean; 
+    properties: any[]; 
+    message: string 
+  }> {
+    try {
+      console.log("🔍 PropertyAutoService: Getting properties with cross-role info for user:", userId.substring(0, 8) + '...');
+
+      // Obtener propiedades y roles del usuario
+      const [propertiesResult, rolesResult] = await Promise.all([
+        supabase
+          .from('properties')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('user_roles')
+          .select('role_type, role_specific_data, is_verified')
+          .eq('user_id', userId)
+          .eq('is_verified', true)
+      ]);
+
+      if (propertiesResult.error) {
+        throw new Error(`Error fetching properties: ${propertiesResult.error.message}`);
+      }
+
+      if (rolesResult.error) {
+        throw new Error(`Error fetching roles: ${rolesResult.error.message}`);
+      }
+
+      const properties = propertiesResult.data || [];
+      const roles = rolesResult.data || [];
+
+      // Enriquecer propiedades con información de roles
+      const enrichedProperties = properties.map(property => {
+        const enrichedProperty = { ...property };
+        
+        // Agregar información de roles relacionados
+        enrichedProperty.relatedRoles = [];
+        
+        roles.forEach(role => {
+          const roleData = role.role_specific_data as any;
+          const roleAddress = roleData?.address || roleData?.company_address;
+          
+          // Si la dirección del rol coincide con la propiedad, agregar relación
+          if (roleAddress && (
+            property.address?.toLowerCase().includes(roleAddress.toLowerCase()) ||
+            roleAddress.toLowerCase().includes(property.address?.toLowerCase() || '')
+          )) {
+            enrichedProperty.relatedRoles.push({
+              role_type: role.role_type,
+              role_label: this.getRoleDisplayName(role.role_type),
+              role_data: roleData
+            });
+          }
+        });
+
+        return enrichedProperty;
+      });
+
+      return {
+        success: true,
+        properties: enrichedProperties,
+        message: `${enrichedProperties.length} propiedades obtenidas con información cruzada de ${roles.length} roles`
+      };
+
+    } catch (error) {
+      console.error("❌ PropertyAutoService: Error getting cross-role properties:", error);
+      return {
+        success: false,
+        properties: [],
+        message: error instanceof Error ? error.message : "Error desconocido al obtener propiedades"
+      };
+    }
+  }
+
+  /**
+   * Helper: Obtener nombre de display del rol
+   */
+  private static getRoleDisplayName(roleType: string): string {
+    const roleNames = {
+      'particular': 'Particular',
+      'community_member': 'Miembro de Comunidad',
+      'service_provider': 'Proveedor de Servicios',
+      'property_administrator': 'Administrador de Fincas'
+    };
+    return roleNames[roleType as keyof typeof roleNames] || roleType;
   }
 
   /**

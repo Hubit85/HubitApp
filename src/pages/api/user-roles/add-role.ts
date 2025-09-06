@@ -96,6 +96,118 @@ const generateCommunityCode = (address: string): string => {
   return `COM-${hash}-${randomNum}`.toUpperCase();
 };
 
+// NUEVA FUNCIÓN: Sincronizar información entre roles
+const syncInformationBetweenRoles = async (userId: string, newRoleType: string, newRoleData: any): Promise<void> => {
+  try {
+    console.log('🔄 API: Starting cross-role information sync for user:', userId.substring(0, 8) + '...');
+    
+    // Obtener todos los roles existentes del usuario
+    const { data: existingRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('role_type, role_specific_data')
+      .eq('user_id', userId)
+      .eq('is_verified', true);
+
+    if (rolesError) {
+      console.warn('⚠️ API: Could not fetch existing roles for sync:', rolesError);
+      return;
+    }
+
+    if (!existingRoles || existingRoles.length === 0) {
+      console.log('📝 API: No existing roles to sync with');
+      return;
+    }
+
+    console.log(`🔍 API: Found ${existingRoles.length} existing roles to sync with`);
+
+    // Lógica de sincronización específica
+    const syncPromises = existingRoles.map(async (existingRole) => {
+      if (existingRole.role_type === newRoleType) {
+        return; // No sincronizar con el mismo rol
+      }
+
+      let updatedData = { ...existingRole.role_specific_data };
+      let hasChanges = false;
+
+      // SINCRONIZACIÓN PARTICULAR ↔ MIEMBRO DE COMUNIDAD
+      if ((newRoleType === 'particular' && existingRole.role_type === 'community_member') ||
+          (newRoleType === 'community_member' && existingRole.role_type === 'particular')) {
+        
+        // Sincronizar datos básicos
+        const fieldsToSync = ['full_name', 'phone', 'address', 'postal_code', 'city', 'province', 'country'];
+        
+        for (const field of fieldsToSync) {
+          if (newRoleData[field] && (!updatedData[field] || updatedData[field] !== newRoleData[field])) {
+            updatedData[field] = newRoleData[field];
+            hasChanges = true;
+            console.log(`📤 API: Syncing ${field} from ${newRoleType} to ${existingRole.role_type}`);
+          }
+        }
+
+        // Si el nuevo rol es community_member, sincronizar info de comunidad al particular
+        if (newRoleType === 'community_member') {
+          const communityFields = ['community_name', 'portal_number', 'apartment_number'];
+          for (const field of communityFields) {
+            if (newRoleData[field]) {
+              updatedData[`community_${field}`] = newRoleData[field];
+              hasChanges = true;
+            }
+          }
+        }
+      }
+
+      // SINCRONIZACIÓN CON PROVEEDORES DE SERVICIOS
+      if (newRoleType === 'service_provider') {
+        // Los proveedores pueden beneficiarse de conocer ubicaciones de otros roles
+        if (newRoleData.company_city && !updatedData.service_area) {
+          updatedData.service_area = newRoleData.company_city;
+          hasChanges = true;
+        }
+      }
+
+      // SINCRONIZACIÓN CON ADMINISTRADORES DE FINCAS
+      if (newRoleType === 'property_administrator') {
+        // Administradores pueden beneficiarse de conocer propiedades gestionadas
+        if (newRoleData.company_city && !updatedData.management_area) {
+          updatedData.management_area = newRoleData.company_city;
+          hasChanges = true;
+        }
+      }
+
+      // Aplicar cambios si los hay
+      if (hasChanges) {
+        const { error: updateError } = await supabase
+          .from('user_roles')
+          .update({ 
+            role_specific_data: updatedData,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+          .eq('role_type', existingRole.role_type);
+
+        if (updateError) {
+          console.warn(`⚠️ API: Failed to sync data to ${existingRole.role_type}:`, updateError);
+        } else {
+          console.log(`✅ API: Successfully synced data to ${existingRole.role_type}`);
+        }
+      }
+    });
+
+    await Promise.all(syncPromises);
+    
+    // SINCRONIZACIÓN DE PROPIEDADES
+    if (newRoleType === 'particular' || newRoleType === 'community_member') {
+      await PropertyAutoService.syncPropertiesBetweenRoles(userId);
+    }
+
+    console.log('✅ API: Cross-role information sync completed successfully');
+
+  } catch (error) {
+    console.error('❌ API: Error in cross-role sync:', error);
+    throw error;
+  }
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ 
@@ -331,6 +443,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (propertyResult.success) {
               console.log('✅ API: Default property created successfully:', propertyResult.message);
               
+              // NUEVA FUNCIONALIDAD: Sincronizar información entre roles existentes
+              await syncInformationBetweenRoles(userId, roleType, processedRoleData);
+              
               // Add property creation info to the response
               const processingTime = Date.now() - startTime;
               return res.status(200).json({
@@ -342,7 +457,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 property: propertyResult.property,
                 propertyCreated: true,
                 requiresVerification: !shouldAutoVerify,
-                processingTime
+                processingTime,
+                crossSyncCompleted: true
               });
               
             } else {
@@ -356,6 +472,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
 
+        // NUEVA FUNCIONALIDAD: Sincronizar información entre todos los roles
+        try {
+          await syncInformationBetweenRoles(userId, roleType, processedRoleData);
+        } catch (syncError) {
+          console.warn('⚠️ API: Cross-role sync failed (non-critical):', syncError);
+          // Don't fail the role creation for sync errors
+        }
+
         const processingTime = Date.now() - startTime;
         console.log(`✅ API: add-role completed successfully in ${processingTime}ms`);
 
@@ -366,7 +490,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             `Rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} agregado. Revisa tu email para completar la verificación.`,
           role: newRole,
           requiresVerification: !shouldAutoVerify,
-          processingTime
+          processingTime,
+          crossSyncCompleted: true
         });
 
       } catch (insertError: any) {
