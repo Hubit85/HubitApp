@@ -444,8 +444,22 @@ function RegisterPageContent() {
         if (additionalRoles.length > 0) {
           setSuccessMessage("¡Cuenta creada! Configurando roles adicionales...");
           
-          // Esperar un momento para que la cuenta se complete
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // Esperar un momento para que la cuenta se complete y obtener el usuario actual
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          
+          // Obtener la sesión actual para obtener el user ID
+          const { data: { user: currentUser } } = await supabase.auth.getUser();
+          
+          if (!currentUser) {
+            console.error("❌ No se pudo obtener el usuario después del registro");
+            setSuccessMessage(`Cuenta creada con rol principal. Los roles adicionales se pueden agregar desde tu dashboard.`);
+            setTimeout(() => {
+              router.push("/dashboard");
+            }, 2000);
+            return;
+          }
+          
+          console.log("✅ Usuario obtenido para crear roles adicionales:", currentUser.id);
           
           // Crear cada rol adicional
           let rolesCreatedSuccessfully = 0;
@@ -470,6 +484,8 @@ function RegisterPageContent() {
                 roleSpecificData = formData.property_administrator;
               }
               
+              console.log(`🔄 Creando rol adicional: ${additionalRole} para usuario:`, currentUser.id);
+              
               // Llamar al API para agregar el rol
               const roleResponse = await fetch('/api/user-roles/add-role', {
                 method: 'POST',
@@ -477,7 +493,7 @@ function RegisterPageContent() {
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  userId: user?.id, // Usar el ID del usuario recién creado
+                  userId: currentUser.id,
                   roleType: additionalRole,
                   roleSpecificData: roleSpecificData
                 })
@@ -487,11 +503,14 @@ function RegisterPageContent() {
               
               if (roleResult.success) {
                 rolesCreatedSuccessfully++;
-                console.log(`✅ Rol adicional creado: ${additionalRole}`);
+                console.log(`✅ Rol adicional creado exitosamente: ${additionalRole}`);
               } else {
                 roleErrors.push(`${additionalRole}: ${roleResult.message}`);
                 console.error(`❌ Error creando rol ${additionalRole}:`, roleResult.message);
               }
+              
+              // Pequeña pausa entre creaciones de roles para evitar rate limits
+              await new Promise(resolve => setTimeout(resolve, 500));
               
             } catch (roleError) {
               roleErrors.push(`${additionalRole}: Error de conexión`);
@@ -502,10 +521,13 @@ function RegisterPageContent() {
           // Mostrar resultado final
           if (rolesCreatedSuccessfully === additionalRoles.length) {
             setSuccessMessage(`¡Cuenta creada exitosamente con ${orderedRoles.length} roles! Redirigiendo...`);
+            console.log(`✅ Todos los roles creados exitosamente (${orderedRoles.length} total)`);
           } else if (rolesCreatedSuccessfully > 0) {
             setSuccessMessage(`Cuenta creada. ${rolesCreatedSuccessfully} de ${additionalRoles.length} roles adicionales configurados. Los roles pendientes recibirán verificación por email.`);
+            console.log(`⚠️ Roles parcialmente creados: ${rolesCreatedSuccessfully}/${additionalRoles.length}`);
           } else {
             setSuccessMessage(`Cuenta creada con rol principal. Los roles adicionales se pueden agregar desde tu dashboard.`);
+            console.log(`❌ No se pudieron crear roles adicionales`);
           }
           
           // Mostrar errores específicos si los hay (solo para debugging, no asustar al usuario)
