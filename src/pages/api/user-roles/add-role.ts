@@ -351,10 +351,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Create a simple object with safe property copying
     const processedRoleData: Record<string, any> = {};
     
-    // Safely copy properties one by one using a simple loop
+    // Safely copy properties one by one using Object.hasOwnProperty.call (TypeScript safe)
     if (roleSpecificData && typeof roleSpecificData === 'object' && roleSpecificData !== null) {
       for (const key in roleSpecificData) {
-        if (roleSpecificData.hasOwnProperty(key)) {
+        if (Object.hasOwnProperty.call(roleSpecificData, key)) {
           const value = roleSpecificData[key];
           if (value !== undefined && value !== null) {
             processedRoleData[key] = value;
