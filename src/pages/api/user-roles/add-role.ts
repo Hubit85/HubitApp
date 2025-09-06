@@ -345,20 +345,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Step 3: Process role data with completely safe method
+    // Step 3: Process role data with type-safe method  
     console.log('🔧 API: Processing role-specific data safely...');
     
-    // Create a simple object with safe property copying
+    // Create processedRoleData with explicit type checking
     const processedRoleData: Record<string, any> = {};
     
-    // Safely copy properties one by one using Object.hasOwnProperty.call (TypeScript safe)
-    if (roleSpecificData && typeof roleSpecificData === 'object' && roleSpecificData !== null) {
-      for (const key in roleSpecificData) {
-        if (Object.hasOwnProperty.call(roleSpecificData, key)) {
-          const value = roleSpecificData[key];
-          if (value !== undefined && value !== null) {
-            processedRoleData[key] = value;
-          }
+    // Type-safe processing with explicit validation
+    if (roleSpecificData && 
+        typeof roleSpecificData === 'object' && 
+        roleSpecificData !== null &&
+        !Array.isArray(roleSpecificData)) {
+      
+      // Get all enumerable own properties safely
+      const entries = Object.entries(roleSpecificData as Record<string, any>);
+      
+      for (const [key, value] of entries) {
+        if (value !== undefined && value !== null && value !== '') {
+          processedRoleData[key] = value;
         }
       }
     }
