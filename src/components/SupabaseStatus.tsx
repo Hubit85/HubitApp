@@ -19,14 +19,71 @@ export default function SupabaseStatus() {
                               process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== "";
 
   useEffect(() => {
+    let mounted = true;
+    let checkInterval: NodeJS.Timeout;
+
+    const performConnectionCheck = async () => {
+      if (!mounted) return;
+      
+      try {
+        setConnectionStatus('checking');
+        
+        const isConnected = await checkConnection();
+        
+        if (mounted) {
+          setConnectionStatus(isConnected ? 'connected' : 'error');
+          
+          // Only show errors in console, not in UI to avoid spam
+          if (!isConnected) {
+            console.warn('⚠️ Supabase connection appears to be down');
+          } else if (connectionStatus === 'error' && isConnected) {
+            console.log('✅ Supabase connection restored');
+          }
+        }
+      } catch (error) {
+        console.warn('🔍 Connection check error:', error);
+        if (mounted) {
+          setConnectionStatus('error');
+        }
+      }
+    };
+
+    const performDatabaseCheck = async () => {
+      if (!mounted) return;
+      
+      try {
+        setDbStatus('checking');
+        await checkDatabaseTables();
+      } catch (error) {
+        console.warn('🔍 Database check error:', error);
+        if (mounted) {
+          setDbStatus('error');
+        }
+      }
+    };
+
     if (!isSupabaseConfigured) {
       setConnectionStatus('not_configured');
       setDbStatus('not_configured');
       return;
     }
-    
-    checkConnection();
-    checkDatabaseTables();
+
+    // Initial checks
+    performConnectionCheck();
+    performDatabaseCheck();
+
+    // Set up periodic checks every 30 seconds (less frequent to reduce load)
+    checkInterval = setInterval(() => {
+      performConnectionCheck();
+      performDatabaseCheck();
+    }, 30000);
+
+    return () => {
+      mounted = false;
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+    };
   }, [isSupabaseConfigured]);
 
   const checkConnection = async (): Promise<boolean> => {
@@ -69,19 +126,37 @@ export default function SupabaseStatus() {
     }
 
     try {
+      console.log('🔍 Checking database tables...');
+      
+      // Create timeout for database checks
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Database check timeout')), 8000);
+      });
+
       // Check if main tables exist by testing specific queries with better error handling
-      const checks = await Promise.allSettled([
+      const checksPromise = Promise.allSettled([
         supabase.from('profiles').select('count').limit(1),
         supabase.from('properties').select('count').limit(1),
         supabase.from('budget_requests').select('count').limit(1)
       ]);
       
-      const hasFailures = checks.some(result => result.status === 'rejected' || 
-        (result.status === 'fulfilled' && result.value.error));
+      const checks = await Promise.race([checksPromise, timeoutPromise]) as any;
       
+      const hasFailures = checks.some((result: any) => {
+        if (result.status === 'rejected') return true;
+        if (result.status === 'fulfilled' && result.value.error) {
+          // Allow certain "acceptable" errors that indicate the table exists but query failed due to RLS
+          const acceptableErrors = ['PGRST116', 'PGRST103', '42501']; // No rows, RLS violation, etc.
+          return !acceptableErrors.includes(result.value.error.code);
+        }
+        return false;
+      });
+      
+      console.log('✅ Database tables check completed:', { hasFailures });
       setDbStatus(hasFailures ? 'error' : 'ready');
+      
     } catch (error) {
-      console.warn("Database tables check exception:", error);
+      console.warn('⚠️ Database tables check exception:', error);
       setDbStatus('error');
     }
   };
