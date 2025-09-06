@@ -685,23 +685,35 @@ export default function UserRoleManager() {
                           </div>
 
                           {(() => {
-                            if (role.role_type === 'community_member' && typeof role.role_specific_data === 'object' && role.role_specific_data !== null && !Array.isArray(role.role_specific_data)) {
-                              const data = role.role_specific_data as Record<string, any>;
-                              return (
-                                <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
-                                  <div className="flex items-center gap-1 text-blue-700">
-                                    <Home className="h-3 w-3" />
-                                    <span className="text-xs font-medium">
-                                      Comunidad: {data.community_code ? (data.community_name || data.community_code) : 'No asignada'}
-                                    </span>
-                                  </div>
-                                  {data.apartment_number && (
-                                    <div className="text-xs text-blue-600 mt-1">
-                                      {data.apartment_number}
+                            if (role.role_type === 'community_member') {
+                              // Safe type guard for role_specific_data
+                              const hasValidData = role.role_specific_data && 
+                                                   typeof role.role_specific_data === 'object' && 
+                                                   !Array.isArray(role.role_specific_data) &&
+                                                   role.role_specific_data !== null;
+                              
+                              if (hasValidData) {
+                                const data = role.role_specific_data as Record<string, string>;
+                                const communityCode = data.community_code || '';
+                                const communityName = data.community_name || '';
+                                const apartmentNumber = data.apartment_number || '';
+                                
+                                return (
+                                  <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
+                                    <div className="flex items-center gap-1 text-blue-700">
+                                      <Home className="h-3 w-3" />
+                                      <span className="text-xs font-medium">
+                                        Comunidad: {communityCode ? (communityName || communityCode) : 'No asignada'}
+                                      </span>
                                     </div>
-                                  )}
-                                </div>
-                              );
+                                    {apartmentNumber && (
+                                      <div className="text-xs text-blue-600 mt-1">
+                                        {apartmentNumber}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              }
                             }
                             return null;
                           })()}
