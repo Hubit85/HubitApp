@@ -94,8 +94,8 @@ export default function LoginPage() {
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
           {/* Header with HuBiT Logo matching register page */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="relative w-16 h-16 transition-transform duration-200 hover:scale-105 overflow-hidden">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="relative w-24 h-24 transition-transform duration-200 hover:scale-105 overflow-hidden">
                 <Image
                   src="/HuBiT logo.png"
                   alt="HuBiT Logo"
@@ -105,12 +105,9 @@ export default function LoginPage() {
                 />
               </div>
               <div className="flex flex-col items-start">
-                <h1 className="text-4xl md:text-5xl font-bold text-black tracking-wide">
+                <h1 className="text-5xl md:text-6xl font-bold text-black tracking-wide">
                   HuBiT
                 </h1>
-                <p className="text-lg text-stone-600 font-medium">
-                  Hub de servicios comunitarios
-                </p>
               </div>
             </div>
             <p className="text-xl text-stone-600 font-light">

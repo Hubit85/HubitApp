@@ -825,8 +825,8 @@ function RegisterPageContent() {
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
           {/* Header con Logo */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="relative w-16 h-16 transition-transform duration-200 hover:scale-105 overflow-hidden">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="relative w-24 h-24 transition-transform duration-200 hover:scale-105 overflow-hidden">
                 <Image
                   src="/HuBiT logo.png"
                   alt="HuBiT Logo"
@@ -836,7 +836,7 @@ function RegisterPageContent() {
                 />
               </div>
               <div className="flex flex-col items-start">
-                <h1 className="text-4xl md:text-5xl font-bold text-black tracking-wide">
+                <h1 className="text-5xl md:text-6xl font-bold text-black tracking-wide">
                   HuBiT
                 </h1>
                 <p className="text-lg text-stone-600 font-medium">
@@ -1867,7 +1867,7 @@ function RegisterPageContent() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-stone-200" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
+              <div className="relative flex justify-center text-xs uppercase {
                 <span className="bg-gray-50 px-2 text-stone-500">¿Ya tienes cuenta?</span>
               </div>
             </div>
