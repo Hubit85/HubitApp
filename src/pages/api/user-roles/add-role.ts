@@ -348,18 +348,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Step 3: Prepare role data with automatic community code generation
     let processedRoleData: Record<string, any> = {};
     
-    // CRITICAL FIX: Ensure roleSpecificData is a proper object before spreading
+    // CRITICAL FIX: Ensure roleSpecificData is a proper object before processing
     if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData) && roleSpecificData !== null) {
       try {
-        // Safely extract valid properties from roleSpecificData
-        const validEntries = Object.entries(roleSpecificData as Record<string, any>).filter(([key, value]) => 
-          typeof key === 'string' && 
-          key.length > 0 && 
-          value !== undefined && 
-          value !== null
-        );
+        // Safely process the roleSpecificData object
+        const safeRoleData = roleSpecificData as Record<string, any>;
         
-        processedRoleData = Object.fromEntries(validEntries);
+        // Filter valid entries and create new object
+        const validEntries: Array<[string, any]> = [];
+        
+        for (const [key, value] of Object.entries(safeRoleData)) {
+          if (typeof key === 'string' && key.length > 0 && value !== undefined && value !== null) {
+            validEntries.push([key, value]);
+          }
+        }
+        
+        // Create the processed data object from valid entries
+        for (const [key, value] of validEntries) {
+          processedRoleData[key] = value;
+        }
         
         console.log('✅ API: Successfully processed role-specific data with', validEntries.length, 'valid fields');
       } catch (processingError) {
