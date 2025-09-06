@@ -123,11 +123,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
       // Try to fetch profile from database with timeout
       try {        
-        const { data: profileData, error: profileError } = await supabase
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Fetch timeout')), 8000);
+        });
+
+        const profilePromise = supabase
           .from("profiles")
           .select("*")
           .eq("id", userObject.id)
           .maybeSingle();
+
+        const { data: profileData, error: profileError } = await Promise.race([profilePromise, timeoutPromise]);
 
         if (profileError && profileError.code !== 'PGRST116') {
           console.warn("⚠️ Profile fetch error:", profileError.message);
