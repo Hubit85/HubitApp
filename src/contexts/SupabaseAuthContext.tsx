@@ -460,7 +460,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log("🚪 Starting sign out process...");
       
-      // Clear all auth state first to prevent redirect loops
+      // Clear all auth state IMMEDIATELY to prevent any redirect loops
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -468,22 +468,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setActiveRole(null);
       setLoading(true);
       
-      // Call Supabase sign out
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("❌ Supabase sign out error:", error);
-        // Still continue with local cleanup even if there's an error
-      } else {
-        console.log("✅ Supabase sign out successful");
-      }
-      
       // Clear any localStorage items that might retain user data
       if (typeof window !== 'undefined') {
         try {
-          // Clear Supabase session from localStorage
-          localStorage.removeItem('sb-' + (process.env.NEXT_PUBLIC_SUPABASE_URL?.split('://')[1] || 'hubit') + '-auth-token');
-          localStorage.removeItem('supabase.auth.token');
+          // Clear all possible Supabase localStorage keys
+          const storageKeys = Object.keys(localStorage);
+          storageKeys.forEach(key => {
+            if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+              localStorage.removeItem(key);
+            }
+          });
           
           // Clear other user-related data
           localStorage.removeItem('selectedProperty');
@@ -496,10 +490,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
       }
       
+      // Call Supabase sign out (but don't wait for it to complete to prevent hanging)
+      supabase.auth.signOut().catch(error => {
+        console.warn("⚠️ Supabase sign out warning:", error);
+        // Don't throw here - we want the local cleanup to succeed regardless
+      });
+      
+      console.log("✅ Sign out process completed");
+      
     } catch (error) {
       console.error("❌ Sign out exception:", error);
       
-      // Even if there's an error, clear the local state
+      // Even if there's an error, ensure local state is cleared
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -507,7 +509,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setActiveRole(null);
     } finally {
       setLoading(false);
-      console.log("✅ Sign out process completed");
     }
   };
 
