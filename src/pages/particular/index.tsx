@@ -755,12 +755,6 @@ export default function ParticularDashboard() {
                   </Card>
                 </div>
               )}
-
-              {activeTab === "roles" && (
-                <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
-                  <UserRoleManager />
-                </div>
-              )}
             </div>
           </ZoomableSection>
         </div>

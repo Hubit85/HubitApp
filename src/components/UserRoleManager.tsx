@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle, Plus, UserCheck, Mail, Clock, Trash2, User, Users, Building, Settings, AlertTriangle, Loader2 } from "lucide-react";
+import { CheckCircle, Plus, UserCheck, Mail, Clock, Trash2, User, Users, Building, Settings, AlertTriangle, Loader2, Home } from "lucide-react";
 
 export default function UserRoleManager() {
   const { user, profile } = useSupabaseAuth();
@@ -683,6 +683,25 @@ export default function UserRoleManager() {
                               Creado: {new Date(role.created_at).toLocaleDateString()}
                             </span>
                           </div>
+
+                          {/* Añadir información específica para miembro de comunidad */}
+                          {role.role_type === 'community_member' && role.role_specific_data && (
+                            <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
+                              <div className="flex items-center gap-1 text-blue-700">
+                                <Home className="h-3 w-3" />
+                                <span className="text-xs font-medium">
+                                  Comunidad: {role.role_specific_data.community_code ? 
+                                    (role.role_specific_data.community_name || role.role_specific_data.community_code) : 
+                                    'No asignada'}
+                                </span>
+                              </div>
+                              {role.role_specific_data.apartment_number && (
+                                <div className="text-xs text-blue-600 mt-1">
+                                  {role.role_specific_data.apartment_number}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       
