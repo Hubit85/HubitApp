@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -28,7 +29,7 @@ interface RoleFormData {
   full_name: string;
   phone: string;
   address: string;
-  role: RoleType | "";
+  roles: RoleType[]; // Cambiado de 'role' a 'roles' para soportar múltiples
   
   // Campos específicos de empresa/administrador
   company_name?: string;
@@ -53,7 +54,7 @@ export default function RegisterPage() {
     full_name: "",
     phone: "",
     address: "",
-    role: "",
+    roles: [], // Inicializado como array vacío
     company_name: "",
     company_address: "",
     cif: "",
@@ -97,7 +98,7 @@ function RegisterPageContent() {
     full_name: "",
     phone: "",
     address: "",
-    role: "",
+    roles: [], // Inicializado como array vacío
     company_name: "",
     company_address: "",
     cif: "",
@@ -176,7 +177,7 @@ function RegisterPageContent() {
     }
   };
 
-  const handleInputChange = (field: keyof RoleFormData, value: string) => {
+  const handleInputChange = (field: keyof RoleFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Reset CIF validation when CIF changes
@@ -185,39 +186,49 @@ function RegisterPageContent() {
     }
   };
 
-  const handleRoleSelection = (role: RoleType) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      role,
-      // Reset role-specific fields when changing role
-      company_name: "",
-      company_address: "",
-      cif: "",
-      business_email: "",
-      business_phone: "",
-      professional_number: "",
-      community_code: ""
-    }));
-    setCifValid(null);
+  // Nueva función para manejar la selección múltiple de roles
+  const handleRoleToggle = (role: RoleType) => {
+    setFormData(prev => {
+      const newRoles = prev.roles.includes(role)
+        ? prev.roles.filter(r => r !== role)
+        : [...prev.roles, role];
+      
+      return {
+        ...prev,
+        roles: newRoles
+      };
+    });
+  };
+
+  // Nueva función para confirmar la selección de roles
+  const handleConfirmRoles = () => {
+    if (formData.roles.length === 0) {
+      setError("Debes seleccionar al menos un rol para continuar");
+      return;
+    }
+    
+    setError("");
     setCurrentStep(2);
   };
 
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        return !!formData.role;
+        return formData.roles.length > 0;
       case 2:
         const baseValid = !!(formData.full_name && formData.address && formData.email && formData.phone);
         
-        if (formData.role === 'service_provider') {
-          return baseValid && !!(formData.company_name && formData.company_address && 
-                 formData.cif && formData.business_email && formData.business_phone) && cifValid === true;
-        }
-        
-        if (formData.role === 'property_administrator') {
-          return baseValid && !!(formData.company_name && formData.company_address && 
-                 formData.cif && formData.professional_number && formData.business_email && 
-                 formData.business_phone) && cifValid === true;
+        // Si incluye service_provider o property_administrator, validar campos empresariales
+        const hasBusinessRole = formData.roles.includes('service_provider') || formData.roles.includes('property_administrator');
+        if (hasBusinessRole) {
+          const businessFieldsValid = !!(formData.company_name && formData.company_address && 
+                 formData.cif && formData.business_email && formData.business_phone);
+          
+          const adminFieldsValid = formData.roles.includes('property_administrator') 
+            ? !!formData.professional_number 
+            : true;
+          
+          return baseValid && businessFieldsValid && adminFieldsValid && cifValid === true;
         }
         
         return baseValid;
@@ -231,11 +242,14 @@ function RegisterPageContent() {
   };
 
   const handleNext = async () => {
-    if (currentStep === 2 && (formData.role === 'service_provider' || formData.role === 'property_administrator') && formData.cif && cifValid === null) {
-      const isValid = await verifyCIFAgainstRegistry(formData.cif);
-      if (!isValid) {
-        setError("El CIF proporcionado no es válido o no está registrado en el registro civil.");
-        return;
+    if (currentStep === 2) {
+      const hasBusinessRole = formData.roles.includes('service_provider') || formData.roles.includes('property_administrator');
+      if (hasBusinessRole && formData.cif && cifValid === null) {
+        const isValid = await verifyCIFAgainstRegistry(formData.cif);
+        if (!isValid) {
+          setError("El CIF proporcionado no es válido o no está registrado en el registro civil.");
+          return;
+        }
       }
     }
     
@@ -262,61 +276,44 @@ function RegisterPageContent() {
     setSuccessMessage("");
 
     try {
+      // Para registro múltiple, usamos el rol principal (el primero seleccionado)
+      const primaryRole = formData.roles[0];
+      
       // Generate community code for community members if it's the first registration
       let communityCode = formData.community_code;
-      if (formData.role === 'community_member' && !communityCode) {
+      if (formData.roles.includes('community_member') && !communityCode) {
         communityCode = generateCommunityCode(formData.address);
       }
 
-      // Prepare role-specific data
+      // Prepare role-specific data based on primary role
       let roleSpecificData = {};
       
-      switch (formData.role) {
-        case 'particular':
-          roleSpecificData = {
-            full_name: formData.full_name,
-            address: formData.address,
-            phone: formData.phone
-          };
-          break;
-        
-        case 'community_member':
-          roleSpecificData = {
-            full_name: formData.full_name,
-            address: formData.address,
-            phone: formData.phone,
-            community_code: communityCode
-          };
-          break;
-        
-        case 'service_provider':
-          roleSpecificData = {
-            company_name: formData.company_name,
-            company_address: formData.company_address,
-            cif: formData.cif,
-            business_email: formData.business_email,
-            business_phone: formData.business_phone
-          };
-          break;
-        
-        case 'property_administrator':
-          roleSpecificData = {
-            company_name: formData.company_name,
-            company_address: formData.company_address,
-            cif: formData.cif,
-            professional_number: formData.professional_number,
-            business_email: formData.business_email,
-            business_phone: formData.business_phone
-          };
-          break;
+      if (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator')) {
+        roleSpecificData = {
+          company_name: formData.company_name,
+          company_address: formData.company_address,
+          cif: formData.cif,
+          business_email: formData.business_email,
+          business_phone: formData.business_phone,
+          professional_number: formData.professional_number,
+          selected_roles: formData.roles // Guardar todos los roles seleccionados
+        };
+      } else {
+        roleSpecificData = {
+          full_name: formData.full_name,
+          address: formData.address,
+          phone: formData.phone,
+          community_code: communityCode,
+          selected_roles: formData.roles // Guardar todos los roles seleccionados
+        };
       }
 
       const result = await signUp(formData.email, formData.password, {
-        full_name: formData.role === 'service_provider' || formData.role === 'property_administrator' 
+        full_name: (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
           ? formData.company_name 
           : formData.full_name,
-        user_type: formData.role as "particular" | "community_member" | "service_provider" | "property_administrator",
-        phone: formData.role === 'service_provider' || formData.role === 'property_administrator' 
+        user_type: primaryRole,
+        phone: (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
           ? formData.business_phone 
           : formData.phone
       });
@@ -457,15 +454,15 @@ function RegisterPageContent() {
                   </div>
                   <div>
                     <CardTitle className="text-2xl font-bold text-black">
-                      Selecciona tu Perfil
+                      Selecciona tu Rol
                     </CardTitle>
                     <CardDescription className="text-stone-600">
-                      Elige el tipo de cuenta que mejor se adapte a tus necesidades
+                      Puedes seleccionar uno o varios roles según tus necesidades
                     </CardDescription>
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   {(error || successMessage) && (
                     <Alert className={error ? "border-red-200 bg-red-50" : "border-green-200 bg-green-50"}>
                       <AlertDescription className={error ? "text-red-800" : "text-green-800"}>
@@ -478,21 +475,30 @@ function RegisterPageContent() {
                     {(['particular', 'community_member', 'service_provider', 'property_administrator'] as RoleType[]).map((role) => {
                       const roleInfo = getRoleInfo(role);
                       const RoleIcon = roleInfo.icon;
+                      const isSelected = formData.roles.includes(role);
+                      
                       return (
                         <Card 
                           key={role}
                           className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-2 ${
-                            formData.role === role 
-                              ? 'border-stone-800 bg-stone-50' 
+                            isSelected
+                              ? 'border-stone-800 bg-stone-50 shadow-lg ring-2 ring-stone-200' 
                               : 'border-stone-200 hover:border-stone-400'
                           }`}
-                          onClick={() => handleRoleSelection(role)}
+                          onClick={() => handleRoleToggle(role)}
                         >
-                          <CardContent className="p-6 text-center">
-                            <div className={`mx-auto w-12 h-12 rounded-xl mb-4 flex items-center justify-center bg-gradient-to-r ${roleInfo.color}`}>
+                          <CardContent className="p-6 text-center relative">
+                            {isSelected && (
+                              <div className="absolute top-3 right-3">
+                                <CheckCircle className="h-5 w-5 text-stone-800" />
+                              </div>
+                            )}
+                            <div className={`mx-auto w-12 h-12 rounded-xl mb-4 flex items-center justify-center bg-gradient-to-r ${roleInfo.color} ${
+                              isSelected ? 'scale-110' : ''
+                            } transition-transform duration-200`}>
                               <RoleIcon className="h-6 w-6 text-white" />
                             </div>
-                            <h3 className="font-semibold text-lg text-black mb-2">
+                            <h3 className={`font-semibold text-lg mb-2 ${isSelected ? 'text-stone-800' : 'text-black'}`}>
                               {roleInfo.label}
                             </h3>
                             <p className="text-sm text-stone-600">
@@ -503,26 +509,57 @@ function RegisterPageContent() {
                       );
                     })}
                   </div>
+
+                  {/* Mostrar roles seleccionados */}
+                  {formData.roles.length > 0 && (
+                    <div className="p-4 bg-stone-50 rounded-lg border border-stone-200">
+                      <h3 className="font-medium text-stone-900 mb-3">Roles seleccionados:</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.roles.map((role) => {
+                          const roleInfo = getRoleInfo(role);
+                          return (
+                            <Badge 
+                              key={role} 
+                              variant="default"
+                              className="bg-stone-800 hover:bg-stone-900 text-white px-3 py-1"
+                            >
+                              {roleInfo.label}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Botón Confirmar */}
+                  <div className="pt-4">
+                    <Button
+                      onClick={handleConfirmRoles}
+                      disabled={formData.roles.length === 0}
+                      className="w-full bg-stone-800 hover:bg-stone-900 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none h-12"
+                    >
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Confirmar Selección
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
                 </CardContent>
               </>
             )}
 
             {/* Step 2: Personal/Business Information */}
-            {currentStep === 2 && formData.role && (
+            {currentStep === 2 && formData.roles.length > 0 && (
               <>
                 <CardHeader className="text-center space-y-4 pb-6">
-                  <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg bg-gradient-to-r ${getRoleInfo(formData.role).color}`}>
-                    {React.createElement(getRoleInfo(formData.role).icon, { className: "h-8 w-8 text-white" })}
+                  <div className="mx-auto w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center shadow-lg">
+                    <User className="h-8 w-8 text-white" />
                   </div>
                   <div>
                     <CardTitle className="text-2xl font-bold text-black">
-                      Información {formData.role === 'service_provider' || formData.role === 'property_administrator' ? 'Empresarial' : 'Personal'}
+                      Información {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator')) ? 'Empresarial' : 'Personal'}
                     </CardTitle>
                     <CardDescription className="text-stone-600">
-                      {formData.role === 'particular' && "Completa tu información personal"}
-                      {formData.role === 'community_member' && "Completa tu información de residencia"}
-                      {formData.role === 'service_provider' && "Completa la información de tu empresa"}
-                      {formData.role === 'property_administrator' && "Completa la información de tu administración"}
+                      Completa tu información para los roles seleccionados
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -540,14 +577,12 @@ function RegisterPageContent() {
                     {/* Common Fields */}
                     <div className="space-y-2">
                       <Label htmlFor="full_name" className="text-sm font-medium text-stone-700">
-                        {formData.role === 'service_provider' 
+                        {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
                           ? "Nombre de la empresa" 
-                          : formData.role === 'property_administrator' 
-                          ? "Nombre de la administración"
                           : "Nombre completo"} *
                       </Label>
                       <div className="relative">
-                        {formData.role === 'service_provider' || formData.role === 'property_administrator' ? (
+                        {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator')) ? (
                           <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
                         ) : (
                           <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
@@ -558,10 +593,8 @@ function RegisterPageContent() {
                           value={formData.full_name}
                           onChange={(e) => handleInputChange("full_name", e.target.value)}
                           placeholder={
-                            formData.role === 'service_provider' 
+                            (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
                               ? "Servicios Técnicos Madrid S.L." 
-                              : formData.role === 'property_administrator'
-                              ? "Administración García & Asociados"
                               : "Juan Pérez García"
                           }
                           className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
@@ -572,7 +605,7 @@ function RegisterPageContent() {
 
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-sm font-medium text-stone-700">
-                        {formData.role === 'service_provider' || formData.role === 'property_administrator' 
+                        {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
                           ? "Correo electrónico del negocio" 
                           : "Correo electrónico"} *
                       </Label>
@@ -584,7 +617,7 @@ function RegisterPageContent() {
                           value={formData.email}
                           onChange={(e) => handleInputChange("email", e.target.value)}
                           placeholder={
-                            formData.role === 'service_provider' || formData.role === 'property_administrator'
+                            (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
                               ? "info@empresa.com"
                               : "tu@email.com"
                           }
@@ -614,7 +647,7 @@ function RegisterPageContent() {
 
                     <div className="space-y-2">
                       <Label htmlFor="address" className="text-sm font-medium text-stone-700">
-                        {formData.role === 'service_provider' || formData.role === 'property_administrator' 
+                        {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
                           ? "Domicilio de la empresa" 
                           : "Domicilio"} *
                       </Label>
@@ -632,8 +665,8 @@ function RegisterPageContent() {
                       </div>
                     </div>
 
-                    {/* Role-specific fields */}
-                    {(formData.role === 'service_provider' || formData.role === 'property_administrator') && (
+                    {/* Role-specific fields for business roles */}
+                    {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator')) && (
                       <>
                         <div className="space-y-2">
                           <Label htmlFor="cif" className="text-sm font-medium text-stone-700">
@@ -696,7 +729,7 @@ function RegisterPageContent() {
                           )}
                         </div>
 
-                        {formData.role === 'property_administrator' && (
+                        {formData.roles.includes('property_administrator') && (
                           <div className="space-y-2">
                             <Label htmlFor="professional_number" className="text-sm font-medium text-stone-700">
                               Número de colegiado *
@@ -718,7 +751,7 @@ function RegisterPageContent() {
                       </>
                     )}
 
-                    {formData.role === 'community_member' && (
+                    {formData.roles.includes('community_member') && (
                       <div className="space-y-2 md:col-span-2">
                         <Label className="text-sm font-medium text-stone-700">
                           Código de comunidad
@@ -936,3 +969,4 @@ function RegisterPageContent() {
     </>
   );
 }
+
