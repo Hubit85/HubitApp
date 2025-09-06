@@ -16,7 +16,8 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Sparkles, UserCircle,
   Home, Users, Wrench, Building, MapPin, FileText, AlertCircle, CheckCircle, Shield,
-  ArrowLeft, Clock, Star
+  ArrowLeft, Clock, Star,
+  DollarSign, AlertTriangle, Zap, Trees, Paintbrush, Thermometer, Hammer, Key
 } from "lucide-react";
 
 type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
@@ -180,6 +181,22 @@ function RegisterPageContent() {
       router.push("/dashboard");
     }
   }, [user, loading, router]);
+
+  const DynamicServiceIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
+    const iconProps = { className: className || "h-6 w-6 text-white" };
+    switch (iconName) {
+      case "Wrench": return <Wrench {...iconProps} />;
+      case "Zap": return <Zap {...iconProps} />;
+      case "Sparkles": return <Sparkles {...iconProps} />;
+      case "Trees": return <Trees {...iconProps} />;
+      case "Paintbrush": return <Paintbrush {...iconProps} />;
+      case "Thermometer": return <Thermometer {...iconProps} />;
+      case "Hammer": return <Hammer {...iconProps} />;
+      case "Key": return <Key {...iconProps} />;
+      case "Home": return <Home {...iconProps} />;
+      default: return <Wrench {...iconProps} />;
+    }
+  };
 
   // Password validation
   useEffect(() => {
@@ -1364,7 +1381,7 @@ function RegisterPageContent() {
                                       <div className={`mx-auto w-12 h-12 rounded-xl mb-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-600 ${
                                         isSelected ? 'scale-110' : ''
                                       } transition-transform duration-200`}>
-                                        <Wrench className="h-6 w-6 text-white" />
+                                        <DynamicServiceIcon iconName={service.icon} />
                                       </div>
                                       
                                       <h4 className={`font-bold text-lg mb-2 ${isSelected ? 'text-stone-800' : 'text-stone-900'}`}>
@@ -1412,7 +1429,7 @@ function RegisterPageContent() {
                                       <div key={serviceId} className="flex items-center justify-between p-3 bg-white rounded-lg border">
                                         <div className="flex items-center gap-3">
                                           <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <Wrench className="h-4 w-4 text-blue-600" />
+                                            <DynamicServiceIcon iconName={service.icon} className="h-4 w-4 text-blue-600" />
                                           </div>
                                           <span className="font-medium text-stone-900">{service.name}</span>
                                         </div>
