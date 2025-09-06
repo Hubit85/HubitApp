@@ -383,6 +383,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // En la función signUp, mejorar la creación de roles múltiples
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
     try {
       console.log("📝 Starting sign up process...");
@@ -428,7 +429,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           await supabase.from("profiles").insert(profileData);
           
-          // Create initial role
+          // IMPORTANTE: Solo crear el rol principal aquí, no todos los roles
+          // Los roles adicionales se manejarán en el proceso de registro
           await supabase.from('user_roles').insert({
             user_id: data.user.id,
             role_type: userData.user_type,
@@ -438,12 +440,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             role_specific_data: {}
           });
           
-          console.log("✅ Profile and role created");
+          console.log("✅ Profile and primary role created");
         } catch (profileError) {
           console.warn("⚠️ Profile creation failed but user was created:", profileError);
         }
 
-        return { success: true };
+        return { success: true, userId: data.user.id };
       }
 
       return { 
