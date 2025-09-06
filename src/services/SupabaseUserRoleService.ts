@@ -323,6 +323,7 @@ export class SupabaseUserRoleService {
   static async verifyRole(verificationToken: string): Promise<{ success: boolean; message: string; role?: UserRole }> {
     return ConnectionManager.executeWithLimit(async () => {
       try {
+        // Use timeout approach with proper typing
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Operation timeout')), 12000);
         });
@@ -335,7 +336,8 @@ export class SupabaseUserRoleService {
             .eq('verification_token', verificationToken)
             .single();
 
-          const { data: roleData, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]);
+          const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
+          const { data: roleData, error: fetchError } = result;
 
           if (fetchError || !roleData) {
             return {
@@ -366,7 +368,8 @@ export class SupabaseUserRoleService {
             .select()
             .single();
 
-          const { data: updatedRole, error: updateError } = await Promise.race([updatePromise, timeoutPromise]);
+          const updateResult = await Promise.race([updatePromise, timeoutPromise]) as any;
+          const { data: updatedRole, error: updateError } = updateResult;
 
           if (updateError) {
             throw new Error(updateError.message);
