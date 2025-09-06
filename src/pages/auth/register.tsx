@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
