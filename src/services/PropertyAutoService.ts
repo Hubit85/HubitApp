@@ -33,7 +33,7 @@ export class PropertyAutoService {
       }
 
       // Determinar el tipo de propiedad basado en el rol del usuario
-      let propertyType: Property["type"] = "apartment"; // por defecto
+      let propertyType = "apartment"; // por defecto
       let propertyName = "";
       
       if (userData.user_type === "community_member") {
@@ -47,21 +47,18 @@ export class PropertyAutoService {
         propertyName = `Propiedad en ${userData.city}`;
       }
 
-      // Crear los datos de la propiedad
+      // Crear los datos de la propiedad usando el schema correcto
       const propertyData = {
         user_id: userId,
         name: propertyName,
         address: userData.address,
         city: userData.city,
         postal_code: userData.postal_code || "",
-        province: userData.province || "",
-        country: userData.country || "España",
-        type: propertyType,
-        status: "owned" as const,
+        property_type: propertyType, // Campo correcto del schema
         is_currently_selected: true, // Marcar como seleccionada por defecto
         
         // Información específica de comunidad si aplica
-        ...(userData.user_type === "community_member" && {
+        ...(userData.user_type === "community_member" && userData.community_name && {
           community_info: {
             community_name: userData.community_name || "",
             portal_number: userData.portal_number || "",
@@ -71,8 +68,7 @@ export class PropertyAutoService {
           }
         }),
         
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        created_at: new Date().toISOString()
       };
 
       // Insertar la propiedad en la base de datos
@@ -90,7 +86,7 @@ export class PropertyAutoService {
       console.log("✅ PropertyAutoService: Default property created successfully:", {
         propertyId: newProperty.id.substring(0, 8) + '...',
         propertyName: propertyData.name,
-        propertyType: propertyData.type,
+        propertyType: propertyData.property_type,
         city: propertyData.city
       });
 
@@ -165,11 +161,11 @@ export class PropertyAutoService {
               if (!property.community_info && role.role_type === 'community_member') {
                 if (roleData.community_name || roleData.portal_number || roleData.apartment_number) {
                   updateFields.community_info = {
-                    community_name: roleData.community_name || property.community_info?.community_name || '',
-                    portal_number: roleData.portal_number || property.community_info?.portal_number || '',
-                    apartment_number: roleData.apartment_number || property.community_info?.apartment_number || '',
-                    management_company: property.community_info?.management_company || null,
-                    total_units: property.community_info?.total_units || null
+                    community_name: roleData.community_name || '',
+                    portal_number: roleData.portal_number || '',
+                    apartment_number: roleData.apartment_number || '',
+                    management_company: null,
+                    total_units: null
                   };
                   needsUpdate = true;
                 }
@@ -184,8 +180,6 @@ export class PropertyAutoService {
 
             // Aplicar actualizaciones si las hay
             if (needsUpdate) {
-              updateFields.updated_at = new Date().toISOString();
-
               const { error: updateError } = await supabase
                 .from('properties')
                 .update(updateFields)
@@ -287,12 +281,12 @@ export class PropertyAutoService {
       const properties = propertiesResult.data || [];
       const roles = rolesResult.data || [];
 
-      // Enriquecer propiedades con información de roles
+      // Enriquecer propiedades con información de roles - pero sin acceder a propiedades que no existen
       const enrichedProperties = properties.map(property => {
         const enrichedProperty = { ...property };
         
         // Agregar información de roles relacionados
-        enrichedProperty.relatedRoles = [];
+        const relatedRoles: any[] = [];
         
         roles.forEach(role => {
           const roleData = role.role_specific_data as any;
@@ -303,13 +297,18 @@ export class PropertyAutoService {
             property.address?.toLowerCase().includes(roleAddress.toLowerCase()) ||
             roleAddress.toLowerCase().includes(property.address?.toLowerCase() || '')
           )) {
-            enrichedProperty.relatedRoles.push({
+            relatedRoles.push({
               role_type: role.role_type,
               role_label: this.getRoleDisplayName(role.role_type),
               role_data: roleData
             });
           }
         });
+
+        // Solo agregar relatedRoles si hay relaciones
+        if (relatedRoles.length > 0) {
+          (enrichedProperty as any).relatedRoles = relatedRoles;
+        }
 
         return enrichedProperty;
       });

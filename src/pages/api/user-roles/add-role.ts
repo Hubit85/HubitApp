@@ -346,7 +346,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Step 3: Prepare role data with automatic community code generation
-    let processedRoleData = { ...roleSpecificData };
+    let processedRoleData: Record<string, any> = {};
+    
+    if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData)) {
+      processedRoleData = { ...roleSpecificData };
+    } else {
+      processedRoleData = {};
+    }
     
     if (roleType === 'community_member') {
       // Generate community code if not provided or empty

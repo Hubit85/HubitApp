@@ -869,7 +869,7 @@ export interface Database {
           address: string | null
           avatar_url: string | null
           city: string | null
-          country: string
+          country: string | null
           created_at: string
           email: string
           email_notifications: boolean
@@ -880,21 +880,18 @@ export interface Database {
           last_login: string | null
           phone: string | null
           postal_code: string | null
+          province: string | null
           sms_notifications: boolean
           timezone: string
           updated_at: string
-          user_type:
-            | "particular"
-            | "community_member"
-            | "service_provider"
-            | "property_administrator"
+          user_type: Database["public"]["Enums"]["user_type_enum"]
           verification_code: string | null
         }
         Insert: {
           address?: string | null
           avatar_url?: string | null
           city?: string | null
-          country?: string
+          country?: string | null
           created_at?: string
           email: string
           email_notifications?: boolean
@@ -905,21 +902,18 @@ export interface Database {
           last_login?: string | null
           phone?: string | null
           postal_code?: string | null
+          province?: string | null
           sms_notifications?: boolean
           timezone?: string
           updated_at?: string
-          user_type:
-            | "particular"
-            | "community_member"
-            | "service_provider"
-            | "property_administrator"
+          user_type?: Database["public"]["Enums"]["user_type_enum"]
           verification_code?: string | null
         }
         Update: {
           address?: string | null
           avatar_url?: string | null
           city?: string | null
-          country?: string
+          country?: string | null
           created_at?: string
           email?: string
           email_notifications?: boolean
@@ -930,14 +924,11 @@ export interface Database {
           last_login?: string | null
           phone?: string | null
           postal_code?: string | null
+          province?: string | null
           sms_notifications?: boolean
           timezone?: string
           updated_at?: string
-          user_type?:
-            | "particular"
-            | "community_member"
-            | "service_provider"
-            | "property_administrator"
+          user_type?: Database["public"]["Enums"]["user_type_enum"]
           verification_code?: string | null
         }
         Relationships: [
@@ -958,17 +949,16 @@ export interface Database {
           description: string | null
           id: string
           images: string[] | null
+          is_currently_selected: boolean
           latitude: number | null
           longitude: number | null
           name: string
-          postal_code: string | null
-          property_status: "active" | "inactive" | "maintenance"
-          property_type: "residential" | "commercial" | "mixed"
-          total_area: number | null
-          units_count: number
-          updated_at: string
+          postal_code: string
+          property_type: string
+          size: number | null
           user_id: string
           year_built: number | null
+          community_info: Json | null
         }
         Insert: {
           address: string
@@ -978,17 +968,16 @@ export interface Database {
           description?: string | null
           id?: string
           images?: string[] | null
+          is_currently_selected?: boolean
           latitude?: number | null
           longitude?: number | null
           name: string
-          postal_code?: string | null
-          property_status?: "active" | "inactive" | "maintenance"
-          property_type: "residential" | "commercial" | "mixed"
-          total_area?: number | null
-          units_count?: number
-          updated_at?: string
+          postal_code: string
+          property_type: string
+          size?: number | null
           user_id: string
           year_built?: number | null
+          community_info?: Json | null
         }
         Update: {
           address?: string
@@ -998,23 +987,23 @@ export interface Database {
           description?: string | null
           id?: string
           images?: string[] | null
+          is_currently_selected?: boolean
           latitude?: number | null
           longitude?: number | null
           name?: string
-          postal_code?: string | null
-          property_status?: "active" | "inactive" | "maintenance"
-          property_type?: "residential" | "commercial" | "mixed"
-          total_area?: number | null
-          units_count?: number
-          updated_at?: string
+          postal_code?: string
+          property_type?: string
+          size?: number | null
           user_id?: string
           year_built?: number | null
+          community_info?: Json | null
         }
         Relationships: [
           {
             foreignKeyName: "properties_user_id_fkey"
             columns: ["user_id"]
-            referencedRelation: "users"
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           }
         ]
