@@ -263,7 +263,7 @@ export default function ParticularDashboard() {
                             <User className="h-16 w-16 text-blue-600" />
                           </div>
                           <h2 className="text-xl font-bold text-gray-800">Carlos García</h2>
-                          <p className="text-gray-500 mb-4">{t("individual")}</p>
+                          <p className="text-gray-500 mb-4">{t("particular")}</p>
                           <Button className="w-full transition-all duration-200 hover:scale-105">
                             {t("editProfile")}
                           </Button>
