@@ -345,43 +345,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Step 3: Prepare role data with the simplest possible approach
-    console.log('🔧 API: Processing role-specific data with simple object construction...');
+    // Step 3: Process role data with completely safe method
+    console.log('🔧 API: Processing role-specific data safely...');
     
-    // Use the simplest possible object creation to avoid TypeScript spread issues
-    const processedRoleData = Object.create(null) as Record<string, any>;
+    // Create a completely new object with only the properties we need
+    const processedRoleData: Record<string, any> = {};
     
-    // Only copy properties if roleSpecificData is a valid object
-    if (roleSpecificData && 
-        typeof roleSpecificData === 'object' && 
-        !Array.isArray(roleSpecificData) && 
-        roleSpecificData !== null) {
-      
-      console.log('🔧 API: Valid role data object found, copying properties individually...');
-      
-      try {
-        // Get enumerable properties only
-        const keys = Object.keys(roleSpecificData);
-        console.log('🔧 API: Processing', keys.length, 'enumerable properties');
-        
-        // Copy each property individually without any spread operations
-        keys.forEach((key) => {
-          if (typeof key === 'string' && key.length > 0) {
-            const value = (roleSpecificData as Record<string, any>)[key];
-            if (value !== undefined && value !== null) {
-              processedRoleData[key] = value;
-            }
+    // Safely copy all valid properties from roleSpecificData
+    if (roleSpecificData && typeof roleSpecificData === 'object' && roleSpecificData !== null) {
+      // Use a for-in loop to avoid any spread operations
+      for (const key in roleSpecificData) {
+        if (Object.prototype.hasOwnProperty.call(roleSpecificData, key)) {
+          const value = roleSpecificData[key];
+          if (value !== undefined && value !== null) {
+            processedRoleData[key] = value;
           }
-        });
-        
-        console.log('✅ API: Processed', Object.keys(processedRoleData).length, 'valid role data properties');
-      } catch (copyError) {
-        console.warn('⚠️ API: Error copying role data properties:', copyError);
-        // processedRoleData remains empty but valid
+        }
       }
-    } else {
-      console.warn('⚠️ API: Invalid or null roleSpecificData, using empty object');
     }
+    
+    console.log('✅ API: Role data processed with', Object.keys(processedRoleData).length, 'properties');
     
     if (roleType === 'community_member') {
       // Generate community code if not provided or empty
