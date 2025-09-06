@@ -474,6 +474,73 @@ export class SupabaseUserRoleService {
     });
   }
 
+  static async removePendingRole(userId: string, roleType: UserRole['role_type']): Promise<{ success: boolean; message: string }> {
+    return ConnectionManager.executeWithLimit(async () => {
+      try {
+        console.log('🗑️ Removing pending role:', { userId, roleType });
+
+        // Use timeout approach with proper typing
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Operation timeout')), 10000);
+        });
+
+        const fetchPromise = supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('role_type', roleType)
+          .single();
+
+        const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
+        const { data: roleData, error: fetchError } = result;
+
+        if (fetchError || !roleData) {
+          return {
+            success: false,
+            message: "Rol no encontrado"
+          };
+        }
+
+        if (roleData.is_verified) {
+          return {
+            success: false,
+            message: "No puedes eliminar un rol ya verificado. Usa la opción 'Eliminar' en su lugar."
+          };
+        }
+
+        // Delete the unverified role
+        const deletePromise = supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', userId)
+          .eq('role_type', roleType)
+          .eq('is_verified', false);
+
+        const deleteResult = await Promise.race([deletePromise, timeoutPromise]) as any;
+        const { error: deleteError } = deleteResult;
+
+        if (deleteError) {
+          console.error('❌ Error deleting pending role:', deleteError);
+          throw new Error(`Error al eliminar verificación pendiente: ${deleteError.message}`);
+        }
+
+        console.log('✅ Successfully removed pending role:', roleType);
+
+        return {
+          success: true,
+          message: `Verificación pendiente de ${this.getRoleDisplayName(roleType)} eliminada correctamente`
+        };
+
+      } catch (error) {
+        console.error("❌ Error removing pending role:", error);
+        return {
+          success: false,
+          message: error instanceof Error ? error.message : "Error al eliminar la verificación pendiente"
+        };
+      }
+    });
+  }
+
   static async clearPendingVerifications(userId: string): Promise<{ success: boolean; message: string; removedCount?: number }> {
     return ConnectionManager.executeWithLimit(async () => {
       try {
@@ -507,7 +574,8 @@ export class SupabaseUserRoleService {
           .eq('user_id', userId)
           .eq('is_verified', false);
 
-        const { error } = await Promise.race([deletePromise, timeoutPromise]);
+        const deleteResult = await Promise.race([deletePromise, timeoutPromise]) as any;
+        const { error } = deleteResult;
 
         if (error) {
           console.error('❌ Error deleting pending roles:', error);
@@ -527,72 +595,6 @@ export class SupabaseUserRoleService {
         return {
           success: false,
           message: error instanceof Error ? error.message : "Error al eliminar las verificaciones pendientes"
-        };
-      }
-    });
-  }
-
-  static async removePendingRole(userId: string, roleType: UserRole['role_type']): Promise<{ success: boolean; message: string }> {
-    return ConnectionManager.executeWithLimit(async () => {
-      try {
-        console.log('🗑️ Removing pending role:', { userId, roleType });
-
-        // Use timeout approach instead of abortSignal
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Operation timeout')), 8000);
-        });
-
-        // Verify that the role exists and is not verified
-        const fetchPromise = supabase
-          .from('user_roles')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('role_type', roleType)
-          .single();
-
-        const { data: roleData, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]);
-
-        if (fetchError || !roleData) {
-          return {
-            success: false,
-            message: "Rol no encontrado"
-          };
-        }
-
-        if (roleData.is_verified) {
-          return {
-            success: false,
-            message: "No puedes eliminar un rol ya verificado. Usa la opción 'Eliminar' en su lugar."
-          };
-        }
-
-        // Delete the unverified role
-        const deletePromise = supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', userId)
-          .eq('role_type', roleType)
-          .eq('is_verified', false);
-
-        const { error: deleteError } = await Promise.race([deletePromise, timeoutPromise]);
-
-        if (deleteError) {
-          console.error('❌ Error deleting pending role:', deleteError);
-          throw new Error(`Error al eliminar verificación pendiente: ${deleteError.message}`);
-        }
-
-        console.log('✅ Successfully removed pending role:', roleType);
-
-        return {
-          success: true,
-          message: `Verificación pendiente de ${this.getRoleDisplayName(roleType)} eliminada correctamente`
-        };
-
-      } catch (error) {
-        console.error("❌ Error removing pending role:", error);
-        return {
-          success: false,
-          message: error instanceof Error ? error.message : "Error al eliminar la verificación pendiente"
         };
       }
     });
@@ -643,7 +645,8 @@ export class SupabaseUserRoleService {
           .select()
           .single();
 
-        const { data, error } = await Promise.race([insertPromise, timeoutPromise]);
+        const result = await Promise.race([insertPromise, timeoutPromise]) as any;
+        const { data, error } = result;
 
         if (error) throw error;
 
@@ -676,7 +679,8 @@ export class SupabaseUserRoleService {
           .select()
           .single();
 
-        const { data, error } = await Promise.race([updatePromise, timeoutPromise]);
+        const result = await Promise.race([updatePromise, timeoutPromise]) as any;
+        const { data, error } = result;
 
         if (error) throw error;
 
