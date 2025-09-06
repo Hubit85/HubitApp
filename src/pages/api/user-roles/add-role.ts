@@ -294,7 +294,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 `Tu rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} ha sido agregado y verificado automáticamente.` :
                 `Tu rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} ha sido agregado. Revisa tu email para verificarlo.`,
               type: 'info' as const,
-              category: 'role_management' as const,
+              category: 'system' as const,
               read: false,
               created_at: new Date().toISOString()
             });
