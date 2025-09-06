@@ -686,7 +686,7 @@ export default function UserRoleManager() {
 
                           {(() => {
                             if (role.role_type === 'community_member' && typeof role.role_specific_data === 'object' && role.role_specific_data !== null && !Array.isArray(role.role_specific_data)) {
-                              const data = role.role_specific_data as { community_code?: string; community_name?: string; apartment_number?: string };
+                              const data = role.role_specific_data as Record<string, any>;
                               return (
                                 <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
                                   <div className="flex items-center gap-1 text-blue-700">
