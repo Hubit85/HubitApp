@@ -48,34 +48,87 @@ export class SupabaseUserRoleService {
   static async getUserRoles(userId: string): Promise<UserRole[]> {
     return ConnectionManager.executeWithLimit(async () => {
       try {
-        console.log(`🔍 getUserRoles for user:`, userId);
+        console.log(`🔍 getUserRoles STARTING for user:`, userId);
+        console.log(`🔍 Full userId:`, userId);
+        
+        // Add connection test first
+        const { data: connectionTest, error: connectionError } = await supabase
+          .from('profiles')
+          .select('id')
+          .limit(1);
+        
+        if (connectionError) {
+          console.warn('❌ Connection test failed:', connectionError);
+          throw new Error(`Connection failed: ${connectionError.message}`);
+        }
+        
+        console.log('✅ Connection test passed');
         
         const { data, error } = await supabase
           .from('user_roles')
-          .select('*')
+          .select(`
+            id,
+            user_id,
+            role_type,
+            is_verified,
+            is_active,
+            role_specific_data,
+            verification_token,
+            verification_expires_at,
+            verification_confirmed_at,
+            created_at,
+            updated_at
+          `)
           .eq('user_id', userId)
           .order('created_at', { ascending: true });
 
+        console.log(`🔍 getUserRoles QUERY RESULT:`, {
+          userId: userId.substring(0, 8) + '...',
+          dataLength: data?.length || 0,
+          error: error?.message || 'none',
+          errorCode: error?.code || 'none',
+          data: data ? data.map(r => ({
+            id: r.id.substring(0, 8) + '...',
+            role_type: r.role_type,
+            is_verified: r.is_verified,
+            is_active: r.is_active,
+            created_at: r.created_at
+          })) : null
+        });
+
         if (error) {
-          console.warn(`getUserRoles failed:`, error.message);
+          console.warn(`❌ getUserRoles SUPABASE ERROR:`, {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+          });
           
           // Return empty array for certain non-critical errors
           if (error.code === 'PGRST116' || error.message.includes('no rows')) {
-            console.log('✅ No roles found (empty result)');
+            console.log('✅ No roles found (empty result) - this is normal for new users');
             return [];
           }
           
-          throw new Error(`Error fetching user roles: ${error.message}`);
+          throw new Error(`Error fetching user roles: ${error.message} (Code: ${error.code})`);
         }
 
-        console.log(`✅ getUserRoles successful, found ${data?.length || 0} roles`);
-        return (data || []) as UserRole[];
+        const roles = (data || []) as UserRole[];
+        console.log(`✅ getUserRoles SUCCESSFUL, found ${roles.length} roles:`, 
+          roles.map(r => `${r.role_type}(${r.is_verified ? 'verified' : 'pending'}${r.is_active ? ', active' : ''})`).join(', ')
+        );
+        
+        return roles;
         
       } catch (networkError) {
-        console.warn(`getUserRoles network error:`, networkError);
+        console.error(`❌ getUserRoles NETWORK/EXCEPTION ERROR:`, {
+          error: networkError,
+          message: networkError instanceof Error ? networkError.message : String(networkError),
+          userId: userId.substring(0, 8) + '...'
+        });
         
         // For network errors, return empty array to prevent app breaking
-        console.error("getUserRoles failed completely, returning empty array");
+        console.error("getUserRoles failed completely, returning empty array to prevent UI crash");
         return [];
       }
     });
