@@ -28,9 +28,22 @@ export default function UserRoleManager() {
       setError("");
       setSuccessMessage("");
       
-      // Mostrar mensaje informativo sobre sincronización automática
-      console.log('🎭 UserRoleManager: Loading roles for user', user.id);
-      console.log('👤 Profile user_type:', profile?.user_type);
+      // Debugging adicional para entender el problema
+      console.log('🎭 UserRoleManager: Loading roles for user', {
+        userId: user.id,
+        userEmail: user.email,
+        profileUserType: profile?.user_type,
+        profileEmail: profile?.email
+      });
+      
+      // Verificar si el problema es con el user ID que se está pasando
+      if (user.email === 'ddayanacastro10@gmail.com') {
+        console.log('🔍 DEBUGGING TARGET USER: ddayanacastro10@gmail.com', {
+          actualUserId: user.id,
+          expectedUserId: 'f9192183-4d0f-43f4-98e0-37b1ae77cadc', // From our database query
+          userIdMatches: user.id === 'f9192183-4d0f-43f4-98e0-37b1ae77cadc'
+        });
+      }
       
       loadUserRoles();
     }
@@ -43,7 +56,36 @@ export default function UserRoleManager() {
       setLoading(true);
       setError("");
       
-      console.log('🔄 Frontend: Loading user roles...');
+      console.log('🔄 Frontend UserRoleManager: Loading user roles...', {
+        userId: user.id,
+        userEmail: user.email
+      });
+      
+      // Para usuarios específicos, agregar debugging extra
+      if (user.email === 'ddayanacastro10@gmail.com') {
+        console.log('🎯 DIRECT DATABASE CHECK for ddayanacastro10@gmail.com:');
+        
+        // Hacer una consulta directa para ver qué está pasando
+        try {
+          const { data: directCheck, error: directError } = await supabase
+            .from('user_roles')
+            .select('*')
+            .eq('user_id', user.id);
+            
+          console.log('📊 DIRECT DATABASE RESULT:', {
+            userId: user.id,
+            rolesFound: directCheck?.length || 0,
+            roles: directCheck,
+            error: directError?.message || 'none'
+          });
+          
+          if (directError) {
+            console.error('❌ DIRECT DATABASE ERROR:', directError);
+          }
+        } catch (directQueryError) {
+          console.error('❌ DIRECT QUERY EXCEPTION:', directQueryError);
+        }
+      }
       
       // Esperar un poco para que la sincronización automática del contexto termine
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -51,10 +93,22 @@ export default function UserRoleManager() {
       const roles = await SupabaseUserRoleService.getUserRoles(user.id);
       setUserRoles(roles);
       
+      console.log('📋 UserRoleManager: Roles loaded result:', {
+        userId: user.id.substring(0, 8) + '...',
+        userEmail: user.email,
+        rolesCount: roles.length,
+        roles: roles.map(r => ({
+          role_type: r.role_type,
+          is_verified: r.is_verified,
+          is_active: r.is_active,
+          id: r.id.substring(0, 8) + '...'
+        }))
+      });
+      
       const activeRole = await SupabaseUserRoleService.getActiveRole(user.id);
       setCurrentRole(activeRole);
 
-      console.log('✅ Frontend: Roles loaded successfully:', roles.length);
+      console.log('✅ Frontend UserRoleManager: Roles loaded successfully:', roles.length);
       
       // Mensaje de éxito cuando los roles se han cargado correctamente
       if (roles.length > 0) {
@@ -71,18 +125,31 @@ export default function UserRoleManager() {
         setTimeout(() => {
           setSuccessMessage("");
         }, 5000);
-      } else if (profile?.user_type) {
-        // Solo mostrar mensaje de sincronización si realmente no hay roles
-        setSuccessMessage(`🔄 Sincronizando tu rol "${profile.user_type}"... Un momento.`);
+      } else {
+        // Problema detectado: No se encontraron roles
+        console.warn('⚠️ NO ROLES FOUND - This is the problem!', {
+          userId: user.id,
+          userEmail: user.email,
+          profileUserType: profile?.user_type
+        });
         
-        // Intentar recargar después de un momento
-        setTimeout(() => {
-          loadUserRoles();
-        }, 3000);
+        if (user.email === 'ddayanacastro10@gmail.com') {
+          setError(`🔍 DEBUG: No se encontraron roles para ${user.email} (User ID: ${user.id.substring(0, 8)}...). Los datos deben existir en la base de datos según las consultas manuales.`);
+        } else if (profile?.user_type) {
+          // Solo mostrar mensaje de sincronización si realmente no hay roles
+          setSuccessMessage(`🔄 Sincronizando tu rol "${profile.user_type}"... Un momento.`);
+          
+          // Intentar recargar después de un momento
+          setTimeout(() => {
+            loadUserRoles();
+          }, 3000);
+        } else {
+          setError("No se encontraron roles. Si acabas de registrarte, los roles pueden tardar unos minutos en aparecer.");
+        }
       }
 
     } catch (err) {
-      console.error("❌ Frontend: Error loading user roles:", err);
+      console.error("❌ Frontend UserRoleManager: Error loading user roles:", err);
       
       // Manejo más específico de errores de carga
       if (err instanceof Error) {
