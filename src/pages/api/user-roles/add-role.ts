@@ -345,26 +345,60 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Step 3: Process role data with completely type-safe method
-    console.log('🔧 API: Processing role-specific data safely...');
+    // Step 3: Process role data with completely safe and explicit approach
+    console.log('🔧 API: Processing role-specific data with explicit type safety...');
     
-    // Create processedRoleData with explicit safe copying
-    const processedRoleData: Record<string, any> = {};
+    // Create a completely safe object with explicit property validation
+    const processedRoleData: Record<string, unknown> = {};
     
-    // Completely safe processing without any potential spread operation issues
-    if (roleSpecificData && typeof roleSpecificData === 'object' && roleSpecificData !== null && !Array.isArray(roleSpecificData)) {
-      // Use for...in loop with proper type checking - the safest approach
-      for (const key in roleSpecificData) {
-        // Use bracket notation to avoid any type inference issues
-        const value = (roleSpecificData as any)[key];
-        if (value !== undefined && value !== null && value !== '') {
-          processedRoleData[key] = value;
+    // Explicitly validate and copy known properties safely
+    try {
+      // Direct property access with type guards - no looping or spreading
+      const knownStringFields = [
+        'full_name', 'phone', 'address', 'postal_code', 'city', 'province', 'country',
+        'community_code', 'community_name', 'portal_number', 'apartment_number',
+        'company_name', 'company_address', 'company_postal_code', 'company_city',
+        'company_province', 'company_country', 'cif', 'business_email', 'business_phone',
+        'professional_number'
+      ];
+      
+      const knownArrayFields = ['selected_services'];
+      const knownObjectFields = ['service_costs'];
+      
+      // Process string fields
+      knownStringFields.forEach(field => {
+        const value = (roleSpecificData as any)?.[field];
+        if (typeof value === 'string' && value.trim().length > 0) {
+          processedRoleData[field] = value.trim();
         }
-      }
+      });
+      
+      // Process array fields
+      knownArrayFields.forEach(field => {
+        const value = (roleSpecificData as any)?.[field];
+        if (Array.isArray(value) && value.length > 0) {
+          processedRoleData[field] = value;
+        }
+      });
+      
+      // Process object fields
+      knownObjectFields.forEach(field => {
+        const value = (roleSpecificData as any)?.[field];
+        if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0) {
+          processedRoleData[field] = value;
+        }
+      });
+      
+      console.log('✅ API: Role data processed with', Object.keys(processedRoleData).length, 'properties');
+      
+    } catch (processingError) {
+      console.error('❌ API: Error processing role data:', processingError);
+      return res.status(400).json({
+        success: false,
+        message: 'Error al procesar los datos específicos del rol'
+      });
     }
-    
-    console.log('✅ API: Role data processed with', Object.keys(processedRoleData).length, 'properties');
-    
+
     if (roleType === 'community_member') {
       // Generate community code if not provided or empty
       if (!processedRoleData.community_code || processedRoleData.community_code.trim() === '') {
