@@ -97,7 +97,7 @@ const generateCommunityCode = (address: string): string => {
 };
 
 // NUEVA FUNCIÓN: Sincronizar información entre roles
-const syncInformationBetweenRoles = async (userId: string, newRoleType: string, newRoleData: any): Promise<void> => {
+const syncInformationBetweenRoles = async (userId: string, newRoleType: string, newRoleData: Record<string, any>): Promise<void> => {
   try {
     console.log('🔄 API: Starting cross-role information sync for user:', userId.substring(0, 8) + '...');
     
@@ -126,7 +126,14 @@ const syncInformationBetweenRoles = async (userId: string, newRoleType: string, 
         return; // No sincronizar con el mismo rol
       }
 
-      let updatedData = { ...existingRole.role_specific_data };
+      const currentRoleData = existingRole.role_specific_data as Record<string, any> || {};
+      const updatedData: Record<string, any> = {};
+      
+      // Copy all existing data first
+      Object.keys(currentRoleData).forEach(key => {
+        updatedData[key] = currentRoleData[key];
+      });
+      
       let hasChanges = false;
 
       // SINCRONIZACIÓN PARTICULAR ↔ MIEMBRO DE COMUNIDAD
@@ -430,10 +437,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .from('user_roles')
           .insert({
             user_id: userId,
-            role_type: roleType,
+            role_type: roleType as 'particular' | 'community_member' | 'service_provider' | 'property_administrator',
             is_verified: shouldAutoVerify,
-            is_active: false, // Will be activated manually by user
-            role_specific_data: processedRoleData,
+            is_active: false,
+            role_specific_data: processedRoleData as any,
             verification_token: verificationToken,
             verification_expires_at: verificationExpires?.toISOString() || null,
             verification_confirmed_at: shouldAutoVerify ? new Date().toISOString() : null,
