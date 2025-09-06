@@ -349,14 +349,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let processedRoleData: Record<string, any> = {};
     
     // CRITICAL FIX: Ensure roleSpecificData is a proper object before spreading
-    if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData)) {
-      // Create a safe copy without any potential non-object properties
-      processedRoleData = Object.fromEntries(
-        Object.entries(roleSpecificData).filter(([key, value]) => 
-          typeof key === 'string' && value !== undefined
-        )
-      );
+    if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData) && roleSpecificData !== null) {
+      try {
+        // Safely extract valid properties from roleSpecificData
+        const validEntries = Object.entries(roleSpecificData as Record<string, any>).filter(([key, value]) => 
+          typeof key === 'string' && 
+          key.length > 0 && 
+          value !== undefined && 
+          value !== null
+        );
+        
+        processedRoleData = Object.fromEntries(validEntries);
+        
+        console.log('✅ API: Successfully processed role-specific data with', validEntries.length, 'valid fields');
+      } catch (processingError) {
+        console.warn('⚠️ API: Error processing role-specific data:', processingError);
+        processedRoleData = {};
+      }
     } else {
+      console.warn('⚠️ API: Invalid roleSpecificData format, using empty object');
       processedRoleData = {};
     }
     
