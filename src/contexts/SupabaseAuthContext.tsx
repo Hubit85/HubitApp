@@ -660,9 +660,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             }
           }
           
+          // CRITICAL FIX: Ensure user_type is defined and valid before creating role
+          const validUserType = userData.user_type;
+          if (!validUserType || !['particular', 'community_member', 'service_provider', 'property_administrator'].includes(validUserType)) {
+            console.error('❌ Invalid user_type for role creation:', validUserType);
+            return { error: "Tipo de usuario inválido para crear el rol" };
+          }
+          
           await supabase.from('user_roles').insert({
             user_id: data.user.id,
-            role_type: userData.user_type,
+            role_type: validUserType,
             is_active: true,
             is_verified: true,
             verification_confirmed_at: new Date().toISOString(),
