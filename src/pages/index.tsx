@@ -94,13 +94,38 @@ export default function HomePage() {
                 <Button 
                   size="lg" 
                   className="group relative text-lg px-10 py-6 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 text-white border-0 rounded-xl shadow-2xl shadow-blue-900/50 hover:shadow-blue-800/60 transition-all duration-500 hover:-translate-y-1 hover:scale-105 overflow-hidden"
-                  asChild
+                  onClick={async (e) => {
+                    // Prevent default link navigation momentarily
+                    e.preventDefault();
+                    
+                    // Clear any lingering session data before navigating to register
+                    console.log("🔄 Clearing any lingering session before register navigation...");
+                    
+                    if (typeof window !== 'undefined') {
+                      // Clear localStorage and sessionStorage to prevent any conflicts
+                      Object.keys(localStorage).forEach(key => {
+                        if (key.includes('supabase') || key.includes('sb-') || key.includes('auth') || key.includes('session')) {
+                          localStorage.removeItem(key);
+                        }
+                      });
+                      
+                      Object.keys(sessionStorage).forEach(key => {
+                        if (key.includes('supabase') || key.includes('sb-') || key.includes('auth') || key.includes('session')) {
+                          sessionStorage.removeItem(key);
+                        }
+                      });
+                    }
+                    
+                    // Small delay to ensure storage is cleared, then navigate
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // Now navigate to register
+                    window.location.href = '/auth/register';
+                  }}
                 >
-                  <Link href="/auth/register">
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    <Sparkles className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                    {t("register")}
-                  </Link>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  <Sparkles className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  {t("register")}
                 </Button>
                 <Button 
                   size="lg" 

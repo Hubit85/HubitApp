@@ -177,31 +177,67 @@ function RegisterPageContent() {
 
   // Redirect if user is already authenticated
   useEffect(() => {
-    // Add delay to ensure signOut cleanup is complete
     const checkAuthState = async () => {
       if (loading) return; // Still loading, wait
       
+      console.log("🔍 Register page: Checking authentication state", {
+        hasUser: !!user,
+        hasSession: !!session,
+        sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'none',
+        currentTime: new Date().toISOString()
+      });
+      
+      // If we have user and session, verify they're actually valid
       if (user && session) {
-        console.log("🔄 User detected in register page, checking session validity...", {
-          userId: user.id,
-          email: user.email,
-          hasSession: !!session,
-          sessionValid: session.expires_at ? new Date(session.expires_at * 1000) > new Date() : false
-        });
+        // Check if session is expired
+        const isExpired = session.expires_at && new Date(session.expires_at * 1000) <= new Date();
         
-        // Check if session is actually valid (not expired)
-        if (session.expires_at && new Date(session.expires_at * 1000) > new Date()) {
-          console.log("✅ Valid session found, redirecting to dashboard...");
+        if (isExpired) {
+          console.log("⚠️ Session expired, clearing state manually...");
+          
+          // Clear all auth state
+          if (typeof window !== 'undefined') {
+            localStorage.clear();
+            sessionStorage.clear();
+          }
+          
+          // Force page reload to ensure clean state
+          window.location.reload();
+          return;
+        }
+        
+        // Try to verify the session is actually valid by making a test call
+        try {
+          const { data: { user: currentUser }, error } = await supabase.auth.getUser();
+          
+          if (error || !currentUser) {
+            console.log("⚠️ Session verification failed, clearing state...");
+            if (typeof window !== 'undefined') {
+              localStorage.clear();
+              sessionStorage.clear();
+            }
+            window.location.reload();
+            return;
+          }
+          
+          // Session is valid, redirect to dashboard
+          console.log("✅ Valid session verified, redirecting to dashboard...");
           router.push("/dashboard");
-        } else {
-          console.log("⚠️ Expired session found, clearing state...");
-          // If session is expired, don't redirect
+          
+        } catch (verificationError) {
+          console.log("❌ Session verification error, clearing state...", verificationError);
+          if (typeof window !== 'undefined') {
+            localStorage.clear();
+            sessionStorage.clear();
+          }
+          window.location.reload();
+          return;
         }
       }
     };
 
-    // Add small delay to let signOut complete its cleanup
-    const timeoutId = setTimeout(checkAuthState, 500);
+    // Add delay to allow signOut cleanup to complete, then check
+    const timeoutId = setTimeout(checkAuthState, 1000); // Increased delay
     
     return () => clearTimeout(timeoutId);
   }, [user, session, loading, router]);

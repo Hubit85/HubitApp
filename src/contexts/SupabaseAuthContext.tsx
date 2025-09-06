@@ -460,7 +460,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log("🚪 Starting comprehensive sign out process...");
       
-      // Clear all auth state IMMEDIATELY to prevent any redirect loops
+      // STEP 1: Clear ALL auth state IMMEDIATELY and AGGRESSIVELY
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -468,94 +468,115 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setActiveRole(null);
       setLoading(true);
       
-      // Clear any localStorage items that might retain user data
+      // STEP 2: Force clear all browser storage IMMEDIATELY
       if (typeof window !== 'undefined') {
         try {
-          // Get all storage keys first
-          const storageKeys = Object.keys(localStorage);
-          console.log("🧹 Clearing localStorage keys:", storageKeys.length);
+          console.log("🧹 Clearing ALL browser storage comprehensively...");
           
-          storageKeys.forEach(key => {
-            if (key.includes('supabase') || key.includes('sb-') || key.includes('auth') || 
-                key.includes('session') || key.includes('user') || key.includes('token')) {
-              localStorage.removeItem(key);
-              console.log(`🗑️ Removed key: ${key}`);
-            }
+          // Clear localStorage completely
+          const localStorageKeys = Object.keys(localStorage);
+          console.log(`Found ${localStorageKeys.length} localStorage keys to clear`);
+          localStorageKeys.forEach(key => {
+            localStorage.removeItem(key);
+            console.log(`🗑️ Cleared localStorage key: ${key}`);
           });
           
-          // Clear other user-related data
-          localStorage.removeItem('selectedProperty');
-          localStorage.removeItem('user_profile');
-          localStorage.removeItem('user_preferences');
-          
-          // Also try to clear sessionStorage
-          const sessionKeys = Object.keys(sessionStorage);
-          sessionKeys.forEach(key => {
-            if (key.includes('supabase') || key.includes('sb-') || key.includes('auth') || 
-                key.includes('session') || key.includes('user') || key.includes('token')) {
-              sessionStorage.removeItem(key);
-              console.log(`🗑️ Removed session key: ${key}`);
-            }
+          // Clear sessionStorage completely
+          const sessionStorageKeys = Object.keys(sessionStorage);
+          sessionStorageKeys.forEach(key => {
+            sessionStorage.removeItem(key);
+            console.log(`🗑️ Cleared sessionStorage key: ${key}`);
           });
           
-          console.log("✅ Local/session storage cleaned comprehensively");
+          // Force clear any potential IndexedDB Supabase data
+          try {
+            const indexedDBKeys = await indexedDB.databases();
+            indexedDBKeys.forEach(db => {
+              if (db.name && db.name.includes('supabase')) {
+                indexedDB.deleteDatabase(db.name);
+                console.log(`🗑️ Deleted IndexedDB: ${db.name}`);
+              }
+            });
+          } catch (idbError) {
+            console.warn("IndexedDB clear warning:", idbError);
+          }
+          
+          console.log("✅ All browser storage cleared completely");
         } catch (storageError) {
-          console.warn("⚠️ Error clearing storage:", storageError);
+          console.error("❌ Error clearing storage:", storageError);
         }
       }
       
-      // Call Supabase sign out but don't wait for completion to avoid hanging
-      const supabaseSignOut = supabase.auth.signOut();
+      // STEP 3: Call Supabase sign out with timeout
+      const supabaseSignOut = async () => {
+        try {
+          const { error } = await supabase.auth.signOut({ scope: 'global' });
+          if (error) throw error;
+          console.log("✅ Supabase global sign out successful");
+        } catch (supabaseError) {
+          console.warn("⚠️ Supabase sign out error:", supabaseError);
+        }
+      };
       
-      // Force additional cleanup after a delay
-      setTimeout(() => {
-        console.log("🔄 Secondary cleanup pass...");
+      // Execute with timeout
+      try {
+        await Promise.race([
+          supabaseSignOut(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+        ]);
+      } catch (timeoutError) {
+        console.warn("⚠️ Supabase sign out timed out, proceeding anyway");
+      }
+      
+      // STEP 4: Multiple cleanup passes to ensure nothing survives
+      for (let i = 0; i < 3; i++) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Force state clearing again
         setUser(null);
         setProfile(null);
         setSession(null);
         setUserRoles([]);
         setActiveRole(null);
         
-        // Try to clear any remaining Supabase state
+        // Clear storage again
         if (typeof window !== 'undefined') {
           try {
-            // Force clear any remaining supabase keys that might have been recreated
             Object.keys(localStorage).forEach(key => {
-              if (key.startsWith('sb-')) {
+              if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
                 localStorage.removeItem(key);
               }
             });
+            Object.keys(sessionStorage).forEach(key => {
+              if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
+                sessionStorage.removeItem(key);
+              }
+            });
           } catch (e) {
-            console.warn("Secondary cleanup error:", e);
+            console.warn(`Cleanup pass ${i + 1} error:`, e);
           }
         }
-      }, 1000);
-      
-      // Wait for supabase signout but with timeout
-      try {
-        await Promise.race([
-          supabaseSignOut,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
-        ]);
-        console.log("✅ Supabase sign out completed successfully");
-      } catch (signOutError) {
-        console.warn("⚠️ Supabase sign out timeout or error (proceeding anyway):", signOutError);
       }
       
-      // Final delay to ensure all async operations complete
+      // STEP 5: Final state reset
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      console.log("✅ Complete sign out process finished");
+      console.log("✅ Complete comprehensive sign out process finished");
       
     } catch (error) {
       console.error("❌ Sign out exception:", error);
       
-      // Even if there's an error, ensure local state is cleared
+      // EMERGENCY STATE CLEARING - Even if there's an error, ensure local state is cleared
       setUser(null);
       setProfile(null);
       setSession(null);
       setUserRoles([]);
       setActiveRole(null);
+      
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
     } finally {
       setLoading(false);
     }
