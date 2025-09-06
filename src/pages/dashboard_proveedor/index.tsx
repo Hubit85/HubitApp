@@ -33,9 +33,14 @@ export default function DashboardProveedor() {
   // Get company name from the service provider role data
   const getCompanyName = () => {
     const serviceProviderRole = userRoles.find(role => role.role_type === 'service_provider');
-    if (serviceProviderRole?.role_specific_data?.company_name) {
-      return serviceProviderRole.role_specific_data.company_name;
+    // Safely access company_name from the JSONB field
+    const companyNameFromData = (serviceProviderRole?.role_specific_data as { company_name?: string })?.company_name;
+    
+    if (companyNameFromData && typeof companyNameFromData === 'string') {
+      return companyNameFromData;
     }
+    
+    // Fallback to full_name if company_name is not available or not a string
     return profile?.full_name || "Empresa no especificada";
   };
 
