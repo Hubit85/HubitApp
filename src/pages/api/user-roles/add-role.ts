@@ -348,16 +348,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Step 3: Prepare role data with automatic community code generation
     const processedRoleData: Record<string, any> = {};
     
-    // CRITICAL FIX: Direct property assignment to avoid spread type issues completely
+    // FINAL FIX: Explicit object construction without any spread operations
     if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData) && roleSpecificData !== null) {
       try {
-        // Safely copy properties one by one to avoid spread type errors
-        const sourceData = roleSpecificData as Record<string, any>;
+        const sourceKeys = Object.keys(roleSpecificData);
+        console.log('🔧 API: Processing', sourceKeys.length, 'role-specific data fields');
         
-        // Copy all valid properties directly
-        Object.keys(sourceData).forEach(key => {
-          if (typeof key === 'string' && key.length > 0) {
-            const value = sourceData[key];
+        // Explicitly copy each valid property
+        sourceKeys.forEach(key => {
+          if (key && typeof key === 'string' && key.length > 0) {
+            const value = (roleSpecificData as any)[key];
             if (value !== undefined && value !== null) {
               processedRoleData[key] = value;
             }
@@ -367,11 +367,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('✅ API: Successfully processed role-specific data with', Object.keys(processedRoleData).length, 'valid fields');
       } catch (processingError) {
         console.warn('⚠️ API: Error processing role-specific data:', processingError);
-        // processedRoleData is already initialized as empty object
+        // processedRoleData already initialized as empty object above
       }
     } else {
       console.warn('⚠️ API: Invalid roleSpecificData format, using empty object');
-      // processedRoleData is already initialized as empty object
+      // processedRoleData already initialized as empty object above
     }
     
     if (roleType === 'community_member') {
