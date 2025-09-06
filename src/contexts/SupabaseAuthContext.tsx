@@ -3,6 +3,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile, ProfileInsert } from "@/integrations/supabase/types";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
+import { PropertyAutoService, UserPropertyData } from "@/services/PropertyAutoService";
 
 interface AuthContextType {
   user: User | null;
@@ -580,7 +581,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // En la función signUp, mejorar la creación de roles múltiples
+  // En la función signUp, mejorar la creación de roles múltiples y propiedades automáticas
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
     try {
       console.log("📝 Starting sign up process...");
@@ -638,6 +639,38 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           });
           
           console.log("✅ Profile and primary role created");
+
+          // NUEVO: Crear propiedad automática si el rol lo requiere
+          if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
+            console.log("🏠 Creating default property for user with role:", userData.user_type);
+            
+            const propertyUserData: UserPropertyData = {
+              full_name: userData.full_name || 'Usuario',
+              address: userData.address || '',
+              city: userData.city || '',
+              postal_code: userData.postal_code || '',
+              province: userData.province || '',
+              country: userData.country || 'España',
+              community_name: (userData as any).community_name || '',
+              portal_number: (userData as any).portal_number || '',
+              apartment_number: (userData as any).apartment_number || '',
+              user_type: userData.user_type
+            };
+
+            try {
+              const propertyResult = await PropertyAutoService.createDefaultProperty(data.user.id, propertyUserData);
+              if (propertyResult.success) {
+                console.log("✅ Default property created successfully:", propertyResult.message);
+              } else {
+                console.warn("⚠️ Property creation failed:", propertyResult.message);
+                // No fallar completamente el registro por esto
+              }
+            } catch (propertyError) {
+              console.warn("⚠️ Property creation error (non-critical):", propertyError);
+              // No fallar el registro por errores de propiedad
+            }
+          }
+          
         } catch (profileError) {
           console.warn("⚠️ Profile creation failed but user was created:", profileError);
         }
