@@ -349,7 +349,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('🔧 API: Processing role-specific data with explicit type safety...');
     
     // Create a completely safe object with explicit property validation
-    const processedRoleData: Record<string, unknown> = {};
+    const processedRoleData: Record<string, any> = {};
     
     // Explicitly validate and copy known properties safely
     try {
@@ -365,27 +365,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const knownArrayFields = ['selected_services'];
       const knownObjectFields = ['service_costs'];
       
-      // Process string fields
+      // Process string fields with explicit type checking
       knownStringFields.forEach(field => {
-        const value = (roleSpecificData as any)?.[field];
-        if (typeof value === 'string' && value.trim().length > 0) {
-          processedRoleData[field] = value.trim();
+        const rawValue = (roleSpecificData as any)?.[field];
+        if (rawValue && typeof rawValue === 'string' && rawValue.trim().length > 0) {
+          processedRoleData[field] = rawValue.trim();
         }
       });
       
-      // Process array fields
+      // Process array fields with explicit validation
       knownArrayFields.forEach(field => {
-        const value = (roleSpecificData as any)?.[field];
-        if (Array.isArray(value) && value.length > 0) {
-          processedRoleData[field] = value;
+        const rawValue = (roleSpecificData as any)?.[field];
+        if (Array.isArray(rawValue) && rawValue.length > 0) {
+          processedRoleData[field] = rawValue;
         }
       });
       
-      // Process object fields
+      // Process object fields with explicit validation
       knownObjectFields.forEach(field => {
-        const value = (roleSpecificData as any)?.[field];
-        if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0) {
-          processedRoleData[field] = value;
+        const rawValue = (roleSpecificData as any)?.[field];
+        if (rawValue && typeof rawValue === 'object' && !Array.isArray(rawValue) && Object.keys(rawValue).length > 0) {
+          processedRoleData[field] = rawValue;
         }
       });
       
@@ -401,8 +401,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (roleType === 'community_member') {
       // Generate community code if not provided or empty
-      if (!processedRoleData.community_code || processedRoleData.community_code.trim() === '') {
-        processedRoleData.community_code = generateCommunityCode(processedRoleData.address || '');
+      const communityCodeValue = processedRoleData.community_code;
+      const addressValue = processedRoleData.address;
+      
+      if (!communityCodeValue || (typeof communityCodeValue === 'string' && communityCodeValue.trim() === '')) {
+        const safeAddress = typeof addressValue === 'string' ? addressValue : '';
+        processedRoleData.community_code = generateCommunityCode(safeAddress);
         console.log('🏘️ API: Generated community code:', processedRoleData.community_code);
       }
     }
@@ -477,15 +481,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           
           try {
             const propertyUserData: UserPropertyData = {
-              full_name: processedRoleData.full_name || 'Usuario',
-              address: processedRoleData.address || '',
-              city: processedRoleData.city || '',
-              postal_code: processedRoleData.postal_code || '',
-              province: processedRoleData.province || '',
-              country: processedRoleData.country || 'España',
-              community_name: processedRoleData.community_name || '',
-              portal_number: processedRoleData.portal_number || '',
-              apartment_number: processedRoleData.apartment_number || '',
+              full_name: (typeof processedRoleData.full_name === 'string' ? processedRoleData.full_name : 'Usuario'),
+              address: (typeof processedRoleData.address === 'string' ? processedRoleData.address : ''),
+              city: (typeof processedRoleData.city === 'string' ? processedRoleData.city : ''),
+              postal_code: (typeof processedRoleData.postal_code === 'string' ? processedRoleData.postal_code : ''),
+              province: (typeof processedRoleData.province === 'string' ? processedRoleData.province : ''),
+              country: (typeof processedRoleData.country === 'string' ? processedRoleData.country : 'España'),
+              community_name: (typeof processedRoleData.community_name === 'string' ? processedRoleData.community_name : ''),
+              portal_number: (typeof processedRoleData.portal_number === 'string' ? processedRoleData.portal_number : ''),
+              apartment_number: (typeof processedRoleData.apartment_number === 'string' ? processedRoleData.apartment_number : ''),
               user_type: roleType
             };
 
