@@ -584,7 +584,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   // En la función signUp, mejorar la creación de roles múltiples y propiedades automáticas
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
     try {
-      console.log("📝 Starting sign up process...");
+      console.log("📝 Starting enhanced sign up process...");
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -594,6 +594,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             full_name: userData.full_name,
             user_type: userData.user_type,
             phone: userData.phone,
+            address: userData.address,
+            city: userData.city,
+            postal_code: userData.postal_code,
+            province: userData.province,
+            country: userData.country
           }
         }
       });
@@ -627,20 +632,43 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           await supabase.from("profiles").insert(profileData);
           
-          // IMPORTANTE: Solo crear el rol principal aquí, no todos los roles
-          // Los roles adicionales se manejarán en el proceso de registro
+          // Create the primary role with enhanced role-specific data
+          const roleSpecificData: any = {};
+          
+          if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
+            roleSpecificData.full_name = userData.full_name;
+            roleSpecificData.phone = userData.phone;
+            roleSpecificData.address = userData.address;
+            roleSpecificData.postal_code = userData.postal_code;
+            roleSpecificData.city = userData.city;
+            roleSpecificData.province = userData.province;
+            roleSpecificData.country = userData.country;
+            
+            // Additional fields for community members
+            if (userData.user_type === 'community_member') {
+              roleSpecificData.community_name = (userData as any).community_name || '';
+              roleSpecificData.portal_number = (userData as any).portal_number || '';
+              roleSpecificData.apartment_number = (userData as any).apartment_number || '';
+              
+              // Generate community code if not provided
+              if (!roleSpecificData.community_name && userData.address) {
+                roleSpecificData.community_code = generateCommunityCode(userData.address);
+              }
+            }
+          }
+          
           await supabase.from('user_roles').insert({
             user_id: data.user.id,
             role_type: userData.user_type,
             is_active: true,
             is_verified: true,
             verification_confirmed_at: new Date().toISOString(),
-            role_specific_data: {}
+            role_specific_data: roleSpecificData
           });
           
-          console.log("✅ Profile and primary role created");
+          console.log("✅ Profile and primary role created with enhanced data");
 
-          // NUEVO: Crear propiedad automática si el rol lo requiere
+          // Create default property for roles that need it
           if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
             console.log("🏠 Creating default property for user with role:", userData.user_type);
             
@@ -686,6 +714,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       console.error("❌ Sign up exception:", error);
       return { error: "Error inesperado durante el registro" };
     }
+  };
+
+  // Helper function to generate community code
+  const generateCommunityCode = (address: string): string => {
+    const hash = address.toLowerCase().replace(/\s+/g, '').slice(0, 10);
+    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `COM-${hash}-${randomNum}`.toUpperCase();
   };
 
   const signOut = async () => {

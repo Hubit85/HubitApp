@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@/integrations/supabase/client';
 import { SupabaseUserRoleService } from '@/services/SupabaseUserRoleService';
+import { PropertyAutoService, UserPropertyData } from '@/services/PropertyAutoService';
 
 interface RoleSpecificData {
   // Particular fields
@@ -14,6 +15,9 @@ interface RoleSpecificData {
 
   // Community member fields (inherits from particular)
   community_code?: string;
+  community_name?: string;
+  portal_number?: string;
+  apartment_number?: string;
 
   // Service provider fields
   company_name?: string;
@@ -302,6 +306,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         } catch (notificationError) {
           console.warn('⚠️ API: Could not create notification (non-critical):', notificationError);
           // Don't fail the entire operation for notification errors
+        }
+
+        // Step 7: Create default property for particular and community_member roles (non-blocking)
+        if (roleType === 'particular' || roleType === 'community_member') {
+          console.log(`🏠 API: Creating default property for role: ${roleType}`);
+          
+          try {
+            const propertyUserData: UserPropertyData = {
+              full_name: processedRoleData.full_name || 'Usuario',
+              address: processedRoleData.address || '',
+              city: processedRoleData.city || '',
+              postal_code: processedRoleData.postal_code || '',
+              province: processedRoleData.province || '',
+              country: processedRoleData.country || 'España',
+              community_name: processedRoleData.community_name || '',
+              portal_number: processedRoleData.portal_number || '',
+              apartment_number: processedRoleData.apartment_number || '',
+              user_type: roleType
+            };
+
+            const propertyResult = await PropertyAutoService.createDefaultProperty(userId, propertyUserData);
+            
+            if (propertyResult.success) {
+              console.log('✅ API: Default property created successfully:', propertyResult.message);
+              
+              // Add property creation info to the response
+              const processingTime = Date.now() - startTime;
+              return res.status(200).json({
+                success: true,
+                message: shouldAutoVerify ? 
+                  `Rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} agregado, verificado y propiedad creada correctamente` :
+                  `Rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} agregado con propiedad por defecto. Revisa tu email para completar la verificación.`,
+                role: newRole,
+                property: propertyResult.property,
+                propertyCreated: true,
+                requiresVerification: !shouldAutoVerify,
+                processingTime
+              });
+              
+            } else {
+              console.warn('⚠️ API: Property creation failed (non-critical):', propertyResult.message);
+              // Continue without failing - property creation is non-critical for role creation
+            }
+            
+          } catch (propertyError) {
+            console.warn('⚠️ API: Property creation error (non-critical):', propertyError);
+            // Don't fail the role creation for property errors
+          }
         }
 
         const processingTime = Date.now() - startTime;
