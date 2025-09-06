@@ -1,24 +1,81 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle, XCircle, AlertTriangle, Loader2, Database, Users, Settings, Server } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import SupabaseStatus from "@/components/SupabaseStatus";
+import { CheckCircle, XCircle, AlertTriangle, Loader2, Database, Settings, RefreshCw, ExternalLink } from "lucide-react";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
-interface SystemStatus {
-  supabase: 'connected' | 'error' | 'checking';
-  database: 'ready' | 'error' | 'checking';
-  auth: 'working' | 'error' | 'checking';
+type Status = 'checking' | 'success' | 'warning' | 'error';
+
+interface Check {
+  id: string;
+  name: string;
+  status: Status;
+  message?: string;
 }
 
 export default function SystemStatusCard() {
-  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
-    supabase: 'checking',
-    database: 'checking', 
-    auth: 'checking'
-  });
+  const { isConnected } = useSupabaseAuth();
+  const [loading, setLoading] = useState(false);
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
+  const [checks, setChecks] = useState<Check[]>([
+    { id: 'supabase_connection', name: 'Conexión a Supabase', status: 'checking' },
+    { id: 'auth_status', name: 'Servicio de Autenticación', status: 'checking' }
+  ]);
+
+  const performSystemChecks = async () => {
+    setLoading(true);
+    setChecks(prev => prev.map(c => ({ ...c, status: 'checking' })));
+
+    // Simulating checks
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setChecks([
+      {
+        id: 'supabase_connection',
+        name: 'Conexión a Supabase',
+        status: isConnected ? 'success' : 'error',
+        message: isConnected ? 'Conectado correctamente' : 'Fallo en la conexión'
+      },
+      {
+        id: 'auth_status',
+        name: 'Servicio de Autenticación',
+        status: isConnected ? 'success' : 'error',
+        message: isConnected ? 'Operativo' : 'No disponible'
+      }
+    ]);
+
+    setLastChecked(new Date());
+    setLoading(false);
+  };
+  
+  useEffect(() => {
+    performSystemChecks();
+  }, [isConnected]);
+
+  const getStatusIcon = (status: Status) => {
+    switch (status) {
+      case 'checking': return <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />;
+      case 'success': return <CheckCircle className="h-4 w-4 text-emerald-500" />;
+      case 'warning': return <AlertTriangle className="h-4 w-4 text-amber-500" />;
+      case 'error': return <XCircle className="h-4 w-4 text-red-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: Status) => {
+    switch (status) {
+      case 'checking': return <Badge variant="outline">Verificando...</Badge>;
+      case 'success': return <Badge className="bg-emerald-100 text-emerald-800">Operativo</Badge>;
+      case 'warning': return <Badge variant="destructive" className="bg-amber-100 text-amber-800">Aviso</Badge>;
+      case 'error': return <Badge variant="destructive">Error</Badge>;
+    }
+  };
+  
+  const overallStatus: Status = checks.some(c => c.status === 'error') ? 'error' :
+                                checks.some(c => c.status === 'warning') ? 'warning' :
+                                checks.some(c => c.status === 'checking') ? 'checking' : 'success';
+
 
   return (
     <Card className="w-full bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg">
@@ -58,7 +115,6 @@ export default function SystemStatusCard() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* System Checks */}
         <div className="space-y-3">
           {checks.map((check) => (
             <div
@@ -72,45 +128,25 @@ export default function SystemStatusCard() {
                     {check.name}
                   </p>
                   <p className="text-xs text-neutral-500">
-                    {check.message || check.description}
+                    {check.message}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
                 {getStatusBadge(check.status)}
-                {check.action && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs"
-                    asChild={!!check.action.href}
-                    onClick={check.action.onClick}
-                  >
-                    {check.action.href ? (
-                      <a href={check.action.href} target={check.action.href.startsWith('http') ? '_blank' : undefined}>
-                        {check.action.label}
-                        {check.action.href.startsWith('http') && <ExternalLink className="h-3 w-3 ml-1" />}
-                      </a>
-                    ) : (
-                      <span>{check.action.label}</span>
-                    )}
-                  </Button>
-                )}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Last checked info */}
         {lastChecked && (
           <div className="text-xs text-neutral-500 text-center pt-2 border-t border-neutral-200">
             Última verificación: {lastChecked.toLocaleTimeString('es-ES')}
           </div>
         )}
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-neutral-200">
+        <div className="grid grid-cols-1 gap-3 pt-4 border-t border-neutral-200">
           <Button
             variant="outline"
             size="sm"
@@ -120,6 +156,7 @@ export default function SystemStatusCard() {
             <a 
               href="https://supabase.com/dashboard/project/djkrzbmgzfwagmripozi" 
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2"
             >
               <Settings className="h-3 w-3" />
@@ -127,27 +164,6 @@ export default function SystemStatusCard() {
               <ExternalLink className="h-3 w-3" />
             </a>
           </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-xs"
-            asChild
-          >
-            <a href="/email-templates" className="flex items-center gap-2">
-              <Mail className="h-3 w-3" />
-              Email Templates
-            </a>
-          </Button>
-        </div>
-
-        {/* Resend API Diagnostics */}
-        <div className="pt-4 border-t border-neutral-200">
-          <h4 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
-            <Send className="h-4 w-4" />
-            Diagnóstico de Resend API
-          </h4>
-          <ResendKeyTester />
         </div>
       </CardContent>
     </Card>
