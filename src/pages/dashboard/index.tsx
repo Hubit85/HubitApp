@@ -11,7 +11,7 @@ import {
   Shield, Home, Wrench, FileText, Mail, Phone, Calendar, Users, Building, Store, Bell, 
   CreditCard, ThumbsUp, Award, StarIcon, Heart, Clock, Package, MapPin, Briefcase,
   AlertTriangle, Video, Calculator, BarChart3, Eye, DollarSign, TrendingUp, Target,
-  PieChart, ClipboardList
+  PieChart, ClipboardList, MessageSquare, FileCheck
 } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import { Header } from "@/components/layout/Header";
