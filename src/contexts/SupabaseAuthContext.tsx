@@ -133,7 +133,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           .eq("id", userObject.id)
           .maybeSingle();
 
-        const { data: profileData, error: profileError } = await Promise.race([profilePromise, timeoutPromise]);
+        const result = await Promise.race([profilePromise, timeoutPromise]) as any;
+        const { data: profileData, error: profileError } = result;
 
         if (profileError && profileError.code !== 'PGRST116') {
           console.warn("⚠️ Profile fetch error:", profileError.message);
