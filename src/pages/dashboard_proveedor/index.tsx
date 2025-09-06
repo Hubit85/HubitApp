@@ -33,15 +33,32 @@ export default function DashboardProveedor() {
   // Get company name from the service provider role data
   const getCompanyName = () => {
     const serviceProviderRole = userRoles.find(role => role.role_type === 'service_provider');
-    // Safely access company_name from the JSONB field
-    const companyNameFromData = (serviceProviderRole?.role_specific_data as { company_name?: string })?.company_name;
     
-    if (companyNameFromData && typeof companyNameFromData === 'string') {
-      return companyNameFromData;
+    if (serviceProviderRole?.role_specific_data) {
+      // Check for company_name in the role specific data
+      const roleData = serviceProviderRole.role_specific_data as any;
+      
+      if (roleData.company_name && typeof roleData.company_name === 'string' && roleData.company_name.trim()) {
+        return roleData.company_name;
+      }
     }
     
-    // Fallback to full_name if company_name is not available or not a string
-    return profile?.full_name || "Empresa no especificada";
+    // Fallback: if no company name in role data, check if profile full_name looks like a company name
+    // (this handles the case where the user registered with company name as full_name)
+    if (profile?.full_name) {
+      const fullName = profile.full_name;
+      // Check if it contains business-related words or is longer than typical personal names
+      const businessKeywords = ['s.l.', 'sl', 's.a.', 'sa', 'ltda', 'servicios', 'empresa', 'compañía', 'group', 'madrid', 'barcelona', 'valencia'];
+      const containsBusinessKeyword = businessKeywords.some(keyword => fullName.toLowerCase().includes(keyword));
+      const isLongName = fullName.split(' ').length > 3; // More than 3 words likely a company
+      
+      if (containsBusinessKeyword || isLongName) {
+        return fullName;
+      }
+    }
+    
+    // Final fallback
+    return "Empresa no especificada";
   };
 
   const companyName = getCompanyName();
