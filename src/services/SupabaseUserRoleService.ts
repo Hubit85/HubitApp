@@ -266,7 +266,8 @@ export class SupabaseUserRoleService {
             })
             .eq('user_id', userId);
 
-          const { error: deactivateError } = await Promise.race([deactivatePromise, timeoutPromise]);
+          const deactivateResult = await Promise.race([deactivatePromise, timeoutPromise]) as any;
+          const { error: deactivateError } = deactivateResult;
 
           if (deactivateError) {
             throw new Error(`Error deactivating roles: ${deactivateError.message}`);
@@ -283,7 +284,8 @@ export class SupabaseUserRoleService {
             .eq('role_type', roleType)
             .eq('is_verified', true);
 
-          const { error: activateError } = await Promise.race([activatePromise, timeoutPromise]);
+          const activateResult = await Promise.race([activatePromise, timeoutPromise]) as any;
+          const { error: activateError } = activateResult;
 
           if (activateError) {
             throw new Error(`Error activating role: ${activateError.message}`);
