@@ -327,6 +327,30 @@ function RegisterPageContent() {
     const orderedRoles = getOrderedRoles(formData.roles);
     
     if (currentRoleIndex < orderedRoles.length - 1) {
+      // Antes de ir al siguiente rol, verificar si necesitamos auto-completar datos
+      const nextRole = orderedRoles[currentRoleIndex + 1];
+      
+      // Si el rol actual es "particular" y el siguiente es "community_member", 
+      // pre-rellenar los datos del miembro de comunidad
+      if (currentRole === 'particular' && nextRole === 'community_member') {
+        const particularData = formData.particular;
+        setFormData(prev => ({
+          ...prev,
+          community_member: {
+            ...prev.community_member,
+            full_name: particularData.full_name,
+            phone: particularData.phone,
+            address: particularData.address,
+            postal_code: particularData.postal_code,
+            city: particularData.city,
+            province: particularData.province,
+            country: particularData.country,
+            // Mantener el community_code existente si lo hay
+            community_code: prev.community_member.community_code
+          }
+        }));
+      }
+      
       // Ir al siguiente rol
       setCurrentRoleIndex(prev => prev + 1);
     } else {
@@ -853,20 +877,42 @@ function RegisterPageContent() {
                         </div>
 
                         {currentRole === 'community_member' && (
-                          <div className="space-y-2 md:col-span-2">
-                            <Label className="text-sm font-medium text-stone-700">
-                              Código de comunidad
-                            </Label>
-                            <p className="text-sm text-stone-500">
-                              Si eres el primer miembro de tu comunidad en registrarse, se generará automáticamente un código único basado en tu dirección.
-                            </p>
-                            <div className="p-3 bg-stone-50 rounded-lg border border-stone-200">
-                              <p className="text-sm text-stone-700 flex items-center">
-                                <Shield className="w-4 h-4 mr-2" />
-                                El código se generará automáticamente durante el registro
+                          <>
+                            {/* Mostrar nota informativa si los datos fueron pre-rellenados desde particular */}
+                            {formData.roles.includes('particular') && currentRoleIndex > 0 && (
+                              <div className="space-y-2 md:col-span-2">
+                                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                  <div className="flex items-start space-x-3">
+                                    <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <h4 className="font-medium text-blue-900 mb-1">
+                                        Información pre-rellenada
+                                      </h4>
+                                      <p className="text-sm text-blue-800">
+                                        Hemos copiado automáticamente tus datos personales del perfil de "Particular". 
+                                        Puedes modificar cualquier campo si es necesario.
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="space-y-2 md:col-span-2">
+                              <Label className="text-sm font-medium text-stone-700">
+                                Código de comunidad
+                              </Label>
+                              <p className="text-sm text-stone-500">
+                                Si eres el primer miembro de tu comunidad en registrarse, se generará automáticamente un código único basado en tu dirección.
                               </p>
+                              <div className="p-3 bg-stone-50 rounded-lg border border-stone-200">
+                                <p className="text-sm text-stone-700 flex items-center">
+                                  <Shield className="w-4 h-4 mr-2" />
+                                  El código se generará automáticamente durante el registro
+                                </p>
+                              </div>
                             </div>
-                          </div>
+                          </>
                         )}
                       </div>
                     );
