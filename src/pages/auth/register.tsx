@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -235,24 +234,32 @@ function RegisterPageContent() {
     const currentRole = getCurrentRole();
     if (!currentRole) return false;
 
-    const roleData = formData[currentRole];
+    const roleData = formData[currentRole] as any; // Type assertion para manejar union types
 
     switch (currentRole) {
-      case 'particular':
-        return !!(roleData.full_name && roleData.phone && roleData.address);
+      case 'particular': {
+        const data = roleData as typeof formData.particular;
+        return !!(data.full_name && data.phone && data.address);
+      }
       
-      case 'community_member':
-        return !!(roleData.full_name && roleData.phone && roleData.address);
+      case 'community_member': {
+        const data = roleData as typeof formData.community_member;
+        return !!(data.full_name && data.phone && data.address);
+      }
       
-      case 'service_provider':
-        return !!(roleData.company_name && roleData.company_address && 
-                 roleData.cif && roleData.business_email && roleData.business_phone && 
+      case 'service_provider': {
+        const data = roleData as typeof formData.service_provider;
+        return !!(data.company_name && data.company_address && 
+                 data.cif && data.business_email && data.business_phone && 
                  cifValid === true);
+      }
       
-      case 'property_administrator':
-        return !!(roleData.company_name && roleData.company_address && 
-                 roleData.cif && roleData.business_email && roleData.business_phone && 
-                 roleData.professional_number && cifValid === true);
+      case 'property_administrator': {
+        const data = roleData as typeof formData.property_administrator;
+        return !!(data.company_name && data.company_address && 
+                 data.cif && data.business_email && data.business_phone && 
+                 data.professional_number && cifValid === true);
+      }
       
       default:
         return false;
@@ -265,7 +272,7 @@ function RegisterPageContent() {
     
     // Validar CIF si es necesario
     if ((currentRole === 'service_provider' || currentRole === 'property_administrator')) {
-      const roleData = formData[currentRole];
+      const roleData = formData[currentRole] as any;
       if (roleData.cif && cifValid === null) {
         const isValid = await verifyCIFAgainstRegistry(roleData.cif);
         if (!isValid) {
@@ -668,228 +675,237 @@ function RegisterPageContent() {
                   )}
 
                   {/* Formularios específicos por rol */}
-                  {(currentRole === 'particular' || currentRole === 'community_member') && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          Nombre completo *
-                        </Label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                          <Input
-                            type="text"
-                            value={formData[currentRole].full_name}
-                            onChange={(e) => updateCurrentRoleData("full_name", e.target.value)}
-                            placeholder="Juan Pérez García"
-                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          Teléfono móvil *
-                        </Label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                          <Input
-                            type="tel"
-                            value={formData[currentRole].phone}
-                            onChange={(e) => updateCurrentRoleData("phone", e.target.value)}
-                            placeholder="+34 600 000 000"
-                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 md:col-span-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          Domicilio *
-                        </Label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                          <Input
-                            type="text"
-                            value={formData[currentRole].address}
-                            onChange={(e) => updateCurrentRoleData("address", e.target.value)}
-                            placeholder="Calle Mayor 123, Madrid"
-                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      {currentRole === 'community_member' && (
-                        <div className="space-y-2 md:col-span-2">
-                          <Label className="text-sm font-medium text-stone-700">
-                            Código de comunidad
-                          </Label>
-                          <p className="text-sm text-stone-500">
-                            Si eres el primer miembro de tu comunidad en registrarse, se generará automáticamente un código único basado en tu dirección.
-                          </p>
-                          <div className="p-3 bg-stone-50 rounded-lg border border-stone-200">
-                            <p className="text-sm text-stone-700 flex items-center">
-                              <Shield className="w-4 h-4 mr-2" />
-                              El código se generará automáticamente durante el registro
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {(currentRole === 'service_provider' || currentRole === 'property_administrator') && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          Nombre de la empresa *
-                        </Label>
-                        <div className="relative">
-                          <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                          <Input
-                            type="text"
-                            value={formData[currentRole].company_name}
-                            onChange={(e) => updateCurrentRoleData("company_name", e.target.value)}
-                            placeholder="Servicios Técnicos Madrid S.L."
-                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          Correo electrónico del negocio *
-                        </Label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                          <Input
-                            type="email"
-                            value={formData[currentRole].business_email}
-                            onChange={(e) => updateCurrentRoleData("business_email", e.target.value)}
-                            placeholder="info@empresa.com"
-                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          Teléfono del negocio *
-                        </Label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                          <Input
-                            type="tel"
-                            value={formData[currentRole].business_phone}
-                            onChange={(e) => updateCurrentRoleData("business_phone", e.target.value)}
-                            placeholder="+34 900 000 000"
-                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          Domicilio de la empresa *
-                        </Label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                          <Input
-                            type="text"
-                            value={formData[currentRole].company_address}
-                            onChange={(e) => updateCurrentRoleData("company_address", e.target.value)}
-                            placeholder="Calle Industria 456, Madrid"
-                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          CIF * <Badge variant="secondary" className="ml-2 text-xs bg-stone-100 text-stone-700">Verificación automática</Badge>
-                        </Label>
-                        <div className="relative">
-                          <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                          <Input
-                            type="text"
-                            value={formData[currentRole].cif}
-                            onChange={(e) => updateCurrentRoleData("cif", e.target.value.toUpperCase())}
-                            placeholder="A12345678"
-                            className="pl-10 pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                            required
-                          />
-                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                            {cifValidating ? (
-                              <Loader2 className="h-5 w-5 animate-spin text-stone-600" />
-                            ) : cifValid === true ? (
-                              <CheckCircle className="h-5 w-5 text-green-600" />
-                            ) : cifValid === false ? (
-                              <AlertCircle className="h-5 w-5 text-red-600" />
-                            ) : null}
-                          </div>
-                        </div>
-                        {formData[currentRole].cif && cifValid === null && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => verifyCIFAgainstRegistry(formData[currentRole].cif)}
-                            disabled={cifValidating}
-                            className="mt-2 border-stone-200 hover:bg-stone-50"
-                          >
-                            {cifValidating ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Verificando CIF...
-                              </>
-                            ) : (
-                              <>
-                                <Shield className="w-4 h-4 mr-2" />
-                                Verificar CIF
-                              </>
-                            )}
-                          </Button>
-                        )}
-                        {cifValid === true && (
-                          <p className="text-sm text-green-600 flex items-center">
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            CIF verificado en el registro civil
-                          </p>
-                        )}
-                        {cifValid === false && (
-                          <p className="text-sm text-red-600 flex items-center">
-                            <AlertCircle className="w-4 h-4 mr-1" />
-                            CIF no válido o no encontrado en el registro civil
-                          </p>
-                        )}
-                      </div>
-
-                      {currentRole === 'property_administrator' && (
+                  {(currentRole === 'particular' || currentRole === 'community_member') && (() => {
+                    const roleData = formData[currentRole] as typeof formData.particular | typeof formData.community_member;
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-stone-700">
-                            Número de colegiado *
+                            Nombre completo *
                           </Label>
                           <div className="relative">
-                            <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
                             <Input
                               type="text"
-                              value={formData[currentRole].professional_number}
-                              onChange={(e) => updateCurrentRoleData("professional_number", e.target.value)}
-                              placeholder="CAF-MAD-1234"
+                              value={roleData.full_name}
+                              onChange={(e) => updateCurrentRoleData("full_name", e.target.value)}
+                              placeholder="Juan Pérez García"
                               className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                               required
                             />
                           </div>
                         </div>
-                      )}
-                    </div>
-                  )}
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-stone-700">
+                            Teléfono móvil *
+                          </Label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                            <Input
+                              type="tel"
+                              value={roleData.phone}
+                              onChange={(e) => updateCurrentRoleData("phone", e.target.value)}
+                              placeholder="+34 600 000 000"
+                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                          <Label className="text-sm font-medium text-stone-700">
+                            Domicilio *
+                          </Label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                            <Input
+                              type="text"
+                              value={roleData.address}
+                              onChange={(e) => updateCurrentRoleData("address", e.target.value)}
+                              placeholder="Calle Mayor 123, Madrid"
+                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {currentRole === 'community_member' && (
+                          <div className="space-y-2 md:col-span-2">
+                            <Label className="text-sm font-medium text-stone-700">
+                              Código de comunidad
+                            </Label>
+                            <p className="text-sm text-stone-500">
+                              Si eres el primer miembro de tu comunidad en registrarse, se generará automáticamente un código único basado en tu dirección.
+                            </p>
+                            <div className="p-3 bg-stone-50 rounded-lg border border-stone-200">
+                              <p className="text-sm text-stone-700 flex items-center">
+                                <Shield className="w-4 h-4 mr-2" />
+                                El código se generará automáticamente durante el registro
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {(currentRole === 'service_provider' || currentRole === 'property_administrator') && (() => {
+                    const roleData = formData[currentRole] as typeof formData.service_provider | typeof formData.property_administrator;
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-stone-700">
+                            Nombre de la empresa *
+                          </Label>
+                          <div className="relative">
+                            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                            <Input
+                              type="text"
+                              value={roleData.company_name}
+                              onChange={(e) => updateCurrentRoleData("company_name", e.target.value)}
+                              placeholder="Servicios Técnicos Madrid S.L."
+                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-stone-700">
+                            Correo electrónico del negocio *
+                          </Label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                            <Input
+                              type="email"
+                              value={roleData.business_email}
+                              onChange={(e) => updateCurrentRoleData("business_email", e.target.value)}
+                              placeholder="info@empresa.com"
+                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-stone-700">
+                            Teléfono del negocio *
+                          </Label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                            <Input
+                              type="tel"
+                              value={roleData.business_phone}
+                              onChange={(e) => updateCurrentRoleData("business_phone", e.target.value)}
+                              placeholder="+34 900 000 000"
+                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-stone-700">
+                            Domicilio de la empresa *
+                          </Label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                            <Input
+                              type="text"
+                              value={roleData.company_address}
+                              onChange={(e) => updateCurrentRoleData("company_address", e.target.value)}
+                              placeholder="Calle Industria 456, Madrid"
+                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-stone-700">
+                            CIF * <Badge variant="secondary" className="ml-2 text-xs bg-stone-100 text-stone-700">Verificación automática</Badge>
+                          </Label>
+                          <div className="relative">
+                            <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                            <Input
+                              type="text"
+                              value={roleData.cif}
+                              onChange={(e) => updateCurrentRoleData("cif", e.target.value.toUpperCase())}
+                              placeholder="A12345678"
+                              className="pl-10 pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                              required
+                            />
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                              {cifValidating ? (
+                                <Loader2 className="h-5 w-5 animate-spin text-stone-600" />
+                              ) : cifValid === true ? (
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                              ) : cifValid === false ? (
+                                <AlertCircle className="h-5 w-5 text-red-600" />
+                              ) : null}
+                            </div>
+                          </div>
+                          {roleData.cif && cifValid === null && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => verifyCIFAgainstRegistry(roleData.cif)}
+                              disabled={cifValidating}
+                              className="mt-2 border-stone-200 hover:bg-stone-50"
+                            >
+                              {cifValidating ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Verificando CIF...
+                                </>
+                              ) : (
+                                <>
+                                  <Shield className="w-4 h-4 mr-2" />
+                                  Verificar CIF
+                                </>
+                              )}
+                            </Button>
+                          )}
+                          {cifValid === true && (
+                            <p className="text-sm text-green-600 flex items-center">
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              CIF verificado en el registro civil
+                            </p>
+                          )}
+                          {cifValid === false && (
+                            <p className="text-sm text-red-600 flex items-center">
+                              <AlertCircle className="w-4 h-4 mr-1" />
+                              CIF no válido o no encontrado en el registro civil
+                            </p>
+                          )}
+                        </div>
+
+                        {currentRole === 'property_administrator' && (() => {
+                          const adminData = roleData as typeof formData.property_administrator;
+                          return (
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-stone-700">
+                                Número de colegiado *
+                              </Label>
+                              <div className="relative">
+                                <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                                <Input
+                                  type="text"
+                                  value={adminData.professional_number}
+                                  onChange={(e) => updateCurrentRoleData("professional_number", e.target.value)}
+                                  placeholder="CAF-MAD-1234"
+                                  className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                                  required
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    );
+                  })()}
 
                   {/* Navigation buttons */}
                   <div className="flex gap-4 pt-6">
