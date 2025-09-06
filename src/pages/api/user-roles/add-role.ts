@@ -346,35 +346,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Step 3: Prepare role data with automatic community code generation
-    console.log('🔧 API: Processing role-specific data safely...');
+    console.log('🔧 API: Processing role-specific data with basic object construction...');
     
-    // Initialize with empty object using the safest approach
-    const processedRoleData: Record<string, any> = Object.create(null);
+    // Use basic Record initialization without any spread operations
+    const processedRoleData: Record<string, any> = {};
     
-    // Safe processing of role-specific data
-    if (roleSpecificData !== null && roleSpecificData !== undefined && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData)) {
+    // Manual property copying to avoid any spread type issues
+    if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData)) {
       try {
-        // Get keys safely and process one by one
-        const dataKeys = Object.keys(roleSpecificData);
-        console.log('🔧 API: Found', dataKeys.length, 'role-specific data fields to process');
+        console.log('🔧 API: Starting safe role data processing...');
         
-        for (let i = 0; i < dataKeys.length; i++) {
-          const key = dataKeys[i];
-          if (typeof key === 'string' && key.length > 0) {
-            const value = (roleSpecificData as Record<string, any>)[key];
-            if (value !== undefined && value !== null) {
-              processedRoleData[key] = value;
+        // Get all property names and copy them individually
+        const propertyNames = Object.getOwnPropertyNames(roleSpecificData);
+        console.log('🔧 API: Found', propertyNames.length, 'properties to process');
+        
+        propertyNames.forEach(propertyName => {
+          try {
+            if (typeof propertyName === 'string' && propertyName.length > 0) {
+              const propertyValue = (roleSpecificData as any)[propertyName];
+              if (propertyValue !== undefined && propertyValue !== null) {
+                // Direct assignment without any spread operations
+                processedRoleData[propertyName] = propertyValue;
+              }
             }
+          } catch (propertyError) {
+            console.warn(`⚠️ API: Error processing property ${propertyName}:`, propertyError);
           }
-        }
+        });
         
-        console.log('✅ API: Successfully processed', Object.keys(processedRoleData).length, 'valid role-specific data fields');
+        console.log('✅ API: Successfully processed', Object.keys(processedRoleData).length, 'role-specific properties');
       } catch (processingError) {
-        console.warn('⚠️ API: Error processing role-specific data:', processingError);
-        // processedRoleData is already initialized as empty object
+        console.warn('⚠️ API: Error in role data processing:', processingError);
+        // processedRoleData is already initialized as empty
       }
     } else {
-      console.warn('⚠️ API: Invalid or empty roleSpecificData, using empty object');
+      console.warn('⚠️ API: Invalid roleSpecificData type, using empty object');
     }
     
     if (roleType === 'community_member') {
