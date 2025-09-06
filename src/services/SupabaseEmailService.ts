@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface EmailTemplate {
@@ -212,35 +213,6 @@ export class SupabaseEmailService {
             </a>
           </div>
 
-          <!-- Features highlight with modern design -->
-          <div style="background: linear-gradient(135deg, #f1f5f9, #e2e8f0); padding: 30px; border-radius: 16px; margin: 30px 0; border: 1px solid rgba(148, 163, 184, 0.2);">
-            <h3 style="color: #1f2937; font-size: 20px; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-              🚀 ¿Qué puedes hacer en HuBiT?
-            </h3>
-            <div style="display: grid; gap: 12px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #3b82f6; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">📝</span>
-                <span style="color: #374151; font-size: 15px; font-weight: 400;">Publicar solicitudes de presupuesto para tus proyectos</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #10b981; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">🔍</span>
-                <span style="color: #374151; font-size: 15px; font-weight: 400;">Encontrar profesionales verificados en tu área</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #8b5cf6; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">💬</span>
-                <span style="color: #374151; font-size: 15px; font-weight: 400;">Comunicarte directamente con los proveedores</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #f59e0b; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">⭐</span>
-                <span style="color: #374151; font-size: 15px; font-weight: 400;">Ver reseñas y calificaciones verificadas</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #ef4444; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">🚨</span>
-                <span style="color: #374151; font-size: 15px; font-weight: 400;">Acceder a servicios de emergencia 24/7</span>
-              </div>
-            </div>
-          </div>
-
           <!-- Enhanced footer -->
           <div style="text-align: center; margin-top: 50px; padding-top: 30px; border-top: 2px solid rgba(229, 231, 235, 0.6);">
             <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px; font-weight: 300;">
@@ -274,40 +246,8 @@ export class SupabaseEmailService {
             <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #dc2626, #ef4444); margin: 20px auto; border-radius: 2px;"></div>
           </div>
 
-          <!-- Main message -->
-          <div style="margin-bottom: 40px;">
-            <p style="color: #374151; font-size: 18px; line-height: 1.7; margin-bottom: 24px; font-weight: 300;">
-              Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en <strong style="color: #dc2626;">HuBiT</strong>.
-            </p>
-            
-            <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-              Si solicitaste este cambio, haz clic en el botón de abajo para crear una nueva contraseña:
-            </p>
-          </div>
-
-          <!-- Action button -->
-          <div style="text-align: center; margin: 40px 0;">
-            <a href="{{ .ConfirmationURL }}" 
-               style="display: inline-block; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 18px 48px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4); letter-spacing: 0.3px;">
-              🔒 Crear nueva contraseña
-            </a>
-          </div>
-
-          <!-- Security notice -->
-          <div style="background: linear-gradient(135deg, #fef2f2, #fee2e2); padding: 25px; border-radius: 12px; border-left: 4px solid #dc2626; margin: 30px 0;">
-            <h3 style="color: #dc2626; font-size: 18px; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-              ⚠️ Importante
-            </h3>
-            <p style="color: #7f1d1d; font-size: 15px; line-height: 1.6; margin: 0;">
-              Este enlace expirará en <strong>24 horas</strong> por seguridad. Si no solicitaste este cambio, puedes ignorar este email - tu cuenta permanecerá segura.
-            </p>
-          </div>
-
           <!-- Footer -->
           <div style="text-align: center; margin-top: 50px; padding-top: 30px; border-top: 2px solid rgba(229, 231, 235, 0.6);">
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px;">
-              ¿Necesitas ayuda? Contacta nuestro soporte en <a href="mailto:support@hubit.es" style="color: #dc2626; text-decoration: none;">support@hubit.es</a>
-            </p>
             <p style="color: #9ca3af; font-size: 13px; line-height: 1.6; margin: 0;">
               © {{ now.Year }} HuBiT. Todos los derechos reservados.
             </p>
@@ -334,40 +274,8 @@ export class SupabaseEmailService {
             <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #059669, #10b981); margin: 20px auto; border-radius: 2px;"></div>
           </div>
 
-          <!-- Main message -->
-          <div style="margin-bottom: 40px;">
-            <p style="color: #374151; font-size: 18px; line-height: 1.7; margin-bottom: 24px; font-weight: 300;">
-              ¡Hola! Hemos recibido una solicitud para acceder a tu cuenta de <strong style="color: #059669;">HuBiT</strong>.
-            </p>
-            
-            <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-              Haz clic en el enlace mágico de abajo para iniciar sesión de forma segura:
-            </p>
-          </div>
-
-          <!-- Access button -->
-          <div style="text-align: center; margin: 40px 0;">
-            <a href="{{ .ConfirmationURL }}" 
-               style="display: inline-block; background: linear-gradient(135deg, #059669, #047857); color: white; padding: 18px 48px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4); letter-spacing: 0.3px;">
-              🔐 Acceder a mi cuenta
-            </a>
-          </div>
-
-          <!-- Information -->
-          <div style="background: linear-gradient(135deg, #f0f9f5, #dcfce7); padding: 25px; border-radius: 12px; border-left: 4px solid #059669; margin: 30px 0;">
-            <h3 style="color: #059669; font-size: 18px; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-              ✅ Acceso rápido y seguro
-            </h3>
-            <p style="color: #065f46; font-size: 15px; line-height: 1.6; margin: 0;">
-              Este enlace te permitirá acceder directamente sin necesidad de recordar tu contraseña. Expira en <strong>1 hora</strong> por seguridad.
-            </p>
-          </div>
-
           <!-- Footer -->
           <div style="text-align: center; margin-top: 50px; padding-top: 30px; border-top: 2px solid rgba(229, 231, 235, 0.6);">
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px;">
-              Si no solicitaste este acceso, puedes ignorar este email de forma segura.
-            </p>
             <p style="color: #9ca3af; font-size: 13px; line-height: 1.6; margin: 0;">
               © {{ now.Year }} HuBiT. Todos los derechos reservados.
             </p>
@@ -394,55 +302,8 @@ export class SupabaseEmailService {
             <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #8b5cf6, #a855f7); margin: 20px auto; border-radius: 2px;"></div>
           </div>
 
-          <!-- Main message -->
-          <div style="margin-bottom: 40px;">
-            <p style="color: #374151; font-size: 18px; line-height: 1.7; margin-bottom: 24px; font-weight: 300;">
-              ¡Excelentes noticias! Has sido invitado a unirte a <strong style="color: #8b5cf6;">HuBiT</strong>, la plataforma líder que conecta propietarios con profesionales de confianza.
-            </p>
-            
-            <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-              Para activar tu cuenta y comenzar a disfrutar de todos nuestros servicios, acepta la invitación:
-            </p>
-          </div>
-
-          <!-- Accept invitation button -->
-          <div style="text-align: center; margin: 40px 0;">
-            <a href="{{ .ConfirmationURL }}" 
-               style="display: inline-block; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 18px 48px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); letter-spacing: 0.3px;">
-              🚀 Aceptar invitación
-            </a>
-          </div>
-
-          <!-- Benefits -->
-          <div style="background: linear-gradient(135deg, #faf5ff, #f3e8ff); padding: 30px; border-radius: 12px; margin: 30px 0;">
-            <h3 style="color: #8b5cf6; font-size: 20px; margin-bottom: 20px; font-weight: 600; text-align: center;">
-              🌟 Beneficios exclusivos te esperan
-            </h3>
-            <div style="display: grid; gap: 16px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #8b5cf6; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">📝</span>
-                <span style="color: #5b21b6; font-size: 15px; font-weight: 500;">Solicita presupuestos gratuitos para tus proyectos</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #10b981; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">🔍</span>
-                <span style="color: #5b21b6; font-size: 15px; font-weight: 500;">Accede a profesionales verificados y calificados</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #f59e0b; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">⭐</span>
-                <span style="color: #5b21b6; font-size: 15px; font-weight: 500;">Lee reseñas reales de otros usuarios</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="background: #ef4444; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">🚨</span>
-                <span style="color: #5b21b6; font-size: 15px; font-weight: 500;">Servicios de emergencia disponibles 24/7</span>
-              </div>
-            </div>
-          </div>
-
           <!-- Footer -->
           <div style="text-align: center; margin-top: 50px; padding-top: 30px; border-top: 2px solid rgba(229, 231, 235, 0.6);">
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px;">
-              Si no esperabas esta invitación, puedes ignorar este email de forma segura.
-            </p>
             <p style="color: #9ca3af; font-size: 13px; line-height: 1.6; margin: 0;">
               © {{ now.Year }} HuBiT. Todos los derechos reservados.<br>
               <strong style="color: #6b7280;">Tu plataforma de confianza para servicios profesionales</strong>
