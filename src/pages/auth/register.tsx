@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -13,10 +12,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Sparkles, UserCircle,
   Home, Users, Wrench, Building, MapPin, FileText, AlertCircle, CheckCircle, Shield,
-  ArrowLeft
+  ArrowLeft, Clock, Star
 } from "lucide-react";
 
 type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
@@ -26,96 +26,91 @@ interface RoleFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  full_name: string;
-  phone: string;
-  address: string;
-  roles: RoleType[]; // Cambiado de 'role' a 'roles' para soportar múltiples
+  roles: RoleType[];
   
-  // Campos específicos de empresa/administrador
-  company_name?: string;
-  company_address?: string;
-  cif?: string;
-  business_email?: string;
-  business_phone?: string;
+  // Datos específicos por rol
+  particular: {
+    full_name: string;
+    phone: string;
+    address: string;
+  };
   
-  // Campo específico de administrador de fincas
-  professional_number?: string;
+  community_member: {
+    full_name: string;
+    phone: string;
+    address: string;
+    community_code?: string;
+  };
   
-  // Campo específico de comunidad
-  community_code?: string;
+  service_provider: {
+    company_name: string;
+    company_address: string;
+    cif: string;
+    business_email: string;
+    business_phone: string;
+  };
+  
+  property_administrator: {
+    company_name: string;
+    company_address: string;
+    cif: string;
+    business_email: string;
+    business_phone: string;
+    professional_number: string;
+  };
 }
 
+// Orden específico de los roles según requerimiento
+const ROLE_ORDER: RoleType[] = ['particular', 'community_member', 'service_provider', 'property_administrator'];
+
 export default function RegisterPage() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<RoleFormData>({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    full_name: "",
-    phone: "",
-    address: "",
-    roles: [], // Inicializado como array vacío
-    company_name: "",
-    company_address: "",
-    cif: "",
-    business_email: "",
-    business_phone: "",
-    professional_number: "",
-    community_code: ""
-  });
-
-  // State variables for form control and validation
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  
-  // Fix boolean type issues - ensure these are properly typed
-  const [cifValidating, setCifValidating] = useState<boolean>(false);
-  const [cifValid, setCifValid] = useState<boolean | null>(null);
-  
-  const [passwordValidation, setPasswordValidation] = useState({
-    length: false,
-    uppercase: false,
-    lowercase: false,
-    number: false
-  });
-
-  const router = useRouter();
-
   // Create a wrapper component that uses the auth context
   return <RegisterPageContent />;
 }
 
-// Separate component that uses the auth context
 function RegisterPageContent() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [currentRoleIndex, setCurrentRoleIndex] = useState(0); // Para rastrear qué rol estamos completando
+  
   const [formData, setFormData] = useState<RoleFormData>({
     email: "",
     password: "",
     confirmPassword: "",
-    full_name: "",
-    phone: "",
-    address: "",
-    roles: [], // Inicializado como array vacío
-    company_name: "",
-    company_address: "",
-    cif: "",
-    business_email: "",
-    business_phone: "",
-    professional_number: "",
-    community_code: ""
+    roles: [],
+    particular: {
+      full_name: "",
+      phone: "",
+      address: "",
+    },
+    community_member: {
+      full_name: "",
+      phone: "",
+      address: "",
+      community_code: "",
+    },
+    service_provider: {
+      company_name: "",
+      company_address: "",
+      cif: "",
+      business_email: "",
+      business_phone: "",
+    },
+    property_administrator: {
+      company_name: "",
+      company_address: "",
+      cif: "",
+      business_email: "",
+      business_phone: "",
+      professional_number: "",
+    }
   });
 
-  // State variables for form control and validation
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   
-  // Fix boolean type issues - ensure these are properly typed
   const [cifValidating, setCifValidating] = useState<boolean>(false);
   const [cifValid, setCifValid] = useState<boolean | null>(null);
   
@@ -126,7 +121,6 @@ function RegisterPageContent() {
     number: false
   });
 
-  // Now we can safely use the hook inside the provider
   const { user, loading, signUp } = useSupabaseAuth();
   const router = useRouter();
 
@@ -147,26 +141,42 @@ function RegisterPageContent() {
     });
   }, [formData.password]);
 
-  // CIF validation function
-  const validateCIF = (cif: string): boolean => {
-    // Basic CIF validation pattern for Spain
-    const cifPattern = /^[ABCDEFGHJNPQRSUVW]\d{8}$/;
-    if (!cifPattern.test(cif)) return false;
-    
-    // Additional validation logic could be added here
-    // This is a simplified validation
-    return true;
+  // Obtener roles ordenados según el orden especificado
+  const getOrderedRoles = (selectedRoles: RoleType[]): RoleType[] => {
+    return ROLE_ORDER.filter(role => selectedRoles.includes(role));
   };
 
-  // Mock CIF verification against civil registry
+  // Obtener el rol actual que se está completando
+  const getCurrentRole = (): RoleType | null => {
+    const orderedRoles = getOrderedRoles(formData.roles);
+    return orderedRoles[currentRoleIndex] || null;
+  };
+
+  // Calcular el progreso total del registro
+  const calculateProgress = (): number => {
+    if (currentStep === 1) return 20; // Selección de roles
+    if (currentStep === 2) {
+      // En el paso 2, calculamos progreso basado en roles completados
+      const totalRoles = formData.roles.length;
+      const rolesCompleted = currentRoleIndex;
+      const roleProgress = totalRoles > 0 ? (rolesCompleted / totalRoles) * 60 : 0; // 60% para todos los roles
+      return 20 + roleProgress;
+    }
+    if (currentStep === 3) return 90; // Contraseña
+    return 100; // Completado
+  };
+
+  // CIF validation function
+  const validateCIF = (cif: string): boolean => {
+    const cifPattern = /^[ABCDEFGHJNPQRSUVW]\d{8}$/;
+    return cifPattern.test(cif);
+  };
+
   const verifyCIFAgainstRegistry = async (cif: string): Promise<boolean> => {
     setCifValidating(true);
     try {
-      // Simulate API call to civil registry
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock validation - in real implementation, this would call the actual registry
-      const isValid = validateCIF(cif) && !['A00000000', 'B00000000'].includes(cif); // Example invalid CIFs
+      const isValid = validateCIF(cif) && !['A00000000', 'B00000000'].includes(cif);
       setCifValid(isValid);
       return isValid;
     } catch (error) {
@@ -177,16 +187,6 @@ function RegisterPageContent() {
     }
   };
 
-  const handleInputChange = (field: keyof RoleFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Reset CIF validation when CIF changes
-    if (field === 'cif') {
-      setCifValid(null);
-    }
-  };
-
-  // Nueva función para manejar la selección múltiple de roles
   const handleRoleToggle = (role: RoleType) => {
     setFormData(prev => {
       const newRoles = prev.roles.includes(role)
@@ -200,7 +200,6 @@ function RegisterPageContent() {
     });
   };
 
-  // Nueva función para confirmar la selección de roles
   const handleConfirmRoles = () => {
     if (formData.roles.length === 0) {
       setError("Debes seleccionar al menos un rol para continuar");
@@ -209,58 +208,100 @@ function RegisterPageContent() {
     
     setError("");
     setCurrentStep(2);
+    setCurrentRoleIndex(0); // Empezar con el primer rol
   };
 
-  const validateStep = (step: number): boolean => {
-    switch (step) {
-      case 1:
-        return formData.roles.length > 0;
-      case 2:
-        const baseValid = !!(formData.full_name && formData.address && formData.email && formData.phone);
-        
-        // Si incluye service_provider o property_administrator, validar campos empresariales
-        const hasBusinessRole = formData.roles.includes('service_provider') || formData.roles.includes('property_administrator');
-        if (hasBusinessRole) {
-          const businessFieldsValid = !!(formData.company_name && formData.company_address && 
-                 formData.cif && formData.business_email && formData.business_phone);
-          
-          const adminFieldsValid = formData.roles.includes('property_administrator') 
-            ? !!formData.professional_number 
-            : true;
-          
-          return baseValid && businessFieldsValid && adminFieldsValid && cifValid === true;
-        }
-        
-        return baseValid;
-      case 3:
-        return !!(formData.password && formData.confirmPassword && 
-               formData.password === formData.confirmPassword &&
-               Object.values(passwordValidation).every(Boolean));
+  // Actualizar datos específicos del rol actual
+  const updateCurrentRoleData = (field: string, value: string) => {
+    const currentRole = getCurrentRole();
+    if (!currentRole) return;
+
+    setFormData(prev => ({
+      ...prev,
+      [currentRole]: {
+        ...prev[currentRole],
+        [field]: value
+      }
+    }));
+
+    // Reset CIF validation when CIF changes
+    if (field === 'cif') {
+      setCifValid(null);
+    }
+  };
+
+  // Validar datos del rol actual
+  const validateCurrentRole = (): boolean => {
+    const currentRole = getCurrentRole();
+    if (!currentRole) return false;
+
+    const roleData = formData[currentRole];
+
+    switch (currentRole) {
+      case 'particular':
+        return !!(roleData.full_name && roleData.phone && roleData.address);
+      
+      case 'community_member':
+        return !!(roleData.full_name && roleData.phone && roleData.address);
+      
+      case 'service_provider':
+        return !!(roleData.company_name && roleData.company_address && 
+                 roleData.cif && roleData.business_email && roleData.business_phone && 
+                 cifValid === true);
+      
+      case 'property_administrator':
+        return !!(roleData.company_name && roleData.company_address && 
+                 roleData.cif && roleData.business_email && roleData.business_phone && 
+                 roleData.professional_number && cifValid === true);
+      
       default:
         return false;
     }
   };
 
-  const handleNext = async () => {
-    if (currentStep === 2) {
-      const hasBusinessRole = formData.roles.includes('service_provider') || formData.roles.includes('property_administrator');
-      if (hasBusinessRole && formData.cif && cifValid === null) {
-        const isValid = await verifyCIFAgainstRegistry(formData.cif);
+  // Manejar navegación entre roles
+  const handleNextRole = async () => {
+    const currentRole = getCurrentRole();
+    
+    // Validar CIF si es necesario
+    if ((currentRole === 'service_provider' || currentRole === 'property_administrator')) {
+      const roleData = formData[currentRole];
+      if (roleData.cif && cifValid === null) {
+        const isValid = await verifyCIFAgainstRegistry(roleData.cif);
         if (!isValid) {
           setError("El CIF proporcionado no es válido o no está registrado en el registro civil.");
           return;
         }
       }
     }
+
+    if (!validateCurrentRole()) {
+      setError("Por favor, completa todos los campos requeridos para este rol.");
+      return;
+    }
+
+    setError("");
+    const orderedRoles = getOrderedRoles(formData.roles);
     
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => prev + 1);
-      setError("");
+    if (currentRoleIndex < orderedRoles.length - 1) {
+      // Ir al siguiente rol
+      setCurrentRoleIndex(prev => prev + 1);
+    } else {
+      // Todos los roles completados, ir al paso de contraseña
+      setCurrentStep(3);
+    }
+  };
+
+  const handlePrevRole = () => {
+    if (currentRoleIndex > 0) {
+      setCurrentRoleIndex(prev => prev - 1);
+    } else {
+      // Volver al paso de selección de roles
+      setCurrentStep(1);
     }
   };
 
   const generateCommunityCode = (address: string): string => {
-    // Generate a community code based on the address
     const hash = address.toLowerCase().replace(/\s+/g, '').slice(0, 10);
     const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     return `COM-${hash}-${randomNum}`.toUpperCase();
@@ -271,52 +312,51 @@ function RegisterPageContent() {
     
     if (submitting) return;
     
+    // Validar contraseña
+    if (!Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword) {
+      setError("Por favor, verifica que la contraseña cumple todos los requisitos y coincide con la confirmación.");
+      return;
+    }
+    
     setSubmitting(true);
     setError("");
     setSuccessMessage("");
 
     try {
-      // Para registro múltiple, usamos el rol principal (el primero seleccionado)
-      const primaryRole = formData.roles[0];
+      const primaryRole = getOrderedRoles(formData.roles)[0];
       
-      // Generate community code for community members if it's the first registration
-      let communityCode = formData.community_code;
-      if (formData.roles.includes('community_member') && !communityCode) {
-        communityCode = generateCommunityCode(formData.address);
+      // Preparar datos según el rol principal
+      let userData: any = {};
+      
+      if (primaryRole === 'particular') {
+        userData = {
+          full_name: formData.particular.full_name,
+          user_type: primaryRole,
+          phone: formData.particular.phone,
+        };
+      } else if (primaryRole === 'community_member') {
+        const communityCode = formData.community_member.community_code || 
+                             generateCommunityCode(formData.community_member.address);
+        userData = {
+          full_name: formData.community_member.full_name,
+          user_type: primaryRole,
+          phone: formData.community_member.phone,
+        };
+      } else if (primaryRole === 'service_provider') {
+        userData = {
+          full_name: formData.service_provider.company_name,
+          user_type: primaryRole,
+          phone: formData.service_provider.business_phone,
+        };
+      } else if (primaryRole === 'property_administrator') {
+        userData = {
+          full_name: formData.property_administrator.company_name,
+          user_type: primaryRole,
+          phone: formData.property_administrator.business_phone,
+        };
       }
 
-      // Prepare role-specific data based on primary role
-      let roleSpecificData = {};
-      
-      if (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator')) {
-        roleSpecificData = {
-          company_name: formData.company_name,
-          company_address: formData.company_address,
-          cif: formData.cif,
-          business_email: formData.business_email,
-          business_phone: formData.business_phone,
-          professional_number: formData.professional_number,
-          selected_roles: formData.roles // Guardar todos los roles seleccionados
-        };
-      } else {
-        roleSpecificData = {
-          full_name: formData.full_name,
-          address: formData.address,
-          phone: formData.phone,
-          community_code: communityCode,
-          selected_roles: formData.roles // Guardar todos los roles seleccionados
-        };
-      }
-
-      const result = await signUp(formData.email, formData.password, {
-        full_name: (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
-          ? formData.company_name 
-          : formData.full_name,
-        user_type: primaryRole,
-        phone: (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
-          ? formData.business_phone 
-          : formData.phone
-      });
+      const result = await signUp(formData.email, formData.password, userData);
 
       if (result?.error) {
         setError(result.error);
@@ -346,7 +386,6 @@ function RegisterPageContent() {
     }
   };
 
-  // Show loading screen only during initial auth check
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -388,6 +427,9 @@ function RegisterPageContent() {
     return roles[role];
   };
 
+  const currentRole = getCurrentRole();
+  const orderedRoles = getOrderedRoles(formData.roles);
+
   return (
     <>
       <Head>
@@ -397,7 +439,7 @@ function RegisterPageContent() {
 
       <div className="min-h-screen bg-gray-50 relative overflow-hidden">
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
-          {/* Header with HuBiT Logo matching Header component */}
+          {/* Header con Logo */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-6">
               <div className="relative w-16 h-16 transition-transform duration-200 hover:scale-105 overflow-hidden">
@@ -423,29 +465,57 @@ function RegisterPageContent() {
             </p>
           </div>
 
-          {/* Progress Indicator */}
-          <div className="flex items-center justify-center space-x-4 mb-8">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-                  currentStep >= step 
-                    ? 'bg-stone-800 text-white shadow-lg' 
-                    : 'bg-white text-stone-400 border border-stone-200'
+          {/* Indicador de progreso mejorado */}
+          <div className="w-full max-w-2xl mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-medium text-stone-700">Progreso del registro</span>
+              <span className="text-sm text-stone-500">{Math.round(calculateProgress())}%</span>
+            </div>
+            <Progress value={calculateProgress()} className="h-2 mb-4" />
+            
+            {/* Steps indicator */}
+            <div className="flex items-center justify-center space-x-4">
+              <div className={`flex items-center ${currentStep >= 1 ? 'text-stone-800' : 'text-stone-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                  currentStep >= 1 ? 'bg-stone-800 text-white' : 'bg-stone-200'
                 }`}>
-                  {currentStep > step ? <CheckCircle className="w-5 h-5" /> : step}
+                  1
                 </div>
-                {step < 3 && (
-                  <div className={`w-16 h-1 mx-2 rounded-full transition-all duration-300 ${
-                    currentStep > step ? 'bg-stone-800' : 'bg-stone-200'
-                  }`} />
-                )}
+                <span className="ml-2 text-sm font-medium">Roles</span>
               </div>
-            ))}
+              
+              <div className={`w-12 h-1 rounded-full transition-all duration-300 ${
+                currentStep > 1 ? 'bg-stone-800' : 'bg-stone-200'
+              }`} />
+              
+              <div className={`flex items-center ${currentStep >= 2 ? 'text-stone-800' : 'text-stone-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                  currentStep >= 2 ? 'bg-stone-800 text-white' : 'bg-stone-200'
+                }`}>
+                  2
+                </div>
+                <span className="ml-2 text-sm font-medium">Información</span>
+              </div>
+              
+              <div className={`w-12 h-1 rounded-full transition-all duration-300 ${
+                currentStep > 2 ? 'bg-stone-800' : 'bg-stone-200'
+              }`} />
+              
+              <div className={`flex items-center ${currentStep >= 3 ? 'text-stone-800' : 'text-stone-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                  currentStep >= 3 ? 'bg-stone-800 text-white' : 'bg-stone-200'
+                }`}>
+                  3
+                </div>
+                <span className="ml-2 text-sm font-medium">Contraseña</span>
+              </div>
+            </div>
           </div>
 
           {/* Register Card */}
           <Card className="w-full max-w-2xl bg-white border-stone-200 shadow-2xl shadow-stone-900/10">
-            {/* Step 1: Role Selection */}
+            
+            {/* STEP 1: Role Selection */}
             {currentStep === 1 && (
               <>
                 <CardHeader className="text-center space-y-4 pb-6">
@@ -472,7 +542,7 @@ function RegisterPageContent() {
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(['particular', 'community_member', 'service_provider', 'property_administrator'] as RoleType[]).map((role) => {
+                    {ROLE_ORDER.map((role) => {
                       const roleInfo = getRoleInfo(role);
                       const RoleIcon = roleInfo.icon;
                       const isSelected = formData.roles.includes(role);
@@ -510,28 +580,33 @@ function RegisterPageContent() {
                     })}
                   </div>
 
-                  {/* Mostrar roles seleccionados */}
+                  {/* Mostrar roles seleccionados con orden */}
                   {formData.roles.length > 0 && (
                     <div className="p-4 bg-stone-50 rounded-lg border border-stone-200">
-                      <h3 className="font-medium text-stone-900 mb-3">Roles seleccionados:</h3>
+                      <h3 className="font-medium text-stone-900 mb-3">Roles seleccionados (orden de registro):</h3>
                       <div className="flex flex-wrap gap-2">
-                        {formData.roles.map((role) => {
+                        {getOrderedRoles(formData.roles).map((role, index) => {
                           const roleInfo = getRoleInfo(role);
                           return (
                             <Badge 
                               key={role} 
                               variant="default"
-                              className="bg-stone-800 hover:bg-stone-900 text-white px-3 py-1"
+                              className="bg-stone-800 hover:bg-stone-900 text-white px-3 py-1 flex items-center gap-2"
                             >
+                              <span className="text-xs bg-stone-600 rounded-full w-5 h-5 flex items-center justify-center">
+                                {index + 1}
+                              </span>
                               {roleInfo.label}
                             </Badge>
                           );
                         })}
                       </div>
+                      <p className="text-xs text-stone-500 mt-2">
+                        * Completarás la información de cada rol paso a paso en este orden
+                      </p>
                     </div>
                   )}
 
-                  {/* Botón Confirmar */}
                   <div className="pt-4">
                     <Button
                       onClick={handleConfirmRoles}
@@ -547,20 +622,39 @@ function RegisterPageContent() {
               </>
             )}
 
-            {/* Step 2: Personal/Business Information */}
-            {currentStep === 2 && formData.roles.length > 0 && (
+            {/* STEP 2: Role Information (Sequential) */}
+            {currentStep === 2 && currentRole && (
               <>
                 <CardHeader className="text-center space-y-4 pb-6">
                   <div className="mx-auto w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center shadow-lg">
-                    <User className="h-8 w-8 text-white" />
+                    {getRoleInfo(currentRole).icon({ className: "h-8 w-8 text-white" })}
                   </div>
                   <div>
                     <CardTitle className="text-2xl font-bold text-black">
-                      Información {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator')) ? 'Empresarial' : 'Personal'}
+                      {getRoleInfo(currentRole).label}
                     </CardTitle>
                     <CardDescription className="text-stone-600">
-                      Completa tu información para los roles seleccionados
+                      Paso {currentRoleIndex + 1} de {orderedRoles.length}: Completa la información para este rol
                     </CardDescription>
+                    
+                    {/* Progress indicator for roles */}
+                    <div className="flex justify-center mt-4">
+                      <div className="flex items-center space-x-2">
+                        {orderedRoles.map((role, index) => (
+                          <div key={role} className="flex items-center">
+                            <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                              index < currentRoleIndex ? 'bg-green-500' :
+                              index === currentRoleIndex ? 'bg-stone-800' : 'bg-stone-300'
+                            }`} />
+                            {index < orderedRoles.length - 1 && (
+                              <div className={`w-6 h-0.5 mx-1 ${
+                                index < currentRoleIndex ? 'bg-green-500' : 'bg-stone-300'
+                              }`} />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </CardHeader>
 
@@ -573,207 +667,236 @@ function RegisterPageContent() {
                     </Alert>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Common Fields */}
-                    <div className="space-y-2">
-                      <Label htmlFor="full_name" className="text-sm font-medium text-stone-700">
-                        {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
-                          ? "Nombre de la empresa" 
-                          : "Nombre completo"} *
-                      </Label>
-                      <div className="relative">
-                        {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator')) ? (
-                          <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                        ) : (
+                  {/* Formularios específicos por rol */}
+                  {(currentRole === 'particular' || currentRole === 'community_member') && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-stone-700">
+                          Nombre completo *
+                        </Label>
+                        <div className="relative">
                           <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                          <Input
+                            type="text"
+                            value={formData[currentRole].full_name}
+                            onChange={(e) => updateCurrentRoleData("full_name", e.target.value)}
+                            placeholder="Juan Pérez García"
+                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-stone-700">
+                          Teléfono móvil *
+                        </Label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                          <Input
+                            type="tel"
+                            value={formData[currentRole].phone}
+                            onChange={(e) => updateCurrentRoleData("phone", e.target.value)}
+                            placeholder="+34 600 000 000"
+                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 md:col-span-2">
+                        <Label className="text-sm font-medium text-stone-700">
+                          Domicilio *
+                        </Label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                          <Input
+                            type="text"
+                            value={formData[currentRole].address}
+                            onChange={(e) => updateCurrentRoleData("address", e.target.value)}
+                            placeholder="Calle Mayor 123, Madrid"
+                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {currentRole === 'community_member' && (
+                        <div className="space-y-2 md:col-span-2">
+                          <Label className="text-sm font-medium text-stone-700">
+                            Código de comunidad
+                          </Label>
+                          <p className="text-sm text-stone-500">
+                            Si eres el primer miembro de tu comunidad en registrarse, se generará automáticamente un código único basado en tu dirección.
+                          </p>
+                          <div className="p-3 bg-stone-50 rounded-lg border border-stone-200">
+                            <p className="text-sm text-stone-700 flex items-center">
+                              <Shield className="w-4 h-4 mr-2" />
+                              El código se generará automáticamente durante el registro
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {(currentRole === 'service_provider' || currentRole === 'property_administrator') && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-stone-700">
+                          Nombre de la empresa *
+                        </Label>
+                        <div className="relative">
+                          <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                          <Input
+                            type="text"
+                            value={formData[currentRole].company_name}
+                            onChange={(e) => updateCurrentRoleData("company_name", e.target.value)}
+                            placeholder="Servicios Técnicos Madrid S.L."
+                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-stone-700">
+                          Correo electrónico del negocio *
+                        </Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                          <Input
+                            type="email"
+                            value={formData[currentRole].business_email}
+                            onChange={(e) => updateCurrentRoleData("business_email", e.target.value)}
+                            placeholder="info@empresa.com"
+                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-stone-700">
+                          Teléfono del negocio *
+                        </Label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                          <Input
+                            type="tel"
+                            value={formData[currentRole].business_phone}
+                            onChange={(e) => updateCurrentRoleData("business_phone", e.target.value)}
+                            placeholder="+34 900 000 000"
+                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-stone-700">
+                          Domicilio de la empresa *
+                        </Label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                          <Input
+                            type="text"
+                            value={formData[currentRole].company_address}
+                            onChange={(e) => updateCurrentRoleData("company_address", e.target.value)}
+                            placeholder="Calle Industria 456, Madrid"
+                            className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-stone-700">
+                          CIF * <Badge variant="secondary" className="ml-2 text-xs bg-stone-100 text-stone-700">Verificación automática</Badge>
+                        </Label>
+                        <div className="relative">
+                          <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                          <Input
+                            type="text"
+                            value={formData[currentRole].cif}
+                            onChange={(e) => updateCurrentRoleData("cif", e.target.value.toUpperCase())}
+                            placeholder="A12345678"
+                            className="pl-10 pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                            required
+                          />
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            {cifValidating ? (
+                              <Loader2 className="h-5 w-5 animate-spin text-stone-600" />
+                            ) : cifValid === true ? (
+                              <CheckCircle className="h-5 w-5 text-green-600" />
+                            ) : cifValid === false ? (
+                              <AlertCircle className="h-5 w-5 text-red-600" />
+                            ) : null}
+                          </div>
+                        </div>
+                        {formData[currentRole].cif && cifValid === null && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => verifyCIFAgainstRegistry(formData[currentRole].cif)}
+                            disabled={cifValidating}
+                            className="mt-2 border-stone-200 hover:bg-stone-50"
+                          >
+                            {cifValidating ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Verificando CIF...
+                              </>
+                            ) : (
+                              <>
+                                <Shield className="w-4 h-4 mr-2" />
+                                Verificar CIF
+                              </>
+                            )}
+                          </Button>
                         )}
-                        <Input
-                          id="full_name"
-                          type="text"
-                          value={formData.full_name}
-                          onChange={(e) => handleInputChange("full_name", e.target.value)}
-                          placeholder={
-                            (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
-                              ? "Servicios Técnicos Madrid S.L." 
-                              : "Juan Pérez García"
-                          }
-                          className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                          required
-                        />
+                        {cifValid === true && (
+                          <p className="text-sm text-green-600 flex items-center">
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            CIF verificado en el registro civil
+                          </p>
+                        )}
+                        {cifValid === false && (
+                          <p className="text-sm text-red-600 flex items-center">
+                            <AlertCircle className="w-4 h-4 mr-1" />
+                            CIF no válido o no encontrado en el registro civil
+                          </p>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm font-medium text-stone-700">
-                        {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
-                          ? "Correo electrónico del negocio" 
-                          : "Correo electrónico"} *
-                      </Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => handleInputChange("email", e.target.value)}
-                          placeholder={
-                            (formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
-                              ? "info@empresa.com"
-                              : "tu@email.com"
-                          }
-                          className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm font-medium text-stone-700">
-                        Teléfono móvil *
-                      </Label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => handleInputChange("phone", e.target.value)}
-                          placeholder="+34 600 000 000"
-                          className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="address" className="text-sm font-medium text-stone-700">
-                        {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator'))
-                          ? "Domicilio de la empresa" 
-                          : "Domicilio"} *
-                      </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                        <Input
-                          id="address"
-                          type="text"
-                          value={formData.address}
-                          onChange={(e) => handleInputChange("address", e.target.value)}
-                          placeholder="Calle Mayor 123, Madrid"
-                          className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Role-specific fields for business roles */}
-                    {(formData.roles.includes('service_provider') || formData.roles.includes('property_administrator')) && (
-                      <>
+                      {currentRole === 'property_administrator' && (
                         <div className="space-y-2">
-                          <Label htmlFor="cif" className="text-sm font-medium text-stone-700">
-                            CIF * <Badge variant="secondary" className="ml-2 text-xs bg-stone-100 text-stone-700">Verificación automática</Badge>
+                          <Label className="text-sm font-medium text-stone-700">
+                            Número de colegiado *
                           </Label>
                           <div className="relative">
                             <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
                             <Input
-                              id="cif"
                               type="text"
-                              value={formData.cif || ""}
-                              onChange={(e) => handleInputChange("cif", e.target.value.toUpperCase())}
-                              placeholder="A12345678"
-                              className="pl-10 pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                              value={formData[currentRole].professional_number}
+                              onChange={(e) => updateCurrentRoleData("professional_number", e.target.value)}
+                              placeholder="CAF-MAD-1234"
+                              className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                               required
                             />
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                              {cifValidating ? (
-                                <Loader2 className="h-5 w-5 animate-spin text-stone-600" />
-                              ) : cifValid === true ? (
-                                <CheckCircle className="h-5 w-5 text-green-600" />
-                              ) : cifValid === false ? (
-                                <AlertCircle className="h-5 w-5 text-red-600" />
-                              ) : null}
-                            </div>
                           </div>
-                          {formData.cif && cifValid === null && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => verifyCIFAgainstRegistry(formData.cif!)}
-                              disabled={cifValidating}
-                              className="mt-2 border-stone-200 hover:bg-stone-50"
-                            >
-                              {cifValidating ? (
-                                <>
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                  Verificando CIF...
-                                </>
-                              ) : (
-                                <>
-                                  <Shield className="w-4 h-4 mr-2" />
-                                  Verificar CIF
-                                </>
-                              )}
-                            </Button>
-                          )}
-                          {cifValid === true && (
-                            <p className="text-sm text-green-600 flex items-center">
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              CIF verificado en el registro civil
-                            </p>
-                          )}
-                          {cifValid === false && (
-                            <p className="text-sm text-red-600 flex items-center">
-                              <AlertCircle className="w-4 h-4 mr-1" />
-                              CIF no válido o no encontrado en el registro civil
-                            </p>
-                          )}
                         </div>
+                      )}
+                    </div>
+                  )}
 
-                        {formData.roles.includes('property_administrator') && (
-                          <div className="space-y-2">
-                            <Label htmlFor="professional_number" className="text-sm font-medium text-stone-700">
-                              Número de colegiado *
-                            </Label>
-                            <div className="relative">
-                              <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                              <Input
-                                id="professional_number"
-                                type="text"
-                                value={formData.professional_number || ""}
-                                onChange={(e) => handleInputChange("professional_number", e.target.value)}
-                                placeholder="CAF-MAD-1234"
-                                className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                required
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {formData.roles.includes('community_member') && (
-                      <div className="space-y-2 md:col-span-2">
-                        <Label className="text-sm font-medium text-stone-700">
-                          Código de comunidad
-                        </Label>
-                        <p className="text-sm text-stone-500">
-                          Si eres el primer miembro de tu comunidad en registrarse, se generará automáticamente un código único basado en tu dirección.
-                        </p>
-                        <div className="p-3 bg-stone-50 rounded-lg border border-stone-200">
-                          <p className="text-sm text-stone-700 flex items-center">
-                            <Shield className="w-4 h-4 mr-2" />
-                            El código se generará automáticamente durante el registro
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-4">
+                  {/* Navigation buttons */}
+                  <div className="flex gap-4 pt-6">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setCurrentStep(1)}
+                      onClick={handlePrevRole}
                       className="flex-1 border-stone-200 hover:bg-stone-50"
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
@@ -781,19 +904,46 @@ function RegisterPageContent() {
                     </Button>
                     <Button
                       type="button"
-                      onClick={handleNext}
-                      disabled={!validateStep(2) || cifValidating}
+                      onClick={handleNextRole}
+                      disabled={!validateCurrentRole() || cifValidating}
                       className="flex-1 bg-stone-800 hover:bg-stone-900 text-white"
                     >
-                      Continuar
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      {currentRoleIndex < orderedRoles.length - 1 ? (
+                        <>
+                          Siguiente Rol
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          Continuar
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </>
+                      )}
                     </Button>
                   </div>
+
+                  {/* Mostrar resumen de roles completados */}
+                  {currentRoleIndex > 0 && (
+                    <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <h4 className="font-medium text-green-900 mb-2 flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Roles completados
+                      </h4>
+                      <div className="text-sm space-y-1">
+                        {orderedRoles.slice(0, currentRoleIndex).map((role) => (
+                          <div key={role} className="flex items-center text-green-700">
+                            <Star className="w-3 h-3 mr-2" />
+                            {getRoleInfo(role).label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </>
             )}
 
-            {/* Step 3: Password Setup */}
+            {/* STEP 3: Password Setup */}
             {currentStep === 3 && (
               <>
                 <CardHeader className="text-center space-y-4 pb-6">
@@ -805,8 +955,31 @@ function RegisterPageContent() {
                       Configurar Contraseña
                     </CardTitle>
                     <CardDescription className="text-stone-600">
-                      Crea una contraseña segura para tu cuenta
+                      Último paso: Crea una contraseña segura para tu cuenta
                     </CardDescription>
+                  </div>
+
+                  {/* Mostrar resumen de todos los roles */}
+                  <div className="p-4 bg-stone-50 rounded-lg border border-stone-200 text-left">
+                    <h4 className="font-medium text-stone-900 mb-3 text-center">Resumen de tu registro</h4>
+                    <div className="space-y-2">
+                      {orderedRoles.map((role, index) => (
+                        <div key={role} className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                            <span className="text-sm font-medium">{getRoleInfo(role).label}</span>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            Completado
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-stone-200">
+                      <p className="text-xs text-stone-500 text-center">
+                        Email: {formData.email || 'Pendiente de configurar'}
+                      </p>
+                    </div>
                   </div>
                 </CardHeader>
 
@@ -820,6 +993,25 @@ function RegisterPageContent() {
                   )}
 
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Email field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-medium text-stone-700">
+                        Correo electrónico *
+                      </Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="tu@email.com"
+                          className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
+                          required
+                        />
+                      </div>
+                    </div>
+
                     {/* Password */}
                     <div className="space-y-2">
                       <Label htmlFor="password" className="text-sm font-medium text-stone-700">
@@ -831,7 +1023,7 @@ function RegisterPageContent() {
                           id="password"
                           type={showPassword ? "text" : "password"}
                           value={formData.password}
-                          onChange={(e) => handleInputChange("password", e.target.value)}
+                          onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                           placeholder="••••••••"
                           className="pl-10 pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                           required
@@ -879,7 +1071,7 @@ function RegisterPageContent() {
                           id="confirmPassword"
                           type={showConfirmPassword ? "text" : "password"}
                           value={formData.confirmPassword}
-                          onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                          onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                           placeholder="••••••••"
                           className="pl-10 pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                           required
@@ -901,7 +1093,10 @@ function RegisterPageContent() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setCurrentStep(2)}
+                        onClick={() => {
+                          setCurrentStep(2);
+                          setCurrentRoleIndex(orderedRoles.length - 1); // Volver al último rol
+                        }}
                         className="flex-1 border-stone-200 hover:bg-stone-50"
                       >
                         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -909,7 +1104,7 @@ function RegisterPageContent() {
                       </Button>
                       <Button
                         type="submit"
-                        disabled={submitting || !validateStep(3)}
+                        disabled={submitting || !Object.values(passwordValidation).every(Boolean) || formData.password !== formData.confirmPassword}
                         className="flex-1 bg-stone-800 hover:bg-stone-900 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                       >
                         {submitting ? (
@@ -921,7 +1116,7 @@ function RegisterPageContent() {
                           <>
                             <Sparkles className="w-5 h-5 mr-2" />
                             Crear Cuenta
-                            <ArrowRight className="w-5 h-5 ml-2" />
+                            <CheckCircle className="w-5 h-5 ml-2" />
                           </>
                         )}
                       </Button>
@@ -969,4 +1164,3 @@ function RegisterPageContent() {
     </>
   );
 }
-
