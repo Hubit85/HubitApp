@@ -163,7 +163,7 @@ export function CrossRoleDataSync() {
     let updatedAssociations: string[];
 
     if (operation === 'add') {
-      updatedAssociations = [...new Set([...propertyAssociations, propertyId])];
+      updatedAssociations = Array.from(new Set([...propertyAssociations, propertyId]));
     } else {
       updatedAssociations = propertyAssociations.filter((id: string) => id !== propertyId);
     }

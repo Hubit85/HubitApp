@@ -114,8 +114,8 @@ export class CrossRoleDataService {
           // Check managed properties
           const managedProperties = await SupabasePropertyService.getManagedProperties(userId);
           accessibleProperties = managedProperties
-            .filter(prop => propertyIds.includes(prop.id))
-            .map(prop => prop.id);
+            .filter((prop: { id: string }) => propertyIds.includes(prop.id))
+            .map((prop: { id: string }) => prop.id);
           break;
 
         case 'service_provider':
@@ -188,7 +188,7 @@ export class CrossRoleDataService {
       }
 
       // Commit transaction
-      const { error: commitError } = await supabase.rpc('commit_cross_role_sync');
+      const { error: commitError } = await supabase.rpc('commit_cross_role_sync', {});
       
       if (commitError) {
         throw new Error(`Commit failed: ${commitError.message}`);
@@ -203,7 +203,7 @@ export class CrossRoleDataService {
 
     } catch (error) {
       // Rollback transaction
-      await supabase.rpc('rollback_cross_role_sync');
+      await supabase.rpc('rollback_cross_role_sync', {});
       
       return {
         success: false,
@@ -381,7 +381,8 @@ export class CrossRoleDataService {
         throw error;
       }
 
-      return [...new Set(data?.map(contract => contract.property_id).filter(Boolean) || [])];
+      const propertyIds = data?.map((contract: { property_id: string | null }) => contract.property_id).filter(Boolean) as string[] || [];
+      return Array.from(new Set(propertyIds));
 
     } catch (error) {
       console.error('Error getting service provider properties:', error);
@@ -481,9 +482,9 @@ export class CrossRoleDataService {
         const syncHistory = roleData.sync_history || [];
 
         // Find sync partners
-        const syncPartners = [...new Set(
+        const syncPartners = Array.from(new Set(
           syncHistory.map((sync: any) => sync.target_role)
-        )] as UserRole['role_type'][];
+        )) as UserRole['role_type'][];
 
         // Get last sync date
         const lastSyncDate = syncHistory.length > 0 

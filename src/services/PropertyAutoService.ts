@@ -384,7 +384,7 @@ export class PropertyAutoService {
 
         // Actualizar información de comunidad si aplica
         if (updatedUserData.user_type === "community_member") {
-          const currentCommunityInfo = property.community_info || {};
+          const currentCommunityInfo = property.community_info ? JSON.parse(JSON.stringify(property.community_info)) : {};
           const newCommunityInfo = {
             ...currentCommunityInfo,
             ...(updatedUserData.community_name && { community_name: updatedUserData.community_name }),

@@ -10,6 +10,7 @@ export interface Property {
   size?: number; // in square meters
   bedrooms?: number;
   bathrooms?: number;
+  units_count?: number;
   yearBuilt?: number;
   description?: string;
   images?: string[];

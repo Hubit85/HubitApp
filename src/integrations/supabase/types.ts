@@ -945,6 +945,7 @@ export interface Database {
           address: string
           amenities: string[] | null
           city: string
+          community_info: Json | null
           created_at: string
           description: string | null
           id: string
@@ -954,16 +955,19 @@ export interface Database {
           longitude: number | null
           name: string
           postal_code: string
+          property_status: "active" | "inactive" | "maintenance" | null
           property_type: string
           size: number | null
+          units_count: number | null
+          updated_at: string
           user_id: string
           year_built: number | null
-          community_info: Json | null
         }
         Insert: {
           address: string
           amenities?: string[] | null
           city: string
+          community_info?: Json | null
           created_at?: string
           description?: string | null
           id?: string
@@ -973,16 +977,19 @@ export interface Database {
           longitude?: number | null
           name: string
           postal_code: string
+          property_status?: "active" | "inactive" | "maintenance" | null
           property_type: string
           size?: number | null
+          units_count?: number | null
+          updated_at?: string
           user_id: string
           year_built?: number | null
-          community_info?: Json | null
         }
         Update: {
           address?: string
           amenities?: string[] | null
           city?: string
+          community_info?: Json | null
           created_at?: string
           description?: string | null
           id?: string
@@ -992,11 +999,13 @@ export interface Database {
           longitude?: number | null
           name?: string
           postal_code?: string
+          property_status?: "active" | "inactive" | "maintenance" | null
           property_type?: string
           size?: number | null
+          units_count?: number | null
+          updated_at?: string
           user_id?: string
           year_built?: number | null
-          community_info?: Json | null
         }
         Relationships: [
           {
@@ -1472,7 +1481,46 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      begin_cross_role_sync: {
+        Args: {
+          user_id: string
+          source_role: string
+          target_role: string
+        }
+        Returns: undefined
+      }
+      commit_cross_role_sync: {
+        Args: Record<string, unknown>
+        Returns: undefined
+      }
+      rollback_cross_role_sync: {
+        Args: Record<string, unknown>
+        Returns: undefined
+      }
+      sync_property_budget_history: {
+        Args: {
+          property_id: string
+          source_role: string
+          target_role: string
+        }
+        Returns: undefined
+      }
+      sync_property_contracts: {
+        Args: {
+          property_id: string
+          source_role: string
+          target_role: string
+        }
+        Returns: undefined
+      }
+      sync_property_documents: {
+        Args: {
+          property_id: string
+          source_role: string
+          target_role: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       budget_request_category:

@@ -67,6 +67,21 @@ export class SupabasePropertyService {
     return data || [];
   }
 
+  static async getManagedProperties(adminId: string): Promise<Property[]> {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*, user_roles!inner(user_id, role_type)")
+      .eq("user_roles.user_id", adminId)
+      .eq("user_roles.role_type", "property_administrator");
+
+    if (error) {
+      console.error("Error fetching managed properties:", error);
+      throw new Error(error.message);
+    }
+
+    return data as Property[] || [];
+  }
+
   static async deleteProperty(id: string): Promise<void> {
     const { error } = await supabase
       .from("properties")

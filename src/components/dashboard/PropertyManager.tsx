@@ -60,7 +60,6 @@ export default function PropertyManager() {
         postal_code: "",
         property_type: "residential",
         description: "",
-        units_count: 1,
       });
     }
     setIsDialogOpen(true);
@@ -81,19 +80,18 @@ export default function PropertyManager() {
       
       let res;
       if (isEditing) {
-        const updateData: PropertyUpdate = { ...propertyData };
-        delete updateData.id; 
+        const { id, created_at, user_id, ...updateData } = propertyData as Property;
         res = await supabase.from("properties").update(updateData).eq("id", currentProperty.id!);
       } else {
         const insertData: PropertyInsert = {
             user_id: user.id,
-            name: propertyData.name,
-            address: propertyData.address,
-            city: propertyData.city,
-            postal_code: propertyData.postal_code,
-            property_type: propertyData.property_type || 'residential',
+            name: propertyData.name || 'Nueva Propiedad',
+            address: propertyData.address || '',
+            city: propertyData.city || '',
+            postal_code: propertyData.postal_code || '',
+            property_type: (propertyData as Property).property_type || 'residential',
             description: propertyData.description || '',
-            units_count: propertyData.units_count || 1
+            units_count: (currentProperty as any).units_count || 1
         };
         res = await supabase.from("properties").insert(insertData);
       }
@@ -190,6 +188,10 @@ export default function PropertyManager() {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">Descripción</Label>
               <Textarea id="description" value={currentProperty.description || ''} onChange={(e) => setCurrentProperty({...currentProperty, description: e.target.value})} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="units_count" className="text-right">Nº Unidades</Label>
+              <Input id="units_count" type="number" value={(currentProperty as any).units_count || 1} onChange={(e) => setCurrentProperty({...currentProperty, units_count: parseInt(e.target.value, 10)})} className="col-span-3" />
             </div>
           </div>
           <DialogFooter>
