@@ -348,20 +348,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Step 3: Process role data with completely safe method
     console.log('🔧 API: Processing role-specific data safely...');
     
-    // Create a completely new object with only the properties we need
-    const processedRoleData: Record<string, any> = {};
+    // Create a plain object without any problematic operations
+    const processedRoleData = Object.create(null);
     
-    // Safely copy all valid properties from roleSpecificData
+    // Manually copy each property to avoid any spread type issues
     if (roleSpecificData && typeof roleSpecificData === 'object' && roleSpecificData !== null) {
-      // Use a for-in loop to avoid any spread operations
-      for (const key in roleSpecificData) {
-        if (Object.prototype.hasOwnProperty.call(roleSpecificData, key)) {
-          const value = roleSpecificData[key];
-          if (value !== undefined && value !== null) {
-            processedRoleData[key] = value;
-          }
+      const keys = Object.keys(roleSpecificData);
+      keys.forEach(key => {
+        const value = roleSpecificData[key];
+        if (value !== undefined && value !== null) {
+          processedRoleData[key] = value;
         }
-      }
+      });
     }
     
     console.log('✅ API: Role data processed with', Object.keys(processedRoleData).length, 'properties');
