@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
-import { User, FileText, Store, Star, Home, Settings, Bell, CreditCard, ThumbsUp, Award, LogOut } from "lucide-react";
+import { User, FileText, Store, Star, Home, Settings, Bell, CreditCard, ThumbsUp, Award, LogOut, UserCheck } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { authService } from "@/services/AuthService";
 
@@ -33,6 +33,7 @@ export function SidebarParticular({ activeTab, setActiveTab }: SidebarParticular
     { id: "favoritos", label: "myFavorites", icon: Star },
     { id: "propiedades", label: "myProperties", icon: Home },
     { id: "historial", label: "serviceHistory", icon: FileText },
+    { id: "roles", label: "roleManagement", icon: UserCheck },
     { id: "notificaciones", label: "notifications", icon: Bell },
     { id: "configuracion", label: "configuration", icon: Settings },
     { id: "pagos", label: "myPayments", icon: CreditCard },
