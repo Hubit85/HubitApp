@@ -30,6 +30,7 @@ import Image from "next/image";
 import ZoomableSection from "@/components/ZoomableSection";
 import ServiceHistoryCard from "@/components/ratings/ServiceHistoryCard";
 import RatingModal from "@/components/ratings/RatingModal";
+import UserRoleManager from "@/components/UserRoleManager";
 
 interface ServiceProvider {
   id: string;
@@ -752,6 +753,12 @@ export default function ParticularDashboard() {
                       </div>
                     </CardContent>
                   </Card>
+                </div>
+              )}
+
+              {activeTab === "roles" && (
+                <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
+                  <UserRoleManager />
                 </div>
               )}
             </div>
