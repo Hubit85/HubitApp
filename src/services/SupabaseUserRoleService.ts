@@ -532,20 +532,22 @@ export class SupabaseUserRoleService {
       try {
         console.log('🗑️ Removing pending role:', { userId, roleType });
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        // Use timeout approach instead of abortSignal
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Operation timeout')), 8000);
+        });
 
         // Verify that the role exists and is not verified
-        const { data: roleData, error: fetchError } = await supabase
+        const fetchPromise = supabase
           .from('user_roles')
           .select('*')
           .eq('user_id', userId)
           .eq('role_type', roleType)
-          .single()
-          .abortSignal(controller.signal);
+          .single();
+
+        const { data: roleData, error: fetchError } = await Promise.race([fetchPromise, timeoutPromise]);
 
         if (fetchError || !roleData) {
-          clearTimeout(timeoutId);
           return {
             success: false,
             message: "Rol no encontrado"
@@ -553,7 +555,6 @@ export class SupabaseUserRoleService {
         }
 
         if (roleData.is_verified) {
-          clearTimeout(timeoutId);
           return {
             success: false,
             message: "No puedes eliminar un rol ya verificado. Usa la opción 'Eliminar' en su lugar."
@@ -561,15 +562,14 @@ export class SupabaseUserRoleService {
         }
 
         // Delete the unverified role
-        const { error: deleteError } = await supabase
+        const deletePromise = supabase
           .from('user_roles')
           .delete()
           .eq('user_id', userId)
           .eq('role_type', roleType)
-          .eq('is_verified', false)
-          .abortSignal(controller.signal);
+          .eq('is_verified', false);
 
-        clearTimeout(timeoutId);
+        const { error: deleteError } = await Promise.race([deletePromise, timeoutPromise]);
 
         if (deleteError) {
           console.error('❌ Error deleting pending role:', deleteError);
@@ -627,17 +627,18 @@ export class SupabaseUserRoleService {
           role_specific_data: roleData || {}
         };
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        // Use timeout approach instead of abortSignal
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Operation timeout')), 8000);
+        });
 
-        const { data, error } = await supabase
+        const insertPromise = supabase
           .from("user_roles")
           .insert(roleRecord)
           .select()
-          .single()
-          .abortSignal(controller.signal);
+          .single();
 
-        clearTimeout(timeoutId);
+        const { data, error } = await Promise.race([insertPromise, timeoutPromise]);
 
         if (error) throw error;
 
@@ -657,19 +658,20 @@ export class SupabaseUserRoleService {
           updated_at: new Date().toISOString()
         };
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+        // Use timeout approach instead of abortSignal
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Operation timeout')), 8000);
+        });
 
-        const { data, error } = await supabase
+        const updatePromise = supabase
           .from("user_roles")
           .update(updateData)
           .eq("user_id", userId)
           .eq("role_type", roleType)
           .select()
-          .single()
-          .abortSignal(controller.signal);
+          .single();
 
-        clearTimeout(timeoutId);
+        const { data, error } = await Promise.race([updatePromise, timeoutPromise]);
 
         if (error) throw error;
 
