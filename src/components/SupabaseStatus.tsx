@@ -29,24 +29,36 @@ export default function SupabaseStatus() {
     checkDatabaseTables();
   }, [isSupabaseConfigured]);
 
-  const checkConnection = async () => {
-    if (!isSupabaseConfigured) {
-      setConnectionStatus('not_configured');
-      return;
-    }
-
+  const checkConnection = async (): Promise<boolean> => {
     try {
-      // Simple health check
-      const { error } = await supabase.from('profiles').select('count').limit(1);
-      if (error) {
-        console.warn("Supabase connection check failed:", error.message);
-        setConnectionStatus('error');
-      } else {
-        setConnectionStatus('connected');
-      }
+      // Create a simple timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Connection timeout')), 5000); // 5 second timeout
+      });
+
+      // Try a very lightweight query that doesn't depend on RLS
+      const connectionPromise = supabase
+        .from('profiles')
+        .select('id')
+        .limit(0); // Don't return any data, just test connection
+
+      const result = await Promise.race([connectionPromise, timeoutPromise]) as any;
+      const { error } = result;
+
+      // Connection is OK if no error or if it's just "no rows found" 
+      const connected = !error || error.code === 'PGRST116';
+      
+      console.log('🔗 Connection check result:', {
+        connected,
+        error: error?.message || 'none',
+        code: error?.code || 'none'
+      });
+
+      return connected;
+
     } catch (error) {
-      console.warn("Supabase connection check exception:", error);
-      setConnectionStatus('error');
+      console.warn('🚨 Connection check failed:', error);
+      return false; // Assume disconnected on any network error
     }
   };
 
