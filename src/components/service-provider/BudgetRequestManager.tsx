@@ -200,7 +200,7 @@ export function BudgetRequestManager() {
         if (validCategories.length > 0) {
           // Apply category filter
           const categoryFiltered = allRequests.filter(request => 
-            validCategories.some(cat => 
+            validCategories.some((cat: string) => 
               cat.toLowerCase() === request.category.toLowerCase()
             )
           );
