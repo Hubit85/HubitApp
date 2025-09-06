@@ -348,27 +348,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Step 3: Prepare role data with automatic community code generation
     let processedRoleData: Record<string, any> = {};
     
-    // CRITICAL FIX: Ensure roleSpecificData is a proper object before processing
+    // CRITICAL FIX: Ensure roleSpecificData is properly processed without spread type issues
     if (roleSpecificData && typeof roleSpecificData === 'object' && !Array.isArray(roleSpecificData) && roleSpecificData !== null) {
       try {
         // Safely process the roleSpecificData object
         const safeRoleData = roleSpecificData as Record<string, any>;
         
-        // Filter valid entries and create new object
-        const validEntries: Array<[string, any]> = [];
+        // Create a clean object by copying valid properties one by one
+        processedRoleData = {};
         
-        for (const [key, value] of Object.entries(safeRoleData)) {
-          if (typeof key === 'string' && key.length > 0 && value !== undefined && value !== null) {
-            validEntries.push([key, value]);
+        for (const key in safeRoleData) {
+          if (safeRoleData.hasOwnProperty(key)) {
+            const value = safeRoleData[key];
+            if (typeof key === 'string' && key.length > 0 && value !== undefined && value !== null) {
+              processedRoleData[key] = value;
+            }
           }
         }
         
-        // Create the processed data object from valid entries
-        for (const [key, value] of validEntries) {
-          processedRoleData[key] = value;
-        }
-        
-        console.log('✅ API: Successfully processed role-specific data with', validEntries.length, 'valid fields');
+        console.log('✅ API: Successfully processed role-specific data with', Object.keys(processedRoleData).length, 'valid fields');
       } catch (processingError) {
         console.warn('⚠️ API: Error processing role-specific data:', processingError);
         processedRoleData = {};
