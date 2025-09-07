@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { IncidentReportForm } from "@/components/IncidentReportForm";
 import { 
   User, Users, Home, TrendingUp, AlertTriangle, Calendar, 
   Shield, Store, Star, Search, Filter, Plus, Edit, Eye, 
@@ -615,37 +616,12 @@ export default function DashboardMiembro() {
                     <p className="text-stone-600">Informa sobre problemas o averías en tu comunidad</p>
                   </div>
                   
-                  <Card className="border-stone-200 shadow-lg">
-                    <CardContent className="p-8 text-center">
-                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Shield className="h-8 w-8 text-red-600" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-black mb-2">Sistema de Incidencias</h3>
-                      <p className="text-stone-600 mb-6">
-                        Aquí podrás reportar incidencias, averías o problemas en las zonas comunes de tu comunidad. El administrador de fincas recibirá la notificación inmediatamente.
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <Shield className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">Reportar</p>
-                          <p className="text-xs text-stone-600">Describe el problema</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <Bell className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">Notificar</p>
-                          <p className="text-xs text-stone-600">Al administrador</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <CheckCircle className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">Resolver</p>
-                          <p className="text-xs text-stone-600">Seguimiento automático</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-                        Próximamente disponible
-                      </Badge>
-                    </CardContent>
-                  </Card>
+                  <IncidentReportForm 
+                    onSuccess={() => {
+                      // Optional: You can add success handling here, like showing a success message or refreshing data
+                      console.log("Incidencia reportada exitosamente");
+                    }}
+                  />
                 </ZoomableSection>
               )}
 
