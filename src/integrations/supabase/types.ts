@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -1704,6 +1703,53 @@ export interface Database {
           }
         ]
       }
+      community_member_administrators: {
+        Row: {
+          id: string
+          user_id: string
+          company_name: string
+          company_cif: string
+          contact_email: string | null
+          contact_phone: string | null
+          administrator_verified: boolean
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          company_name: string
+          company_cif: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          administrator_verified?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          company_name?: string
+          company_cif?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          administrator_verified?: boolean
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_member_administrators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1936,3 +1982,7 @@ export type CommunityUpdate = Database["public"]["Tables"]["communities"]["Updat
 export type Incident = Database["public"]["Tables"]["incidents"]["Row"];
 export type IncidentInsert = Database["public"]["Tables"]["incidents"]["Insert"];
 export type IncidentUpdate = Database["public"]["Tables"]["incidents"]["Update"];
+
+export type CommunityMemberAdministrator = Database["public"]["Tables"]["community_member_administrators"]["Row"];
+export type CommunityMemberAdministratorInsert = Database["public"]["Tables"]["community_member_administrators"]["Insert"];
+export type CommunityMemberAdministratorUpdate = Database["public"]["Tables"]["community_member_administrators"]["Update"];
