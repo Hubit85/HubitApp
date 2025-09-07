@@ -260,7 +260,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         description: formData.description.trim(),
         category: formData.category,
         urgency: formData.urgency,
-        status: 'pending',
+        status: 'pending' as const,
         work_location: formData.location.trim() || 'Áreas comunes de la comunidad',
         special_requirements: null,
         images: photoUrls.length > 0 ? photoUrls : [],
