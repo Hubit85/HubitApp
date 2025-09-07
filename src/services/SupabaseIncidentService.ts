@@ -30,7 +30,7 @@ export interface Incident {
   community_id: string;
   administrator_id: string;
   admin_notes?: string | null;
-  reviewed_at?: string;
+  reviewed_at?: string | null;
   reviewed_by?: string;
   created_at: string;
   updated_at: string;
@@ -342,10 +342,10 @@ export class SupabaseIncidentService {
     }
   }
 
-  static async processIncidentToBudgetRequest(incident: Incident, userId: string): Promise<void> {
+  static async processIncidentToBudgetRequest(incident: Incident, userId?: string): Promise<void> {
     try {
       // Mark the incident as processed
-      await this.updateIncidentStatus(incident.id, 'processed', incident.admin_notes, userId);
+      await this.updateIncidentStatus(incident.id, 'processed', incident.admin_notes || undefined, userId);
 
       // Note: The actual budget request creation will be handled by the parent component
       // This service method just marks the incident as processed
