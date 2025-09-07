@@ -17,7 +17,7 @@ import {
   CheckCircle, Loader2, Calendar, Image as ImageIcon, FileText,
   Users, Zap, Info, Target, ArrowRight
 } from "lucide-react";
-import { BudgetRequestInsert, Property } from "@/integrations/supabase/types";
+import { BudgetRequestInsert, Property, BudgetRequest } from "@/integrations/supabase/types";
 import { SupabaseBudgetService } from "@/services/SupabaseBudgetService";
 import { supabase } from "@/integrations/supabase/client";
 
