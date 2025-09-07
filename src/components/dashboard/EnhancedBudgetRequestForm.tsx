@@ -152,13 +152,16 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         description: prefilledIncident.description || "",
         category: prefilledIncident.category || "other",
         urgency: prefilledIncident.urgency || "normal",
-        community_id: prefilledIncident.community_id || null,
         work_location: prefilledIncident.work_location || "",
         special_requirements: prefilledIncident.special_requirements || "",
         images: prefilledIncident.images || [],
         documents: prefilledIncident.documents || [],
         incident_id: prefilledIncident.id || null
       }));
+
+      if (prefilledIncident.community_id) {
+        setSelectedCommunityId(prefilledIncident.community_id);
+      }
 
       if (prefilledIncident.images && prefilledIncident.images.length > 0) {
         const files = prefilledIncident.images.map((url: string, index: number) => ({
@@ -224,8 +227,8 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
       setCommunities(data || []);
       
-      if (data && data.length > 0 && !formData.community_id) {
-        setFormData(prev => ({ ...prev, community_id: data[0].id }));
+      if (data && data.length > 0 && !selectedCommunityId) {
+        setSelectedCommunityId(data[0].id);
       }
 
     } catch (err) {
@@ -653,7 +656,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                 ) : activeRole?.role_type === 'property_administrator' && communities.length > 0 ? (
                   <div>
                     <Label htmlFor="community_id">Comunidad</Label>
-                    <Select value={formData.community_id || ""} onValueChange={(value) => setFormData(prev => ({ ...prev, community_id: value || null }))}>
+                    <Select value={selectedCommunityId || ""} onValueChange={(value) => setSelectedCommunityId(value || null)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona una comunidad" />
                       </SelectTrigger>
