@@ -45,6 +45,7 @@ import {
   Settings
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
+import { SidebarFincas } from "@/components/layout/SidebarFincas";
 import { useRouter } from "next/router";
 import ZoomableSection from "@/components/ZoomableSection";
 import { ContractManager } from "@/components/contracts/ContractManager";
@@ -407,69 +408,7 @@ export default function AdministradorFincas() {
 
       <div className="flex h-screen bg-gray-100 pt-16">
         {/* Sidebar */}
-        <div className="w-64 bg-gray-800 text-white shadow-lg">
-          <div className="p-4">
-            <h2 className="text-2xl font-bold mb-6">{t("dashboard")}</h2>
-            <nav className="space-y-2">
-              <Button 
-                variant={activeTab === "controlPanel" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("controlPanel")}
-              >
-                <TrendingUp className="mr-2 h-5 w-5" />
-                {t("controlPanel")}
-              </Button>
-              <Button 
-                variant={activeTab === "videoconference" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("videoconference")}
-              >
-                <Video className="mr-2 h-5 w-5" />
-                {t("scheduleVideoConference")}
-              </Button>
-              <Button 
-                variant={activeTab === "mapa" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("mapa")}
-              >
-                <MapPin className="mr-2 h-5 w-5" />
-                {t("map")}
-              </Button>
-              <Button 
-                variant={activeTab === "comunidades" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("comunidades")}
-              >
-                <Building className="mr-2 h-5 w-5" />
-                {t("communities")}
-              </Button>
-              <Button 
-                variant={activeTab === "servicios" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => handleServicesDashboardClick()}
-              >
-                <Wrench className="mr-2 h-5 w-5" />
-                {t("currentServices")}
-              </Button>
-              <Button 
-                variant={activeTab === "juntas" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("juntas")}
-              >
-                <CalendarIcon className="mr-2 h-5 w-5" />
-                {t("meetings")}
-              </Button>
-              <Button 
-                variant={activeTab === "pendientes" ? "default" : "ghost"} 
-                className="w-full justify-start"
-                onClick={() => setActiveTab("pendientes")}
-              >
-                <ClipboardList className="mr-2 h-5 w-5" />
-                {t("pendingIssues")}
-              </Button>
-            </nav>
-          </div>
-        </div>
+        <SidebarFincas activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Main Content */}
         <div className="flex-1 overflow-hidden">
