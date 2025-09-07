@@ -587,7 +587,9 @@ export function ContractManager() {
                           <div className="flex items-center gap-3 mb-2">
                             <div className="text-2xl">📄</div>
                             <div>
-                              <h3 className="text-lg font-semibold text-neutral-900">{contract.title}</h3>
+                              <h3 className="text-lg font-semibold text-neutral-900">
+                                {contract.quote_title || contract.work_description || 'Contrato de Servicio'}
+                              </h3>
                               <div className="flex items-center gap-2 text-sm text-neutral-600">
                                 <User className="h-4 w-4" />
                                 <span>{contract.client_name || contract.provider_name}</span>
@@ -612,10 +614,10 @@ export function ContractManager() {
                               <span>Creado: {new Date(contract.created_at).toLocaleDateString()}</span>
                             </div>
 
-                            {contract.deadline_date && (
+                            {contract.end_date && (
                               <div className="flex items-center gap-1 text-orange-600">
                                 <Clock className="h-4 w-4" />
-                                <span>Fecha límite: {new Date(contract.deadline_date).toLocaleDateString()}</span>
+                                <span>Fecha límite: {new Date(contract.end_date).toLocaleDateString()}</span>
                               </div>
                             )}
                           </div>
@@ -716,7 +718,7 @@ export function ContractManager() {
                                     setSelectedQuote(quote);
                                     setContractForm(prev => ({
                                       ...prev,
-                                      title: quote.title || 'Contrato de Servicio',
+                                      title: quote.title || quote.description || 'Contrato de Servicio',
                                       work_scope: quote.description || ''
                                     }));
                                   }}
