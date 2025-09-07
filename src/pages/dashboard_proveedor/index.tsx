@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { BudgetRequestManager } from "@/components/service-provider/BudgetRequestManager";
+import { ContractManager } from "@/components/contracts/ContractManager";
 import { 
   User, Users, Store, TrendingUp, AlertTriangle, Calendar, 
   DollarSign, FileText, Settings, Bell, Star, Search, Filter,
@@ -80,9 +81,9 @@ export default function DashboardProveedor() {
     { id: "perfil", label: "Mi Perfil", icon: Wrench },
     { id: "servicios", label: "Mis Servicios", icon: Store },
     { id: "presupuestos", label: "Gestionar Presupuestos", icon: FileText },
+    { id: "contratos", label: "Gestionar Contratos", icon: ClipboardList },
     { id: "clientes", label: "Mis Clientes", icon: Users },
     { id: "calendario", label: "Calendario", icon: Calendar },
-    { id: "contratos", label: "Contratos Activos", icon: ClipboardList },
     { id: "evaluacion", label: "Evaluaciones Recibidas", icon: StarIcon },
     { id: "facturacion", label: "Facturación", icon: CreditCard },
     { id: "estadisticas", label: "Estadísticas", icon: TrendingUp },
@@ -620,8 +621,25 @@ export default function DashboardProveedor() {
                 </ZoomableSection>
               )}
 
+              {/* Gestión de Contratos Tab */}
+              {activeTab === "contratos" && (
+                <ZoomableSection>
+                  <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+                      <ClipboardList className="h-8 w-8 text-purple-600" />
+                      Gestión de Contratos
+                    </h1>
+                    <p className="text-stone-600">
+                      Administra contratos activos, crea nuevos contratos desde cotizaciones aceptadas y realiza seguimiento de proyectos
+                    </p>
+                  </div>
+                  
+                  <ContractManager />
+                </ZoomableSection>
+              )}
+
               {/* Other tabs placeholder */}
-              {!["overview", "servicios", "perfil", "evaluacion", "presupuestos"].includes(activeTab) && (
+              {!["overview", "servicios", "perfil", "evaluacion", "presupuestos", "contratos"].includes(activeTab) && (
                 <ZoomableSection>
                   <Card className="border-stone-200 shadow-xl bg-gradient-to-br from-white to-neutral-50">
                     <CardContent className="p-8 text-center">
