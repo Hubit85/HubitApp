@@ -6,7 +6,7 @@ export interface IncidentInsert {
   description: string;
   category: string;
   urgency: 'low' | 'normal' | 'high' | 'emergency';
-  work_location?: string;
+  work_location?: string | null;
   special_requirements?: string;
   images?: string[];
   documents?: string[];
@@ -22,14 +22,14 @@ export interface Incident {
   category: string;
   urgency: 'low' | 'normal' | 'high' | 'emergency';
   status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed';
-  work_location?: string;
+  work_location?: string | null;
   special_requirements?: string;
   images?: string[];
   documents?: string[];
   reporter_id: string;
   community_id: string;
   administrator_id: string;
-  admin_notes?: string;
+  admin_notes?: string | null;
   reviewed_at?: string;
   reviewed_by?: string;
   created_at: string;

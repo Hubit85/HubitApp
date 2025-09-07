@@ -23,7 +23,7 @@ interface Incident {
   category: string;
   urgency: string;
   status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed';
-  work_location: string;
+  work_location?: string | null;
   special_requirements?: string;
   images?: string[];
   documents?: string[];
@@ -32,7 +32,7 @@ interface Incident {
   community_name: string;
   community_id: string;
   created_at: string;
-  admin_notes?: string;
+  admin_notes?: string | null;
 }
 
 const SERVICE_CATEGORIES = {
