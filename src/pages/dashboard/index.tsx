@@ -478,7 +478,7 @@ export default function Dashboard() {
                       <DollarSign className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h1 className="font-bold text-stone-900 mb-1">Ingresos del Mes</h3>
+                      <h3 className="font-bold text-stone-900 mb-1">Ingresos del Mes</h3>
                       <p className="text-2xl font-bold text-green-600">€3,450</p>
                       <p className="text-stone-600 text-sm">+15% vs mes anterior</p>
                     </div>
