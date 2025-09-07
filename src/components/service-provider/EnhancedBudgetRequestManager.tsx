@@ -34,9 +34,9 @@ interface BudgetRequestWithDetails extends BudgetRequest {
     city: string;
   } | null;
   profiles?: {
-    full_name: string;
+    full_name: string | null;
     email: string;
-    phone?: string;
+    phone: string | null;
   } | null;
 }
 
@@ -176,14 +176,14 @@ export function EnhancedBudgetRequestManager() {
               .eq('id', request.user_id)
               .single();
 
-            return { ...request, profiles: profile };
+            return { ...request, profiles: profile || null };
           } catch (error) {
-            return request;
+            return { ...request, profiles: null };
           }
         })
       );
 
-      setAvailableRequests(enrichedRequests);
+      setAvailableRequests(enrichedRequests as BudgetRequestWithDetails[]);
 
     } catch (err) {
       console.error("Error loading available requests:", err);
@@ -214,7 +214,7 @@ export function EnhancedBudgetRequestManager() {
               ...quote,
               budget_requests: {
                 ...request,
-                profiles: profile
+                profiles: profile || null
               }
             };
           } catch (error) {
@@ -223,7 +223,7 @@ export function EnhancedBudgetRequestManager() {
         })
       );
 
-      setMyQuotes(enrichedQuotes);
+      setMyQuotes(enrichedQuotes as QuoteWithDetails[]);
 
     } catch (err) {
       console.error("Error loading my quotes:", err);
@@ -265,8 +265,8 @@ export function EnhancedBudgetRequestManager() {
         budget_request_id: selectedRequest.id,
         amount: parseFloat(quoteData.amount),
         estimated_hours: parseFloat(quoteData.estimated_hours) || null,
-        materials_cost: parseFloat(quoteData.materials_cost) || null,
-        labor_cost: parseFloat(quoteData.labor_cost) || null,
+        materials_cost: parseFloat(quoteData.materials_cost) || undefined,
+        labor_cost: parseFloat(quoteData.labor_cost) || undefined,
         description: quoteData.description,
         terms_and_conditions: quoteData.terms_and_conditions || null,
         valid_until: quoteData.valid_until ? new Date(quoteData.valid_until).toISOString() : null,

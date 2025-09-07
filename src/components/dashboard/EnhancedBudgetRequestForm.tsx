@@ -316,7 +316,7 @@ export function EnhancedBudgetRequestForm({ onSuccess }: { onSuccess?: () => voi
 
                 <div>
                   <Label htmlFor="category">Categoría de Servicio *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as BudgetRequest['category'] }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -338,7 +338,7 @@ export function EnhancedBudgetRequestForm({ onSuccess }: { onSuccess?: () => voi
 
                 <div>
                   <Label htmlFor="urgency">Nivel de Urgencia</Label>
-                  <Select value={formData.urgency} onValueChange={(value) => setFormData(prev => ({ ...prev, urgency: value }))}>
+                  <Select value={formData.urgency} onValueChange={(value) => setFormData(prev => ({ ...prev, urgency: value as BudgetRequest['urgency'] }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -658,11 +658,11 @@ export function EnhancedBudgetRequestForm({ onSuccess }: { onSuccess?: () => voi
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="font-medium text-neutral-700 min-w-[100px]">Categoría:</span>
-                  <span>{getCategoryOption(formData.category).icon} {getCategoryOption(formData.category).label}</span>
+                  <span>{getCategoryOption(formData.category!).icon} {getCategoryOption(formData.category!).label}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="font-medium text-neutral-700 min-w-[100px]">Urgencia:</span>
-                  <span>{getUrgencyOption(formData.urgency).icon} {getUrgencyOption(formData.urgency).label}</span>
+                  <span>{getUrgencyOption(formData.urgency!).icon} {getUrgencyOption(formData.urgency!).label}</span>
                 </div>
                 {(formData.budget_range_min || formData.budget_range_max) && (
                   <div className="flex items-start gap-2">

@@ -1026,6 +1026,7 @@ export interface Database {
           description: string
           estimated_duration: string | null
           estimated_start_date: string | null
+          estimated_hours: number | null
           id: string
           labor_cost: number
           materials_cost: number
@@ -1047,8 +1048,9 @@ export interface Database {
           description: string
           estimated_duration?: string | null
           estimated_start_date?: string | null
+          estimated_hours?: number | null
           id?: string
-          labor_cost: number
+          labor_cost?: number
           materials_cost?: number
           notes?: string | null
           payment_terms?: string
@@ -1068,6 +1070,7 @@ export interface Database {
           description?: string
           estimated_duration?: string | null
           estimated_start_date?: string | null
+          estimated_hours?: number | null
           id?: string
           labor_cost?: number
           materials_cost?: number
@@ -1491,6 +1494,12 @@ export interface Database {
       }
       commit_cross_role_sync: {
         Args: Record<string, unknown>
+        Returns: undefined
+      }
+      increment_quotes_count: {
+        Args: {
+          budget_request_id: string
+        }
         Returns: undefined
       }
       rollback_cross_role_sync: {

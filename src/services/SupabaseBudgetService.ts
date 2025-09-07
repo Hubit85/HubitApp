@@ -203,7 +203,7 @@ export class SupabaseBudgetService {
 
     if (filters?.serviceCategories && filters.serviceCategories.length > 0) {
       // Filtrar por categorías que maneje el proveedor
-      query = query.in("category", filters.serviceCategories);
+      query = query.in("category", filters.serviceCategories as BudgetRequest['category'][]);
     }
 
     if (filters?.urgency) {
@@ -493,7 +493,7 @@ export class SupabaseBudgetService {
     }
 
     if (filters?.serviceCategories && filters.serviceCategories.length > 0) {
-      supabaseQuery = supabaseQuery.in("category", filters.serviceCategories);
+      supabaseQuery = supabaseQuery.in("category", filters.serviceCategories as BudgetRequest['category'][]);
     }
 
     const { data, error } = await supabaseQuery
