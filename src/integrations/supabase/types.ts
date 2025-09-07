@@ -595,7 +595,7 @@ export interface Database {
           reviewed_at: string | null
           reviewed_by: string | null
           special_requirements: string | null
-          status: "pending" | "approved" | "processing" | "completed" | "rejected"
+          status: "pending" | "under_review" | "approved" | "rejected" | "processed"
           title: string
           updated_at: string
           urgency: "low" | "normal" | "high" | "emergency"
@@ -615,7 +615,7 @@ export interface Database {
           reviewed_at?: string | null
           reviewed_by?: string | null
           special_requirements?: string | null
-          status?: "pending" | "approved" | "processing" | "completed" | "rejected"
+          status?: "pending" | "under_review" | "approved" | "rejected" | "processed"
           title: string
           updated_at?: string
           urgency?: "low" | "normal" | "high" | "emergency"
@@ -635,7 +635,7 @@ export interface Database {
           reviewed_at?: string | null
           reviewed_by?: string | null
           special_requirements?: string | null
-          status?: "pending" | "approved" | "processing" | "completed" | "rejected"
+          status?: "pending" | "under_review" | "approved" | "rejected" | "processed"
           title?: string
           updated_at?: string
           urgency?: "low" | "normal" | "high" | "emergency"
@@ -1810,7 +1810,7 @@ export interface Database {
         | "resolved"
         | "cancelled"
       emergency_request_urgency_level: "high" | "critical"
-      incident_status: "pending" | "approved" | "processing" | "completed" | "rejected"
+      incident_status: "pending" | "under_review" | "approved" | "rejected" | "processed"
       incident_urgency: "low" | "normal" | "high" | "emergency"
       invoice_status: "pending" | "sent" | "paid" | "overdue" | "cancelled"
       message_type: "text" | "image" | "file" | "system"
