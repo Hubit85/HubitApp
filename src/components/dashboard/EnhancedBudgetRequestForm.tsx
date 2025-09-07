@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Send, Eye, Star, Building, MapPin, Clock, Euro, AlertTriangle, 
   CheckCircle, Loader2, Calendar, Image as ImageIcon, FileText,
-  Users, Zap, Info, Target, ArrowRight
+  Users, Zap, Info, Target, ArrowRight, Upload, X, File, Paperclip
 } from "lucide-react";
 import { BudgetRequestInsert, Property, BudgetRequest } from "@/integrations/supabase/types";
 import { SupabaseBudgetService } from "@/services/SupabaseBudgetService";
@@ -39,6 +39,22 @@ interface ProviderPreviewResults {
   preview: EligibleProviderPreview[];
 }
 
+interface Community {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  postal_code: string;
+}
+
+interface UploadedFile {
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  file?: File;
+}
+
 const SERVICE_CATEGORIES: ServiceCategoryOption[] = [
   { value: "cleaning", label: "Limpieza", icon: "🧽", description: "Servicios de limpieza general y especializada" },
   { value: "plumbing", label: "Fontanería", icon: "🔧", description: "Reparaciones e instalaciones de fontanería" },
@@ -60,13 +76,34 @@ const URGENCY_OPTIONS = [
   { value: "emergency", label: "Emergencia", icon: "🚨", description: "Situación urgente, necesito ayuda inmediata" }
 ];
 
-export function EnhancedBudgetRequestForm({ onSuccess }: { onSuccess?: () => void }) {
+const ACCEPTED_FILE_TYPES = {
+  'image/jpeg': '.jpg',
+  'image/jpg': '.jpg',
+  'image/png': '.png',
+  'image/gif': '.gif',
+  'image/webp': '.webp',
+  'application/pdf': '.pdf',
+  'application/msword': '.doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+  'text/plain': '.txt'
+};
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILES = 5;
+
+export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: { 
+  onSuccess?: () => void;
+  prefilledIncident?: any;
+}) {
   const { user, activeRole } = useSupabaseAuth();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   
   // Preview states
   const [showPreview, setShowPreview] = useState(false);
@@ -75,29 +112,63 @@ export function EnhancedBudgetRequestForm({ onSuccess }: { onSuccess?: () => voi
 
   const [formData, setFormData] = useState<BudgetRequestInsert>({
     user_id: user?.id || "",
-    title: "",
-    description: "",
-    category: "other",
-    urgency: "normal",
+    title: prefilledIncident?.title || "",
+    description: prefilledIncident?.description || "",
+    category: prefilledIncident?.category || "other",
+    urgency: prefilledIncident?.urgency || "normal",
     property_id: null,
+    community_id: prefilledIncident?.community_id || null,
     budget_range_min: null,
     budget_range_max: null,
     preferred_date: null,
     deadline_date: null,
-    work_location: "",
-    special_requirements: "",
-    images: [],
-    documents: []
+    work_location: prefilledIncident?.work_location || "",
+    special_requirements: prefilledIncident?.special_requirements || "",
+    images: prefilledIncident?.images || [],
+    documents: prefilledIncident?.documents || [],
+    incident_id: prefilledIncident?.id || null
   });
 
   const [autoPublish, setAutoPublish] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
-    if (user && (activeRole?.role_type === 'particular' || activeRole?.role_type === 'property_administrator')) {
-      loadUserProperties();
+    if (user) {
+      if (activeRole?.role_type === 'particular') {
+        loadUserProperties();
+      } else if (activeRole?.role_type === 'property_administrator') {
+        loadUserCommunities();
+      }
     }
   }, [user, activeRole]);
+
+  useEffect(() => {
+    if (prefilledIncident) {
+      setFormData(prev => ({
+        ...prev,
+        title: prefilledIncident.title || "",
+        description: prefilledIncident.description || "",
+        category: prefilledIncident.category || "other",
+        urgency: prefilledIncident.urgency || "normal",
+        community_id: prefilledIncident.community_id || null,
+        work_location: prefilledIncident.work_location || "",
+        special_requirements: prefilledIncident.special_requirements || "",
+        images: prefilledIncident.images || [],
+        documents: prefilledIncident.documents || [],
+        incident_id: prefilledIncident.id || null
+      }));
+
+      if (prefilledIncident.images && prefilledIncident.images.length > 0) {
+        const files = prefilledIncident.images.map((url: string, index: number) => ({
+          name: `incident-image-${index + 1}.jpg`,
+          size: 0,
+          type: 'image/jpeg',
+          url: url
+        }));
+        setUploadedFiles(files);
+      }
+    }
+  }, [prefilledIncident]);
 
   const loadUserProperties = async () => {
     if (!user?.id) return;
@@ -119,7 +190,6 @@ export function EnhancedBudgetRequestForm({ onSuccess }: { onSuccess?: () => voi
 
       setProperties(data || []);
       
-      // Auto-select the first property if available
       if (data && data.length > 0 && !formData.property_id) {
         setFormData(prev => ({ ...prev, property_id: data[0].id }));
       }
@@ -130,6 +200,180 @@ export function EnhancedBudgetRequestForm({ onSuccess }: { onSuccess?: () => voi
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadUserCommunities = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('communities')
+        .select('*')
+        .eq('administrator_id', user.id)
+        .eq('status', 'active')
+        .order('name');
+
+      if (error) {
+        console.error("Error loading communities:", error);
+        throw error;
+      }
+
+      setCommunities(data || []);
+      
+      if (data && data.length > 0 && !formData.community_id) {
+        setFormData(prev => ({ ...prev, community_id: data[0].id }));
+      }
+
+    } catch (err) {
+      console.error("Error loading communities:", err);
+      setError("Error al cargar las comunidades");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || uploadedFiles.length >= MAX_FILES) return;
+
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Check file type
+      if (!Object.keys(ACCEPTED_FILE_TYPES).includes(file.type)) {
+        errors.push(`${file.name}: Tipo de archivo no permitido`);
+        continue;
+      }
+      
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        errors.push(`${file.name}: Archivo demasiado grande (máx. 10MB)`);
+        continue;
+      }
+      
+      // Check total files limit
+      if (uploadedFiles.length + validFiles.length >= MAX_FILES) {
+        errors.push(`Máximo ${MAX_FILES} archivos permitidos`);
+        break;
+      }
+      
+      validFiles.push(file);
+    }
+
+    if (errors.length > 0) {
+      setError(errors.join(', '));
+      return;
+    }
+
+    if (validFiles.length === 0) return;
+
+    setUploadingFiles(true);
+    setError("");
+
+    try {
+      const newFiles: UploadedFile[] = [];
+
+      for (const file of validFiles) {
+        // Generate unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `budget-request-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('budget-attachments')
+          .upload(fileName, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('budget-attachments')
+          .getPublicUrl(fileName);
+
+        newFiles.push({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: publicUrl,
+          file: file
+        });
+      }
+
+      setUploadedFiles(prev => [...prev, ...newFiles]);
+      
+      // Update form data
+      const imageFiles = newFiles.filter(f => f.type.startsWith('image/')).map(f => f.url);
+      const documentFiles = newFiles.filter(f => !f.type.startsWith('image/')).map(f => f.url);
+      
+      setFormData(prev => ({
+        ...prev,
+        images: [...(prev.images || []), ...imageFiles],
+        documents: [...(prev.documents || []), ...documentFiles]
+      }));
+
+    } catch (err) {
+      console.error("Error uploading files:", err);
+      setError("Error al subir archivos. Por favor, intenta de nuevo.");
+    } finally {
+      setUploadingFiles(false);
+      // Reset file input
+      event.target.value = '';
+    }
+  };
+
+  const removeFile = async (index: number) => {
+    const fileToRemove = uploadedFiles[index];
+    
+    try {
+      // Remove from Supabase Storage if it's a new upload
+      if (fileToRemove.file) {
+        const fileName = fileToRemove.url.split('/').pop();
+        if (fileName) {
+          await supabase.storage
+            .from('budget-attachments')
+            .remove([fileName]);
+        }
+      }
+      
+      // Remove from local state
+      const newFiles = uploadedFiles.filter((_, i) => i !== index);
+      setUploadedFiles(newFiles);
+      
+      // Update form data
+      const imageFiles = newFiles.filter(f => f.type.startsWith('image/')).map(f => f.url);
+      const documentFiles = newFiles.filter(f => !f.type.startsWith('image/')).map(f => f.url);
+      
+      setFormData(prev => ({
+        ...prev,
+        images: imageFiles,
+        documents: documentFiles
+      }));
+      
+    } catch (err) {
+      console.error("Error removing file:", err);
+      setError("Error al eliminar archivo");
+    }
+  };
+
+  const getFileIcon = (type: string) => {
+    if (type.startsWith('image/')) return <ImageIcon className="h-4 w-4" />;
+    if (type === 'application/pdf') return <FileText className="h-4 w-4" />;
+    return <File className="h-4 w-4" />;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const handlePreviewProviders = async () => {
