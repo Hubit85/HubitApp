@@ -1344,10 +1344,10 @@ export interface Database {
       }
       work_sessions: {
         Row: {
-          client_approved: boolean
+          client_approved: boolean | null
           client_notes: string | null
           contract_id: string
-          created_at: string
+          created_at: string | null
           description: string | null
           duration_minutes: number | null
           end_time: string | null
@@ -1360,14 +1360,14 @@ export interface Database {
           service_provider_id: string
           start_time: string
           total_cost: number | null
-          updated_at: string
+          updated_at: string | null
           work_performed: string | null
         }
         Insert: {
-          client_approved?: boolean
+          client_approved?: boolean | null
           client_notes?: string | null
           contract_id: string
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
           end_time?: string | null
@@ -1380,14 +1380,14 @@ export interface Database {
           service_provider_id: string
           start_time: string
           total_cost?: number | null
-          updated_at?: string
+          updated_at?: string | null
           work_performed?: string | null
         }
         Update: {
-          client_approved?: boolean
+          client_approved?: boolean | null
           client_notes?: string | null
           contract_id?: string
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
           end_time?: string | null
@@ -1400,20 +1400,101 @@ export interface Database {
           service_provider_id?: string
           start_time?: string
           total_cost?: number | null
-          updated_at?: string
+          updated_at?: string | null
           work_performed?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "work_sessions_contract_id_fkey"
             columns: ["contract_id"]
+            isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "work_sessions_service_provider_id_fkey"
             columns: ["service_provider_id"]
+            isOneToOne: false
             referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      incident_reports: {
+        Row: {
+          id: string
+          user_id: string
+          property_admin_id: string | null
+          title: string
+          description: string
+          category: string
+          location: string | null
+          urgency: string
+          status: string
+          photo_urls: string[] | null
+          reported_at: string
+          resolved_at: string | null
+          resolution_notes: string | null
+          budget_request_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          property_admin_id?: string | null
+          title: string
+          description: string
+          category: string
+          location?: string | null
+          urgency?: string
+          status?: string
+          photo_urls?: string[] | null
+          reported_at?: string
+          resolved_at?: string | null
+          resolution_notes?: string | null
+          budget_request_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          property_admin_id?: string | null
+          title?: string
+          description?: string
+          category?: string
+          location?: string | null
+          urgency?: string
+          status?: string
+          photo_urls?: string[] | null
+          reported_at?: string
+          resolved_at?: string | null
+          resolution_notes?: string | null
+          budget_request_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_property_admin_id_fkey"
+            columns: ["property_admin_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_budget_request_id_fkey"
+            columns: ["budget_request_id"]
+            isOneToOne: false
+            referencedRelation: "budget_requests"
             referencedColumns: ["id"]
           }
         ]
@@ -1594,7 +1675,8 @@ export interface Database {
         | "rating"
         | "message"
         | "system"
-      notification_type: "info" | "success" | "warning" | "error" | "system"
+        | "incident"
+      notification_type: "info" | "success" | "warning" | "error"
       payment_method: "stripe" | "paypal" | "bank_transfer" | "cash"
       payment_status:
         | "pending"
@@ -1604,7 +1686,7 @@ export interface Database {
         | "refunded"
         | "cancelled"
       property_status: "active" | "inactive" | "maintenance"
-      property_type: "residential" | "commercial" | "mixed"
+      property_type: "residential" | "commercial" | "industrial" | "land"
       quote_status: "pending" | "accepted" | "rejected" | "expired" | "cancelled"
       role_type:
         | "particular"
