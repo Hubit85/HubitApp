@@ -57,16 +57,13 @@ export function CommunityAdministratorAssignment() {
         .from('community_member_administrators')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (queryError) {
-        if (queryError.code === 'PGRST116') {
-          // No assignment found - this is normal for new users
-          setAssignment(null);
-        } else {
-          throw queryError;
-        }
-      } else {
+        throw queryError;
+      }
+
+      if (data) {
         setAssignment(data);
         setFormData({
           company_name: data.company_name || "",
@@ -75,6 +72,9 @@ export function CommunityAdministratorAssignment() {
           contact_phone: data.contact_phone || "",
           notes: data.notes || ""
         });
+      } else {
+        // No assignment found - this is normal for new users
+        setAssignment(null);
       }
     } catch (err) {
       console.error("Error loading administrator assignment:", err);
