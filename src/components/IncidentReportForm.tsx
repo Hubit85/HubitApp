@@ -296,7 +296,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
             user_id: admin.user_id,
             title: `Nueva incidencia reportada - ${urgencyLevel?.label || 'Normal'}`,
             message: `${profile?.full_name || 'Un miembro de comunidad'} ha reportado una incidencia: "${formData.title}". Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
-            type: formData.urgency === 'emergency' ? 'error' : 'info',
+            type: (formData.urgency === 'emergency' ? 'error' : 'info') as 'error' | 'info',
             category: 'incident' as const,
             related_entity_type: 'incident',
             related_entity_id: incident.id,
