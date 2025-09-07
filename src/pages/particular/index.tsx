@@ -31,6 +31,7 @@ import ZoomableSection from "@/components/ZoomableSection";
 import ServiceHistoryCard from "@/components/ratings/ServiceHistoryCard";
 import RatingModal from "@/components/ratings/RatingModal";
 import UserRoleManager from "@/components/UserRoleManager";
+import { EnhancedBudgetRequestForm } from "@/components/dashboard/EnhancedBudgetRequestForm";
 
 interface ServiceProvider {
   id: string;
@@ -335,44 +336,13 @@ export default function ParticularDashboard() {
               )}
               
               {activeTab === "presupuesto" && (
-                <div className="bg-white rounded-lg shadow-md p-6 transition-all duration-300">
-                  <Card className="transition-all duration-200 hover:shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="text-gray-800">{t("requestQuote")}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <form className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="service-type" className="text-gray-700">{t("serviceType")}</Label>
-                            <select id="service-type" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-blue-500">
-                              <option value="">{t("selectServiceType")}</option>
-                              <option value="plumbing">{t("plumbing")}</option>
-                              <option value="electrical">{t("electrical")}</option>
-                              <option value="painting">{t("painting")}</option>
-                              <option value="carpentry">{t("carpentry")}</option>
-                              <option value="other">{t("other")}</option>
-                            </select>
-                          </div>
-                          <div>
-                            <Label htmlFor="service-date" className="text-gray-700">{t("preferredDate")}</Label>
-                            <Input id="service-date" type="date" className="transition-all duration-200 focus:scale-105" />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="service-title" className="text-gray-700">{t("serviceTitle")}</Label>
-                          <Input id="service-title" placeholder={t("exampleLeakRepair")} className="transition-all duration-200 focus:scale-105" />
-                        </div>
-                        <div>
-                          <Label htmlFor="service-description" className="text-gray-700">{t("detailedDescription")}</Label>
-                          <Textarea id="service-description" rows={4} placeholder={t("describeServiceNeeded")} className="transition-all duration-200 focus:scale-105" />
-                        </div>
-                        <Button className="w-full transition-all duration-200 hover:scale-105 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
-                          {t("requestQuotes")}
-                        </Button>
-                      </form>
-                    </CardContent>
-                  </Card>
+                <div className="bg-white rounded-lg shadow-md transition-all duration-300">
+                  <EnhancedBudgetRequestForm 
+                    onSuccess={() => {
+                      // Refresh the page or show success message
+                      setActiveTab("historial"); // Navigate to history to see new requests
+                    }} 
+                  />
                 </div>
               )}
               
