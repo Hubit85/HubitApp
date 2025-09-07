@@ -17,6 +17,9 @@ import ZoomableSection from "@/components/ZoomableSection";
 import { Header } from "@/components/layout/Header";
 import PropertyManager from "@/components/dashboard/PropertyManager";
 import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
+import { BudgetRequestManager as ServiceProviderBudgetManager } from "@/components/service-provider/BudgetRequestManager";
+import { EnhancedBudgetRequestForm } from "@/components/dashboard/EnhancedBudgetRequestForm";
+import { ContractManager } from "@/components/contracts/ContractManager";
 import UserRoleManager from "@/components/UserRoleManager";
 import { IncidentReportForm } from "@/components/IncidentReportForm";
 
@@ -154,7 +157,7 @@ export default function Dashboard() {
           { id: "clientes", label: "Mis Clientes", icon: Users },
           { id: "calendario", label: "Calendario", icon: Calendar },
           { id: "contratos", label: "Contratos Activos", icon: ClipboardList },
-          { id: "evaluacion", label: "Evaluaciones Recibidas", icon: StarIcon },
+          { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
           { id: "facturacion", label: "Facturación", icon: CreditCard },
           { id: "estadisticas", label: "Estadísticas", icon: TrendingUp },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
@@ -1341,6 +1344,101 @@ export default function Dashboard() {
               </Card>
             )}
           </div>
+        );
+
+      case "presupuestos":
+        return (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+              <FileText className="h-8 w-8 text-blue-600" />
+              Gestión de Presupuestos y Ofertas
+            </h1>
+            <p className="text-stone-600">
+              Encuentra oportunidades de negocio, envía cotizaciones profesionales y gestiona tus propuestas
+            </p>
+          </div>
+          
+          <ServiceProviderBudgetManager />
+        );
+
+      case "presupuesto":
+        return (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2">
+              {activeRole?.role_type === "property_administrator" ? "Solicitar Presupuesto" : "Solicitar Presupuesto"}
+            </h1>
+            <p className="text-stone-600">
+              {activeRole?.role_type === "property_administrator" 
+                ? "Solicita presupuestos profesionales para las comunidades bajo tu administración"
+                : "Obtén presupuestos profesionales para tus proyectos"}
+            </p>
+          </div>
+          
+          {activeRole?.role_type === "community_member" ? (
+            <Card className="border-amber-200 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 mt-6">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-amber-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-2">Funcionalidad No Disponible</h3>
+                <p className="text-amber-700 mb-4">
+                  Como miembro de comunidad, no puedes solicitar presupuestos directamente. 
+                  Para servicios en tu comunidad, debes reportar la incidencia al administrador de fincas.
+                </p>
+                <p className="text-amber-600 text-sm mb-6">
+                  El administrador de fincas será quien gestione los presupuestos en nombre de la comunidad.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    onClick={() => setActiveTab("incidencias")}
+                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Reportar Incidencia
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setActiveTab("administrador")}
+                    className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Contactar Administrador
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : activeRole?.role_type === "property_administrator" ? (
+            <div className="mt-6">
+              <EnhancedBudgetRequestForm />
+            </div>
+          ) : (
+            <div className="mt-6">
+              <BudgetRequestManager />
+            </div>
+          )}
+        );
+
+      case "contratos":
+        return (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+              <ClipboardList className="h-8 w-8 text-purple-600" />
+              {activeRole?.role_type === "service_provider" ? "Gestión de Contratos" : 
+               activeRole?.role_type === "property_administrator" ? "Contratos de Comunidades" :
+               activeRole?.role_type === "community_member" ? "Mis Contratos" : "Mis Contratos"}
+            </h1>
+            <p className="text-stone-600">
+              {activeRole?.role_type === "service_provider" 
+                ? "Administra contratos activos, crea nuevos contratos desde cotizaciones aceptadas y realiza seguimiento de proyectos"
+                : activeRole?.role_type === "property_administrator"
+                ? "Gestiona contratos de servicios para las comunidades bajo tu administración"
+                : activeRole?.role_type === "community_member"
+                ? "Gestiona contratos de servicios comunitarios, firmas digitales y seguimiento de trabajos"
+                : "Administra tus contratos de servicios"}
+            </p>
+          </div>
+          
+          <ContractManager />
         );
 
       default:
