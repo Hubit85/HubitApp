@@ -13,7 +13,7 @@ import {
   User, Users, Home, TrendingUp, AlertTriangle, Calendar, 
   Shield, Store, Star, Search, Filter, Plus, Edit, Eye, 
   CheckCircle, Clock, MapPin, Phone, Mail, Settings, Bell,
-  FileText, Loader2, LogOut, Package, ArrowRight, StarIcon, Heart, CreditCard
+  FileText, Loader2, LogOut, Package, ArrowRight, StarIcon, Heart, CreditCard, Wrench, ClipboardList
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
@@ -24,6 +24,7 @@ import SupabaseStatus from "@/components/SupabaseStatus";
 import SystemStatusCard from "@/components/SystemStatusCard";
 import UserRoleManager from "@/components/UserRoleManager";
 import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
+import { ContractManager } from "@/components/contracts/ContractManager";
 
 export default function DashboardMiembro() {
   const { user, profile, signOut, loading } = useSupabaseAuth();
@@ -42,17 +43,15 @@ export default function DashboardMiembro() {
   };
 
   const navItems = [
-    { id: "overview", label: "Resumen", icon: Home },
-    { id: "perfil", label: "Mi Perfil", icon: Users },
-    { id: "comunidad", label: "Mi Comunidad", icon: Home },
-    { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
-    { id: "proveedores", label: "Proveedores Verificados", icon: Store },
-    { id: "favoritos", label: "Mis Favoritos", icon: Heart },
-    { id: "historial", label: "Historial de Servicios", icon: Clock },
-    { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
-    { id: "incidencias", label: "Reportar Incidencias", icon: Shield },
+    { id: "overview", label: "Panel de Control", icon: Home },
+    { id: "servicios", label: "Servicios de la Comunidad", icon: Wrench },
+    { id: "presupuestos", label: "Solicitar Presupuesto", icon: ClipboardList },
+    { id: "contratos", label: "Mis Contratos", icon: FileText },
+    { id: "juntas", label: "Juntas y Reuniones", icon: Calendar },
+    { id: "pendientes", label: "Temas Pendientes", icon: AlertTriangle },
+    { id: "usuarios", label: "Otros Residentes", icon: Users },
     { id: "notificaciones", label: "Notificaciones", icon: Bell },
-    { id: "pagos", label: "Mis Pagos", icon: CreditCard },
+    { id: "perfil", label: "Mi Perfil", icon: User },
     { id: "configuracion", label: "Configuración", icon: Settings },
   ];
 
@@ -612,8 +611,25 @@ export default function DashboardMiembro() {
                 </ZoomableSection>
               )}
 
+              {/* Contratos Tab */}
+              {activeTab === "contratos" && (
+                <ZoomableSection>
+                  <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+                      <FileText className="h-8 w-8 text-purple-600" />
+                      Mis Contratos
+                    </h1>
+                    <p className="text-stone-600">
+                      Gestiona contratos de servicios comunitarios, firmas digitales y seguimiento de trabajos
+                    </p>
+                  </div>
+                  
+                  <ContractManager />
+                </ZoomableSection>
+              )}
+
               {/* Other tabs placeholder */}
-              {!["overview", "comunidad", "presupuesto", "perfil", "incidencias", "evaluacion"].includes(activeTab) && (
+              {!["overview", "servicios", "presupuestos", "contratos", "perfil"].includes(activeTab) && (
                 <ZoomableSection>
                   <Card className="border-stone-200 shadow-lg">
                     <CardContent className="p-8 text-center">
