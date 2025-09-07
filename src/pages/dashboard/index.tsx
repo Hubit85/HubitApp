@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -27,7 +28,6 @@ export default function Dashboard() {
   const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
-  // Initialize with a default value to prevent controlled/uncontrolled switching
   const [selectedRole, setSelectedRole] = useState<string>("particular");
 
   useEffect(() => {
@@ -36,10 +36,8 @@ export default function Dashboard() {
     }
   }, [user, loading, router]);
 
-  // Fix: Initialize selectedRole with proper fallback handling and prevent state switching
   useEffect(() => {
-    // Always set a value, never leave it empty or undefined
-    let newRole = "particular"; // Default fallback
+    let newRole = "particular";
     
     if (activeRole?.role_type) {
       newRole = activeRole.role_type;
@@ -47,7 +45,6 @@ export default function Dashboard() {
       newRole = profile.user_type;
     }
     
-    // Only update if the new role is different from current
     if (newRole !== selectedRole) {
       setSelectedRole(newRole);
     }
@@ -61,22 +58,16 @@ export default function Dashboard() {
   const handleRoleChange = async (newRole: string) => {
     if (!user || newRole === selectedRole || !newRole) return;
     
-    console.log("🔄 Changing role to:", newRole);
-    
     try {
       const result = await activateRole(newRole as any);
       
       if (result.success) {
-        console.log("✅ Role changed successfully");
         await refreshRoles();
         setActiveTab("overview");
-        // selectedRole will be updated by useEffect when activeRole changes
       } else {
-        console.error("❌ Failed to change role:", result.message);
         alert(`Error al cambiar el rol: ${result.message}`);
       }
     } catch (error) {
-      console.error("💥 Error in handleRoleChange:", error);
       alert(`Error inesperado al cambiar el rol: ${error instanceof Error ? error.message : "Error desconocido"}`);
     }
   };
@@ -111,13 +102,11 @@ export default function Dashboard() {
     );
   };
 
-  // Base navigation items that are common
   const baseNavItems = [
     { id: "overview", label: "Resumen", icon: Shield },
     { id: "perfil", label: "Mi Perfil", icon: User },
   ];
 
-  // Role-specific navigation items
   const getRoleSpecificNavItems = (roleType: string) => {
     switch (roleType) {
       case "particular":
@@ -191,7 +180,6 @@ export default function Dashboard() {
     }
   };
 
-  // Role-specific overview content
   const renderRoleOverview = (roleType: string) => {
     const userTypeInfo = getUserTypeInfo(roleType);
     const UserTypeIcon = userTypeInfo.icon;
@@ -200,7 +188,6 @@ export default function Dashboard() {
       case "particular":
         return (
           <div className="space-y-8">
-            {/* Status Cards for Particular */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardContent className="p-6">
@@ -245,7 +232,6 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Quick Actions */}
             <div>
               <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
                 <Package className="h-8 w-8 text-stone-600" />
@@ -299,7 +285,6 @@ export default function Dashboard() {
       case "community_member":
         return (
           <div className="space-y-8">
-            {/* Status Cards for Community Member */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardContent className="p-6">
@@ -344,7 +329,6 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Community Updates */}
             <div>
               <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
                 <Bell className="h-8 w-8 text-stone-600" />
@@ -402,7 +386,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Actions */}
             <div>
               <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
                 <Package className="h-8 w-8 text-stone-600" />
@@ -456,7 +439,6 @@ export default function Dashboard() {
       case "service_provider":
         return (
           <div className="space-y-8">
-            {/* Business Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardContent className="p-6">
@@ -523,7 +505,6 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Recent Activity */}
             <div>
               <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
                 <Clock className="h-8 w-8 text-stone-600" />
@@ -609,7 +590,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Actions */}
             <div>
               <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
                 <Package className="h-8 w-8 text-stone-600" />
@@ -676,7 +656,6 @@ export default function Dashboard() {
       case "property_administrator":
         return (
           <div className="space-y-8">
-            {/* Management Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="border-stone-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <CardContent className="p-6">
@@ -739,7 +718,6 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            {/* Management Activity */}
             <div>
               <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
                 <Clock className="h-8 w-8 text-stone-600" />
@@ -825,7 +803,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Management Actions */}
             <div>
               <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
                 <Package className="h-8 w-8 text-stone-600" />
@@ -874,7 +851,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Financial Summary */}
             <div>
               <h2 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
                 <TrendingUp className="h-8 w-8 text-stone-600" />
@@ -983,18 +959,19 @@ export default function Dashboard() {
     }
   };
 
-  // Role-specific tab content renderer
   const renderRoleSpecificContent = (tabId: string, roleType: string) => {
     switch (tabId) {
       case "propiedades":
         return (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2">
-              {roleType === "community_member" ? "Mi Comunidad" : "Mis Propiedades"}
-            </h1>
-            <p className="text-stone-600">
-              {roleType === "community_member" ? "Información y gestión de tu comunidad" : "Gestiona tus propiedades residenciales"}
-            </p>
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2">
+                {roleType === "community_member" ? "Mi Comunidad" : "Mis Propiedades"}
+              </h1>
+              <p className="text-stone-600">
+                {roleType === "community_member" ? "Información y gestión de tu comunidad" : "Gestiona tus propiedades residenciales"}
+              </p>
+            </div>
             {(roleType === "particular" || roleType === "community_member") ? (
               <div className="mt-6">
                 <PropertyManager />
@@ -1032,14 +1009,16 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             )}
-          </div>
+          </>
         );
 
       case "comunidad":
         return (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2">Mi Comunidad</h1>
-            <p className="text-stone-600">Información y gestión de tu comunidad</p>
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2">Mi Comunidad</h1>
+              <p className="text-stone-600">Información y gestión de tu comunidad</p>
+            </div>
             
             <div className="mt-6 space-y-6">
               <Card className="border-stone-200 shadow-lg">
@@ -1116,76 +1095,98 @@ export default function Dashboard() {
                 </Card>
               </div>
             </div>
-          </div>
+          </>
         );
 
       case "presupuesto":
       case "presupuestos":
-        return (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2">
-              {roleType === "service_provider" ? "Gestionar Presupuestos" : 
-               roleType === "property_administrator" ? "Solicitar Presupuesto" : "Solicitar Presupuesto"}
-            </h1>
-            <p className="text-stone-600">
-              {roleType === "service_provider" 
-                ? "Gestiona y responde a solicitudes de presupuestos" 
-                : roleType === "property_administrator"
-                ? "Solicita presupuestos profesionales para las comunidades bajo tu administración"
-                : "Obtén presupuestos profesionales para tus proyectos"}
-            </p>
-            {roleType === "community_member" ? (
-              <Card className="border-amber-200 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 mt-6">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Shield className="h-8 w-8 text-amber-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-black mb-2">Funcionalidad No Disponible</h3>
-                  <p className="text-amber-700 mb-4">
-                    Como miembro de comunidad, no puedes solicitar presupuestos directamente. 
-                    Para servicios en tu comunidad, debes reportar la incidencia al administrador de fincas.
-                  </p>
-                  <p className="text-amber-600 text-sm mb-6">
-                    El administrador de fincas será quien gestione los presupuestos en nombre de la comunidad.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button 
-                      onClick={() => setActiveTab("incidencias")}
-                      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-                    >
-                      <Shield className="h-4 w-4 mr-2" />
-                      Reportar Incidencia
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => setActiveTab("administrador")}
-                      className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Contactar Administrador
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="mt-6">
-                <BudgetRequestManager />
+        if (roleType === "service_provider") {
+          return (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+                  <FileText className="h-8 w-8 text-blue-600" />
+                  Gestión de Presupuestos y Ofertas
+                </h1>
+                <p className="text-stone-600">
+                  Encuentra oportunidades de negocio, envía cotizaciones profesionales y gestiona tus propuestas
+                </p>
               </div>
-            )}
-          </div>
-        );
+              <ServiceProviderBudgetManager />
+            </>
+          );
+        } else {
+          return (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-black mb-2">
+                  {roleType === "property_administrator" ? "Solicitar Presupuesto" : "Solicitar Presupuesto"}
+                </h1>
+                <p className="text-stone-600">
+                  {roleType === "property_administrator" 
+                    ? "Solicita presupuestos profesionales para las comunidades bajo tu administración"
+                    : "Obtén presupuestos profesionales para tus proyectos"}
+                </p>
+              </div>
+              {roleType === "community_member" ? (
+                <Card className="border-amber-200 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 mt-6">
+                  <CardContent className="p-8 text-center">
+                    <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Shield className="h-8 w-8 text-amber-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-black mb-2">Funcionalidad No Disponible</h3>
+                    <p className="text-amber-700 mb-4">
+                      Como miembro de comunidad, no puedes solicitar presupuestos directamente. 
+                      Para servicios en tu comunidad, debes reportar la incidencia al administrador de fincas.
+                    </p>
+                    <p className="text-amber-600 text-sm mb-6">
+                      El administrador de fincas será quien gestione los presupuestos en nombre de la comunidad.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button 
+                        onClick={() => setActiveTab("incidencias")}
+                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Reportar Incidencia
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => setActiveTab("administrador")}
+                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Contactar Administrador
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : roleType === "property_administrator" ? (
+                <div className="mt-6">
+                  <EnhancedBudgetRequestForm />
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <BudgetRequestManager />
+                </div>
+              )}
+            </>
+          );
+        }
 
       case "evaluacion":
         return (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2">
-              {roleType === "service_provider" ? "Evaluaciones Recibidas" : "Evaluación de Servicios"}
-            </h1>
-            <p className="text-stone-600">
-              {roleType === "service_provider" 
-                ? "Revisa las calificaciones y comentarios de tus clientes"
-                : "Califica los servicios recibidos"}
-            </p>
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2">
+                {roleType === "service_provider" ? "Evaluaciones Recibidas" : "Evaluación de Servicios"}
+              </h1>
+              <p className="text-stone-600">
+                {roleType === "service_provider" 
+                  ? "Revisa las calificaciones y comentarios de tus clientes"
+                  : "Califica los servicios recibidos"}
+              </p>
+            </div>
             
             <Card className="border-stone-200 shadow-lg mt-6">
               <CardContent className="p-8 text-center">
@@ -1250,20 +1251,22 @@ export default function Dashboard() {
                 </Badge>
               </CardContent>
             </Card>
-          </div>
+          </>
         );
 
       case "incidencias":
         return (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2">
-              {roleType === "property_administrator" ? "Gestión de Incidencias" : "Reportar Incidencias"}
-            </h1>
-            <p className="text-stone-600">
-              {roleType === "property_administrator" 
-                ? "Administra incidencias reportadas por las comunidades"
-                : "Informa sobre problemas o averías en tu comunidad"}
-            </p>
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2">
+                {roleType === "property_administrator" ? "Gestión de Incidencias" : "Reportar Incidencias"}
+              </h1>
+              <p className="text-stone-600">
+                {roleType === "property_administrator" 
+                  ? "Administra incidencias reportadas por las comunidades"
+                  : "Informa sobre problemas o averías en tu comunidad"}
+              </p>
+            </div>
             
             {roleType === "community_member" ? (
               <div className="mt-6">
@@ -1291,50 +1294,6 @@ export default function Dashboard() {
                       ? "Centraliza todas las incidencias reportadas por miembros de las comunidades, priorízalas y gestiona su resolución con proveedores especializados."
                       : "Aquí podrás reportar incidencias, averías o problemas en las zonas comunes de tu comunidad. El administrador de fincas recibirá la notificación inmediatamente."}
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    {roleType === "property_administrator" ? (
-                      <>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <AlertTriangle className="h-6 w-6 text-red-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">23 Activas</p>
-                          <p className="text-xs text-stone-600">Incidencias</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <Clock className="h-6 w-6 text-orange-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">8 Urgentes</p>
-                          <p className="text-xs text-stone-600">Requieren atención</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">15 Resueltas</p>
-                          <p className="text-xs text-stone-600">Esta semana</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <Store className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">12 Proveedores</p>
-                          <p className="text-xs text-stone-600">Asignados</p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <Shield className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">Reportar</p>
-                          <p className="text-xs text-stone-600">Describe el problema</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <Bell className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">Notificar</p>
-                          <p className="text-xs text-stone-600">Al administrador</p>
-                        </div>
-                        <div className="p-4 bg-stone-50 rounded-lg">
-                          <CheckCircle className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                          <p className="text-sm font-medium text-stone-900">Resolver</p>
-                          <p className="text-xs text-stone-600">Seguimiento automático</p>
-                        </div>
-                      </>
-                    )}
-                  </div>
                   <Badge className="bg-orange-100 text-orange-800 border-orange-200">
                     {roleType === "property_administrator" 
                       ? "Integrado con sistema de presupuestos automáticos"
@@ -1343,102 +1302,32 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             )}
-          </div>
+          </>
         );
-
-      case "presupuestos":
-        return (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
-              <FileText className="h-8 w-8 text-blue-600" />
-              Gestión de Presupuestos y Ofertas
-            </h1>
-            <p className="text-stone-600">
-              Encuentra oportunidades de negocio, envía cotizaciones profesionales y gestiona tus propuestas
-            </p>
-          </div>
-          
-          <ServiceProviderBudgetManager />
-        );
-
-      case "presupuesto":
-        return (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2">
-              {activeRole?.role_type === "property_administrator" ? "Solicitar Presupuesto" : "Solicitar Presupuesto"}
-            </h1>
-            <p className="text-stone-600">
-              {activeRole?.role_type === "property_administrator" 
-                ? "Solicita presupuestos profesionales para las comunidades bajo tu administración"
-                : "Obtén presupuestos profesionales para tus proyectos"}
-            </p>
-          </div>
-          
-          {activeRole?.role_type === "community_member" ? (
-            <Card className="border-amber-200 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 mt-6">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="h-8 w-8 text-amber-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-black mb-2">Funcionalidad No Disponible</h3>
-                <p className="text-amber-700 mb-4">
-                  Como miembro de comunidad, no puedes solicitar presupuestos directamente. 
-                  Para servicios en tu comunidad, debes reportar la incidencia al administrador de fincas.
-                </p>
-                <p className="text-amber-600 text-sm mb-6">
-                  El administrador de fincas será quien gestione los presupuestos en nombre de la comunidad.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button 
-                    onClick={() => setActiveTab("incidencias")}
-                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    Reportar Incidencia
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => setActiveTab("administrador")}
-                    className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                  >
-                    <Mail className="h-4 w-4 mr-2" />
-                    Contactar Administrador
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : activeRole?.role_type === "property_administrator" ? (
-            <div className="mt-6">
-              <EnhancedBudgetRequestForm />
-            </div>
-          ) : (
-            <div className="mt-6">
-              <BudgetRequestManager />
-            </div>
-          )}
-        );
-
+      
       case "contratos":
         return (
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
-              <ClipboardList className="h-8 w-8 text-purple-600" />
-              {activeRole?.role_type === "service_provider" ? "Gestión de Contratos" : 
-               activeRole?.role_type === "property_administrator" ? "Contratos de Comunidades" :
-               activeRole?.role_type === "community_member" ? "Mis Contratos" : "Mis Contratos"}
-            </h1>
-            <p className="text-stone-600">
-              {activeRole?.role_type === "service_provider" 
-                ? "Administra contratos activos, crea nuevos contratos desde cotizaciones aceptadas y realiza seguimiento de proyectos"
-                : activeRole?.role_type === "property_administrator"
-                ? "Gestiona contratos de servicios para las comunidades bajo tu administración"
-                : activeRole?.role_type === "community_member"
-                ? "Gestiona contratos de servicios comunitarios, firmas digitales y seguimiento de trabajos"
-                : "Administra tus contratos de servicios"}
-            </p>
-          </div>
-          
-          <ContractManager />
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+                <ClipboardList className="h-8 w-8 text-purple-600" />
+                {roleType === "service_provider" ? "Gestión de Contratos" : 
+                 roleType === "property_administrator" ? "Contratos de Comunidades" :
+                 roleType === "community_member" ? "Mis Contratos" : "Mis Contratos"}
+              </h1>
+              <p className="text-stone-600">
+                {roleType === "service_provider" 
+                  ? "Administra contratos activos, crea nuevos contratos desde cotizaciones aceptadas y realiza seguimiento de proyectos"
+                  : roleType === "property_administrator"
+                  ? "Gestiona contratos de servicios para las comunidades bajo tu administración"
+                  : roleType === "community_member"
+                  ? "Gestiona contratos de servicios comunitarios, firmas digitales y seguimiento de trabajos"
+                  : "Administra tus contratos de servicios"}
+              </p>
+            </div>
+            
+            <ContractManager />
+          </>
         );
 
       default:
@@ -1497,11 +1386,9 @@ export default function Dashboard() {
       </Head>
 
       <div className="min-h-screen bg-white">
-        {/* Header */}
         <Header />
 
         <div className="flex">
-          {/* Sidebar */}
           <div className="w-72 bg-gray-800 text-white shadow-lg flex flex-col min-h-screen">
             <div className="p-6 border-b border-gray-700">
               <div className="flex items-center gap-3 mb-4">
@@ -1514,7 +1401,6 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              {/* Role Selector */}
               <div className="space-y-2">
                 <label className="text-xs text-gray-400 font-medium uppercase tracking-wide">
                   Rol Activo
@@ -1558,14 +1444,12 @@ export default function Dashboard() {
                   </SelectContent>
                 </Select>
                 
-                {/* Mostrar información sobre roles disponibles */}
                 {getRoleOptions().length > 1 && (
                   <p className="text-xs text-gray-400 mt-1">
                     {getRoleOptions().length} roles disponibles
                   </p>
                 )}
                 
-                {/* Mostrar si no hay otros roles disponibles */}
                 {getRoleOptions().length <= 1 && userRoles.length > 1 && (
                   <p className="text-xs text-amber-400 mt-1">
                     Otros roles pendientes de verificación
@@ -1596,7 +1480,6 @@ export default function Dashboard() {
               </nav>
             </div>
 
-            {/* Sign Out Button at Bottom */}
             <div className="p-4 border-t border-gray-700">
               <Button
                 variant="ghost"
@@ -1609,10 +1492,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 bg-gray-50">
+          <main className="flex-1 bg-gray-50">
             <div className="max-w-full px-8 py-8">
-              {/* Overview Tab */}
               {activeTab === "overview" && (
                 <ZoomableSection>
                   <div className="mb-8">
@@ -1637,12 +1518,10 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-
                   {renderRoleOverview(currentRole)}
                 </ZoomableSection>
               )}
 
-              {/* Mi Perfil Tab - Now includes all profile information and role management */}
               {activeTab === "perfil" && (
                 <ZoomableSection>
                   <div className="mb-6">
@@ -1660,7 +1539,6 @@ export default function Dashboard() {
                   </div>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Profile Details */}
                     <div className="lg:col-span-1">
                       <Card className="border-stone-200 shadow-lg">
                         <CardHeader className="text-center pb-4">
@@ -1687,9 +1565,7 @@ export default function Dashboard() {
                               <UserTypeIcon className="h-5 w-5 text-stone-500" />
                               <div>
                                 <p className="text-sm text-stone-500 font-medium">
-                                  {currentRole === "service_provider" ? "Empresa" : 
-                                   currentRole === "property_administrator" ? "Empresa" : 
-                                   "Nombre"}
+                                  {currentRole === "service_provider" || currentRole === "property_administrator" ? "Empresa" : "Nombre"}
                                 </p>
                                 <p className="font-semibold text-black">{profile.full_name || "No especificado"}</p>
                               </div>
@@ -1703,36 +1579,6 @@ export default function Dashboard() {
                               </div>
                             </div>
 
-                            {currentRole === "community_member" && (
-                              <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
-                                <Home className="h-5 w-5 text-stone-500" />
-                                <div>
-                                  <p className="text-sm text-stone-500 font-medium">Vivienda</p>
-                                  <p className="font-semibold text-black">Edificio A - Portal 3 - 2ºB</p>
-                                </div>
-                              </div>
-                            )}
-
-                            {currentRole === "service_provider" && (
-                              <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
-                                <Store className="h-5 w-5 text-stone-500" />
-                                <div>
-                                  <p className="text-sm text-stone-500 font-medium">Especialidad</p>
-                                  <p className="font-semibold text-black">Fontanería y Electricidad</p>
-                                </div>
-                              </div>
-                            )}
-
-                            {currentRole === "property_administrator" && (
-                              <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
-                                <Briefcase className="h-5 w-5 text-stone-500" />
-                                <div>
-                                  <p className="text-sm text-stone-500 font-medium">Número de Colegiado</p>
-                                  <p className="font-semibold text-black">CAF-Mad-2847</p>
-                                </div>
-                              </div>
-                            )}
-
                             {profile.phone && (
                               <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
                                 <Phone className="h-5 w-5 text-stone-500" />
@@ -1743,25 +1589,11 @@ export default function Dashboard() {
                               </div>
                             )}
 
-                            {(currentRole === "service_provider" || currentRole === "property_administrator") && (
-                              <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
-                                <MapPin className="h-5 w-5 text-stone-500" />
-                                <div>
-                                  <p className="text-sm text-stone-500 font-medium">
-                                    {currentRole === "service_provider" ? "Zona de Trabajo" : "Zona de Actuación"}
-                                  </p>
-                                  <p className="font-semibold text-black">Madrid y {currentRole === "property_administrator" ? "área metropolitana" : "alrededores"}</p>
-                                </div>
-                              </div>
-                            )}
-
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
                               <Calendar className="h-5 w-5 text-stone-500" />
                               <div>
                                 <p className="text-sm text-stone-500 font-medium">
-                                  {currentRole === "community_member" ? "Miembro desde" : 
-                                   (currentRole === "service_provider" || currentRole === "property_administrator") ? "En la plataforma desde" :
-                                   "Miembro desde"}
+                                  Miembro desde
                                 </p>
                                 <p className="font-semibold text-black">
                                   {profile.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", {
@@ -1772,18 +1604,6 @@ export default function Dashboard() {
                                 </p>
                               </div>
                             </div>
-                          </div>
-
-                          <div className="pt-4 border-t border-stone-200">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm text-stone-600 font-medium">Rol Activo</span>
-                              <Badge className={`${userTypeInfo.color} text-white border-0`}>
-                                {userTypeInfo.label}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-stone-500">
-                              {userTypeInfo.description}
-                            </p>
                           </div>
 
                           <div className="pt-4 border-t border-stone-200">
@@ -1798,9 +1618,7 @@ export default function Dashboard() {
                       </Card>
                     </div>
 
-                    {/* Profile Management Tools - Including Role Management */}
                     <div className="lg:col-span-2 space-y-6">
-                      {/* Role Management Section */}
                       <Card className="border-stone-200 shadow-lg">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-xl font-bold text-black">
@@ -1816,7 +1634,6 @@ export default function Dashboard() {
                         </CardContent>
                       </Card>
 
-                      {/* System Tools */}
                       <Card className="border-stone-200 shadow-lg">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-xl font-bold text-black">
@@ -1843,16 +1660,16 @@ export default function Dashboard() {
                 </ZoomableSection>
               )}
 
-              {/* Role-specific tabs */}
               {activeTab !== "overview" && activeTab !== "perfil" && (
                 <ZoomableSection>
                   {renderRoleSpecificContent(activeTab, currentRole)}
                 </ZoomableSection>
               )}
             </div>
-          </div>
+          </main>
         </div>
       </div>
     </>
   );
 }
+
