@@ -13,7 +13,7 @@ import {
   User, Home, TrendingUp, AlertTriangle, Calendar, 
   Shield, Store, Star, Search, Filter, Plus, Edit, Eye, 
   CheckCircle, Clock, MapPin, Phone, Mail, Settings, Bell,
-  FileText, Users, Loader2, LogOut, Heart, Package, ArrowRight, Wrench, StarIcon, CreditCard
+  FileText, Users, Loader2, LogOut, Heart, Package, ArrowRight, Wrench, StarIcon, CreditCard, ClipboardList
 } from 'lucide-react';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Header } from "@/components/layout/Header";
@@ -25,6 +25,7 @@ import SystemStatusCard from "@/components/SystemStatusCard";
 import UserRoleManager from "@/components/UserRoleManager";
 import PropertyManager from "@/components/dashboard/PropertyManager";
 import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
+import { ContractManager } from "@/components/contracts/ContractManager";
 
 export default function DashboardParticular() {
   const { user, profile, signOut, loading } = useSupabaseAuth();
@@ -43,16 +44,12 @@ export default function DashboardParticular() {
   };
 
   const navItems = [
-    { id: "overview", label: "Resumen", icon: Home },
-    { id: "perfil", label: "Mi Perfil", icon: User },
-    { id: "propiedades", label: "Mis Propiedades", icon: Home },
-    { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
-    { id: "proveedores", label: "Proveedores de Servicios", icon: Wrench },
-    { id: "favoritos", label: "Mis Favoritos", icon: Heart },
-    { id: "historial", label: "Historial de Servicios", icon: Clock },
-    { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+    { id: "overview", label: "Panel de Control", icon: Home },
+    { id: "servicios", label: "Servicios Actuales", icon: Wrench },
+    { id: "presupuestos", label: "Solicitar Presupuesto", icon: ClipboardList },
+    { id: "contratos", label: "Mis Contratos", icon: FileText },
     { id: "notificaciones", label: "Notificaciones", icon: Bell },
-    { id: "pagos", label: "Mis Pagos", icon: CreditCard },
+    { id: "perfil", label: "Mi Perfil", icon: User },
     { id: "configuracion", label: "Configuración", icon: Settings },
   ];
 
@@ -408,8 +405,25 @@ export default function DashboardParticular() {
                 </ZoomableSection>
               )}
 
+              {/* Contratos Tab */}
+              {activeTab === "contratos" && (
+                <ZoomableSection>
+                  <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+                      <FileText className="h-8 w-8 text-purple-600" />
+                      Mis Contratos
+                    </h1>
+                    <p className="text-stone-600">
+                      Gestiona y revisa tus contratos de servicios, firmas digitales y seguimiento de trabajos
+                    </p>
+                  </div>
+                  
+                  <ContractManager />
+                </ZoomableSection>
+              )}
+
               {/* Other tabs placeholder */}
-              {!["overview", "propiedades", "presupuesto", "perfil", "evaluacion"].includes(activeTab) && (
+              {!["overview", "servicios", "presupuestos", "contratos", "perfil"].includes(activeTab) && (
                 <ZoomableSection>
                   <Card className="border-stone-200 shadow-lg">
                     <CardContent className="p-8 text-center">
