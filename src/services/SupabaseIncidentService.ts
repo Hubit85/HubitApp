@@ -34,6 +34,10 @@ export interface Incident {
   reviewed_by?: string;
   created_at: string;
   updated_at: string;
+  // Additional joined fields
+  reporter_name?: string;
+  reporter_email?: string;
+  community_name?: string;
 }
 
 export class SupabaseIncidentService {
@@ -61,7 +65,12 @@ export class SupabaseIncidentService {
     try {
       const { data, error } = await supabase
         .from('incidents')
-        .select('*')
+        .select(`
+          *,
+          community:communities!incidents_community_id_fkey(
+            name
+          )
+        `)
         .eq('reporter_id', reporterId)
         .order('created_at', { ascending: false });
 
@@ -70,7 +79,10 @@ export class SupabaseIncidentService {
         throw new Error(`Error al obtener incidencias: ${error.message}`);
       }
 
-      return data || [];
+      return (data || []).map(incident => ({
+        ...incident,
+        community_name: incident.community?.name || 'Comunidad desconocida'
+      }));
     } catch (error) {
       console.error("Service error fetching incidents by reporter:", error);
       throw error;
@@ -99,7 +111,12 @@ export class SupabaseIncidentService {
         throw new Error(`Error al obtener incidencias: ${error.message}`);
       }
 
-      return data || [];
+      return (data || []).map(incident => ({
+        ...incident,
+        reporter_name: incident.reporter?.full_name || 'Usuario desconocido',
+        reporter_email: incident.reporter?.email || '',
+        community_name: incident.community?.name || 'Comunidad desconocida'
+      }));
     } catch (error) {
       console.error("Service error fetching incidents by administrator:", error);
       throw error;
@@ -171,7 +188,12 @@ export class SupabaseIncidentService {
         throw new Error(`Error al obtener la incidencia: ${error.message}`);
       }
 
-      return data;
+      return {
+        ...data,
+        reporter_name: data.reporter?.full_name || 'Usuario desconocido',
+        reporter_email: data.reporter?.email || '',
+        community_name: data.community?.name || 'Comunidad desconocida'
+      };
     } catch (error) {
       console.error("Service error fetching incident by ID:", error);
       throw error;
@@ -245,7 +267,12 @@ export class SupabaseIncidentService {
         throw new Error(`Error al obtener resumen de incidencias: ${error.message}`);
       }
 
-      const incidents = data || [];
+      const incidents = (data || []).map(incident => ({
+        ...incident,
+        reporter_name: incident.reporter?.full_name || 'Usuario desconocido',
+        community_name: incident.community?.name || 'Comunidad desconocida'
+      }));
+
       const total = incidents.length;
       const pending = incidents.filter(i => i.status === 'pending').length;
       const approved = incidents.filter(i => i.status === 'approved').length;
@@ -273,6 +300,31 @@ export class SupabaseIncidentService {
     } catch (error) {
       console.error("Service error processing incident to budget request:", error);
       throw error;
+    }
+  }
+
+  static async getCommunityFromIncident(incidentId: string): Promise<{ id: string; name: string; address: string } | null> {
+    try {
+      const { data, error } = await supabase
+        .from('incidents')
+        .select(`
+          community:communities!incidents_community_id_fkey(
+            id,
+            name,
+            address
+          )
+        `)
+        .eq('id', incidentId)
+        .single();
+
+      if (error || !data?.community) {
+        return null;
+      }
+
+      return data.community;
+    } catch (error) {
+      console.error("Service error fetching community from incident:", error);
+      return null;
     }
   }
 }
