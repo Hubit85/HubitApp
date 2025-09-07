@@ -629,7 +629,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {properties.length > 0 ? (
+                {activeRole?.role_type === 'particular' && properties.length > 0 ? (
                   <div>
                     <Label htmlFor="property_id">Propiedad</Label>
                     <Select value={formData.property_id || ""} onValueChange={(value) => setFormData(prev => ({ ...prev, property_id: value || null }))}>
@@ -648,12 +648,36 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                       </SelectContent>
                     </Select>
                   </div>
+                ) : activeRole?.role_type === 'property_administrator' && communities.length > 0 ? (
+                  <div>
+                    <Label htmlFor="community_id">Comunidad</Label>
+                    <Select value={formData.community_id || ""} onValueChange={(value) => setFormData(prev => ({ ...prev, community_id: value || null }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una comunidad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {communities.map(community => (
+                          <SelectItem key={community.id} value={community.id}>
+                            <div>
+                              <div className="font-medium">{community.name}</div>
+                              <div className="text-xs text-neutral-600">{community.address}, {community.city}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 ) : (
                   <div className="md:col-span-2">
-                    <Label htmlFor="work_location">Ubicación del Trabajo</Label>
+                    <Label htmlFor="work_location">
+                      {activeRole?.role_type === 'property_administrator' ? 'Dirección de la Comunidad' : 'Ubicación del Trabajo'}
+                    </Label>
                     <Input
                       id="work_location"
-                      placeholder="Dirección donde se realizará el trabajo"
+                      placeholder={activeRole?.role_type === 'property_administrator' ? 
+                        "Dirección completa de la comunidad" : 
+                        "Dirección donde se realizará el trabajo"
+                      }
                       value={formData.work_location || ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, work_location: e.target.value }))}
                     />
