@@ -133,7 +133,6 @@ export default function Dashboard() {
           { id: "propiedades", label: "Mis Propiedades", icon: Home },
           { id: "comunidad", label: "Mi Comunidad", icon: Users },
           { id: "servicios", label: "Servicios Disponibles", icon: Store },
-          { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores Verificados", icon: Store },
           { id: "favoritos", label: "Mis Favoritos", icon: Heart },
           { id: "historial", label: "Historial de Servicios", icon: Clock },
@@ -415,20 +414,20 @@ export default function Dashboard() {
                     </div>
                     <h3 className="text-lg font-bold text-black mb-3">Reportar Incidencia</h3>
                     <p className="text-sm text-stone-600 mb-4">
-                      Informa sobre problemas en tu comunidad
+                      Informa sobre problemas en tu comunidad al administrador
                     </p>
                     <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
                   </CardContent>
                 </Card>
 
-                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("presupuesto")}>
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("administrador")}>
                   <CardContent className="p-6 text-center">
                     <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-700 transition-colors">
-                      <FileText className="h-8 w-8 text-white" />
+                      <Mail className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-black mb-3">Solicitar Servicio</h3>
+                    <h3 className="text-lg font-bold text-black mb-3">Contactar Administrador</h3>
                     <p className="text-sm text-stone-600 mb-4">
-                      Obtén presupuestos de proveedores verificados
+                      Comunícate directamente con el administrador de fincas
                     </p>
                     <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
                   </CardContent>
@@ -441,7 +440,7 @@ export default function Dashboard() {
                     </div>
                     <h3 className="text-lg font-bold text-black mb-3">Proveedores Verificados</h3>
                     <p className="text-sm text-stone-600 mb-4">
-                      Encuentra profesionales de confianza
+                      Consulta proveedores autorizados por la comunidad
                     </p>
                     <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
                   </CardContent>
@@ -1112,9 +1111,44 @@ export default function Dashboard() {
                 ? "Gestiona y responde a solicitudes de presupuestos" 
                 : "Obtén presupuestos profesionales para tus proyectos"}
             </p>
-            <div className="mt-6">
-              <BudgetRequestManager />
-            </div>
+            {roleType === "community_member" ? (
+              <Card className="border-amber-200 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 mt-6">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield className="h-8 w-8 text-amber-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-black mb-2">Funcionalidad No Disponible</h3>
+                  <p className="text-amber-700 mb-4">
+                    Como miembro de comunidad, no puedes solicitar presupuestos directamente. 
+                    Para servicios en tu comunidad, debes reportar la incidencia al administrador de fincas.
+                  </p>
+                  <p className="text-amber-600 text-sm mb-6">
+                    El administrador de fincas será quien gestione los presupuestos en nombre de la comunidad.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button 
+                      onClick={() => setActiveTab("incidencias")}
+                      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Reportar Incidencia
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setActiveTab("administrador")}
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Contactar Administrador
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="mt-6">
+                <BudgetRequestManager />
+              </div>
+            )}
           </div>
         );
 
