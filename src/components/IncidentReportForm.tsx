@@ -36,10 +36,10 @@ const SERVICE_CATEGORIES = [
 ];
 
 const URGENCY_LEVELS = [
-  { value: 'low', label: 'Baja', color: 'bg-green-100 text-green-800', icon: '🟢' },
-  { value: 'normal', label: 'Normal', color: 'bg-blue-100 text-blue-800', icon: '🔵' },
-  { value: 'high', label: 'Alta', color: 'bg-orange-100 text-orange-800', icon: '🟠' },
-  { value: 'emergency', label: 'Emergencia', color: 'bg-red-100 text-red-800', icon: '🔴' },
+  { value: 'low' as const, label: 'Baja', color: 'bg-green-100 text-green-800', icon: '🟢' },
+  { value: 'normal' as const, label: 'Normal', color: 'bg-blue-100 text-blue-800', icon: '🔵' },
+  { value: 'high' as const, label: 'Alta', color: 'bg-orange-100 text-orange-800', icon: '🟠' },
+  { value: 'emergency' as const, label: 'Emergencia', color: 'bg-red-100 text-red-800', icon: '🔴' },
 ];
 
 interface IncidentFormData {
@@ -47,7 +47,7 @@ interface IncidentFormData {
   description: string;
   category: string;
   location: string;
-  urgency: string;
+  urgency: 'low' | 'normal' | 'high' | 'emergency';
   photos: File[];
 }
 
@@ -127,7 +127,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
   };
 
   const handleInputChange = (field: keyof IncidentFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'urgency') {
+      setFormData(prev => ({ ...prev, [field]: value as 'low' | 'normal' | 'high' | 'emergency' }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
     setError("");
   };
 
