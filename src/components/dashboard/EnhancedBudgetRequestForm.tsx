@@ -110,14 +110,13 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [providerPreview, setProviderPreview] = useState<ProviderPreviewResults | null>(null);
 
-  const [formData, setFormData] = useState<BudgetRequestInsert & { community_id?: string | null }>({
+  const [formData, setFormData] = useState<BudgetRequestInsert>({
     user_id: user?.id || "",
     title: prefilledIncident?.title || "",
     description: prefilledIncident?.description || "",
     category: prefilledIncident?.category || "other",
     urgency: prefilledIncident?.urgency || "normal",
     property_id: null,
-    community_id: prefilledIncident?.community_id || null,
     budget_range_min: null,
     budget_range_max: null,
     preferred_date: null,
@@ -128,6 +127,9 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
     documents: prefilledIncident?.documents || [],
     incident_id: prefilledIncident?.id || null
   });
+
+  // Separate state for community_id since it's not part of budget_requests table yet
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(prefilledIncident?.community_id || null);
 
   const [autoPublish, setAutoPublish] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
