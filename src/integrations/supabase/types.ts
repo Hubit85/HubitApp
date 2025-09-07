@@ -1676,7 +1676,7 @@ export interface Database {
         | "message"
         | "system"
         | "incident"
-      notification_type: "info" | "success" | "warning" | "error"
+      notification_type: "info" | "success" | "warning" | "error" | "system"
       payment_method: "stripe" | "paypal" | "bank_transfer" | "cash"
       payment_status:
         | "pending"
