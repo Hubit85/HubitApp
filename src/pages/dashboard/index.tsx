@@ -20,6 +20,7 @@ import PropertyManager from "@/components/dashboard/PropertyManager";
 import BudgetRequestManager from "@/components/dashboard/BudgetRequestManager";
 import { BudgetRequestManager as ServiceProviderBudgetManager } from "@/components/service-provider/BudgetRequestManager";
 import { EnhancedBudgetRequestForm } from "@/components/dashboard/EnhancedBudgetRequestForm";
+import { IncidentManagement } from "@/components/dashboard/IncidentManagement";
 import { ContractManager } from "@/components/contracts/ContractManager";
 import UserRoleManager from "@/components/UserRoleManager";
 import { IncidentReportForm } from "@/components/IncidentReportForm";
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedRole, setSelectedRole] = useState<string>("particular");
+  const [incidentToProcess, setIncidentToProcess] = useState<any>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -70,6 +72,11 @@ export default function Dashboard() {
     } catch (error) {
       alert(`Error inesperado al cambiar el rol: ${error instanceof Error ? error.message : "Error desconocido"}`);
     }
+  };
+
+  const handleProcessIncident = (incident: any) => {
+    setIncidentToProcess(incident);
+    setActiveTab("presupuesto");
   };
 
   const getUserTypeInfo = (userType: string) => {
@@ -1163,7 +1170,13 @@ export default function Dashboard() {
                 </Card>
               ) : roleType === "property_administrator" ? (
                 <div className="mt-6">
-                  <EnhancedBudgetRequestForm />
+                  <EnhancedBudgetRequestForm 
+                    prefilledIncident={incidentToProcess}
+                    onSuccess={() => {
+                      setIncidentToProcess(null);
+                      console.log("Budget request created from incident successfully");
+                    }}
+                  />
                 </div>
               ) : (
                 <div className="mt-6">
@@ -1276,28 +1289,22 @@ export default function Dashboard() {
                   }}
                 />
               </div>
+            ) : roleType === "property_administrator" ? (
+              <div className="mt-6">
+                <IncidentManagement onProcessIncident={handleProcessIncident} />
+              </div>
             ) : (
               <Card className="border-stone-200 shadow-lg mt-6">
                 <CardContent className="p-8 text-center">
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    {roleType === "property_administrator" ? (
-                      <AlertTriangle className="h-8 w-8 text-red-600" />
-                    ) : (
-                      <Shield className="h-8 w-8 text-red-600" />
-                    )}
+                    <Shield className="h-8 w-8 text-red-600" />
                   </div>
-                  <h3 className="text-2xl font-bold text-black mb-2">
-                    Sistema de {roleType === "property_administrator" ? "Gestión de " : ""}Incidencias
-                  </h3>
+                  <h3 className="text-2xl font-bold text-black mb-2">Sistema de Incidencias</h3>
                   <p className="text-stone-600 mb-6">
-                    {roleType === "property_administrator"
-                      ? "Centraliza todas las incidencias reportadas por miembros de las comunidades, priorízalas y gestiona su resolución con proveedores especializados."
-                      : "Aquí podrás reportar incidencias, averías o problemas en las zonas comunes de tu comunidad. El administrador de fincas recibirá la notificación inmediatamente."}
+                    Esta funcionalidad está disponible para miembros de comunidad (reportar) y administradores de fincas (gestionar).
                   </p>
                   <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-                    {roleType === "property_administrator" 
-                      ? "Integrado con sistema de presupuestos automáticos"
-                      : "Solo disponible para miembros de comunidad"}
+                    No disponible para este rol
                   </Badge>
                 </CardContent>
               </Card>
@@ -1672,4 +1679,3 @@ export default function Dashboard() {
     </>
   );
 }
-
