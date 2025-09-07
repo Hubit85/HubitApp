@@ -28,6 +28,21 @@ interface ExtendedContract extends Contract {
   property_address?: string;
 }
 
+interface ExtendedQuote extends Quote {
+  user_id: string;
+  title: string;
+  description: string;
+  budget_requests?: {
+    title: string;
+    profiles: {
+      full_name: string;
+    };
+    properties: {
+      address: string;
+    };
+  };
+}
+
 interface ContractFormData {
   title: string;
   description: string;
@@ -51,8 +66,8 @@ export function ContractManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentTab, setCurrentTab] = useState("my-contracts");
-  const [availableQuotes, setAvailableQuotes] = useState<Quote[]>([]);
-  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [availableQuotes, setAvailableQuotes] = useState<ExtendedQuote[]>([]);
+  const [selectedQuote, setSelectedQuote] = useState<ExtendedQuote | null>(null);
 
   const [contractForm, setContractForm] = useState<ContractFormData>({
     title: "",
@@ -98,6 +113,8 @@ export function ContractManager() {
   };
 
   const loadClientContracts = async () => {
+    if (!user?.id) return;
+
     try {
       const { data, error } = await supabase
         .from('contracts')
@@ -117,7 +134,7 @@ export function ContractManager() {
             )
           )
         `)
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -143,12 +160,14 @@ export function ContractManager() {
   };
 
   const loadProviderContracts = async () => {
+    if (!user?.id) return;
+
     try {
       // Get service provider ID first
       const { data: providerData, error: providerError } = await supabase
         .from('service_providers')
         .select('id')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .single();
 
       if (providerError) {
@@ -200,12 +219,14 @@ export function ContractManager() {
   };
 
   const loadAvailableQuotes = async () => {
+    if (!user?.id) return;
+
     try {
       // Get service provider ID first
       const { data: providerData, error: providerError } = await supabase
         .from('service_providers')
         .select('id')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .single();
 
       if (providerError) {
@@ -220,6 +241,7 @@ export function ContractManager() {
           budget_requests (
             title,
             description,
+            user_id,
             properties (
               address
             ),
@@ -238,8 +260,17 @@ export function ContractManager() {
         return;
       }
 
-      setAvailableQuotes(data || []);
-      console.log("✅ Available quotes loaded:", (data || []).length);
+      // Transform data to ensure required properties exist
+      const transformedQuotes: ExtendedQuote[] = (data || []).map((quote: any) => ({
+        ...quote,
+        user_id: quote.budget_requests?.user_id || quote.user_id || '',
+        title: quote.title || quote.budget_requests?.title || 'Servicio sin título',
+        description: quote.description || quote.budget_requests?.description || 'Sin descripción',
+        budget_requests: quote.budget_requests
+      }));
+
+      setAvailableQuotes(transformedQuotes);
+      console.log("✅ Available quotes loaded:", transformedQuotes.length);
 
     } catch (error) {
       console.error("❌ Error loading available quotes:", error);
@@ -274,14 +305,14 @@ export function ContractManager() {
         user_id: selectedQuote.user_id,
         service_provider_id: providerData.id,
         contract_number: contractNumber,
-        title: contractForm.title || selectedQuote.title || 'Contrato de Servicio',
+        title: contractForm.title || selectedQuote.title,
         work_description: contractForm.work_scope || selectedQuote.description,
         total_amount: selectedQuote.amount,
         payment_schedule: contractForm.payment_terms,
         deadline_date: contractForm.deadline ? new Date(contractForm.deadline).toISOString() : null,
         warranty_period: contractForm.warranty_period,
         special_conditions: contractForm.special_terms || null,
-        status: 'draft' as const,
+        status: 'pending' as const,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -361,12 +392,16 @@ export function ContractManager() {
         return <Badge className="bg-gray-100 text-gray-800 border-gray-200">📝 Borrador</Badge>;
       case 'pending':
         return <Badge className="bg-amber-100 text-amber-800 border-amber-200">⏳ Pendiente Firma</Badge>;
+      case 'signed':
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">✅ Firmado</Badge>;
       case 'active':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">✅ Activo</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200">🚀 Activo</Badge>;
       case 'completed':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">🎉 Completado</Badge>;
+        return <Badge className="bg-purple-100 text-purple-800 border-purple-200">🎉 Completado</Badge>;
       case 'cancelled':
         return <Badge className="bg-red-100 text-red-800 border-red-200">❌ Cancelado</Badge>;
+      case 'disputed':
+        return <Badge className="bg-orange-100 text-orange-800 border-orange-200">⚠️ En Disputa</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -516,9 +551,11 @@ export function ContractManager() {
                 <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="draft">Borrador</SelectItem>
                 <SelectItem value="pending">Pendiente Firma</SelectItem>
+                <SelectItem value="signed">Firmado</SelectItem>
                 <SelectItem value="active">Activo</SelectItem>
                 <SelectItem value="completed">Completado</SelectItem>
                 <SelectItem value="cancelled">Cancelado</SelectItem>
+                <SelectItem value="disputed">En Disputa</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -597,7 +634,7 @@ export function ContractManager() {
                             Ver Detalles
                           </Button>
                           
-                          {contract.status === 'draft' && (
+                          {contract.status === 'pending' && (
                             <Button size="sm" className="bg-gradient-to-r from-purple-600 to-indigo-600">
                               <Edit className="h-4 w-4 mr-2" />
                               Editar
@@ -647,10 +684,10 @@ export function ContractManager() {
                                 <h3 className="text-lg font-semibold text-neutral-900">{quote.title}</h3>
                                 <div className="flex items-center gap-2 text-sm text-neutral-600">
                                   <User className="h-4 w-4" />
-                                  <span>{(quote as any).budget_requests?.profiles?.full_name || 'Cliente'}</span>
+                                  <span>{quote.budget_requests?.profiles?.full_name || 'Cliente'}</span>
                                   <Separator orientation="vertical" className="h-4" />
                                   <MapPin className="h-4 w-4" />
-                                  <span>{(quote as any).budget_requests?.properties?.address || 'Ubicación'}</span>
+                                  <span>{quote.budget_requests?.properties?.address || 'Ubicación'}</span>
                                 </div>
                               </div>
                             </div>
@@ -709,7 +746,7 @@ export function ContractManager() {
                                   <Card className="p-4 bg-neutral-50">
                                     <h4 className="font-medium mb-2">Resumen de la cotización</h4>
                                     <div className="text-sm space-y-1">
-                                      <p><span className="font-medium">Cliente:</span> {(quote as any).budget_requests?.profiles?.full_name}</p>
+                                      <p><span className="font-medium">Cliente:</span> {quote.budget_requests?.profiles?.full_name}</p>
                                       <p><span className="font-medium">Servicio:</span> {quote.title}</p>
                                       <p><span className="font-medium">Monto:</span> €{quote.amount.toLocaleString()}</p>
                                       <p><span className="font-medium">Descripción:</span> {quote.description}</p>
