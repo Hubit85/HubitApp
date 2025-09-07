@@ -28,12 +28,31 @@ interface ExtendedContract extends Contract {
   property_address?: string;
 }
 
-interface ExtendedQuote extends Quote {
+interface ExtendedQuote {
+  id: string;
+  amount: number;
+  attachments: string[] | null;
+  budget_request_id: string;
+  created_at: string;
+  description?: string;
+  estimated_duration: string | null;
+  estimated_start_date: string | null;
+  labor_cost: number;
+  materials_cost: number;
+  notes: string | null;
+  payment_terms: string;
+  service_provider_id: string;
+  status: "pending" | "accepted" | "rejected" | "expired" | "cancelled";
+  terms_and_conditions: string | null;
+  updated_at: string;
+  valid_until: string | null;
+  viewed_by_client: boolean;
+  warranty_period: string | null;
   user_id: string;
   title?: string;
-  description?: string;
   budget_requests?: {
     title: string;
+    description?: string;
     user_id: string;
     profiles: {
       full_name: string;
