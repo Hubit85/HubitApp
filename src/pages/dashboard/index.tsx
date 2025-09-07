@@ -164,7 +164,7 @@ export default function Dashboard() {
         return [
           { id: "comunidades", label: "Comunidades Gestionadas", icon: Users },
           { id: "propiedades", label: "Gestión de Propiedades", icon: Home },
-          { id: "presupuestos", label: "Presupuestos y Contratos", icon: FileText },
+          { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText }, // CHANGED: from "presupuestos" to "presupuesto"
           { id: "proveedores", label: "Proveedores Autorizados", icon: Store },
           { id: "incidencias", label: "Gestión de Incidencias", icon: AlertTriangle },
           { id: "juntas", label: "Juntas y Reuniones", icon: Video },
@@ -1106,13 +1106,13 @@ export default function Dashboard() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-black mb-2">
               {roleType === "service_provider" ? "Gestionar Presupuestos" : 
-               roleType === "property_administrator" ? "Licitar Presupuestos" : "Solicitar Presupuesto"}
+               roleType === "property_administrator" ? "Solicitar Presupuesto" : "Solicitar Presupuesto"}
             </h1>
             <p className="text-stone-600">
               {roleType === "service_provider" 
                 ? "Gestiona y responde a solicitudes de presupuestos" 
                 : roleType === "property_administrator"
-                ? "Gestiona licitaciones y solicita presupuestos para las comunidades bajo tu administración"
+                ? "Solicita presupuestos profesionales para las comunidades bajo tu administración"
                 : "Obtén presupuestos profesionales para tus proyectos"}
             </p>
             {roleType === "community_member" ? (
