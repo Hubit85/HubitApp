@@ -163,7 +163,6 @@ export default function Dashboard() {
       case "property_administrator":
         return [
           { id: "comunidades", label: "Comunidades Gestionadas", icon: Users },
-          { id: "propiedades", label: "Gestión de Propiedades", icon: Home },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores Autorizados", icon: Store },
           { id: "incidencias", label: "Gestión de Incidencias", icon: AlertTriangle },
