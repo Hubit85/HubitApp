@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -24,6 +23,7 @@ import { IncidentManagement } from "@/components/dashboard/IncidentManagement";
 import { ContractManager } from "@/components/contracts/ContractManager";
 import UserRoleManager from "@/components/UserRoleManager";
 import { IncidentReportForm } from "@/components/IncidentReportForm";
+import { CommunityAdministratorAssignment } from "@/components/CommunityAdministratorAssignment";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
