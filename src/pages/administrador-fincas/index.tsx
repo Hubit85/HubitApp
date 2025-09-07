@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   ShoppingBag,
   User,
+  Users,
   TrendingUp,
   TrendingDown,
   Clock,
@@ -38,7 +39,10 @@ import {
   TreePine,
   Building2,
   Home,
-  Hammer
+  Hammer,
+  Star as StarIcon,
+  Bell,
+  Settings
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
