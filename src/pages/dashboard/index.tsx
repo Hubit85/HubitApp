@@ -1660,27 +1660,35 @@ export default function Dashboard() {
                         </Card>
                       )}
 
-                      <Card className="border-stone-200 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-xl font-bold text-black">
-                            <Settings className="h-6 w-6 text-stone-600" />
-                            Herramientas del Sistema
-                          </CardTitle>
-                          <CardDescription>
-                            Herramientas de configuración y diagnóstico
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-center py-8">
-                            <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <Settings className="h-8 w-8 text-stone-600" />
+                      {/* Property Administrator Profile - Only for property administrators */}
+                      {currentRole === "property_administrator" && (
+                        <PropertyAdministratorProfile />
+                      )}
+
+                      {/* Generic profile tools for non-property-administrator roles */}
+                      {currentRole !== "property_administrator" && (
+                        <Card className="border-stone-200 shadow-lg">
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-xl font-bold text-black">
+                              <Settings className="h-6 w-6 text-stone-600" />
+                              Herramientas del Sistema
+                            </CardTitle>
+                            <CardDescription>
+                              Herramientas de configuración y diagnóstico
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-center py-8">
+                              <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Settings className="h-8 w-8 text-stone-600" />
+                              </div>
+                              <h3 className="text-lg font-semibold text-stone-900 mb-2">Sistema Configurado</h3>
+                              <p className="text-stone-600 text-sm">Todas las herramientas del sistema están funcionando correctamente.</p>
+                              <Badge className="bg-green-100 text-green-800 mt-3">✓ Operativo</Badge>
                             </div>
-                            <h3 className="text-lg font-semibold text-stone-900 mb-2">Sistema Configurado</h3>
-                            <p className="text-stone-600 text-sm">Todas las herramientas del sistema están funcionando correctamente.</p>
-                            <Badge className="bg-green-100 text-green-800 mt-3">✓ Operativo</Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
                   </div>
                 </ZoomableSection>
