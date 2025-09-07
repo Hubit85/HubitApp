@@ -1358,7 +1358,7 @@ export default function Dashboard() {
                   Rol Activo
                 </label>
                 <Select
-                  value={selectedRole || ""}
+                  value={selectedRole}
                   onValueChange={handleRoleChange}
                 >
                   <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600 transition-all duration-300 rounded-lg">
