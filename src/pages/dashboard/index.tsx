@@ -1641,6 +1641,24 @@ export default function Dashboard() {
                         </CardContent>
                       </Card>
 
+                      {/* Community Administrator Assignment - Only for community members */}
+                      {currentRole === "community_member" && (
+                        <Card className="border-stone-200 shadow-lg">
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-xl font-bold text-black">
+                              <Building className="h-6 w-6 text-stone-600" />
+                              Administrador de Fincas
+                            </CardTitle>
+                            <CardDescription>
+                              Asigna la empresa que administra tu comunidad
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <CommunityAdministratorAssignment />
+                          </CardContent>
+                        </Card>
+                      )}
+
                       <Card className="border-stone-200 shadow-lg">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-xl font-bold text-black">
