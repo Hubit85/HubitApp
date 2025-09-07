@@ -6,7 +6,6 @@ import {
   Video,
   AlertTriangle,
   FileCheck,
-  FileText,
   Bell,
   Calendar,
   ThumbsUp,
@@ -27,15 +26,17 @@ interface SidebarCommunityMemberProps {
 export function SidebarCommunityMember({ activeTab, setActiveTab }: SidebarCommunityMemberProps) {
     const { t } = useLanguage();
 
+    // IMPORTANTE: Los miembros de comunidad NO pueden solicitar presupuestos directamente
+    // Solo pueden reportar incidencias al administrador de fincas
     const navItems = [
         { id: "perfil", label: t("myProfile"), icon: User },
         { id: "mis-propiedades", label: t("myProperties"), icon: Home },
         { id: "servicios", label: t("availableServices"), icon: Store },
         { id: "chat", label: t("communityChat"), icon: MessageSquare },
         { id: "videoconferencia", label: t("scheduleVideoConference"), icon: Video },
-        { id: "incidencias", label: t("informIssue"), icon: AlertTriangle },
+        { id: "incidencias", label: t("informIssue"), icon: AlertTriangle }, // ESTA es la funcionalidad principal
         { id: "contratos", label: t("communityContracts"), icon: FileCheck },
-        { id: "presupuesto", label: t("communityBudget"), icon: FileText },
+        // ELIMINADO: "solicitar presupuesto" - Los miembros NO pueden solicitar presupuestos directamente
         { id: "administrador", label: t("contactAdministrator"), icon: Mail },
         { id: "historial", label: t("serviceHistory"), icon: Calendar },
         { id: "recomendaciones", label: t("recommendations"), icon: ThumbsUp },
