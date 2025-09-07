@@ -737,7 +737,6 @@ export function ContractManager() {
                                     setSelectedQuote(quote);
                                     setContractForm(prev => ({
                                       ...prev,
-                                      title: quote.title || quote.description || 'Contrato de Servicio',
                                       work_scope: quote.description || ''
                                     }));
                                   }}
