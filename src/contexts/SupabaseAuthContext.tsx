@@ -174,7 +174,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       // Try to fetch profile from database with timeout
       try {        
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Fetch timeout')), 8000);
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 15000); // Increased from 8000 to 15000ms
         });
 
         const profilePromise = supabase
@@ -188,6 +188,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
         if (profileError && profileError.code !== 'PGRST116') {
           console.warn("⚠️ Profile fetch error:", profileError.message);
+          // Don't fail completely on profile errors, use fallback
         }
 
         if (profileData) {
@@ -209,24 +210,29 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             timezone: 'Europe/Madrid',
           };
 
-          const { data: createdProfile, error: createError } = await supabase
-            .from("profiles")
-            .insert(newProfileData)
-            .select()
-            .single();
+          try {
+            const { data: createdProfile, error: createError } = await supabase
+              .from("profiles")
+              .insert(newProfileData)
+              .select()
+              .single();
 
-          if (!createError && createdProfile) {
-            setProfile(createdProfile);
-            console.log("✅ Profile created successfully");
-          } else {
-            console.warn("⚠️ Profile creation failed:", createError);
+            if (!createError && createdProfile) {
+              setProfile(createdProfile);
+              console.log("✅ Profile created successfully");
+            } else {
+              throw new Error(`Profile creation failed: ${createError?.message || 'Unknown error'}`);
+            }
+          } catch (createProfileError) {
+            console.warn("⚠️ Profile creation failed, using fallback:", createProfileError);
             
-            // Use fallback profile
+            // Use fallback profile instead of failing
             const fallbackProfile: Profile = {
               ...newProfileData,
               address: null,
               city: null,
               postal_code: null,
+              province: null,
               email_notifications: true,
               sms_notifications: false,
               is_verified: false,
@@ -237,12 +243,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             } as Profile;
             
             setProfile(fallbackProfile);
+            console.log("✅ Using fallback profile");
           }
         }
       } catch (profileFetchError) {
         console.warn("⚠️ Profile fetch timeout or error:", profileFetchError);
         
-        // Use emergency profile from metadata
+        // Use emergency profile from metadata - don't let this fail the entire process
         const emergencyProfile: Profile = {
           id: userObject.id,
           email: userObject.email || '',
@@ -267,6 +274,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         };
         
         setProfile(emergencyProfile);
+        console.log("✅ Using emergency profile due to fetch timeout");
       }
 
       // CRITICAL FIX: Enhanced role loading with multiple retry attempts and better error handling
