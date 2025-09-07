@@ -43,6 +43,7 @@ import {
 import { Header } from "@/components/layout/Header";
 import { useRouter } from "next/router";
 import ZoomableSection from "@/components/ZoomableSection";
+import { ContractManager } from "@/components/contracts/ContractManager";
 
 // Coordenadas de Vizcaya, España
 const center = {
@@ -252,6 +253,20 @@ export default function AdministradorFincas() {
       default: return <Wrench className="h-5 w-5" />;
     }
   };
+
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'propiedades', label: 'Mis Propiedades', icon: Building },
+    { id: 'servicios', label: 'Servicios Actuales', icon: Wrench },
+    { id: 'solicitar-presupuesto', label: 'Solicitar Presupuesto', icon: FileText },
+    { id: 'contratos', label: 'Gestionar Contratos', icon: ClipboardList },
+    { id: 'juntas', label: 'Juntas y Reuniones', icon: Calendar },
+    { id: 'pendientes', label: 'Temas Pendientes', icon: AlertTriangle },
+    { id: 'usuarios', label: 'Propietarios/Inquilinos', icon: Users },
+    { id: 'evaluaciones', label: 'Evaluaciones', icon: StarIcon },
+    { id: 'notificaciones', label: 'Notificaciones', icon: Bell },
+    { id: 'configuracion', label: 'Configuración', icon: Settings },
+  ];
 
   if (!isClient) {
     return (
@@ -1009,7 +1024,24 @@ export default function AdministradorFincas() {
                 </div>
               )}
 
-              {/* Solicitar Presupuesto */}
+              {/* Gestión de Contratos Tab */}
+              {activeTab === "contratos" && (
+                <ZoomableSection>
+                  <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+                      <ClipboardList className="h-8 w-8 text-purple-600" />
+                      Gestión de Contratos
+                    </h1>
+                    <p className="text-stone-600">
+                      Administra contratos de servicios para las propiedades bajo tu gestión, seguimiento de trabajos y firmas digitales
+                    </p>
+                  </div>
+                  
+                  <ContractManager />
+                </ZoomableSection>
+              )}
+
+              {/* Solicitar Presupuesto Tab (renamed from presupuestos-y-contratos) */}
               {activeTab === "solicitar-presupuesto" && (
                 <div className="space-y-8">
                   {/* Incidencias Reportadas por Miembros */}
