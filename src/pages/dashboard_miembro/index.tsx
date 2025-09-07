@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -513,102 +514,7 @@ export default function DashboardMiembro() {
                 </ZoomableSection>
               )}
 
-              {/* Budget Requests Tab - Now redirects to incident reporting */}
-              {activeTab === "presupuesto" && (
-                <ZoomableSection>
-                  <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-black mb-2">Solicitud de Servicios</h1>
-                    <p className="text-stone-600">Información sobre cómo solicitar servicios en tu comunidad</p>
-                  </div>
-                  
-                  <Card className="border-amber-200 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50">
-                    <CardContent className="p-8 text-center">
-                      <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Shield className="h-8 w-8 text-amber-600" />
-                      </div>
-                      <h3 className="text-2xl font-bold text-black mb-4">Proceso de Solicitud de Servicios</h3>
-                      <p className="text-amber-700 mb-6">
-                        Como miembro de comunidad, no puedes solicitar presupuestos directamente. 
-                        Para servicios en tu comunidad, debes seguir el siguiente proceso:
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="p-6 bg-white rounded-lg border border-amber-200 shadow-sm">
-                          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Shield className="h-6 w-6 text-red-600" />
-                          </div>
-                          <h4 className="font-semibold text-red-900 mb-2">1. Reportar Incidencia</h4>
-                          <p className="text-red-700 text-sm">
-                            Informa al administrador de fincas sobre el problema o necesidad de servicio
-                          </p>
-                        </div>
-                        
-                        <div className="p-6 bg-white rounded-lg border border-amber-200 shadow-sm">
-                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <FileText className="h-6 w-6 text-blue-600" />
-                          </div>
-                          <h4 className="font-semibold text-blue-900 mb-2">2. Evaluación</h4>
-                          <p className="text-blue-700 text-sm">
-                            El administrador evaluará la incidencia y gestionará los presupuestos necesarios
-                          </p>
-                        </div>
-                        
-                        <div className="p-6 bg-white rounded-lg border border-amber-200 shadow-sm">
-                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <CheckCircle className="h-6 w-6 text-green-600" />
-                          </div>
-                          <h4 className="font-semibold text-green-900 mb-2">3. Resolución</h4>
-                          <p className="text-green-700 text-sm">
-                            El administrador coordinará con proveedores verificados para resolver la incidencia
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="bg-white rounded-lg p-6 border border-amber-200 mb-6">
-                        <h4 className="font-semibold text-amber-900 mb-3">¿Por qué este proceso?</h4>
-                        <ul className="text-left text-amber-700 text-sm space-y-2">
-                          <li className="flex items-start gap-2">
-                            <CheckCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                            <span>Garantiza que todos los servicios estén autorizados por la comunidad</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <CheckCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                            <span>Asegura el uso de proveedores verificados y de confianza</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <CheckCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                            <span>Mantiene un control centralizado de gastos y presupuestos</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <CheckCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                            <span>Protege los intereses comunes de la comunidad</span>
-                          </li>
-                        </ul>
-                      </div>
-                      
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Button 
-                          onClick={() => setActiveTab("incidencias")}
-                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-                        >
-                          <Shield className="h-4 w-4 mr-2" />
-                          Reportar Incidencia
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          onClick={() => setActiveTab("servicios")}
-                          className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                        >
-                          <Wrench className="h-4 w-4 mr-2" />
-                          Ver Servicios Disponibles
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </ZoomableSection>
-              )}
-
-              {/* Incident Reporting Tab */}
+              {/* Incident Reporting Tab - NOW USING THE ACTUAL FORM */}
               {activeTab === "incidencias" && (
                 <ZoomableSection>
                   <div className="mb-6">
@@ -618,7 +524,6 @@ export default function DashboardMiembro() {
                   
                   <IncidentReportForm 
                     onSuccess={() => {
-                      // Optional: You can add success handling here, like showing a success message or refreshing data
                       console.log("Incidencia reportada exitosamente");
                     }}
                   />
@@ -689,7 +594,7 @@ export default function DashboardMiembro() {
               )}
 
               {/* Other tabs placeholder */}
-              {!["overview", "servicios", "presupuestos", "contratos", "perfil"].includes(activeTab) && (
+              {!["overview", "servicios", "contratos", "perfil", "incidencias", "evaluacion", "comunidad"].includes(activeTab) && (
                 <ZoomableSection>
                   <Card className="border-stone-200 shadow-lg">
                     <CardContent className="p-8 text-center">
