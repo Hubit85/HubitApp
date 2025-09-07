@@ -49,6 +49,7 @@ import { SidebarFincas } from "@/components/layout/SidebarFincas";
 import { useRouter } from "next/router";
 import ZoomableSection from "@/components/ZoomableSection";
 import { ContractManager } from "@/components/contracts/ContractManager";
+import { EnhancedBudgetRequestForm } from "@/components/dashboard/EnhancedBudgetRequestForm";
 
 // Coordenadas de Vizcaya, España
 const center = {
@@ -987,6 +988,16 @@ export default function AdministradorFincas() {
               {/* Solicitar Presupuesto Tab (renamed from presupuestos-y-contratos) */}
               {activeTab === "solicitar-presupuesto" && (
                 <div className="space-y-8">
+                  {/* Enhanced Budget Request Form */}
+                  <div className="mb-8">
+                    <EnhancedBudgetRequestForm 
+                      onSuccess={() => {
+                        // Show success message and refresh
+                        console.log("Budget request created successfully from administrator panel");
+                      }} 
+                    />
+                  </div>
+
                   {/* Incidencias Reportadas por Miembros */}
                   <Card>
                     <CardHeader>
