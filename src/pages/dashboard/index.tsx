@@ -34,8 +34,11 @@ export default function Dashboard() {
   useEffect(() => {
     if (activeRole) {
       setSelectedRole(activeRole.role_type);
+    } else if (profile?.user_type) {
+      // Fallback to profile user_type if no active role is set
+      setSelectedRole(profile.user_type);
     }
-  }, [activeRole]);
+  }, [activeRole, profile]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -1314,7 +1317,7 @@ export default function Dashboard() {
     );
   }
 
-  const currentRole = selectedRole || profile.user_type;
+  const currentRole = selectedRole || profile?.user_type || "particular";
   const userTypeInfo = getUserTypeInfo(currentRole);
   const UserTypeIcon = userTypeInfo.icon;
   const navItems = [...baseNavItems, ...getRoleSpecificNavItems(currentRole)];
@@ -1350,15 +1353,17 @@ export default function Dashboard() {
                   Rol Activo
                 </label>
                 <Select
-                  value={selectedRole}
+                  value={selectedRole || ""}
                   onValueChange={handleRoleChange}
                 >
                   <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600 transition-all duration-300 rounded-lg">
-                    <SelectValue>
-                      <div className="flex items-center gap-2">
-                        <UserTypeIcon className="h-4 w-4" />
-                        <span className="text-sm">{userTypeInfo.label}</span>
-                      </div>
+                    <SelectValue placeholder="Seleccionar rol">
+                      {selectedRole && (
+                        <div className="flex items-center gap-2">
+                          <UserTypeIcon className="h-4 w-4" />
+                          <span className="text-sm">{userTypeInfo.label}</span>
+                        </div>
+                      )}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="bg-gray-700 border-gray-600">
