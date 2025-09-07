@@ -14,22 +14,11 @@ import {
   Building, CheckCircle, Edit, Save, X, Loader2, 
   AlertCircle, Phone, Mail, Building2, FileText, User
 } from "lucide-react";
-
-interface AdministratorAssignment {
-  id: string;
-  company_name: string;
-  company_cif: string;
-  contact_email: string | null;
-  contact_phone: string | null;
-  administrator_verified: boolean;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import type { CommunityMemberAdministrator } from "@/integrations/supabase/types";
 
 export function CommunityAdministratorAssignment() {
   const { user, userRoles } = useSupabaseAuth();
-  const [assignment, setAssignment] = useState<AdministratorAssignment | null>(null);
+  const [assignment, setAssignment] = useState<CommunityMemberAdministrator | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -424,7 +413,7 @@ export function CommunityAdministratorAssignment() {
               </Button>
             </div>
           </div>
-        ) : (
+        ) : assignment ? (
           // Display mode
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
@@ -519,7 +508,7 @@ export function CommunityAdministratorAssignment() {
               )}
             </div>
           </div>
-        )}
+        ) : null}
 
         {!assignment && !editing && (
           <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
