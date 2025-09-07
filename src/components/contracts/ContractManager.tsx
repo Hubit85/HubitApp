@@ -420,8 +420,7 @@ export function ContractManager() {
   };
 
   const filteredContracts = contracts.filter(contract => {
-    const matchesSearch = contract.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contract.work_description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (contract.quote_title || contract.work_description || '')?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
     
     return matchesSearch && matchesStatus;
