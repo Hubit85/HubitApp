@@ -44,7 +44,7 @@ interface Community {
   name: string;
   address: string;
   city: string;
-  postal_code: string;
+  postal_code: string | null;
 }
 
 interface UploadedFile {
@@ -110,7 +110,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [providerPreview, setProviderPreview] = useState<ProviderPreviewResults | null>(null);
 
-  const [formData, setFormData] = useState<BudgetRequestInsert>({
+  const [formData, setFormData] = useState<BudgetRequestInsert & { community_id?: string | null }>({
     user_id: user?.id || "",
     title: prefilledIncident?.title || "",
     description: prefilledIncident?.description || "",
