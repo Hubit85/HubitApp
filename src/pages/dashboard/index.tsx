@@ -31,18 +31,20 @@ export default function Dashboard() {
     }
   }, [user, loading, router]);
 
-  // Initialize selectedRole with proper fallback handling
+  // Fix: Initialize selectedRole with proper fallback handling and prevent state switching
   useEffect(() => {
-    if (activeRole?.role_type) {
-      setSelectedRole(activeRole.role_type);
-    } else if (profile?.user_type) {
-      // Fallback to profile user_type if no active role is set
-      setSelectedRole(profile.user_type);
-    } else {
-      // Ensure we always have a valid role, even if it's a default
-      setSelectedRole("particular");
+    // Only update if we don't already have a selected role to prevent switching
+    if (!selectedRole) {
+      if (activeRole?.role_type) {
+        setSelectedRole(activeRole.role_type);
+      } else if (profile?.user_type) {
+        setSelectedRole(profile.user_type);
+      } else {
+        // Always ensure we have a valid role
+        setSelectedRole("particular");
+      }
     }
-  }, [activeRole, profile]);
+  }, [activeRole, profile, selectedRole]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -50,18 +52,16 @@ export default function Dashboard() {
   };
 
   const handleRoleChange = async (newRole: string) => {
-    if (!user || newRole === selectedRole) return;
+    if (!user || newRole === selectedRole || !newRole) return;
     
     console.log("🔄 Changing role to:", newRole);
     
     try {
-      // Don't update selectedRole immediately to prevent state flickering
       const result = await activateRole(newRole as any);
       
       if (result.success) {
         console.log("✅ Role changed successfully");
         await refreshRoles();
-        // Reset to overview tab when changing roles
         setActiveTab("overview");
         // selectedRole will be updated by useEffect when activeRole changes
       } else {
