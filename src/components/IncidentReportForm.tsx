@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,12 @@ interface IncidentReportFormProps {
   onCancel?: () => void;
 }
 
+interface Community {
+  id: string;
+  name: string;
+  administrator_id: string;
+}
+
 export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormProps) {
   const { user, profile, userRoles } = useSupabaseAuth();
   const [formData, setFormData] = useState<IncidentFormData>({
@@ -71,12 +77,54 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [dragActive, setDragActive] = useState(false);
+  const [userCommunity, setUserCommunity] = useState<Community | null>(null);
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if user is community member
   const isCommunityMember = userRoles.some(role => 
     role.role_type === 'community_member' && role.is_verified
   );
+
+  useEffect(() => {
+    if (user && isCommunityMember) {
+      findUserCommunity();
+    } else {
+      setLoading(false);
+    }
+  }, [user, isCommunityMember]);
+
+  const findUserCommunity = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
+      
+      // First, try to find a community that the user is associated with
+      // For this demo, we'll use the first available community with an administrator
+      const { data: communities, error } = await supabase
+        .from('communities')
+        .select('*')
+        .not('administrator_id', 'is', null)
+        .limit(1);
+
+      if (error) {
+        console.error('Error fetching communities:', error);
+        throw error;
+      }
+
+      if (communities && communities.length > 0) {
+        setUserCommunity(communities[0]);
+      } else {
+        setError("No se encontró ninguna comunidad con administrador asignado.");
+      }
+    } catch (err) {
+      console.error('Error finding user community:', err);
+      setError("Error al cargar la información de la comunidad.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (field: keyof IncidentFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -176,42 +224,16 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     return uploadedUrls;
   };
 
-  const findPropertyAdministrator = async () => {
-    try {
-      // For now, find any property administrator in the system
-      // In a real implementation, you'd find the specific administrator for the user's community
-      const { data: adminRoles, error } = await supabase
-        .from('user_roles')
-        .select(`
-          user_id,
-          profiles (
-            id,
-            full_name,
-            email
-          )
-        `)
-        .eq('role_type', 'property_administrator')
-        .eq('is_verified', true)
-        .eq('is_active', true)
-        .limit(1);
-
-      if (error || !adminRoles || adminRoles.length === 0) {
-        console.warn('No property administrator found');
-        return null;
-      }
-
-      return adminRoles[0];
-    } catch (error) {
-      console.error('Error finding property administrator:', error);
-      return null;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user || !isCommunityMember) {
       setError("Solo los miembros de comunidad pueden reportar incidencias.");
+      return;
+    }
+
+    if (!userCommunity) {
+      setError("No se pudo identificar tu comunidad. Por favor, contacta con soporte.");
       return;
     }
 
@@ -232,25 +254,27 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         photoUrls = await uploadPhotosToStorage(formData.photos);
       }
 
-      // Find property administrator
-      const propertyAdmin = await findPropertyAdministrator();
-
-      // Create incident record
+      // Create incident record in the 'incidents' table (not 'incident_reports')
       const incidentData = {
-        user_id: user.id,
         title: formData.title.trim(),
         description: formData.description.trim(),
         category: formData.category,
-        location: formData.location.trim() || 'Áreas comunes',
         urgency: formData.urgency,
         status: 'pending',
-        photo_urls: photoUrls.length > 0 ? photoUrls : null,
-        reported_at: new Date().toISOString(),
-        property_admin_id: propertyAdmin?.user_id || null
+        work_location: formData.location.trim() || 'Áreas comunes de la comunidad',
+        special_requirements: null,
+        images: photoUrls.length > 0 ? photoUrls : [],
+        documents: [],
+        reporter_id: user.id,
+        community_id: userCommunity.id,
+        administrator_id: userCommunity.administrator_id,
+        admin_notes: null,
+        reviewed_at: null,
+        reviewed_by: null
       };
 
       const { data: incident, error: incidentError } = await supabase
-        .from('incident_reports')
+        .from('incidents')
         .insert(incidentData)
         .select()
         .single();
@@ -261,32 +285,30 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       }
 
       // Send notification to property administrator
-      if (propertyAdmin) {
-        try {
-          const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
-          
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: propertyAdmin.user_id,
-              title: `Nueva incidencia reportada - ${urgencyLevel?.label || 'Normal'}`,
-              message: `${profile?.full_name || 'Un miembro de comunidad'} ha reportado una incidencia: "${formData.title}". Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
-              type: formData.urgency === 'emergency' ? 'error' : 'info',
-              category: 'incident',
-              related_entity_type: 'incident_report',
-              related_entity_id: incident.id,
-              action_url: `/dashboard?tab=incidents&incident=${incident.id}`,
-              action_label: 'Ver Incidencia',
-              read: false
-            });
-          
-          console.log('Notification sent to property administrator');
-        } catch (notifError) {
-          console.warn('Failed to send notification:', notifError);
-        }
+      try {
+        const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
+        
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: userCommunity.administrator_id,
+            title: `Nueva incidencia reportada - ${urgencyLevel?.label || 'Normal'}`,
+            message: `${profile?.full_name || 'Un miembro de comunidad'} ha reportado una incidencia: "${formData.title}". Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
+            type: formData.urgency === 'emergency' ? 'error' : 'info',
+            category: 'incident',
+            related_entity_type: 'incident',
+            related_entity_id: incident.id,
+            action_url: `/dashboard?tab=incidencias&incident=${incident.id}`,
+            action_label: 'Ver Incidencia',
+            read: false
+          });
+        
+        console.log('Notification sent to property administrator');
+      } catch (notifError) {
+        console.warn('Failed to send notification:', notifError);
       }
 
-      setSuccessMessage("¡Incidencia reportada exitosamente! El administrador de fincas ha sido notificado.");
+      setSuccessMessage("¡Incidencia reportada exitosamente! El administrador de fincas ha sido notificado y revisará tu solicitud.");
       
       // Reset form
       setFormData({
@@ -313,6 +335,17 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     }
   };
 
+  if (loading) {
+    return (
+      <Card className="border-stone-200 shadow-xl">
+        <CardContent className="p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-stone-600 mx-auto mb-4" />
+          <p className="text-stone-600">Cargando información de la comunidad...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (!isCommunityMember) {
     return (
       <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
@@ -332,6 +365,28 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     );
   }
 
+  if (!userCommunity) {
+    return (
+      <Card className="border-red-200 bg-gradient-to-br from-red-50 to-pink-50">
+        <CardContent className="p-8 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="h-8 w-8 text-red-600" />
+          </div>
+          <h3 className="text-2xl font-bold text-black mb-2">Comunidad No Encontrada</h3>
+          <p className="text-red-700 mb-4">
+            No se pudo identificar tu comunidad o no hay un administrador de fincas asignado.
+          </p>
+          <p className="text-red-600 text-sm mb-4">
+            Por favor, contacta con soporte técnico para resolver este problema.
+          </p>
+          <Badge className="bg-red-100 text-red-800">
+            Configuración requerida
+          </Badge>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="border-stone-200 shadow-xl bg-gradient-to-br from-white to-neutral-50">
       <CardHeader>
@@ -342,7 +397,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
           <div>
             <CardTitle className="text-xl font-semibold">Reportar Incidencia</CardTitle>
             <CardDescription className="mt-1">
-              Informa al administrador de fincas sobre problemas en la comunidad
+              Informa al administrador de fincas sobre problemas en {userCommunity.name}
             </CardDescription>
           </div>
         </div>
