@@ -306,13 +306,9 @@ export function ContractManager() {
         user_id: selectedQuote.user_id,
         service_provider_id: providerData.id,
         contract_number: contractNumber,
-        title: contractForm.title || selectedQuote.title,
-        work_description: contractForm.work_scope || selectedQuote.description,
+        work_description: contractForm.work_scope || selectedQuote.description || 'Descripción del trabajo',
         total_amount: selectedQuote.amount,
         payment_schedule: contractForm.payment_terms,
-        deadline_date: contractForm.deadline ? new Date(contractForm.deadline).toISOString() : null,
-        warranty_period: contractForm.warranty_period,
-        special_conditions: contractForm.special_terms || null,
         status: 'pending' as const,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -331,12 +327,8 @@ export function ContractManager() {
 
       console.log("✅ Contract created successfully:", newContract.id);
 
-      // Update quote with contract reference
-      await supabase
-        .from('quotes')
-        .update({ contract_id: newContract.id })
-        .eq('id', selectedQuote.id);
-
+      // Update quote with contract reference - remove contract_id as it doesn't exist in quotes table
+      
       // Create notification for client
       try {
         await supabase
