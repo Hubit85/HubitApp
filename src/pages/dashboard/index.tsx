@@ -31,12 +31,16 @@ export default function Dashboard() {
     }
   }, [user, loading, router]);
 
+  // Initialize selectedRole with proper fallback handling
   useEffect(() => {
-    if (activeRole) {
+    if (activeRole?.role_type) {
       setSelectedRole(activeRole.role_type);
     } else if (profile?.user_type) {
       // Fallback to profile user_type if no active role is set
       setSelectedRole(profile.user_type);
+    } else {
+      // Ensure we always have a valid role, even if it's a default
+      setSelectedRole("particular");
     }
   }, [activeRole, profile]);
 
@@ -51,8 +55,7 @@ export default function Dashboard() {
     console.log("🔄 Changing role to:", newRole);
     
     try {
-      setSelectedRole(newRole);
-      
+      // Don't update selectedRole immediately to prevent state flickering
       const result = await activateRole(newRole as any);
       
       if (result.success) {
@@ -60,14 +63,13 @@ export default function Dashboard() {
         await refreshRoles();
         // Reset to overview tab when changing roles
         setActiveTab("overview");
+        // selectedRole will be updated by useEffect when activeRole changes
       } else {
         console.error("❌ Failed to change role:", result.message);
-        setSelectedRole(selectedRole);
         alert(`Error al cambiar el rol: ${result.message}`);
       }
     } catch (error) {
       console.error("💥 Error in handleRoleChange:", error);
-      setSelectedRole(selectedRole);
       alert(`Error inesperado al cambiar el rol: ${error instanceof Error ? error.message : "Error desconocido"}`);
     }
   };
@@ -473,7 +475,7 @@ export default function Dashboard() {
                       <DollarSign className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-stone-900 mb-1">Ingresos del Mes</h3>
+                      <h1 className="font-bold text-stone-900 mb-1">Ingresos del Mes</h3>
                       <p className="text-2xl font-bold text-green-600">€3,450</p>
                       <p className="text-stone-600 text-sm">+15% vs mes anterior</p>
                     </div>
@@ -1561,7 +1563,7 @@ export default function Dashboard() {
                                 <Briefcase className="h-5 w-5 text-stone-500" />
                                 <div>
                                   <p className="text-sm text-stone-500 font-medium">Número de Colegiado</p>
-                                  <p className="font-semibold text-black">CAF-MAD-2847</p>
+                                  <p className="font-semibold text-black">CAF-Mad-2847</p>
                                 </div>
                               </div>
                             )}
