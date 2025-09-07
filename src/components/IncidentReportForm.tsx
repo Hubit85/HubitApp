@@ -100,19 +100,19 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     try {
       setLoading(true);
       
-      // Create a default community entry for the user if none exists
-      // This simplifies the process and allows immediate functionality
+      // Simplify: Allow community members to report incidents without specific community setup
+      // The incident will be sent to all property administrators
       const defaultCommunity = {
-        id: `community_${user.id}`,
+        id: 'general_community',
         name: "Mi Comunidad",
-        administrator_id: user.id // For now, use the user as temporary administrator
+        administrator_id: 'all_administrators' // Special flag for all administrators
       };
 
       setUserCommunity(defaultCommunity);
       
     } catch (err) {
-      console.error('Error setting up community:', err);
-      setError("Error al configurar la comunidad.");
+      console.error('Error setting up community access:', err);
+      setError("Error al configurar el acceso para reportar incidencias.");
     } finally {
       setLoading(false);
     }
@@ -297,7 +297,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
             title: `Nueva incidencia reportada - ${urgencyLevel?.label || 'Normal'}`,
             message: `${profile?.full_name || 'Un miembro de comunidad'} ha reportado una incidencia: "${formData.title}". Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
             type: formData.urgency === 'emergency' ? 'error' : 'info',
-            category: 'incident',
+            category: 'incident' as const,
             related_entity_type: 'incident',
             related_entity_id: incident.id,
             action_url: `/dashboard?tab=incidencias&incident=${incident.id}`,
