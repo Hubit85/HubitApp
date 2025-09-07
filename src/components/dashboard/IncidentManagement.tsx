@@ -93,10 +93,6 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
         .from('incidents')
         .select(`
           *,
-          reporter:profiles!incidents_reporter_id_fkey(
-            full_name,
-            email
-          ),
           community:communities!incidents_community_id_fkey(
             name
           )
@@ -108,26 +104,47 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
         throw queryError;
       }
 
-      const formattedIncidents: Incident[] = (data || []).map(incident => ({
-        id: incident.id,
-        title: incident.title,
-        description: incident.description,
-        category: incident.category,
-        urgency: incident.urgency,
-        status: incident.status,
-        work_location: incident.work_location,
-        special_requirements: incident.special_requirements,
-        images: incident.images || [],
-        documents: incident.documents || [],
-        reporter_name: incident.reporter?.full_name || 'Usuario desconocido',
-        reporter_email: incident.reporter?.email || '',
-        community_name: incident.community?.name || 'Comunidad desconocida',
-        community_id: incident.community_id,
-        created_at: incident.created_at,
-        admin_notes: incident.admin_notes
+      // Get reporter information separately to avoid relation issues
+      const incidentsWithReporters = await Promise.all((data || []).map(async (incident) => {
+        let reporter_name = 'Usuario desconocido';
+        let reporter_email = '';
+
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', incident.reporter_id)
+            .single();
+
+          if (profile) {
+            reporter_name = profile.full_name || 'Usuario desconocido';
+            reporter_email = profile.email || '';
+          }
+        } catch (profileError) {
+          console.warn(`Could not fetch profile for reporter ${incident.reporter_id}:`, profileError);
+        }
+
+        return {
+          id: incident.id,
+          title: incident.title,
+          description: incident.description,
+          category: incident.category,
+          urgency: incident.urgency,
+          status: incident.status,
+          work_location: incident.work_location,
+          special_requirements: incident.special_requirements,
+          images: incident.images || [],
+          documents: incident.documents || [],
+          reporter_name,
+          reporter_email,
+          community_name: incident.community?.name || 'Comunidad desconocida',
+          community_id: incident.community_id,
+          created_at: incident.created_at,
+          admin_notes: incident.admin_notes
+        };
       }));
 
-      setIncidents(formattedIncidents);
+      setIncidents(incidentsWithReporters);
 
     } catch (err) {
       console.error("Error loading incidents:", err);

@@ -5,7 +5,7 @@ export interface IncidentInsert {
   title: string;
   description: string;
   category: string;
-  urgency: string;
+  urgency: 'low' | 'normal' | 'high' | 'emergency';
   work_location?: string;
   special_requirements?: string;
   images?: string[];
@@ -20,7 +20,7 @@ export interface Incident {
   title: string;
   description: string;
   category: string;
-  urgency: string;
+  urgency: 'low' | 'normal' | 'high' | 'emergency';
   status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed';
   work_location?: string;
   special_requirements?: string;
@@ -45,7 +45,7 @@ export class SupabaseIncidentService {
     try {
       const { data, error } = await supabase
         .from('incidents')
-        .insert(incidentData)
+        .insert([incidentData])
         .select()
         .single();
 
@@ -54,7 +54,7 @@ export class SupabaseIncidentService {
         throw new Error(`Error al crear la incidencia: ${error.message}`);
       }
 
-      return data;
+      return data as Incident;
     } catch (error) {
       console.error("Service error creating incident:", error);
       throw error;
@@ -95,10 +95,6 @@ export class SupabaseIncidentService {
         .from('incidents')
         .select(`
           *,
-          reporter:profiles!incidents_reporter_id_fkey(
-            full_name,
-            email
-          ),
           community:communities!incidents_community_id_fkey(
             name
           )
@@ -111,12 +107,35 @@ export class SupabaseIncidentService {
         throw new Error(`Error al obtener incidencias: ${error.message}`);
       }
 
-      return (data || []).map(incident => ({
-        ...incident,
-        reporter_name: incident.reporter?.full_name || 'Usuario desconocido',
-        reporter_email: incident.reporter?.email || '',
-        community_name: incident.community?.name || 'Comunidad desconocida'
+      // Get reporter information separately to avoid relation issues
+      const incidentsWithReporters = await Promise.all((data || []).map(async (incident) => {
+        let reporter_name = 'Usuario desconocido';
+        let reporter_email = '';
+
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', incident.reporter_id)
+            .single();
+
+          if (profile) {
+            reporter_name = profile.full_name || 'Usuario desconocido';
+            reporter_email = profile.email || '';
+          }
+        } catch (profileError) {
+          console.warn(`Could not fetch profile for reporter ${incident.reporter_id}:`, profileError);
+        }
+
+        return {
+          ...incident,
+          reporter_name,
+          reporter_email,
+          community_name: incident.community?.name || 'Comunidad desconocida'
+        } as Incident;
       }));
+
+      return incidentsWithReporters;
     } catch (error) {
       console.error("Service error fetching incidents by administrator:", error);
       throw error;
@@ -169,10 +188,6 @@ export class SupabaseIncidentService {
         .from('incidents')
         .select(`
           *,
-          reporter:profiles!incidents_reporter_id_fkey(
-            full_name,
-            email
-          ),
           community:communities!incidents_community_id_fkey(
             name
           )
@@ -188,12 +203,31 @@ export class SupabaseIncidentService {
         throw new Error(`Error al obtener la incidencia: ${error.message}`);
       }
 
+      // Get reporter information separately
+      let reporter_name = 'Usuario desconocido';
+      let reporter_email = '';
+
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', data.reporter_id)
+          .single();
+
+        if (profile) {
+          reporter_name = profile.full_name || 'Usuario desconocido';
+          reporter_email = profile.email || '';
+        }
+      } catch (profileError) {
+        console.warn(`Could not fetch profile for reporter ${data.reporter_id}:`, profileError);
+      }
+
       return {
         ...data,
-        reporter_name: data.reporter?.full_name || 'Usuario desconocido',
-        reporter_email: data.reporter?.email || '',
+        reporter_name,
+        reporter_email,
         community_name: data.community?.name || 'Comunidad desconocida'
-      };
+      } as Incident;
     } catch (error) {
       console.error("Service error fetching incident by ID:", error);
       throw error;
@@ -255,7 +289,6 @@ export class SupabaseIncidentService {
         .from('incidents')
         .select(`
           *,
-          reporter:profiles!incidents_reporter_id_fkey(full_name),
           community:communities!incidents_community_id_fkey(name)
         `)
         .eq('administrator_id', administratorId)
@@ -267,16 +300,35 @@ export class SupabaseIncidentService {
         throw new Error(`Error al obtener resumen de incidencias: ${error.message}`);
       }
 
-      const incidents = (data || []).map(incident => ({
-        ...incident,
-        reporter_name: incident.reporter?.full_name || 'Usuario desconocido',
-        community_name: incident.community?.name || 'Comunidad desconocida'
+      // Get reporter information separately for each incident
+      const incidentsWithReporters = await Promise.all((data || []).map(async (incident) => {
+        let reporter_name = 'Usuario desconocido';
+
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', incident.reporter_id)
+            .single();
+
+          if (profile) {
+            reporter_name = profile.full_name || 'Usuario desconocido';
+          }
+        } catch (profileError) {
+          console.warn(`Could not fetch profile for reporter ${incident.reporter_id}:`, profileError);
+        }
+
+        return {
+          ...incident,
+          reporter_name,
+          community_name: incident.community?.name || 'Comunidad desconocida'
+        } as Incident;
       }));
 
-      const total = incidents.length;
-      const pending = incidents.filter(i => i.status === 'pending').length;
-      const approved = incidents.filter(i => i.status === 'approved').length;
-      const recent = incidents.slice(0, 5);
+      const total = incidentsWithReporters.length;
+      const pending = incidentsWithReporters.filter(i => i.status === 'pending').length;
+      const approved = incidentsWithReporters.filter(i => i.status === 'approved').length;
+      const recent = incidentsWithReporters.slice(0, 5);
 
       return {
         total,
