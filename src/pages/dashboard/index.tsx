@@ -23,7 +23,8 @@ export default function Dashboard() {
   const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
-  const [selectedRole, setSelectedRole] = useState<string>("");
+  // Initialize with a default value to prevent controlled/uncontrolled switching
+  const [selectedRole, setSelectedRole] = useState<string>("particular");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,18 +34,20 @@ export default function Dashboard() {
 
   // Fix: Initialize selectedRole with proper fallback handling and prevent state switching
   useEffect(() => {
-    // Only update if we don't already have a selected role to prevent switching
-    if (!selectedRole) {
-      if (activeRole?.role_type) {
-        setSelectedRole(activeRole.role_type);
-      } else if (profile?.user_type) {
-        setSelectedRole(profile.user_type);
-      } else {
-        // Always ensure we have a valid role
-        setSelectedRole("particular");
-      }
+    // Always set a value, never leave it empty or undefined
+    let newRole = "particular"; // Default fallback
+    
+    if (activeRole?.role_type) {
+      newRole = activeRole.role_type;
+    } else if (profile?.user_type) {
+      newRole = profile.user_type;
     }
-  }, [activeRole, profile, selectedRole]);
+    
+    // Only update if the new role is different from current
+    if (newRole !== selectedRole) {
+      setSelectedRole(newRole);
+    }
+  }, [activeRole, profile]);
 
   const handleSignOut = async () => {
     await signOut();
