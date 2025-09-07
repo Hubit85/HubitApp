@@ -24,7 +24,7 @@ interface Incident {
   urgency: string;
   status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed';
   work_location?: string | null;
-  special_requirements?: string;
+  special_requirements?: string | null;
   images?: string[];
   documents?: string[];
   reporter_name: string;
