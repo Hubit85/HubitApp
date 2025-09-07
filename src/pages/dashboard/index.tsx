@@ -164,7 +164,7 @@ export default function Dashboard() {
         return [
           { id: "comunidades", label: "Comunidades Gestionadas", icon: Users },
           { id: "propiedades", label: "Gestión de Propiedades", icon: Home },
-          { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText }, // CHANGED: from "presupuestos" to "presupuesto"
+          { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores Autorizados", icon: Store },
           { id: "incidencias", label: "Gestión de Incidencias", icon: AlertTriangle },
           { id: "juntas", label: "Juntas y Reuniones", icon: Video },
@@ -831,53 +831,40 @@ export default function Dashboard() {
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("incidencias")}>
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer bg-gradient-to-br from-white to-blue-50" onClick={() => setActiveTab("presupuesto")}>
                   <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-700 transition-colors">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                      <FileText className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Solicitar Presupuesto</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Gestiona licitaciones y solicita presupuestos para las comunidades
+                    </p>
+                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer bg-gradient-to-br from-white to-red-50" onClick={() => setActiveTab("incidencias")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                       <AlertTriangle className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-lg font-bold text-black mb-3">Gestionar Incidencias</h3>
                     <p className="text-sm text-stone-600 mb-4">
-                      Administra reportes y urgencias
+                      Administra reportes y urgencias de las comunidades
                     </p>
                     <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
                   </CardContent>
                 </Card>
 
-                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("presupuestos")}>
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer bg-gradient-to-br from-white to-green-50" onClick={() => setActiveTab("comunidades")}>
                   <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-700 transition-colors">
-                      <FileText className="h-8 w-8 text-white" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                      <Users className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-black mb-3">Licitar Presupuestos</h3>
+                    <h3 className="text-lg font-bold text-black mb-3">Comunidades Gestionadas</h3>
                     <p className="text-sm text-stone-600 mb-4">
-                      Gestiona contratos y licitaciones
-                    </p>
-                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
-                  </CardContent>
-                </Card>
-
-                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("juntas")}>
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-700 transition-colors">
-                      <Video className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold text-black mb-3">Programar Juntas</h3>
-                    <p className="text-sm text-stone-600 mb-4">
-                      Organiza reuniones de comunidad
-                    </p>
-                    <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
-                  </CardContent>
-                </Card>
-
-                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("informes")}>
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-700 transition-colors">
-                      <BarChart3 className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold text-black mb-3">Generar Informes</h3>
-                    <p className="text-sm text-stone-600 mb-4">
-                      Reportes y análisis financiero
+                      Administra las comunidades bajo tu gestión
                     </p>
                     <ChevronRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
                   </CardContent>
@@ -1001,18 +988,48 @@ export default function Dashboard() {
         return (
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-black mb-2">
-              {roleType === "community_member" ? "Mi Comunidad" : 
-               roleType === "property_administrator" ? "Gestionar Propiedades" : 
-               "Mis Propiedades"}
+              {roleType === "community_member" ? "Mi Comunidad" : "Mis Propiedades"}
             </h1>
             <p className="text-stone-600">
-              {roleType === "community_member" ? "Información y gestión de tu comunidad" : 
-               roleType === "property_administrator" ? "Administra múltiples propiedades y comunidades" : 
-               "Gestiona tus propiedades residenciales"}
+              {roleType === "community_member" ? "Información y gestión de tu comunidad" : "Gestiona tus propiedades residenciales"}
             </p>
-            <div className="mt-6">
-              <PropertyManager />
-            </div>
+            {(roleType === "particular" || roleType === "community_member") ? (
+              <div className="mt-6">
+                <PropertyManager />
+              </div>
+            ) : (
+              <Card className="border-amber-200 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 mt-6">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Shield className="h-8 w-8 text-amber-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-black mb-2">Funcionalidad No Disponible</h3>
+                  <p className="text-amber-700 mb-4">
+                    La gestión de propiedades está disponible únicamente para los roles "Particular" y "Miembro de Comunidad".
+                  </p>
+                  <p className="text-amber-600 text-sm mb-6">
+                    Los administradores de fincas gestionan comunidades, no propiedades individuales.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button 
+                      onClick={() => setActiveTab("comunidades")}
+                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Gestionar Comunidades
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setActiveTab("incidencias")}
+                      className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                    >
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      Gestionar Incidencias
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         );
 

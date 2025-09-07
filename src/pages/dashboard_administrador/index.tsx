@@ -45,7 +45,6 @@ export default function DashboardAdministrador() {
     { id: "overview", label: "Panel de Control", icon: Home },
     { id: "perfil", label: "Mi Perfil", icon: Building },
     { id: "comunidades", label: "Comunidades Gestionadas", icon: Users },
-    { id: "propiedades", label: "Gestión de Propiedades", icon: Home },
     { id: "presupuestos", label: "Solicitar Presupuesto", icon: FileText },
     { id: "proveedores", label: "Proveedores Autorizados", icon: Store },
     { id: "incidencias", label: "Gestión de Incidencias", icon: AlertTriangle },
