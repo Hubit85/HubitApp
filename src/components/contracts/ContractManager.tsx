@@ -26,18 +26,15 @@ interface ExtendedContract extends Contract {
   quote_title?: string;
   budget_title?: string;
   property_address?: string;
-  title?: string; // Add this property
-  deadline_date?: string; // Add this property
 }
 
 interface ExtendedQuote extends Quote {
   user_id: string;
   title?: string;
   description?: string;
-  contract_id?: string; // Add this property
   budget_requests?: {
     title: string;
-    user_id: string; // Make sure this exists
+    user_id: string;
     profiles: {
       full_name: string;
     };
