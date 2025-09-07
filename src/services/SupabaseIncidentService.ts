@@ -31,7 +31,7 @@ export interface Incident {
   administrator_id: string;
   admin_notes?: string | null;
   reviewed_at?: string | null;
-  reviewed_by?: string;
+  reviewed_by?: string | null;
   created_at: string;
   updated_at: string;
   // Additional joined fields
