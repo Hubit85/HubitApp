@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -21,6 +22,7 @@ export interface Database {
           expires_at: string | null
           id: string
           images: string[] | null
+          incident_id: string | null
           preferred_date: string | null
           property_id: string | null
           published_at: string | null
@@ -52,6 +54,7 @@ export interface Database {
           expires_at?: string | null
           id?: string
           images?: string[] | null
+          incident_id?: string | null
           preferred_date?: string | null
           property_id?: string | null
           published_at?: string | null
@@ -83,6 +86,7 @@ export interface Database {
           expires_at?: string | null
           id?: string
           images?: string[] | null
+          incident_id?: string | null
           preferred_date?: string | null
           property_id?: string | null
           published_at?: string | null
@@ -105,6 +109,12 @@ export interface Database {
         }
         Relationships: [
           {
+            foreignKeyName: "budget_requests_incident_id_fkey"
+            columns: ["incident_id"]
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_requests_property_id_fkey"
             columns: ["property_id"]
             referencedRelation: "properties"
@@ -119,6 +129,52 @@ export interface Database {
           {
             foreignKeyName: "budget_requests_user_id_fkey"
             columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      communities: {
+        Row: {
+          address: string
+          administrator_id: string
+          city: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          postal_code: string | null
+          status: "active" | "inactive"
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          administrator_id: string
+          city: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          postal_code?: string | null
+          status?: "active" | "inactive"
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          administrator_id?: string
+          city?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          postal_code?: string | null
+          status?: "active" | "inactive"
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communities_administrator_id_fkey"
+            columns: ["administrator_id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
           }
@@ -518,6 +574,170 @@ export interface Database {
           },
           {
             foreignKeyName: "emergency_requests_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      incidents: {
+        Row: {
+          admin_notes: string | null
+          administrator_id: string
+          category: string
+          community_id: string
+          created_at: string
+          description: string
+          documents: string[]
+          id: string
+          images: string[]
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          special_requirements: string | null
+          status: "pending" | "approved" | "processing" | "completed" | "rejected"
+          title: string
+          updated_at: string
+          urgency: "low" | "normal" | "high" | "emergency"
+          work_location: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          administrator_id: string
+          category: string
+          community_id: string
+          created_at?: string
+          description: string
+          documents?: string[]
+          id?: string
+          images?: string[]
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          special_requirements?: string | null
+          status?: "pending" | "approved" | "processing" | "completed" | "rejected"
+          title: string
+          updated_at?: string
+          urgency?: "low" | "normal" | "high" | "emergency"
+          work_location?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          administrator_id?: string
+          category?: string
+          community_id?: string
+          created_at?: string
+          description?: string
+          documents?: string[]
+          id?: string
+          images?: string[]
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          special_requirements?: string | null
+          status?: "pending" | "approved" | "processing" | "completed" | "rejected"
+          title?: string
+          updated_at?: string
+          urgency?: "low" | "normal" | "high" | "emergency"
+          work_location?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidents_administrator_id_fkey"
+            columns: ["administrator_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_community_id_fkey"
+            columns: ["community_id"]
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_reporter_id_fkey"
+            columns: ["reporter_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      incident_reports: {
+        Row: {
+          budget_request_id: string | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          location: string | null
+          photo_urls: string[] | null
+          property_admin_id: string | null
+          reported_at: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          urgency: string
+          user_id: string
+        }
+        Insert: {
+          budget_request_id?: string | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          location?: string | null
+          photo_urls?: string[] | null
+          property_admin_id?: string | null
+          reported_at?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          urgency?: string
+          user_id: string
+        }
+        Update: {
+          budget_request_id?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string | null
+          photo_urls?: string[] | null
+          property_admin_id?: string | null
+          reported_at?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          urgency?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_reports_budget_request_id_fkey"
+            columns: ["budget_request_id"]
+            referencedRelation: "budget_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_property_admin_id_fkey"
+            columns: ["property_admin_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_user_id_fkey"
             columns: ["user_id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1345,6 +1565,67 @@ export interface Database {
           }
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_verified: boolean
+          role_specific_data: Json | null
+          role_type: 
+            | "particular"
+            | "community_member"
+            | "service_provider"
+            | "property_administrator"
+          updated_at: string
+          user_id: string
+          verification_confirmed_at: string | null
+          verification_expires_at: string | null
+          verification_token: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          role_specific_data?: Json | null
+          role_type: 
+            | "particular"
+            | "community_member"
+            | "service_provider"
+            | "property_administrator"
+          updated_at?: string
+          user_id: string
+          verification_confirmed_at?: string | null
+          verification_expires_at?: string | null
+          verification_token?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          role_specific_data?: Json | null
+          role_type?: 
+            | "particular"
+            | "community_member"
+            | "service_provider"
+            | "property_administrator"
+          updated_at?: string
+          user_id?: string
+          verification_confirmed_at?: string | null
+          verification_expires_at?: string | null
+          verification_token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       work_sessions: {
         Row: {
           client_approved: boolean | null
@@ -1423,146 +1704,6 @@ export interface Database {
           }
         ]
       }
-      incident_reports: {
-        Row: {
-          id: string
-          user_id: string
-          property_admin_id: string | null
-          title: string
-          description: string
-          category: string
-          location: string | null
-          urgency: string
-          status: string
-          photo_urls: string[] | null
-          reported_at: string
-          resolved_at: string | null
-          resolution_notes: string | null
-          budget_request_id: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          property_admin_id?: string | null
-          title: string
-          description: string
-          category: string
-          location?: string | null
-          urgency?: string
-          status?: string
-          photo_urls?: string[] | null
-          reported_at?: string
-          resolved_at?: string | null
-          resolution_notes?: string | null
-          budget_request_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          property_admin_id?: string | null
-          title?: string
-          description?: string
-          category?: string
-          location?: string | null
-          urgency?: string
-          status?: string
-          photo_urls?: string[] | null
-          reported_at?: string
-          resolved_at?: string | null
-          resolution_notes?: string | null
-          budget_request_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "incident_reports_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incident_reports_property_admin_id_fkey"
-            columns: ["property_admin_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "incident_reports_budget_request_id_fkey"
-            columns: ["budget_request_id"]
-            isOneToOne: false
-            referencedRelation: "budget_requests"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          is_verified: boolean
-          role_specific_data: Json | null
-          role_type: 
-            | "particular"
-            | "community_member"
-            | "service_provider"
-            | "property_administrator"
-          updated_at: string
-          user_id: string
-          verification_confirmed_at: string | null
-          verification_expires_at: string | null
-          verification_token: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          is_verified?: boolean
-          role_specific_data?: Json | null
-          role_type: 
-            | "particular"
-            | "community_member"
-            | "service_provider"
-            | "property_administrator"
-          updated_at?: string
-          user_id: string
-          verification_confirmed_at?: string | null
-          verification_expires_at?: string | null
-          verification_token?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          is_verified?: boolean
-          role_specific_data?: Json | null
-          role_type?: 
-            | "particular"
-            | "community_member"
-            | "service_provider"
-            | "property_administrator"
-          updated_at?: string
-          user_id?: string
-          verification_confirmed_at?: string | null
-          verification_expires_at?: string | null
-          verification_token?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -1636,6 +1777,7 @@ export interface Database {
         | "cancelled"
         | "expired"
       budget_request_urgency: "low" | "normal" | "high" | "emergency"
+      community_status: "active" | "inactive"
       contract_status:
         | "pending"
         | "signed"
@@ -1668,6 +1810,8 @@ export interface Database {
         | "resolved"
         | "cancelled"
       emergency_request_urgency_level: "high" | "critical"
+      incident_status: "pending" | "approved" | "processing" | "completed" | "rejected"
+      incident_urgency: "low" | "normal" | "high" | "emergency"
       invoice_status: "pending" | "sent" | "paid" | "overdue" | "cancelled"
       message_type: "text" | "image" | "file" | "system"
       notification_category:
@@ -1779,3 +1923,16 @@ export type NotificationUpdate = Database["public"]["Tables"]["notifications"]["
 export type UserRole = Database["public"]["Tables"]["user_roles"]["Row"];
 export type UserRoleInsert = Database["public"]["Tables"]["user_roles"]["Insert"];
 export type UserRoleUpdate = Database["public"]["Tables"]["user_roles"]["Update"];
+
+export type IncidentReport = Database["public"]["Tables"]["incident_reports"]["Row"];
+export type IncidentReportInsert = Database["public"]["Tables"]["incident_reports"]["Insert"];
+export type IncidentReportUpdate = Database["public"]["Tables"]["incident_reports"]["Update"];
+
+// New types for incidents and communities
+export type Community = Database["public"]["Tables"]["communities"]["Row"];
+export type CommunityInsert = Database["public"]["Tables"]["communities"]["Insert"];
+export type CommunityUpdate = Database["public"]["Tables"]["communities"]["Update"];
+
+export type Incident = Database["public"]["Tables"]["incidents"]["Row"];
+export type IncidentInsert = Database["public"]["Tables"]["incidents"]["Insert"];
+export type IncidentUpdate = Database["public"]["Tables"]["incidents"]["Update"];
