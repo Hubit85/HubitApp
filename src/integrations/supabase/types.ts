@@ -682,6 +682,7 @@ export interface Database {
             | "rating"
             | "message"
             | "system"
+            | "incident"
             | null
           created_at: string
           expires_at: string | null
@@ -709,6 +710,7 @@ export interface Database {
             | "rating"
             | "message"
             | "system"
+            | "incident"
             | null
           created_at?: string
           expires_at?: string | null
@@ -736,6 +738,7 @@ export interface Database {
             | "rating"
             | "message"
             | "system"
+            | "incident"
             | null
           created_at?: string
           expires_at?: string | null
