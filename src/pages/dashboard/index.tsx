@@ -24,6 +24,7 @@ import { ContractManager } from "@/components/contracts/ContractManager";
 import UserRoleManager from "@/components/UserRoleManager";
 import { IncidentReportForm } from "@/components/IncidentReportForm";
 import { CommunityAdministratorAssignment } from "@/components/CommunityAdministratorAssignment";
+import { PropertyAdministratorProfile } from "@/components/PropertyAdministratorProfile";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
