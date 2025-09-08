@@ -393,7 +393,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               rolesLoadingSucceeded = true;
               console.log(`✅ Strategy ${i + 1} succeeded: Found ${finalRoles.length} roles from ${result.source}`);
               break;
-            } else if (result.source === 'count-only' && !result.hasRoles) {
+            } else if (result.source === 'count-only' && result.hasRoles === false) {
               finalRoles = [];
               rolesLoadingSucceeded = true;
               console.log(`✅ Strategy ${i + 1} confirmed: No roles exist for user`);
