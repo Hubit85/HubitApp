@@ -64,7 +64,7 @@ export default function UserRoleManager() {
   };
 
   const getRoleColor = (roleType: UserRole['role_type'], isActive: boolean = false) => {
-    const colors = {
+    const colors: Record<UserRole['role_type'], string> = {
       'particular': isActive ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-blue-50 text-blue-700',
       'community_member': isActive ? 'bg-green-100 text-green-800 border-green-200' : 'bg-green-50 text-green-700',
       'service_provider': isActive ? 'bg-purple-100 text-purple-800 border-purple-200' : 'bg-purple-50 text-purple-700',
@@ -73,7 +73,7 @@ export default function UserRoleManager() {
     return colors[roleType] || (isActive ? 'bg-gray-100 text-gray-800 border-gray-200' : 'bg-gray-50 text-gray-700');
   };
 
-  const verifiedRoles = userRoles.filter(role => role.is_verified);
+  const verifiedRoles = userRoles.filter(role => Boolean(role.is_verified));
 
   if (loading) {
     return (
