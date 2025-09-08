@@ -165,7 +165,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '',
+          business_email: userData.business_email || userData.email || '', // FIXED: Always provide fallback
           business_phone: userData.business_phone || userData.phone,
           selected_services: userData.selected_services || [],
           service_costs: userData.service_costs || {}
@@ -180,7 +180,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '',
+          business_email: userData.business_email || userData.email || '', // FIXED: Always provide fallback
           business_phone: userData.business_phone || userData.phone,
           professional_number: userData.professional_number || ''
         };
