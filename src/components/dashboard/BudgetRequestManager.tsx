@@ -104,7 +104,7 @@ export default function BudgetRequestManager() {
       };
       
       let res;
-      if (isEditing) {
+      if (isEditing && currentRequest.id) {
         const updateData: BudgetRequestUpdate = { 
           title: requestData.title,
           description: requestData.description,
@@ -113,7 +113,7 @@ export default function BudgetRequestManager() {
           budget_range_min: requestData.budget_range_min,
           budget_range_max: requestData.budget_range_max
         };
-        res = await supabase.from("budget_requests").update(updateData).eq("id", currentRequest.id!);
+        res = await supabase.from("budget_requests").update(updateData).eq("id", currentRequest.id);
       } else {
         const insertData: BudgetRequestInsert = { 
           user_id: user.id,

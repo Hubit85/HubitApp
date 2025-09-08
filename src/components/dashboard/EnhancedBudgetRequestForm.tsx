@@ -105,7 +105,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   
-  // Preview states
   const [showPreview, setShowPreview] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [providerPreview, setProviderPreview] = useState<ProviderPreviewResults | null>(null);
@@ -128,9 +127,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
     incident_id: prefilledIncident?.id || null
   });
 
-  // Separate state for community_id since it's not part of budget_requests table yet
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(prefilledIncident?.community_id || null);
-
   const [autoPublish, setAutoPublish] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
@@ -249,19 +246,16 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
-      // Check file type
       if (!Object.keys(ACCEPTED_FILE_TYPES).includes(file.type)) {
         errors.push(`${file.name}: Tipo de archivo no permitido`);
         continue;
       }
       
-      // Check file size
       if (file.size > MAX_FILE_SIZE) {
         errors.push(`${file.name}: Archivo demasiado grande (máx. 10MB)`);
         continue;
       }
       
-      // Check total files limit
       if (uploadedFiles.length + validFiles.length >= MAX_FILES) {
         errors.push(`Máximo ${MAX_FILES} archivos permitidos`);
         break;
@@ -284,11 +278,9 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       const newFiles: UploadedFile[] = [];
 
       for (const file of validFiles) {
-        // Generate unique filename
         const fileExt = file.name.split('.').pop();
         const fileName = `budget-request-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
         
-        // Upload to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('budget-attachments')
           .upload(fileName, file);
@@ -297,7 +289,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
           throw uploadError;
         }
 
-        // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('budget-attachments')
           .getPublicUrl(fileName);
@@ -313,7 +304,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
       setUploadedFiles(prev => [...prev, ...newFiles]);
       
-      // Update form data
       const imageFiles = newFiles.filter(f => f.type.startsWith('image/')).map(f => f.url);
       const documentFiles = newFiles.filter(f => !f.type.startsWith('image/')).map(f => f.url);
       
@@ -328,7 +318,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       setError("Error al subir archivos. Por favor, intenta de nuevo.");
     } finally {
       setUploadingFiles(false);
-      // Reset file input
       event.target.value = '';
     }
   };
@@ -337,7 +326,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
     const fileToRemove = uploadedFiles[index];
     
     try {
-      // Remove from Supabase Storage if it's a new upload
       if (fileToRemove.file) {
         const fileName = fileToRemove.url.split('/').pop();
         if (fileName) {
@@ -347,11 +335,9 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         }
       }
       
-      // Remove from local state
       const newFiles = uploadedFiles.filter((_, i) => i !== index);
       setUploadedFiles(newFiles);
       
-      // Update form data
       const imageFiles = newFiles.filter(f => f.type.startsWith('image/')).map(f => f.url);
       const documentFiles = newFiles.filter(f => !f.type.startsWith('image/')).map(f => f.url);
       
@@ -391,7 +377,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       setPreviewLoading(true);
       setError("");
 
-      // Create a temporary budget request for preview
       const tempRequest: any = {
         id: 'temp-preview',
         ...formData,
@@ -432,7 +417,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       const requestData: BudgetRequestInsert = {
         ...formData,
         user_id: user!.id,
-        // Convert empty strings to null for optional fields, ensure proper types
         budget_range_min: formData.budget_range_min || null,
         budget_range_max: formData.budget_range_max || null,
         preferred_date: formData.preferred_date || null,
@@ -451,7 +435,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         setSuccessMessage("¡Solicitud de presupuesto creada exitosamente! Puedes publicarla cuando estés listo.");
       }
 
-      // Reset form
       setFormData({
         user_id: user!.id,
         title: "",
@@ -472,12 +455,10 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       setShowConfirmDialog(false);
       setProviderPreview(null);
 
-      // Call success callback
       if (onSuccess) {
         onSuccess();
       }
 
-      // Clear success message after 5 seconds
       setTimeout(() => setSuccessMessage(""), 5000);
 
     } catch (err) {
@@ -528,7 +509,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         </CardHeader>
 
         <CardContent className="p-6 space-y-6">
-          {/* Status Messages */}
           {(error || successMessage) && (
             <Alert className={`border-2 ${
               error 
@@ -544,7 +524,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
           )}
 
           <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
-            {/* Basic Information */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Info className="h-5 w-5 text-blue-600" />
@@ -626,7 +605,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
             <Separator />
 
-            {/* Location */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-blue-600" />
@@ -638,7 +616,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                   <div>
                     <Label htmlFor="property_id">Propiedad</Label>
                     <Select 
-                      value={formData.property_id ?? undefined} 
+                      value={formData.property_id || undefined} 
                       onValueChange={(value) => setFormData(prev => ({ ...prev, property_id: value }))}
                     >
                       <SelectTrigger>
@@ -660,7 +638,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                   <div>
                     <Label htmlFor="community_id">Comunidad</Label>
                     <Select 
-                      value={selectedCommunityId ?? undefined} 
+                      value={selectedCommunityId || undefined} 
                       onValueChange={(value) => setSelectedCommunityId(value)}
                     >
                       <SelectTrigger>
@@ -709,7 +687,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
             <Separator />
 
-            {/* Budget and Timeline */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Euro className="h-5 w-5 text-blue-600" />
@@ -767,7 +744,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
             <Separator />
 
-            {/* File Upload Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Paperclip className="h-5 w-5 text-blue-600" />
@@ -864,7 +840,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
             <Separator />
 
-            {/* Provider Preview Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -951,7 +926,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
             <Separator />
 
-            {/* Publication Options */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-blue-600" />
@@ -986,7 +960,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
               )}
             </div>
 
-            {/* Submit Button */}
             <div className="flex items-center justify-end gap-4 pt-4">
               <Button
                 type="submit"
@@ -1010,7 +983,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         </CardContent>
       </Card>
 
-      {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -1024,7 +996,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Request Summary */}
             <Card className="p-4 bg-neutral-50">
               <h4 className="font-medium mb-3">Resumen de tu solicitud:</h4>
               <div className="space-y-2 text-sm">
@@ -1051,7 +1022,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
               </div>
             </Card>
 
-            {/* Expected Actions */}
             {providerPreview && (
               <Alert className="border-green-200 bg-green-50">
                 <CheckCircle className="h-4 w-4 text-green-600" />

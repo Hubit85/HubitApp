@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,7 +115,6 @@ export function ContractManager() {
 
       console.log("🔍 Loading contracts data for user:", user.id.substring(0, 8) + '...');
 
-      // Load contracts based on user role
       if (activeRole?.role_type === 'service_provider') {
         await Promise.all([
           loadProviderContracts(),
@@ -183,7 +183,6 @@ export function ContractManager() {
     if (!user?.id) return;
 
     try {
-      // Get service provider ID first
       const { data: providerData, error: providerError } = await supabase
         .from('service_providers')
         .select('id')
@@ -242,7 +241,6 @@ export function ContractManager() {
     if (!user?.id) return;
 
     try {
-      // Get service provider ID first
       const { data: providerData, error: providerError } = await supabase
         .from('service_providers')
         .select('id')
@@ -272,7 +270,7 @@ export function ContractManager() {
         `)
         .eq('service_provider_id', providerData.id)
         .eq('status', 'accepted')
-        .is('contract_id', null) // Only quotes without contracts
+        .is('contract_id', null)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -280,7 +278,6 @@ export function ContractManager() {
         return;
       }
 
-      // Transform data to ensure required properties exist
       const transformedQuotes: ExtendedQuote[] = (data || []).map((quote: any) => ({
         ...quote,
         user_id: quote.budget_requests?.user_id || quote.user_id || '',
@@ -306,7 +303,6 @@ export function ContractManager() {
 
       console.log("📄 Creating contract for quote:", selectedQuote.id);
 
-      // Get service provider ID
       const { data: providerData, error: providerError } = await supabase
         .from('service_providers')
         .select('id')
@@ -317,10 +313,7 @@ export function ContractManager() {
         throw new Error("Error al obtener datos del proveedor");
       }
 
-      // Generate contract number
       const contractNumber = `CON-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
-      // Ensure we have a valid user_id - prioritize budget_request user_id, then fallback
       const contractUserId = selectedQuote.budget_requests?.user_id || selectedQuote.user_id || user.id;
       
       if (!contractUserId) {
@@ -353,9 +346,6 @@ export function ContractManager() {
 
       console.log("✅ Contract created successfully:", newContract.id);
 
-      // Update quote with contract reference - remove contract_id as it doesn't exist in quotes table
-      
-      // Create notification for client
       if (contractUserId) {
         try {
           await supabase
@@ -380,10 +370,7 @@ export function ContractManager() {
       setSuccessMessage("¡Contrato creado exitosamente!");
       setShowContractDialog(false);
       resetContractForm();
-      
-      // Refresh data
       await loadContractsData();
-
       setTimeout(() => setSuccessMessage(""), 5000);
 
     } catch (err) {
@@ -431,7 +418,6 @@ export function ContractManager() {
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = (contract.quote_title || contract.work_description || '')?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
-    
     return matchesSearch && matchesStatus;
   });
 
@@ -485,7 +471,6 @@ export function ContractManager() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Status Messages */}
           {(error || successMessage) && (
             <Alert className={`border-2 ${
               error 
@@ -500,7 +485,6 @@ export function ContractManager() {
             </Alert>
           )}
 
-          {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card className="p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/60">
               <div className="flex items-center gap-3">
@@ -549,7 +533,6 @@ export function ContractManager() {
             </Card>
           </div>
 
-          {/* Search and Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -580,7 +563,6 @@ export function ContractManager() {
             </Select>
           </div>
 
-          {/* Main Content Tabs */}
           <Tabs value={currentTab} onValueChange={setCurrentTab}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="my-contracts">
@@ -641,12 +623,12 @@ export function ContractManager() {
                               <span>Creado: {contract.created_at ? new Date(contract.created_at).toLocaleDateString() : 'Fecha desconocida'}</span>
                             </div>
 
-                            {contract.end_date ? (
+                            {contract.end_date && (
                               <div className="flex items-center gap-1 text-orange-600">
                                 <Clock className="h-4 w-4" />
                                 <span>Fecha límite: {new Date(contract.end_date).toLocaleDateString()}</span>
                               </div>
-                            ) : null}
+                            )}
                           </div>
                         </div>
 
@@ -763,7 +745,6 @@ export function ContractManager() {
                                 </DialogHeader>
                                 
                                 <div className="space-y-6">
-                                  {/* Quote Summary */}
                                   <Card className="p-4 bg-neutral-50">
                                     <h4 className="font-medium mb-2">Resumen de la cotización</h4>
                                     <div className="text-sm space-y-1">
