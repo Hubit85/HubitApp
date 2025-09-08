@@ -137,8 +137,8 @@ export default function BudgetRequestManager() {
     }
   };
 
-  const handleDelete = async (requestId: string | null) => {
-    if (!requestId || typeof requestId !== 'string') {
+  const handleDelete = async (requestId: string) => {
+    if (!requestId) {
       console.error("Cannot delete request: ID is missing or invalid");
       setError("Error: No se puede eliminar la solicitud porque falta el ID");
       return;
@@ -155,8 +155,9 @@ export default function BudgetRequestManager() {
     }
   };
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
+  const getStatusBadgeVariant = (status: string | null) => {
+    const s = status || 'pending';
+    switch (s) {
       case 'pending':
         return 'default';
       case 'published':
