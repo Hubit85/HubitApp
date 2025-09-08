@@ -584,7 +584,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Step 5: Ensure there's always one active verified role
+      // Step 5: Ensure there's always one active verified role if we have verified roles
       if (verifiedRoles.length > 0 && activeRoles.length === 0) {
         console.log("🔄 SYNC: No active role found, activating the role that matches user_type");
         
