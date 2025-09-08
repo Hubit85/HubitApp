@@ -399,8 +399,9 @@ export function ContractManager() {
     setSelectedQuote(null);
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusBadge = (status: string | null) => {
+    const statusValue = status || 'draft'; // Default to 'draft' if status is null
+    switch (statusValue) {
       case 'draft':
         return <Badge className="bg-gray-100 text-gray-800 border-gray-200">📝 Borrador</Badge>;
       case 'pending':
@@ -416,13 +417,14 @@ export function ContractManager() {
       case 'disputed':
         return <Badge className="bg-orange-100 text-orange-800 border-orange-200">⚠️ En Disputa</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="outline">{statusValue}</Badge>;
     }
   };
 
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = (contract.quote_title || contract.work_description || '')?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
+    const contractStatus = contract.status || 'draft'; // Handle null status
+    const matchesStatus = statusFilter === 'all' || contractStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -506,7 +508,7 @@ export function ContractManager() {
                 <CheckCircle className="h-8 w-8 text-green-600" />
                 <div>
                   <div className="text-2xl font-bold text-green-900">
-                    {contracts.filter(c => c.status === 'active').length}
+                    {contracts.filter(c => (c.status || 'draft') === 'active').length}
                   </div>
                   <div className="text-sm text-green-600">Contratos Activos</div>
                 </div>
@@ -518,7 +520,7 @@ export function ContractManager() {
                 <Award className="h-8 w-8 text-blue-600" />
                 <div>
                   <div className="text-2xl font-bold text-blue-900">
-                    {contracts.filter(c => c.status === 'completed').length}
+                    {contracts.filter(c => (c.status || 'draft') === 'completed').length}
                   </div>
                   <div className="text-sm text-blue-600">Completados</div>
                 </div>
@@ -616,7 +618,7 @@ export function ContractManager() {
                           <p className="text-neutral-700 mb-4 line-clamp-2">{contract.work_description}</p>
                           
                           <div className="flex items-center gap-4 text-sm">
-                            {getStatusBadge(contract.status || 'draft')}
+                            {getStatusBadge(contract.status)}
                             <div className="flex items-center gap-1 text-green-600 font-semibold">
                               <Euro className="h-4 w-4" />
                               <span>€{contract.total_amount?.toLocaleString()}</span>
@@ -642,21 +644,21 @@ export function ContractManager() {
                             Ver Detalles
                           </Button>
                           
-                          {contract.status === 'pending' && (
+                          {(contract.status || 'draft') === 'pending' && (
                             <Button size="sm" className="bg-gradient-to-r from-purple-600 to-indigo-600">
                               <Edit className="h-4 w-4 mr-2" />
                               Editar
                             </Button>
                           )}
 
-                          {contract.status === 'pending' && (
+                          {(contract.status || 'draft') === 'pending' && (
                             <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600">
                               <Signature className="h-4 w-4 mr-2" />
                               Firmar
                             </Button>
                           )}
 
-                          {contract.status === 'active' && (
+                          {(contract.status || 'draft') === 'active' && (
                             <Button size="sm" className="bg-gradient-to-r from-amber-600 to-orange-600">
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Completar
