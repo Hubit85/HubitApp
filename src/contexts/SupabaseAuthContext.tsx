@@ -16,7 +16,7 @@ interface AuthContextType {
   isConnected: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'> & { 
-    // NUEVO: Soporte para múltiples roles durante el registro
+    // Soporte para múltiples roles durante el registro
     additionalRoles?: Array<{
       roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
       roleSpecificData: Record<string, any>;
@@ -133,9 +133,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // ENHANCED signUp with improved multiple roles creation
+  // ENHANCED signUp with multiple roles creation
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'> & { 
-    // NUEVO: Soporte para múltiples roles durante el registro
+    // Soporte para múltiples roles durante el registro
     additionalRoles?: Array<{
       roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
       roleSpecificData: Record<string, any>;
@@ -201,7 +201,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           console.log("✅ Profile created successfully with user_type:", profileData.user_type);
 
-          // NUEVO: Create multiple roles natively
+          // Create multiple roles natively
           const rolesToCreate = [
             // Primary role (first)
             {
@@ -215,6 +215,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           console.log(`🎭 Creating ${rolesToCreate.length} roles natively...`);
 
           const createdRoles = [];
+          const roleErrors = [];
+          
           for (let i = 0; i < rolesToCreate.length; i++) {
             const roleRequest = rolesToCreate[i];
             const isFirstRole = i === 0;
@@ -246,7 +248,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
               if (insertError) {
                 console.error(`❌ Failed to create role ${roleRequest.roleType}:`, insertError);
-                continue; // Skip this role but continue with others
+                roleErrors.push(`${roleRequest.roleType}: ${insertError.message}`);
+                continue;
               }
 
               createdRoles.push(newRole);
@@ -281,20 +284,54 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
             } catch (roleError) {
               console.error(`❌ Exception creating role ${roleRequest.roleType}:`, roleError);
+              roleErrors.push(`${roleRequest.roleType}: ${roleError instanceof Error ? roleError.message : 'Unknown error'}`);
             }
           }
 
           console.log(`📊 Native role creation completed: ${createdRoles.length}/${rolesToCreate.length} roles created`);
           
+          // Update profile.user_type to match the first successfully created role if needed
+          if (createdRoles.length > 0) {
+            const firstRoleType = createdRoles[0].role_type;
+            if (firstRoleType !== profileData.user_type) {
+              console.log(`🔄 Updating profile.user_type to ${firstRoleType}`);
+              await supabase
+                .from('profiles')
+                .update({ 
+                  user_type: firstRoleType,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', data.user.id);
+            }
+          }
+          
+          // Return success with details
+          let message = `¡Cuenta creada exitosamente!`;
+          if (createdRoles.length === rolesToCreate.length) {
+            message = `¡Cuenta creada exitosamente con ${createdRoles.length} roles!`;
+          } else if (createdRoles.length > 0) {
+            message = `¡Cuenta creada! ${createdRoles.length} de ${rolesToCreate.length} roles configurados correctamente.`;
+          } else {
+            message = `Cuenta creada, pero hubo problemas configurando los roles. Puedes añadirlos desde tu dashboard.`;
+          }
+          
+          return { 
+            success: true, 
+            userId: data.user.id,
+            message,
+            rolesCreated: createdRoles.length,
+            totalRoles: rolesToCreate.length,
+            errors: roleErrors.length > 0 ? roleErrors : undefined
+          };
+          
         } catch (profileError) {
           console.warn("⚠️ Profile creation failed but user was created:", profileError);
+          return { 
+            success: true, 
+            userId: data.user.id,
+            message: "Cuenta creada, pero hubo problemas con el perfil. Por favor, contacta con soporte."
+          };
         }
-
-        return { 
-          success: true, 
-          userId: data.user.id,
-          message: `¡Cuenta creada exitosamente con ${rolesToCreate.length} roles!`
-        };
       }
 
       return { 
