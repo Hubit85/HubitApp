@@ -90,6 +90,8 @@ export class SupabaseIncidentService {
         ...incident,
         status: incident.status as 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed',
         urgency: incident.urgency as 'low' | 'normal' | 'high' | 'emergency',
+        images: incident.images || undefined,
+        documents: incident.documents || undefined,
         community_name: incident.community?.name || 'Comunidad desconocida'
       }));
     } catch (error) {
@@ -237,6 +239,8 @@ export class SupabaseIncidentService {
         ...data,
         status: data.status as 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed',
         urgency: data.urgency as 'low' | 'normal' | 'high' | 'emergency',
+        images: data.images || undefined,
+        documents: data.documents || undefined,
         reporter_name,
         reporter_email,
         community_name: data.community?.name || 'Comunidad desconocida'

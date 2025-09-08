@@ -138,7 +138,7 @@ export default function BudgetRequestManager() {
   };
 
   const handleDelete = async (requestId: string) => {
-    if (!confirm("¿Estás seguro de que quieres eliminar esta solicitud?")) return;
+    if (!requestId || !confirm("¿Estás seguro de que quieres eliminar esta solicitud?")) return;
     try {
       const { error } = await supabase.from("budget_requests").delete().eq("id", requestId);
       if (error) throw error;
