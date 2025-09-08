@@ -148,7 +148,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       address: userData.address || '',
       postal_code: userData.postal_code || '',
       city: userData.city || '',
-      province: userData.province || '',
       country: userData.country || ''
     };
 
@@ -169,7 +168,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_address: userData.company_address || commonFields.address || '',
           company_postal_code: userData.company_postal_code || commonFields.postal_code || '',
           company_city: userData.company_city || commonFields.city || '',
-          company_province: userData.company_province || commonFields.province || '',
           company_country: userData.company_country || commonFields.country || '',
           cif: userData.cif || '',
           business_email: userData.business_email || userData.email || '',
@@ -184,7 +182,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_address: userData.company_address || commonFields.address || '',
           company_postal_code: userData.company_postal_code || commonFields.postal_code || '',
           company_city: userData.company_city || commonFields.city || '',
-          company_province: userData.company_province || commonFields.province || '',
           company_country: userData.company_country || commonFields.country || '',
           cif: userData.cif || '',
           business_email: userData.business_email || userData.email || '',
@@ -221,7 +218,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             address: userData.address,
             city: userData.city,
             postal_code: userData.postal_code,
-            province: userData.province,
             country: userData.country
           }
         }
@@ -348,7 +344,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                     address: processedRoleData.address || userData.address || '',
                     city: processedRoleData.city || userData.city || '',
                     postal_code: processedRoleData.postal_code || userData.postal_code || '',
-                    province: processedRoleData.province || userData.province || '',
                     country: processedRoleData.country || userData.country || 'España',
                     community_name: processedRoleData.community_name || '',
                     portal_number: processedRoleData.portal_number || '',

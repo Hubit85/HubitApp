@@ -315,7 +315,7 @@ export function BudgetRequestManager() {
       console.log("✅ Quotes loaded successfully:", {
         total_quotes: data?.length || 0,
         by_status: data?.reduce((acc: any, quote) => {
-          acc[quote.status] = (acc[quote.status] || 0) + 1;
+          acc[quote.status || 'unknown'] = (acc[quote.status || 'unknown'] || 0) + 1;
           return acc;
         }, {}) || {}
       });
@@ -353,7 +353,6 @@ export function BudgetRequestManager() {
         estimated_duration: quoteForm.estimated_duration || null,
         estimated_start_date: quoteForm.estimated_start_date || null,
         payment_terms: quoteForm.payment_terms,
-        warranty_period: quoteForm.warranty_period || null,
         notes: quoteForm.notes || null,
         valid_until: quoteForm.valid_until || null,
         terms_and_conditions: quoteForm.terms_and_conditions || null,
@@ -447,7 +446,9 @@ export function BudgetRequestManager() {
     return icons[category] || '📋';
   };
 
-  const getUrgencyBadge = (urgency: string) => {
+  const getUrgencyBadge = (urgency: string | null) => {
+    if (!urgency) return <Badge variant="outline">Sin especificar</Badge>;
+    
     switch (urgency) {
       case 'emergency':
         return <Badge className="bg-red-100 text-red-800 border-red-200">🚨 Emergencia</Badge>;
@@ -462,7 +463,9 @@ export function BudgetRequestManager() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
+    if (!status) return <Badge variant="outline">Sin estado</Badge>;
+    
     switch (status) {
       case 'pending':
         return <Badge className="bg-amber-100 text-amber-800 border-amber-200">⏳ Pendiente</Badge>;
@@ -489,7 +492,8 @@ export function BudgetRequestManager() {
   });
 
   const filteredQuotes = myQuotes.filter(quote => {
-    const matchesSearch = (quote as any).budget_requests?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const requestTitle = (quote as any).budget_requests?.title || '';
+    const matchesSearch = requestTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          quote.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
@@ -723,7 +727,7 @@ export function BudgetRequestManager() {
                               </div>
                             )}
 
-                            {request.views_count > 0 && (
+                            {(request.views_count ?? 0) > 0 && (
                               <div className="flex items-center gap-1 text-neutral-500">
                                 <Eye className="h-4 w-4" />
                                 <span>{request.views_count} vistas</span>
@@ -770,7 +774,7 @@ export function BudgetRequestManager() {
                                       <p><span className="font-medium">Cliente:</span> {request.user_name}</p>
                                       <p><span className="font-medium">Ubicación:</span> {request.property_address}</p>
                                       <p><span className="font-medium">Categoría:</span> {request.category}</p>
-                                      <p><span className="font-medium">Urgencia:</span> {request.urgency}</p>
+                                      <p><span className="font-medium">Urgencia:</span> {request.urgency || 'No especificada'}</p>
                                       <p><span className="font-medium">Descripción:</span> {request.description}</p>
                                     </div>
                                   </Card>
@@ -1000,7 +1004,7 @@ export function BudgetRequestManager() {
                             
                             <div className="flex items-center gap-1 text-neutral-600">
                               <Calendar className="h-4 w-4" />
-                              <span>Enviada: {new Date(quote.created_at).toLocaleDateString()}</span>
+                              <span>Enviada: {quote.created_at ? new Date(quote.created_at).toLocaleDateString() : 'Fecha no disponible'}</span>
                             </div>
 
                             {quote.valid_until && (

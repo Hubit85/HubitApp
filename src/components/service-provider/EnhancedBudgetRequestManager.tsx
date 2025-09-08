@@ -87,7 +87,6 @@ export function EnhancedBudgetRequestManager() {
   const [submittingQuote, setSubmittingQuote] = useState(false);
   const [quoteData, setQuoteData] = useState({
     amount: "",
-    estimated_hours: "",
     materials_cost: "",
     labor_cost: "",
     description: "",
@@ -242,7 +241,6 @@ export function EnhancedBudgetRequestManager() {
     setSelectedRequest(request);
     setQuoteData({
       amount: "",
-      estimated_hours: "",
       materials_cost: "",
       labor_cost: "",
       description: "",
@@ -264,9 +262,8 @@ export function EnhancedBudgetRequestManager() {
         service_provider_id: serviceProviderProfile.id,
         budget_request_id: selectedRequest.id,
         amount: parseFloat(quoteData.amount),
-        estimated_hours: parseFloat(quoteData.estimated_hours) || null,
         materials_cost: parseFloat(quoteData.materials_cost) || undefined,
-        labor_cost: parseFloat(quoteData.labor_cost) || undefined,
+        labor_cost: parseFloat(quoteData.labor_cost),
         description: quoteData.description,
         terms_and_conditions: quoteData.terms_and_conditions || null,
         valid_until: quoteData.valid_until ? new Date(quoteData.valid_until).toISOString() : null,
@@ -292,7 +289,8 @@ export function EnhancedBudgetRequestManager() {
     }
   };
 
-  const getUrgencyDisplay = (urgency: string) => {
+  const getUrgencyDisplay = (urgency: string | null) => {
+    if (!urgency) return { label: "Sin especificar", icon: "❓", color: "bg-neutral-100 text-neutral-700" };
     return URGENCY_LEVELS[urgency as keyof typeof URGENCY_LEVELS] || URGENCY_LEVELS.normal;
   };
 
@@ -300,13 +298,17 @@ export function EnhancedBudgetRequestManager() {
     return SERVICE_CATEGORIES_MAP[category] || SERVICE_CATEGORIES_MAP.other;
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
     const statusConfig = {
       pending: { label: "Pendiente", color: "bg-yellow-100 text-yellow-800" },
       accepted: { label: "Aceptada", color: "bg-green-100 text-green-800" },
       rejected: { label: "Rechazada", color: "bg-red-100 text-red-800" },
       cancelled: { label: "Cancelada", color: "bg-gray-100 text-gray-800" }
     };
+
+    if (!status) {
+      return <Badge className="bg-neutral-100 text-neutral-800">Sin estado</Badge>;
+    }
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending;
     
@@ -847,19 +849,6 @@ export function EnhancedBudgetRequestManager() {
                       placeholder="1500.00"
                       value={quoteData.amount}
                       onChange={(e) => setQuoteData(prev => ({ ...prev, amount: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="quote-hours">Tiempo Estimado (horas)</Label>
-                    <Input
-                      id="quote-hours"
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      placeholder="24"
-                      value={quoteData.estimated_hours}
-                      onChange={(e) => setQuoteData(prev => ({ ...prev, estimated_hours: e.target.value }))}
                     />
                   </div>
 
