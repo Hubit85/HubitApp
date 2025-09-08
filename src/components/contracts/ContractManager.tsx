@@ -612,7 +612,7 @@ export function ContractManager() {
                                 <User className="h-4 w-4" />
                                 <span>{contract.client_name || contract.provider_name}</span>
                                 <Separator orientation="vertical" className="h-4" />
-                                <span>#{contract.contract_number}</span>
+                                <span>#{contract.contract_number || 'N/A'}</span>
                               </div>
                             </div>
                           </div>
@@ -629,7 +629,7 @@ export function ContractManager() {
                             
                             <div className="flex items-center gap-1 text-neutral-600">
                               <Calendar className="h-4 w-4" />
-                              <span>Creado: {new Date(contract.created_at).toLocaleDateString()}</span>
+                              <span>Creado: {contract.created_at ? new Date(contract.created_at).toLocaleDateString() : 'Fecha desconocida'}</span>
                             </div>
 
                             {contract.end_date && (

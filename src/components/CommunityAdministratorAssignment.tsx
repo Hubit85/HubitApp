@@ -491,13 +491,13 @@ export function CommunityAdministratorAssignment() {
             
             <div className="flex items-center justify-between text-sm text-stone-500">
               <span>
-                Registrado: {new Date(assignment.created_at).toLocaleDateString('es-ES', {
+                Registrado: {assignment.created_at ? new Date(assignment.created_at).toLocaleDateString('es-ES', {
                   day: '2-digit',
                   month: 'short',
                   year: 'numeric'
-                })}
+                }) : 'Fecha desconocida'}
               </span>
-              {assignment.updated_at !== assignment.created_at && (
+              {assignment.updated_at !== assignment.created_at && assignment.updated_at && (
                 <span>
                   Actualizado: {new Date(assignment.updated_at).toLocaleDateString('es-ES', {
                     day: '2-digit',

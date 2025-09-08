@@ -320,7 +320,7 @@ export default function UserRoleManager() {
                               </div>
                             )}
                             <span className="text-xs text-neutral-500">
-                              Creado: {new Date(role.created_at).toLocaleDateString()}
+                              Creado: {role.created_at ? new Date(role.created_at).toLocaleDateString() : 'Fecha desconocida'}
                             </span>
                           </div>
 
