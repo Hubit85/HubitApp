@@ -638,7 +638,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                   <div>
                     <Label htmlFor="property_id">Propiedad</Label>
                     <Select 
-                      value={formData.property_id ?? undefined} 
+                      value={formData.property_id || undefined} 
                       onValueChange={(value) => setFormData(prev => ({ ...prev, property_id: value }))}
                     >
                       <SelectTrigger>
