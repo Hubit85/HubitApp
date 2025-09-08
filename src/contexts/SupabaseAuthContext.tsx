@@ -141,47 +141,54 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
   // Helper function to extract role-specific data from user data
   const extractRoleSpecificData = (userData: any, roleType: string): Record<string, any> => {
+    // Only use basic fields that are guaranteed to exist
     const commonFields = {
-      full_name: userData.full_name,
-      phone: userData.phone,
-      address: userData.address,
-      postal_code: userData.postal_code,
-      city: userData.city,
-      province: userData.province,
-      country: userData.country
+      full_name: userData.full_name || '',
+      phone: userData.phone || '',
+      address: userData.address || '',
+      postal_code: userData.postal_code || '',
+      city: userData.city || '',
+      province: userData.province || '',
+      country: userData.country || ''
     };
 
     switch (roleType) {
       case 'particular':
       case 'community_member':
-        return commonFields;
+        return {
+          ...commonFields,
+          community_code: userData.community_code || '',
+          community_name: userData.community_name || '',
+          portal_number: userData.portal_number || '',
+          apartment_number: userData.apartment_number || ''
+        };
       
       case 'service_provider':
         return {
-          company_name: userData.company_name || userData.full_name,
-          company_address: userData.company_address || userData.address,
-          company_postal_code: userData.company_postal_code || userData.postal_code,
-          company_city: userData.company_city || userData.city,
-          company_province: userData.company_province || userData.province,
-          company_country: userData.company_country || userData.country,
+          company_name: userData.company_name || commonFields.full_name || '',
+          company_address: userData.company_address || commonFields.address || '',
+          company_postal_code: userData.company_postal_code || commonFields.postal_code || '',
+          company_city: userData.company_city || commonFields.city || '',
+          company_province: userData.company_province || commonFields.province || '',
+          company_country: userData.company_country || commonFields.country || '',
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email, // Now userData.email is guaranteed
-          business_phone: userData.business_phone || userData.phone,
+          business_email: userData.business_email || userData.email || '',
+          business_phone: userData.business_phone || commonFields.phone || '',
           selected_services: userData.selected_services || [],
           service_costs: userData.service_costs || {}
         };
       
       case 'property_administrator':
         return {
-          company_name: userData.company_name || userData.full_name,
-          company_address: userData.company_address || userData.address,
-          company_postal_code: userData.company_postal_code || userData.postal_code,
-          company_city: userData.company_city || userData.city,
-          company_province: userData.company_province || userData.province,
-          company_country: userData.company_country || userData.country,
+          company_name: userData.company_name || commonFields.full_name || '',
+          company_address: userData.company_address || commonFields.address || '',
+          company_postal_code: userData.company_postal_code || commonFields.postal_code || '',
+          company_city: userData.company_city || commonFields.city || '',
+          company_province: userData.company_province || commonFields.province || '',
+          company_country: userData.company_country || commonFields.country || '',
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email, // Now userData.email is guaranteed
-          business_phone: userData.business_phone || userData.phone,
+          business_email: userData.business_email || userData.email || '',
+          business_phone: userData.business_phone || commonFields.phone || '',
           professional_number: userData.professional_number || ''
         };
       
@@ -259,15 +266,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           const rolesToCreate = [
             // Primary role (first)
             {
-              roleType: userData.user_type,
-              roleSpecificData: extractRoleSpecificData({ ...userData, email: email }, userData.user_type)
+              roleType: userData.user_type || 'particular', // Ensure there's always a value
+              roleSpecificData: extractRoleSpecificData({ 
+                ...userData,
+                email: email // Use guaranteed email parameter
+              }, userData.user_type || 'particular')
             },
             // Additional roles
             ...(userData.additionalRoles || []).map(role => ({
               roleType: role.roleType,
               roleSpecificData: extractRoleSpecificData({ 
-                ...userData, 
-                email: email,
+                ...userData,
+                email: email, // Use guaranteed email parameter
                 ...role.roleSpecificData 
               }, role.roleType)
             }))
