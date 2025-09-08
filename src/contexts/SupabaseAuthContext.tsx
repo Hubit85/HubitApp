@@ -345,14 +345,14 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         // Multi-approach role loading with escalating strategies
         const loadingStrategies = [
           // Strategy 1: Direct service call (preferred)
-          async () => {
+          async (): Promise<{ roles: UserRole[]; source: string; hasRoles?: boolean }> => {
             console.log("📡 Strategy 1: Direct service call");
             const roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
             return { roles, source: 'service' };
           },
           
           // Strategy 2: Direct database query (fallback)
-          async () => {
+          async (): Promise<{ roles: UserRole[]; source: string; hasRoles?: boolean }> => {
             console.log("📡 Strategy 2: Direct database query");
             const { data, error } = await supabase
               .from('user_roles')
@@ -365,7 +365,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           },
           
           // Strategy 3: Simple existence check (emergency)
-          async () => {
+          async (): Promise<{ roles: UserRole[]; source: string; hasRoles?: boolean }> => {
             console.log("📡 Strategy 3: Emergency existence check");
             const { count, error } = await supabase
               .from('user_roles')
