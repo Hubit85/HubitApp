@@ -728,11 +728,11 @@ export function EnhancedBudgetRequestManager() {
                               </span>
                             </div>
 
-                            {quote.estimated_hours && (
+                            {quote.estimated_duration && (
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-neutral-500" />
-                                <span className="font-medium">Tiempo estimado:</span>
-                                <span>{quote.estimated_hours}h</span>
+                                <span className="font-medium">Duración estimada:</span>
+                                <span>{quote.estimated_duration}</span>
                               </div>
                             )}
 

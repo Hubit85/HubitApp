@@ -289,18 +289,22 @@ export class CrossRoleDataService {
       if (budgetRequests && budgetRequests.length > 0) {
         const budgetRequestIds = budgetRequests.map(br => br.id);
         
-        const { data: contracts, error: contractError } = await supabase
-          .from('contracts')
+        // Get quotes for these budget requests first
+        const { data: quotes, error: quotesError } = await supabase
+          .from('quotes')
           .select('id')
-          .in('quote_id', 
-            // Get quotes for these budget requests
-            supabase
-              .from('quotes')
-              .select('id')
-              .in('budget_request_id', budgetRequestIds)
-          );
+          .in('budget_request_id', budgetRequestIds);
 
-        console.log(`📋 Found ${contracts?.length || 0} contracts for property ${propertyId}`);
+        if (!quotesError && quotes && quotes.length > 0) {
+          const quoteIds = quotes.map(q => q.id);
+          
+          const { data: contracts, error: contractError } = await supabase
+            .from('contracts')
+            .select('id')
+            .in('quote_id', quoteIds);
+
+          console.log(`📋 Found ${contracts?.length || 0} contracts for property ${propertyId}`);
+        }
       }
 
     } catch (error) {

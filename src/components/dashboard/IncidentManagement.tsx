@@ -130,7 +130,7 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
           description: incident.description,
           category: incident.category,
           urgency: incident.urgency,
-          status: incident.status,
+          status: incident.status as 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed',
           work_location: incident.work_location,
           special_requirements: incident.special_requirements,
           images: incident.images || [],
@@ -141,7 +141,7 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
           community_id: incident.community_id,
           created_at: incident.created_at,
           admin_notes: incident.admin_notes
-        };
+        } as Incident;
       }));
 
       setIncidents(incidentsWithReporters);
