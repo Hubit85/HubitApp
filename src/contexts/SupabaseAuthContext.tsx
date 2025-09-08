@@ -292,9 +292,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 continue;
               }
 
-              const roleInsertData = {
+              // FIXED: Create the role insert data with proper typing
+              const roleInsertData: UserRoleInsert = {
                 user_id: data.user.id,
-                role_type: roleRequest.roleType as ValidRoleType, // FIXED: Using validated type
+                role_type: roleRequest.roleType as ValidRoleType,
                 is_verified: true,
                 is_active: isFirstRole, // First role is active by default
                 role_specific_data: processedRoleData,
@@ -427,7 +428,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         // Create emergency profile from user metadata
         const emergencyProfile: Profile = {
           id: userObject.id,
-          email: userObject.email || '',
+          email: userObject.email || '', // FIXED: Ensure email is never undefined
           full_name: userObject.user_metadata?.full_name || null,
           user_type: 'particular', // Default fallback
           phone: userObject.user_metadata?.phone || null,
@@ -483,7 +484,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           
           const newProfileData: ProfileInsert = {
             id: userObject.id,
-            email: userObject.email || '',
+            email: userObject.email || '', // FIXED: Ensure email is never undefined
             full_name: userObject.user_metadata?.full_name || null,
             user_type: 'particular',
             phone: userObject.user_metadata?.phone || null,
@@ -533,7 +534,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         
         const emergencyProfile: Profile = {
           id: userObject.id,
-          email: userObject.email || '',
+          email: userObject.email || '', // FIXED: Ensure email is never undefined
           full_name: userObject.user_metadata?.full_name || null,
           user_type: 'particular',
           phone: userObject.user_metadata?.phone || null,
@@ -593,7 +594,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         // Final status logging
         console.log("🏁 CONTEXT: Role loading completed:", {
           userId: userObject.id.substring(0, 8) + '...',
-          email: userObject.email,
+          email: userObject.email || 'unknown', // FIXED: Handle undefined email
           totalRoles: roles.length,
           verifiedRoles: roles.filter(r => r.is_verified).length,
           activeRoleType: activeRole?.role_type || 'none',
@@ -614,7 +615,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       // Emergency profile creation
       const emergencyProfile: Profile = {
         id: userObject.id,
-        email: userObject.email || '',
+        email: userObject.email || '', // FIXED: Ensure email is never undefined
         full_name: userObject.user_metadata?.full_name || null,
         user_type: 'particular',
         phone: null,
