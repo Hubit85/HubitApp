@@ -237,7 +237,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           // FIXED: Use email parameter, which is guaranteed to be a string
           const profileData: ProfileInsert = {
             id: data.user.id,
-            email: email, // FIXED: Using the guaranteed string parameter
+            email: email, // FIXED: Use guaranteed email parameter instead of data.user.email
             ...userData,
           };
 
