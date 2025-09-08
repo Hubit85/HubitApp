@@ -260,7 +260,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             // Primary role (first)
             {
               roleType: userData.user_type,
-              roleSpecificData: extractRoleSpecificData({ ...userData, email: email }, userData.user_type) // FIXED: Use guaranteed email parameter
+              roleSpecificData: extractRoleSpecificData({ ...userData, email }, userData.user_type) // FIXED: Use guaranteed email parameter
             },
             // Additional roles
             ...(userData.additionalRoles || [])
