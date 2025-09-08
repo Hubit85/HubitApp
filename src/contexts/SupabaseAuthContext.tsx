@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,7 +165,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '', // FIXED: Handle undefined email
+          business_email: userData.business_email || userData.email || '', // FIXED: Always provide fallback
           business_phone: userData.business_phone || userData.phone,
           selected_services: userData.selected_services || [],
           service_costs: userData.service_costs || {}
@@ -181,7 +180,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '', // FIXED: Handle undefined email
+          business_email: userData.business_email || userData.email || '', // FIXED: Always provide fallback
           business_phone: userData.business_phone || userData.phone,
           professional_number: userData.professional_number || ''
         };
@@ -241,7 +240,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         try {
           const profileData: ProfileInsert = {
             id: data.user.id,
-            email: data.user.email || '', // FIXED: Provide fallback for potentially undefined email
+            email: data.user.email || email, // FIXED: Always use email parameter as fallback
             ...userData,
           };
 
@@ -264,7 +263,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             // Primary role (first)
             {
               roleType: userData.user_type,
-              roleSpecificData: extractRoleSpecificData(userData, userData.user_type)
+              roleSpecificData: extractRoleSpecificData({ ...userData, email: email }, userData.user_type) // FIXED: Always pass email explicitly
             },
             // Additional roles
             ...(userData.additionalRoles || [])
@@ -435,7 +434,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         // Create emergency profile from user metadata
         const emergencyProfile: Profile = {
           id: userObject.id,
-          email: userObject.email || '', // FIXED: Ensure email is never undefined
+          email: userObject.email || '', // FIXED: Always provide empty string as fallback
           full_name: userObject.user_metadata?.full_name || null,
           user_type: 'particular', // Default fallback
           phone: userObject.user_metadata?.phone || null,
@@ -491,7 +490,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           
           const newProfileData: ProfileInsert = {
             id: userObject.id,
-            email: userObject.email || '', // FIXED: Ensure email is never undefined
+            email: userObject.email || '', // FIXED: Always provide empty string as fallback
             full_name: userObject.user_metadata?.full_name || null,
             user_type: 'particular',
             phone: userObject.user_metadata?.phone || null,
@@ -541,7 +540,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         
         const emergencyProfile: Profile = {
           id: userObject.id,
-          email: userObject.email || '', // FIXED: Ensure email is never undefined
+          email: userObject.email || '', // FIXED: Always provide empty string as fallback
           full_name: userObject.user_metadata?.full_name || null,
           user_type: 'particular',
           phone: userObject.user_metadata?.phone || null,
@@ -598,10 +597,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           setActiveRole(null);
         }
 
-        // Final status logging
+        // Final status logging - FIXED: Always provide email fallback
         console.log("🏁 CONTEXT: Role loading completed:", {
           userId: userObject.id.substring(0, 8) + '...',
-          email: userObject.email || 'unknown', // FIXED: Handle undefined email
+          email: userObject.email || 'unknown', // FIXED: Always provide fallback
           totalRoles: roles.length,
           verifiedRoles: roles.filter(r => r.is_verified).length,
           activeRoleType: activeRole?.role_type || 'none',
@@ -619,10 +618,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("❌ CONTEXT: Critical error in fetchUserData:", error);
       
-      // Emergency profile creation
+      // Emergency profile creation - FIXED: Always provide email fallback
       const emergencyProfile: Profile = {
         id: userObject.id,
-        email: userObject.email || '', // FIXED: Ensure email is never undefined
+        email: userObject.email || '', // FIXED: Always provide empty string as fallback
         full_name: userObject.user_metadata?.full_name || null,
         user_type: 'particular',
         phone: null,
