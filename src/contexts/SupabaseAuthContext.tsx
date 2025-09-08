@@ -165,7 +165,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '',
+          business_email: userData.business_email || userData.email,
           business_phone: userData.business_phone || userData.phone,
           selected_services: userData.selected_services || [],
           service_costs: userData.service_costs || {}
@@ -180,7 +180,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '',
+          business_email: userData.business_email || userData.email,
           business_phone: userData.business_phone || userData.phone,
           professional_number: userData.professional_number || ''
         };
@@ -260,10 +260,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             // Primary role (first)
             {
               roleType: userData.user_type,
-              roleSpecificData: extractRoleSpecificData({ ...userData, email }, userData.user_type) // FIXED: Use guaranteed email parameter
+              roleSpecificData: extractRoleSpecificData({ ...userData, email }, userData.user_type)
             },
             // Additional roles
-            ...(userData.additionalRoles || [])
+            ...(userData.additionalRoles || []).map(role => ({
+              roleType: role.roleType,
+              roleSpecificData: extractRoleSpecificData({ 
+                ...userData, 
+                email, // FIXED: Ensure email is always provided
+                ...role.roleSpecificData 
+              }, role.roleType)
+            }))
           ];
 
           console.log(`🎭 Creating ${rolesToCreate.length} roles natively (no email verification)...`);
