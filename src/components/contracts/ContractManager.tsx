@@ -346,24 +346,28 @@ export function ContractManager() {
 
       console.log("✅ Contract created successfully:", newContract.id);
 
-      // Only send notification if contractUserId is valid (already checked above)
-      try {
-        await supabase
-          .from('notifications')
-          .insert({
-            user_id: contractUserId, // This is guaranteed to be a string at this point
-            title: 'Nuevo contrato disponible',
-            message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}"`,
-            type: 'info' as const,
-            category: 'contract' as const,
-            related_entity_type: 'contract',
-            related_entity_id: newContract.id,
-            action_url: `/dashboard?contract=${newContract.id}`,
-            action_label: 'Ver Contrato',
-            read: false
-          });
-      } catch (notifError) {
-        console.warn("⚠️ Failed to send notification:", notifError);
+      // Send notification to the contract owner
+      const contractUserId = selectedQuote.budget_requests?.user_id || selectedQuote.user_id;
+      
+      if (contractUserId) {
+        try {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: contractUserId,
+              title: 'Nuevo contrato disponible',
+              message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}"`,
+              type: 'info' as const,
+              category: 'contract' as const,
+              related_entity_type: 'contract',
+              related_entity_id: newContract.id,
+              action_url: `/dashboard?contract=${newContract.id}`,
+              action_label: 'Ver Contrato',
+              read: false
+            });
+        } catch (notifError) {
+          console.warn("⚠️ Failed to send notification:", notifError);
+        }
       }
 
       setSuccessMessage("¡Contrato creado exitosamente!");
