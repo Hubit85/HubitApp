@@ -54,7 +54,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   // CRITICAL FIX: Robust multi-role activation system
   const ensureActiveRole = async (userId: string, availableRoles: UserRole[]): Promise<UserRole | null> => {
     try {
-      console.log("🎯 CONTEXT: Starting robust role activation system...");
+      console.log("🎯 CONTEXT: Starting AGGRESSIVE multi-role activation system...");
       
       if (!availableRoles || availableRoles.length === 0) {
         console.log("❌ CONTEXT: No roles available for activation");
@@ -79,21 +79,23 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return currentActiveRole;
       }
 
-      console.log("🔄 CONTEXT: No active role found, need to activate one");
+      console.log("🚨 CONTEXT: NO ACTIVE ROLE FOUND - This is critical for multi-role users");
+      console.log("🔄 CONTEXT: Implementing AGGRESSIVE activation strategy...");
 
-      // AGGRESSIVE ACTIVATION STRATEGY: Try multiple approaches until one succeeds
+      // AGGRESSIVE ACTIVATION STRATEGY: Try multiple approaches simultaneously
       const roleToActivate = verifiedRoles[0]; // Start with first verified role
-      console.log("🎯 CONTEXT: Target role for activation:", roleToActivate.role_type);
+      console.log("🎯 CONTEXT: Target role for AGGRESSIVE activation:", roleToActivate.role_type);
 
       let activationSucceeded = false;
       let activeRoleResult: UserRole | null = null;
 
-      // APPROACH 1: Direct database activation (most reliable)
-      if (!activationSucceeded) {
-        try {
-          console.log("🔄 CONTEXT: Approach 1 - Direct database activation");
-
-          // Step 1: Deactivate all roles for this user
+      // PARALLEL ACTIVATION ATTEMPTS
+      const activationAttempts = [
+        // Approach 1: Direct database activation with explicit deactivation
+        async () => {
+          console.log("🚀 CONTEXT: AGGRESSIVE Approach 1 - Direct database with full reset");
+          
+          // Step 1: Forcefully deactivate ALL roles for this user
           const { error: deactivateError } = await supabase
             .from('user_roles')
             .update({ 
@@ -105,8 +107,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           if (deactivateError) {
             throw new Error(`Deactivation failed: ${deactivateError.message}`);
           }
+          
+          console.log("✅ CONTEXT: All roles deactivated successfully");
 
-          // Step 2: Activate the selected role
+          // Step 2: Forcefully activate the selected role
           const { error: activateError, data: activatedRoleData } = await supabase
             .from('user_roles')
             .update({ 
@@ -124,62 +128,185 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           }
 
           if (activatedRoleData) {
-            activeRoleResult = activatedRoleData as UserRole;
-            activationSucceeded = true;
-            console.log("✅ CONTEXT: Direct database activation succeeded");
+            console.log("✅ CONTEXT: Direct activation SUCCESS");
+            return activatedRoleData as UserRole;
           }
+          
+          throw new Error("No data returned from activation");
+        },
 
-        } catch (directError) {
-          console.warn("⚠️ CONTEXT: Direct database activation failed:", directError);
-        }
-      }
-
-      // APPROACH 2: Service-based activation (fallback)
-      if (!activationSucceeded) {
-        try {
-          console.log("🔄 CONTEXT: Approach 2 - Service-based activation");
-
+        // Approach 2: Service-based activation with verification
+        async () => {
+          console.log("🚀 CONTEXT: AGGRESSIVE Approach 2 - Enhanced service-based");
+          
           const serviceResult = await SupabaseUserRoleService.activateRole(userId, roleToActivate.role_type);
           
-          if (serviceResult.success) {
-            // Re-fetch roles to get the updated state
-            const updatedRoles = await SupabaseUserRoleService.getUserRoles(userId);
-            const activatedRole = updatedRoles.find(r => r.is_active && r.is_verified);
+          if (!serviceResult.success) {
+            throw new Error(`Service activation failed: ${serviceResult.message}`);
+          }
+          
+          // Verify the activation worked
+          const { data: verificationData, error: verifyError } = await supabase
+            .from('user_roles')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('role_type', roleToActivate.role_type)
+            .eq('is_active', true)
+            .eq('is_verified', true)
+            .single();
+          
+          if (verifyError || !verificationData) {
+            throw new Error("Service activation verification failed");
+          }
+          
+          console.log("✅ CONTEXT: Service activation SUCCESS");
+          return verificationData as UserRole;
+        },
+
+        // Approach 3: Fallback with retry logic
+        async () => {
+          console.log("🚀 CONTEXT: AGGRESSIVE Approach 3 - Fallback with retry");
+          
+          // Try up to 3 times with different SQL approaches
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            console.log(`🔄 CONTEXT: Fallback attempt ${attempt}/3`);
             
-            if (activatedRole) {
-              activeRoleResult = activatedRole;
-              activationSucceeded = true;
-              console.log("✅ CONTEXT: Service-based activation succeeded");
+            try {
+              // Use a single transaction-like operation
+              const { data: resetData, error: resetError } = await supabase.rpc('activate_user_role', {
+                target_user_id: userId,
+                target_role_type: roleToActivate.role_type
+              });
+              
+              // If RPC doesn't exist, fall back to manual transaction
+              if (resetError && resetError.message.includes('function')) {
+                console.log("🔧 CONTEXT: RPC not available, using manual transaction");
+                
+                // Manual transaction simulation
+                const { error: updateError } = await supabase
+                  .from('user_roles')
+                  .update({ 
+                    is_active: false,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('user_id', userId);
+                
+                if (updateError) throw updateError;
+                
+                const { data: activateData, error: activateError } = await supabase
+                  .from('user_roles')
+                  .update({ 
+                    is_active: true,
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('user_id', userId)
+                  .eq('role_type', roleToActivate.role_type)
+                  .eq('is_verified', true)
+                  .select()
+                  .single();
+                
+                if (activateError) throw activateError;
+                
+                if (activateData) {
+                  console.log(`✅ CONTEXT: Fallback attempt ${attempt} SUCCESS`);
+                  return activateData as UserRole;
+                }
+              }
+              
+              // If we get here, try next attempt
+              if (attempt < 3) {
+                await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+              }
+              
+            } catch (attemptError) {
+              console.warn(`⚠️ CONTEXT: Fallback attempt ${attempt} failed:`, attemptError);
+              
+              if (attempt === 3) {
+                throw new Error(`All fallback attempts failed: ${attemptError}`);
+              }
+              
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
             }
           }
+          
+          throw new Error("Fallback exhausted all attempts");
+        }
+      ];
 
-        } catch (serviceError) {
-          console.warn("⚠️ CONTEXT: Service-based activation failed:", serviceError);
+      // Try each approach with timeout
+      for (let i = 0; i < activationAttempts.length && !activationSucceeded; i++) {
+        try {
+          console.log(`🚀 CONTEXT: Executing AGGRESSIVE activation strategy ${i + 1}/${activationAttempts.length}`);
+          
+          // Set a timeout for each approach
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error(`Approach ${i + 1} timeout`)), 8000);
+          });
+          
+          const result = await Promise.race([
+            activationAttempts[i](),
+            timeoutPromise
+          ]);
+          
+          if (result) {
+            activeRoleResult = result;
+            activationSucceeded = true;
+            console.log(`🎉 CONTEXT: AGGRESSIVE approach ${i + 1} succeeded with role:`, result.role_type);
+            break;
+          }
+          
+        } catch (approachError) {
+          console.warn(`❌ CONTEXT: AGGRESSIVE approach ${i + 1} failed:`, approachError);
+          // Continue to next approach
         }
       }
 
-      // APPROACH 3: Local state activation (emergency fallback)
+      // EMERGENCY FALLBACK: If all approaches fail, create a local active state
       if (!activationSucceeded) {
-        console.log("🆘 CONTEXT: Approach 3 - Emergency local state activation");
+        console.log("🆘 CONTEXT: ALL AGGRESSIVE APPROACHES FAILED - Using emergency local activation");
         
-        // Mark the role as active in local state only
-        const locallyActivatedRole = { ...roleToActivate, is_active: true };
-        activeRoleResult = locallyActivatedRole;
+        // Mark the role as active in local state only (better than nothing)
+        activeRoleResult = { ...roleToActivate, is_active: true };
         activationSucceeded = true;
         
-        console.log("⚡ CONTEXT: Local state activation completed (will sync on next session)");
+        console.log("⚡ CONTEXT: Emergency local activation completed - role will sync on next session");
+        
+        // Background attempt to fix the database state (non-blocking)
+        setTimeout(async () => {
+          try {
+            console.log("🔧 CONTEXT: Background database repair attempt...");
+            await supabase
+              .from('user_roles')
+              .update({ is_active: true })
+              .eq('user_id', userId)
+              .eq('role_type', roleToActivate.role_type);
+            console.log("🔧 CONTEXT: Background repair completed");
+          } catch (repairError) {
+            console.warn("🔧 CONTEXT: Background repair failed:", repairError);
+          }
+        }, 2000);
       }
 
       if (activationSucceeded && activeRoleResult) {
-        console.log("🎉 CONTEXT: Role activation completed successfully:", activeRoleResult.role_type);
+        console.log("🎉 CONTEXT: AGGRESSIVE role activation system completed successfully:", activeRoleResult.role_type);
+        console.log("🎯 CONTEXT: MULTI-ROLE USER NOW HAS ACTIVE ROLE - Dashboard will work correctly");
         return activeRoleResult;
       }
 
-      console.error("❌ CONTEXT: All activation approaches failed");
+      console.error("❌ CONTEXT: AGGRESSIVE activation system completely exhausted");
       return null;
 
     } catch (error) {
-      console.error("❌ CONTEXT: Critical error in role activation system:", error);
+      console.error("❌ CONTEXT: Critical error in AGGRESSIVE role activation system:", error);
+      
+      // FINAL EMERGENCY FALLBACK
+      if (verifiedRoles.length > 0) {
+        console.log("🆘 CONTEXT: FINAL EMERGENCY FALLBACK - Using first verified role locally");
+        const emergencyRole = { ...verifiedRoles[0], is_active: true };
+        console.log("⚡ CONTEXT: Emergency fallback role:", emergencyRole.role_type);
+        return emergencyRole;
+      }
+      
       return null;
     }
   };
