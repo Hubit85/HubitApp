@@ -322,7 +322,7 @@ export function ContractManager() {
 
       const contractData = {
         quote_id: selectedQuote.id,
-        user_id: selectedQuote.user_id,
+        user_id: selectedQuote.user_id ?? (selectedQuote.budget_requests?.user_id || user.id),
         service_provider_id: providerData.id,
         contract_number: contractNumber,
         work_description: contractForm.work_scope || selectedQuote.description || 'Descripción del trabajo',

@@ -656,7 +656,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                 ) : activeRole?.role_type === 'property_administrator' && communities.length > 0 ? (
                   <div>
                     <Label htmlFor="community_id">Comunidad</Label>
-                    <Select value={selectedCommunityId || ""} onValueChange={(value) => setSelectedCommunityId(value || null)}>
+                    <Select value={selectedCommunityId ?? undefined} onValueChange={(value) => setSelectedCommunityId(value || null)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona una comunidad" />
                       </SelectTrigger>
