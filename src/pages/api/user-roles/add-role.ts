@@ -215,6 +215,193 @@ const syncInformationBetweenRoles = async (userId: string, newRoleType: string, 
   }
 };
 
+// ENHANCED FUNCTION: Comprehensive user_type synchronization between profiles and user_roles
+const ensureUserTypeSynchronization = async (userId: string, newRoleType: string): Promise<boolean> => {
+  try {
+    console.log('🔄 API: Starting comprehensive user_type synchronization for:', userId.substring(0, 8) + '...');
+
+    // Step 1: Get current profile user_type
+    const { data: currentProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('user_type')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      console.warn('⚠️ API: Could not fetch profile for sync:', profileError);
+      return false;
+    }
+
+    // Step 2: Get ALL user roles (verified and unverified)
+    const { data: allRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('role_type, is_verified, is_active, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true });
+
+    if (rolesError) {
+      console.warn('⚠️ API: Could not fetch roles for sync:', rolesError);
+      return false;
+    }
+
+    const verifiedRoles = allRoles.filter(r => r.is_verified);
+    const activeRoles = verifiedRoles.filter(r => r.is_active);
+
+    console.log('📊 API: SYNC - Role analysis:', {
+      currentProfileType: currentProfile.user_type,
+      newRoleType,
+      totalRoles: allRoles.length,
+      verifiedRoles: verifiedRoles.length,
+      activeRoles: activeRoles.length,
+      roles: allRoles.map(r => ({
+        type: r.role_type,
+        verified: r.is_verified,
+        active: r.is_active
+      }))
+    });
+
+    // Step 3: Determine the correct user_type using priority logic
+    let correctUserType = newRoleType;
+    
+    // Priority logic for user_type determination:
+    // 1. If there's an active verified role, use it
+    // 2. If there are verified roles but none active, use the first verified role
+    // 3. If no verified roles, use the new role type
+    
+    if (activeRoles.length > 0) {
+      correctUserType = activeRoles[0].role_type;
+      console.log('🎯 API: SYNC - Using active role as user_type:', correctUserType);
+    } else if (verifiedRoles.length > 0) {
+      correctUserType = verifiedRoles[0].role_type;
+      console.log('🎯 API: SYNC - Using first verified role as user_type:', correctUserType);
+    } else {
+      correctUserType = newRoleType;
+      console.log('🎯 API: SYNC - Using new role as user_type:', correctUserType);
+    }
+
+    console.log('🔍 API: SYNC - Synchronization decision:', {
+      currentProfileType: currentProfile.user_type,
+      newRoleType,
+      calculatedCorrectType: correctUserType,
+      needsProfileUpdate: currentProfile.user_type !== correctUserType,
+      needsRoleActivation: activeRoles.length === 0 && verifiedRoles.length > 0
+    });
+
+    // Step 4: Update profile.user_type if needed
+    if (currentProfile.user_type !== correctUserType) {
+      console.log(`🔄 API: SYNC - Updating profile.user_type from "${currentProfile.user_type}" to "${correctUserType}"`);
+      
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          user_type: correctUserType as any,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      if (updateError) {
+        console.error('❌ API: SYNC - Failed to update profile.user_type:', updateError);
+        return false;
+      } else {
+        console.log('✅ API: SYNC - Profile.user_type updated successfully');
+      }
+    }
+
+    // Step 5: Ensure there's always one active verified role if we have verified roles
+    if (verifiedRoles.length > 0 && activeRoles.length === 0) {
+      console.log('🔄 API: SYNC - No active role found, activating the role that matches user_type');
+      
+      // Find the verified role that matches the correct user_type
+      const roleToActivate = verifiedRoles.find(r => r.role_type === correctUserType) || verifiedRoles[0];
+      
+      try {
+        // First deactivate all roles
+        await supabase
+          .from('user_roles')
+          .update({ is_active: false, updated_at: new Date().toISOString() })
+          .eq('user_id', userId);
+
+        // Then activate the selected role
+        const { error: activateError } = await supabase
+          .from('user_roles')
+          .update({ 
+            is_active: true, 
+            updated_at: new Date().toISOString() 
+          })
+          .eq('user_id', userId)
+          .eq('role_type', roleToActivate.role_type)
+          .eq('is_verified', true);
+
+        if (activateError) {
+          console.error('❌ API: SYNC - Failed to activate role:', activateError);
+        } else {
+          console.log('✅ API: SYNC - Role activated successfully:', roleToActivate.role_type);
+        }
+      } catch (activationError) {
+        console.error('❌ API: SYNC - Error during role activation:', activationError);
+      }
+    }
+
+    // Step 6: Handle the case where we have multiple active roles (shouldn't happen, but fix it)
+    if (activeRoles.length > 1) {
+      console.log('⚠️ API: SYNC - Multiple active roles detected, fixing...');
+      
+      // Keep only the first active role that matches user_type, or just the first one
+      const preferredRole = activeRoles.find(r => r.role_type === correctUserType) || activeRoles[0];
+      
+      // Deactivate all roles first
+      await supabase
+        .from('user_roles')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+      // Activate only the preferred role
+      await supabase
+        .from('user_roles')
+        .update({ 
+          is_active: true, 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('user_id', userId)
+        .eq('role_type', preferredRole.role_type)
+        .eq('is_verified', true);
+        
+      console.log('✅ API: SYNC - Fixed multiple active roles, kept:', preferredRole.role_type);
+    }
+
+    // Step 7: Final verification
+    const { data: finalProfile } = await supabase
+      .from('profiles')
+      .select('user_type')
+      .eq('id', userId)
+      .single();
+
+    const { data: finalActiveRole } = await supabase
+      .from('user_roles')
+      .select('role_type')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .eq('is_verified', true)
+      .single();
+
+    const syncSuccess = finalProfile?.user_type === finalActiveRole?.role_type;
+    
+    console.log('🏁 API: SYNC - Final synchronization state:', {
+      profileUserType: finalProfile?.user_type,
+      activeRoleType: finalActiveRole?.role_type,
+      synchronized: syncSuccess,
+      totalVerifiedRoles: verifiedRoles.length
+    });
+
+    console.log('✅ API: SYNC - Comprehensive user_type synchronization completed successfully');
+    return syncSuccess;
+
+  } catch (error) {
+    console.error('❌ API: SYNC - Critical error in comprehensive synchronization:', error);
+    return false;
+  }
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ 
