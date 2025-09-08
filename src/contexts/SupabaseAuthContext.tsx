@@ -125,6 +125,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }, 300); // Reduced debounce time for faster response
   };
 
+  // Mejorar la función fetchUserData para manejar correctamente múltiples roles
   const fetchUserData = async (userObject: User) => {
     if (!userObject) {
       setLoading(false);
@@ -145,7 +146,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           id: userObject.id,
           email: userObject.email || '',
           full_name: userObject.user_metadata?.full_name || null,
-          user_type: (userObject.user_metadata?.user_type as Profile['user_type']) || 'particular',
+          user_type: 'particular', // Default fallback - will be overridden by role system
           phone: userObject.user_metadata?.phone || null,
           avatar_url: userObject.user_metadata?.avatar_url || null,
           address: null,
@@ -174,7 +175,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       // Try to fetch profile from database with timeout
       try {        
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Profile fetch timeout')), 15000); // Increased from 8000 to 15000ms
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 15000);
         });
 
         const profilePromise = supabase
@@ -188,7 +189,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
         if (profileError && profileError.code !== 'PGRST116') {
           console.warn("⚠️ Profile fetch error:", profileError.message);
-          // Don't fail completely on profile errors, use fallback
         }
 
         if (profileData) {
@@ -202,7 +202,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             id: userObject.id,
             email: userObject.email || '',
             full_name: userObject.user_metadata?.full_name || null,
-            user_type: (userObject.user_metadata?.user_type as Profile['user_type']) || 'particular',
+            user_type: 'particular', // Default - will be managed by role system
             phone: userObject.user_metadata?.phone || null,
             avatar_url: userObject.user_metadata?.avatar_url || null,
             country: 'Spain',
@@ -249,12 +249,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       } catch (profileFetchError) {
         console.warn("⚠️ Profile fetch timeout or error:", profileFetchError);
         
-        // Use emergency profile from metadata - don't let this fail the entire process
+        // Use emergency profile from metadata
         const emergencyProfile: Profile = {
           id: userObject.id,
           email: userObject.email || '',
           full_name: userObject.user_metadata?.full_name || null,
-          user_type: (userObject.user_metadata?.user_type as Profile['user_type']) || 'particular',
+          user_type: 'particular', // Default fallback
           phone: userObject.user_metadata?.phone || null,
           avatar_url: userObject.user_metadata?.avatar_url || null,
           address: null,
@@ -277,11 +277,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         console.log("✅ Using emergency profile due to fetch timeout");
       }
 
-      // CRITICAL FIX: Enhanced role loading with multiple retry attempts and better error handling
+      // CRITICAL: Load and manage user roles properly
       try {
-        console.log("🎭 CONTEXT: Starting enhanced role loading process...");
+        console.log("🎭 CONTEXT: Starting comprehensive role loading...");
         
-        // CRITICAL: Give a small delay to ensure profile is set
+        // Give a small delay to ensure profile is set
         await new Promise(resolve => setTimeout(resolve, 500));
         
         let rolesLoaded = false;
@@ -289,9 +289,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         let attempts = 0;
         const maxAttempts = 5;
         
-        // Special handling for target user
+        // Special handling for debugging
         if (userObject.email === 'ddayanacastro10@gmail.com') {
-          console.log("🎯 SPECIAL ENHANCED HANDLING for ddayanacastro10@gmail.com");
+          console.log("🎯 SPECIAL HANDLING for ddayanacastro10@gmail.com");
         }
         
         while (!rolesLoaded && attempts < maxAttempts) {
@@ -299,14 +299,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             attempts++;
             console.log(`🔄 CONTEXT: Role loading attempt ${attempts}/${maxAttempts} for user ${userObject.id.substring(0, 8)}...`);
             
-            // Add a progressive delay for retries
             if (attempts > 1) {
-              const delay = Math.min(1000 * attempts, 3000); // Max 3 second delay
+              const delay = Math.min(1000 * attempts, 3000);
               console.log(`⏳ CONTEXT: Waiting ${delay}ms before retry...`);
               await new Promise(resolve => setTimeout(resolve, delay));
             }
             
-            // Use direct database query for more reliable results
+            // Direct database query for roles
             const { data: rolesData, error: rolesError } = await supabase
               .from('user_roles')
               .select(`
@@ -329,21 +328,17 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               console.warn(`❌ CONTEXT: Direct database query error (attempt ${attempts}):`, rolesError);
               
               if (rolesError.code === 'PGRST116') {
-                // No rows found - this is actually OK
                 console.log('✅ CONTEXT: No roles found - empty result confirmed');
                 roles = [];
                 rolesLoaded = true;
               } else if (attempts >= maxAttempts) {
-                // Final attempt failed
                 console.error('❌ CONTEXT: All role loading attempts exhausted');
                 roles = [];
-                rolesLoaded = true; // Stop trying
+                rolesLoaded = true;
               } else {
-                // Retry on next iteration
                 continue;
               }
             } else {
-              // Success
               roles = (rolesData || []) as UserRole[];
               rolesLoaded = true;
               
@@ -362,69 +357,80 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.error(`❌ CONTEXT: Role loading attempt ${attempts} failed:`, attemptError);
             
             if (attempts >= maxAttempts) {
-              // All attempts failed
               console.error('❌ CONTEXT: All role loading attempts failed with errors');
               roles = [];
-              rolesLoaded = true; // Stop trying
+              rolesLoaded = true;
             }
-            // Otherwise continue to next attempt
           }
         }
         
-        // Set the roles
+        // CRITICAL: Set roles and manage active role properly
         setUserRoles(roles);
         console.log(`📋 CONTEXT: Set ${roles.length} roles in context state`);
         
-        // Handle active role logic
-        let activeRoleData = roles.find(r => r.is_active);
+        // IMPROVED: Active role management for multiple roles
+        let activeRoleData: UserRole | null = null;
         
-        if (!activeRoleData && roles.length > 0) {
-          // If no active role but we have verified roles, try to activate the first one
-          const verifiedRoles = roles.filter(r => r.is_verified);
+        if (roles.length > 0) {
+          // First, look for any role marked as active
+          activeRoleData = roles.find(r => r.is_active && r.is_verified) || null;
           
-          if (verifiedRoles.length > 0) {
-            console.log("🎭 CONTEXT: No active role found, trying to activate first verified role:", verifiedRoles[0].role_type);
+          if (!activeRoleData) {
+            // If no active role, find the first verified role and activate it
+            const verifiedRoles = roles.filter(r => r.is_verified);
             
-            try {
-              const activateResult = await SupabaseUserRoleService.activateRole(userObject.id, verifiedRoles[0].role_type);
-              if (activateResult.success) {
-                console.log("✅ CONTEXT: First verified role activated successfully");
-                // Update the local state to reflect activation
-                const updatedRoles = roles.map(r => ({
-                  ...r,
-                  is_active: r.role_type === verifiedRoles[0].role_type
-                }));
-                setUserRoles(updatedRoles);
-                activeRoleData = updatedRoles.find(r => r.is_active);
-              } else {
-                console.warn("⚠️ CONTEXT: Failed to auto-activate first verified role:", activateResult.message);
-                activeRoleData = verifiedRoles[0]; // Use without activation
+            if (verifiedRoles.length > 0) {
+              const roleToActivate = verifiedRoles[0]; // Take the first verified role
+              console.log("🎭 CONTEXT: No active role found, activating first verified role:", roleToActivate.role_type);
+              
+              try {
+                // Attempt to activate this role
+                const activateResult = await SupabaseUserRoleService.activateRole(userObject.id, roleToActivate.role_type);
+                
+                if (activateResult.success) {
+                  console.log("✅ CONTEXT: First verified role activated successfully");
+                  
+                  // Update local state to reflect activation
+                  const updatedRoles = roles.map(r => ({
+                    ...r,
+                    is_active: r.id === roleToActivate.id
+                  }));
+                  
+                  setUserRoles(updatedRoles);
+                  activeRoleData = updatedRoles.find(r => r.is_active) || roleToActivate;
+                } else {
+                  console.warn("⚠️ CONTEXT: Failed to auto-activate first verified role:", activateResult.message);
+                  // Use the role without activation
+                  activeRoleData = roleToActivate;
+                }
+              } catch (activateError) {
+                console.warn("⚠️ CONTEXT: Exception during auto-activation:", activateError);
+                activeRoleData = roleToActivate;
               }
-            } catch (activateError) {
-              console.warn("⚠️ CONTEXT: Exception during auto-activation:", activateError);
-              activeRoleData = verifiedRoles[0]; // Use without activation
             }
           }
         }
         
-        setActiveRole(activeRoleData || null);
+        setActiveRole(activeRoleData);
         console.log("🎯 CONTEXT: Active role set:", activeRoleData?.role_type || 'none');
         
-        // Special debugging for target user
+        // Special debugging for specific user
         if (userObject.email === 'ddayanacastro10@gmail.com') {
-          console.log("🔍 FINAL DEBUG STATE for ddayanacastro10@gmail.com:", {
+          console.log("🔍 FINAL CONTEXT STATE for ddayanacastro10@gmail.com:", {
             userId: userObject.id,
             rolesCount: roles.length,
             activeRole: activeRoleData?.role_type || 'none',
-            roles: roles.map(r => r.role_type),
-            contextStateSynced: true
+            allRoles: roles.map(r => ({
+              type: r.role_type,
+              verified: r.is_verified,
+              active: r.is_active
+            })),
+            contextSynced: true
           });
         }
         
       } catch (roleLoadError) {
         console.error("❌ CONTEXT: Critical role loading error:", roleLoadError);
-        
-        // Set empty state on critical error
         setUserRoles([]);
         setActiveRole(null);
       }
