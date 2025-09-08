@@ -282,19 +282,22 @@ const createMultipleRoles = async (
     try {
       console.log(`🔄 API: Processing role ${i + 1}/${roleRequests.length}: ${roleType}`);
       
-      // Validate role type
+      // Validate role type BEFORE using it
       if (!VALID_ROLE_TYPES.includes(roleType as ValidRoleType)) {
         errors.push(`${roleType}: Tipo de rol inválido`);
         failedRoles.push(roleType);
         continue;
       }
-      
+
+      // Cast roleType to ValidRoleType after validation
+      const validatedRoleType = roleType as ValidRoleType;
+
       // Validate role data
-      const validation = validateRoleSpecificData(roleType, roleSpecificData);
+      const validation = validateRoleSpecificData(validatedRoleType, roleSpecificData);
       if (!validation.isValid) {
-        const errorMsg = `${roleType}: ${validation.errors.join(', ')}`;
+        const errorMsg = `${validatedRoleType}: ${validation.errors.join(', ')}`;
         errors.push(errorMsg);
-        failedRoles.push(roleType);
+        failedRoles.push(validatedRoleType);
         continue;
       }
 
@@ -327,16 +330,16 @@ const createMultipleRoles = async (
       }
 
       // Generate community code if needed
-      if (roleType === 'community_member' && !processedRoleData.community_code && processedRoleData.address) {
+      if (validatedRoleType === 'community_member' && !processedRoleData.community_code && processedRoleData.address) {
         processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
       }
 
-      // Create role record - FIXED: Cast to correct type
+      // Create role record - FIXED: Use validated type
       const { data: newRole, error: insertError } = await supabase
         .from('user_roles')
         .insert({
           user_id: userId,
-          role_type: roleType as ValidRoleType, // FIXED: Type assertion to ValidRoleType
+          role_type: validatedRoleType, // FIXED: Using validated type
           is_verified: true, // Auto-verify during batch creation
           is_active: false,  // Will be set properly during sync
           role_specific_data: processedRoleData as any,
@@ -348,17 +351,17 @@ const createMultipleRoles = async (
         .single();
 
       if (insertError) {
-        console.error(`❌ API: Failed to create role ${roleType}:`, insertError);
-        errors.push(`${roleType}: ${insertError.message}`);
-        failedRoles.push(roleType);
+        console.error(`❌ API: Failed to create role ${validatedRoleType}:`, insertError);
+        errors.push(`${validatedRoleType}: ${insertError.message}`);
+        failedRoles.push(validatedRoleType);
         continue;
       }
 
       createdRoles.push(newRole);
-      console.log(`✅ API: Successfully created role ${roleType}`);
+      console.log(`✅ API: Successfully created role ${validatedRoleType}`);
 
       // Create properties for applicable roles
-      if (roleType === 'particular' || roleType === 'community_member') {
+      if (validatedRoleType === 'particular' || validatedRoleType === 'community_member') {
         try {
           const propertyUserData: UserPropertyData = {
             full_name: processedRoleData.full_name || 'Usuario',
@@ -370,17 +373,17 @@ const createMultipleRoles = async (
             community_name: processedRoleData.community_name || '',
             portal_number: processedRoleData.portal_number || '',
             apartment_number: processedRoleData.apartment_number || '',
-            user_type: roleType
+            user_type: validatedRoleType
           };
 
           const propertyResult = await PropertyAutoService.createDefaultProperty(userId, propertyUserData);
           if (propertyResult.success) {
-            console.log(`✅ API: Default property created for ${roleType}`);
+            console.log(`✅ API: Default property created for ${validatedRoleType}`);
           } else {
-            console.warn(`⚠️ API: Property creation failed for ${roleType} (non-critical):`, propertyResult.message);
+            console.warn(`⚠️ API: Property creation failed for ${validatedRoleType} (non-critical):`, propertyResult.message);
           }
         } catch (propertyError) {
-          console.warn(`⚠️ API: Property creation error for ${roleType} (non-critical):`, propertyError);
+          console.warn(`⚠️ API: Property creation error for ${validatedRoleType} (non-critical):`, propertyError);
         }
       }
 
