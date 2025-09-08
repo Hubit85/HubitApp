@@ -314,15 +314,15 @@ export function ContractManager() {
       }
 
       const contractNumber = `CON-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-      const contractUserId = selectedQuote.budget_requests?.user_id || selectedQuote.user_id;
+      const requestUserId = selectedQuote.budget_requests?.user_id || selectedQuote.user_id;
       
-      if (!contractUserId) {
+      if (!requestUserId) {
         throw new Error("No se puede determinar el usuario propietario del contrato");
       }
 
       const contractData = {
         quote_id: selectedQuote.id,
-        user_id: contractUserId,
+        user_id: requestUserId,
         service_provider_id: providerData.id,
         contract_number: contractNumber,
         work_description: contractForm.work_scope || selectedQuote.description || 'Descripción del trabajo',
@@ -346,15 +346,13 @@ export function ContractManager() {
 
       console.log("✅ Contract created successfully:", newContract.id);
 
-      // Send notification to the contract owner
-      const contractUserId = selectedQuote.budget_requests?.user_id || selectedQuote.user_id;
-      
-      if (contractUserId) {
+      // Send notification to the contract owner using the same user ID
+      if (requestUserId) {
         try {
           await supabase
             .from('notifications')
             .insert({
-              user_id: contractUserId,
+              user_id: requestUserId,
               title: 'Nuevo contrato disponible',
               message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}"`,
               type: 'info' as const,
