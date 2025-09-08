@@ -41,10 +41,6 @@ interface SingleRoleRequest {
   roleSpecificData: RoleSpecificData;
 }
 
-interface MultipleRoleRequest {
-  roles: SingleRoleRequest[];
-}
-
 // NUEVO: Manejar tanto roles únicos como múltiples
 interface RequestBody {
   userId: string;
@@ -57,6 +53,9 @@ interface RequestBody {
   enableAutoSync?: boolean;
   syncUserType?: boolean;
 }
+
+const VALID_ROLE_TYPES = ['particular', 'community_member', 'service_provider', 'property_administrator'] as const;
+type ValidRoleType = typeof VALID_ROLE_TYPES[number];
 
 const validateRoleSpecificData = (roleType: string, data: RoleSpecificData): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
@@ -283,6 +282,13 @@ const createMultipleRoles = async (
     try {
       console.log(`🔄 API: Processing role ${i + 1}/${roleRequests.length}: ${roleType}`);
       
+      // Validate role type
+      if (!VALID_ROLE_TYPES.includes(roleType as ValidRoleType)) {
+        errors.push(`${roleType}: Tipo de rol inválido`);
+        failedRoles.push(roleType);
+        continue;
+      }
+      
       // Validate role data
       const validation = validateRoleSpecificData(roleType, roleSpecificData);
       if (!validation.isValid) {
@@ -325,12 +331,12 @@ const createMultipleRoles = async (
         processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
       }
 
-      // Create role record
+      // Create role record - FIXED: Cast to correct type
       const { data: newRole, error: insertError } = await supabase
         .from('user_roles')
         .insert({
           user_id: userId,
-          role_type: roleType as 'particular' | 'community_member' | 'service_provider' | 'property_administrator',
+          role_type: roleType as ValidRoleType, // FIXED: Type assertion to ValidRoleType
           is_verified: true, // Auto-verify during batch creation
           is_active: false,  // Will be set properly during sync
           role_specific_data: processedRoleData as any,
@@ -462,12 +468,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Validate all role types
-    const validRoleTypes = ['particular', 'community_member', 'service_provider', 'property_administrator'];
     for (const roleRequest of roleRequests) {
-      if (!validRoleTypes.includes(roleRequest.roleType)) {
+      if (!VALID_ROLE_TYPES.includes(roleRequest.roleType as ValidRoleType)) {
         return res.status(400).json({
           success: false,
-          message: `Tipo de rol inválido: ${roleRequest.roleType}. Debe ser uno de: ${validRoleTypes.join(', ')}`
+          message: `Tipo de rol inválido: ${roleRequest.roleType}. Debe ser uno de: ${VALID_ROLE_TYPES.join(', ')}`
         });
       }
     }
@@ -536,7 +541,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Step 4: Comprehensive user_type synchronization
-    let syncResult = { success: false };
+    let syncResult: { success: boolean; activeRoleType?: string; totalRoles?: number } = { success: false };
     if (enableAutoSync && syncUserType) {
       console.log('🔄 API: Performing comprehensive user_type synchronization...');
       const createdRoleTypes = creationResult.createdRoles.map(r => r.role_type);
@@ -586,7 +591,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       failedRoles: creationResult.failedRoles,
       errors: creationResult.errors.length > 0 ? creationResult.errors : undefined,
       syncCompleted: syncResult.success,
-      activeRoleType: syncResult.activeRoleType,
+      activeRoleType: syncResult.activeRoleType || undefined, // FIXED: Ensure property exists
       requiresVerification: false, // Auto-verified
       processingTime,
       crossSyncCompleted: true
