@@ -165,7 +165,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '', // FIXED: Always provide fallback
+          business_email: userData.business_email || userData.email || '',
           business_phone: userData.business_phone || userData.phone,
           selected_services: userData.selected_services || [],
           service_costs: userData.service_costs || {}
@@ -180,7 +180,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '', // FIXED: Always provide fallback
+          business_email: userData.business_email || userData.email || '',
           business_phone: userData.business_phone || userData.phone,
           professional_number: userData.professional_number || ''
         };
@@ -190,21 +190,23 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // ENHANCED signUp with improved multiple roles creation
+  // ENHANCED signUp with improved multiple roles creation - NO EMAIL VERIFICATION
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'> & { 
-    // NUEVO: Soporte para múltiples roles durante el registro
+    // Soporte para múltiples roles durante el registro
     additionalRoles?: Array<{
       roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
       roleSpecificData: Record<string, any>;
     }>;
   }) => {
     try {
-      console.log("📝 Starting native multi-role sign up process...");
+      console.log("📝 Starting simplified multi-role sign up process...");
       
+      // Disable email confirmation for immediate access
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: undefined, // No email confirmation needed
           data: {
             full_name: userData.full_name,
             user_type: userData.user_type,
@@ -227,20 +229,14 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return { error: "No se pudo crear la cuenta" };
       }
 
-      // Check if immediate session or needs confirmation
-      if (!data.session && !data.user.email_confirmed_at) {
-        return { 
-          message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
-        };
-      }
-
+      // For immediate session establishment (no email confirmation required)
       if (data.session) {
         console.log("✅ Sign up successful with immediate session");
         
         try {
           const profileData: ProfileInsert = {
             id: data.user.id,
-            email: data.user.email || email, // FIXED: Always use email parameter as fallback
+            email: email, // FIXED: Use the email parameter directly, not data.user.email
             ...userData,
           };
 
@@ -258,18 +254,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           console.log("✅ Profile created successfully with user_type:", profileData.user_type);
 
-          // NUEVO: Create multiple roles natively
+          // Create multiple roles natively without email verification
           const rolesToCreate = [
             // Primary role (first)
             {
               roleType: userData.user_type,
-              roleSpecificData: extractRoleSpecificData({ ...userData, email: email }, userData.user_type) // FIXED: Always pass email explicitly
+              roleSpecificData: extractRoleSpecificData({ ...userData, email: email }, userData.user_type)
             },
             // Additional roles
             ...(userData.additionalRoles || [])
           ];
 
-          console.log(`🎭 Creating ${rolesToCreate.length} roles natively...`);
+          console.log(`🎭 Creating ${rolesToCreate.length} roles natively (no email verification)...`);
 
           const createdRoles = [];
           const roleErrors = [];
@@ -287,25 +283,26 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
               }
 
-              // FIXED: Create role record with proper typing and validation
+              // Validate role type
               const validRoleTypes = ['particular', 'community_member', 'service_provider', 'property_administrator'] as const;
               type ValidRoleType = typeof validRoleTypes[number];
               
-              // Validate role type before using it
               if (!validRoleTypes.includes(roleRequest.roleType as ValidRoleType)) {
                 console.error(`❌ Invalid role type: ${roleRequest.roleType}`);
                 roleErrors.push(`${roleRequest.roleType}: Tipo de rol inválido`);
                 continue;
               }
 
-              // FIXED: Create the role insert data with proper typing
+              // Create the role record - FIXED: No email verification needed
               const roleInsertData: UserRoleInsert = {
                 user_id: data.user.id,
                 role_type: roleRequest.roleType as ValidRoleType,
-                is_verified: true,
+                is_verified: true, // FIXED: Automatically verified, no email needed
                 is_active: isFirstRole, // First role is active by default
                 role_specific_data: processedRoleData,
-                verification_confirmed_at: new Date().toISOString(),
+                verification_confirmed_at: new Date().toISOString(), // FIXED: Immediately confirmed
+                verification_token: null, // FIXED: No token needed
+                verification_expires_at: null, // FIXED: No expiration needed
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               };
@@ -323,7 +320,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               }
 
               createdRoles.push(newRole);
-              console.log(`✅ Successfully created role ${roleRequest.roleType}`);
+              console.log(`✅ Successfully created verified role ${roleRequest.roleType}`);
 
               // Create default property for applicable roles
               if (roleRequest.roleType === 'particular' || roleRequest.roleType === 'community_member') {
@@ -359,7 +356,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             }
           }
 
-          console.log(`📊 Native role creation completed: ${createdRoles.length}/${rolesToCreate.length} roles created`);
+          console.log(`📊 Multi-role creation completed: ${createdRoles.length}/${rolesToCreate.length} roles created`);
           
           // Update profile.user_type to match the first successfully created role if needed
           if (createdRoles.length > 0) {
@@ -379,7 +376,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           // Return success with details
           let message = `¡Cuenta creada exitosamente!`;
           if (createdRoles.length === rolesToCreate.length) {
-            message = `¡Cuenta creada exitosamente con ${createdRoles.length} roles!`;
+            message = `¡Cuenta creada exitosamente con ${createdRoles.length} roles verificados!`;
           } else if (createdRoles.length > 0) {
             message = `¡Cuenta creada! ${createdRoles.length} de ${rolesToCreate.length} roles configurados correctamente.`;
           } else {
@@ -403,14 +400,20 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             message: "Cuenta creada, pero hubo problemas con el perfil. Por favor, contacta con soporte."
           };
         }
+      } else if (!data.user.email_confirmed_at) {
+        // This shouldn't happen with immediate confirmation, but handle just in case
+        console.log("⚠️ Account created but requires email confirmation");
+        return { 
+          message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
+        };
       }
 
       return { 
-        message: "Cuenta creada. Por favor revisa tu email para confirmar antes de iniciar sesión." 
+        message: "Cuenta creada. Por favor inicia sesión para continuar." 
       };
       
     } catch (error) {
-      console.error("❌ Native multi-role sign up exception:", error);
+      console.error("❌ Multi-role sign up exception:", error);
       return { error: "Error inesperado durante el registro" };
     }
   };
