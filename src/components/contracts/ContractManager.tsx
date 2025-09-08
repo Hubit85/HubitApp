@@ -616,8 +616,7 @@ export function ContractManager() {
                           <p className="text-neutral-700 mb-4 line-clamp-2">{contract.work_description}</p>
                           
                           <div className="flex items-center gap-4 text-sm">
-                            {getStatusBadge(contract.status)}
-                            
+                            {getStatusBadge(contract.status || 'draft')}
                             <div className="flex items-center gap-1 text-green-600 font-semibold">
                               <Euro className="h-4 w-4" />
                               <span>€{contract.total_amount?.toLocaleString()}</span>

@@ -204,14 +204,14 @@ export default function BudgetRequestManager() {
                       variant="destructive" 
                       size="sm" 
                       onClick={() => {
-                        if (req.id) {
+                        if (req.id && typeof req.id === 'string') {
                           handleDelete(req.id);
                         } else {
-                          console.warn("Cannot delete request: ID is missing");
+                          console.warn("Cannot delete request: ID is missing or invalid");
                           setError("Error: No se puede eliminar la solicitud porque falta el ID");
                         }
                       }}
-                      disabled={!req.id}
+                      disabled={!req.id || typeof req.id !== 'string'}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
