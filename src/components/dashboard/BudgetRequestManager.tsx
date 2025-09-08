@@ -203,7 +203,12 @@ export default function BudgetRequestManager() {
                     <Button 
                       variant="destructive" 
                       size="sm" 
-                      onClick={() => req.id && handleDelete(req.id)}
+                      onClick={() => {
+                        if (req.id) {
+                          handleDelete(req.id);
+                        }
+                      }}
+                      disabled={!req.id}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
