@@ -1,22 +1,20 @@
-
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Loader2, Database, User, Settings, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 export default function SupabaseStatus() {
   const { user, profile, session, loading } = useSupabaseAuth();
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'not_configured'>('checking');
-  const [dbStatus, setDbStatus] = useState<'checking' | 'ready' | 'error' | 'not_configured'>('checking');
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'placeholder'>('checking');
+  const [dbStatus, setDbStatus] = useState<'checking' | 'ready' | 'error' | 'placeholder'>('checking');
 
-  // Check if Supabase is configured
-  const isSupabaseConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && 
-                              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-                              process.env.NEXT_PUBLIC_SUPABASE_URL !== "" &&
-                              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== "";
+  // Check if we're using placeholder configuration
+  const isPlaceholderConfig = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project') || 
+                             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.includes('placeholder') ||
+                             !isSupabaseConfigured();
 
   useEffect(() => {
     let mounted = true;
@@ -24,6 +22,14 @@ export default function SupabaseStatus() {
 
     const performConnectionCheck = async () => {
       if (!mounted) return;
+      
+      // Skip network calls if using placeholder configuration
+      if (isPlaceholderConfig) {
+        if (mounted) {
+          setConnectionStatus('placeholder');
+        }
+        return;
+      }
       
       try {
         setConnectionStatus('checking');
@@ -33,7 +39,7 @@ export default function SupabaseStatus() {
         if (mounted) {
           setConnectionStatus(isConnected ? 'connected' : 'error');
           
-          // Only show errors in console, not in UI to avoid spam
+          // Only show errors in console if not placeholder
           if (!isConnected) {
             console.warn('⚠️ Supabase connection appears to be down');
           } else if (connectionStatus === 'error' && isConnected) {
@@ -51,6 +57,14 @@ export default function SupabaseStatus() {
     const performDatabaseCheck = async () => {
       if (!mounted) return;
       
+      // Skip network calls if using placeholder configuration
+      if (isPlaceholderConfig) {
+        if (mounted) {
+          setDbStatus('placeholder');
+        }
+        return;
+      }
+      
       try {
         setDbStatus('checking');
         await checkDatabaseTables();
@@ -62,21 +76,17 @@ export default function SupabaseStatus() {
       }
     };
 
-    if (!isSupabaseConfigured) {
-      setConnectionStatus('not_configured');
-      setDbStatus('not_configured');
-      return;
-    }
-
     // Initial checks
     performConnectionCheck();
     performDatabaseCheck();
 
-    // Set up periodic checks every 30 seconds (less frequent to reduce load)
-    checkInterval = setInterval(() => {
-      performConnectionCheck();
-      performDatabaseCheck();
-    }, 30000);
+    // Set up periodic checks only if not using placeholder config
+    if (!isPlaceholderConfig) {
+      checkInterval = setInterval(() => {
+        performConnectionCheck();
+        performDatabaseCheck();
+      }, 30000);
+    }
 
     return () => {
       mounted = false;
@@ -84,20 +94,25 @@ export default function SupabaseStatus() {
         clearInterval(checkInterval);
       }
     };
-  }, [isSupabaseConfigured]);
+  }, [isPlaceholderConfig]);
 
   const checkConnection = async (): Promise<boolean> => {
+    // Don't make network calls to placeholder URLs
+    if (isPlaceholderConfig) {
+      return false;
+    }
+
     try {
       // Create a simple timeout promise
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Connection timeout')), 5000); // 5 second timeout
+        setTimeout(() => reject(new Error('Connection timeout')), 5000);
       });
 
       // Try a very lightweight query that doesn't depend on RLS
       const connectionPromise = supabase
         .from('profiles')
         .select('id')
-        .limit(0); // Don't return any data, just test connection
+        .limit(0);
 
       const result = await Promise.race([connectionPromise, timeoutPromise]) as any;
       const { error } = result;
@@ -115,13 +130,14 @@ export default function SupabaseStatus() {
 
     } catch (error) {
       console.warn('🚨 Connection check failed:', error);
-      return false; // Assume disconnected on any network error
+      return false;
     }
   };
 
   const checkDatabaseTables = async () => {
-    if (!isSupabaseConfigured) {
-      setDbStatus('not_configured');
+    // Don't make network calls to placeholder URLs
+    if (isPlaceholderConfig) {
+      setDbStatus('placeholder');
       return;
     }
 
@@ -146,7 +162,7 @@ export default function SupabaseStatus() {
         if (result.status === 'rejected') return true;
         if (result.status === 'fulfilled' && result.value.error) {
           // Allow certain "acceptable" errors that indicate the table exists but query failed due to RLS
-          const acceptableErrors = ['PGRST116', 'PGRST103', '42501']; // No rows, RLS violation, etc.
+          const acceptableErrors = ['PGRST116', 'PGRST103', '42501'];
           return !acceptableErrors.includes(result.value.error.code);
         }
         return false;
@@ -167,7 +183,7 @@ export default function SupabaseStatus() {
       case 'connected': 
       case 'ready': return <CheckCircle className="h-4 w-4 text-emerald-600" />;
       case 'error': return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'not_configured': return <AlertTriangle className="h-4 w-4 text-amber-600" />;
+      case 'placeholder': return <AlertTriangle className="h-4 w-4 text-amber-600" />;
       default: return <XCircle className="h-4 w-4 text-gray-400" />;
     }
   };
@@ -179,7 +195,7 @@ export default function SupabaseStatus() {
       variant = 'default';
     } else if (status === 'error') {
       variant = 'destructive';
-    } else if (status === 'not_configured') {
+    } else if (status === 'placeholder') {
       variant = 'outline';
     }
     
@@ -191,33 +207,43 @@ export default function SupabaseStatus() {
     );
   };
 
-  // Show configuration notice if Supabase is not set up
-  if (!isSupabaseConfigured) {
+  // Show configuration notice if using placeholder config
+  if (isPlaceholderConfig) {
     return (
       <Card className="w-full max-w-2xl bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60 shadow-lg shadow-amber-900/5">
         <CardHeader>
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-6 w-6 text-amber-600" />
             <div>
-              <CardTitle className="text-xl font-semibold text-amber-900">Supabase No Configurado</CardTitle>
-              <CardDescription className="text-amber-700">Se requiere configuración para funcionalidad completa</CardDescription>
+              <CardTitle className="text-xl font-semibold text-amber-900">Supabase Configuration Needed</CardTitle>
+              <CardDescription className="text-amber-700">Currently using placeholder configuration</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-4 bg-amber-100/50 rounded-lg border border-amber-200">
             <p className="text-sm text-amber-800 mb-3">
-              Para habilitar la funcionalidad completa de HuBiT, necesitas conectar Supabase:
+              To enable full HuBiT functionality, you need to connect Supabase:
             </p>
             <ul className="text-xs text-amber-700 space-y-1 ml-4 list-disc">
-              <li>Haz clic en el botón "Supabase" en la barra de navegación de Softgen</li>
-              <li>Sigue las instrucciones para conectar tu proyecto</li>
-              <li>Las variables de entorno se configurarán automáticamente</li>
+              <li>Click the "Supabase" button in the Softgen navigation bar</li>
+              <li>Follow the instructions to connect your project</li>
+              <li>Environment variables will be configured automatically</li>
+            </ul>
+          </div>
+          <div className="p-4 bg-blue-100/50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800 mb-2">
+              <strong>Current Status:</strong>
+            </p>
+            <ul className="text-xs text-blue-700 space-y-1 ml-4 list-disc">
+              <li>✅ Application compiles and runs successfully</li>
+              <li>📱 UI components work with local mock data</li>
+              <li>🔗 Database features require real Supabase connection</li>
             </ul>
           </div>
           <div className="text-center">
             <p className="text-xs text-amber-600">
-              Mientras tanto, la aplicación funciona con datos locales simulados
+              Meanwhile, the application works with simulated local data
             </p>
           </div>
         </CardContent>
@@ -231,8 +257,8 @@ export default function SupabaseStatus() {
         <div className="flex items-center gap-3">
           <Database className="h-6 w-6 text-emerald-600" />
           <div>
-            <CardTitle className="text-xl font-semibold">Estado de Supabase</CardTitle>
-            <CardDescription>Conexión y configuración de la base de datos</CardDescription>
+            <CardTitle className="text-xl font-semibold">Supabase Status</CardTitle>
+            <CardDescription>Database connection and configuration</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -241,12 +267,13 @@ export default function SupabaseStatus() {
         <div className="space-y-3">
           <h3 className="font-medium text-neutral-900 flex items-center gap-2">
             <Settings className="h-4 w-4" />
-            Conexión
+            Connection
           </h3>
           <div className="flex items-center justify-between p-3 rounded-lg bg-neutral-50/50">
-            <span className="text-sm text-neutral-700">Estado de la conexión a Supabase</span>
-            {getStatusBadge(connectionStatus, connectionStatus === 'connected' ? 'Conectado' : 
-                           connectionStatus === 'error' ? 'Error' : 'Verificando...')}
+            <span className="text-sm text-neutral-700">Supabase connection status</span>
+            {getStatusBadge(connectionStatus, connectionStatus === 'connected' ? 'Connected' : 
+                           connectionStatus === 'error' ? 'Error' : 
+                           connectionStatus === 'placeholder' ? 'Placeholder' : 'Checking...')}
           </div>
         </div>
 
@@ -254,12 +281,13 @@ export default function SupabaseStatus() {
         <div className="space-y-3">
           <h3 className="font-medium text-neutral-900 flex items-center gap-2">
             <Database className="h-4 w-4" />
-            Esquema de Base de Datos
+            Database Schema
           </h3>
           <div className="flex items-center justify-between p-3 rounded-lg bg-neutral-50/50">
-            <span className="text-sm text-neutral-700">Tablas principales configuradas</span>
-            {getStatusBadge(dbStatus, dbStatus === 'ready' ? 'Listo' : 
-                           dbStatus === 'error' ? 'Error' : 'Verificando...')}
+            <span className="text-sm text-neutral-700">Main tables configured</span>
+            {getStatusBadge(dbStatus, dbStatus === 'ready' ? 'Ready' : 
+                           dbStatus === 'error' ? 'Error' : 
+                           dbStatus === 'placeholder' ? 'Placeholder' : 'Checking...')}
           </div>
         </div>
 
@@ -267,25 +295,25 @@ export default function SupabaseStatus() {
         <div className="space-y-3">
           <h3 className="font-medium text-neutral-900 flex items-center gap-2">
             <User className="h-4 w-4" />
-            Autenticación
+            Authentication
           </h3>
           <div className="space-y-2">
             <div className="flex items-center justify-between p-3 rounded-lg bg-neutral-50/50">
-              <span className="text-sm text-neutral-700">Usuario autenticado</span>
+              <span className="text-sm text-neutral-700">Authenticated user</span>
               {loading ? (
                 <Badge variant="secondary" className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Cargando...
+                  Loading...
                 </Badge>
               ) : user ? (
                 <Badge variant="default" className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600" />
-                  Conectado
+                  Connected
                 </Badge>
               ) : (
                 <Badge variant="outline" className="flex items-center gap-2">
                   <XCircle className="h-4 w-4 text-gray-400" />
-                  No autenticado
+                  Not authenticated
                 </Badge>
               )}
             </div>
@@ -294,8 +322,8 @@ export default function SupabaseStatus() {
               <div className="p-3 rounded-lg bg-emerald-50/50 border border-emerald-200/60">
                 <div className="text-sm space-y-1">
                   <p><span className="font-medium">Email:</span> {user.email}</p>
-                  <p><span className="font-medium">Nombre:</span> {profile.full_name || 'Sin especificar'}</p>
-                  <p><span className="font-medium">Tipo de usuario:</span> {profile.user_type}</p>
+                  <p><span className="font-medium">Name:</span> {profile.full_name || 'Not specified'}</p>
+                  <p><span className="font-medium">User type:</span> {profile.user_type}</p>
                 </div>
               </div>
             )}
@@ -304,10 +332,10 @@ export default function SupabaseStatus() {
 
         {/* Configuration Info */}
         <div className="space-y-3">
-          <h3 className="font-medium text-neutral-900">Configuración</h3>
+          <h3 className="font-medium text-neutral-900">Configuration</h3>
           <div className="text-xs text-neutral-600 space-y-1 bg-neutral-50/50 p-3 rounded-lg font-mono">
             <p><span className="font-semibold">URL:</span> {process.env.NEXT_PUBLIC_SUPABASE_URL}</p>
-            <p><span className="font-semibold">Clave:</span> {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20)}...</p>
+            <p><span className="font-semibold">Key:</span> {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20)}...</p>
           </div>
         </div>
 
@@ -317,12 +345,15 @@ export default function SupabaseStatus() {
             variant="outline" 
             size="sm" 
             onClick={() => {
-              checkConnection();
-              checkDatabaseTables();
+              if (!isPlaceholderConfig) {
+                checkConnection();
+                checkDatabaseTables();
+              }
             }}
+            disabled={isPlaceholderConfig}
             className="bg-transparent hover:bg-neutral-50"
           >
-            Verificar conexión
+            Check connection
           </Button>
           {!user && (
             <Button 
@@ -330,7 +361,7 @@ export default function SupabaseStatus() {
               onClick={() => window.location.href = '/auth/login'}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
-              Iniciar sesión
+              Sign in
             </Button>
           )}
         </div>
