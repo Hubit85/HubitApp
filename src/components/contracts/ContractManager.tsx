@@ -351,7 +351,7 @@ export function ContractManager() {
       console.log("✅ Contract created successfully:", newContract.id);
 
       // Send notification to the contract owner using the same user ID
-      if (requestUserId && user?.id && providerData.id) {
+      if (requestUserId && user?.id && providerData?.id) {
         try {
           await supabase
             .from('notifications')

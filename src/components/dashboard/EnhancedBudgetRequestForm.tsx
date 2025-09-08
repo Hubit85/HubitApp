@@ -566,7 +566,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
                 <div>
                   <Label htmlFor="urgency">Nivel de Urgencia</Label>
-                  <Select value={formData.urgency} onValueChange={(value) => setFormData(prev => ({ ...prev, urgency: value as BudgetRequest['urgency'] }))}>
+                  <Select value={formData.urgency || "normal"} onValueChange={(value) => setFormData(prev => ({ ...prev, urgency: value as BudgetRequest['urgency'] }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
