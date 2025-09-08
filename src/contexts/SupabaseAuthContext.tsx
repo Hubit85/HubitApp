@@ -15,7 +15,13 @@ interface AuthContextType {
   loading: boolean;
   isConnected: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => Promise<{ error?: string; message?: string; success?: boolean }>;
+  signUp: (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'> & { 
+    // NUEVO: Soporte para múltiples roles durante el registro
+    additionalRoles?: Array<{
+      roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
+      roleSpecificData: Record<string, any>;
+    }>;
+  }) => Promise<{ error?: string; message?: string; success?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: string }>;
   activateRole: (roleType: UserRole['role_type']) => Promise<{ success: boolean; message: string }>;
@@ -127,10 +133,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Enhanced signUp with improved user_type synchronization
-  const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
+  // ENHANCED signUp with improved multiple roles creation
+  const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'> & { 
+    // NUEVO: Soporte para múltiples roles durante el registro
+    additionalRoles?: Array<{
+      roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
+      roleSpecificData: Record<string, any>;
+    }>;
+  }) => {
     try {
-      console.log("📝 Starting enhanced sign up process...");
+      console.log("📝 Starting native multi-role sign up process...");
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -166,9 +178,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.session) {
-        console.log("✅ Enhanced sign up successful with immediate session");
+        console.log("✅ Sign up successful with immediate session");
         
-        // Try to create profile with proper user_type synchronization
         try {
           const profileData: ProfileInsert = {
             id: data.user.id,
@@ -176,7 +187,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             ...userData,
           };
 
-          // Create profile first to establish user_type baseline
+          // Create profile first
           const { data: createdProfile, error: profileError } = await supabase
             .from("profiles")
             .insert(profileData)
@@ -190,93 +201,100 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           console.log("✅ Profile created successfully with user_type:", profileData.user_type);
 
-          // Enhanced role-specific data preparation
-          const roleSpecificData: any = {};
-          
-          if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
-            roleSpecificData.full_name = userData.full_name;
-            roleSpecificData.phone = userData.phone;
-            roleSpecificData.address = userData.address;
-            roleSpecificData.postal_code = userData.postal_code;
-            roleSpecificData.city = userData.city;
-            roleSpecificData.province = userData.province;
-            roleSpecificData.country = userData.country;
-            
-            // Additional fields for community members
-            if (userData.user_type === 'community_member') {
-              roleSpecificData.community_name = (userData as any).community_name || '';
-              roleSpecificData.portal_number = (userData as any).portal_number || '';
-              roleSpecificData.apartment_number = (userData as any).apartment_number || '';
-              
-              // Generate community code if not provided
-              if (!roleSpecificData.community_name && userData.address) {
-                roleSpecificData.community_code = generateCommunityCode(userData.address);
-              }
-            }
-          }
-          
-          // CRITICAL: Ensure user_type is defined and valid before creating primary role
-          const validUserType = userData.user_type;
-          if (!validUserType || !['particular', 'community_member', 'service_provider', 'property_administrator'].includes(validUserType)) {
-            console.error('❌ Invalid user_type for role creation:', validUserType);
-            return { error: "Tipo de usuario inválido para crear el rol" };
-          }
-          
-          // SIMPLIFIED: Create primary role with clear activation
-          const { data: primaryRoleData, error: primaryRoleError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: data.user.id,
-              role_type: validUserType,
-              is_active: true,  // Primary role is always active
-              is_verified: true,  // Auto-verify during registration
-              verification_confirmed_at: new Date().toISOString(),
-              role_specific_data: roleSpecificData
-            })
-            .select()
-            .single();
+          // NUEVO: Create multiple roles natively
+          const rolesToCreate = [
+            // Primary role (first)
+            {
+              roleType: userData.user_type,
+              roleSpecificData: extractRoleSpecificData(userData, userData.user_type)
+            },
+            // Additional roles
+            ...(userData.additionalRoles || [])
+          ];
 
-          if (primaryRoleError) {
-            console.error("❌ Primary role creation failed:", primaryRoleError);
-            throw primaryRoleError;
-          }
+          console.log(`🎭 Creating ${rolesToCreate.length} roles natively...`);
 
-          console.log("✅ Primary role created successfully:", primaryRoleData.role_type);
-
-          // Create default property for roles that need it
-          if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
-            console.log("🏠 Creating default property for user with role:", userData.user_type);
-            
-            const propertyUserData: UserPropertyData = {
-              full_name: userData.full_name || 'Usuario',
-              address: userData.address || '',
-              city: userData.city || '',
-              postal_code: userData.postal_code || '',
-              province: userData.province || '',
-              country: userData.country || 'España',
-              community_name: (userData as any).community_name || '',
-              portal_number: (userData as any).portal_number || '',
-              apartment_number: (userData as any).apartment_number || '',
-              user_type: userData.user_type
-            };
+          const createdRoles = [];
+          for (let i = 0; i < rolesToCreate.length; i++) {
+            const roleRequest = rolesToCreate[i];
+            const isFirstRole = i === 0;
 
             try {
-              const propertyResult = await PropertyAutoService.createDefaultProperty(data.user.id, propertyUserData);
-              if (propertyResult.success) {
-                console.log("✅ Default property created successfully:", propertyResult.message);
-              } else {
-                console.warn("⚠️ Property creation failed:", propertyResult.message);
+              console.log(`🔄 Creating role ${i + 1}/${rolesToCreate.length}: ${roleRequest.roleType}`);
+
+              // Generate community code if needed
+              let processedRoleData = { ...roleRequest.roleSpecificData };
+              if (roleRequest.roleType === 'community_member' && processedRoleData.address) {
+                processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
               }
-            } catch (propertyError) {
-              console.warn("⚠️ Property creation error (non-critical):", propertyError);
+
+              // Create role record
+              const { data: newRole, error: insertError } = await supabase
+                .from('user_roles')
+                .insert({
+                  user_id: data.user.id,
+                  role_type: roleRequest.roleType,
+                  is_verified: true,
+                  is_active: isFirstRole, // First role is active by default
+                  role_specific_data: processedRoleData,
+                  verification_confirmed_at: new Date().toISOString(),
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+              if (insertError) {
+                console.error(`❌ Failed to create role ${roleRequest.roleType}:`, insertError);
+                continue; // Skip this role but continue with others
+              }
+
+              createdRoles.push(newRole);
+              console.log(`✅ Successfully created role ${roleRequest.roleType}`);
+
+              // Create default property for applicable roles
+              if (roleRequest.roleType === 'particular' || roleRequest.roleType === 'community_member') {
+                try {
+                  const propertyUserData: UserPropertyData = {
+                    full_name: processedRoleData.full_name || userData.full_name || 'Usuario',
+                    address: processedRoleData.address || userData.address || '',
+                    city: processedRoleData.city || userData.city || '',
+                    postal_code: processedRoleData.postal_code || userData.postal_code || '',
+                    province: processedRoleData.province || userData.province || '',
+                    country: processedRoleData.country || userData.country || 'España',
+                    community_name: processedRoleData.community_name || '',
+                    portal_number: processedRoleData.portal_number || '',
+                    apartment_number: processedRoleData.apartment_number || '',
+                    user_type: roleRequest.roleType
+                  };
+
+                  const propertyResult = await PropertyAutoService.createDefaultProperty(data.user.id, propertyUserData);
+                  if (propertyResult.success) {
+                    console.log(`✅ Default property created for ${roleRequest.roleType}`);
+                  } else {
+                    console.warn(`⚠️ Property creation failed for ${roleRequest.roleType}:`, propertyResult.message);
+                  }
+                } catch (propertyError) {
+                  console.warn(`⚠️ Property creation error for ${roleRequest.roleType}:`, propertyError);
+                }
+              }
+
+            } catch (roleError) {
+              console.error(`❌ Exception creating role ${roleRequest.roleType}:`, roleError);
             }
           }
+
+          console.log(`📊 Native role creation completed: ${createdRoles.length}/${rolesToCreate.length} roles created`);
           
         } catch (profileError) {
           console.warn("⚠️ Profile creation failed but user was created:", profileError);
         }
 
-        return { success: true, userId: data.user.id };
+        return { 
+          success: true, 
+          userId: data.user.id,
+          message: `¡Cuenta creada exitosamente con ${rolesToCreate.length} roles!`
+        };
       }
 
       return { 
@@ -284,8 +302,59 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       };
       
     } catch (error) {
-      console.error("❌ Enhanced sign up exception:", error);
+      console.error("❌ Native multi-role sign up exception:", error);
       return { error: "Error inesperado durante el registro" };
+    }
+  };
+
+  // Helper function to extract role-specific data from user data
+  const extractRoleSpecificData = (userData: any, roleType: string): Record<string, any> => {
+    const commonFields = {
+      full_name: userData.full_name,
+      phone: userData.phone,
+      address: userData.address,
+      postal_code: userData.postal_code,
+      city: userData.city,
+      province: userData.province,
+      country: userData.country
+    };
+
+    switch (roleType) {
+      case 'particular':
+      case 'community_member':
+        return commonFields;
+      
+      case 'service_provider':
+        return {
+          company_name: userData.company_name || userData.full_name,
+          company_address: userData.company_address || userData.address,
+          company_postal_code: userData.company_postal_code || userData.postal_code,
+          company_city: userData.company_city || userData.city,
+          company_province: userData.company_province || userData.province,
+          company_country: userData.company_country || userData.country,
+          cif: userData.cif || '',
+          business_email: userData.business_email || userData.email,
+          business_phone: userData.business_phone || userData.phone,
+          selected_services: userData.selected_services || [],
+          service_costs: userData.service_costs || {}
+        };
+      
+      case 'property_administrator':
+        return {
+          company_name: userData.company_name || userData.full_name,
+          company_address: userData.company_address || userData.address,
+          company_postal_code: userData.company_postal_code || userData.postal_code,
+          company_city: userData.company_city || userData.city,
+          company_province: userData.company_province || userData.province,
+          company_country: userData.company_country || userData.country,
+          cif: userData.cif || '',
+          business_email: userData.business_email || userData.email,
+          business_phone: userData.business_phone || userData.phone,
+          professional_number: userData.professional_number || ''
+        };
+      
+      default:
+        return commonFields;
     }
   };
 
