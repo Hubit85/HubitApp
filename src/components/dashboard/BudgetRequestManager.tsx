@@ -205,7 +205,7 @@ export default function BudgetRequestManager() {
                       size="sm" 
                       onClick={() => {
                         if (req.id) {
-                          handleDelete(req.id);
+                          handleDelete(req.id as string);
                         }
                       }}
                     >
