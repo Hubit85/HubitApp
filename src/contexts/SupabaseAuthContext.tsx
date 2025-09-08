@@ -237,7 +237,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           // Create profile first
           const profileData: ProfileInsert = {
             id: data.user.id,
-            email: email, // FIXED: Use guaranteed email parameter instead of data.user.email
+            email: email, // FIXED: Use guaranteed email parameter
             ...userData,
           };
 
@@ -255,25 +255,25 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           console.log("✅ Profile created successfully with user_type:", profileData.user_type);
 
-          // Create multiple roles natively without email verification
+          // Create multiple roles immediately with no email verification
           const rolesToCreate = [
             // Primary role (first)
             {
               roleType: userData.user_type,
-              roleSpecificData: extractRoleSpecificData({ ...userData, email }, userData.user_type)
+              roleSpecificData: extractRoleSpecificData({ ...userData, email: email }, userData.user_type)
             },
             // Additional roles
             ...(userData.additionalRoles || []).map(role => ({
               roleType: role.roleType,
               roleSpecificData: extractRoleSpecificData({ 
                 ...userData, 
-                email, // FIXED: Ensure email is always provided
+                email: email,
                 ...role.roleSpecificData 
               }, role.roleType)
             }))
           ];
 
-          console.log(`🎭 Creating ${rolesToCreate.length} roles natively (no email verification)...`);
+          console.log(`🎭 Creating ${rolesToCreate.length} roles immediately (no email verification)...`);
 
           const createdRoles = [];
           const roleErrors = [];
@@ -301,16 +301,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 continue;
               }
 
-              // Create the role record - FIXED: No email verification needed
+              // Create the role record - IMMEDIATELY VERIFIED AND ACTIVE
               const roleInsertData: UserRoleInsert = {
                 user_id: data.user.id,
                 role_type: roleRequest.roleType as ValidRoleType,
-                is_verified: true, // FIXED: Automatically verified, no email needed
+                is_verified: true, // IMMEDIATELY VERIFIED
                 is_active: isFirstRole, // First role is active by default
                 role_specific_data: processedRoleData,
-                verification_confirmed_at: new Date().toISOString(), // FIXED: Immediately confirmed
-                verification_token: null, // FIXED: No token needed
-                verification_expires_at: null, // FIXED: No expiration needed
+                verification_confirmed_at: new Date().toISOString(), // IMMEDIATELY CONFIRMED
+                verification_token: null, // NO TOKEN NEEDED
+                verification_expires_at: null, // NO EXPIRATION NEEDED
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               };
@@ -384,11 +384,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           // Return success with details
           let message = `¡Cuenta creada exitosamente!`;
           if (createdRoles.length === rolesToCreate.length) {
-            message = `¡Cuenta creada exitosamente con ${createdRoles.length} roles verificados!`;
+            message = `¡Cuenta creada exitosamente con ${createdRoles.length} roles activos!`;
           } else if (createdRoles.length > 0) {
             message = `¡Cuenta creada! ${createdRoles.length} de ${rolesToCreate.length} roles configurados correctamente.`;
           } else {
-            message = `Cuenta creada, pero hubo problemas configurando los roles. Puedes añadirlos desde tu dashboard.`;
+            message = `Cuenta creada, pero hubo problemas configurando los roles. Por favor, contacta con soporte.`;
           }
           
           return { 
