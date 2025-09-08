@@ -189,9 +189,9 @@ export function ContractManager() {
         .eq('user_id', user.id)
         .single();
 
-      if (providerError) {
+      if (providerError || !providerData?.id) {
         console.error("❌ Error loading provider data:", providerError);
-        throw new Error(`Error cargando datos del proveedor: ${providerError.message}`);
+        throw new Error(`Error cargando datos del proveedor: ${providerError?.message || 'ID no encontrado'}`);
       }
 
       const { data, error } = await supabase
@@ -247,7 +247,7 @@ export function ContractManager() {
         .eq('user_id', user.id)
         .single();
 
-      if (providerError) {
+      if (providerError || !providerData?.id) {
         console.warn("⚠️ Provider not found, skipping quotes");
         return;
       }
