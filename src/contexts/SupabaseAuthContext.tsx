@@ -234,10 +234,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         console.log("✅ Sign up successful with immediate session");
         
         try {
-          // FIXED: Use email parameter, which is guaranteed to be a string
+          // Create profile first
           const profileData: ProfileInsert = {
             id: data.user.id,
-            email: email, // FIXED: Using the email parameter instead of data.user.email
+            email: email, // FIXED: Use guaranteed email parameter instead of data.user.email
             ...userData,
           };
 
@@ -260,7 +260,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             // Primary role (first)
             {
               roleType: userData.user_type,
-              roleSpecificData: extractRoleSpecificData({ ...userData, email: email }, userData.user_type)
+              roleSpecificData: extractRoleSpecificData({ ...userData, email }, userData.user_type)
             },
             // Additional roles
             ...(userData.additionalRoles || [])
