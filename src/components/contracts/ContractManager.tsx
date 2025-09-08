@@ -320,9 +320,16 @@ export function ContractManager() {
       // Generate contract number
       const contractNumber = `CON-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
+      // Ensure we have a valid user_id - prioritize budget_request user_id, then fallback
+      const contractUserId = selectedQuote.budget_requests?.user_id || selectedQuote.user_id || user.id;
+      
+      if (!contractUserId) {
+        throw new Error("No se puede determinar el usuario propietario del contrato");
+      }
+
       const contractData = {
         quote_id: selectedQuote.id,
-        user_id: selectedQuote.user_id ?? (selectedQuote.budget_requests?.user_id || user.id),
+        user_id: contractUserId,
         service_provider_id: providerData.id,
         contract_number: contractNumber,
         work_description: contractForm.work_scope || selectedQuote.description || 'Descripción del trabajo',
@@ -349,23 +356,25 @@ export function ContractManager() {
       // Update quote with contract reference - remove contract_id as it doesn't exist in quotes table
       
       // Create notification for client
-      try {
-        await supabase
-          .from('notifications')
-          .insert({
-            user_id: selectedQuote.user_id,
-            title: 'Nuevo contrato disponible',
-            message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}"`,
-            type: 'info' as const,
-            category: 'contract' as const,
-            related_entity_type: 'contract',
-            related_entity_id: newContract.id,
-            action_url: `/dashboard?contract=${newContract.id}`,
-            action_label: 'Ver Contrato',
-            read: false
-          });
-      } catch (notifError) {
-        console.warn("⚠️ Failed to send notification:", notifError);
+      if (contractUserId) {
+        try {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: contractUserId,
+              title: 'Nuevo contrato disponible',
+              message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}"`,
+              type: 'info' as const,
+              category: 'contract' as const,
+              related_entity_type: 'contract',
+              related_entity_id: newContract.id,
+              action_url: `/dashboard?contract=${newContract.id}`,
+              action_label: 'Ver Contrato',
+              read: false
+            });
+        } catch (notifError) {
+          console.warn("⚠️ Failed to send notification:", notifError);
+        }
       }
 
       setSuccessMessage("¡Contrato creado exitosamente!");

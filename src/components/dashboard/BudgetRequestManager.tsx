@@ -137,7 +137,7 @@ export default function BudgetRequestManager() {
     }
   };
 
-  const handleDelete = async (requestId: string | null) => {
+  const handleDelete = async (requestId: string) => {
     if (!requestId) {
       console.error("No request ID provided");
       return;
@@ -197,8 +197,20 @@ export default function BudgetRequestManager() {
                     <Badge variant={getStatusBadgeVariant(req.status)} className="mt-2">{req.status}</Badge>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(req)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(req.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(req)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      onClick={() => {
+                        if (req.id) {
+                          handleDelete(req.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </Card>
