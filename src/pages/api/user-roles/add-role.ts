@@ -648,7 +648,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           userId: userId.substring(0, 8) + '...'
         });
 
-        // Step 6: Create welcome notification (non-blocking)
+        // Step 7: CRÍTICO: Sincronizar user_type automáticamente
+        let syncCompleted = false;
+        try {
+          console.log('🔄 API: Performing automatic user_type synchronization...');
+          
+          // NUEVA LÓGICA: Sincronización automática mejorada
+          syncCompleted = await ensureUserTypeSynchronization(userId, roleType);
+          
+          if (syncCompleted) {
+            console.log('✅ API: user_type synchronization completed successfully');
+          } else {
+            console.warn('⚠️ API: user_type synchronization had issues but continuing...');
+            // No fallar completamente por problemas de sincronización
+          }
+          
+        } catch (syncError) {
+          console.warn('⚠️ API: user_type synchronization failed (non-critical):', syncError);
+          // No fallar la creación del rol por errores de sincronización
+        }
+
+        // Step 8: Create welcome notification (non-blocking)
         try {
           await supabase
             .from('notifications')
@@ -669,7 +689,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // Don't fail the entire operation for notification errors
         }
 
-        // Step 7: Create default property for particular and community_member roles (non-blocking)
+        // Step 9: Create default property for particular and community_member roles (non-blocking)
         if (roleType === 'particular' || roleType === 'community_member') {
           console.log(`🏠 API: Creating default property for role: ${roleType}`);
           
