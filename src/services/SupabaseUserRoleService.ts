@@ -280,6 +280,7 @@ export class SupabaseUserRoleService {
     });
   }
 
+  // ENHANCED FUNCTION: Automatic user_type synchronization during role creation
   static async addRole(
     userId: string, 
     request: AddRoleRequest
@@ -290,10 +291,14 @@ export class SupabaseUserRoleService {
     errorCode?: string;
     emailError?: boolean;
     emailErrorDetails?: string;
+    syncCompleted?: boolean;
   }> {
     return ConnectionManager.executeWithLimit(async () => {
       try {
-        console.log('🚀 Frontend: Starting addRole process via API route:', { userId: userId.substring(0, 8) + '...', roleType: request.role_type });
+        console.log('🚀 Frontend: Starting enhanced addRole process with auto-sync:', { 
+          userId: userId.substring(0, 8) + '...', 
+          roleType: request.role_type 
+        });
 
         // Enhanced session validation before making API call
         try {
@@ -326,19 +331,18 @@ export class SupabaseUserRoleService {
           };
         }
 
-        // Create AbortController with longer timeout for API calls
+        // Enhanced role creation with explicit synchronization request
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout for role creation
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
 
         try {
-          // Add retry logic for network issues
           let attempts = 0;
           const maxAttempts = 2;
           let lastError: any = null;
           
           while (attempts < maxAttempts) {
             try {
-              console.log(`📡 Frontend: Making API call (attempt ${attempts + 1}/${maxAttempts})`);
+              console.log(`📡 Frontend: Making enhanced API call with auto-sync (attempt ${attempts + 1}/${maxAttempts})`);
               
               const response = await fetch('/api/user-roles/add-role', {
                 method: 'POST',
@@ -348,7 +352,9 @@ export class SupabaseUserRoleService {
                 body: JSON.stringify({
                   userId: userId,
                   roleType: request.role_type,
-                  roleSpecificData: request.role_specific_data
+                  roleSpecificData: request.role_specific_data,
+                  enableAutoSync: true, // NUEVO FLAG para habilitar sincronización automática
+                  syncUserType: true,   // NUEVO FLAG para sincronizar user_type
                 }),
                 signal: controller.signal
               });
@@ -361,10 +367,11 @@ export class SupabaseUserRoleService {
                 throw new Error("Respuesta del servidor no válida");
               }
               
-              console.log('📡 Frontend: API response:', {
+              console.log('📡 Frontend: Enhanced API response:', {
                 status: response.status,
                 success: result?.success,
                 message: result?.message?.substring(0, 100) + (result?.message?.length > 100 ? '...' : ''),
+                syncCompleted: result?.crossSyncCompleted || result?.syncCompleted,
                 processingTime: result?.processingTime
               });
 
@@ -414,14 +421,26 @@ export class SupabaseUserRoleService {
                   success: false,
                   message: errorMessage,
                   errorCode: response.status.toString(),
+                  syncCompleted: result?.crossSyncCompleted || result?.syncCompleted || false,
                   ...result
                 };
               }
 
-              // Success case
+              // Success case with enhanced sync reporting
               clearTimeout(timeoutId);
+              
+              // ENHANCED: Report synchronization status
+              const syncStatus = result?.crossSyncCompleted || result?.syncCompleted || false;
+              
+              console.log('✅ Frontend: Role creation completed with sync status:', {
+                success: result.success,
+                syncCompleted: syncStatus,
+                processingTime: result.processingTime
+              });
+              
               return {
                 success: true,
+                syncCompleted: syncStatus,
                 ...result
               };
 
@@ -435,7 +454,8 @@ export class SupabaseUserRoleService {
                 return {
                   success: false,
                   message: "Error: La operación tardó demasiado tiempo. Verifica tu conexión e intenta nuevamente.",
-                  errorCode: 'TIMEOUT'
+                  errorCode: 'TIMEOUT',
+                  syncCompleted: false
                 };
               }
               
@@ -460,13 +480,15 @@ export class SupabaseUserRoleService {
               return {
                 success: false,
                 message: "Error de conexión: No se pudo conectar con el servidor. Verifica tu conexión a internet e intenta nuevamente.",
-                errorCode: 'CONNECTION_ERROR'
+                errorCode: 'CONNECTION_ERROR',
+                syncCompleted: false
               };
             } else if (lastError.message.includes('network')) {
               return {
                 success: false,
                 message: "Error de red: Problema de conectividad. Verifica tu conexión e intenta nuevamente.",
-                errorCode: 'NETWORK_ERROR'
+                errorCode: 'NETWORK_ERROR',
+                syncCompleted: false
               };
             }
             
@@ -477,7 +499,8 @@ export class SupabaseUserRoleService {
           return {
             success: false,
             message: "Error inesperado durante la comunicación con el servidor.",
-            errorCode: 'UNKNOWN_FETCH_ERROR'
+            errorCode: 'UNKNOWN_FETCH_ERROR',
+            syncCompleted: false
           };
 
         } catch (fetchError) {
@@ -486,7 +509,7 @@ export class SupabaseUserRoleService {
         }
 
       } catch (error) {
-        console.error("❌ Frontend: Complete addRole error:", error);
+        console.error("❌ Frontend: Complete enhanced addRole error:", error);
         
         let errorMessage = "Error al agregar el rol. ";
         let errorCode = 'UNKNOWN_ERROR';
@@ -514,7 +537,8 @@ export class SupabaseUserRoleService {
         return {
           success: false,
           message: errorMessage,
-          errorCode
+          errorCode,
+          syncCompleted: false
         };
       }
     });
