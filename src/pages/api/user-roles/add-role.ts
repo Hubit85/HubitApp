@@ -51,7 +51,7 @@ interface RequestBody {
   // Modo individual (compatibilidad hacia atrás)
   roleType?: string;
   roleSpecificData?: RoleSpecificData;
-  // Modo múltiple (nuevo)
+  // MODO MÚLTIPLE MEJORADO (nuevo)
   multipleRoles?: SingleRoleRequest[];
   // Flags de control
   enableAutoSync?: boolean;
