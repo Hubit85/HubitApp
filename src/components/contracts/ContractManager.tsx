@@ -641,12 +641,12 @@ export function ContractManager() {
                               <span>Creado: {contract.created_at ? new Date(contract.created_at).toLocaleDateString() : 'Fecha desconocida'}</span>
                             </div>
 
-                            {contract.end_date ? (
+                            {contract.end_date && new Date(contract.end_date) && (
                               <div className="flex items-center gap-1 text-orange-600">
                                 <Clock className="h-4 w-4" />
                                 <span>Fecha límite: {new Date(contract.end_date).toLocaleDateString()}</span>
                               </div>
-                            ) : null}
+                            )}
                           </div>
                         </div>
 
