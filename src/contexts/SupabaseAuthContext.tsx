@@ -292,9 +292,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       console.error("❌ CONTEXT: Critical error in AGGRESSIVE role activation system:", error);
       
       // FINAL EMERGENCY FALLBACK
-      if (verifiedRoles.length > 0) {
+      if (availableRoles.length > 0) {
         console.log("🆘 CONTEXT: FINAL EMERGENCY FALLBACK - Using first verified role locally");
-        const emergencyRole = { ...verifiedRoles[0], is_active: true };
+        const verifiedRoles = availableRoles.filter(r => r.is_verified);
+        const emergencyRole = verifiedRoles.length > 0 ? 
+          { ...verifiedRoles[0], is_active: true } : 
+          { ...availableRoles[0], is_active: true };
         console.log("⚡ CONTEXT: Emergency fallback role:", emergencyRole.role_type);
         return emergencyRole;
       }
