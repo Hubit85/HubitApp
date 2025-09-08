@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { Profile, ProfileInsert } from "@/integrations/supabase/types";
+import { Profile, ProfileInsert, UserRoleInsert } from "@/integrations/supabase/types";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
 import { PropertyAutoService, UserPropertyData } from "@/services/PropertyAutoService";
 
@@ -133,6 +133,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Helper function to generate community code
+  const generateCommunityCode = (address: string): string => {
+    const hash = address.toLowerCase().replace(/\s+/g, '').slice(0, 10);
+    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `COM-${hash}-${randomNum}`.toUpperCase();
+  };
+
   // Helper function to extract role-specific data from user data
   const extractRoleSpecificData = (userData: any, roleType: string): Record<string, any> => {
     const commonFields = {
@@ -159,7 +166,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email,
+          business_email: userData.business_email || userData.email || '', // FIXED: Handle undefined email
           business_phone: userData.business_phone || userData.phone,
           selected_services: userData.selected_services || [],
           service_costs: userData.service_costs || {}
@@ -174,7 +181,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email,
+          business_email: userData.business_email || userData.email || '', // FIXED: Handle undefined email
           business_phone: userData.business_phone || userData.phone,
           professional_number: userData.professional_number || ''
         };
@@ -642,13 +649,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Helper function to generate community code
-  const generateCommunityCode = (address: string): string => {
-    const hash = address.toLowerCase().replace(/\s+/g, '').slice(0, 10);
-    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `COM-${hash}-${randomNum}`.toUpperCase();
   };
 
   // SIMPLIFIED refreshRoles
