@@ -346,11 +346,12 @@ export function ContractManager() {
 
       console.log("✅ Contract created successfully:", newContract.id);
 
+      // Only send notification if contractUserId is valid (already checked above)
       try {
         await supabase
           .from('notifications')
           .insert({
-            user_id: contractUserId,
+            user_id: contractUserId, // This is guaranteed to be a string at this point
             title: 'Nuevo contrato disponible',
             message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}"`,
             type: 'info' as const,
