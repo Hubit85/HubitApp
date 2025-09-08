@@ -950,6 +950,129 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     return `COM-${hash}-${randomNum}`.toUpperCase();
   };
 
+  // Enhanced refreshRoles with improved synchronization
+  const refreshRoles = async () => {
+    if (!user?.id) {
+      console.log("⚠️ CONTEXT: No user ID available for role refresh");
+      return;
+    }
+
+    try {
+      console.log("🔄 CONTEXT: Starting enhanced role refresh with synchronization...");
+      
+      // Step 1: Fetch updated roles from database
+      const updatedRoles = await SupabaseUserRoleService.getUserRoles(user.id);
+      console.log(`📋 CONTEXT: Fetched ${updatedRoles.length} roles from database`);
+      
+      // Step 2: Update local roles state
+      setUserRoles(updatedRoles);
+      
+      // Step 3: Ensure there's always an active role if we have verified roles
+      const verifiedRoles = updatedRoles.filter(r => r.is_verified);
+      
+      if (verifiedRoles.length > 0) {
+        // Check if we have an active role
+        const currentActiveRole = verifiedRoles.find(r => r.is_active);
+        
+        if (!currentActiveRole) {
+          console.log("🎯 CONTEXT: No active role found, establishing one...");
+          
+          // Use the enhanced active role establishment system
+          const establishedRole = await ensureActiveRole(user.id, verifiedRoles);
+          
+          if (establishedRole) {
+            setActiveRole(establishedRole);
+            console.log("✅ CONTEXT: Active role established during refresh:", establishedRole.role_type);
+            
+            // Update the profile user_type to match the active role
+            await ensureUserTypeSynchronization(user.id, establishedRole.role_type);
+            
+            // Refresh profile to reflect the synchronized user_type
+            const { data: refreshedProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+            
+            if (refreshedProfile) {
+              setProfile(refreshedProfile);
+              console.log("✅ CONTEXT: Profile synchronized with active role");
+            }
+            
+          } else {
+            console.warn("⚠️ CONTEXT: Could not establish active role during refresh");
+            setActiveRole(null);
+          }
+        } else {
+          setActiveRole(currentActiveRole);
+          console.log("✅ CONTEXT: Active role confirmed:", currentActiveRole.role_type);
+          
+          // Ensure profile is synchronized with the active role
+          if (profile && profile.user_type !== currentActiveRole.role_type) {
+            console.log("🔄 CONTEXT: Synchronizing profile with active role");
+            await ensureUserTypeSynchronization(user.id, currentActiveRole.role_type);
+            
+            // Refresh profile
+            const { data: refreshedProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+            
+            if (refreshedProfile) {
+              setProfile(refreshedProfile);
+              console.log("✅ CONTEXT: Profile synchronized during refresh");
+            }
+          }
+        }
+      } else {
+        console.log("⚠️ CONTEXT: No verified roles available");
+        setActiveRole(null);
+      }
+      
+      console.log("✅ CONTEXT: Enhanced role refresh completed successfully");
+      
+    } catch (error) {
+      console.error("❌ CONTEXT: Error during role refresh:", error);
+      
+      // On error, don't crash - just log and continue with current state
+      // This prevents UI breaks when there are temporary connection issues
+    }
+  };
+
+  // Enhanced signIn with improved role synchronization
+  const signIn = async (email: string, password: string) => {
+    try {
+      console.log("🔐 CONTEXT: Starting enhanced sign in process...");
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("❌ CONTEXT: Sign in error:", error.message);
+        return { error: error.message };
+      }
+
+      if (data?.user && data?.session) {
+        console.log("✅ CONTEXT: Sign in successful, starting user data fetch with sync...");
+        
+        // The fetchUserData function will handle role synchronization automatically
+        await fetchUserData(data.user);
+        
+        console.log("✅ CONTEXT: Enhanced sign in completed");
+        return { success: true };
+      }
+
+      return { error: "Error de inicio de sesión" };
+      
+    } catch (error) {
+      console.error("❌ CONTEXT: Sign in exception:", error);
+      return { error: "Error inesperado durante el inicio de sesión" };
+    }
+  };
+
   const signOut = async () => {
     try {
       console.log("🚪 Starting comprehensive sign out process...");
