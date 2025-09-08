@@ -36,6 +36,28 @@ interface RoleSpecificData {
   professional_number?: string;
 }
 
+interface SingleRoleRequest {
+  roleType: string;
+  roleSpecificData: RoleSpecificData;
+}
+
+interface MultipleRoleRequest {
+  roles: SingleRoleRequest[];
+}
+
+// NUEVO: Manejar tanto roles únicos como múltiples
+interface RequestBody {
+  userId: string;
+  // Modo individual (compatibilidad hacia atrás)
+  roleType?: string;
+  roleSpecificData?: RoleSpecificData;
+  // Modo múltiple (nuevo)
+  multipleRoles?: SingleRoleRequest[];
+  // Flags de control
+  enableAutoSync?: boolean;
+  syncUserType?: boolean;
+}
+
 const validateRoleSpecificData = (roleType: string, data: RoleSpecificData): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
@@ -96,310 +118,292 @@ const generateCommunityCode = (address: string): string => {
   return `COM-${hash}-${randomNum}`.toUpperCase();
 };
 
-// NUEVA FUNCIÓN: Sincronizar información entre roles
-const syncInformationBetweenRoles = async (userId: string, newRoleType: string, newRoleData: Record<string, any>): Promise<void> => {
+// NUEVA FUNCIÓN MEJORADA: Sincronización automática de user_type más robusta
+const ensureComprehensiveUserTypeSynchronization = async (
+  userId: string, 
+  createdRoleTypes: string[]
+): Promise<{ success: boolean; activeRoleType?: string; totalRoles?: number }> => {
   try {
-    console.log('🔄 API: Starting cross-role information sync for user:', userId.substring(0, 8) + '...');
-    
-    // Obtener todos los roles existentes del usuario
-    const { data: existingRoles, error: rolesError } = await supabase
-      .from('user_roles')
-      .select('role_type, role_specific_data')
-      .eq('user_id', userId)
-      .eq('is_verified', true);
+    console.log('🔄 API: Starting comprehensive user_type synchronization with created roles:', createdRoleTypes);
 
-    if (rolesError) {
-      console.warn('⚠️ API: Could not fetch existing roles for sync:', rolesError);
-      return;
+    // Step 1: Get current profile and ALL user roles (including newly created)
+    const [profileResult, rolesResult] = await Promise.all([
+      supabase.from('profiles').select('user_type').eq('id', userId).single(),
+      supabase.from('user_roles').select('role_type, is_verified, is_active, created_at').eq('user_id', userId).order('created_at', { ascending: true })
+    ]);
+
+    const { data: currentProfile, error: profileError } = profileResult;
+    const { data: allRoles, error: rolesError } = rolesResult;
+
+    if (profileError || rolesError) {
+      console.warn('⚠️ API: Could not fetch profile or roles for comprehensive sync');
+      return { success: false };
     }
 
-    if (!existingRoles || existingRoles.length === 0) {
-      console.log('📝 API: No existing roles to sync with');
-      return;
-    }
-
-    console.log(`🔍 API: Found ${existingRoles.length} existing roles to sync with`);
-
-    // Lógica de sincronización específica
-    const syncPromises = existingRoles.map(async (existingRole) => {
-      if (existingRole.role_type === newRoleType) {
-        return; // No sincronizar con el mismo rol
-      }
-
-      const currentRoleData = existingRole.role_specific_data as Record<string, any> || {};
-      const updatedData: Record<string, any> = {};
-      
-      // Copy all existing data first
-      Object.keys(currentRoleData).forEach(key => {
-        updatedData[key] = currentRoleData[key];
-      });
-      
-      let hasChanges = false;
-
-      // SINCRONIZACIÓN PARTICULAR ↔ MIEMBRO DE COMUNIDAD
-      if ((newRoleType === 'particular' && existingRole.role_type === 'community_member') ||
-          (newRoleType === 'community_member' && existingRole.role_type === 'particular')) {
-        
-        // Sincronizar datos básicos
-        const fieldsToSync = ['full_name', 'phone', 'address', 'postal_code', 'city', 'province', 'country'];
-        
-        for (const field of fieldsToSync) {
-          if (newRoleData[field] && (!updatedData[field] || updatedData[field] !== newRoleData[field])) {
-            updatedData[field] = newRoleData[field];
-            hasChanges = true;
-            console.log(`📤 API: Syncing ${field} from ${newRoleType} to ${existingRole.role_type}`);
-          }
-        }
-
-        // Si el nuevo rol es community_member, sincronizar info de comunidad al particular
-        if (newRoleType === 'community_member') {
-          const communityFields = ['community_name', 'portal_number', 'apartment_number'];
-          for (const field of communityFields) {
-            if (newRoleData[field]) {
-              updatedData[`community_${field}`] = newRoleData[field];
-              hasChanges = true;
-            }
-          }
-        }
-      }
-
-      // SINCRONIZACIÓN CON PROVEEDORES DE SERVICIOS
-      if (newRoleType === 'service_provider') {
-        // Los proveedores pueden beneficiarse de conocer ubicaciones de otros roles
-        if (newRoleData.company_city && !updatedData.service_area) {
-          updatedData.service_area = newRoleData.company_city;
-          hasChanges = true;
-        }
-      }
-
-      // SINCRONIZACIÓN CON ADMINISTRADORES DE FINCAS
-      if (newRoleType === 'property_administrator') {
-        // Administradores pueden beneficiarse de conocer propiedades gestionadas
-        if (newRoleData.company_city && !updatedData.management_area) {
-          updatedData.management_area = newRoleData.company_city;
-          hasChanges = true;
-        }
-      }
-
-      // Aplicar cambios si los hay
-      if (hasChanges) {
-        const { error: updateError } = await supabase
-          .from('user_roles')
-          .update({ 
-            role_specific_data: updatedData,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userId)
-          .eq('role_type', existingRole.role_type);
-
-        if (updateError) {
-          console.warn(`⚠️ API: Failed to sync data to ${existingRole.role_type}:`, updateError);
-        } else {
-          console.log(`✅ API: Successfully synced data to ${existingRole.role_type}`);
-        }
-      }
+    console.log('📊 API: COMPREHENSIVE SYNC - Current state:', {
+      currentProfileType: currentProfile?.user_type,
+      totalRoles: allRoles?.length || 0,
+      verifiedRoles: allRoles?.filter(r => r.is_verified).length || 0,
+      activeRoles: allRoles?.filter(r => r.is_active).length || 0,
+      createdRoleTypes,
+      allRoleTypes: allRoles?.map(r => r.role_type) || []
     });
 
-    await Promise.all(syncPromises);
+    // Step 2: Determine the priority order for user_type
+    const ROLE_PRIORITY = ['particular', 'community_member', 'service_provider', 'property_administrator'];
     
-    // SINCRONIZACIÓN DE PROPIEDADES
-    if (newRoleType === 'particular' || newRoleType === 'community_member') {
-      await PropertyAutoService.syncPropertiesBetweenRoles(userId);
+    const verifiedRoles = (allRoles || []).filter(r => r.is_verified);
+    
+    // Find the highest priority verified role
+    let targetUserType = currentProfile?.user_type || 'particular';
+    
+    for (const priorityRole of ROLE_PRIORITY) {
+      if (verifiedRoles.some(r => r.role_type === priorityRole)) {
+        targetUserType = priorityRole;
+        break;
+      }
     }
-
-    console.log('✅ API: Cross-role information sync completed successfully');
-
-  } catch (error) {
-    console.error('❌ API: Error in cross-role sync:', error);
-    throw error;
-  }
-};
-
-// ENHANCED FUNCTION: Comprehensive user_type synchronization between profiles and user_roles
-const ensureUserTypeSynchronization = async (userId: string, newRoleType: string): Promise<boolean> => {
-  try {
-    console.log('🔄 API: Starting comprehensive user_type synchronization for:', userId.substring(0, 8) + '...');
-
-    // Step 1: Get current profile user_type
-    const { data: currentProfile, error: profileError } = await supabase
-      .from('profiles')
-      .select('user_type')
-      .eq('id', userId)
-      .single();
-
-    if (profileError) {
-      console.warn('⚠️ API: Could not fetch profile for sync:', profileError);
-      return false;
-    }
-
-    // Step 2: Get ALL user roles (verified and unverified)
-    const { data: allRoles, error: rolesError } = await supabase
-      .from('user_roles')
-      .select('role_type, is_verified, is_active, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: true });
-
-    if (rolesError) {
-      console.warn('⚠️ API: Could not fetch roles for sync:', rolesError);
-      return false;
-    }
-
-    const verifiedRoles = allRoles.filter(r => r.is_verified);
-    const activeRoles = verifiedRoles.filter(r => r.is_active);
-
-    console.log('📊 API: SYNC - Role analysis:', {
-      currentProfileType: currentProfile.user_type,
-      newRoleType,
-      totalRoles: allRoles.length,
-      verifiedRoles: verifiedRoles.length,
-      activeRoles: activeRoles.length,
-      roles: allRoles.map(r => ({
-        type: r.role_type,
-        verified: r.is_verified,
-        active: r.is_active
-      }))
+    
+    console.log('🎯 API: COMPREHENSIVE SYNC - Target user_type determined:', {
+      targetUserType,
+      reasoning: 'First verified role in priority order',
+      availableVerifiedRoles: verifiedRoles.map(r => r.role_type)
     });
 
-    // Step 3: Determine the correct user_type using priority logic
-    let correctUserType = newRoleType;
-    
-    // Priority logic for user_type determination:
-    // 1. If there's an active verified role, use it
-    // 2. If there are verified roles but none active, use the first verified role
-    // 3. If no verified roles, use the new role type
-    
-    if (activeRoles.length > 0) {
-      correctUserType = activeRoles[0].role_type;
-      console.log('🎯 API: SYNC - Using active role as user_type:', correctUserType);
-    } else if (verifiedRoles.length > 0) {
-      correctUserType = verifiedRoles[0].role_type;
-      console.log('🎯 API: SYNC - Using first verified role as user_type:', correctUserType);
-    } else {
-      correctUserType = newRoleType;
-      console.log('🎯 API: SYNC - Using new role as user_type:', correctUserType);
-    }
-
-    console.log('🔍 API: SYNC - Synchronization decision:', {
-      currentProfileType: currentProfile.user_type,
-      newRoleType,
-      calculatedCorrectType: correctUserType,
-      needsProfileUpdate: currentProfile.user_type !== correctUserType,
-      needsRoleActivation: activeRoles.length === 0 && verifiedRoles.length > 0
-    });
-
-    // Step 4: Update profile.user_type if needed
-    if (currentProfile.user_type !== correctUserType) {
-      console.log(`🔄 API: SYNC - Updating profile.user_type from "${currentProfile.user_type}" to "${correctUserType}"`);
+    // Step 3: Update profile.user_type if needed
+    if (currentProfile?.user_type !== targetUserType) {
+      console.log(`🔄 API: COMPREHENSIVE SYNC - Updating profile.user_type from "${currentProfile?.user_type}" to "${targetUserType}"`);
       
-      const { error: updateError } = await supabase
+      const { error: updateProfileError } = await supabase
         .from('profiles')
         .update({ 
-          user_type: correctUserType as any,
+          user_type: targetUserType as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', userId);
 
-      if (updateError) {
-        console.error('❌ API: SYNC - Failed to update profile.user_type:', updateError);
-        return false;
-      } else {
-        console.log('✅ API: SYNC - Profile.user_type updated successfully');
+      if (updateProfileError) {
+        console.error('❌ API: COMPREHENSIVE SYNC - Failed to update profile.user_type:', updateProfileError);
+        return { success: false };
       }
+      
+      console.log('✅ API: COMPREHENSIVE SYNC - Profile.user_type updated successfully');
     }
 
-    // Step 5: Ensure there's always one active verified role if we have verified roles
-    if (verifiedRoles.length > 0 && activeRoles.length === 0) {
-      console.log('🔄 API: SYNC - No active role found, activating the role that matches user_type');
-      
-      // Find the verified role that matches the correct user_type
-      const roleToActivate = verifiedRoles.find(r => r.role_type === correctUserType) || verifiedRoles[0];
-      
-      try {
-        // First deactivate all roles
-        await supabase
-          .from('user_roles')
-          .update({ is_active: false, updated_at: new Date().toISOString() })
-          .eq('user_id', userId);
-
-        // Then activate the selected role
-        const { error: activateError } = await supabase
-          .from('user_roles')
-          .update({ 
-            is_active: true, 
-            updated_at: new Date().toISOString() 
-          })
-          .eq('user_id', userId)
-          .eq('role_type', roleToActivate.role_type)
-          .eq('is_verified', true);
-
-        if (activateError) {
-          console.error('❌ API: SYNC - Failed to activate role:', activateError);
-        } else {
-          console.log('✅ API: SYNC - Role activated successfully:', roleToActivate.role_type);
-        }
-      } catch (activationError) {
-        console.error('❌ API: SYNC - Error during role activation:', activationError);
-      }
+    // Step 4: Ensure exactly ONE active verified role (the target user_type)
+    const activeRoles = verifiedRoles.filter(r => r.is_active);
+    const targetRole = verifiedRoles.find(r => r.role_type === targetUserType);
+    
+    if (!targetRole) {
+      console.error('❌ API: COMPREHENSIVE SYNC - Target role not found in verified roles');
+      return { success: false };
     }
-
-    // Step 6: Handle the case where we have multiple active roles (shouldn't happen, but fix it)
-    if (activeRoles.length > 1) {
-      console.log('⚠️ API: SYNC - Multiple active roles detected, fixing...');
+    
+    // Fix active role situation
+    if (activeRoles.length !== 1 || !activeRoles.some(r => r.role_type === targetUserType)) {
+      console.log('🔄 API: COMPREHENSIVE SYNC - Fixing active role configuration');
       
-      // Keep only the first active role that matches user_type, or just the first one
-      const preferredRole = activeRoles.find(r => r.role_type === correctUserType) || activeRoles[0];
-      
-      // Deactivate all roles first
+      // First, deactivate all roles
       await supabase
         .from('user_roles')
         .update({ is_active: false, updated_at: new Date().toISOString() })
         .eq('user_id', userId);
-
-      // Activate only the preferred role
-      await supabase
+      
+      // Then activate only the target role
+      const { error: activateError } = await supabase
         .from('user_roles')
         .update({ 
           is_active: true, 
           updated_at: new Date().toISOString() 
         })
         .eq('user_id', userId)
-        .eq('role_type', preferredRole.role_type)
+        .eq('role_type', targetUserType)
         .eq('is_verified', true);
-        
-      console.log('✅ API: SYNC - Fixed multiple active roles, kept:', preferredRole.role_type);
+
+      if (activateError) {
+        console.error('❌ API: COMPREHENSIVE SYNC - Failed to activate target role:', activateError);
+        return { success: false };
+      }
+      
+      console.log('✅ API: COMPREHENSIVE SYNC - Active role configuration fixed');
     }
 
-    // Step 7: Final verification
-    const { data: finalProfile } = await supabase
-      .from('profiles')
-      .select('user_type')
-      .eq('id', userId)
-      .single();
+    // Step 5: Final verification
+    const [finalProfileResult, finalActiveRoleResult] = await Promise.all([
+      supabase.from('profiles').select('user_type').eq('id', userId).single(),
+      supabase.from('user_roles').select('role_type').eq('user_id', userId).eq('is_active', true).eq('is_verified', true).single()
+    ]);
 
-    const { data: finalActiveRole } = await supabase
-      .from('user_roles')
-      .select('role_type')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .eq('is_verified', true)
-      .single();
+    const finalSuccess = (
+      finalProfileResult.data?.user_type === finalActiveRoleResult.data?.role_type &&
+      finalProfileResult.data?.user_type === targetUserType
+    );
 
-    const syncSuccess = finalProfile?.user_type === finalActiveRole?.role_type;
-    
-    console.log('🏁 API: SYNC - Final synchronization state:', {
-      profileUserType: finalProfile?.user_type,
-      activeRoleType: finalActiveRole?.role_type,
-      synchronized: syncSuccess,
+    console.log('🏁 API: COMPREHENSIVE SYNC - Final state verification:', {
+      profileUserType: finalProfileResult.data?.user_type,
+      activeRoleType: finalActiveRoleResult.data?.role_type,
+      targetUserType,
+      synchronized: finalSuccess,
       totalVerifiedRoles: verifiedRoles.length
     });
 
-    console.log('✅ API: SYNC - Comprehensive user_type synchronization completed successfully');
-    return syncSuccess;
+    return {
+      success: finalSuccess,
+      activeRoleType: targetUserType,
+      totalRoles: verifiedRoles.length
+    };
 
   } catch (error) {
-    console.error('❌ API: SYNC - Critical error in comprehensive synchronization:', error);
-    return false;
+    console.error('❌ API: COMPREHENSIVE SYNC - Critical error:', error);
+    return { success: false };
   }
+};
+
+// NUEVA FUNCIÓN: Crear múltiples roles de forma eficiente
+const createMultipleRoles = async (
+  userId: string, 
+  roleRequests: SingleRoleRequest[]
+): Promise<{
+  success: boolean;
+  createdRoles: any[];
+  failedRoles: string[];
+  totalProcessed: number;
+  errors: string[];
+}> => {
+  const createdRoles: any[] = [];
+  const failedRoles: string[] = [];
+  const errors: string[] = [];
+  
+  console.log(`🚀 API: Starting batch creation of ${roleRequests.length} roles for user:`, userId.substring(0, 8) + '...');
+
+  for (let i = 0; i < roleRequests.length; i++) {
+    const roleRequest = roleRequests[i];
+    const { roleType, roleSpecificData } = roleRequest;
+    
+    try {
+      console.log(`🔄 API: Processing role ${i + 1}/${roleRequests.length}: ${roleType}`);
+      
+      // Validate role data
+      const validation = validateRoleSpecificData(roleType, roleSpecificData);
+      if (!validation.isValid) {
+        const errorMsg = `${roleType}: ${validation.errors.join(', ')}`;
+        errors.push(errorMsg);
+        failedRoles.push(roleType);
+        continue;
+      }
+
+      // Process role specific data safely
+      const processedRoleData: Record<string, any> = {};
+      
+      // Safe property copying (avoiding spread operator issues)
+      const knownStringFields = [
+        'full_name', 'phone', 'address', 'postal_code', 'city', 'province', 'country',
+        'community_code', 'community_name', 'portal_number', 'apartment_number',
+        'company_name', 'company_address', 'company_postal_code', 'company_city',
+        'company_province', 'company_country', 'cif', 'business_email', 'business_phone',
+        'professional_number'
+      ];
+      
+      knownStringFields.forEach(field => {
+        const value = (roleSpecificData as any)?.[field];
+        if (value && typeof value === 'string' && value.trim().length > 0) {
+          processedRoleData[field] = value.trim();
+        }
+      });
+      
+      // Handle arrays and objects
+      if (roleSpecificData.selected_services && Array.isArray(roleSpecificData.selected_services)) {
+        processedRoleData.selected_services = roleSpecificData.selected_services;
+      }
+      
+      if (roleSpecificData.service_costs && typeof roleSpecificData.service_costs === 'object') {
+        processedRoleData.service_costs = roleSpecificData.service_costs;
+      }
+
+      // Generate community code if needed
+      if (roleType === 'community_member' && !processedRoleData.community_code && processedRoleData.address) {
+        processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
+      }
+
+      // Create role record
+      const { data: newRole, error: insertError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: userId,
+          role_type: roleType as 'particular' | 'community_member' | 'service_provider' | 'property_administrator',
+          is_verified: true, // Auto-verify during batch creation
+          is_active: false,  // Will be set properly during sync
+          role_specific_data: processedRoleData as any,
+          verification_confirmed_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error(`❌ API: Failed to create role ${roleType}:`, insertError);
+        errors.push(`${roleType}: ${insertError.message}`);
+        failedRoles.push(roleType);
+        continue;
+      }
+
+      createdRoles.push(newRole);
+      console.log(`✅ API: Successfully created role ${roleType}`);
+
+      // Create properties for applicable roles
+      if (roleType === 'particular' || roleType === 'community_member') {
+        try {
+          const propertyUserData: UserPropertyData = {
+            full_name: processedRoleData.full_name || 'Usuario',
+            address: processedRoleData.address || '',
+            city: processedRoleData.city || '',
+            postal_code: processedRoleData.postal_code || '',
+            province: processedRoleData.province || '',
+            country: processedRoleData.country || 'España',
+            community_name: processedRoleData.community_name || '',
+            portal_number: processedRoleData.portal_number || '',
+            apartment_number: processedRoleData.apartment_number || '',
+            user_type: roleType
+          };
+
+          const propertyResult = await PropertyAutoService.createDefaultProperty(userId, propertyUserData);
+          if (propertyResult.success) {
+            console.log(`✅ API: Default property created for ${roleType}`);
+          } else {
+            console.warn(`⚠️ API: Property creation failed for ${roleType} (non-critical):`, propertyResult.message);
+          }
+        } catch (propertyError) {
+          console.warn(`⚠️ API: Property creation error for ${roleType} (non-critical):`, propertyError);
+        }
+      }
+
+    } catch (roleError) {
+      console.error(`❌ API: Exception creating role ${roleType}:`, roleError);
+      const errorMsg = roleError instanceof Error ? roleError.message : 'Unknown error';
+      errors.push(`${roleType}: ${errorMsg}`);
+      failedRoles.push(roleType);
+    }
+  }
+
+  const success = createdRoles.length > 0;
+  const totalProcessed = createdRoles.length + failedRoles.length;
+
+  console.log(`📊 API: Batch creation completed:`, {
+    totalRequested: roleRequests.length,
+    created: createdRoles.length,
+    failed: failedRoles.length,
+    success,
+    failedRoles
+  });
+
+  return {
+    success,
+    createdRoles,
+    failedRoles,
+    totalProcessed,
+    errors
+  };
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -411,10 +415,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const startTime = Date.now();
-  console.log('🚀 API: add-role endpoint called');
+  console.log('🚀 API: Enhanced add-role endpoint called with multi-role support');
 
   try {
-    const { userId, roleType, roleSpecificData } = req.body;
+    const requestBody = req.body as RequestBody;
+    const { userId, enableAutoSync = true, syncUserType = true } = requestBody;
 
     // Enhanced input validation
     if (!userId || typeof userId !== 'string') {
@@ -425,390 +430,182 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // Determine if this is a multiple role request or single role request
+    const isMultipleRoles = requestBody.multipleRoles && Array.isArray(requestBody.multipleRoles);
+    
+    let roleRequests: SingleRoleRequest[] = [];
+    
+    if (isMultipleRoles) {
+      roleRequests = requestBody.multipleRoles!;
+      console.log(`📋 API: Multiple roles mode detected: ${roleRequests.length} roles to process`);
+    } else {
+      // Single role mode (backward compatibility)
+      if (!requestBody.roleType || !requestBody.roleSpecificData) {
+        return res.status(400).json({
+          success: false,
+          message: 'Para modo individual: roleType y roleSpecificData son requeridos'
+        });
+      }
+      
+      roleRequests = [{
+        roleType: requestBody.roleType,
+        roleSpecificData: requestBody.roleSpecificData
+      }];
+      console.log(`📋 API: Single role mode detected: ${requestBody.roleType}`);
+    }
+
+    if (roleRequests.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No hay roles para procesar'
+      });
+    }
+
+    // Validate all role types
     const validRoleTypes = ['particular', 'community_member', 'service_provider', 'property_administrator'];
-    if (!roleType || !validRoleTypes.includes(roleType)) {
-      console.error('❌ API: Invalid roleType:', roleType);
-      return res.status(400).json({ 
-        success: false, 
-        message: `Tipo de rol inválido. Debe ser uno de: ${validRoleTypes.join(', ')}` 
-      });
+    for (const roleRequest of roleRequests) {
+      if (!validRoleTypes.includes(roleRequest.roleType)) {
+        return res.status(400).json({
+          success: false,
+          message: `Tipo de rol inválido: ${roleRequest.roleType}. Debe ser uno de: ${validRoleTypes.join(', ')}`
+        });
+      }
     }
 
-    if (!roleSpecificData || typeof roleSpecificData !== 'object') {
-      console.error('❌ API: Invalid or missing roleSpecificData');
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Datos específicos del rol son requeridos' 
-      });
-    }
+    // Step 1: Verify user exists
+    console.log('🔍 API: Verifying user existence...');
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, email, full_name, user_type')
+      .eq('id', userId)
+      .single();
 
-    console.log('✅ API: Input validation passed', { userId: userId.substring(0, 8) + '...', roleType });
-
-    // Validate role-specific data
-    const validation = validateRoleSpecificData(roleType, roleSpecificData);
-    if (!validation.isValid) {
-      console.error('❌ API: Role data validation failed:', validation.errors);
-      return res.status(400).json({
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('❌ API: Profile check failed:', profileError);
+      return res.status(500).json({
         success: false,
-        message: `Datos incompletos: ${validation.errors.join(', ')}`
+        message: 'Error verificando usuario. Intenta nuevamente.'
       });
     }
 
-    // Step 1: Check if user exists and get their data with retry logic
-    console.log('🔍 API: Checking user existence and current roles...');
-    let userCheckAttempts = 0;
-    const maxUserCheckAttempts = 3;
-    let userExists = false;
-    let existingRoles: any[] = [];
+    if (!profileData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado. Asegúrate de que la cuenta esté creada correctamente.'
+      });
+    }
 
-    while (userCheckAttempts < maxUserCheckAttempts && !userExists) {
-      try {
-        // Check if user profile exists
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, email, full_name, user_type')
-          .eq('id', userId)
-          .single();
+    console.log('✅ API: User profile verified:', { userId: profileData.id.substring(0, 8) + '...', email: profileData.email });
 
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.warn(`⚠️ API: Profile check attempt ${userCheckAttempts + 1} failed:`, profileError.message);
-          userCheckAttempts++;
-          if (userCheckAttempts < maxUserCheckAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * userCheckAttempts));
-            continue;
-          }
-          throw profileError;
-        }
+    // Step 2: Check for existing roles to avoid conflicts
+    const { data: existingRoles } = await supabase
+      .from('user_roles')
+      .select('role_type, is_verified')
+      .eq('user_id', userId);
 
-        if (!profileData) {
-          return res.status(404).json({
-            success: false,
-            message: 'Usuario no encontrado. Asegúrate de que la cuenta esté creada correctamente.'
-          });
-        }
-
-        userExists = true;
-        console.log('✅ API: User profile found:', { userId: profileData.id.substring(0, 8) + '...', email: profileData.email });
-
-        // Get existing roles
-        const { data: rolesData, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('role_type, is_verified, is_active')
-          .eq('user_id', userId);
-
-        if (rolesError && rolesError.code !== 'PGRST116') {
-          console.warn('⚠️ API: Could not fetch existing roles:', rolesError.message);
-          // Don't fail completely, just proceed without existing roles data
+    const conflictingRoles: string[] = [];
+    for (const roleRequest of roleRequests) {
+      const existing = existingRoles?.find(r => r.role_type === roleRequest.roleType);
+      if (existing) {
+        if (existing.is_verified) {
+          conflictingRoles.push(`${roleRequest.roleType} (ya verificado)`);
         } else {
-          existingRoles = rolesData || [];
-          console.log('📋 API: Found existing roles:', existingRoles.length);
+          conflictingRoles.push(`${roleRequest.roleType} (verificación pendiente)`);
         }
-
-        break;
-
-      } catch (checkError) {
-        userCheckAttempts++;
-        console.error(`❌ API: User check attempt ${userCheckAttempts} failed:`, checkError);
-        
-        if (userCheckAttempts >= maxUserCheckAttempts) {
-          return res.status(500).json({
-            success: false,
-            message: `Error de conexión después de ${maxUserCheckAttempts} intentos. Intenta nuevamente en unos momentos.`
-          });
-        }
-        
-        // Wait with exponential backoff
-        await new Promise(resolve => setTimeout(resolve, 1000 * userCheckAttempts));
       }
     }
 
-    // Step 2: Check if role already exists
-    const existingRole = existingRoles.find(r => r.role_type === roleType);
-    if (existingRole) {
-      console.log('⚠️ API: Role already exists', { roleType, isVerified: existingRole.is_verified });
-      if (existingRole.is_verified) {
-        return res.status(409).json({
-          success: false,
-          message: `Ya tienes el rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} verificado.`
-        });
-      } else {
-        return res.status(409).json({
-          success: false,
-          message: `Ya tienes una verificación pendiente para el rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)}.`
-        });
-      }
-    }
-
-    // Step 3: Process role data with completely safe and explicit approach
-    console.log('🔧 API: Processing role-specific data with explicit type safety...');
-    
-    // Create a completely safe object with explicit property validation
-    const processedRoleData: Record<string, any> = {};
-    
-    // Explicitly validate and copy known properties safely
-    try {
-      // Direct property access with type guards - no looping or spreading
-      const knownStringFields = [
-        'full_name', 'phone', 'address', 'postal_code', 'city', 'province', 'country',
-        'community_code', 'community_name', 'portal_number', 'apartment_number',
-        'company_name', 'company_address', 'company_postal_code', 'company_city',
-        'company_province', 'company_country', 'cif', 'business_email', 'business_phone',
-        'professional_number'
-      ];
-      
-      const knownArrayFields = ['selected_services'];
-      const knownObjectFields = ['service_costs'];
-      
-      // Process string fields with explicit type checking
-      knownStringFields.forEach(field => {
-        const rawValue = (roleSpecificData as any)?.[field];
-        if (rawValue && typeof rawValue === 'string' && rawValue.trim().length > 0) {
-          processedRoleData[field] = rawValue.trim();
-        }
-      });
-      
-      // Process array fields with explicit validation
-      knownArrayFields.forEach(field => {
-        const rawValue = (roleSpecificData as any)?.[field];
-        if (Array.isArray(rawValue) && rawValue.length > 0) {
-          processedRoleData[field] = rawValue;
-        }
-      });
-      
-      // Process object fields with explicit validation
-      knownObjectFields.forEach(field => {
-        const rawValue = (roleSpecificData as any)?.[field];
-        if (rawValue && typeof rawValue === 'object' && !Array.isArray(rawValue) && Object.keys(rawValue).length > 0) {
-          processedRoleData[field] = rawValue;
-        }
-      });
-      
-      console.log('✅ API: Role data processed with', Object.keys(processedRoleData).length, 'properties');
-      
-    } catch (processingError) {
-      console.error('❌ API: Error processing role data:', processingError);
-      return res.status(400).json({
+    if (conflictingRoles.length > 0) {
+      return res.status(409).json({
         success: false,
-        message: 'Error al procesar los datos específicos del rol'
+        message: `Los siguientes roles ya existen: ${conflictingRoles.join(', ')}`
       });
     }
 
-    if (roleType === 'community_member') {
-      // Generate community code if not provided or empty
-      const communityCodeValue = processedRoleData.community_code;
-      const addressValue = processedRoleData.address;
-      
-      if (!communityCodeValue || (typeof communityCodeValue === 'string' && communityCodeValue.trim() === '')) {
-        const safeAddress = typeof addressValue === 'string' ? addressValue : '';
-        processedRoleData.community_code = generateCommunityCode(safeAddress);
-        console.log('🏘️ API: Generated community code:', processedRoleData.community_code);
-      }
+    // Step 3: Create multiple roles efficiently
+    console.log(`🏗️ API: Creating ${roleRequests.length} roles...`);
+    const creationResult = await createMultipleRoles(userId, roleRequests);
+
+    if (!creationResult.success || creationResult.createdRoles.length === 0) {
+      return res.status(500).json({
+        success: false,
+        message: `Error creando roles: ${creationResult.errors.join('; ')}`,
+        failedRoles: creationResult.failedRoles,
+        errors: creationResult.errors
+      });
     }
 
-    // Step 4: Determine if role should be automatically verified (during registration flow)
-    // During registration, if this is being called immediately after signup, auto-verify
-    const shouldAutoVerify = true; // For multi-role registration, auto-verify all roles
-    
-    const verificationToken = shouldAutoVerify ? null : SupabaseUserRoleService.generateVerificationToken();
-    const verificationExpires = shouldAutoVerify ? null : new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-    // Step 5: Insert role with retry logic
-    console.log('💾 API: Creating role record...');
-    let insertAttempts = 0;
-    const maxInsertAttempts = 3;
-    let roleCreated = false;
-
-    while (insertAttempts < maxInsertAttempts && !roleCreated) {
-      try {
-        const { data: newRole, error: insertError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: userId,
-            role_type: roleType as 'particular' | 'community_member' | 'service_provider' | 'property_administrator',
-            is_verified: shouldAutoVerify,
-            is_active: false,
-            role_specific_data: processedRoleData as any,
-            verification_token: verificationToken,
-            verification_expires_at: verificationExpires?.toISOString() || null,
-            verification_confirmed_at: shouldAutoVerify ? new Date().toISOString() : null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          throw insertError;
-        }
-
-        roleCreated = true;
-        console.log('✅ API: Role created successfully', { 
-          roleType, 
-          isVerified: shouldAutoVerify,
-          userId: userId.substring(0, 8) + '...'
-        });
-
-        // Step 7: CRÍTICO: Sincronizar user_type automáticamente
-        let syncCompleted = false;
-        try {
-          console.log('🔄 API: Performing automatic user_type synchronization...');
-          
-          // NUEVA LÓGICA: Sincronización automática mejorada
-          syncCompleted = await ensureUserTypeSynchronization(userId, roleType);
-          
-          if (syncCompleted) {
-            console.log('✅ API: user_type synchronization completed successfully');
-          } else {
-            console.warn('⚠️ API: user_type synchronization had issues but continuing...');
-            // No fallar completamente por problemas de sincronización
-          }
-          
-        } catch (syncError) {
-          console.warn('⚠️ API: user_type synchronization failed (non-critical):', syncError);
-          // No fallar la creación del rol por errores de sincronización
-        }
-
-        // Step 8: Create welcome notification (non-blocking)
-        try {
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: userId,
-              title: `Nuevo rol agregado: ${SupabaseUserRoleService.getRoleDisplayName(roleType)}`,
-              message: shouldAutoVerify ? 
-                `Tu rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} ha sido agregado y verificado automáticamente.` :
-                `Tu rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} ha sido agregado. Revisa tu email para verificarlo.`,
-              type: 'info' as const,
-              category: 'system' as const,
-              read: false,
-              created_at: new Date().toISOString()
-            });
-          console.log('📨 API: Welcome notification created');
-        } catch (notificationError) {
-          console.warn('⚠️ API: Could not create notification (non-critical):', notificationError);
-          // Don't fail the entire operation for notification errors
-        }
-
-        // Step 9: Create default property for particular and community_member roles (non-blocking)
-        if (roleType === 'particular' || roleType === 'community_member') {
-          console.log(`🏠 API: Creating default property for role: ${roleType}`);
-          
-          try {
-            const propertyUserData: UserPropertyData = {
-              full_name: (typeof processedRoleData.full_name === 'string' ? processedRoleData.full_name : 'Usuario'),
-              address: (typeof processedRoleData.address === 'string' ? processedRoleData.address : ''),
-              city: (typeof processedRoleData.city === 'string' ? processedRoleData.city : ''),
-              postal_code: (typeof processedRoleData.postal_code === 'string' ? processedRoleData.postal_code : ''),
-              province: (typeof processedRoleData.province === 'string' ? processedRoleData.province : ''),
-              country: (typeof processedRoleData.country === 'string' ? processedRoleData.country : 'España'),
-              community_name: (typeof processedRoleData.community_name === 'string' ? processedRoleData.community_name : ''),
-              portal_number: (typeof processedRoleData.portal_number === 'string' ? processedRoleData.portal_number : ''),
-              apartment_number: (typeof processedRoleData.apartment_number === 'string' ? processedRoleData.apartment_number : ''),
-              user_type: roleType
-            };
-
-            const propertyResult = await PropertyAutoService.createDefaultProperty(userId, propertyUserData);
-            
-            if (propertyResult.success) {
-              console.log('✅ API: Default property created successfully:', propertyResult.message);
-              
-              // NUEVA FUNCIONALIDAD: Sincronizar información entre roles existentes
-              await syncInformationBetweenRoles(userId, roleType, processedRoleData);
-              
-              // Add property creation info to the response
-              const processingTime = Date.now() - startTime;
-              return res.status(200).json({
-                success: true,
-                message: shouldAutoVerify ? 
-                  `Rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} agregado, verificado y propiedad creada correctamente` :
-                  `Rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} agregado con propiedad por defecto. Revisa tu email para completar la verificación.`,
-                role: newRole,
-                property: propertyResult.property,
-                propertyCreated: true,
-                requiresVerification: !shouldAutoVerify,
-                processingTime,
-                crossSyncCompleted: true
-              });
-              
-            } else {
-              console.warn('⚠️ API: Property creation failed (non-critical):', propertyResult.message);
-              // Continue without failing - property creation is non-critical for role creation
-            }
-            
-          } catch (propertyError) {
-            console.warn('⚠️ API: Property creation error (non-critical):', propertyError);
-            // Don't fail the role creation for property errors
-          }
-        }
-
-        // NUEVA FUNCIONALIDAD: Sincronizar información entre todos los roles
-        try {
-          await syncInformationBetweenRoles(userId, roleType, processedRoleData);
-        } catch (syncError) {
-          console.warn('⚠️ API: Cross-role sync failed (non-critical):', syncError);
-          // Don't fail the role creation for sync errors
-        }
-
-        const processingTime = Date.now() - startTime;
-        console.log(`✅ API: add-role completed successfully in ${processingTime}ms`);
-
-        return res.status(200).json({
-          success: true,
-          message: shouldAutoVerify ? 
-            `Rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} agregado y verificado correctamente` :
-            `Rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} agregado. Revisa tu email para completar la verificación.`,
-          role: newRole,
-          requiresVerification: !shouldAutoVerify,
-          processingTime,
-          crossSyncCompleted: true
-        });
-
-      } catch (insertError: any) {
-        insertAttempts++;
-        console.error(`❌ API: Role creation attempt ${insertAttempts} failed:`, insertError);
-        
-        if (insertAttempts >= maxInsertAttempts) {
-          console.error('❌ API: All role creation attempts failed');
-          
-          let errorMessage = 'Error al crear el rol después de múltiples intentos.';
-          
-          if (insertError.message?.includes('duplicate key')) {
-            errorMessage = `Ya existe un rol de ${SupabaseUserRoleService.getRoleDisplayName(roleType)} para este usuario.`;
-          } else if (insertError.message?.includes('violates foreign key')) {
-            errorMessage = 'Error de referencia de datos. Contacta con soporte.';
-          } else if (insertError.message?.includes('violates check constraint')) {
-            errorMessage = 'Los datos proporcionados no cumplen los requisitos del sistema.';
-          } else if (insertError.code === '42501') {
-            errorMessage = 'Error de permisos. Verifica que tu sesión esté activa.';
-          } else if (insertError.code === 'PGRST301') {
-            errorMessage = 'Error de conexión con la base de datos. Intenta nuevamente.';
-          }
-
-          return res.status(500).json({
-            success: false,
-            message: errorMessage,
-            errorCode: insertError.code || 'UNKNOWN',
-            processingTime: Date.now() - startTime
-          });
-        }
-        
-        // Wait with exponential backoff before retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * insertAttempts));
-      }
+    // Step 4: Comprehensive user_type synchronization
+    let syncResult = { success: false };
+    if (enableAutoSync && syncUserType) {
+      console.log('🔄 API: Performing comprehensive user_type synchronization...');
+      const createdRoleTypes = creationResult.createdRoles.map(r => r.role_type);
+      syncResult = await ensureComprehensiveUserTypeSynchronization(userId, createdRoleTypes);
     }
 
-    // This should never be reached, but just in case
-    return res.status(500).json({
-      success: false,
-      message: 'Error inesperado en la creación del rol'
+    // Step 5: Create success notifications (non-blocking)
+    try {
+      const notifications = creationResult.createdRoles.map(role => ({
+        user_id: userId,
+        title: isMultipleRoles 
+          ? `¡${creationResult.createdRoles.length} roles agregados correctamente!`
+          : `Nuevo rol: ${SupabaseUserRoleService.getRoleDisplayName(role.role_type)}`,
+        message: isMultipleRoles
+          ? `Se han agregado y verificado ${creationResult.createdRoles.length} roles automáticamente.`
+          : `Tu rol de ${SupabaseUserRoleService.getRoleDisplayName(role.role_type)} ha sido agregado y verificado automáticamente.`,
+        type: 'info' as const,
+        category: 'system' as const,
+        read: false,
+        created_at: new Date().toISOString()
+      }));
+
+      await supabase.from('notifications').insert(notifications);
+      console.log(`📨 API: Created ${notifications.length} success notifications`);
+    } catch (notificationError) {
+      console.warn('⚠️ API: Could not create notifications (non-critical):', notificationError);
+    }
+
+    // Step 6: Prepare comprehensive response
+    const processingTime = Date.now() - startTime;
+    const responseMessage = isMultipleRoles
+      ? `¡${creationResult.createdRoles.length} de ${roleRequests.length} roles creados exitosamente!`
+      : `Rol de ${SupabaseUserRoleService.getRoleDisplayName(creationResult.createdRoles[0].role_type)} agregado correctamente`;
+
+    const response = {
+      success: true,
+      message: responseMessage,
+      multipleRoles: isMultipleRoles,
+      totalRequested: roleRequests.length,
+      totalCreated: creationResult.createdRoles.length,
+      totalFailed: creationResult.failedRoles.length,
+      createdRoles: creationResult.createdRoles.map(r => ({
+        roleType: r.role_type,
+        isVerified: r.is_verified,
+        isActive: r.is_active
+      })),
+      failedRoles: creationResult.failedRoles,
+      errors: creationResult.errors.length > 0 ? creationResult.errors : undefined,
+      syncCompleted: syncResult.success,
+      activeRoleType: syncResult.activeRoleType,
+      requiresVerification: false, // Auto-verified
+      processingTime,
+      crossSyncCompleted: true
+    };
+
+    console.log(`✅ API: Enhanced add-role completed successfully in ${processingTime}ms:`, {
+      multipleRoles: isMultipleRoles,
+      totalCreated: creationResult.createdRoles.length,
+      syncSuccess: syncResult.success
     });
+
+    return res.status(200).json(response);
 
   } catch (error: any) {
     const processingTime = Date.now() - startTime;
-    console.error('❌ API: Unhandled error in add-role:', error);
+    console.error('❌ API: Unhandled error in enhanced add-role:', error);
 
     let statusCode = 500;
-    let errorMessage = 'Error interno del servidor al procesar la solicitud.';
+    let errorMessage = 'Error interno del servidor al procesar la solicitud de roles.';
 
     // Handle specific error types
     if (error.message?.includes('JWT') || error.message?.includes('auth')) {
@@ -826,7 +623,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       success: false,
       message: errorMessage,
       errorDetails: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      processingTime
+      processingTime,
+      multipleRoles: req.body.multipleRoles ? true : false
     });
   }
 }
