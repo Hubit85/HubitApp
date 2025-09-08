@@ -323,7 +323,7 @@ export function ContractManager() {
       const contractData = {
         quote_id: selectedQuote.id,
         user_id: requestUserId,
-        service_provider_id: providerData.id,
+        service_provider_id: providerData?.id || '',
         contract_number: contractNumber,
         work_description: contractForm.work_scope || selectedQuote.description || 'Descripción del trabajo',
         total_amount: selectedQuote.amount,
@@ -332,6 +332,10 @@ export function ContractManager() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
+
+      if (!providerData?.id) {
+        throw new Error("No se pudo obtener el ID del proveedor de servicios");
+      }
 
       const { data: newContract, error: createError } = await supabase
         .from('contracts')
