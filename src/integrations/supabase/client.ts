@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
  * Checks if Supabase is properly configured by verifying the presence and validity of environment variables.
  * @returns {boolean} `true` if configured, `false` otherwise.
  */
-export const isSupabaseConfigured = (): boolean => {
+export function isSupabaseConfigured(): boolean {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return false;
   }
@@ -33,7 +33,7 @@ export const isSupabaseConfigured = (): boolean => {
   } catch {
     return false;
   }
-};
+}
 
 // Initialize Supabase client.
 // If the config is invalid, provide dummy values to prevent the client from throwing an error,
