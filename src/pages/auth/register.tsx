@@ -755,18 +755,13 @@ function RegisterPageContent() {
       }
 
       if (result?.success) {
-        if (result.rolesCreated === result.totalRoles) {
-          setSuccessMessage(`¡Cuenta creada exitosamente con ${result.totalRoles} rol${result.totalRoles > 1 ? 'es' : ''}! Redirigiendo...`);
-        } else if (result.rolesCreated && result.rolesCreated > 0) {
-          setSuccessMessage(`Cuenta creada con ${result.rolesCreated} de ${result.totalRoles} roles. Los demás se pueden activar desde tu dashboard.`);
-        } else {
-          setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
-        }
-
+        // FIXED: Eliminar referencias a propiedades que no existen
+        setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+        
         // Redirigir al dashboard
         setTimeout(() => {
           router.push("/dashboard");
-        }, result.rolesCreated === result.totalRoles ? 2500 : 4000);
+        }, 2500);
         
         return;
       }
