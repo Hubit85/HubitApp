@@ -169,7 +169,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           
           // Try up to 3 times with different SQL approaches
           for (let attempt = 1; attempt <= 3; attempt++) {
-            console.log(`🔄 CONTEXT: Fallback attempt ${attempt}/3`);
+            console.log(`🔄 CONTEXT: Fallback attempt ${attempt}/1`);
             
             try {
               // Use a single transaction-like operation
