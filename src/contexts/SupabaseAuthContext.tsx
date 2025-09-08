@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,13 +36,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   // Improved connectivity check with timeout and retry
   const checkConnection = async (): Promise<boolean> => {
     try {
-      // Use a simple query that doesn't depend on RLS
       const { error } = await supabase
         .from("profiles")
         .select("id")
         .limit(0);
       
-      const connected = !error || error.code === 'PGRST116'; // PGRST116 is "no rows found" which is fine
+      const connected = !error || error.code === 'PGRST116';
       setIsConnected(connected);
       return connected;
     } catch (error) {
@@ -51,10 +51,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // CRITICAL FIX: Robust multi-role activation system
+  // SIMPLIFIED ROLE ACTIVATION: Remove complex activation and focus on core functionality
   const ensureActiveRole = async (userId: string, availableRoles: UserRole[]): Promise<UserRole | null> => {
     try {
-      console.log("🎯 CONTEXT: Starting AGGRESSIVE multi-role activation system...");
+      console.log("🎯 CONTEXT: Starting simplified role activation system...");
       
       if (!availableRoles || availableRoles.length === 0) {
         console.log("❌ CONTEXT: No roles available for activation");
@@ -79,227 +79,48 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return currentActiveRole;
       }
 
-      console.log("🚨 CONTEXT: NO ACTIVE ROLE FOUND - This is critical for multi-role users");
-      console.log("🔄 CONTEXT: Implementing AGGRESSIVE activation strategy...");
+      console.log("🚨 CONTEXT: NO ACTIVE ROLE FOUND - Activating first verified role");
+      
+      // Simply activate the first verified role
+      const roleToActivate = verifiedRoles[0];
+      console.log("🎯 CONTEXT: Activating role:", roleToActivate.role_type);
 
-      // AGGRESSIVE ACTIVATION STRATEGY: Try multiple approaches simultaneously
-      const roleToActivate = verifiedRoles[0]; // Start with first verified role
-      console.log("🎯 CONTEXT: Target role for AGGRESSIVE activation:", roleToActivate.role_type);
+      try {
+        // Simple activation: deactivate all, then activate the target role
+        await supabase
+          .from('user_roles')
+          .update({ is_active: false, updated_at: new Date().toISOString() })
+          .eq('user_id', userId);
 
-      let activationSucceeded = false;
-      let activeRoleResult: UserRole | null = null;
+        const { error: activateError } = await supabase
+          .from('user_roles')
+          .update({ is_active: true, updated_at: new Date().toISOString() })
+          .eq('user_id', userId)
+          .eq('id', roleToActivate.id)
+          .eq('is_verified', true);
 
-      // PARALLEL ACTIVATION ATTEMPTS
-      const activationAttempts = [
-        // Approach 1: Direct database activation with explicit deactivation
-        async () => {
-          console.log("🚀 CONTEXT: AGGRESSIVE Approach 1 - Direct database with full reset");
-          
-          // Step 1: Forcefully deactivate ALL roles for this user
-          const { error: deactivateError } = await supabase
-            .from('user_roles')
-            .update({ 
-              is_active: false, 
-              updated_at: new Date().toISOString() 
-            })
-            .eq('user_id', userId);
-
-          if (deactivateError) {
-            throw new Error(`Deactivation failed: ${deactivateError.message}`);
-          }
-          
-          console.log("✅ CONTEXT: All roles deactivated successfully");
-
-          // Step 2: Forcefully activate the selected role
-          const { error: activateError, data: activatedRoleData } = await supabase
-            .from('user_roles')
-            .update({ 
-              is_active: true, 
-              updated_at: new Date().toISOString() 
-            })
-            .eq('user_id', userId)
-            .eq('id', roleToActivate.id)
-            .eq('is_verified', true)
-            .select()
-            .single();
-
-          if (activateError) {
-            throw new Error(`Direct activation failed: ${activateError.message}`);
-          }
-
-          if (activatedRoleData) {
-            console.log("✅ CONTEXT: Direct activation SUCCESS");
-            return activatedRoleData as UserRole;
-          }
-          
-          throw new Error("No data returned from activation");
-        },
-
-        // Approach 2: Service-based activation with verification
-        async () => {
-          console.log("🚀 CONTEXT: AGGRESSIVE Approach 2 - Enhanced service-based");
-          
-          const serviceResult = await SupabaseUserRoleService.activateRole(userId, roleToActivate.role_type);
-          
-          if (!serviceResult.success) {
-            throw new Error(`Service activation failed: ${serviceResult.message}`);
-          }
-          
-          // Verify the activation worked
-          const { data: verificationData, error: verifyError } = await supabase
-            .from('user_roles')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('role_type', roleToActivate.role_type)
-            .eq('is_active', true)
-            .eq('is_verified', true)
-            .single();
-          
-          if (verifyError || !verificationData) {
-            throw new Error("Service activation verification failed");
-          }
-          
-          console.log("✅ CONTEXT: Service activation SUCCESS");
-          return verificationData as UserRole;
-        },
-
-        // Approach 3: Fallback with retry logic
-        async () => {
-          console.log("🚀 CONTEXT: AGGRESSIVE Approach 3 - Fallback with retry");
-          
-          // Try up to 3 times with different SQL approaches
-          for (let attempt = 1; attempt <= 3; attempt++) {
-            console.log(`🔄 CONTEXT: Fallback attempt ${attempt}/3`);
-            
-            try {
-              // Manual transaction simulation instead of RPC
-              console.log("🔧 CONTEXT: Using manual transaction");
-              
-              // Manual transaction simulation
-              const { error: updateError } = await supabase
-                .from('user_roles')
-                .update({ 
-                  is_active: false,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('user_id', userId);
-              
-              if (updateError) throw updateError;
-              
-              const { data: activateData, error: activateError } = await supabase
-                .from('user_roles')
-                .update({ 
-                  is_active: true,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('user_id', userId)
-                .eq('role_type', roleToActivate.role_type)
-                .eq('is_verified', true)
-                .select()
-                .single();
-              
-              if (activateError) throw activateError;
-              
-              if (activateData) {
-                console.log(`✅ CONTEXT: Fallback attempt ${attempt} SUCCESS`);
-                return activateData as UserRole;
-              }
-              
-              // If we get here, try next attempt
-              if (attempt < 3) {
-                await new Promise(resolve => setTimeout(resolve, 500 * attempt));
-              }
-              
-            } catch (attemptError) {
-              console.warn(`⚠️ CONTEXT: Fallback attempt ${attempt} failed:`, attemptError);
-              
-              if (attempt === 3) {
-                throw new Error(`All fallback attempts failed: ${attemptError}`);
-              }
-              
-              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-            }
-          }
-          
-          throw new Error("Fallback exhausted all attempts");
+        if (activateError) {
+          console.error("❌ CONTEXT: Activation failed:", activateError);
+          return roleToActivate; // Return anyway - better than nothing
         }
-      ];
 
-      // Try each approach with timeout
-      for (let i = 0; i < activationAttempts.length && !activationSucceeded; i++) {
-        try {
-          console.log(`🚀 CONTEXT: Executing AGGRESSIVE activation strategy ${i + 1}/${activationAttempts.length}`);
-          
-          // Set a timeout for each approach
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error(`Approach ${i + 1} timeout`)), 8000);
-          });
-          
-          const result = await Promise.race([
-            activationAttempts[i](),
-            timeoutPromise
-          ]);
-          
-          if (result) {
-            activeRoleResult = result;
-            activationSucceeded = true;
-            console.log(`🎉 CONTEXT: AGGRESSIVE approach ${i + 1} succeeded with role:`, result.role_type);
-            break;
-          }
-          
-        } catch (approachError) {
-          console.warn(`❌ CONTEXT: AGGRESSIVE approach ${i + 1} failed:`, approachError);
-          // Continue to next approach
-        }
+        console.log("✅ CONTEXT: Role activated successfully:", roleToActivate.role_type);
+        return { ...roleToActivate, is_active: true };
+
+      } catch (error) {
+        console.error("❌ CONTEXT: Error during activation:", error);
+        // Return the role marked as active locally
+        return { ...roleToActivate, is_active: true };
       }
-
-      // EMERGENCY FALLBACK: If all approaches fail, create a local active state
-      if (!activationSucceeded) {
-        console.log("🆘 CONTEXT: ALL AGGRESSIVE APPROACHES FAILED - Using emergency local activation");
-        
-        // Mark the role as active in local state only (better than nothing)
-        activeRoleResult = { ...roleToActivate, is_active: true };
-        activationSucceeded = true;
-        
-        console.log("⚡ CONTEXT: Emergency local activation completed - role will sync on next session");
-        
-        // Background attempt to fix the database state (non-blocking)
-        setTimeout(async () => {
-          try {
-            console.log("🔧 CONTEXT: Background database repair attempt...");
-            await supabase
-              .from('user_roles')
-              .update({ is_active: true })
-              .eq('user_id', userId)
-              .eq('role_type', roleToActivate.role_type);
-            console.log("🔧 CONTEXT: Background repair completed");
-          } catch (repairError) {
-            console.warn("🔧 CONTEXT: Background repair failed:", repairError);
-          }
-        }, 2000);
-      }
-
-      if (activationSucceeded && activeRoleResult) {
-        console.log("🎉 CONTEXT: AGGRESSIVE role activation system completed successfully:", activeRoleResult.role_type);
-        console.log("🎯 CONTEXT: MULTI-ROLE USER NOW HAS ACTIVE ROLE - Dashboard will work correctly");
-        return activeRoleResult;
-      }
-
-      console.error("❌ CONTEXT: AGGRESSIVE activation system completely exhausted");
-      return null;
 
     } catch (error) {
-      console.error("❌ CONTEXT: Critical error in AGGRESSIVE role activation system:", error);
+      console.error("❌ CONTEXT: Critical error in role activation:", error);
       
-      // FINAL EMERGENCY FALLBACK
-      if (availableRoles.length > 0) {
-        console.log("🆘 CONTEXT: FINAL EMERGENCY FALLBACK - Using first verified role locally");
-        const verifiedRoles = availableRoles.filter(r => r.is_verified);
-        const emergencyRole = verifiedRoles.length > 0 ? 
-          { ...verifiedRoles[0], is_active: true } : 
-          { ...availableRoles[0], is_active: true };
-        console.log("⚡ CONTEXT: Emergency fallback role:", emergencyRole.role_type);
-        return emergencyRole;
+      // FINAL FALLBACK: return first verified role
+      const verifiedRoles = availableRoles.filter(r => r.is_verified);
+      if (verifiedRoles.length > 0) {
+        console.log("🆘 CONTEXT: FINAL FALLBACK - Using first verified role locally");
+        return { ...verifiedRoles[0], is_active: true };
       }
       
       return null;
@@ -355,7 +176,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             ...userData,
           };
 
-          // CRITICAL: Create profile first to establish user_type baseline
+          // Create profile first to establish user_type baseline
           const { data: createdProfile, error: profileError } = await supabase
             .from("profiles")
             .insert(profileData)
@@ -401,7 +222,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             return { error: "Tipo de usuario inválido para crear el rol" };
           }
           
-          // ENHANCED: Create primary role with explicit synchronization
+          // SIMPLIFIED: Create primary role with clear activation
           const { data: primaryRoleData, error: primaryRoleError } = await supabase
             .from('user_roles')
             .insert({
@@ -421,11 +242,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           }
 
           console.log("✅ Primary role created successfully:", primaryRoleData.role_type);
-
-          // CRITICAL: Verify synchronization between profiles.user_type and user_roles
-          await ensureUserTypeSynchronization(data.user.id, validUserType);
-          
-          console.log("✅ Profile and primary role created with enhanced synchronization");
 
           // Create default property for roles that need it
           if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
@@ -450,11 +266,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 console.log("✅ Default property created successfully:", propertyResult.message);
               } else {
                 console.warn("⚠️ Property creation failed:", propertyResult.message);
-                // No fallar completamente el registro por esto
               }
             } catch (propertyError) {
               console.warn("⚠️ Property creation error (non-critical):", propertyError);
-              // No fallar el registro por errores de propiedad
             }
           }
           
@@ -475,201 +289,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // ENHANCED FUNCTION: Comprehensive user_type synchronization with multi-role support
-  const ensureUserTypeSynchronization = async (userId: string, expectedUserType: string): Promise<void> => {
-    try {
-      console.log("🔄 SYNC: Starting comprehensive user_type synchronization...");
-      console.log("🔍 SYNC: Input parameters:", { 
-        userId: userId.substring(0, 8) + '...', 
-        expectedUserType 
-      });
-
-      // Step 1: Get current profile user_type
-      const { data: currentProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', userId)
-        .single();
-
-      if (profileError) {
-        console.warn("⚠️ SYNC: Could not fetch profile for sync:", profileError);
-        return;
-      }
-
-      console.log("📋 SYNC: Current profile user_type:", currentProfile.user_type);
-
-      // Step 2: Get ALL user roles (verified and unverified)
-      const { data: allRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('id, role_type, is_verified, is_active, created_at')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: true });
-
-      if (rolesError) {
-        console.warn("⚠️ SYNC: Could not fetch roles for sync:", rolesError);
-        return;
-      }
-
-      const verifiedRoles = allRoles.filter(r => r.is_verified);
-      const activeRoles = verifiedRoles.filter(r => r.is_active);
-
-      console.log("📊 SYNC: Role analysis:", {
-        totalRoles: allRoles.length,
-        verifiedRoles: verifiedRoles.length,
-        activeRoles: activeRoles.length,
-        roles: allRoles.map(r => ({
-          type: r.role_type,
-          verified: r.is_verified,
-          active: r.is_active
-        }))
-      });
-
-      // Step 3: Determine the correct user_type using priority logic
-      let correctUserType = expectedUserType;
-      
-      // Priority logic for user_type determination:
-      // 1. If there's an active verified role, use it
-      // 2. If there are verified roles but none active, use the first verified role
-      // 3. Otherwise, use the expected type
-      
-      if (activeRoles.length > 0) {
-        correctUserType = activeRoles[0].role_type;
-        console.log("🎯 SYNC: Using active role as user_type:", correctUserType);
-      } else if (verifiedRoles.length > 0) {
-        correctUserType = verifiedRoles[0].role_type;
-        console.log("🎯 SYNC: Using first verified role as user_type:", correctUserType);
-      } else if (allRoles.length > 0) {
-        // If we have unverified roles but they match the expected type, use expected
-        const hasExpectedRole = allRoles.some(r => r.role_type === expectedUserType);
-        if (hasExpectedRole) {
-          correctUserType = expectedUserType;
-          console.log("🎯 SYNC: Using expected user_type (matches unverified role):", correctUserType);
-        } else {
-          // Use the first role we have
-          correctUserType = allRoles[0].role_type;
-          console.log("🎯 SYNC: Using first available role as user_type:", correctUserType);
-        }
-      }
-
-      console.log("🔍 SYNC: Synchronization decision:", {
-        currentProfileType: currentProfile.user_type,
-        expectedType: expectedUserType,
-        calculatedCorrectType: correctUserType,
-        needsProfileUpdate: currentProfile.user_type !== correctUserType,
-        needsRoleActivation: activeRoles.length === 0 && verifiedRoles.length > 0
-      });
-
-      // Step 4: Update profile.user_type if needed
-      if (currentProfile.user_type !== correctUserType) {
-        console.log(`🔄 SYNC: Updating profile.user_type from "${currentProfile.user_type}" to "${correctUserType}"`);
-        
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ 
-            user_type: correctUserType as any,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', userId);
-
-        if (updateError) {
-          console.error("❌ SYNC: Failed to update profile.user_type:", updateError);
-          throw new Error(`Failed to update profile user_type: ${updateError.message}`);
-        } else {
-          console.log("✅ SYNC: Profile.user_type updated successfully");
-        }
-      }
-
-      // Step 5: Ensure there's always one active verified role if we have verified roles
-      if (verifiedRoles.length > 0 && activeRoles.length === 0) {
-        console.log("🔄 SYNC: No active role found, activating the role that matches user_type");
-        
-        // Find the verified role that matches the correct user_type
-        const roleToActivate = verifiedRoles.find(r => r.role_type === correctUserType) || verifiedRoles[0];
-        
-        try {
-          // Deactivate all roles first
-          await supabase
-            .from('user_roles')
-            .update({ is_active: false, updated_at: new Date().toISOString() })
-            .eq('user_id', userId);
-
-          // Activate the selected role
-          const { error: activateError } = await supabase
-            .from('user_roles')
-            .update({ 
-              is_active: true, 
-              updated_at: new Date().toISOString() 
-            })
-            .eq('user_id', userId)
-            .eq('id', roleToActivate.id);
-
-          if (activateError) {
-            console.error("❌ SYNC: Failed to activate role:", activateError);
-          } else {
-            console.log("✅ SYNC: Role activated successfully:", roleToActivate.role_type);
-          }
-        } catch (activationError) {
-          console.error("❌ SYNC: Error during role activation:", activationError);
-        }
-      }
-
-      // Step 6: Handle the case where we have multiple active roles (shouldn't happen, but fix it)
-      if (activeRoles.length > 1) {
-        console.log("⚠️ SYNC: Multiple active roles detected, fixing...");
-        
-        // Keep only the first active role that matches user_type, or just the first one
-        const preferredRole = activeRoles.find(r => r.role_type === correctUserType) || activeRoles[0];
-        
-        // Deactivate all roles
-        await supabase
-          .from('user_roles')
-          .update({ is_active: false, updated_at: new Date().toISOString() })
-          .eq('user_id', userId);
-
-        // Activate only the preferred role
-        await supabase
-          .from('user_roles')
-          .update({ 
-            is_active: true, 
-            updated_at: new Date().toISOString() 
-          })
-          .eq('user_id', userId)
-          .eq('id', preferredRole.id);
-          
-        console.log("✅ SYNC: Fixed multiple active roles, kept:", preferredRole.role_type);
-      }
-
-      // Step 7: Final verification
-      const { data: finalProfile } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', userId)
-        .single();
-
-      const { data: finalActiveRole } = await supabase
-        .from('user_roles')
-        .select('role_type')
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .eq('is_verified', true)
-        .single();
-
-      console.log("🏁 SYNC: Final synchronization state:", {
-        profileUserType: finalProfile?.user_type,
-        activeRoleType: finalActiveRole?.role_type,
-        synchronized: finalProfile?.user_type === finalActiveRole?.role_type,
-        totalVerifiedRoles: verifiedRoles.length
-      });
-
-      console.log("✅ SYNC: Comprehensive user_type synchronization completed successfully");
-
-    } catch (error) {
-      console.error("❌ SYNC: Critical error in comprehensive synchronization:", error);
-      throw new Error(`Synchronization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
-
-  // Enhanced fetchUserData with improved user_type synchronization
+  // SIMPLIFIED fetchUserData with focus on core functionality
   const fetchUserData = async (userObject: User) => {
     if (!userObject) {
       setLoading(false);
@@ -677,7 +297,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      console.log("👤 CONTEXT: Starting enhanced user data fetch for:", userObject.id.substring(0, 8) + '...');
+      console.log("👤 CONTEXT: Starting user data fetch for:", userObject.id.substring(0, 8) + '...');
       
       // Check connection with timeout
       const isConnected = await checkConnection();
@@ -716,7 +336,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Step 1: Load or create profile with synchronization
+      // Step 1: Load or create profile
       try {        
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Profile fetch timeout')), 15000);
@@ -738,10 +358,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         if (profileData) {
           setProfile(profileData);
           console.log("✅ Profile loaded from database with user_type:", profileData.user_type);
-          
-          // ENHANCED: Perform synchronization check after loading profile
-          await ensureUserTypeSynchronization(userObject.id, profileData.user_type);
-          
         } else {
           // Create new profile if it doesn't exist
           console.log("📝 Creating new profile...");
@@ -750,7 +366,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             id: userObject.id,
             email: userObject.email || '',
             full_name: userObject.user_metadata?.full_name || null,
-            user_type: 'particular', // Default - will be managed by role system
+            user_type: 'particular',
             phone: userObject.user_metadata?.phone || null,
             avatar_url: userObject.user_metadata?.avatar_url || null,
             country: 'Spain',
@@ -768,17 +384,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             if (!createError && createdProfile) {
               setProfile(createdProfile);
               console.log("✅ Profile created successfully");
-              
-              // Ensure synchronization for new profile
-              await ensureUserTypeSynchronization(userObject.id, newProfileData.user_type!);
-              
             } else {
               throw new Error(`Profile creation failed: ${createError?.message || 'Unknown error'}`);
             }
           } catch (createProfileError) {
             console.warn("⚠️ Profile creation failed, using fallback:", createProfileError);
             
-            // Use fallback profile instead of failing
             const fallbackProfile: Profile = {
               ...newProfileData,
               address: null,
@@ -827,171 +438,47 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setProfile(emergencyProfile);
       }
 
-      // Step 2: BULLETPROOF ROLE LOADING SYSTEM (unchanged from previous implementation)
+      // Step 2: SIMPLIFIED ROLE LOADING SYSTEM
       try {
-        console.log("🎭 CONTEXT: Starting bulletproof role loading system...");
+        console.log("🎭 CONTEXT: Starting simplified role loading...");
         
-        let rolesLoadingSucceeded = false;
-        let finalRoles: UserRole[] = [];
-        let finalActiveRole: UserRole | null = null;
-        
-        // Multi-approach role loading with escalating strategies
-        const loadingStrategies = [
-          // Strategy 1: Direct service call (preferred)
-          async (): Promise<{ roles: UserRole[]; source: string; hasRoles?: boolean }> => {
-            console.log("📡 Strategy 1: Direct service call");
-            const roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
-            return { roles, source: 'service' };
-          },
-          
-          // Strategy 2: Direct database query (fallback)
-          async (): Promise<{ roles: UserRole[]; source: string; hasRoles?: boolean }> => {
-            console.log("📡 Strategy 2: Direct database query");
-            const { data, error } = await supabase
-              .from('user_roles')
-              .select('*')
-              .eq('user_id', userObject.id)
-              .order('created_at', { ascending: true });
-            
-            if (error) throw error;
-            return { roles: data as UserRole[] || [], source: 'database' };
-          },
-          
-          // Strategy 3: Simple existence check (emergency)
-          async (): Promise<{ roles: UserRole[]; source: string; hasRoles?: boolean }> => {
-            console.log("📡 Strategy 3: Emergency existence check");
-            const { count, error } = await supabase
-              .from('user_roles')
-              .select('*', { count: 'exact', head: true })
-              .eq('user_id', userObject.id);
-            
-            if (error) throw error;
-            return { 
-              roles: [], 
-              source: 'count-only', 
-              hasRoles: (count || 0) > 0 
-            };
-          }
-        ];
+        const roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
+        setUserRoles(roles);
+        console.log(`📋 CONTEXT: Roles loaded: ${roles.length} roles`);
 
-        // Try each strategy until one succeeds
-        for (let i = 0; i < loadingStrategies.length; i++) {
-          try {
-            console.log(`🔄 Attempting role loading strategy ${i + 1}/${loadingStrategies.length}...`);
+        // Step 3: SIMPLIFIED ACTIVE ROLE MANAGEMENT
+        if (roles.length > 0) {
+          console.log("🎯 CONTEXT: Starting simplified active role management...");
+          
+          const finalActiveRole = await ensureActiveRole(userObject.id, roles);
+          setActiveRole(finalActiveRole);
+          
+          if (finalActiveRole) {
+            console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
             
-            const result = await loadingStrategies[i]();
-            
-            if (result.roles && result.roles.length > 0) {
-              finalRoles = result.roles;
-              rolesLoadingSucceeded = true;
-              console.log(`✅ Strategy ${i + 1} succeeded: Found ${finalRoles.length} roles from ${result.source}`);
-              break;
-            } else if (result.source === 'count-only' && result.hasRoles === false) {
-              finalRoles = [];
-              rolesLoadingSucceeded = true;
-              console.log(`✅ Strategy ${i + 1} confirmed: No roles exist for user`);
-              break;
-            } else {
-              console.log(`⚠️ Strategy ${i + 1} returned empty but no error - trying next...`);
-            }
-            
-          } catch (strategyError) {
-            console.warn(`❌ Strategy ${i + 1} failed:`, strategyError);
-            
-            if (i === loadingStrategies.length - 1) {
-              console.error("❌ All role loading strategies failed");
-              // Don't fail completely - set empty roles and continue
-              finalRoles = [];
-              rolesLoadingSucceeded = true;
-            }
+            // Update local roles state to reflect any changes
+            const updatedRoles = roles.map(r => ({
+              ...r,
+              is_active: r.id === finalActiveRole.id
+            }));
+            setUserRoles(updatedRoles);
+          } else {
+            console.warn("⚠️ CONTEXT: Could not establish active role");
           }
         }
 
-        // Set the loaded roles
-        setUserRoles(finalRoles);
-        console.log(`📋 CONTEXT: Final roles loaded: ${finalRoles.length} roles`);
-
-        // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT with user_type sync
-        if (finalRoles.length > 0) {
-          console.log("🎯 CONTEXT: Starting enhanced active role management with sync...");
-          
-          try {
-            finalActiveRole = await ensureActiveRole(userObject.id, finalRoles);
-            
-            if (finalActiveRole) {
-              console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
-              
-              // CRITICAL: Ensure profile.user_type matches active role
-              const currentProfile = profile || (await supabase.from('profiles').select('user_type').eq('id', userObject.id).single()).data;
-              if (currentProfile && currentProfile.user_type !== finalActiveRole.role_type) {
-                console.log("🔄 CONTEXT: Syncync profile.user_type with active role");
-                await ensureUserTypeSynchronization(userObject.id, finalActiveRole.role_type);
-                
-                // Refresh profile data
-                const { data: refreshedProfile } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', userObject.id)
-                  .single();
-                
-                if (refreshedProfile) {
-                  setProfile(refreshedProfile);
-                  console.log("✅ CONTEXT: Profile refreshed with synchronized user_type");
-                }
-              }
-              
-              // Update local roles state to reflect any changes
-              const updatedRoles = finalRoles.map(r => ({
-                ...r,
-                is_active: r.id === finalActiveRole!.id
-              }));
-              setUserRoles(updatedRoles);
-            } else {
-              console.warn("⚠️ CONTEXT: Could not establish active role");
-            }
-            
-          } catch (activeRoleError) {
-            console.error("❌ CONTEXT: Error in active role management:", activeRoleError);
-            // Use first verified role as fallback
-            const fallbackRole = finalRoles.find(r => r.is_verified);
-            if (fallbackRole) {
-              finalActiveRole = fallbackRole;
-              console.log("🔧 CONTEXT: Using fallback active role:", fallbackRole.role_type);
-            }
-          }
-        }
-
-        setActiveRole(finalActiveRole);
-        
         // Final status logging
-        console.log("🏁 CONTEXT: Enhanced role loading system completed:", {
+        console.log("🏁 CONTEXT: Simplified role loading completed:", {
           userId: userObject.id.substring(0, 8) + '...',
           email: userObject.email,
-          totalRoles: finalRoles.length,
-          verifiedRoles: finalRoles.filter(r => r.is_verified).length,
-          activeRole: finalActiveRole?.role_type || 'none',
-          systemStatus: 'completed with sync'
+          totalRoles: roles.length,
+          verifiedRoles: roles.filter(r => r.is_verified).length,
+          activeRole: activeRole?.role_type || 'none',
+          systemStatus: 'completed'
         });
-        
-        // Special logging for multi-role users
-        if (finalRoles.length > 1) {
-          console.log("🌟 MULTI-ROLE USER SUCCESS WITH SYNC:", {
-            userId: userObject.id.substring(0, 8) + '...',
-            email: userObject.email,
-            allRoles: finalRoles.map(r => ({
-              type: r.role_type,
-              verified: r.is_verified,
-              active: r.is_active,
-              id: r.id.substring(0, 8) + '...'
-            })),
-            activeRoleSet: !!finalActiveRole,
-            readyForDashboard: true,
-            syncCompleted: true
-          });
-        }
 
       } catch (criticalRoleError) {
-        console.error("❌ CONTEXT: Critical error in role management system:", criticalRoleError);
+        console.error("❌ CONTEXT: Critical error in role management:", criticalRoleError);
         
         // Emergency fallback: set empty state but don't crash
         setUserRoles([]);
@@ -1040,7 +527,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     return `COM-${hash}-${randomNum}`.toUpperCase();
   };
 
-  // Enhanced refreshRoles with improved synchronization
+  // SIMPLIFIED refreshRoles
   const refreshRoles = async () => {
     if (!user?.id) {
       console.log("⚠️ CONTEXT: No user ID available for role refresh");
@@ -1048,47 +535,27 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      console.log("🔄 CONTEXT: Starting enhanced role refresh with synchronization...");
+      console.log("🔄 CONTEXT: Starting role refresh...");
       
-      // Step 1: Fetch updated roles from database
       const updatedRoles = await SupabaseUserRoleService.getUserRoles(user.id);
       console.log(`📋 CONTEXT: Fetched ${updatedRoles.length} roles from database`);
       
-      // Step 2: Update local roles state
       setUserRoles(updatedRoles);
       
-      // Step 3: Ensure there's always an active role if we have verified roles
+      // Ensure there's always an active role if we have verified roles
       const verifiedRoles = updatedRoles.filter(r => r.is_verified);
       
       if (verifiedRoles.length > 0) {
-        // Check if we have an active role
         const currentActiveRole = verifiedRoles.find(r => r.is_active);
         
         if (!currentActiveRole) {
           console.log("🎯 CONTEXT: No active role found, establishing one...");
           
-          // Use the enhanced active role establishment system
           const establishedRole = await ensureActiveRole(user.id, verifiedRoles);
           
           if (establishedRole) {
             setActiveRole(establishedRole);
             console.log("✅ CONTEXT: Active role established during refresh:", establishedRole.role_type);
-            
-            // Update the profile user_type to match the active role
-            await ensureUserTypeSynchronization(user.id, establishedRole.role_type);
-            
-            // Refresh profile to reflect the synchronized user_type
-            const { data: refreshedProfile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', user.id)
-              .single();
-            
-            if (refreshedProfile) {
-              setProfile(refreshedProfile);
-              console.log("✅ CONTEXT: Profile synchronized with active role");
-            }
-            
           } else {
             console.warn("⚠️ CONTEXT: Could not establish active role during refresh");
             setActiveRole(null);
@@ -1096,44 +563,23 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         } else {
           setActiveRole(currentActiveRole);
           console.log("✅ CONTEXT: Active role confirmed:", currentActiveRole.role_type);
-          
-          // Ensure profile is synchronized with the active role
-          if (profile && profile.user_type !== currentActiveRole.role_type) {
-            console.log("🔄 CONTEXT: Synchronizing profile with active role");
-            await ensureUserTypeSynchronization(user.id, currentActiveRole.role_type);
-            
-            // Refresh profile
-            const { data: refreshedProfile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', user.id)
-              .single();
-            
-            if (refreshedProfile) {
-              setProfile(refreshedProfile);
-              console.log("✅ CONTEXT: Profile synchronized during refresh");
-            }
-          }
         }
       } else {
         console.log("⚠️ CONTEXT: No verified roles available");
         setActiveRole(null);
       }
       
-      console.log("✅ CONTEXT: Enhanced role refresh completed successfully");
+      console.log("✅ CONTEXT: Role refresh completed successfully");
       
     } catch (error) {
       console.error("❌ CONTEXT: Error during role refresh:", error);
-      
-      // On error, don't crash - just log and continue with current state
-      // This prevents UI breaks when there are temporary connection issues
     }
   };
 
-  // Enhanced signIn with improved role synchronization
+  // SIMPLIFIED signIn
   const signIn = async (email: string, password: string) => {
     try {
-      console.log("🔐 CONTEXT: Starting enhanced sign in process...");
+      console.log("🔐 CONTEXT: Starting sign in process...");
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -1146,12 +592,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data?.user && data?.session) {
-        console.log("✅ CONTEXT: Sign in successful, starting user data fetch with sync...");
+        console.log("✅ CONTEXT: Sign in successful, starting user data fetch...");
         
-        // The fetchUserData function will handle role synchronization automatically
         await fetchUserData(data.user);
         
-        console.log("✅ CONTEXT: Enhanced sign in completed");
+        console.log("✅ CONTEXT: Sign in completed");
         return { success: true };
       }
 
@@ -1167,7 +612,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     try {
       console.log("🚪 Starting comprehensive sign out process...");
       
-      // STEP 1: Clear ALL auth state IMMEDIATELY and AGGRESSIVELY
+      // STEP 1: Clear ALL auth state IMMEDIATELY
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -1175,105 +620,42 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setActiveRole(null);
       setLoading(true);
       
-      // STEP 2: Force clear all browser storage IMMEDIATELY
+      // STEP 2: Force clear all browser storage
       if (typeof window !== 'undefined') {
         try {
-          console.log("🧹 Clearing ALL browser storage comprehensively...");
+          console.log("🧹 Clearing browser storage...");
           
-          // Clear localStorage completely
           const localStorageKeys = Object.keys(localStorage);
-          console.log(`Found ${localStorageKeys.length} localStorage keys to clear`);
           localStorageKeys.forEach(key => {
             localStorage.removeItem(key);
-            console.log(`🗑️ Cleared localStorage key: ${key}`);
           });
           
-          // Clear sessionStorage completely
           const sessionStorageKeys = Object.keys(sessionStorage);
           sessionStorageKeys.forEach(key => {
             sessionStorage.removeItem(key);
-            console.log(`🗑️ Cleared sessionStorage key: ${key}`);
           });
           
-          // Force clear any potential IndexedDB Supabase data
-          try {
-            const indexedDBKeys = await indexedDB.databases();
-            indexedDBKeys.forEach(db => {
-              if (db.name && db.name.includes('supabase')) {
-                indexedDB.deleteDatabase(db.name);
-                console.log(`🗑️ Deleted IndexedDB: ${db.name}`);
-              }
-            });
-          } catch (idbError) {
-            console.warn("IndexedDB clear warning:", idbError);
-          }
-          
-          console.log("✅ All browser storage cleared completely");
+          console.log("✅ All browser storage cleared");
         } catch (storageError) {
           console.error("❌ Error clearing storage:", storageError);
         }
       }
       
-      // STEP 3: Call Supabase sign out with timeout
-      const supabaseSignOut = async () => {
-        try {
-          const { error } = await supabase.auth.signOut({ scope: 'global' });
-          if (error) throw error;
-          console.log("✅ Supabase global sign out successful");
-        } catch (supabaseError) {
-          console.warn("⚠️ Supabase sign out error:", supabaseError);
-        }
-      };
-      
-      // Execute with timeout
+      // STEP 3: Call Supabase sign out
       try {
-        await Promise.race([
-          supabaseSignOut(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
-        ]);
-      } catch (timeoutError) {
-        console.warn("⚠️ Supabase sign out timed out, proceeding anyway");
+        const { error } = await supabase.auth.signOut({ scope: 'global' });
+        if (error) throw error;
+        console.log("✅ Supabase sign out successful");
+      } catch (supabaseError) {
+        console.warn("⚠️ Supabase sign out error:", supabaseError);
       }
       
-      // STEP 4: Multiple cleanup passes to ensure nothing survives
-      for (let i = 0; i < 3; i++) {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Force state clearing again
-        setUser(null);
-        setProfile(null);
-        setSession(null);
-        setUserRoles([]);
-        setActiveRole(null);
-        
-        // Clear storage again
-        if (typeof window !== 'undefined') {
-          try {
-            Object.keys(localStorage).forEach(key => {
-              if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
-                localStorage.removeItem(key);
-              }
-            });
-            Object.keys(sessionStorage).forEach(key => {
-              if (key.includes('supabase') || key.includes('sb-') || key.includes('auth')) {
-                sessionStorage.removeItem(key);
-              }
-            });
-          } catch (e) {
-            console.warn(`Cleanup pass ${i + 1} error:`, e);
-          }
-        }
-      }
-      
-      // STEP 5: Final state reset
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      console.log("✅ Complete comprehensive sign out process finished");
+      console.log("✅ Sign out process completed");
       
     } catch (error) {
       console.error("❌ Sign out exception:", error);
       
-      // EMERGENCY STATE CLEARING - Even if there's an error, ensure local state is cleared
+      // EMERGENCY STATE CLEARING
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -1318,12 +700,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      console.log("🔄 CONTEXT: Activating role through enhanced system:", roleType);
+      console.log("🔄 CONTEXT: Activating role:", roleType);
       
       const result = await SupabaseUserRoleService.activateRole(user.id, roleType);
       
       if (result.success) {
-        // Re-fetch and ensure roles are properly set
         await refreshRoles();
         console.log("✅ CONTEXT: Role activation and refresh completed");
       }
@@ -1334,6 +715,54 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       return { success: false, message: "Error al activar el rol" };
     }
   };
+
+  // Set up auth state listener
+  useEffect(() => {
+    let mounted = true;
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) {
+        setSession(session);
+        if (session?.user) {
+          setUser(session.user);
+          fetchUserData(session.user);
+        } else {
+          setLoading(false);
+        }
+      }
+    });
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+
+      console.log("🔐 Auth state change:", event);
+      
+      setSession(session);
+      
+      if (session?.user) {
+        setUser(session.user);
+        
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          await fetchUserData(session.user);
+        }
+      } else {
+        setUser(null);
+        setProfile(null);
+        setUserRoles([]);
+        setActiveRole(null);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const value = {
     user,
