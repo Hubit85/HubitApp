@@ -51,10 +51,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // SIMPLIFIED ROLE ACTIVATION: Remove complex activation and focus on core functionality
+  // FIXED ROLE ACTIVATION: Remove variable scope conflict
   const ensureActiveRole = async (userId: string, availableRoles: UserRole[]): Promise<UserRole | null> => {
     try {
-      console.log("🎯 CONTEXT: Starting simplified role activation system...");
+      console.log("🎯 CONTEXT: Starting role activation system...");
       
       if (!availableRoles || availableRoles.length === 0) {
         console.log("❌ CONTEXT: No roles available for activation");
@@ -446,15 +446,15 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setUserRoles(roles);
         console.log(`📋 CONTEXT: Roles loaded: ${roles.length} roles`);
 
-        // Step 3: SIMPLIFIED ACTIVE ROLE MANAGEMENT
+        // Step 3: FIXED ACTIVE ROLE MANAGEMENT
         if (roles.length > 0) {
-          console.log("🎯 CONTEXT: Starting simplified active role management...");
+          console.log("🎯 CONTEXT: Starting active role management...");
           
           const finalActiveRole = await ensureActiveRole(userObject.id, roles);
-          setActiveRole(finalActiveRole);
           
           if (finalActiveRole) {
             console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
+            setActiveRole(finalActiveRole);
             
             // Update local roles state to reflect any changes
             const updatedRoles = roles.map(r => ({
@@ -464,16 +464,20 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             setUserRoles(updatedRoles);
           } else {
             console.warn("⚠️ CONTEXT: Could not establish active role");
+            setActiveRole(null);
           }
+        } else {
+          console.log("📝 CONTEXT: No roles found for user");
+          setActiveRole(null);
         }
 
         // Final status logging
-        console.log("🏁 CONTEXT: Simplified role loading completed:", {
+        console.log("🏁 CONTEXT: Role loading completed:", {
           userId: userObject.id.substring(0, 8) + '...',
           email: userObject.email,
           totalRoles: roles.length,
           verifiedRoles: roles.filter(r => r.is_verified).length,
-          activeRole: activeRole?.role_type || 'none',
+          activeRoleType: activeRole?.role_type || 'none',
           systemStatus: 'completed'
         });
 
