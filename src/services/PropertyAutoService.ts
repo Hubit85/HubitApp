@@ -55,17 +55,10 @@ export class PropertyAutoService {
         city: userData.city,
         postal_code: userData.postal_code || "",
         property_type: propertyType, // Campo correcto del schema
-        is_currently_selected: true, // Marcar como seleccionada por defecto
         
-        // Información específica de comunidad si aplica
+        // Para información de comunidad, usar la descripción en su lugar
         ...(userData.user_type === "community_member" && userData.community_name && {
-          community_info: {
-            community_name: userData.community_name || "",
-            portal_number: userData.portal_number || "",
-            apartment_number: userData.apartment_number || "",
-            management_company: null,
-            total_units: null
-          }
+          description: `${userData.community_name}${userData.portal_number ? ` - Portal ${userData.portal_number}` : ''}${userData.apartment_number ? ` - Apto ${userData.apartment_number}` : ''}`
         }),
         
         created_at: new Date().toISOString()
@@ -157,17 +150,15 @@ export class PropertyAutoService {
             for (const role of rolesWithAddress) {
               const roleData = role.role_specific_data as any;
               
-              // Si la propiedad no tiene información completa, completarla desde los roles
-              if (!property.community_info && role.role_type === 'community_member') {
+              // Si la propiedad no tiene descripción completa y es miembro de comunidad, actualizarla
+              if (role.role_type === 'community_member') {
                 if (roleData.community_name || roleData.portal_number || roleData.apartment_number) {
-                  updateFields.community_info = {
-                    community_name: roleData.community_name || '',
-                    portal_number: roleData.portal_number || '',
-                    apartment_number: roleData.apartment_number || '',
-                    management_company: null,
-                    total_units: null
-                  };
-                  needsUpdate = true;
+                  const communityDescription = `${roleData.community_name || ''}${roleData.portal_number ? ` - Portal ${roleData.portal_number}` : ''}${roleData.apartment_number ? ` - Apto ${roleData.apartment_number}` : ''}`;
+                  
+                  if (!property.description || !property.description.includes(roleData.community_name || '')) {
+                    updateFields.description = communityDescription;
+                    needsUpdate = true;
+                  }
                 }
               }
 
@@ -382,18 +373,16 @@ export class PropertyAutoService {
           updatedFields.postal_code = updatedUserData.postal_code;
         }
 
-        // Actualizar información de comunidad si aplica
+        // Actualizar información de comunidad si aplica - usando descripción en su lugar
         if (updatedUserData.user_type === "community_member") {
-          const currentCommunityInfo = property.community_info ? JSON.parse(JSON.stringify(property.community_info)) : {};
-          const newCommunityInfo = {
-            ...currentCommunityInfo,
-            ...(updatedUserData.community_name && { community_name: updatedUserData.community_name }),
-            ...(updatedUserData.portal_number && { portal_number: updatedUserData.portal_number }),
-            ...(updatedUserData.apartment_number && { apartment_number: updatedUserData.apartment_number })
-          };
-
-          if (JSON.stringify(newCommunityInfo) !== JSON.stringify(currentCommunityInfo)) {
-            updatedFields.community_info = newCommunityInfo;
+          let communityDescription = property.description || '';
+          
+          if (updatedUserData.community_name || updatedUserData.portal_number || updatedUserData.apartment_number) {
+            const newCommunityDescription = `${updatedUserData.community_name || ''}${updatedUserData.portal_number ? ` - Portal ${updatedUserData.portal_number}` : ''}${updatedUserData.apartment_number ? ` - Apto ${updatedUserData.apartment_number}` : ''}`;
+            
+            if (newCommunityDescription !== communityDescription) {
+              updatedFields.description = newCommunityDescription;
+            }
           }
         }
 

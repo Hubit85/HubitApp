@@ -26,7 +26,7 @@ export class SupabaseContractService {
       .from("contracts")
       .insert({
         ...contractData,
-        status: "pending" as Database["public"]["Enums"]["contract_status"],
+        status: "pending",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -77,7 +77,7 @@ export class SupabaseContractService {
       .from("contracts")
       .select(`
         *,
-        profiles!contracts_client_id_fkey (
+        profiles!contracts_user_id_fkey (
           id,
           full_name,
           email,
@@ -85,9 +85,7 @@ export class SupabaseContractService {
         ),
         service_providers (
           id,
-          company_name,
-          email,
-          phone
+          company_name
         )
       `)
       .eq("id", id)
@@ -113,7 +111,7 @@ export class SupabaseContractService {
     const { data, error } = await supabase
       .from("contracts")
       .select("*")
-      .eq("client_id", userId)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -127,7 +125,7 @@ export class SupabaseContractService {
     const { data, error } = await supabase
       .from("contracts")
       .select("*")
-      .eq("provider_id", providerId)
+      .eq("service_provider_id", providerId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -150,10 +148,10 @@ export class SupabaseContractService {
 
     const contract = await this.updateContract(id, updates);
 
-    // If both signatures are present, activate the contract with explicit type casting
+    // If both signatures are present, activate the contract
     if (contract.client_signature && contract.provider_signature) {
       return this.updateContract(id, {
-        status: "active" as Database["public"]["Enums"]["contract_status"],
+        status: "active",
         start_date: new Date().toISOString()
       });
     }
@@ -163,14 +161,15 @@ export class SupabaseContractService {
 
   static async completeContract(id: string): Promise<Contract> {
     return this.updateContract(id, {
-      status: "completed" as Database["public"]["Enums"]["contract_status"],
+      status: "completed",
       end_date: new Date().toISOString()
     });
   }
 
   static async cancelContract(id: string, reason?: string): Promise<Contract> {
     return this.updateContract(id, {
-      status: "cancelled" as Database["public"]["Enums"]["contract_status"]
+      status: "cancelled",
+      cancellation_reason: reason || null
     });
   }
 
@@ -358,7 +357,7 @@ export class SupabaseContractService {
     }
 
     if (filters?.status) {
-      query = query.eq("status", filters.status as Database["public"]["Enums"]["contract_status"]);
+      query = query.eq("status", filters.status);
     }
 
     if (filters?.dateFrom) {
