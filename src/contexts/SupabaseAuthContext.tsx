@@ -133,9 +133,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // ENHANCED signUp with multiple roles creation
+  // ENHANCED signUp with improved multiple roles creation
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'> & { 
-    // Soporte para múltiples roles durante el registro
+    // NUEVO: Soporte para múltiples roles durante el registro
     additionalRoles?: Array<{
       roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
       roleSpecificData: Record<string, any>;
@@ -183,7 +183,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         try {
           const profileData: ProfileInsert = {
             id: data.user.id,
-            email: data.user.email!,
+            email: data.user.email || '', // FIXED: Provide fallback for potentially undefined email
             ...userData,
           };
 
@@ -201,7 +201,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
           console.log("✅ Profile created successfully with user_type:", profileData.user_type);
 
-          // Create multiple roles natively
+          // NUEVO: Create multiple roles natively
           const rolesToCreate = [
             // Primary role (first)
             {
@@ -230,19 +230,21 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
               }
 
-              // Create role record
+              // FIXED: Create role record with proper typing
+              const roleInsertData = {
+                user_id: data.user.id,
+                role_type: roleRequest.roleType,
+                is_verified: true,
+                is_active: isFirstRole, // First role is active by default
+                role_specific_data: processedRoleData,
+                verification_confirmed_at: new Date().toISOString(),
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+
               const { data: newRole, error: insertError } = await supabase
                 .from('user_roles')
-                .insert({
-                  user_id: data.user.id,
-                  role_type: roleRequest.roleType,
-                  is_verified: true,
-                  is_active: isFirstRole, // First role is active by default
-                  role_specific_data: processedRoleData,
-                  verification_confirmed_at: new Date().toISOString(),
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                })
+                .insert(roleInsertData)
                 .select()
                 .single();
 
@@ -284,7 +286,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
             } catch (roleError) {
               console.error(`❌ Exception creating role ${roleRequest.roleType}:`, roleError);
-              roleErrors.push(`${roleRequest.roleType}: ${roleError instanceof Error ? roleError.message : 'Unknown error'}`);
+              const errorMessage = roleError instanceof Error ? roleError.message : 'Unknown error';
+              roleErrors.push(`${roleRequest.roleType}: ${errorMessage}`);
             }
           }
 
