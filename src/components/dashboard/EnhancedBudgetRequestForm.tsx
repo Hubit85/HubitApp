@@ -667,7 +667,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                         "Dirección completa de la comunidad" : 
                         "Dirección donde se realizará el trabajo"
                       }
-                      value={formData.work_location || ""}
+                      value={formData.work_location ?? ""}
                       onChange={(e) => setFormData(prev => ({ ...prev, work_location: e.target.value }))}
                     />
                   </div>
