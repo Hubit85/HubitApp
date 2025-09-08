@@ -206,6 +206,8 @@ export default function BudgetRequestManager() {
                       onClick={() => {
                         if (req.id) {
                           handleDelete(req.id);
+                        } else {
+                          console.warn("Cannot delete request: ID is missing");
                         }
                       }}
                       disabled={!req.id}
