@@ -208,6 +208,7 @@ export default function BudgetRequestManager() {
                           handleDelete(req.id);
                         } else {
                           console.warn("Cannot delete request: ID is missing");
+                          setError("Error: No se puede eliminar la solicitud porque falta el ID");
                         }
                       }}
                       disabled={!req.id}
