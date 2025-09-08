@@ -277,10 +277,21 @@ export class SupabaseBudgetService {
     console.log("✅ Quote created:", data.id);
 
     // Incrementar contador de cotizaciones en la solicitud de presupuesto
+    // Usando una actualización directa en lugar de RPC inexistente
     try {
-      await supabase.rpc('increment_quotes_count', { 
-        budget_request_id: quoteData.budget_request_id 
-      });
+      const { data: currentRequest, error: fetchError } = await supabase
+        .from('budget_requests')
+        .select('quotes_count')
+        .eq('id', quoteData.budget_request_id)
+        .single();
+
+      if (!fetchError && currentRequest) {
+        const newCount = (currentRequest.quotes_count || 0) + 1;
+        await supabase
+          .from('budget_requests')
+          .update({ quotes_count: newCount })
+          .eq('id', quoteData.budget_request_id);
+      }
     } catch (incrementError) {
       console.warn("⚠️ Failed to increment quotes count:", incrementError);
     }

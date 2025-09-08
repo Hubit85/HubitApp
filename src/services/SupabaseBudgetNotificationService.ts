@@ -257,14 +257,17 @@ export class SupabaseBudgetNotificationService {
       const clientName = userProfile?.full_name || 'Cliente';
 
       // Crear mensaje personalizado basado en la urgencia
-      const urgencyText = {
+      const urgencyText: { [key: string]: string } = {
         'emergency': '🚨 URGENTE',
         'high': '🔥 ALTA PRIORIDAD',
         'normal': '📅 NORMAL',
         'low': '🕐 BAJA PRIORIDAD'
-      }[budgetRequest.urgency] || 'NUEVA';
+      };
+      
+      const urgencyKey = budgetRequest.urgency || 'normal';
+      const urgencyLabel = urgencyText[urgencyKey] || 'NUEVA';
 
-      const title = `${urgencyText}: Nueva solicitud de presupuesto`;
+      const title = `${urgencyLabel}: Nueva solicitud de presupuesto`;
       
       let message = `${clientName} solicita un presupuesto para "${budgetRequest.title}" en la categoría ${budgetRequest.category}.`;
       

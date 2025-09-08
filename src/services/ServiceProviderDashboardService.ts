@@ -323,7 +323,7 @@ export class ServiceProviderDashboardService {
           type,
           title: quote.budget_requests?.title || 'Solicitud de presupuesto',
           description,
-          timestamp: quote.updated_at,
+          timestamp: quote.updated_at || quote.created_at || new Date().toISOString(),
           status: quote.status,
           amount: quote.amount
         };

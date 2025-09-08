@@ -94,7 +94,7 @@ export class SupabaseDocumentService {
     return data || [];
   }
 
-  static async getDocumentsByEntity(entityType: Database["public"]["Enums"]["document_related_entity_type"], entityId: string): Promise<Document[]> {
+  static async getDocumentsByEntity(entityType: string, entityId: string): Promise<Document[]> {
     const { data, error } = await supabase
       .from("documents")
       .select("*")
@@ -109,7 +109,7 @@ export class SupabaseDocumentService {
     return data || [];
   }
 
-  static async getDocumentsByType(documentType: Database["public"]["Enums"]["document_type"], userId?: string): Promise<Document[]> {
+  static async getDocumentsByType(documentType: string, userId?: string): Promise<Document[]> {
     let query = supabase
       .from("documents")
       .select("*")
@@ -198,8 +198,8 @@ export class SupabaseDocumentService {
     file: File,
     documentData: Omit<DocumentInsert, "file_path" | "file_size">
   ): Promise<Document> {
-    // Create appropriate folder name based on document type with explicit casting
-    const folderMap: Record<Database["public"]["Enums"]["document_type"], string> = {
+    // Create appropriate folder name based on document type using string mapping
+    const folderMap: Record<string, string> = {
       "contract": "contracts",
       "invoice": "invoices", 
       "receipt": "receipts",
@@ -212,7 +212,7 @@ export class SupabaseDocumentService {
       "other": "documents"
     };
     
-    const folder = folderMap[documentData.document_type as Database["public"]["Enums"]["document_type"]] || "documents";
+    const folder = folderMap[documentData.document_type] || "documents";
     const filePath = await this.uploadFile(file, folder);
     
     // Create document record
@@ -233,8 +233,8 @@ export class SupabaseDocumentService {
       await this.deleteFileFromStorage(document.file_path);
     }
 
-    // Create appropriate folder name based on related entity type with correct enum casting
-    const folderMap: Record<Database["public"]["Enums"]["document_related_entity_type"], string> = {
+    // Create appropriate folder name based on related entity type using string mapping
+    const folderMap: Record<string, string> = {
       "contract": "contracts",
       "invoice": "invoices", 
       "budget_request": "budget-requests",
@@ -341,11 +341,11 @@ export class SupabaseDocumentService {
     }
 
     if (filters?.documentType) {
-      supabaseQuery = supabaseQuery.eq("document_type", filters.documentType as Database["public"]["Enums"]["document_type"]);
+      supabaseQuery = supabaseQuery.eq("document_type", filters.documentType);
     }
 
     if (filters?.entityType) {
-      supabaseQuery = supabaseQuery.eq("related_entity_type", filters.entityType as Database["public"]["Enums"]["document_related_entity_type"]);
+      supabaseQuery = supabaseQuery.eq("related_entity_type", filters.entityType);
     }
 
     if (filters?.dateFrom) {

@@ -631,7 +631,7 @@ export class SupabaseUserRoleService {
   }
 
   static getRoleDisplayName(roleType: UserRole['role_type']): string {
-    const roleNames = {
+    const roleNames: Record<string, string> = {
       'particular': 'Particular',
       'community_member': 'Miembro de Comunidad',
       'service_provider': 'Proveedor de Servicios',

@@ -43,9 +43,15 @@ export interface Incident {
 export class SupabaseIncidentService {
   static async createIncident(incidentData: IncidentInsert): Promise<Incident> {
     try {
+      // Ensure status is set for insert
+      const insertData = {
+        ...incidentData,
+        status: 'pending' as const
+      };
+
       const { data, error } = await supabase
         .from('incidents')
-        .insert([incidentData])
+        .insert(insertData)
         .select()
         .single();
 
@@ -79,8 +85,11 @@ export class SupabaseIncidentService {
         throw new Error(`Error al obtener incidencias: ${error.message}`);
       }
 
+      // Map and cast the status and urgency fields properly
       return (data || []).map(incident => ({
         ...incident,
+        status: incident.status as 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed',
+        urgency: incident.urgency as 'low' | 'normal' | 'high' | 'emergency',
         community_name: incident.community?.name || 'Comunidad desconocida'
       }));
     } catch (error) {
@@ -129,6 +138,8 @@ export class SupabaseIncidentService {
 
         return {
           ...incident,
+          status: incident.status as 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed',
+          urgency: incident.urgency as 'low' | 'normal' | 'high' | 'emergency',
           reporter_name,
           reporter_email,
           community_name: incident.community?.name || 'Comunidad desconocida'
@@ -224,6 +235,8 @@ export class SupabaseIncidentService {
 
       return {
         ...data,
+        status: data.status as 'pending' | 'under_review' | 'approved' | 'rejected' | 'processed',
+        urgency: data.urgency as 'low' | 'normal' | 'high' | 'emergency',
         reporter_name,
         reporter_email,
         community_name: data.community?.name || 'Comunidad desconocida'
