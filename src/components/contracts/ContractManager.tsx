@@ -355,7 +355,7 @@ export function ContractManager() {
           .insert({
             user_id: selectedQuote.user_id,
             title: 'Nuevo contrato disponible',
-            message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title}"`,
+            message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}"`,
             type: 'info' as const,
             category: 'contract' as const,
             related_entity_type: 'contract',
