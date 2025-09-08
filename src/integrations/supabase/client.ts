@@ -2,14 +2,33 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+// Provide better error handling for missing environment variables
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error('Missing Supabase environment variables');
+  console.warn('⚠️ Supabase environment variables are missing or placeholder values');
+  console.warn('📋 To connect to your real Supabase project:');
+  console.warn('1. Go to https://supabase.com/dashboard');
+  console.warn('2. Select your project');
+  console.warn('3. Go to Settings > API');
+  console.warn('4. Copy your Project URL and anon public key');
+  console.warn('5. Update your .env.local file with real values');
 }
+
+// Use placeholder values if environment variables are missing
+const supabaseUrl = SUPABASE_URL || 'https://placeholder-project.supabase.co';
+const supabaseKey = SUPABASE_PUBLISHABLE_KEY || 'placeholder-anon-key';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
+
+// Export a helper to check if we're using real Supabase connection
+export const isSupabaseConfigured = () => {
+  return SUPABASE_URL && 
+         SUPABASE_PUBLISHABLE_KEY && 
+         !SUPABASE_URL.includes('placeholder') && 
+         !SUPABASE_PUBLISHABLE_KEY.includes('placeholder');
+};
