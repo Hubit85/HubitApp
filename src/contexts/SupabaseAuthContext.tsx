@@ -290,8 +290,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         const maxAttempts = 5;
         
         // Special handling for debugging
-        if (userObject.email === 'ddayanacastro10@gmail.com') {
-          console.log("🎯 SPECIAL HANDLING for ddayanacastro10@gmail.com");
+        if (userObject.email === 'ddayanacastro10@gmail.com' || userObject.email === 'dvillaher@hotmail.com') {
+          console.log(`🎯 SPECIAL HANDLING for ${userObject.email}`);
         }
         
         while (!rolesLoaded && attempts < maxAttempts) {
@@ -373,60 +373,143 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         
         if (roles.length > 0) {
           // First, look for any role marked as active
-          activeRoleData = roles.find(r => r.is_active && r.is_verified) || null;
+          const currentActiveRole = roles.find(r => r.is_active && r.is_verified);
           
-          if (!activeRoleData) {
-            // If no active role, find the first verified role and activate it
+          if (currentActiveRole) {
+            // We have an active role, use it
+            activeRoleData = currentActiveRole;
+            console.log("✅ CONTEXT: Found existing active role:", activeRoleData.role_type);
+          } else {
+            // No active role found - need to activate one
             const verifiedRoles = roles.filter(r => r.is_verified);
             
             if (verifiedRoles.length > 0) {
-              const roleToActivate = verifiedRoles[0]; // Take the first verified role
-              console.log("🎭 CONTEXT: No active role found, activating first verified role:", roleToActivate.role_type);
+              console.log(`🎭 CONTEXT: No active role found among ${verifiedRoles.length} verified roles, activating first one...`);
               
-              try {
-                // Attempt to activate this role
-                const activateResult = await SupabaseUserRoleService.activateRole(userObject.id, roleToActivate.role_type);
-                
-                if (activateResult.success) {
-                  console.log("✅ CONTEXT: First verified role activated successfully");
+              // CRITICAL FIX: Use a more robust role activation strategy
+              const roleToActivate = verifiedRoles[0]; // Take the first verified role
+              console.log("🎯 CONTEXT: Attempting to activate role:", roleToActivate.role_type);
+              
+              let activationSucceeded = false;
+              let activationAttempts = 0;
+              const maxActivationAttempts = 3;
+              
+              while (!activationSucceeded && activationAttempts < maxActivationAttempts) {
+                try {
+                  activationAttempts++;
+                  console.log(`🔄 CONTEXT: Role activation attempt ${activationAttempts}/${maxActivationAttempts} for ${roleToActivate.role_type}`);
                   
-                  // Update local state to reflect activation
+                  // First deactivate all roles
+                  const { error: deactivateError } = await supabase
+                    .from('user_roles')
+                    .update({ 
+                      is_active: false, 
+                      updated_at: new Date().toISOString() 
+                    })
+                    .eq('user_id', userObject.id);
+
+                  if (deactivateError) {
+                    throw new Error(`Deactivation failed: ${deactivateError.message}`);
+                  }
+
+                  // Then activate the selected role
+                  const { error: activateError, data: activatedRoleData } = await supabase
+                    .from('user_roles')
+                    .update({ 
+                      is_active: true, 
+                      updated_at: new Date().toISOString() 
+                    })
+                    .eq('user_id', userObject.id)
+                    .eq('role_type', roleToActivate.role_type)
+                    .eq('is_verified', true)
+                    .select()
+                    .single();
+
+                  if (activateError) {
+                    throw new Error(`Activation failed: ${activateError.message}`);
+                  }
+
+                  // Update local state to reflect the change
                   const updatedRoles = roles.map(r => ({
                     ...r,
                     is_active: r.id === roleToActivate.id
                   }));
                   
                   setUserRoles(updatedRoles);
-                  activeRoleData = updatedRoles.find(r => r.is_active) || roleToActivate;
-                } else {
-                  console.warn("⚠️ CONTEXT: Failed to auto-activate first verified role:", activateResult.message);
-                  // Use the role without activation
-                  activeRoleData = roleToActivate;
+                  activeRoleData = updatedRoles.find(r => r.is_active) || activatedRoleData;
+                  activationSucceeded = true;
+                  
+                  console.log("✅ CONTEXT: Role activated successfully:", activeRoleData.role_type);
+                  
+                } catch (activateError) {
+                  console.warn(`⚠️ CONTEXT: Role activation attempt ${activationAttempts} failed:`, activateError);
+                  
+                  if (activationAttempts < maxActivationAttempts) {
+                    // Wait before retry with exponential backoff
+                    const waitTime = Math.min(1000 * Math.pow(2, activationAttempts - 1), 3000);
+                    console.log(`⏳ CONTEXT: Waiting ${waitTime}ms before retry...`);
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                  }
                 }
-              } catch (activateError) {
-                console.warn("⚠️ CONTEXT: Exception during auto-activation:", activateError);
+              }
+              
+              // If activation failed after all attempts, use the role without DB activation
+              if (!activationSucceeded) {
+                console.warn("⚠️ CONTEXT: All role activation attempts failed, using role locally:", roleToActivate.role_type);
                 activeRoleData = roleToActivate;
+                
+                // Update local state to show this role as active (UI-only)
+                const updatedRoles = roles.map(r => ({
+                  ...r,
+                  is_active: r.id === roleToActivate.id
+                }));
+                setUserRoles(updatedRoles);
+                
+                console.log("🔧 CONTEXT: Using role locally without DB activation - user can switch roles manually from dashboard");
               }
             }
           }
         }
         
         setActiveRole(activeRoleData);
-        console.log("🎯 CONTEXT: Active role set:", activeRoleData?.role_type || 'none');
+        console.log("🎯 CONTEXT: Final active role set:", activeRoleData?.role_type || 'none');
         
-        // Special debugging for specific user
-        if (userObject.email === 'ddayanacastro10@gmail.com') {
-          console.log("🔍 FINAL CONTEXT STATE for ddayanacastro10@gmail.com:", {
-            userId: userObject.id,
-            rolesCount: roles.length,
+        // Special debugging for multi-role users
+        if (roles.length > 1) {
+          console.log("🔍 MULTI-ROLE USER FINAL STATE:", {
+            userId: userObject.id.substring(0, 8) + '...',
+            userEmail: userObject.email,
+            totalRoles: roles.length,
+            verifiedRoles: roles.filter(r => r.is_verified).length,
             activeRole: activeRoleData?.role_type || 'none',
             allRoles: roles.map(r => ({
               type: r.role_type,
               verified: r.is_verified,
-              active: r.is_active
-            })),
-            contextSynced: true
+              active: r.is_active,
+              id: r.id.substring(0, 8) + '...'
+            }))
           });
+          
+          // If user has multiple verified roles but no active role, this is a critical issue
+          if (roles.filter(r => r.is_verified).length > 1 && !activeRoleData) {
+            console.error("🚨 CRITICAL: Multi-role user with no active role - this should not happen!");
+            
+            // Emergency fallback: manually set the first verified role as active in local state only
+            const firstVerified = roles.find(r => r.is_verified);
+            if (firstVerified) {
+              console.log("🆘 CONTEXT: Emergency fallback - using first verified role locally:", firstVerified.role_type);
+              
+              const emergencyUpdatedRoles = roles.map(r => ({
+                ...r,
+                is_active: r.id === firstVerified.id
+              }));
+              
+              setUserRoles(emergencyUpdatedRoles);
+              setActiveRole(firstVerified);
+              
+              console.log("⚡ CONTEXT: Emergency active role set:", firstVerified.role_type);
+            }
+          }
         }
         
       } catch (roleLoadError) {
