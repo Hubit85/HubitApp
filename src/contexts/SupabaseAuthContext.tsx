@@ -140,7 +140,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Helper function to extract role-specific data from user data
-  const extractRoleSpecificData = (userData: any, roleType: string): Record<string, any> => {
+  const extractRoleSpecificData = (userData: any & { email: string }, roleType: string): Record<string, any> => {
     const commonFields = {
       full_name: userData.full_name,
       phone: userData.phone,
