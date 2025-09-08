@@ -432,7 +432,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       const requestData: BudgetRequestInsert = {
         ...formData,
         user_id: user!.id,
-        // Convert empty strings to null for optional fields
+        // Convert empty strings to null for optional fields, ensure proper types
         budget_range_min: formData.budget_range_min || null,
         budget_range_max: formData.budget_range_max || null,
         preferred_date: formData.preferred_date || null,

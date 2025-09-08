@@ -97,7 +97,7 @@ export default function BudgetRequestManager() {
       const requestData = {
         ...currentRequest,
         user_id: user.id,
-        property_id: currentRequest.property_id || properties[0]?.id,
+        property_id: currentRequest.property_id || properties[0]?.id || '',
         title: currentRequest.title || '',
         description: currentRequest.description || '',
         category: currentRequest.category as typeof CATEGORIES[number] || 'maintenance',
