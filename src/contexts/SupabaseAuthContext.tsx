@@ -165,7 +165,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '', // FIXED: Always provide fallback
+          business_email: userData.business_email || userData.email || '',
           business_phone: userData.business_phone || userData.phone,
           selected_services: userData.selected_services || [],
           service_costs: userData.service_costs || {}
@@ -180,7 +180,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '', // FIXED: Always provide fallback
+          business_email: userData.business_email || userData.email || '',
           business_phone: userData.business_phone || userData.phone,
           professional_number: userData.professional_number || ''
         };
@@ -234,9 +234,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         console.log("✅ Sign up successful with immediate session");
         
         try {
+          // FIXED: Use email parameter, which is guaranteed to be a string
           const profileData: ProfileInsert = {
             id: data.user.id,
-            email: email, // FIXED: Use the email parameter directly, not data.user.email
+            email: email, // FIXED: Using the guaranteed string parameter
             ...userData,
           };
 
@@ -434,7 +435,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       if (!isConnected) {
         console.log("📱 Database offline - using emergency profile");
         
-        // Create emergency profile from user metadata
+        // Create emergency profile from user metadata - FIXED: Always provide email fallback
         const emergencyProfile: Profile = {
           id: userObject.id,
           email: userObject.email || '', // FIXED: Always provide empty string as fallback
@@ -488,7 +489,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           setProfile(profileData);
           console.log("✅ Profile loaded from database with user_type:", profileData.user_type);
         } else {
-          // Create new profile if it doesn't exist
+          // Create new profile if it doesn't exist - FIXED: Always provide email fallback
           console.log("📝 Creating new profile...");
           
           const newProfileData: ProfileInsert = {
@@ -541,6 +542,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       } catch (profileFetchError) {
         console.warn("⚠️ Profile fetch timeout, using emergency profile");
         
+        // FIXED: Always provide email fallback
         const emergencyProfile: Profile = {
           id: userObject.id,
           email: userObject.email || '', // FIXED: Always provide empty string as fallback
