@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Loader2, Database, User, Settings, AlertTriangle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 export default function SupabaseStatus() {
@@ -11,81 +11,74 @@ export default function SupabaseStatus() {
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'placeholder'>('checking');
   const [dbStatus, setDbStatus] = useState<'checking' | 'ready' | 'error' | 'placeholder'>('checking');
 
-  // Check if we're using placeholder configuration
-  const isPlaceholderConfig = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project') || 
-                             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.includes('placeholder') ||
-                             !isSupabaseConfigured();
+  const configured = isSupabaseConfigured();
+
+  const checkConnection = useCallback(async (): Promise<boolean> => {
+    if (!configured) {
+      return false;
+    }
+    try {
+      const timeoutPromise = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000));
+      const connectionPromise = supabase.from('profiles').select('id').limit(0);
+      const { error } = await Promise.race([connectionPromise, timeoutPromise]);
+      const connected = !error || error.code === 'PGRST116';
+      return connected;
+    } catch (error) {
+      console.warn('🚨 Connection check failed:', error);
+      return false;
+    }
+  }, [configured]);
+
+  const checkDatabaseTables = useCallback(async () => {
+    if (!configured) {
+      setDbStatus('placeholder');
+      return;
+    }
+    try {
+      setDbStatus('checking');
+      const timeoutPromise = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Database check timeout')), 8000));
+      const checksPromise = Promise.allSettled([
+        supabase.from('profiles').select('count', { count: 'exact' }).limit(1),
+        supabase.from('properties').select('count', { count: 'exact' }).limit(1),
+        supabase.from('budget_requests').select('count', { count: 'exact' }).limit(1),
+      ]);
+      const results = await Promise.race([checksPromise, timeoutPromise]);
+      const hasFailures = results.some((result: any) => {
+        if (result.status === 'rejected') return true;
+        if (result.status === 'fulfilled' && result.value.error) {
+          const acceptableErrors = ['PGRST116', 'PGRST103', '42501'];
+          return !acceptableErrors.includes(result.value.error.code);
+        }
+        return false;
+      });
+      setDbStatus(hasFailures ? 'error' : 'ready');
+    } catch (error) {
+      console.warn('⚠️ Database tables check exception:', error);
+      setDbStatus('error');
+    }
+  }, [configured]);
 
   useEffect(() => {
     let mounted = true;
     let checkInterval: NodeJS.Timeout;
 
-    const performConnectionCheck = async () => {
+    const runChecks = () => {
       if (!mounted) return;
-      
-      // Skip network calls if using placeholder configuration
-      if (isPlaceholderConfig) {
-        if (mounted) {
-          setConnectionStatus('placeholder');
-        }
+      if (!configured) {
+        setConnectionStatus('placeholder');
+        setDbStatus('placeholder');
         return;
       }
-      
-      try {
-        setConnectionStatus('checking');
-        
-        const isConnected = await checkConnection();
-        
-        if (mounted) {
-          setConnectionStatus(isConnected ? 'connected' : 'error');
-          
-          // Only show errors in console if not placeholder
-          if (!isConnected) {
-            console.warn('⚠️ Supabase connection appears to be down');
-          } else if (connectionStatus === 'error' && isConnected) {
-            console.log('✅ Supabase connection restored');
-          }
-        }
-      } catch (error) {
-        console.warn('🔍 Connection check error:', error);
-        if (mounted) {
-          setConnectionStatus('error');
-        }
-      }
+      checkConnection().then(connected => {
+        if(mounted) setConnectionStatus(connected ? 'connected' : 'error');
+      });
+      checkDatabaseTables();
     };
+    
+    runChecks();
 
-    const performDatabaseCheck = async () => {
-      if (!mounted) return;
-      
-      // Skip network calls if using placeholder configuration
-      if (isPlaceholderConfig) {
-        if (mounted) {
-          setDbStatus('placeholder');
-        }
-        return;
-      }
-      
-      try {
-        setDbStatus('checking');
-        await checkDatabaseTables();
-      } catch (error) {
-        console.warn('🔍 Database check error:', error);
-        if (mounted) {
-          setDbStatus('error');
-        }
-      }
-    };
-
-    // Initial checks
-    performConnectionCheck();
-    performDatabaseCheck();
-
-    // Set up periodic checks only if not using placeholder config
-    if (!isPlaceholderConfig) {
-      checkInterval = setInterval(() => {
-        performConnectionCheck();
-        performDatabaseCheck();
-      }, 30000);
+    if (configured) {
+      checkInterval = setInterval(runChecks, 30000);
     }
 
     return () => {
@@ -94,88 +87,7 @@ export default function SupabaseStatus() {
         clearInterval(checkInterval);
       }
     };
-  }, [isPlaceholderConfig]);
-
-  const checkConnection = async (): Promise<boolean> => {
-    // Don't make network calls to placeholder URLs
-    if (isPlaceholderConfig) {
-      return false;
-    }
-
-    try {
-      // Create a simple timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Connection timeout')), 5000);
-      });
-
-      // Try a very lightweight query that doesn't depend on RLS
-      const connectionPromise = supabase
-        .from('profiles')
-        .select('id')
-        .limit(0);
-
-      const result = await Promise.race([connectionPromise, timeoutPromise]) as any;
-      const { error } = result;
-
-      // Connection is OK if no error or if it's just "no rows found" 
-      const connected = !error || error.code === 'PGRST116';
-      
-      console.log('🔗 Connection check result:', {
-        connected,
-        error: error?.message || 'none',
-        code: error?.code || 'none'
-      });
-
-      return connected;
-
-    } catch (error) {
-      console.warn('🚨 Connection check failed:', error);
-      return false;
-    }
-  };
-
-  const checkDatabaseTables = async () => {
-    // Don't make network calls to placeholder URLs
-    if (isPlaceholderConfig) {
-      setDbStatus('placeholder');
-      return;
-    }
-
-    try {
-      console.log('🔍 Checking database tables...');
-      
-      // Create timeout for database checks
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Database check timeout')), 8000);
-      });
-
-      // Check if main tables exist by testing specific queries with better error handling
-      const checksPromise = Promise.allSettled([
-        supabase.from('profiles').select('count').limit(1),
-        supabase.from('properties').select('count').limit(1),
-        supabase.from('budget_requests').select('count').limit(1)
-      ]);
-      
-      const checks = await Promise.race([checksPromise, timeoutPromise]) as any;
-      
-      const hasFailures = checks.some((result: any) => {
-        if (result.status === 'rejected') return true;
-        if (result.status === 'fulfilled' && result.value.error) {
-          // Allow certain "acceptable" errors that indicate the table exists but query failed due to RLS
-          const acceptableErrors = ['PGRST116', 'PGRST103', '42501'];
-          return !acceptableErrors.includes(result.value.error.code);
-        }
-        return false;
-      });
-      
-      console.log('✅ Database tables check completed:', { hasFailures });
-      setDbStatus(hasFailures ? 'error' : 'ready');
-      
-    } catch (error) {
-      console.warn('⚠️ Database tables check exception:', error);
-      setDbStatus('error');
-    }
-  };
+  }, [configured, checkConnection, checkDatabaseTables]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -190,15 +102,9 @@ export default function SupabaseStatus() {
 
   const getStatusBadge = (status: string, label: string) => {
     let variant: "default" | "secondary" | "destructive" | "outline" = "secondary";
-    
-    if (status === 'connected' || status === 'ready') {
-      variant = 'default';
-    } else if (status === 'error') {
-      variant = 'destructive';
-    } else if (status === 'placeholder') {
-      variant = 'outline';
-    }
-    
+    if (status === 'connected' || status === 'ready') variant = 'default';
+    else if (status === 'error') variant = 'destructive';
+    else if (status === 'placeholder') variant = 'outline';
     return (
       <Badge variant={variant} className="flex items-center gap-2">
         {getStatusIcon(status)}
@@ -207,8 +113,7 @@ export default function SupabaseStatus() {
     );
   };
 
-  // Show configuration notice if using placeholder config
-  if (isPlaceholderConfig) {
+  if (!configured) {
     return (
       <Card className="w-full max-w-2xl bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60 shadow-lg shadow-amber-900/5">
         <CardHeader>
@@ -263,7 +168,6 @@ export default function SupabaseStatus() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Connection Status */}
         <div className="space-y-3">
           <h3 className="font-medium text-neutral-900 flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -276,8 +180,6 @@ export default function SupabaseStatus() {
                            connectionStatus === 'placeholder' ? 'Placeholder' : 'Checking...')}
           </div>
         </div>
-
-        {/* Database Schema */}
         <div className="space-y-3">
           <h3 className="font-medium text-neutral-900 flex items-center gap-2">
             <Database className="h-4 w-4" />
@@ -290,8 +192,6 @@ export default function SupabaseStatus() {
                            dbStatus === 'placeholder' ? 'Placeholder' : 'Checking...')}
           </div>
         </div>
-
-        {/* Authentication Status */}
         <div className="space-y-3">
           <h3 className="font-medium text-neutral-900 flex items-center gap-2">
             <User className="h-4 w-4" />
@@ -329,8 +229,6 @@ export default function SupabaseStatus() {
             )}
           </div>
         </div>
-
-        {/* Configuration Info */}
         <div className="space-y-3">
           <h3 className="font-medium text-neutral-900">Configuration</h3>
           <div className="text-xs text-neutral-600 space-y-1 bg-neutral-50/50 p-3 rounded-lg font-mono">
@@ -338,19 +236,17 @@ export default function SupabaseStatus() {
             <p><span className="font-semibold">Key:</span> {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20)}...</p>
           </div>
         </div>
-
-        {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => {
-              if (!isPlaceholderConfig) {
+              if (configured) {
                 checkConnection();
                 checkDatabaseTables();
               }
             }}
-            disabled={isPlaceholderConfig}
+            disabled={!configured}
             className="bg-transparent hover:bg-neutral-50"
           >
             Check connection
