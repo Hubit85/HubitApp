@@ -169,48 +169,40 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           
           // Try up to 3 times with different SQL approaches
           for (let attempt = 1; attempt <= 3; attempt++) {
-            console.log(`🔄 CONTEXT: Fallback attempt ${attempt}/1`);
+            console.log(`🔄 CONTEXT: Fallback attempt ${attempt}/3`);
             
             try {
-              // Use a single transaction-like operation
-              const { data: resetData, error: resetError } = await supabase.rpc('activate_user_role', {
-                target_user_id: userId,
-                target_role_type: roleToActivate.role_type
-              });
+              // Manual transaction simulation instead of RPC
+              console.log("🔧 CONTEXT: Using manual transaction");
               
-              // If RPC doesn't exist, fall back to manual transaction
-              if (resetError && resetError.message.includes('function')) {
-                console.log("🔧 CONTEXT: RPC not available, using manual transaction");
-                
-                // Manual transaction simulation
-                const { error: updateError } = await supabase
-                  .from('user_roles')
-                  .update({ 
-                    is_active: false,
-                    updated_at: new Date().toISOString()
-                  })
-                  .eq('user_id', userId);
-                
-                if (updateError) throw updateError;
-                
-                const { data: activateData, error: activateError } = await supabase
-                  .from('user_roles')
-                  .update({ 
-                    is_active: true,
-                    updated_at: new Date().toISOString()
-                  })
-                  .eq('user_id', userId)
-                  .eq('role_type', roleToActivate.role_type)
-                  .eq('is_verified', true)
-                  .select()
-                  .single();
-                
-                if (activateError) throw activateError;
-                
-                if (activateData) {
-                  console.log(`✅ CONTEXT: Fallback attempt ${attempt} SUCCESS`);
-                  return activateData as UserRole;
-                }
+              // Manual transaction simulation
+              const { error: updateError } = await supabase
+                .from('user_roles')
+                .update({ 
+                  is_active: false,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId);
+              
+              if (updateError) throw updateError;
+              
+              const { data: activateData, error: activateError } = await supabase
+                .from('user_roles')
+                .update({ 
+                  is_active: true,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', userId)
+                .eq('role_type', roleToActivate.role_type)
+                .eq('is_verified', true)
+                .select()
+                .single();
+              
+              if (activateError) throw activateError;
+              
+              if (activateData) {
+                console.log(`✅ CONTEXT: Fallback attempt ${attempt} SUCCESS`);
+                return activateData as UserRole;
               }
               
               // If we get here, try next attempt
