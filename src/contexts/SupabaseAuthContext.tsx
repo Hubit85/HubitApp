@@ -140,7 +140,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Helper function to extract role-specific data from user data
-  const extractRoleSpecificData = (userData: any & { email: string }, roleType: string): Record<string, any> => {
+  const extractRoleSpecificData = (userData: any, roleType: string): Record<string, any> => {
     const commonFields = {
       full_name: userData.full_name,
       phone: userData.phone,
@@ -165,7 +165,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email,
+          business_email: userData.business_email || userData.email, // Now userData.email is guaranteed
           business_phone: userData.business_phone || userData.phone,
           selected_services: userData.selected_services || [],
           service_costs: userData.service_costs || {}
@@ -180,7 +180,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           company_province: userData.company_province || userData.province,
           company_country: userData.company_country || userData.country,
           cif: userData.cif || '',
-          business_email: userData.business_email || userData.email,
+          business_email: userData.business_email || userData.email, // Now userData.email is guaranteed
           business_phone: userData.business_phone || userData.phone,
           professional_number: userData.professional_number || ''
         };
