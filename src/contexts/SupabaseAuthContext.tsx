@@ -133,6 +133,57 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Helper function to extract role-specific data from user data
+  const extractRoleSpecificData = (userData: any, roleType: string): Record<string, any> => {
+    const commonFields = {
+      full_name: userData.full_name,
+      phone: userData.phone,
+      address: userData.address,
+      postal_code: userData.postal_code,
+      city: userData.city,
+      province: userData.province,
+      country: userData.country
+    };
+
+    switch (roleType) {
+      case 'particular':
+      case 'community_member':
+        return commonFields;
+      
+      case 'service_provider':
+        return {
+          company_name: userData.company_name || userData.full_name,
+          company_address: userData.company_address || userData.address,
+          company_postal_code: userData.company_postal_code || userData.postal_code,
+          company_city: userData.company_city || userData.city,
+          company_province: userData.company_province || userData.province,
+          company_country: userData.company_country || userData.country,
+          cif: userData.cif || '',
+          business_email: userData.business_email || userData.email,
+          business_phone: userData.business_phone || userData.phone,
+          selected_services: userData.selected_services || [],
+          service_costs: userData.service_costs || {}
+        };
+      
+      case 'property_administrator':
+        return {
+          company_name: userData.company_name || userData.full_name,
+          company_address: userData.company_address || userData.address,
+          company_postal_code: userData.company_postal_code || userData.postal_code,
+          company_city: userData.company_city || userData.city,
+          company_province: userData.company_province || userData.province,
+          company_country: userData.company_country || userData.country,
+          cif: userData.cif || '',
+          business_email: userData.business_email || userData.email,
+          business_phone: userData.business_phone || userData.phone,
+          professional_number: userData.professional_number || ''
+        };
+      
+      default:
+        return commonFields;
+    }
+  };
+
   // ENHANCED signUp with improved multiple roles creation
   const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'> & { 
     // NUEVO: Soporte para múltiples roles durante el registro
@@ -230,10 +281,20 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
               }
 
-              // FIXED: Create role record with proper typing
+              // FIXED: Create role record with proper typing and validation
+              const validRoleTypes = ['particular', 'community_member', 'service_provider', 'property_administrator'] as const;
+              type ValidRoleType = typeof validRoleTypes[number];
+              
+              // Validate role type before using it
+              if (!validRoleTypes.includes(roleRequest.roleType as ValidRoleType)) {
+                console.error(`❌ Invalid role type: ${roleRequest.roleType}`);
+                roleErrors.push(`${roleRequest.roleType}: Tipo de rol inválido`);
+                continue;
+              }
+
               const roleInsertData = {
                 user_id: data.user.id,
-                role_type: roleRequest.roleType,
+                role_type: roleRequest.roleType as ValidRoleType, // FIXED: Using validated type
                 is_verified: true,
                 is_active: isFirstRole, // First role is active by default
                 role_specific_data: processedRoleData,
@@ -344,57 +405,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("❌ Native multi-role sign up exception:", error);
       return { error: "Error inesperado durante el registro" };
-    }
-  };
-
-  // Helper function to extract role-specific data from user data
-  const extractRoleSpecificData = (userData: any, roleType: string): Record<string, any> => {
-    const commonFields = {
-      full_name: userData.full_name,
-      phone: userData.phone,
-      address: userData.address,
-      postal_code: userData.postal_code,
-      city: userData.city,
-      province: userData.province,
-      country: userData.country
-    };
-
-    switch (roleType) {
-      case 'particular':
-      case 'community_member':
-        return commonFields;
-      
-      case 'service_provider':
-        return {
-          company_name: userData.company_name || userData.full_name,
-          company_address: userData.company_address || userData.address,
-          company_postal_code: userData.company_postal_code || userData.postal_code,
-          company_city: userData.company_city || userData.city,
-          company_province: userData.company_province || userData.province,
-          company_country: userData.company_country || userData.country,
-          cif: userData.cif || '',
-          business_email: userData.business_email || userData.email,
-          business_phone: userData.business_phone || userData.phone,
-          selected_services: userData.selected_services || [],
-          service_costs: userData.service_costs || {}
-        };
-      
-      case 'property_administrator':
-        return {
-          company_name: userData.company_name || userData.full_name,
-          company_address: userData.company_address || userData.address,
-          company_postal_code: userData.company_postal_code || userData.postal_code,
-          company_city: userData.company_city || userData.city,
-          company_province: userData.company_province || userData.province,
-          company_country: userData.company_country || userData.country,
-          cif: userData.cif || '',
-          business_email: userData.business_email || userData.email,
-          business_phone: userData.business_phone || userData.phone,
-          professional_number: userData.professional_number || ''
-        };
-      
-      default:
-        return commonFields;
     }
   };
 
