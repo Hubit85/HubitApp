@@ -644,7 +644,7 @@ export function ContractManager() {
                             {contract.end_date && (
                               <div className="flex items-center gap-1 text-orange-600">
                                 <Clock className="h-4 w-4" />
-                                <span>Fecha límite: {new Date(contract.end_date as string).toLocaleDateString()}</span>
+                                <span>Fecha límite: {new Date(contract.end_date).toLocaleDateString()}</span>
                               </div>
                             )}
                           </div>
