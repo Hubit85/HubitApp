@@ -311,7 +311,275 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Enhanced fetchUserData with bulletproof role loading
+  // Enhanced signUp with improved user_type synchronization
+  const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
+    try {
+      console.log("📝 Starting enhanced sign up process...");
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: userData.full_name,
+            user_type: userData.user_type,
+            phone: userData.phone,
+            address: userData.address,
+            city: userData.city,
+            postal_code: userData.postal_code,
+            province: userData.province,
+            country: userData.country
+          }
+        }
+      });
+
+      if (error) {
+        console.error("❌ Sign up error:", error);
+        return { error: error.message };
+      }
+
+      if (!data.user) {
+        return { error: "No se pudo crear la cuenta" };
+      }
+
+      // Check if immediate session or needs confirmation
+      if (!data.session && !data.user.email_confirmed_at) {
+        return { 
+          message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
+        };
+      }
+
+      if (data.session) {
+        console.log("✅ Enhanced sign up successful with immediate session");
+        
+        // Try to create profile with proper user_type synchronization
+        try {
+          const profileData: ProfileInsert = {
+            id: data.user.id,
+            email: data.user.email!,
+            ...userData,
+          };
+
+          // CRITICAL: Create profile first to establish user_type baseline
+          const { data: createdProfile, error: profileError } = await supabase
+            .from("profiles")
+            .insert(profileData)
+            .select()
+            .single();
+
+          if (profileError) {
+            console.error("❌ Profile creation failed:", profileError);
+            throw profileError;
+          }
+
+          console.log("✅ Profile created successfully with user_type:", profileData.user_type);
+
+          // Enhanced role-specific data preparation
+          const roleSpecificData: any = {};
+          
+          if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
+            roleSpecificData.full_name = userData.full_name;
+            roleSpecificData.phone = userData.phone;
+            roleSpecificData.address = userData.address;
+            roleSpecificData.postal_code = userData.postal_code;
+            roleSpecificData.city = userData.city;
+            roleSpecificData.province = userData.province;
+            roleSpecificData.country = userData.country;
+            
+            // Additional fields for community members
+            if (userData.user_type === 'community_member') {
+              roleSpecificData.community_name = (userData as any).community_name || '';
+              roleSpecificData.portal_number = (userData as any).portal_number || '';
+              roleSpecificData.apartment_number = (userData as any).apartment_number || '';
+              
+              // Generate community code if not provided
+              if (!roleSpecificData.community_name && userData.address) {
+                roleSpecificData.community_code = generateCommunityCode(userData.address);
+              }
+            }
+          }
+          
+          // CRITICAL: Ensure user_type is defined and valid before creating primary role
+          const validUserType = userData.user_type;
+          if (!validUserType || !['particular', 'community_member', 'service_provider', 'property_administrator'].includes(validUserType)) {
+            console.error('❌ Invalid user_type for role creation:', validUserType);
+            return { error: "Tipo de usuario inválido para crear el rol" };
+          }
+          
+          // ENHANCED: Create primary role with explicit synchronization
+          const { data: primaryRoleData, error: primaryRoleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: data.user.id,
+              role_type: validUserType,
+              is_active: true,  // Primary role is always active
+              is_verified: true,  // Auto-verify during registration
+              verification_confirmed_at: new Date().toISOString(),
+              role_specific_data: roleSpecificData
+            })
+            .select()
+            .single();
+
+          if (primaryRoleError) {
+            console.error("❌ Primary role creation failed:", primaryRoleError);
+            throw primaryRoleError;
+          }
+
+          console.log("✅ Primary role created successfully:", primaryRoleData.role_type);
+
+          // CRITICAL: Verify synchronization between profiles.user_type and user_roles
+          await ensureUserTypeSynchronization(data.user.id, validUserType);
+          
+          console.log("✅ Profile and primary role created with enhanced synchronization");
+
+          // Create default property for roles that need it
+          if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
+            console.log("🏠 Creating default property for user with role:", userData.user_type);
+            
+            const propertyUserData: UserPropertyData = {
+              full_name: userData.full_name || 'Usuario',
+              address: userData.address || '',
+              city: userData.city || '',
+              postal_code: userData.postal_code || '',
+              province: userData.province || '',
+              country: userData.country || 'España',
+              community_name: (userData as any).community_name || '',
+              portal_number: (userData as any).portal_number || '',
+              apartment_number: (userData as any).apartment_number || '',
+              user_type: userData.user_type
+            };
+
+            try {
+              const propertyResult = await PropertyAutoService.createDefaultProperty(data.user.id, propertyUserData);
+              if (propertyResult.success) {
+                console.log("✅ Default property created successfully:", propertyResult.message);
+              } else {
+                console.warn("⚠️ Property creation failed:", propertyResult.message);
+                // No fallar completamente el registro por esto
+              }
+            } catch (propertyError) {
+              console.warn("⚠️ Property creation error (non-critical):", propertyError);
+              // No fallar el registro por errores de propiedad
+            }
+          }
+          
+        } catch (profileError) {
+          console.warn("⚠️ Profile creation failed but user was created:", profileError);
+        }
+
+        return { success: true, userId: data.user.id };
+      }
+
+      return { 
+        message: "Cuenta creada. Por favor revisa tu email para confirmar antes de iniciar sesión." 
+      };
+      
+    } catch (error) {
+      console.error("❌ Enhanced sign up exception:", error);
+      return { error: "Error inesperado durante el registro" };
+    }
+  };
+
+  // NEW FUNCTION: Ensure synchronization between profiles.user_type and active user_roles
+  const ensureUserTypeSynchronization = async (userId: string, expectedUserType: string): Promise<void> => {
+    try {
+      console.log("🔄 SYNC: Starting user_type synchronization check...");
+
+      // Get current profile user_type
+      const { data: currentProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        console.warn("⚠️ SYNC: Could not fetch profile for sync:", profileError);
+        return;
+      }
+
+      // Get active role from user_roles
+      const { data: activeRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role_type')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .eq('is_verified', true)
+        .single();
+
+      if (roleError && roleError.code !== 'PGRST116') {
+        console.warn("⚠️ SYNC: Could not fetch active role for sync:", roleError);
+      }
+
+      const profileUserType = currentProfile.user_type;
+      const activeRoleType = activeRole?.role_type;
+
+      console.log("🔍 SYNC: Current state:", {
+        profileUserType,
+        activeRoleType,
+        expectedUserType,
+        needsSync: profileUserType !== activeRoleType || profileUserType !== expectedUserType
+      });
+
+      // Determine the correct user_type (priority: active role > expected > current profile)
+      let correctUserType = expectedUserType;
+      if (activeRoleType && activeRoleType !== profileUserType) {
+        correctUserType = activeRoleType;
+        console.log("📝 SYNC: Using active role as correct user_type:", correctUserType);
+      }
+
+      // Update profile.user_type if needed
+      if (profileUserType !== correctUserType) {
+        console.log(`🔄 SYNC: Updating profile.user_type from "${profileUserType}" to "${correctUserType}"`);
+        
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ 
+            user_type: correctUserType as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userId);
+
+        if (updateError) {
+          console.error("❌ SYNC: Failed to update profile.user_type:", updateError);
+        } else {
+          console.log("✅ SYNC: Profile.user_type updated successfully");
+        }
+      }
+
+      // Also ensure there's always an active role that matches
+      if (!activeRoleType || activeRoleType !== correctUserType) {
+        console.log("🔄 SYNC: Ensuring active role matches user_type");
+        
+        // First, deactivate all roles
+        await supabase
+          .from('user_roles')
+          .update({ is_active: false })
+          .eq('user_id', userId);
+
+        // Then activate the role that matches the correct user_type
+        const { error: activateError } = await supabase
+          .from('user_roles')
+          .update({ is_active: true })
+          .eq('user_id', userId)
+          .eq('role_type', correctUserType)
+          .eq('is_verified', true);
+
+        if (activateError) {
+          console.error("❌ SYNC: Failed to activate matching role:", activateError);
+        } else {
+          console.log("✅ SYNC: Active role synchronized with user_type");
+        }
+      }
+
+      console.log("✅ SYNC: User_type synchronization completed successfully");
+
+    } catch (error) {
+      console.error("❌ SYNC: Error in user_type synchronization:", error);
+      // Don't throw - this is a synchronization helper, not critical for user creation
+    }
+  };
+
+  // Enhanced fetchUserData with improved user_type synchronization
   const fetchUserData = async (userObject: User) => {
     if (!userObject) {
       setLoading(false);
@@ -358,7 +626,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Step 1: Load or create profile
+      // Step 1: Load or create profile with synchronization
       try {        
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Profile fetch timeout')), 15000);
@@ -379,7 +647,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
         if (profileData) {
           setProfile(profileData);
-          console.log("✅ Profile loaded from database");
+          console.log("✅ Profile loaded from database with user_type:", profileData.user_type);
+          
+          // ENHANCED: Perform synchronization check after loading profile
+          await ensureUserTypeSynchronization(userObject.id, profileData.user_type);
+          
         } else {
           // Create new profile if it doesn't exist
           console.log("📝 Creating new profile...");
@@ -406,6 +678,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             if (!createError && createdProfile) {
               setProfile(createdProfile);
               console.log("✅ Profile created successfully");
+              
+              // Ensure synchronization for new profile
+              await ensureUserTypeSynchronization(userObject.id, newProfileData.user_type!);
+              
             } else {
               throw new Error(`Profile creation failed: ${createError?.message || 'Unknown error'}`);
             }
@@ -461,7 +737,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setProfile(emergencyProfile);
       }
 
-      // Step 2: BULLETPROOF ROLE LOADING SYSTEM
+      // Step 2: BULLETPROOF ROLE LOADING SYSTEM (unchanged from previous implementation)
       try {
         console.log("🎭 CONTEXT: Starting bulletproof role loading system...");
         
@@ -545,15 +821,34 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setUserRoles(finalRoles);
         console.log(`📋 CONTEXT: Final roles loaded: ${finalRoles.length} roles`);
 
-        // Step 3: BULLETPROOF ACTIVE ROLE MANAGEMENT
+        // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT with user_type sync
         if (finalRoles.length > 0) {
-          console.log("🎯 CONTEXT: Starting bulletproof active role management...");
+          console.log("🎯 CONTEXT: Starting enhanced active role management with sync...");
           
           try {
             finalActiveRole = await ensureActiveRole(userObject.id, finalRoles);
             
             if (finalActiveRole) {
               console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
+              
+              // CRITICAL: Ensure profile.user_type matches active role
+              const currentProfile = profile || (await supabase.from('profiles').select('user_type').eq('id', userObject.id).single()).data;
+              if (currentProfile && currentProfile.user_type !== finalActiveRole.role_type) {
+                console.log("🔄 CONTEXT: Syncync profile.user_type with active role");
+                await ensureUserTypeSynchronization(userObject.id, finalActiveRole.role_type);
+                
+                // Refresh profile data
+                const { data: refreshedProfile } = await supabase
+                  .from('profiles')
+                  .select('*')
+                  .eq('id', userObject.id)
+                  .single();
+                
+                if (refreshedProfile) {
+                  setProfile(refreshedProfile);
+                  console.log("✅ CONTEXT: Profile refreshed with synchronized user_type");
+                }
+              }
               
               // Update local roles state to reflect any changes
               const updatedRoles = finalRoles.map(r => ({
@@ -579,18 +874,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setActiveRole(finalActiveRole);
         
         // Final status logging
-        console.log("🏁 CONTEXT: Role loading system completed:", {
+        console.log("🏁 CONTEXT: Enhanced role loading system completed:", {
           userId: userObject.id.substring(0, 8) + '...',
           email: userObject.email,
           totalRoles: finalRoles.length,
           verifiedRoles: finalRoles.filter(r => r.is_verified).length,
           activeRole: finalActiveRole?.role_type || 'none',
-          systemStatus: 'completed'
+          systemStatus: 'completed with sync'
         });
         
         // Special logging for multi-role users
         if (finalRoles.length > 1) {
-          console.log("🌟 MULTI-ROLE USER SUCCESS:", {
+          console.log("🌟 MULTI-ROLE USER SUCCESS WITH SYNC:", {
             userId: userObject.id.substring(0, 8) + '...',
             email: userObject.email,
             allRoles: finalRoles.map(r => ({
@@ -600,7 +895,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               id: r.id.substring(0, 8) + '...'
             })),
             activeRoleSet: !!finalActiveRole,
-            readyForDashboard: true
+            readyForDashboard: true,
+            syncCompleted: true
           });
         }
 
@@ -644,277 +940,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       setActiveRole(null);
     } finally {
       setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-
-    const initializeAuth = async () => {
-      try {
-        console.log("🚀 Initializing Enhanced Supabase Auth System...");
-        
-        // Check connection first
-        await checkConnection();
-        
-        // Get current session with timeout
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
-        
-        if (error) {
-          console.error("❌ Error getting session:", error);
-          setLoading(false);
-          return;
-        }
-
-        console.log("📱 Session status:", !!session);
-        setSession(session);
-        setUser(session?.user || null);
-        
-        if (session?.user) {
-          await fetchUserData(session.user);
-        } else {
-          setLoading(false);
-        }
-        
-      } catch (error) {
-        console.error("❌ Error initializing enhanced auth:", error);
-        if (mounted) {
-          setLoading(false);
-          setIsConnected(false);
-        }
-      }
-    };
-
-    initializeAuth();
-
-    // Listen for auth changes with improved error handling
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        
-        console.log("🔄 Enhanced auth state changed:", event, !!session?.user);
-        
-        setSession(session);
-        setUser(session?.user || null);
-        
-        if (session?.user) {
-          await fetchUserData(session.user);
-        } else {
-          setProfile(null);
-          setUserRoles([]);
-          setActiveRole(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    // Periodic connection check every 30 seconds
-    const connectionCheckInterval = setInterval(async () => {
-      if (mounted && user) {
-        await checkConnection();
-      }
-    }, 30000);
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-      clearInterval(connectionCheckInterval);
-    };
-  }, []);
-
-  const refreshRoles = async () => {
-    if (!user) return;
-    
-    try {
-      console.log("🔄 CONTEXT: Refreshing roles manually...");
-      const roles = await SupabaseUserRoleService.getUserRoles(user.id);
-      setUserRoles(roles);
-      
-      // Ensure active role after refresh
-      const activeRoleData = await ensureActiveRole(user.id, roles);
-      setActiveRole(activeRoleData);
-      
-      console.log("✅ CONTEXT: Roles refreshed successfully");
-    } catch (error) {
-      console.error("❌ CONTEXT: Error refreshing roles:", error);
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      console.log("🔑 Starting enhanced sign in process...");
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        console.error("❌ Sign in error:", error.message);
-        
-        // Provide user-friendly error messages
-        let userMessage = error.message;
-        if (error.message.includes('Invalid login credentials')) {
-          userMessage = "Credenciales incorrectas. Verifica tu email y contraseña.";
-        } else if (error.message.includes('Email not confirmed')) {
-          userMessage = "Por favor confirma tu email antes de iniciar sesión.";
-        } else if (error.message.includes('Too many requests')) {
-          userMessage = "Demasiados intentos. Espera unos minutos antes de intentar de nuevo.";
-        }
-        
-        return { error: userMessage };
-      }
-
-      console.log("✅ Enhanced sign in successful");
-      return {};
-
-    } catch (error) {
-      console.error("❌ Sign in exception:", error);
-      return { error: "Error de conexión. Por favor intenta nuevamente." };
-    }
-  };
-
-  // Enhanced signUp with multi-role support
-  const signUp = async (email: string, password: string, userData: Omit<ProfileInsert, 'id' | 'email'>) => {
-    try {
-      console.log("📝 Starting enhanced sign up process...");
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: userData.full_name,
-            user_type: userData.user_type,
-            phone: userData.phone,
-            address: userData.address,
-            city: userData.city,
-            postal_code: userData.postal_code,
-            province: userData.province,
-            country: userData.country
-          }
-        }
-      });
-
-      if (error) {
-        console.error("❌ Sign up error:", error);
-        return { error: error.message };
-      }
-
-      if (!data.user) {
-        return { error: "No se pudo crear la cuenta" };
-      }
-
-      // Check if immediate session or needs confirmation
-      if (!data.session && !data.user.email_confirmed_at) {
-        return { 
-          message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
-        };
-      }
-
-      if (data.session) {
-        console.log("✅ Enhanced sign up successful with immediate session");
-        
-        // Try to create profile
-        try {
-          const profileData: ProfileInsert = {
-            id: data.user.id,
-            email: data.user.email!,
-            ...userData,
-          };
-
-          await supabase.from("profiles").insert(profileData);
-          
-          // Create the primary role with enhanced role-specific data
-          const roleSpecificData: any = {};
-          
-          if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
-            roleSpecificData.full_name = userData.full_name;
-            roleSpecificData.phone = userData.phone;
-            roleSpecificData.address = userData.address;
-            roleSpecificData.postal_code = userData.postal_code;
-            roleSpecificData.city = userData.city;
-            roleSpecificData.province = userData.province;
-            roleSpecificData.country = userData.country;
-            
-            // Additional fields for community members
-            if (userData.user_type === 'community_member') {
-              roleSpecificData.community_name = (userData as any).community_name || '';
-              roleSpecificData.portal_number = (userData as any).portal_number || '';
-              roleSpecificData.apartment_number = (userData as any).apartment_number || '';
-              
-              // Generate community code if not provided
-              if (!roleSpecificData.community_name && userData.address) {
-                roleSpecificData.community_code = generateCommunityCode(userData.address);
-              }
-            }
-          }
-          
-          // CRITICAL FIX: Ensure user_type is defined and valid before creating role
-          const validUserType = userData.user_type;
-          if (!validUserType || !['particular', 'community_member', 'service_provider', 'property_administrator'].includes(validUserType)) {
-            console.error('❌ Invalid user_type for role creation:', validUserType);
-            return { error: "Tipo de usuario inválido para crear el rol" };
-          }
-          
-          await supabase.from('user_roles').insert({
-            user_id: data.user.id,
-            role_type: validUserType,
-            is_active: true,
-            is_verified: true,
-            verification_confirmed_at: new Date().toISOString(),
-            role_specific_data: roleSpecificData
-          });
-          
-          console.log("✅ Profile and primary role created with enhanced data");
-
-          // Create default property for roles that need it
-          if (userData.user_type === 'particular' || userData.user_type === 'community_member') {
-            console.log("🏠 Creating default property for user with role:", userData.user_type);
-            
-            const propertyUserData: UserPropertyData = {
-              full_name: userData.full_name || 'Usuario',
-              address: userData.address || '',
-              city: userData.city || '',
-              postal_code: userData.postal_code || '',
-              province: userData.province || '',
-              country: userData.country || 'España',
-              community_name: (userData as any).community_name || '',
-              portal_number: (userData as any).portal_number || '',
-              apartment_number: (userData as any).apartment_number || '',
-              user_type: userData.user_type
-            };
-
-            try {
-              const propertyResult = await PropertyAutoService.createDefaultProperty(data.user.id, propertyUserData);
-              if (propertyResult.success) {
-                console.log("✅ Default property created successfully:", propertyResult.message);
-              } else {
-                console.warn("⚠️ Property creation failed:", propertyResult.message);
-                // No fallar completamente el registro por esto
-              }
-            } catch (propertyError) {
-              console.warn("⚠️ Property creation error (non-critical):", propertyError);
-              // No fallar el registro por errores de propiedad
-            }
-          }
-          
-        } catch (profileError) {
-          console.warn("⚠️ Profile creation failed but user was created:", profileError);
-        }
-
-        return { success: true, userId: data.user.id };
-      }
-
-      return { 
-        message: "Cuenta creada. Por favor revisa tu email para confirmar antes de iniciar sesión." 
-      };
-      
-    } catch (error) {
-      console.error("❌ Enhanced sign up exception:", error);
-      return { error: "Error inesperado durante el registro" };
     }
   };
 
