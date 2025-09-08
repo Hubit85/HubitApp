@@ -137,9 +137,10 @@ export default function BudgetRequestManager() {
     }
   };
 
-  const handleDelete = async (requestId: string) => {
-    if (!requestId) {
-      console.error("No request ID provided");
+  const handleDelete = async (requestId: string | null) => {
+    if (!requestId || typeof requestId !== 'string') {
+      console.error("Cannot delete request: ID is missing or invalid");
+      setError("Error: No se puede eliminar la solicitud porque falta el ID");
       return;
     }
     
@@ -203,15 +204,8 @@ export default function BudgetRequestManager() {
                     <Button 
                       variant="destructive" 
                       size="sm" 
-                      onClick={() => {
-                        if (req.id && typeof req.id === 'string') {
-                          handleDelete(req.id);
-                        } else {
-                          console.warn("Cannot delete request: ID is missing or invalid");
-                          setError("Error: No se puede eliminar la solicitud porque falta el ID");
-                        }
-                      }}
-                      disabled={!req.id || typeof req.id !== 'string'}
+                      onClick={() => handleDelete(req.id)}
+                      disabled={!req.id}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
