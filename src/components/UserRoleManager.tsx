@@ -73,6 +73,7 @@ export default function UserRoleManager() {
     return colors[roleType] || (isActive ? 'bg-gray-100 text-gray-800 border-gray-200' : 'bg-gray-50 text-gray-700');
   };
 
+  // Filter verified roles using strict comparison to handle null values
   const verifiedRoles = userRoles.filter(role => role.is_verified === true);
 
   if (loading) {
@@ -133,7 +134,11 @@ export default function UserRoleManager() {
                         ? 'border-emerald-200 bg-emerald-50 shadow-emerald-100' 
                         : 'border-gray-200 bg-white hover:border-blue-200 hover:bg-blue-50/30'
                     }`}
-                    onClick={() => !isActive && !submitting && handleActivateRole(role.role_type)}
+                    onClick={() => {
+                      if (!isActive && !submitting && role.role_type) {
+                        handleActivateRole(role.role_type);
+                      }
+                    }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -180,7 +185,9 @@ export default function UserRoleManager() {
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleActivateRole(role.role_type);
+                            if (role.role_type) {
+                              handleActivateRole(role.role_type);
+                            }
                           }}
                           disabled={submitting}
                         >
@@ -308,7 +315,11 @@ export default function UserRoleManager() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleActivateRole(role.role_type)}
+                            onClick={() => {
+                              if (role.role_type) {
+                                handleActivateRole(role.role_type);
+                              }
+                            }}
                             disabled={submitting}
                             className="bg-transparent hover:bg-emerald-50 border-emerald-300 text-emerald-700"
                           >
