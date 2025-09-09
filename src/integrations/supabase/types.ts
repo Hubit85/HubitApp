@@ -1717,9 +1717,47 @@ export type ServiceProvider = Tables<'service_providers'>;
 export type ServiceProviderInsert = Database["public"]["Tables"]["service_providers"]["Insert"];
 export type ServiceProviderUpdate = Database["public"]["Tables"]["service_providers"]["Update"];
 
-export type UserRole = Tables<'user_roles'>;
-export type UserRoleInsert = Database["public"]["Tables"]["user_roles"]["Insert"];
-export type UserRoleUpdate = Database["public"]["Tables"]["user_roles"]["Update"];
+export type UserRole = {
+  id: string
+  user_id: string
+  role_type: 'particular' | 'community_member' | 'service_provider' | 'property_administrator'
+  is_verified: boolean | null
+  is_active: boolean | null
+  role_specific_data: Json | null
+  verification_token: string | null
+  verification_expires_at: string | null
+  verification_confirmed_at: string | null
+  created_at: string | null
+  updated_at: string | null
+}
+
+export type UserRoleInsert = {
+  id?: string
+  user_id: string
+  role_type: 'particular' | 'community_member' | 'service_provider' | 'property_administrator'
+  is_verified?: boolean | null
+  is_active?: boolean | null
+  role_specific_data?: Json | null
+  verification_token?: string | null
+  verification_expires_at?: string | null
+  verification_confirmed_at?: string | null
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+export type UserRoleUpdate = {
+  id?: string
+  user_id?: string
+  role_type?: 'particular' | 'community_member' | 'service_provider' | 'property_administrator'
+  is_verified?: boolean | null
+  is_active?: boolean | null
+  role_specific_data?: Json | null
+  verification_token?: string | null
+  verification_expires_at?: string | null
+  verification_confirmed_at?: string | null
+  created_at?: string | null
+  updated_at?: string | null
+}
 
 export type WorkSession = Tables<'work_sessions'>;
 export type WorkSessionInsert = Database["public"]["Tables"]["work_sessions"]["Insert"];
