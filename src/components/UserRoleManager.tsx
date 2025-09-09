@@ -73,8 +73,10 @@ export default function UserRoleManager() {
     return colors[roleType] || (isActive ? 'bg-gray-100 text-gray-800 border-gray-200' : 'bg-gray-50 text-gray-700');
   };
 
-  // Filter verified roles using strict comparison to handle null values
-  const verifiedRoles = userRoles.filter(role => role.is_verified === true);
+  // Filter verified roles - properly handle boolean | null type
+  const verifiedRoles = userRoles.filter((role): role is UserRole & { is_verified: true } => {
+    return role.is_verified === true;
+  });
 
   if (loading) {
     return (
