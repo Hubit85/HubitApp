@@ -1409,118 +1409,94 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              {/* Enhanced Role Management Section */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                    Rol Activo
-                  </label>
-                  <Select
-                    value={selectedRole}
-                    onValueChange={handleRoleChange}
-                  >
-                    <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600 transition-all duration-300 rounded-lg">
-                      <SelectValue placeholder="Seleccionar rol">
-                        {selectedRole && (
+              <div className="space-y-2">
+                <label className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+                  Rol Activo
+                </label>
+                <Select
+                  value={selectedRole}
+                  onValueChange={handleRoleChange}
+                >
+                  <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600 transition-all duration-300 rounded-lg">
+                    <SelectValue placeholder="Seleccionar rol">
+                      {selectedRole && (
+                        <div className="flex items-center gap-2">
+                          <UserTypeIcon className="h-4 w-4" />
+                          <span className="text-sm">{userTypeInfo.label}</span>
+                        </div>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-700 border-gray-600">
+                    {getRoleOptions().map((role) => {
+                      const RoleIcon = role.icon;
+                      const isCurrentRole = selectedRole === role.value;
+                      return (
+                        <SelectItem 
+                          key={role.value} 
+                          value={role.value}
+                          className={`text-white transition-colors duration-200 ${
+                            isCurrentRole 
+                              ? "bg-gray-600 text-white focus:bg-gray-600" 
+                              : "hover:bg-gray-600 focus:bg-gray-600"
+                          }`}
+                        >
                           <div className="flex items-center gap-2">
-                            <UserTypeIcon className="h-4 w-4" />
-                            <span className="text-sm">{userTypeInfo.label}</span>
+                            <RoleIcon className="h-4 w-4" />
+                            <span>{role.label}</span>
+                            {isCurrentRole && <CheckCircle className="h-3 w-3 ml-1 text-green-400" />}
                           </div>
-                        )}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-700 border-gray-600">
-                      {getRoleOptions().map((role) => {
-                        const RoleIcon = role.icon;
-                        const isCurrentRole = selectedRole === role.value;
-                        return (
-                          <SelectItem 
-                            key={role.value} 
-                            value={role.value}
-                            className={`text-white transition-colors duration-200 ${
-                              isCurrentRole 
-                                ? "bg-gray-600 text-white focus:bg-gray-600" 
-                                : "hover:bg-gray-600 focus:bg-gray-600"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <RoleIcon className="h-4 w-4" />
-                              <span>{role.label}</span>
-                              {isCurrentRole && <CheckCircle className="h-3 w-3 ml-1 text-green-400" />}
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                  
-                  {getRoleOptions().length > 1 && (
-                    <p className="text-xs text-gray-400 mt-1">
-                      {getRoleOptions().length} roles disponibles
-                    </p>
-                  )}
-                  
-                  {getRoleOptions().length <= 1 && userRoles.length > 1 && (
-                    <p className="text-xs text-amber-400 mt-1">
-                      Otros roles pendientes de verificación
-                    </p>
-                  )}
-                </div>
-
-                {/* Quick Role Switch Buttons - Only show if multiple verified roles */}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                
                 {getRoleOptions().length > 1 && (
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                      Cambio Rápido
-                    </label>
-                    <div className="grid grid-cols-1 gap-1">
-                      {getRoleOptions().map((role) => {
-                        const RoleIcon = role.icon;
-                        const isCurrentRole = selectedRole === role.value;
-                        return (
-                          <Button
-                            key={role.value}
-                            variant="ghost"
-                            size="sm"
-                            className={`w-full justify-start text-left transition-all duration-200 ${
-                              isCurrentRole
-                                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                                : "text-gray-300 hover:text-white hover:bg-gray-700"
-                            }`}
-                            onClick={() => !isCurrentRole && handleRoleChange(role.value)}
-                            disabled={isCurrentRole}
-                          >
-                            <RoleIcon className="mr-2 h-4 w-4" />
-                            <span className="text-xs font-medium truncate">{role.label}</span>
-                            {isCurrentRole && <CheckCircle className="h-3 w-3 ml-auto text-emerald-200" />}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                    <div className="pt-2 border-t border-gray-600">
-                      <p className="text-xs text-gray-500 text-center">
-                        Cambiar rol actualiza el dashboard
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Role Status Indicator */}
-                <div className="p-3 bg-gray-700/50 rounded-lg border border-gray-600">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <span className="text-xs font-medium text-green-400">ESTADO ACTIVO</span>
-                  </div>
-                  <p className="text-xs text-gray-300">
-                    Usando rol de <strong>{userTypeInfo.label}</strong>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {getRoleOptions().length} roles disponibles
                   </p>
-                  {getRoleOptions().length > 1 && (
-                    <p className="text-xs text-gray-400 mt-1">
-                      {getRoleOptions().length - 1} roles adicionales disponibles
-                    </p>
-                  )}
-                </div>
+                )}
+                
+                {getRoleOptions().length <= 1 && userRoles.length > 1 && (
+                  <p className="text-xs text-amber-400 mt-1">
+                    Otros roles pendientes de verificación
+                  </p>
+                )}
               </div>
+            </div>
+
+            <div className="flex-1 p-4">
+              <nav className="space-y-2">
+                {navItems.map((item, index) => (
+                  <Button
+                    key={item.id}
+                    variant={activeTab === item.id ? "default" : "ghost"}
+                    className={`w-full justify-start text-left transition-all duration-300 ${
+                      activeTab === item.id 
+                        ? "bg-gray-700 text-white hover:bg-gray-600" 
+                        : "text-gray-300 hover:text-white hover:bg-gray-700"
+                    }`}
+                    onClick={() => setActiveTab(item.id)}
+                  >
+                    <item.icon className={`mr-3 h-4 w-4 transition-colors duration-300 ${
+                      activeTab === item.id ? "text-white" : "text-gray-400"
+                    }`} />
+                    <span className="font-medium">{item.label}</span>
+                  </Button>
+                ))}
+              </nav>
+            </div>
+
+            <div className="p-4 border-t border-gray-700">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/30 transition-all duration-300"
+                onClick={handleSignOut}
+              >
+                <LogOut className="mr-3 h-4 w-4" />
+                <span className="font-medium">Cerrar Sesión</span>
+              </Button>
             </div>
           </div>
 
