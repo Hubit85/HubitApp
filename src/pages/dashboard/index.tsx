@@ -62,16 +62,105 @@ export default function Dashboard() {
     if (!user || newRole === selectedRole || !newRole) return;
     
     try {
+      // Show loading state visually
+      const roleSelector = document.querySelector('[data-role-selector]');
+      if (roleSelector) {
+        roleSelector.style.opacity = '0.6';
+        roleSelector.style.pointerEvents = 'none';
+      }
+
+      console.log(`🔄 Iniciando cambio de rol de "${selectedRole}" a "${newRole}"`);
+      
       const result = await activateRole(newRole as any);
       
       if (result.success) {
+        console.log("✅ Cambio de rol exitoso, actualizando interfaz...");
+        
+        // Update local state immediately for better UX
+        setSelectedRole(newRole);
+        
+        // Refresh roles to get updated data
         await refreshRoles();
+        
+        // Reset to overview tab to show new role capabilities
         setActiveTab("overview");
+        
+        // Show success notification
+        const successDiv = document.createElement('div');
+        successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse';
+        successDiv.innerHTML = `
+          <div class="flex items-center gap-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>Rol cambiado exitosamente</span>
+          </div>
+        `;
+        document.body.appendChild(successDiv);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+          if (document.body.contains(successDiv)) {
+            successDiv.style.transition = 'opacity 0.5s ease-out';
+            successDiv.style.opacity = '0';
+            setTimeout(() => {
+              if (document.body.contains(successDiv)) {
+                document.body.removeChild(successDiv);
+              }
+            }, 500);
+          }
+        }, 3000);
+        
       } else {
-        alert(`Error al cambiar el rol: ${result.message}`);
+        console.error("❌ Error al cambiar rol:", result.message);
+        
+        // Show error notification
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        errorDiv.innerHTML = `
+          <div class="flex items-center gap-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span>Error: ${result.message}</span>
+          </div>
+        `;
+        document.body.appendChild(errorDiv);
+        
+        // Remove error notification after 5 seconds
+        setTimeout(() => {
+          if (document.body.contains(errorDiv)) {
+            document.body.removeChild(errorDiv);
+          }
+        }, 5000);
       }
     } catch (error) {
-      alert(`Error inesperado al cambiar el rol: ${error instanceof Error ? error.message : "Error desconocido"}`);
+      console.error("❌ Error inesperado al cambiar rol:", error);
+      
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      errorDiv.innerHTML = `
+        <div class="flex items-center gap-2">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          <span>Error inesperado al cambiar el rol</span>
+        </div>
+      `;
+      document.body.appendChild(errorDiv);
+      
+      setTimeout(() => {
+        if (document.body.contains(errorDiv)) {
+          document.body.removeChild(errorDiv);
+        }
+      }, 5000);
+    } finally {
+      // Restore role selector state
+      const roleSelector = document.querySelector('[data-role-selector]');
+      if (roleSelector) {
+        roleSelector.style.opacity = '1';
+        roleSelector.style.pointerEvents = 'auto';
+      }
     }
   };
 
@@ -1416,6 +1505,7 @@ export default function Dashboard() {
                 <Select
                   value={selectedRole}
                   onValueChange={handleRoleChange}
+                  data-role-selector
                 >
                   <SelectTrigger className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600 transition-all duration-300 rounded-lg">
                     <SelectValue placeholder="Seleccionar rol">
@@ -1435,16 +1525,16 @@ export default function Dashboard() {
                         <SelectItem 
                           key={role.value} 
                           value={role.value}
-                          className={`text-white transition-colors duration-200 ${
+                          className={`text-white transition-all duration-200 ${
                             isCurrentRole 
-                              ? "bg-gray-600 text-white focus:bg-gray-600" 
-                              : "hover:bg-gray-600 focus:bg-gray-600"
+                              ? "bg-emerald-600 text-white focus:bg-emerald-600 shadow-md" 
+                              : "hover:bg-gray-600 focus:bg-gray-600 hover:scale-105"
                           }`}
                         >
                           <div className="flex items-center gap-2">
                             <RoleIcon className="h-4 w-4" />
                             <span>{role.label}</span>
-                            {isCurrentRole && <CheckCircle className="h-3 w-3 ml-1 text-green-400" />}
+                            {isCurrentRole && <CheckCircle className="h-3 w-3 ml-1 text-emerald-200" />}
                           </div>
                         </SelectItem>
                       );
