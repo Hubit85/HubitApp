@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { LogOut, FileText, HelpCircle, Mail, Settings as SettingsIcon } from "lucide-react";
+import { LogOut, FileText, HelpCircle, Mail, Settings as SettingsIcon, User } from "lucide-react";
 import { authService } from "@/services/AuthService";
 import Image from "next/image";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 export function Header() {
   const router = useRouter();
   const { t, language } = useLanguage();
+  const { user } = useSupabaseAuth();
   
   // Check if user is in any dashboard/control panel
   const isDashboardPage = router.pathname.startsWith('/dashboard') || 
@@ -83,6 +85,21 @@ export function Header() {
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
           
+          {/* Profile button - Show when user is logged in */}
+          {user && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="bg-white text-black border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm hover:shadow-md"
+              asChild
+            >
+              <Link href="/profile">
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Mi Perfil</span>
+              </Link>
+            </Button>
+          )}
+
           {/* Help button - available on all pages */}
           <Button 
             variant="outline" 
@@ -132,7 +149,7 @@ export function Header() {
           )}
           
           {/* Only show login/register buttons on non-dashboard pages and non-home page */}
-          {!isDashboardPage && !isHomePage && (
+          {!isDashboardPage && !isHomePage && !user && (
             <>
               <Button variant="ghost" asChild className="bg-black hover:bg-gray-800 text-white transition-all duration-200 hover:scale-105">
                 <Link href="/auth/login">{t("login")}</Link>
