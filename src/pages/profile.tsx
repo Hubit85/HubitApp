@@ -329,7 +329,7 @@ export default function ProfilePage() {
                     )}
                     <div className="flex items-center gap-3">
                       <Calendar className="h-4 w-4 text-neutral-500" />
-                      <span>Miembro desde {new Date(profile.created_at).toLocaleDateString('es-ES')}</span>
+                      <span>Miembro desde {profile.created_at ? new Date(profile.created_at).toLocaleDateString('es-ES') : "Fecha desconocida"}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Shield className="h-4 w-4 text-neutral-500" />
