@@ -224,7 +224,7 @@ export function CommunityAdministratorAssignment() {
           contact_email: administrator.contact_email,
           contact_phone: administrator.contact_phone || null,
           administrator_verified: false, // Pending approval
-          notes: `Solicitud enviada a ${administrator.company_name} el ${new Date().toLocaleDateString('es-ES')}`
+          notes: `Solicitud enviada a ${administrator.company_name} el ${new Date().toLocaleDateString('es-ES')}. Esperando confirmación del administrador.`
         })
         .select()
         .single();
@@ -237,31 +237,41 @@ export function CommunityAdministratorAssignment() {
           .from('notifications')
           .insert({
             user_id: administrator.user_id,
-            title: 'Nueva solicitud de asignación',
-            message: `Un miembro de comunidad ha solicitado ser asignado a tu gestión. Empresa: ${administrator.company_name}`,
+            title: 'Nueva solicitud de asignación de miembro de comunidad',
+            message: `${profile?.full_name || 'Un miembro de comunidad'} (${user.email}) ha solicitado ser asignado a la gestión de ${administrator.company_name}. Revisa la solicitud en tu perfil de administrador.`,
             type: 'info',
             category: 'assignment_request',
             related_entity_type: 'community_member_administrator',
             related_entity_id: data.id,
-            action_url: `/dashboard?tab=perfil&section=assignment_requests`,
-            action_label: 'Ver Solicitud',
+            action_url: `/dashboard?tab=perfil`,
+            action_label: 'Ver Solicitudes',
             read: false
           });
 
         if (notificationError) {
           console.warn("Failed to send notification:", notificationError);
+        } else {
+          console.log(`Assignment request notification sent to ${administrator.company_name}`);
         }
       } catch (notifError) {
         console.warn("Error sending notification:", notifError);
       }
 
-      setSuccess(`Solicitud enviada a ${administrator.company_name}. Recibirás una notificación cuando sea aprobada.`);
+      setSuccess(`✅ Solicitud enviada exitosamente a ${administrator.company_name}. 
+
+La empresa recibirá una notificación y podrá aprobar tu solicitud desde su panel de administrador. Una vez aprobada, podrás:
+
+• Reportar incidencias directamente a tu administrador
+• Recibir respuestas y seguimiento personalizado  
+• Acceder a servicios específicos de tu comunidad
+
+¡Te notificaremos cuando recibas una respuesta!`);
       
       // Reload data
       await loadAllData();
 
       // Auto-hide success message
-      setTimeout(() => setSuccess(""), 5000);
+      setTimeout(() => setSuccess(""), 8000);
 
     } catch (err) {
       console.error("Error requesting assignment:", err);

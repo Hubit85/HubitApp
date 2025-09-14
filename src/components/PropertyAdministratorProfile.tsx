@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { 
   Building, 
   Mail, 
@@ -16,7 +19,10 @@ import {
   Edit3,
   Save,
   X,
-  Phone
+  Phone,
+  Users,
+  Clock,
+  UserCheck
 } from "lucide-react";
 
 interface PropertyAdministratorData {
@@ -34,6 +40,8 @@ export function PropertyAdministratorProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [processingRequest, setProcessingRequest] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     company_name: profile?.full_name || "",
     company_cif: "",
@@ -43,15 +51,87 @@ export function PropertyAdministratorProfile() {
     notes: ""
   });
 
-  // Get administrator data from the user profile
-  const adminData: PropertyAdministratorData = {
-    company_name: profile?.full_name || "No especificado",
-    company_cif: "Pendiente de configurar",
-    contact_email: user?.email || "No especificado",
-    contact_phone: profile?.phone || "No especificado",
-    membership_date: profile?.created_at || new Date().toISOString(),
-    license_number: "Pendiente de configurar",
-    notes: "Información básica del administrador de fincas"
+  useEffect(() => {
+    if (user?.id) {
+      loadPendingAssignmentRequests();
+    }
+  }, [user?.id]);
+
+  const loadPendingAssignmentRequests = async () => {
+    if (!user?.id) return;
+
+    try {
+      // Find requests where the administrator email matches this user's email
+      const { data: requests, error } = await supabase
+        .from('community_member_administrators')
+        .select(`
+          *,
+          profiles!community_member_administrators_user_id_fkey(full_name, email)
+        `)
+        .eq('contact_email', user.email)
+        .eq('administrator_verified', false)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('Error loading assignment requests:', error);
+        return;
+      }
+
+      setPendingRequests(requests || []);
+    } catch (err) {
+      console.error('Error loading pending requests:', err);
+    }
+  };
+
+  const handleAssignmentRequest = async (requestId: string, approve: boolean) => {
+    try {
+      setProcessingRequest(requestId);
+      setError("");
+
+      const { error: updateError } = await supabase
+        .from('community_member_administrators')
+        .update({
+          administrator_verified: approve,
+          notes: approve 
+            ? `Asignación confirmada por ${profile?.full_name || 'Administrador'} el ${new Date().toLocaleDateString('es-ES')}`
+            : `Solicitud rechazada por ${profile?.full_name || 'Administrador'} el ${new Date().toLocaleDateString('es-ES')}`
+        })
+        .eq('id', requestId);
+
+      if (updateError) throw updateError;
+
+      // Send notification back to the community member
+      const request = pendingRequests.find(r => r.id === requestId);
+      if (request) {
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: request.user_id,
+            title: approve ? 'Asignación de administrador confirmada' : 'Solicitud de asignación rechazada',
+            message: approve 
+              ? `Tu solicitud de asignación a ${request.company_name} ha sido aprobada. Ya puedes reportar incidencias.`
+              : `Tu solicitud de asignación a ${request.company_name} ha sido rechazada. Puedes intentar con otro administrador.`,
+            type: approve ? 'info' : 'warning',
+            category: 'assignment_response',
+            related_entity_type: 'community_member_administrator',
+            related_entity_id: requestId,
+            read: false
+          });
+
+        if (notificationError) {
+          console.warn('Failed to send notification:', notificationError);
+        }
+      }
+
+      // Reload requests
+      await loadPendingAssignmentRequests();
+
+    } catch (err) {
+      console.error('Error processing assignment request:', err);
+      setError('Error al procesar la solicitud');
+    } finally {
+      setProcessingRequest(null);
+    }
   };
 
   const validateCIF = (cif: string): boolean => {
@@ -111,8 +191,131 @@ export function PropertyAdministratorProfile() {
     setError("");
   };
 
+  // Get administrator data from the user profile
+  const adminData: PropertyAdministratorData = {
+    company_name: profile?.full_name || "No especificado",
+    company_cif: "Pendiente de configurar",
+    contact_email: user?.email || "No especificado",
+    contact_phone: profile?.phone || "No especificado",
+    membership_date: profile?.created_at || new Date().toISOString(),
+    license_number: "Pendiente de configurar",
+    notes: "Información básica del administrador de fincas"
+  };
+
   return (
     <div className="space-y-6">
+      {/* Assignment Requests Section - NEW */}
+      {pendingRequests.length > 0 && (
+        <Card className="border-blue-200 shadow-lg bg-gradient-to-br from-blue-50 to-white">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-xl font-bold text-blue-900">
+                  <UserCheck className="h-6 w-6 text-blue-600" />
+                  Solicitudes de Asignación
+                </CardTitle>
+                <CardDescription className="text-blue-700">
+                  Miembros de comunidad que solicitan ser asignados a tu gestión
+                </CardDescription>
+              </div>
+              <Badge className="bg-blue-100 text-blue-800">
+                {pendingRequests.length} pendiente{pendingRequests.length !== 1 ? 's' : ''}
+              </Badge>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            {error && (
+              <Alert className="border-red-200 bg-red-50">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {pendingRequests.map((request) => (
+              <div key={request.id} className="p-4 bg-white rounded-lg border border-blue-200 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      <h4 className="font-semibold text-blue-900">
+                        {request.profiles?.full_name || 'Miembro de Comunidad'}
+                      </h4>
+                      <Badge className="bg-orange-100 text-orange-800 text-xs">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Pendiente
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-1 text-sm text-blue-700 mb-3">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-3 w-3" />
+                        <span>{request.profiles?.email || 'Email no disponible'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-3 w-3" />
+                        <span>Solicitado: {new Date(request.created_at).toLocaleDateString('es-ES')}</span>
+                      </div>
+                    </div>
+
+                    {request.notes && (
+                      <div className="p-2 bg-blue-50 rounded text-xs text-blue-800 mb-3">
+                        {request.notes}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button
+                      onClick={() => handleAssignmentRequest(request.id, true)}
+                      disabled={processingRequest === request.id}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {processingRequest === request.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <>
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Aprobar
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      onClick={() => handleAssignmentRequest(request.id, false)}
+                      disabled={processingRequest === request.id}
+                      size="sm"
+                      variant="outline"
+                      className="border-red-300 text-red-700 hover:bg-red-50"
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Rechazar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                ¿Qué significa aprobar una asignación?
+              </h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• El miembro de comunidad podrá reportar incidencias directamente a tu empresa</li>
+                <li>• Recibirás notificaciones de todas las incidencias que reporten</li>
+                <li>• Podrás gestionar sus solicitudes de presupuestos y servicios</li>
+                <li>• Se establecerá una comunicación directa para la gestión de su comunidad</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Separator />
+
+      {/* Existing Company Information Card */}
       <Card className="border-stone-200 shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
