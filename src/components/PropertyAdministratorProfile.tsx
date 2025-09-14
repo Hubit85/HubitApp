@@ -74,6 +74,7 @@ export function PropertyAdministratorProfile() {
       }
 
       if (adminData) {
+        // Update form data with existing administrator data
         setFormData({
           company_name: adminData.company_name || profile?.full_name || "",
           company_cif: adminData.company_cif || "",
@@ -82,6 +83,20 @@ export function PropertyAdministratorProfile() {
           license_number: adminData.license_number || "",
           notes: adminData.notes || ""
         });
+        
+        console.log('Administrator data loaded:', adminData);
+      } else {
+        // Set default form data if no administrator record exists
+        setFormData({
+          company_name: profile?.full_name || "",
+          company_cif: "",
+          contact_email: user?.email || "",
+          contact_phone: profile?.phone || "",
+          license_number: "",
+          notes: ""
+        });
+        
+        console.log('No administrator data found, using defaults');
       }
     } catch (err) {
       console.error('Error loading administrator data:', err);
@@ -207,7 +222,7 @@ export function PropertyAdministratorProfile() {
       const adminData = {
         user_id: user.id,
         company_name: formData.company_name.trim(),
-        company_cif: formData.company_cif.trim() || `TEMP-${Date.now()}`,
+        company_cif: formData.company_cif.trim() || null,
         contact_email: formData.contact_email.trim(),
         contact_phone: formData.contact_phone.trim() || null,
         license_number: formData.license_number.trim() || null,
@@ -217,25 +232,33 @@ export function PropertyAdministratorProfile() {
 
       if (existingAdmin) {
         // Update existing record
-        const { error: updateError } = await supabase
+        const { data: updatedData, error: updateError } = await supabase
           .from('property_administrators')
           .update(adminData)
-          .eq('id', existingAdmin.id);
+          .eq('id', existingAdmin.id)
+          .select()
+          .single();
 
         if (updateError) throw updateError;
+        
+        console.log('Administrator profile updated:', updatedData);
       } else {
         // Create new record
-        const { error: insertError } = await supabase
+        const { data: createdData, error: insertError } = await supabase
           .from('property_administrators')
           .insert({
             ...adminData,
             created_at: new Date().toISOString()
-          });
+          })
+          .select()
+          .single();
 
         if (insertError) throw insertError;
+        
+        console.log('Administrator profile created:', createdData);
       }
 
-      // Also update the profile with the company name if it's different
+      // Update the profile with the company name if it's different
       if (formData.company_name !== profile?.full_name) {
         const { error: profileError } = await supabase
           .from('profiles')
@@ -248,14 +271,21 @@ export function PropertyAdministratorProfile() {
 
         if (profileError) {
           console.warn('Failed to update profile:', profileError);
+        } else {
+          console.log('Profile updated with company name');
         }
       }
 
-      console.log("Administrator profile updated successfully");
+      console.log("✅ Administrator profile saved successfully");
       setIsEditing(false);
       
+      // Force a reload of the data to show the updated values
+      setTimeout(() => {
+        loadAdministratorData();
+      }, 500);
+      
     } catch (err) {
-      console.error("Error saving administrator data:", err);
+      console.error("❌ Error saving administrator data:", err);
       setError("Error al guardar la información. Inténtalo de nuevo.");
     } finally {
       setSaving(false);
@@ -263,14 +293,8 @@ export function PropertyAdministratorProfile() {
   };
 
   const handleCancel = () => {
-    setFormData({
-      company_name: profile?.full_name || "",
-      company_cif: "",
-      contact_email: user?.email || "",
-      contact_phone: profile?.phone || "",
-      license_number: "",
-      notes: ""
-    });
+    // Reset to existing data or defaults
+    loadAdministratorData();
     setIsEditing(false);
     setError("");
   };
