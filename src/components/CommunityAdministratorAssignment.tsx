@@ -147,7 +147,21 @@ export function CommunityAdministratorAssignment() {
     try {
       console.log('🔍 Loading available property administrators...');
       
-      // STEP 1: Get all property administrator roles from user_roles table
+      // First, let's verify our Supabase connection
+      const { data: connectionTest, error: connectionError } = await supabase
+        .from('profiles')
+        .select('count')
+        .limit(1);
+
+      if (connectionError) {
+        console.error('❌ Supabase connection failed:', connectionError);
+        setError('Error de conexión con la base de datos');
+        return;
+      }
+
+      console.log('✅ Supabase connection verified');
+
+      // STEP 1: Query user_roles for property administrators
       const { data: adminRoles, error: rolesError } = await supabase
         .from('user_roles')
         .select(`
@@ -159,46 +173,65 @@ export function CommunityAdministratorAssignment() {
         .eq('role_type', 'property_administrator')
         .eq('is_verified', true);
 
+      console.log('📋 Query result from user_roles:', {
+        success: !rolesError,
+        error: rolesError?.message || 'none',
+        dataCount: adminRoles?.length || 0,
+        data: adminRoles?.map(r => ({
+          id: r.id.substring(0, 8) + '...',
+          user_id: r.user_id.substring(0, 8) + '...',
+          profileName: r.profiles ? (r.profiles as any).full_name : 'no-profile',
+          profileEmail: r.profiles ? (r.profiles as any).email : 'no-email'
+        })) || []
+      });
+
       if (rolesError) {
-        console.error('❌ Error loading administrator roles:', rolesError);
-        setError('Error al cargar administradores de fincas desde roles');
+        console.error('❌ Error querying user_roles:', rolesError);
+        setError('Error al cargar administradores desde la tabla de roles: ' + rolesError.message);
         return;
       }
 
-      console.log('📋 Raw administrator role data from database:', adminRoles?.length || 0, 'records');
-
-      // STEP 2: Also try direct query from profiles table for debugging
-      const { data: allProfiles, error: profilesError } = await supabase
+      // STEP 2: Fallback query - check profiles directly
+      console.log('🔄 Performing fallback query on profiles table...');
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, full_name, email, user_type')
         .eq('user_type', 'property_administrator');
 
-      console.log('🔍 Direct profiles query result:', {
-        profilesCount: allProfiles?.length || 0,
-        profilesError: profilesError?.message || 'none',
-        profiles: allProfiles?.map(p => ({ 
-          name: p.full_name, 
+      console.log('📋 Query result from profiles:', {
+        success: !profilesError,
+        error: profilesError?.message || 'none',
+        dataCount: profilesData?.length || 0,
+        data: profilesData?.map(p => ({
+          id: p.id.substring(0, 8) + '...',
+          name: p.full_name,
           email: p.email,
-          userId: p.id.substring(0, 8) + '...'
+          type: p.user_type
         })) || []
       });
 
+      if (profilesError) {
+        console.warn('⚠️ Fallback profile query also failed:', profilesError);
+      }
+
+      // STEP 3: Process the results
       const adminList: PropertyAdministrator[] = [];
-      
+
+      // Process adminRoles if we have them
       if (adminRoles && adminRoles.length > 0) {
-        console.log(`🔍 Processing ${adminRoles.length} administrator role records...`);
+        console.log(`🔄 Processing ${adminRoles.length} admin roles...`);
         
         adminRoles.forEach((adminRole, index) => {
-          console.log(`Processing admin role ${index + 1}:`, {
-            id: adminRole.id,
+          console.log(`Processing admin ${index + 1}:`, {
+            id: adminRole.id.substring(0, 8) + '...',
             user_id: adminRole.user_id.substring(0, 8) + '...',
-            profiles: adminRole.profiles,
-            role_specific_data: adminRole.role_specific_data
+            hasProfile: !!adminRole.profiles,
+            profileData: adminRole.profiles
           });
 
-          // FIXED: Safe profile handling with comprehensive null checks
           let adminData: PropertyAdministrator;
           
+          // Handle profile data safely
           if (adminRole.profiles && 
               typeof adminRole.profiles === 'object' && 
               !Array.isArray(adminRole.profiles) &&
@@ -210,158 +243,127 @@ export function CommunityAdministratorAssignment() {
               phone?: string | null 
             };
             
-            // Create administrator entry with profile data
-            adminData = {
-              id: adminRole.id,
-              user_id: adminRole.user_id,
-              company_name: profile.full_name || `Administrador ${adminRole.user_id.substring(0, 8)}`,
-              company_cif: `CIF-${adminRole.user_id.substring(0, 8)}`,
-              contact_email: profile.email || `admin-${adminRole.user_id.substring(0, 8)}@hubit.es`,
-              contact_phone: profile.phone || undefined,
+            // Only proceed if we have at least an email
+            if (profile.email) {
+              adminData = {
+                id: adminRole.id,
+                user_id: adminRole.user_id,
+                company_name: profile.full_name || `Administrador de Fincas`,
+                company_cif: `CIF-${adminRole.user_id.substring(0, 8)}`,
+                contact_email: profile.email,
+                contact_phone: profile.phone || undefined,
+                license_number: undefined,
+                profile: {
+                  full_name: profile.full_name || 'Administrador de Fincas',
+                  email: profile.email
+                }
+              };
+
+              // Apply role-specific data if available
+              if (adminRole.role_specific_data && 
+                  typeof adminRole.role_specific_data === 'object' &&
+                  adminRole.role_specific_data !== null) {
+                
+                const roleData = adminRole.role_specific_data as Record<string, any>;
+                
+                if (roleData.company_name && typeof roleData.company_name === 'string') {
+                  adminData.company_name = roleData.company_name;
+                }
+                if (roleData.cif && typeof roleData.cif === 'string') {
+                  adminData.company_cif = roleData.cif;
+                }
+                if (roleData.business_email && typeof roleData.business_email === 'string') {
+                  adminData.contact_email = roleData.business_email;
+                }
+                if (roleData.business_phone && typeof roleData.business_phone === 'string') {
+                  adminData.contact_phone = roleData.business_phone;
+                }
+                if (roleData.professional_number && typeof roleData.professional_number === 'string') {
+                  adminData.license_number = roleData.professional_number;
+                }
+              }
+
+              console.log(`✅ Added admin ${index + 1}:`, {
+                name: adminData.company_name,
+                email: adminData.contact_email,
+                userId: adminData.user_id.substring(0, 8) + '...'
+              });
+
+              adminList.push(adminData);
+            } else {
+              console.warn(`⚠️ Skipping admin ${index + 1}: no email address`);
+            }
+          } else {
+            console.warn(`⚠️ Skipping admin ${index + 1}: no profile data`);
+          }
+        });
+      } 
+      
+      // If no admins from roles, try profiles fallback
+      else if (profilesData && profilesData.length > 0) {
+        console.log('🔄 Using profiles fallback data...');
+        
+        profilesData.forEach((profile, index) => {
+          if (profile.email) { // Only add if email exists
+            const fallbackAdmin: PropertyAdministrator = {
+              id: `fallback-${profile.id}`,
+              user_id: profile.id,
+              company_name: profile.full_name || `Administrador de Fincas`,
+              company_cif: `CIF-${profile.id.substring(0, 8)}`,
+              contact_email: profile.email,
+              contact_phone: undefined,
               license_number: undefined,
               profile: {
                 full_name: profile.full_name || 'Administrador de Fincas',
-                email: profile.email || `admin-${adminRole.user_id.substring(0, 8)}@hubit.es`
-              }
-            };
-          } else {
-            // Handle case where profiles is null, empty, or invalid
-            console.warn('⚠️ Admin with missing profile data, creating fallback:', adminRole.user_id);
-            
-            adminData = {
-              id: adminRole.id,
-              user_id: adminRole.user_id,
-              company_name: `Administrador ${adminRole.user_id.substring(0, 8)}`,
-              company_cif: `CIF-${adminRole.user_id.substring(0, 8)}`,
-              contact_email: `admin-${adminRole.user_id.substring(0, 8)}@hubit.es`,
-              contact_phone: undefined,
-              license_number: undefined,
-              profile: {
-                full_name: 'Administrador de Fincas',
-                email: `admin-${adminRole.user_id.substring(0, 8)}@hubit.es`
-              }
-            };
-          }
-
-          // FIXED: Extract and apply data from role_specific_data if available
-          if (adminRole.role_specific_data && 
-              typeof adminRole.role_specific_data === 'object' &&
-              adminRole.role_specific_data !== null) {
-            
-            const roleData = adminRole.role_specific_data as Record<string, any>;
-            
-            // Apply business information from role_specific_data
-            if (roleData.company_name && typeof roleData.company_name === 'string') {
-              adminData.company_name = roleData.company_name;
-            }
-            if (roleData.cif && typeof roleData.cif === 'string') {
-              adminData.company_cif = roleData.cif;
-            }
-            if (roleData.business_email && typeof roleData.business_email === 'string') {
-              adminData.contact_email = roleData.business_email;
-            }
-            if (roleData.business_phone && typeof roleData.business_phone === 'string') {
-              adminData.contact_phone = roleData.business_phone;
-            }
-            if (roleData.professional_number && typeof roleData.professional_number === 'string') {
-              adminData.license_number = roleData.professional_number;
-            }
-          }
-
-          console.log(`✅ Created admin entry ${index + 1}:`, {
-            name: adminData.company_name,
-            email: adminData.contact_email,
-            cif: adminData.company_cif,
-            userId: adminData.user_id.substring(0, 8) + '...'
-          });
-
-          adminList.push(adminData);
-        });
-      } else {
-        console.warn('⚠️ No administrator role records found in user_roles table');
-        
-        // FALLBACK: Try to create entries from profiles if they exist
-        if (allProfiles && allProfiles.length > 0) {
-          console.log('🔄 Using fallback method with profiles data...');
-          
-          allProfiles.forEach((profileData, index) => {
-            const fallbackAdmin: PropertyAdministrator = {
-              id: `fallback-${profileData.id}`,
-              user_id: profileData.id,
-              company_name: profileData.full_name || `Administrador ${profileData.id.substring(0, 8)}`,
-              company_cif: `CIF-${profileData.id.substring(0, 8)}`,
-              contact_email: profileData.email || `admin-${profileData.id.substring(0, 8)}@hubit.es`,
-              contact_phone: undefined,
-              license_number: undefined,
-              profile: {
-                full_name: profileData.full_name || 'Administrador de Fincas',
-                email: profileData.email || `admin-${profileData.id.substring(0, 8)}@hubit.es`
+                email: profile.email
               }
             };
             
             adminList.push(fallbackAdmin);
-            console.log(`✅ Fallback admin entry ${index + 1}:`, {
+            console.log(`✅ Fallback admin ${index + 1}:`, {
               name: fallbackAdmin.company_name,
               email: fallbackAdmin.contact_email
             });
-          });
-        }
+          }
+        });
       }
 
-      console.log(`📊 Final administrator list (${adminList.length} total):`, 
-        adminList.map(admin => ({ 
-          name: admin.company_name, 
-          email: admin.contact_email,
-          userId: admin.user_id.substring(0, 8) + '...'
-        }))
-      );
+      console.log(`📊 Final admin list: ${adminList.length} administrators found`);
 
       // Set the administrators list
       setAvailableAdministrators(adminList);
 
-      // FIXED: Enhanced search for expected administrators
+      // Enhanced search for expected administrators (Pipaón, Castro)
       const searchTerms = ['pipaón', 'pipan', 'castro'];
-      const foundAdmins = adminList.filter(admin => {
+      const foundExpectedAdmins = adminList.filter(admin => {
         const searchText = `${admin.company_name} ${admin.contact_email}`.toLowerCase();
         return searchTerms.some(term => searchText.includes(term.toLowerCase()));
       });
 
-      console.log('🔍 Search for expected administrators (Pipaón, Castro):', {
+      console.log('🔍 Search for expected administrators:', {
         searchTerms,
-        foundCount: foundAdmins.length,
-        foundAdmins: foundAdmins.map(admin => ({
+        foundCount: foundExpectedAdmins.length,
+        foundAdmins: foundExpectedAdmins.map(admin => ({
           name: admin.company_name,
-          email: admin.contact_email,
-          userId: admin.user_id.substring(0, 8) + '...'
+          email: admin.contact_email
         }))
       });
 
-      // DIAGNOSTIC: Log current user information for context
-      console.log('👤 Current user context:', {
-        userId: user?.id?.substring(0, 8) + '...' || 'none',
-        email: user?.email || 'none',
-        isCommunityMember,
-        userRoles: userRoles.map(r => `${r.role_type}(${r.is_verified})`),
-        profileName: profile?.full_name || 'none'
-      });
-
+      // Provide feedback
       if (adminList.length === 0) {
-        console.warn('❌ NO ADMINISTRATORS FOUND - This indicates a significant system issue');
-        console.warn('🔧 Possible solutions:');
-        console.warn('   1. Check if property administrators have registered and been verified');
-        console.warn('   2. Verify user_roles table has property_administrator entries');
-        console.warn('   3. Check if profiles are properly linked to user_roles');
-        console.warn('   4. Ensure RLS policies allow reading administrator data');
-        
-        setError('No se encontraron administradores de fincas disponibles. Contacta con soporte técnico.');
+        console.warn('❌ NO ADMINISTRATORS FOUND');
+        setError('No se encontraron administradores de fincas. Asegúrate de que hay administradores registrados y verificados en el sistema.');
       } else {
         console.log(`✅ Successfully loaded ${adminList.length} administrators`);
+        
+        if (foundExpectedAdmins.length === 0) {
+          console.log('ℹ️ Expected administrators (Pipaón, Castro) not found in current list');
+        }
       }
 
     } catch (err) {
       console.error('❌ Critical error loading administrators:', err);
       setError('Error crítico al cargar administradores: ' + (err instanceof Error ? err.message : 'Error desconocido'));
-      // Don't crash, set empty array
       setAvailableAdministrators([]);
     }
   };

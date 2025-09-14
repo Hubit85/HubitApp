@@ -42,3 +42,11 @@ export const supabase = createClient<Database>(
   SUPABASE_URL || "http://localhost:54321",
   SUPABASE_ANON_KEY || "placeholder-key"
 );
+
+// Export additional utility functions for debugging
+export const getSupabaseConfig = () => ({
+  url: SUPABASE_URL,
+  hasValidUrl: !!SUPABASE_URL && !SUPABASE_URL.includes("placeholder"),
+  hasValidKey: !!SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes("placeholder"),
+  isConfigured: isSupabaseConfigured()
+});
