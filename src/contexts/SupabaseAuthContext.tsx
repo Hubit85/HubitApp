@@ -772,10 +772,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT
+        let finalActiveRole: UserRole | null = null;
         if (roles.length > 0) {
           console.log("🎯 CONTEXT: Starting active role management...");
           
-          const finalActiveRole = await ensureActiveRole(userObject.id, roles);
+          finalActiveRole = await ensureActiveRole(userObject.id, roles);
           
           if (finalActiveRole) {
             console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
