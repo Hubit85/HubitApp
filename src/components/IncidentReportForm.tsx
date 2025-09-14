@@ -94,9 +94,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     role.role_type === 'community_member' && role.is_verified
   );
 
-  // FIXED: Always provide email fallback for user email
-  const userEmail = user?.email ?? ''; // Use nullish coalescing operator for proper null handling
-
   useEffect(() => {
     if (user && isCommunityMember) {
       initializeComponent();
