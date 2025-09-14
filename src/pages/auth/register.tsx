@@ -755,13 +755,106 @@ function RegisterPageContent() {
       }
 
       if (result?.success) {
-        // FIXED: Eliminar referencias a propiedades que no existen
-        setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+        // ENHANCED: Post-registration validation to ensure roles were created
+        console.log('✅ Registration successful, performing post-registration validation...');
+        setSuccessMessage("¡Cuenta creada exitosamente! Verificando configuración...");
         
-        // Redirigir al dashboard
+        // BULLETPROOF: Verify roles were actually created
+        try {
+          // Wait a moment for database consistency
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Get current session to verify user ID
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session?.user?.id) {
+            console.log('🔍 POST-REGISTRATION: Verifying role creation for user:', session.user.id);
+            
+            // Check if roles were created
+            const { data: createdRoles, error: rolesCheckError } = await supabase
+              .from('user_roles')
+              .select('id, role_type, is_verified, is_active')
+              .eq('user_id', session.user.id);
+            
+            if (!rolesCheckError && createdRoles) {
+              console.log(`✅ POST-REGISTRATION: Found ${createdRoles.length} roles created`);
+              
+              if (createdRoles.length === orderedRoles.length) {
+                console.log('🎯 POST-REGISTRATION: All roles created successfully!');
+                setSuccessMessage(`¡Cuenta creada exitosamente con ${createdRoles.length} roles! Redirigiendo...`);
+              } else if (createdRoles.length > 0) {
+                console.log(`⚠️ POST-REGISTRATION: Partial success - ${createdRoles.length}/${orderedRoles.length} roles created`);
+                setSuccessMessage(`Cuenta creada con ${createdRoles.length} de ${orderedRoles.length} roles. Redirigiendo...`);
+              } else {
+                // CRITICAL: Zero roles created - attempt emergency recovery
+                console.error('🚨 POST-REGISTRATION: ZERO ROLES CREATED - Attempting emergency recovery...');
+                
+                try {
+                  // Create at least the primary role
+                  const emergencyRoleData = {
+                    user_id: session.user.id,
+                    role_type: primaryRole,
+                    is_verified: true,
+                    is_active: true,
+                    role_specific_data: extractRoleSpecificDataForEmergency(userData, primaryRole),
+                    verification_confirmed_at: new Date().toISOString(),
+                    verification_token: null,
+                    verification_expires_at: null,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
+                  
+                  const { data: emergencyRole, error: emergencyError } = await supabase
+                    .from('user_roles')
+                    .insert(emergencyRoleData)
+                    .select()
+                    .single();
+                  
+                  if (!emergencyError && emergencyRole) {
+                    console.log('🆘 EMERGENCY RECOVERY: Created primary role successfully');
+                    setSuccessMessage("¡Cuenta creada! Se ha configurado tu rol principal. Puedes agregar roles adicionales desde tu perfil.");
+                    
+                    // Create notification about partial registration
+                    try {
+                      await supabase
+                        .from('notifications')
+                        .insert({
+                          user_id: session.user.id,
+                          title: 'Registro completado parcialmente',
+                          message: 'Tu cuenta se ha creado correctamente. Puedes configurar roles adicionales desde tu perfil.',
+                          type: 'info' as const,
+                          category: 'system' as const,
+                          read: false
+                        });
+                    } catch (notificationError) {
+                      console.warn('Could not create recovery notification:', notificationError);
+                    }
+                  } else {
+                    throw new Error(`Emergency recovery failed: ${emergencyError?.message}`);
+                  }
+                } catch (emergencyError) {
+                  console.error('❌ EMERGENCY RECOVERY FAILED:', emergencyError);
+                  setError("La cuenta se creó pero hubo un problema con la configuración de roles. Por favor, contacta con soporte.");
+                  return;
+                }
+              }
+            } else {
+              console.warn('⚠️ POST-REGISTRATION: Could not verify role creation:', rolesCheckError);
+              setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+            }
+          } else {
+            console.warn('⚠️ POST-REGISTRATION: No session found after registration');
+            setSuccessMessage("¡Cuenta creada exitosamente! Por favor, inicia sesión.");
+          }
+        } catch (validationError) {
+          console.warn('⚠️ POST-REGISTRATION: Validation failed, but proceeding:', validationError);
+          setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+        }
+        
+        // Redirigir al dashboard después de la validación
         setTimeout(() => {
           router.push("/dashboard");
-        }, 2500);
+        }, 3000);
         
         return;
       }
@@ -1914,4 +2007,57 @@ function RegisterPageContent() {
       </div>
     </>
   );
+}
+
+// Helper function to extract role-specific data for emergency recovery
+function extractRoleSpecificDataForEmergency(userData: any, roleType: RoleType): any {
+  switch (roleType) {
+    case 'particular':
+      return {
+        full_name: userData.full_name,
+        user_type: roleType,
+        phone: userData.phone,
+        address: userData.address,
+        postal_code: userData.postal_code,
+        city: userData.city,
+        province: userData.province,
+        country: userData.country,
+      };
+    case 'community_member':
+      return {
+        full_name: userData.full_name,
+        user_type: roleType,
+        phone: userData.phone,
+        address: userData.address,
+        postal_code: userData.postal_code,
+        city: userData.city,
+        province: userData.province,
+        country: userData.country,
+        community_code: userData.community_code,
+      };
+    case 'service_provider':
+      return {
+        company_name: userData.company_name,
+        user_type: roleType,
+        phone: userData.business_phone,
+        address: userData.company_address,
+        postal_code: userData.company_postal_code,
+        city: userData.company_city,
+        province: userData.company_province,
+        country: userData.company_country,
+      };
+    case 'property_administrator':
+      return {
+        company_name: userData.company_name,
+        user_type: roleType,
+        phone: userData.business_phone,
+        address: userData.company_address,
+        postal_code: userData.company_postal_code,
+        city: userData.company_city,
+        province: userData.company_province,
+        country: userData.company_country,
+      };
+    default:
+      return {};
+  }
 }
