@@ -95,7 +95,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
   );
 
   // FIXED: Always provide email fallback for user email
-  const userEmail = user?.email ?? ''; // Use nullish coalescing instead
+  const userEmail = user?.email ?? ''; // Use nullish coalescing operator for proper null handling
 
   useEffect(() => {
     if (user && isCommunityMember) {
