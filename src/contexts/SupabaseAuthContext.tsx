@@ -605,7 +605,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               .eq('id', userObject.id)
               .single();
             
-            if (!profileCheckError && profileCheck) {
+            if (!profileCheckError && profileCheck && profileCheck.created_at) {
               const profileAge = new Date(profileCheck.created_at);
               const now = new Date();
               const ageHours = (now.getTime() - profileAge.getTime()) / (1000 * 60 * 60);
@@ -620,7 +620,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   // Create the missing primary role
                   const roleInsertData: UserRoleInsert = {
                     user_id: userObject.id,
-                    role_type: profileCheck.user_type,
+                    role_type: profileCheck.user_type as 'particular' | 'community_member' | 'service_provider' | 'property_administrator',
                     is_verified: true,
                     is_active: true,
                     role_specific_data: {
@@ -656,7 +656,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                         .insert({
                           user_id: userObject.id,
                           title: '¡Perfil completado automáticamente!',
-                          message: `Tu rol de ${SupabaseUserRoleService.getRoleDisplayName(profileCheck.user_type)} ha sido configurado correctamente.`,
+                          message: `Tu rol de ${SupabaseUserRoleService.getRoleDisplayName(profileCheck.user_type as 'particular' | 'community_member' | 'service_provider' | 'property_administrator')} ha sido configurado correctamente.`,
                           type: 'success' as const,
                           category: 'system' as const,
                           read: false
