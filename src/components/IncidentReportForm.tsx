@@ -169,7 +169,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
               id: assignment.id,
               user_id: matchingAdmin.user_id,
               company_name: assignment.company_name,
-              contact_email: assignment.contact_email
+              contact_email: profile.email!
             });
           }
         }
