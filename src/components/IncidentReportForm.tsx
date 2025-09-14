@@ -468,8 +468,8 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         try {
           const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
           
-          // FIXED: Remove problematic email reference and use fallback
-          const reporterName = profile?.full_name || 'Un miembro de comunidad';
+          // FIXED: Safe handling of profile data with null check
+          const reporterName = profile?.full_name || user?.email?.split('@')[0] || 'Un miembro de comunidad';
           
           const notification = {
             user_id: targetAdministrator.user_id,
