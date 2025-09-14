@@ -823,6 +823,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        // Check if finalActiveRole is null before accessing role_type
+        if (finalActiveRole?.role_type === 'property_administrator') {
+          console.log("✅ CONTEXT: Active role is property_administrator");
+        }
+
       } catch (criticalRoleError) {
         console.error("❌ CONTEXT: Critical error in role management:", criticalRoleError);
         
