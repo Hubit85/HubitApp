@@ -40,6 +40,7 @@ export function PropertyAdministratorProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // Add success message state
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [processingRequest, setProcessingRequest] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -62,6 +63,8 @@ export function PropertyAdministratorProfile() {
     if (!user?.id) return;
 
     try {
+      console.log('Loading administrator data for user:', user.id);
+      
       const { data: adminData, error } = await supabase
         .from('property_administrators')
         .select('*')
@@ -70,22 +73,27 @@ export function PropertyAdministratorProfile() {
 
       if (error && error.code !== 'PGRST116') {
         console.warn('Error loading administrator data:', error);
+        setError("Error al cargar los datos del administrador");
         return;
       }
 
       if (adminData) {
+        console.log('Administrator data found:', adminData);
+        
         // Update form data with existing administrator data
         setFormData({
           company_name: adminData.company_name || profile?.full_name || "",
-          company_cif: adminData.company_cif || "",
+          company_cif: adminData.company_cif?.startsWith('TEMP-CIF-') ? "" : (adminData.company_cif || ""), // Hide temporary CIF
           contact_email: adminData.contact_email || user?.email || "",
           contact_phone: adminData.contact_phone || profile?.phone || "",
           license_number: adminData.license_number || "",
           notes: adminData.notes || ""
         });
         
-        console.log('Administrator data loaded:', adminData);
+        console.log('✅ Administrator data loaded successfully');
       } else {
+        console.log('No administrator data found, using defaults');
+        
         // Set default form data if no administrator record exists
         setFormData({
           company_name: profile?.full_name || "",
@@ -96,10 +104,11 @@ export function PropertyAdministratorProfile() {
           notes: ""
         });
         
-        console.log('No administrator data found, using defaults');
+        console.log('✅ Default form data set');
       }
     } catch (err) {
-      console.error('Error loading administrator data:', err);
+      console.error('Critical error loading administrator data:', err);
+      setError("Error crítico al cargar la información del administrador");
     }
   };
 
@@ -219,16 +228,19 @@ export function PropertyAdministratorProfile() {
         throw checkError;
       }
 
+      // FIXED: Properly handle null/undefined conversion for Supabase
       const adminData = {
         user_id: user.id,
         company_name: formData.company_name.trim(),
-        company_cif: formData.company_cif.trim() || null,
+        company_cif: formData.company_cif.trim() || 'TEMP-CIF-' + Date.now(), // FIXED: Provide non-null default
         contact_email: formData.contact_email.trim(),
         contact_phone: formData.contact_phone.trim() || null,
         license_number: formData.license_number.trim() || null,
         notes: formData.notes.trim() || null,
         updated_at: new Date().toISOString()
       };
+
+      console.log('Saving administrator data:', adminData);
 
       if (existingAdmin) {
         // Update existing record
@@ -239,7 +251,10 @@ export function PropertyAdministratorProfile() {
           .select()
           .single();
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('Update error:', updateError);
+          throw updateError;
+        }
         
         console.log('Administrator profile updated:', updatedData);
       } else {
@@ -253,7 +268,10 @@ export function PropertyAdministratorProfile() {
           .select()
           .single();
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          throw insertError;
+        }
         
         console.log('Administrator profile created:', createdData);
       }
@@ -278,15 +296,41 @@ export function PropertyAdministratorProfile() {
 
       console.log("✅ Administrator profile saved successfully");
       setIsEditing(false);
+      setError(""); // Clear any previous errors
+      setSuccessMessage("✅ Información guardada correctamente"); // Show success message
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
       
       // Force a reload of the data to show the updated values
-      setTimeout(() => {
-        loadAdministratorData();
-      }, 500);
+      await loadAdministratorData();
       
     } catch (err) {
       console.error("❌ Error saving administrator data:", err);
-      setError("Error al guardar la información. Inténtalo de nuevo.");
+      
+      // Enhanced error handling
+      if (err && typeof err === 'object' && 'code' in err) {
+        const supabaseError = err as any;
+        
+        switch (supabaseError.code) {
+          case '23505': // Unique violation
+            setError("Ya existe un registro con este CIF. Por favor, usa otro CIF.");
+            break;
+          case '23503': // Foreign key violation
+            setError("Error de referencia en la base de datos. Contacta con soporte.");
+            break;
+          case '23502': // Not null violation
+            setError("Faltan campos obligatorios. Verifica que el nombre y email estén completos.");
+            break;
+          default:
+            setError(`Error de base de datos: ${supabaseError.message || 'Error desconocido'}`);
+        }
+      } else {
+        setError("Error al guardar la información. Por favor, inténtalo de nuevo.");
+      }
+      
     } finally {
       setSaving(false);
     }
@@ -299,12 +343,12 @@ export function PropertyAdministratorProfile() {
     setError("");
   };
 
-  // Get administrator data from form data or fallbacks
+  // Get administrator data from form data or fallbacks - FIXED: Better handling
   const adminData: PropertyAdministratorData = {
     company_name: formData.company_name || profile?.full_name || "No especificado",
     company_cif: formData.company_cif || "Pendiente de configurar",
     contact_email: formData.contact_email || user?.email || "No especificado",
-    contact_phone: formData.contact_phone || profile?.phone || "No especificado",
+    contact_phone: formData.contact_phone || "No especificado",
     membership_date: profile?.created_at || new Date().toISOString(),
     license_number: formData.license_number || "Pendiente de configurar",
     notes: formData.notes || "Información básica del administrador de fincas"
@@ -472,11 +516,15 @@ export function PropertyAdministratorProfile() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {error && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
+          {(error || successMessage) && (
+            <Alert className={`border-2 ${error ? "border-red-200 bg-red-50" : "border-green-200 bg-green-50"}`}>
+              <div className="flex items-center gap-2">
+                {error ? <AlertCircle className="h-4 w-4 text-red-600" /> : <CheckCircle className="h-4 w-4 text-green-600" />}
+                <AlertDescription className={`font-medium ${error ? "text-red-800" : "text-green-800"}`}>
+                  {error || successMessage}
+                </AlertDescription>
+              </div>
+            </Alert>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
