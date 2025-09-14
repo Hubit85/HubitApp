@@ -125,61 +125,152 @@ export function CommunityAdministratorAssignment() {
   };
 
   const loadAvailableAdministrators = async () => {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select(`
-        id,
-        user_id,
-        profiles!user_roles_user_id_fkey(full_name, email)
-      `)
-      .eq('role_type', 'property_administrator')
-      .eq('is_verified', true);
+    try {
+      console.log('🔍 Loading available property administrators...');
+      
+      // FIXED: More comprehensive query to get all property administrators
+      const { data: admins, error } = await supabase
+        .from('user_roles')
+        .select(`
+          id,
+          user_id,
+          role_specific_data,
+          profiles!user_roles_user_id_fkey(full_name, email, phone)
+        `)
+        .eq('role_type', 'property_administrator')
+        .eq('is_verified', true);
 
-    if (error) {
-      console.warn("Error loading administrators:", error);
-      return;
-    }
+      if (error) {
+        console.error('❌ Error loading administrators:', error);
+        return;
+      }
 
-    const administrators: PropertyAdministrator[] = [];
-    
-    if (data) {
-      data.forEach(admin => {
-        // Check if the admin has a valid profile
-        if (admin.profiles && 
-            typeof admin.profiles === 'object' && 
-            !Array.isArray(admin.profiles)) {
-          
-          const profile = admin.profiles as { full_name: string | null; email: string | null };
-          
-          // FIXED: Include all property administrators, even with minimal data
-          const companyName = profile.full_name || `Administrador ${admin.user_id.substring(0, 8)}`;
-          const contactEmail = profile.email || `admin-${admin.user_id.substring(0, 8)}@administrador.com`;
-          
-          administrators.push({
+      console.log('📋 Raw administrator data from database:', admins);
+
+      const adminList: PropertyAdministrator[] = [];
+      
+      if (admins && admins.length > 0) {
+        console.log(`🔍 Processing ${admins.length} administrator records...`);
+        
+        admins.forEach((admin, index) => {
+          console.log(`Processing admin ${index + 1}:`, {
             id: admin.id,
             user_id: admin.user_id,
-            company_name: companyName,
-            company_cif: `CIF-${admin.user_id.substring(0, 8)}`, // Generate a temporary CIF
-            contact_email: contactEmail,
-            contact_phone: undefined, // Will be populated if available
-            license_number: undefined,
-            profile: {
-              full_name: companyName,
-              email: contactEmail
-            }
+            profiles: admin.profiles,
+            role_specific_data: admin.role_specific_data
           });
-        }
+
+          // FIXED: Much more flexible profile handling
+          let adminData: PropertyAdministrator;
+          
+          if (admin.profiles && typeof admin.profiles === 'object' && !Array.isArray(admin.profiles)) {
+            const profile = admin.profiles as { full_name: string | null; email: string | null; phone?: string | null };
+            
+            // FIXED: Create administrator entry even with minimal data
+            adminData = {
+              id: admin.id,
+              user_id: admin.user_id,
+              company_name: profile.full_name || `Administrador ${admin.user_id.substring(0, 8)}`,
+              company_cif: `CIF-${admin.user_id.substring(0, 8)}`, // Temporary CIF
+              contact_email: profile.email || `admin-${admin.user_id.substring(0, 8)}@hubit.es`,
+              contact_phone: profile.phone || undefined,
+              license_number: undefined,
+              profile: {
+                full_name: profile.full_name || 'Administrador de Fincas',
+                email: profile.email || `admin-${admin.user_id.substring(0, 8)}@hubit.es`
+              }
+            };
+          } else {
+            // FIXED: Handle case where profiles is null or empty
+            console.warn('⚠️ Admin with missing profile data, creating fallback:', admin.user_id);
+            
+            adminData = {
+              id: admin.id,
+              user_id: admin.user_id,
+              company_name: `Administrador ${admin.user_id.substring(0, 8)}`,
+              company_cif: `CIF-${admin.user_id.substring(0, 8)}`,
+              contact_email: `admin-${admin.user_id.substring(0, 8)}@hubit.es`,
+              contact_phone: undefined,
+              license_number: undefined,
+              profile: {
+                full_name: 'Administrador de Fincas',
+                email: `admin-${admin.user_id.substring(0, 8)}@hubit.es`
+              }
+            };
+          }
+
+          // FIXED: Extract data from role_specific_data if available
+          if (admin.role_specific_data && typeof admin.role_specific_data === 'object') {
+            const roleData = admin.role_specific_data as any;
+            
+            if (roleData.company_name) {
+              adminData.company_name = roleData.company_name;
+            }
+            if (roleData.cif) {
+              adminData.company_cif = roleData.cif;
+            }
+            if (roleData.business_email) {
+              adminData.contact_email = roleData.business_email;
+            }
+            if (roleData.business_phone) {
+              adminData.contact_phone = roleData.business_phone;
+            }
+            if (roleData.professional_number) {
+              adminData.license_number = roleData.professional_number;
+            }
+          }
+
+          console.log(`✅ Created admin entry:`, {
+            name: adminData.company_name,
+            email: adminData.contact_email,
+            cif: adminData.company_cif
+          });
+
+          adminList.push(adminData);
+        });
+      } else {
+        console.warn('⚠️ No administrator records found in database');
+      }
+
+      console.log(`📊 Final administrator list (${adminList.length} total):`, 
+        adminList.map(admin => ({ 
+          name: admin.company_name, 
+          email: admin.contact_email,
+          userId: admin.user_id.substring(0, 8) + '...'
+        }))
+      );
+
+      // FIXED: Always set the administrators, even if empty
+      setAvailableAdministrators(adminList);
+
+      // FIXED: Log specific information about expected administrators
+      const pipaonAdmin = adminList.find(admin => 
+        admin.company_name.toLowerCase().includes('pipaón') || 
+        admin.company_name.toLowerCase().includes('pipan') ||
+        admin.contact_email.toLowerCase().includes('pipan')
+      );
+      
+      const castroAdmin = adminList.find(admin => 
+        admin.company_name.toLowerCase().includes('castro') ||
+        admin.contact_email.toLowerCase().includes('castro')
+      );
+
+      console.log('🔍 Looking for expected administrators:', {
+        pipaonFound: !!pipaonAdmin,
+        castroFound: !!castroAdmin,
+        pipaonData: pipaonAdmin,
+        castroData: castroAdmin
       });
+
+      if (adminList.length === 0) {
+        console.warn('❌ NO ADMINISTRATORS FOUND - This suggests a database or query issue');
+      }
+
+    } catch (err) {
+      console.error('❌ Critical error loading administrators:', err);
+      // FIXED: Don't crash, set empty array
+      setAvailableAdministrators([]);
     }
-
-    console.log(`Loaded ${administrators.length} property administrators:`, 
-      administrators.map(admin => ({ 
-        name: admin.company_name, 
-        email: admin.contact_email 
-      }))
-    );
-
-    setAvailableAdministrators(administrators);
   };
 
   const handleRequestAssignment = async (administrator: PropertyAdministrator) => {
