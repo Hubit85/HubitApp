@@ -117,7 +117,7 @@ export function CommunityAdministratorAssignment() {
         return;
       }
 
-      // FIXED: Properly type the assignment requests with correct mapping
+      // FIXED: Properly type the assignment requests with correct mapping and null handling
       const typedRequests = (requests || []).map(request => ({
         id: request.id,
         administrator_id: request.company_cif, // Map to company_cif as identifier
@@ -129,7 +129,7 @@ export function CommunityAdministratorAssignment() {
           company_name: request.company_name,
           company_cif: request.company_cif,
           contact_email: request.contact_email || '',
-          contact_phone: request.contact_phone,
+          contact_phone: request.contact_phone ?? undefined, // FIXED: Convert null to undefined
           profile: {
             full_name: request.company_name,
             email: request.contact_email || ''
@@ -444,7 +444,7 @@ La empresa recibirá una notificación y podrá aprobar tu solicitud desde su pa
 ¡Te notificaremos cuando recibas una respuesta!`);
       
       // Reload data
-      await loadAllData();
+      await initializeComponent(); // FIXED: Replace loadAllData with initializeComponent
 
       // Auto-hide success message
       setTimeout(() => setSuccess(""), 8000);
