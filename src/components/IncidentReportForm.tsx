@@ -204,14 +204,14 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       
       if (admins) {
         admins.forEach(admin => {
-          // Safe access to profile data
+          // Safe access to profile data with proper null checking
           if (admin.profiles && typeof admin.profiles === 'object' && !Array.isArray(admin.profiles)) {
-            const profile = admin.profiles as { full_name: string | null; email: string };
+            const profile = admin.profiles as { full_name: string | null; email: string | null };
             adminList.push({
               id: admin.id,
               user_id: admin.user_id,
               company_name: profile.full_name || 'Administrador de Fincas',
-              contact_email: profile.email || '' // FIXED: Always provide fallback string
+              contact_email: profile.email || '' // FIXED: Always provide fallback string for null email
             });
           }
         });
