@@ -68,7 +68,7 @@ export function PropertyAdministratorProfile() {
           *,
           profiles!community_member_administrators_user_id_fkey(full_name, email)
         `)
-        .eq('contact_email', user.email)
+        .eq('contact_email', user.email || '') // FIXED: Added fallback empty string
         .eq('administrator_verified', false)
         .order('created_at', { ascending: false });
 

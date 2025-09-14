@@ -35,7 +35,7 @@ interface AssignmentRequest {
 }
 
 export function CommunityAdministratorAssignment() {
-  const { user, userRoles } = useSupabaseAuth();
+  const { user, profile, userRoles } = useSupabaseAuth(); // FIXED: Added profile to destructuring
   const [currentAssignment, setCurrentAssignment] = useState<CommunityMemberAdministrator | null>(null);
   const [availableAdministrators, setAvailableAdministrators] = useState<PropertyAdministrator[]>([]);
   const [pendingRequests, setPendingRequests] = useState<AssignmentRequest[]>([]);
