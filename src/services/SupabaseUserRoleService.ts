@@ -49,36 +49,8 @@ export class SupabaseUserRoleService {
     try {
       console.log('🔧 ENHANCED ID RECOVERY for:', { email, providedUserId: providedUserId.substring(0, 8) + '...' });
 
-      // Step 1: Check auth.users table for the correct ID
-      try {
-        const { data: authUser, error: authError } = await supabase.auth.admin.listUsers();
-        
-        if (!authError && authUser) {
-          const matchingAuthUser = authUser.users.find(u => u.email === email);
-          if (matchingAuthUser && matchingAuthUser.id !== providedUserId) {
-            console.log('🔍 AUTH USER MISMATCH FOUND:', {
-              providedId: providedUserId.substring(0, 8) + '...',
-              authId: matchingAuthUser.id.substring(0, 8) + '...'
-            });
-            
-            // Check if this corrected ID has roles
-            const { data: rolesWithAuthId } = await supabase
-              .from('user_roles')
-              .select('id')
-              .eq('user_id', matchingAuthUser.id);
-              
-            if (rolesWithAuthId && rolesWithAuthId.length > 0) {
-              console.log('✅ ROLES FOUND WITH AUTH ID - RECOVERY SUCCESSFUL');
-              return {
-                recovered: true,
-                correctedId: matchingAuthUser.id
-              };
-            }
-          }
-        }
-      } catch (authAdminError) {
-        console.log('ℹ️ Auth admin access not available, trying alternative methods');
-      }
+      // FIXED: Remove auth admin access completely as it's not available
+      console.log('ℹ️ Skipping auth admin access - using direct database methods only');
       
       // Strategy 1: Look up user by email in profiles
       const { data: profileByEmail, error: emailError } = await supabase
@@ -147,27 +119,43 @@ export class SupabaseUserRoleService {
         }
       }
       
-      // Strategy 3: Look for roles by email pattern (in case there's embedded email data)
-      console.log('🔄 Strategy 3: Searching for roles with email pattern...');
-      const { data: rolesWithEmail, error: emailRolesError } = await supabase
-        .from('user_roles')
-        .select(`
-          id, user_id, role_type, is_verified, role_specific_data
-        `)
-        .like('role_specific_data', `%${email}%`)
-        .limit(10);
+      // FIXED: Strategy 3 - Use safe queries only, no LIKE operators on JSONB or UUID
+      console.log('🔄 Strategy 3: Searching by exact matches only...');
       
-      if (!emailRolesError && rolesWithEmail && rolesWithEmail.length > 0) {
-        console.log('🎯 FOUND ROLES WITH EMAIL PATTERN:', rolesWithEmail.length);
-        
-        // Return the first user_id that has roles with this email
-        const firstMatchUserId = rolesWithEmail[0].user_id;
-        console.log('🎯 Using first match user ID:', firstMatchUserId.substring(0, 8) + '...');
-        
-        return {
-          recovered: true,
-          correctedId: firstMatchUserId
-        };
+      // Try to find any user_roles for users with the same email domain
+      const emailDomain = email.split('@')[1];
+      if (emailDomain) {
+        try {
+          // Find all profiles with the same domain
+          const { data: domainProfiles, error: domainError } = await supabase
+            .from('profiles')
+            .select('id, email')
+            .ilike('email', `%@${emailDomain}`); // Safe ILIKE on email text field
+          
+          if (!domainError && domainProfiles && domainProfiles.length > 0) {
+            console.log(`🔍 Found ${domainProfiles.length} profiles with domain ${emailDomain}`);
+            
+            // Check each profile for roles
+            for (const domainProfile of domainProfiles) {
+              if (domainProfile.email === email) {
+                const { data: domainRoles, error: domainRolesError } = await supabase
+                  .from('user_roles')
+                  .select('*')
+                  .eq('user_id', domainProfile.id);
+                
+                if (!domainRolesError && domainRoles && domainRoles.length > 0) {
+                  console.log('🎯 FOUND ROLES WITH DOMAIN MATCH:', domainRoles.length);
+                  return {
+                    recovered: true,
+                    correctedId: domainProfile.id
+                  };
+                }
+              }
+            }
+          }
+        } catch (domainError) {
+          console.warn('Domain search failed:', domainError);
+        }
       }
       
       console.log('❌ No roles found with any recovery strategy');
@@ -350,24 +338,39 @@ export class SupabaseUserRoleService {
                   }
                 }
                 
-                // Try alternative searches
-                const alternativeSearches = [
-                  // Search by email in role_specific_data
-                  supabase.from('user_roles').select('*').like('role_specific_data', `%${profile.email}%`),
-                  // Search for similar user_ids (in case of partial match)
-                  supabase.from('user_roles').select('*').like('user_id', `${userId.substring(0, 20)}%`)
-                ];
+                // FIXED: Remove problematic like queries that cause operator errors
+                console.log('🔍 Alternative search methods (safe)');
                 
-                const results = await Promise.allSettled(alternativeSearches);
-                
-                results.forEach((result, index) => {
-                  if (result.status === 'fulfilled' && result.value.data) {
-                    console.log(`🔍 Alternative search ${index + 1}:`, result.value.data.length, 'results');
-                    if (result.value.data.length > 0) {
-                      console.log('🎯 POTENTIAL MATCH FOUND in alternative search');
+                // Try direct exact matches instead of LIKE queries
+                try {
+                  // Method 1: Search by exact email match in profiles
+                  const { data: profileMatches, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('id, email')
+                    .eq('email', profile.email);
+                  
+                  if (!profileError && profileMatches && profileMatches.length > 0) {
+                    console.log(`📋 Found ${profileMatches.length} profile matches`);
+                    
+                    for (const profileMatch of profileMatches) {
+                      if (profileMatch.id !== userId) {
+                        console.log('🔍 Checking roles for profile match:', profileMatch.id.substring(0, 8) + '...');
+                        
+                        const { data: altRoles } = await supabase
+                          .from('user_roles')
+                          .select('*')
+                          .eq('user_id', profileMatch.id);
+                        
+                        if (altRoles && altRoles.length > 0) {
+                          console.log('🎯 FOUND ROLES WITH ALTERNATIVE ID:', altRoles.length);
+                          return altRoles as UserRole[];
+                        }
+                      }
                     }
                   }
-                });
+                } catch (altError) {
+                  console.warn('Alternative search method failed:', altError);
+                }
               }
             } else {
               console.log('❌ User profile not found - this is a critical issue');
