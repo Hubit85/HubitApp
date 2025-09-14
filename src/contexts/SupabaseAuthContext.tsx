@@ -772,13 +772,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT
-        let finalActiveRole: UserRole | null = null;
         if (roles.length > 0) {
           console.log("🎯 CONTEXT: Starting active role management...");
           
-          finalActiveRole = await ensureActiveRole(userObject.id, roles);
+          const finalActiveRole: UserRole | null = await ensureActiveRole(userObject.id, roles);
           
-          if (finalActiveRole) {
+          if (finalActiveRole !== null && finalActiveRole !== undefined) {
             console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
             setActiveRole(finalActiveRole);
             
@@ -788,6 +787,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               is_active: r.id === finalActiveRole.id
             }));
             setUserRoles(updatedRoles);
+            
+            // Check if finalActiveRole is property_administrator
+            if (finalActiveRole.role_type === 'property_administrator') {
+              console.log("✅ CONTEXT: Active role is property_administrator");
+            }
           } else {
             console.warn("⚠️ CONTEXT: Could not establish active role");
             setActiveRole(null);
@@ -798,12 +802,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
 
         // ENHANCED Final status logging with specific issue detection
+        const finalActiveRole: UserRole | null = activeRole;
         const finalStatus = {
           userId: userObject.id.substring(0, 8) + '...',
           email: userObject.email || 'unknown',
           totalRoles: roles.length,
           verifiedRoles: roles.filter(r => r.is_verified).length,
-          activeRoleType: finalActiveRole && finalActiveRole.role_type ? finalActiveRole.role_type : 'none',
+          activeRoleType: finalActiveRole !== null && finalActiveRole !== undefined ? finalActiveRole.role_type : 'none',
           loadingMethod: loadingMethod,
           systemStatus: 'completed'
         };
@@ -821,17 +826,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.log("🚨 ISSUE DETECTED: No roles found for user who should have multiple roles");
             console.log("💡 RECOMMENDATION: Check if roles were created with different user ID");
           }
-        }
-
-        // Check if finalActiveRole is null before accessing role_type
-        if (finalActiveRole && finalActiveRole.role_type === 'property_administrator') {
-          console.log("✅ CONTEXT: Active role is property_administrator");
-        }
-
-        if (finalActiveRole) {
-          console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
-        } else {
-          console.log("No active role available");
         }
 
       } catch (criticalRoleError) {
