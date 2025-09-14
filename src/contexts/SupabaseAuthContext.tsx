@@ -584,7 +584,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       try {
         console.log("🎭 CONTEXT: Starting enhanced role loading...");
         
-        // STRATEGY 1: Use the service (preferred method)
+        // STRATEGY 1: Use the service (preferred method) with error recovery
         let roles: UserRole[] = [];
         let loadingMethod = 'unknown';
         
@@ -593,6 +593,54 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
           loadingMethod = 'service';
           console.log(`📊 Service result: ${roles.length} roles found`);
+          
+          // ENHANCED: Additional validation for BORJAPIPAON case
+          if (userObject.email?.includes('borjapipaon') && roles.length === 0) {
+            console.log('🔍 BORJAPIPAON CASE: Zero roles from service, attempting recovery...');
+            
+            // Direct database check with comprehensive error handling
+            const { data: directCheck, error: directError } = await supabase
+              .from('user_roles')
+              .select('*')
+              .eq('user_id', userObject.id);
+            
+            console.log('🔍 Direct database check result:', {
+              data: directCheck?.length || 0,
+              error: directError?.message || 'none'
+            });
+            
+            if (directCheck && directCheck.length > 0) {
+              console.log('✅ RECOVERY SUCCESS: Found roles in direct database check');
+              roles = directCheck as UserRole[];
+              loadingMethod = 'direct_recovery';
+            } else {
+              console.log('🔍 Attempting email-based ID recovery...');
+              
+              // Try ID recovery for BORJAPIPAON
+              const recoveryResult = await SupabaseUserRoleService.attemptIdRecovery(
+                userObject.email || '', 
+                userObject.id
+              );
+              
+              if (recoveryResult.recovered && recoveryResult.correctedId) {
+                console.log('🎯 ID RECOVERY: Found correct user ID, loading roles...');
+                
+                const { data: correctedRoles, error: correctedError } = await supabase
+                  .from('user_roles')
+                  .select('*')
+                  .eq('user_id', recoveryResult.correctedId);
+                
+                if (!correctedError && correctedRoles) {
+                  roles = correctedRoles as UserRole[];
+                  loadingMethod = 'id_recovery';
+                  console.log(`✅ ID RECOVERY SUCCESS: ${roles.length} roles found with correct ID`);
+                }
+              } else {
+                console.log('❌ ID recovery failed:', recoveryResult.issue);
+              }
+            }
+          }
+          
         } catch (serviceError) {
           console.warn("❌ Service method failed:", serviceError);
           
@@ -630,119 +678,41 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           } catch (directError) {
             console.error("❌ Direct database method also failed:", directError);
             
-            // STRATEGY 3: Enhanced email-based lookup with comprehensive user ID recovery
-            try {
-              console.log("🔄 STRATEGY 3: Enhanced user ID recovery...");
+            // STRATEGY 3: Email-based ID recovery for problematic accounts
+            if (userObject.email) {
+              console.log("🔄 STRATEGY 3: Email-based ID recovery...");
               
-              if (userObject.email) {
-                // First check: Look for profile with this email
-                const { data: profileByEmail, error: emailError } = await supabase
-                  .from('profiles')
-                  .select('id, email, full_name, created_at')
-                  .eq('email', userObject.email)
-                  .maybeSingle();
-
-                if (!emailError && profileByEmail) {
-                  console.log('📧 Profile found by email:', {
-                    profileId: profileByEmail.id.substring(0, 8) + '...',
-                    sessionId: userObject.id.substring(0, 8) + '...',
-                    email: profileByEmail.email,
-                    idsMatch: profileByEmail.id === userObject.id
-                  });
-
-                  if (profileByEmail.id !== userObject.id) {
-                    console.log("🚨 CRITICAL USER ID MISMATCH DETECTED!");
-                    console.log("This suggests the user was registered with a different ID than their current session");
-                    
-                    // Try loading roles with the profile's user ID
-                    const { data: correctRoles, error: correctRolesError } = await supabase
-                      .from('user_roles')
-                      .select(`
-                        id,
-                        user_id,
-                        role_type,
-                        is_verified,
-                        is_active,
-                        role_specific_data,
-                        verification_token,
-                        verification_expires_at,
-                        verification_confirmed_at,
-                        created_at,
-                        updated_at
-                      `)
-                      .eq('user_id', profileByEmail.id)
-                      .order('created_at', { ascending: true });
-
-                    if (!correctRolesError && correctRoles && correctRoles.length > 0) {
-                      console.log("✅ SUCCESS: Found roles with profile's user ID");
-                      console.log(`📊 Recovered ${correctRoles.length} roles:`, correctRoles.map(r => r.role_type));
-                      
-                      roles = correctRoles as UserRole[];
-                      loadingMethod = 'user_id_recovery';
-                      
-                      // This is a critical system inconsistency that should be reported
-                      console.error("🚨 SYSTEM INCONSISTENCY: User session ID doesn't match profile ID");
-                      console.error("Session ID:", userObject.id);
-                      console.error("Profile ID:", profileByEmail.id);
-                      console.error("Email:", userObject.email);
-                      
-                    } else {
-                      console.log("❌ No roles found even with profile's user ID");
-                    }
-                  } else {
-                    console.log("✅ User IDs match, but no roles found for this user");
-                  }
-                }
+              try {
+                const recoveryResult = await SupabaseUserRoleService.attemptIdRecovery(
+                  userObject.email, 
+                  userObject.id
+                );
                 
-                // Additional diagnostic: Check if there are ANY roles for this email pattern
-                if (roles.length === 0) {
-                  console.log("🔍 FINAL DIAGNOSTIC: Searching for any roles with similar email...");
+                if (recoveryResult.recovered && recoveryResult.correctedId) {
+                  console.log('🎯 ID RECOVERY: Found correct user ID, loading roles...');
                   
-                  try {
-                    // Look for any profiles with similar email
-                    const emailPattern = userObject.email.split('@')[0]; // e.g., "borjapipaon"
-                    
-                    const { data: similarProfiles, error: similarError } = await supabase
-                      .from('profiles')
-                      .select('id, email, full_name')
-                      .ilike('email', `%${emailPattern}%`)
-                      .limit(5);
-
-                    if (!similarError && similarProfiles && similarProfiles.length > 0) {
-                      console.log('🔍 Found similar profiles:', similarProfiles.map(p => ({
-                        id: p.id.substring(0, 8) + '...',
-                        email: p.email,
-                        name: p.full_name
-                      })));
-                      
-                      // Check if any of these have roles
-                      for (const profile of similarProfiles) {
-                        const { data: profileRoles } = await supabase
-                          .from('user_roles')
-                          .select('role_type, is_verified')
-                          .eq('user_id', profile.id);
-                          
-                        if (profileRoles && profileRoles.length > 0) {
-                          console.log(`📊 Profile ${profile.email} has ${profileRoles.length} roles:`, profileRoles.map(r => r.role_type));
-                        }
-                      }
-                    }
-                  } catch (diagnosticError) {
-                    console.log('❌ Final diagnostic failed:', diagnosticError);
+                  const { data: correctedRoles, error: correctedError } = await supabase
+                    .from('user_roles')
+                    .select('*')
+                    .eq('user_id', recoveryResult.correctedId);
+                  
+                  if (!correctedError && correctedRoles) {
+                    roles = correctedRoles as UserRole[];
+                    loadingMethod = 'id_recovery';
+                    console.log(`✅ ID RECOVERY SUCCESS: ${roles.length} roles found with correct ID`);
                   }
+                } else {
+                  console.log('❌ ID recovery failed:', recoveryResult.issue);
                 }
+              } catch (recoveryError) {
+                console.error("❌ ID recovery failed:", recoveryError);
               }
-              
-              // If still no roles found, this might be a completely new user
-              if (roles.length === 0) {
-                console.log("📝 No roles found - this might be a new user without roles yet");
-                loadingMethod = 'no_roles_found';
-              }
-              
-            } catch (emailError) {
-              console.error("❌ Email-based recovery failed:", emailError);
-              roles = [];
-              loadingMethod = 'all_failed';
+            }
+            
+            // If still no roles found, this might be a completely new user
+            if (roles.length === 0) {
+              console.log("📝 No roles found after all recovery attempts");
+              loadingMethod = 'no_roles_found';
             }
           }
         }
@@ -759,6 +729,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           console.log("- Roles found:", roles.length);
           console.log("- Loading method:", loadingMethod);
           console.log("- Role types:", roles.map(r => r.role_type));
+          console.log("- Role verification status:", roles.map(r => ({
+            type: r.role_type,
+            verified: r.is_verified,
+            active: r.is_active
+          })));
           
           if (roles.length === 0) {
             console.error("🚨 ZERO ROLES DETECTED FOR BORJAPIPAON");
@@ -768,6 +743,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.error("2. User ID mismatch between auth and database");
             console.error("3. Roles were created but database query is failing");
             console.error("4. User is using different account than registered");
+          } else {
+            console.log("✅ BORJAPIPAON ROLES FOUND SUCCESSFULLY:", roles.length);
           }
         }
 
@@ -802,13 +779,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
 
         // ENHANCED Final status logging with specific issue detection
-        const finalActiveRole: UserRole | null = activeRole;
+        const currentActiveRole = activeRole;
         const finalStatus = {
           userId: userObject.id.substring(0, 8) + '...',
           email: userObject.email || 'unknown',
           totalRoles: roles.length,
           verifiedRoles: roles.filter(r => r.is_verified).length,
-          activeRoleType: finalActiveRole !== null && finalActiveRole !== undefined ? finalActiveRole.role_type : 'none',
+          activeRoleType: currentActiveRole ? currentActiveRole.role_type : 'none',
           loadingMethod: loadingMethod,
           systemStatus: 'completed'
         };
@@ -825,6 +802,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           if (roles.length === 0) {
             console.log("🚨 ISSUE DETECTED: No roles found for user who should have multiple roles");
             console.log("💡 RECOMMENDATION: Check if roles were created with different user ID");
+            console.log("💡 Try logging out and logging back in");
+            console.log("💡 If issue persists, contact support with user ID:", userObject.id);
+          } else {
+            console.log("✅ SUCCESS: Found roles for BORJAPIPAON user");
           }
         }
 
