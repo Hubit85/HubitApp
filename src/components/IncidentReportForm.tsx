@@ -11,8 +11,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { 
   Upload, X, Camera, FileImage, Loader2, Shield, AlertTriangle, 
-  CheckCircle, MapPin, Clock, AlertCircle, Image as ImageIcon
+  CheckCircle, MapPin, Clock, AlertCircle, Image as ImageIcon, Home
 } from "lucide-react";
+import PropertySelector from "./PropertySelector";
+import type { Property } from "@/integrations/supabase/types";
 
 // Service categories matching those in register.tsx
 const SERVICE_CATEGORIES = [
@@ -48,6 +50,8 @@ interface IncidentFormData {
   location: string;
   urgency: 'low' | 'normal' | 'high' | 'emergency';
   photos: File[];
+  selectedProperty?: Property;
+  selectedUnit?: any;
 }
 
 interface IncidentReportFormProps {
@@ -70,7 +74,9 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     category: "",
     location: "",
     urgency: "normal",
-    photos: []
+    photos: [],
+    selectedProperty: undefined,
+    selectedUnit: undefined
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -78,7 +84,9 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
   const [successMessage, setSuccessMessage] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const [propertyAdministrators, setPropertyAdministrators] = useState<PropertyAdministrator[]>([]);
+  const [assignedAdministrator, setAssignedAdministrator] = useState<PropertyAdministrator | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showPropertySelector, setShowPropertySelector] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if user is community member
@@ -88,18 +96,93 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
   useEffect(() => {
     if (user && isCommunityMember) {
-      findPropertyAdministrators();
+      initializeComponent();
     } else {
       setLoading(false);
     }
   }, [user, isCommunityMember]);
 
-  const findPropertyAdministrators = async () => {
+  const initializeComponent = async () => {
     if (!user?.id) return;
 
     try {
       setLoading(true);
       
+      // Load assigned administrator for this community member
+      await loadAssignedAdministrator();
+      
+      // Load available property administrators as fallback
+      await findPropertyAdministrators();
+      
+    } catch (err) {
+      console.error('Error initializing component:', err);
+      setError("Error al inicializar el formulario de incidencias");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadAssignedAdministrator = async () => {
+    if (!user?.id) return;
+
+    try {
+      // Look for approved administrator assignment
+      const { data: assignment, error } = await supabase
+        .from('community_member_administrators')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('administrator_verified', true)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Error loading assigned administrator:', error);
+        return;
+      }
+
+      if (assignment) {
+        // Find the full administrator details
+        const { data: adminRole, error: adminError } = await supabase
+          .from('user_roles')
+          .select(`
+            user_id,
+            profiles!user_roles_user_id_fkey(full_name, email)
+          `)
+          .eq('role_type', 'property_administrator')
+          .eq('is_verified', true);
+
+        if (adminError) {
+          console.warn('Error loading administrator details:', adminError);
+          return;
+        }
+
+        // Find matching administrator by company details
+        if (adminRole) {
+          const matchingAdmin = adminRole.find(admin => 
+            admin.profiles && 
+            typeof admin.profiles === 'object' && 
+            !Array.isArray(admin.profiles) &&
+            (admin.profiles as any).email === assignment.contact_email
+          );
+
+          if (matchingAdmin) {
+            setAssignedAdministrator({
+              id: assignment.id,
+              user_id: matchingAdmin.user_id,
+              company_name: assignment.company_name,
+              contact_email: assignment.contact_email
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error loading assigned administrator:', err);
+    }
+  };
+
+  const findPropertyAdministrators = async () => {
+    if (!user?.id) return;
+
+    try {
       // Find property administrators for notifications - FIXED QUERY
       const { data: admins, error } = await supabase
         .from('user_roles')
@@ -113,6 +196,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
       if (error) {
         console.error('Error fetching property administrators:', error);
+        return;
       }
 
       // FIXED: Better type handling for the admin list
@@ -137,9 +221,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       
     } catch (err) {
       console.error('Error setting up property administrators:', err);
-      setError("Error al configurar el sistema de administradores.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -149,6 +230,16 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));
     }
+    setError("");
+  };
+
+  const handlePropertySelection = (property: any, unit?: any) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedProperty: property,
+      selectedUnit: unit
+    }));
+    setShowPropertySelector(false);
     setError("");
   };
 
@@ -278,6 +369,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       return;
     }
 
+    if (!formData.selectedProperty) {
+      setError("Por favor, selecciona la propiedad donde se encuentra la incidencia.");
+      return;
+    }
+
     setSubmitting(true);
     setError("");
     setSuccessMessage("");
@@ -290,18 +386,25 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         photoUrls = await uploadPhotosToStorage(formData.photos);
       }
 
-      // FIXED: Use proper administrator ID handling
+      // Determine administrator ID
       let primaryAdministratorId: string;
       
-      if (propertyAdministrators.length > 0) {
-        // Use the first available property administrator
+      if (assignedAdministrator) {
+        // Use assigned administrator
+        primaryAdministratorId = assignedAdministrator.user_id;
+      } else if (propertyAdministrators.length > 0) {
+        // Use first available property administrator
         primaryAdministratorId = propertyAdministrators[0].user_id;
       } else {
         // FALLBACK: Use the reporter's ID as temporary administrator
-        // This allows the incident to be created and can be reassigned later
         primaryAdministratorId = user.id;
         console.warn('No property administrators found, using reporter as temporary administrator');
       }
+
+      // Build location details including property info
+      const locationDetails = formData.selectedProperty 
+        ? `${formData.selectedProperty.name || formData.selectedProperty.address} - ${formData.location.trim() || 'Ubicación específica no especificada'}`
+        : formData.location.trim() || 'Áreas comunes de la comunidad';
 
       // Create incident record with proper UUID
       const incidentData = {
@@ -310,13 +413,13 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         category: formData.category,
         urgency: formData.urgency,
         status: 'pending' as const,
-        work_location: formData.location.trim() || 'Áreas comunes de la comunidad',
-        special_requirements: null,
-        images: photoUrls.length > 0 ? photoUrls : null, // Use null instead of empty array
-        documents: null, // Use null instead of empty array
+        work_location: locationDetails,
+        special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unitNumber}` : null,
+        images: photoUrls.length > 0 ? photoUrls : null,
+        documents: null,
         reporter_id: user.id,
-        community_id: 'general_community', // This should be a valid community ID
-        administrator_id: primaryAdministratorId, // Always use valid UUID
+        community_id: 'general_community',
+        administrator_id: primaryAdministratorId,
         admin_notes: null,
         reviewed_at: null,
         reviewed_by: null
@@ -327,7 +430,8 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         reporter_id: incidentData.reporter_id,
         administrator_id: incidentData.administrator_id,
         category: incidentData.category,
-        urgency: incidentData.urgency
+        urgency: incidentData.urgency,
+        work_location: incidentData.work_location
       });
 
       const { data: incident, error: incidentError } = await supabase
@@ -341,11 +445,9 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         
         // Provide specific error handling
         if (incidentError.code === '23503') {
-          // Foreign key violation
           setError("Error de configuración del sistema. No se encontró un administrador válido asignado.");
           return;
         } else if (incidentError.code === '22P02') {
-          // Invalid UUID
           setError("Error de datos inválidos. Por favor, contacta con soporte técnico.");
           return;
         } else {
@@ -355,15 +457,17 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
       console.log('Incident created successfully:', incident.id);
 
-      // Send notifications to property administrators (only if we have real administrators)
-      if (propertyAdministrators.length > 0) {
+      // Send notifications to the assigned administrator
+      const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+      
+      if (targetAdministrator) {
         try {
           const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
           
-          const notifications = propertyAdministrators.map(admin => ({
-            user_id: admin.user_id,
+          const notification = {
+            user_id: targetAdministrator.user_id,
             title: `Nueva incidencia reportada - ${urgencyLevel?.label || 'Normal'}`,
-            message: `${profile?.full_name || 'Un miembro de comunidad'} ha reportado una incidencia: "${formData.title}". Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
+            message: `${profile?.full_name || 'Un miembro de comunidad'} ha reportado una incidencia: "${formData.title}". Propiedad: ${formData.selectedProperty?.name || 'No especificada'}. Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
             type: (formData.urgency === 'emergency' ? 'error' : 'info') as 'error' | 'info',
             category: 'incident' as const,
             related_entity_type: 'incident',
@@ -371,26 +475,24 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
             action_url: `/dashboard?tab=incidencias&incident=${incident.id}`,
             action_label: 'Ver Incidencia',
             read: false
-          }));
+          };
 
-          const { error: notifError } = await supabase.from('notifications').insert(notifications);
+          const { error: notifError } = await supabase.from('notifications').insert([notification]);
           
           if (notifError) {
-            console.warn('Failed to send notifications:', notifError);
+            console.warn('Failed to send notification:', notifError);
           } else {
-            console.log(`Notification sent to ${propertyAdministrators.length} property administrators`);
+            console.log(`Notification sent to administrator: ${targetAdministrator.company_name}`);
           }
         } catch (notifError) {
-          console.warn('Failed to create notifications:', notifError);
+          console.warn('Failed to create notification:', notifError);
         }
-      } else {
-        console.warn('No property administrators found - notifications not sent');
       }
 
       // Success message
       setSuccessMessage(
-        propertyAdministrators.length > 0
-          ? "¡Incidencia reportada exitosamente! Los administradores de fincas han sido notificados y revisarán tu solicitud."
+        targetAdministrator
+          ? `¡Incidencia reportada exitosamente! ${targetAdministrator.company_name} ha sido notificado y revisará tu solicitud.`
           : "¡Incidencia reportada exitosamente! Se ha creado el reporte y será asignado a un administrador cuando esté disponible."
       );
       
@@ -401,7 +503,9 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         category: "",
         location: "",
         urgency: "normal",
-        photos: []
+        photos: [],
+        selectedProperty: undefined,
+        selectedUnit: undefined
       });
 
       // Call success callback
@@ -470,268 +574,336 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
   }
 
   return (
-    <Card className="border-stone-200 shadow-xl bg-gradient-to-br from-white to-neutral-50">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-red-100 to-orange-100 rounded-xl">
-            <Shield className="h-6 w-6 text-red-600" />
+    <>
+      <Card className="border-stone-200 shadow-xl bg-gradient-to-br from-white to-neutral-50">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-red-100 to-orange-100 rounded-xl">
+              <Shield className="h-6 w-6 text-red-600" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-semibold">Reportar Incidencia</CardTitle>
+              <CardDescription className="mt-1">
+                Informa al administrador de fincas sobre problemas en Mi Comunidad
+                {assignedAdministrator ? (
+                  <span className="text-green-600 font-medium ml-2">
+                    (Administrador: {assignedAdministrator.company_name})
+                  </span>
+                ) : propertyAdministrators.length > 0 ? (
+                  <span className="text-blue-600 font-medium ml-2">
+                    ({propertyAdministrators.length} administrador{propertyAdministrators.length !== 1 ? 'es' : ''} disponible{propertyAdministrators.length !== 1 ? 's' : ''})
+                  </span>
+                ) : (
+                  <span className="text-orange-600 font-medium ml-2">
+                    (Asigna un administrador en Mi Perfil)
+                  </span>
+                )}
+              </CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-xl font-semibold">Reportar Incidencia</CardTitle>
-            <CardDescription className="mt-1">
-              Informa al administrador de fincas sobre problemas en Mi Comunidad
-              {propertyAdministrators.length > 0 && (
-                <span className="text-green-600 font-medium ml-2">
-                  ({propertyAdministrators.length} administrador{propertyAdministrators.length !== 1 ? 'es' : ''} disponible{propertyAdministrators.length !== 1 ? 's' : ''})
-                </span>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {(error || successMessage) && (
+            <Alert className={`border-2 ${error ? "border-red-200 bg-red-50" : "border-green-200 bg-green-50"}`}>
+              <div className="flex items-center gap-2">
+                {error ? <AlertCircle className="h-4 w-4 text-red-600" /> : <CheckCircle className="h-4 w-4 text-green-600" />}
+                <AlertDescription className={`font-medium ${error ? "text-red-800" : "text-green-800"}`}>
+                  {error || successMessage}
+                </AlertDescription>
+              </div>
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Property Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-stone-700">
+                Propiedad donde ocurre la incidencia *
+              </Label>
+              {formData.selectedProperty ? (
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Home className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="font-medium text-blue-900">
+                        {formData.selectedProperty.name}
+                      </p>
+                      <p className="text-sm text-blue-700">
+                        {formData.selectedProperty.address}, {formData.selectedProperty.city}
+                      </p>
+                      {formData.selectedUnit && (
+                        <p className="text-xs text-blue-600">
+                          Unidad: {formData.selectedUnit.unitNumber}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPropertySelector(true)}
+                    className="bg-white hover:bg-blue-50"
+                  >
+                    Cambiar
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowPropertySelector(true)}
+                  className="w-full h-12 border-dashed border-stone-300 hover:border-blue-400 bg-stone-50 hover:bg-blue-50 text-stone-600"
+                >
+                  <Home className="h-4 w-4 mr-2" />
+                  Seleccionar Propiedad
+                </Button>
               )}
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
-        {(error || successMessage) && (
-          <Alert className={`border-2 ${error ? "border-red-200 bg-red-50" : "border-green-200 bg-green-50"}`}>
-            <div className="flex items-center gap-2">
-              {error ? <AlertCircle className="h-4 w-4 text-red-600" /> : <CheckCircle className="h-4 w-4 text-green-600" />}
-              <AlertDescription className={`font-medium ${error ? "text-red-800" : "text-green-800"}`}>
-                {error || successMessage}
-              </AlertDescription>
-            </div>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium text-stone-700">
-                Título de la incidencia *
-              </Label>
-              <Input
-                id="title"
-                type="text"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="Ej: Fuga de agua en el garaje"
-                className="h-12 bg-white border-stone-200 focus:border-red-500 focus:ring-red-500/20"
-                required
-              />
             </div>
 
-            {/* Category */}
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-sm font-medium text-stone-700">
-                Categoría del servicio *
-              </Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                <SelectTrigger className="h-12 bg-white border-stone-200 focus:border-red-500">
-                  <SelectValue placeholder="Selecciona la categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SERVICE_CATEGORIES.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <div className="flex items-center gap-2">
-                        <span>{category.icon}</span>
-                        <span>{category.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Location */}
-            <div className="space-y-2">
-              <Label htmlFor="location" className="text-sm font-medium text-stone-700">
-                Ubicación específica
-              </Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Title */}
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-sm font-medium text-stone-700">
+                  Título de la incidencia *
+                </Label>
                 <Input
-                  id="location"
+                  id="title"
                   type="text"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange("location", e.target.value)}
-                  placeholder="Ej: Portal A, Ascensor 2, Jardín trasero"
-                  className="pl-10 h-12 bg-white border-stone-200 focus:border-red-500 focus:ring-red-500/20"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  placeholder="Ej: Fuga de agua en el garaje"
+                  className="h-12 bg-white border-stone-200 focus:border-red-500 focus:ring-red-500/20"
+                  required
                 />
               </div>
-            </div>
 
-            {/* Urgency */}
-            <div className="space-y-2">
-              <Label htmlFor="urgency" className="text-sm font-medium text-stone-700">
-                Nivel de urgencia *
-              </Label>
-              <Select value={formData.urgency} onValueChange={(value) => handleInputChange("urgency", value)}>
-                <SelectTrigger className="h-12 bg-white border-stone-200 focus:border-red-500">
-                  <SelectValue placeholder="Selecciona la urgencia" />
-                </SelectTrigger>
-                <SelectContent>
-                  {URGENCY_LEVELS.map((level) => (
-                    <SelectItem key={level.value} value={level.value}>
-                      <div className="flex items-center gap-2">
-                        <span>{level.icon}</span>
-                        <span>{level.label}</span>
-                        {level.value === 'emergency' && (
-                          <Badge className="bg-red-100 text-red-800 text-xs ml-2">
-                            Atención inmediata
-                          </Badge>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium text-stone-700">
-              Descripción detallada *
-            </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Describe la incidencia con el mayor detalle posible: qué ha ocurrido, cuándo lo notaste, si afecta a otros residentes, etc."
-              className="min-h-[120px] bg-white border-stone-200 focus:border-red-500 focus:ring-red-500/20 resize-none"
-              required
-            />
-            <p className="text-xs text-stone-500">
-              Mínimo 20 caracteres. Incluye todos los detalles relevantes para facilitar la resolución.
-            </p>
-          </div>
-
-          {/* Photo Upload */}
-          <div className="space-y-4">
-            <Label className="text-sm font-medium text-stone-700">
-              Fotografías (opcional)
-            </Label>
-            <p className="text-sm text-stone-600">
-              Añade hasta 5 fotografías para proporcionar más información visual sobre la incidencia.
-            </p>
-
-            {/* Drop Zone */}
-            <div
-              className={`relative border-2 border-dashed rounded-lg p-6 transition-colors ${
-                dragActive
-                  ? 'border-red-400 bg-red-50'
-                  : 'border-stone-300 hover:border-red-400 bg-stone-50 hover:bg-red-50'
-              }`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) => handlePhotoUpload(e.target.files)}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              
-              <div className="text-center">
-                <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Camera className="h-6 w-6 text-stone-500" />
-                </div>
-                <p className="text-sm font-medium text-stone-700 mb-1">
-                  Arrastra las imágenes aquí o haz clic para seleccionar
-                </p>
-                <p className="text-xs text-stone-500">
-                  PNG, JPG, GIF hasta 5MB cada una. Máximo 5 imágenes.
-                </p>
-              </div>
-            </div>
-
-            {/* Photo Preview */}
-            {formData.photos.length > 0 && (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium text-stone-700">
-                  Fotografías seleccionadas ({formData.photos.length}/5)
+              {/* Category */}
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-sm font-medium text-stone-700">
+                  Categoría del servicio *
                 </Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {formData.photos.map((photo, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square bg-stone-100 rounded-lg overflow-hidden border border-stone-200">
-                        <div className="w-full h-full flex items-center justify-center">
-                          <FileImage className="h-8 w-8 text-stone-400" />
+                <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                  <SelectTrigger className="h-12 bg-white border-stone-200 focus:border-red-500">
+                    <SelectValue placeholder="Selecciona la categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SERVICE_CATEGORIES.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{category.icon}</span>
+                          <span>{category.name}</span>
                         </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removePhoto(index)}
-                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                      <p className="text-xs text-stone-600 mt-1 truncate">
-                        {photo.name}
-                      </p>
-                    </div>
-                  ))}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Location */}
+              <div className="space-y-2">
+                <Label htmlFor="location" className="text-sm font-medium text-stone-700">
+                  Ubicación específica dentro de la propiedad
+                </Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+                  <Input
+                    id="location"
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    placeholder="Ej: Portal A, Ascensor 2, Jardín trasero, Apartamento 3B"
+                    className="pl-10 h-12 bg-white border-stone-200 focus:border-red-500 focus:ring-red-500/20"
+                  />
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Form Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-stone-200">
-            {onCancel && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                disabled={submitting}
-                className="flex-1 border-stone-200 hover:bg-stone-50"
+              {/* Urgency */}
+              <div className="space-y-2">
+                <Label htmlFor="urgency" className="text-sm font-medium text-stone-700">
+                  Nivel de urgencia *
+                </Label>
+                <Select value={formData.urgency} onValueChange={(value) => handleInputChange("urgency", value)}>
+                  <SelectTrigger className="h-12 bg-white border-stone-200 focus:border-red-500">
+                    <SelectValue placeholder="Selecciona la urgencia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {URGENCY_LEVELS.map((level) => (
+                      <SelectItem key={level.value} value={level.value}>
+                        <div className="flex items-center gap-2">
+                          <span>{level.icon}</span>
+                          <span>{level.label}</span>
+                          {level.value === 'emergency' && (
+                            <Badge className="bg-red-100 text-red-800 text-xs ml-2">
+                              Atención inmediata
+                            </Badge>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium text-stone-700">
+                Descripción detallada *
+              </Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                placeholder="Describe la incidencia con el mayor detalle posible: qué ha ocurrido, cuándo lo notaste, si afecta a otros residentes, etc."
+                className="min-h-[120px] bg-white border-stone-200 focus:border-red-500 focus:ring-red-500/20 resize-none"
+                required
+              />
+              <p className="text-xs text-stone-500">
+                Mínimo 20 caracteres. Incluye todos los detalles relevantes para facilitar la resolución.
+              </p>
+            </div>
+
+            {/* Photo Upload */}
+            <div className="space-y-4">
+              <Label className="text-sm font-medium text-stone-700">
+                Fotografías (opcional)
+              </Label>
+              <p className="text-sm text-stone-600">
+                Añade hasta 5 fotografías para proporcionar más información visual sobre la incidencia.
+              </p>
+
+              {/* Drop Zone */}
+              <div
+                className={`relative border-2 border-dashed rounded-lg p-6 transition-colors ${
+                  dragActive
+                    ? 'border-red-400 bg-red-50'
+                    : 'border-stone-300 hover:border-red-400 bg-stone-50 hover:bg-red-50'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
               >
-                Cancelar
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={submitting || !formData.title.trim() || !formData.description.trim() || !formData.category}
-              className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Reportando incidencia...
-                </>
-              ) : (
-                <>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Reportar Incidencia
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => handlePhotoUpload(e.target.files)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Camera className="h-6 w-6 text-stone-500" />
+                  </div>
+                  <p className="text-sm font-medium text-stone-700 mb-1">
+                    Arrastra las imágenes aquí o haz clic para seleccionar
+                  </p>
+                  <p className="text-xs text-stone-500">
+                    PNG, JPG, GIF hasta 5MB cada una. Máximo 5 imágenes.
+                  </p>
+                </div>
+              </div>
 
-        {/* Info Box */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-start gap-3">
-            <Clock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <h4 className="font-medium text-blue-900 mb-1">
-                ¿Qué sucede después de reportar?
-              </h4>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Los administradores de fincas recibirán una notificación inmediata</li>
-                <li>• Se evaluará la incidencia y su prioridad</li>
-                <li>• Si requiere servicios externos, se solicitarán presupuestos</li>
-                <li>• Recibirás actualizaciones sobre el estado de resolución</li>
-                <li>• Las incidencias de emergencia tienen atención prioritaria</li>
-              </ul>
+              {/* Photo Preview */}
+              {formData.photos.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-stone-700">
+                    Fotografías seleccionadas ({formData.photos.length}/5)
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {formData.photos.map((photo, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square bg-stone-100 rounded-lg overflow-hidden border border-stone-200">
+                          <div className="w-full h-full flex items-center justify-center">
+                            <FileImage className="h-8 w-8 text-stone-400" />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(index)}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <p className="text-xs text-stone-600 mt-1 truncate">
+                          {photo.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-stone-200">
+              {onCancel && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  disabled={submitting}
+                  className="flex-1 border-stone-200 hover:bg-stone-50"
+                >
+                  Cancelar
+                </Button>
+              )}
+              <Button
+                type="submit"
+                disabled={submitting || !formData.title.trim() || !formData.description.trim() || !formData.category || !formData.selectedProperty}
+                className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Reportando incidencia...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Reportar Incidencia
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+
+          {/* Info Box */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-start gap-3">
+              <Clock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium text-blue-900 mb-1">
+                  ¿Qué sucede después de reportar?
+                </h4>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• {assignedAdministrator ? assignedAdministrator.company_name : 'Los administradores de fincas'} recibirán una notificación inmediata</li>
+                  <li>• Se evaluará la incidencia y su prioridad</li>
+                  <li>• Si requiere servicios externos, se solicitarán presupuestos</li>
+                  <li>• Recibirás actualizaciones sobre el estado de resolución</li>
+                  <li>• Las incidencias de emergencia tienen atención prioritaria</li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Property Selector Modal */}
+      {showPropertySelector && (
+        <PropertySelector
+          onPropertySelected={handlePropertySelection}
+          onCancel={() => setShowPropertySelector(false)}
+          userType="community_member"
+          mode="incident"
+          title="Selecciona la Propiedad para la Incidencia"
+          allowNoUnitSelection={true}
+        />
+      )}
+    </>
   );
 }
