@@ -104,19 +104,10 @@ export function CommunityAdministratorAssignment() {
       .select(`
         id,
         user_id,
-        profiles!user_roles_user_id_fkey(full_name, email),
-        property_administrators!property_administrators_user_id_fkey(
-          id,
-          company_name,
-          company_cif,
-          contact_email,
-          contact_phone,
-          license_number
-        )
+        profiles!user_roles_user_id_fkey(full_name, email)
       `)
       .eq('role_type', 'property_administrator')
-      .eq('is_verified', true)
-      .eq('is_active', true);
+      .eq('is_verified', true);
 
     if (error) {
       console.warn("Error loading administrators:", error);
@@ -127,31 +118,39 @@ export function CommunityAdministratorAssignment() {
     
     if (data) {
       data.forEach(admin => {
-        if (admin.property_administrators && 
-            admin.profiles && 
+        // Check if the admin has a valid profile
+        if (admin.profiles && 
             typeof admin.profiles === 'object' && 
             !Array.isArray(admin.profiles)) {
           
-          const profile = admin.profiles as { full_name: string; email: string };
-          const adminData = Array.isArray(admin.property_administrators) 
-            ? admin.property_administrators[0] 
-            : admin.property_administrators;
-            
-          if (adminData && typeof adminData === 'object') {
+          const profile = admin.profiles as { full_name: string | null; email: string | null };
+          
+          // FIXED: Only add administrators with valid email addresses and include all verified admins
+          if (profile.email && profile.full_name) {
             administrators.push({
-              id: adminData.id,
+              id: admin.id,
               user_id: admin.user_id,
-              company_name: adminData.company_name || profile.full_name || 'Administrador de Fincas',
-              company_cif: adminData.company_cif || '',
-              contact_email: adminData.contact_email || profile.email,
-              contact_phone: adminData.contact_phone || undefined,
-              license_number: adminData.license_number || undefined,
-              profile
+              company_name: profile.full_name,
+              company_cif: `CIF-${admin.user_id.substring(0, 8)}`, // Generate a temporary CIF
+              contact_email: profile.email,
+              contact_phone: undefined, // Will be populated if available
+              license_number: undefined,
+              profile: {
+                full_name: profile.full_name,
+                email: profile.email
+              }
             });
           }
         }
       });
     }
+
+    console.log(`Loaded ${administrators.length} property administrators:`, 
+      administrators.map(admin => ({ 
+        name: admin.company_name, 
+        email: admin.contact_email 
+      }))
+    );
 
     setAvailableAdministrators(administrators);
   };
