@@ -199,20 +199,25 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         return;
       }
 
-      // FIXED: Better type handling for the admin list
+      // FIXED: Better type handling for the admin list with proper null checking
       const adminList: PropertyAdministrator[] = [];
       
       if (admins) {
         admins.forEach(admin => {
-          // Safe access to profile data with proper null checking
+          // Safe access to profile data with comprehensive null checking
           if (admin.profiles && typeof admin.profiles === 'object' && !Array.isArray(admin.profiles)) {
             const profile = admin.profiles as { full_name: string | null; email: string | null };
-            adminList.push({
-              id: admin.id,
-              user_id: admin.user_id,
-              company_name: profile.full_name || 'Administrador de Fincas',
-              contact_email: profile.email || '' // FIXED: Always provide fallback string for null email
-            });
+            
+            // FIXED: Ensure we have a valid email before adding to the list
+            const email = profile.email;
+            if (email) { // Only add administrators with valid email addresses
+              adminList.push({
+                id: admin.id,
+                user_id: admin.user_id,
+                company_name: profile.full_name || 'Administrador de Fincas',
+                contact_email: email // Now guaranteed to be non-null
+              });
+            }
           }
         });
       }
