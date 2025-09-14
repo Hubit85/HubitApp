@@ -54,8 +54,39 @@ export function PropertyAdministratorProfile() {
   useEffect(() => {
     if (user?.id) {
       loadPendingAssignmentRequests();
+      loadAdministratorData();
     }
   }, [user?.id]);
+
+  const loadAdministratorData = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data: adminData, error } = await supabase
+        .from('property_administrators')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Error loading administrator data:', error);
+        return;
+      }
+
+      if (adminData) {
+        setFormData({
+          company_name: adminData.company_name || profile?.full_name || "",
+          company_cif: adminData.company_cif || "",
+          contact_email: adminData.contact_email || user?.email || "",
+          contact_phone: adminData.contact_phone || profile?.phone || "",
+          license_number: adminData.license_number || "",
+          notes: adminData.notes || ""
+        });
+      }
+    } catch (err) {
+      console.error('Error loading administrator data:', err);
+    }
+  };
 
   const loadPendingAssignmentRequests = async () => {
     if (!user?.id) return;
@@ -162,13 +193,66 @@ export function PropertyAdministratorProfile() {
       setSaving(true);
       setError("");
 
-      // TODO: When property_administrators table is properly integrated,
-      // save the data to that table. For now, show success message.
-      
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
+      // First, check if a property administrator record already exists
+      const { data: existingAdmin, error: checkError } = await supabase
+        .from('property_administrators')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      const adminData = {
+        user_id: user.id,
+        company_name: formData.company_name.trim(),
+        company_cif: formData.company_cif.trim() || `TEMP-${Date.now()}`,
+        contact_email: formData.contact_email.trim(),
+        contact_phone: formData.contact_phone.trim() || null,
+        license_number: formData.license_number.trim() || null,
+        notes: formData.notes.trim() || null,
+        updated_at: new Date().toISOString()
+      };
+
+      if (existingAdmin) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('property_administrators')
+          .update(adminData)
+          .eq('id', existingAdmin.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Create new record
+        const { error: insertError } = await supabase
+          .from('property_administrators')
+          .insert({
+            ...adminData,
+            created_at: new Date().toISOString()
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      // Also update the profile with the company name if it's different
+      if (formData.company_name !== profile?.full_name) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: formData.company_name.trim(),
+            phone: formData.contact_phone.trim() || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
+
+        if (profileError) {
+          console.warn('Failed to update profile:', profileError);
+        }
+      }
+
+      console.log("Administrator profile updated successfully");
       setIsEditing(false);
-      console.log("Administrator profile would be updated successfully");
       
     } catch (err) {
       console.error("Error saving administrator data:", err);
@@ -191,15 +275,15 @@ export function PropertyAdministratorProfile() {
     setError("");
   };
 
-  // Get administrator data from the user profile
+  // Get administrator data from form data or fallbacks
   const adminData: PropertyAdministratorData = {
-    company_name: profile?.full_name || "No especificado",
-    company_cif: "Pendiente de configurar",
-    contact_email: user?.email || "No especificado",
-    contact_phone: profile?.phone || "No especificado",
+    company_name: formData.company_name || profile?.full_name || "No especificado",
+    company_cif: formData.company_cif || "Pendiente de configurar",
+    contact_email: formData.contact_email || user?.email || "No especificado",
+    contact_phone: formData.contact_phone || profile?.phone || "No especificado",
     membership_date: profile?.created_at || new Date().toISOString(),
-    license_number: "Pendiente de configurar",
-    notes: "Información básica del administrador de fincas"
+    license_number: formData.license_number || "Pendiente de configurar",
+    notes: formData.notes || "Información básica del administrador de fincas"
   };
 
   return (
