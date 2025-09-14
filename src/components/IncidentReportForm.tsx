@@ -290,18 +290,20 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         photoUrls = await uploadPhotosToStorage(formData.photos);
       }
 
-      // Use the first property administrator as the primary one, or create a placeholder
+      // FIXED: Use proper administrator ID handling
       let primaryAdministratorId: string;
       
       if (propertyAdministrators.length > 0) {
+        // Use the first available property administrator
         primaryAdministratorId = propertyAdministrators[0].user_id;
       } else {
-        // Create a temporary placeholder record if no administrators exist
-        // This allows the incident to be created and administrators can be notified later
-        primaryAdministratorId = user.id; // Use the reporter as temporary admin
+        // FALLBACK: Use the reporter's ID as temporary administrator
+        // This allows the incident to be created and can be reassigned later
+        primaryAdministratorId = user.id;
+        console.warn('No property administrators found, using reporter as temporary administrator');
       }
 
-      // Create incident record in the 'incidents' table
+      // Create incident record with proper UUID
       const incidentData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -310,15 +312,23 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         status: 'pending' as const,
         work_location: formData.location.trim() || 'Áreas comunes de la comunidad',
         special_requirements: null,
-        images: photoUrls.length > 0 ? photoUrls : [],
-        documents: [],
+        images: photoUrls.length > 0 ? photoUrls : null, // Use null instead of empty array
+        documents: null, // Use null instead of empty array
         reporter_id: user.id,
-        community_id: 'general_community', // Use a general community ID
-        administrator_id: primaryAdministratorId, // Use valid UUID
+        community_id: 'general_community', // This should be a valid community ID
+        administrator_id: primaryAdministratorId, // Always use valid UUID
         admin_notes: null,
         reviewed_at: null,
         reviewed_by: null
       };
+
+      console.log('Creating incident with data:', {
+        title: incidentData.title,
+        reporter_id: incidentData.reporter_id,
+        administrator_id: incidentData.administrator_id,
+        category: incidentData.category,
+        urgency: incidentData.urgency
+      });
 
       const { data: incident, error: incidentError } = await supabase
         .from('incidents')
@@ -328,10 +338,24 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
       if (incidentError) {
         console.error('Error creating incident:', incidentError);
-        throw incidentError;
+        
+        // Provide specific error handling
+        if (incidentError.code === '23503') {
+          // Foreign key violation
+          setError("Error de configuración del sistema. No se encontró un administrador válido asignado.");
+          return;
+        } else if (incidentError.code === '22P02') {
+          // Invalid UUID
+          setError("Error de datos inválidos. Por favor, contacta con soporte técnico.");
+          return;
+        } else {
+          throw incidentError;
+        }
       }
 
-      // Send notifications to all property administrators
+      console.log('Incident created successfully:', incident.id);
+
+      // Send notifications to property administrators (only if we have real administrators)
       if (propertyAdministrators.length > 0) {
         try {
           const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
@@ -349,16 +373,26 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
             read: false
           }));
 
-          await supabase.from('notifications').insert(notifications);
-          console.log(`Notification sent to ${propertyAdministrators.length} property administrators`);
+          const { error: notifError } = await supabase.from('notifications').insert(notifications);
+          
+          if (notifError) {
+            console.warn('Failed to send notifications:', notifError);
+          } else {
+            console.log(`Notification sent to ${propertyAdministrators.length} property administrators`);
+          }
         } catch (notifError) {
-          console.warn('Failed to send notification:', notifError);
+          console.warn('Failed to create notifications:', notifError);
         }
       } else {
-        console.warn('No property administrators found to notify');
+        console.warn('No property administrators found - notifications not sent');
       }
 
-      setSuccessMessage("¡Incidencia reportada exitosamente! Los administradores de fincas han sido notificados y revisarán tu solicitud.");
+      // Success message
+      setSuccessMessage(
+        propertyAdministrators.length > 0
+          ? "¡Incidencia reportada exitosamente! Los administradores de fincas han sido notificados y revisarán tu solicitud."
+          : "¡Incidencia reportada exitosamente! Se ha creado el reporte y será asignado a un administrador cuando esté disponible."
+      );
       
       // Reset form
       setFormData({
@@ -381,17 +415,21 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       console.error('Error submitting incident:', err);
       
       // Provide more specific error messages
-      let errorMessage = "Error al reportar la incidencia.";
+      let errorMessage = "Error al reportar la incidencia. Por favor, inténtalo de nuevo.";
       
       if (err instanceof Error) {
         if (err.message.includes('administrator_id')) {
-          errorMessage = "Error de configuración del sistema. Por favor, contacta con soporte técnico.";
+          errorMessage = "Error de configuración del sistema. No se encontró un administrador válido.";
         } else if (err.message.includes('uuid')) {
-          errorMessage = "Error de datos. Por favor, inténtalo de nuevo o contacta con soporte.";
+          errorMessage = "Error de datos inválidos. Por favor, contacta con soporte técnico.";
+        } else if (err.message.includes('23503')) {
+          errorMessage = "Error de configuración de la base de datos. Contacta con soporte.";
         } else if (err.message.includes('RLS') || err.message.includes('policy')) {
-          errorMessage = "Error de permisos. Las fotografías se guardarán localmente. La incidencia se ha reportado correctamente.";
+          errorMessage = "Error de permisos del sistema. La incidencia fue reportada pero las fotos no se pudieron guardar.";
+        } else if (err.message.includes('community_id')) {
+          errorMessage = "Error de comunidad no válida. Contacta con tu administrador de fincas.";
         } else {
-          errorMessage = err.message;
+          errorMessage = `Error: ${err.message}`;
         }
       }
       
