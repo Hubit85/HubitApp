@@ -836,13 +836,35 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         }
 
       } catch (error) {
-        console.error("❌ CONTEXT: Critical error in role loading:", error);
+        console.error("❌ CONTEXT: Critical error in fetchUserData:", error);
         
-        // Emergency fallback: set empty state but don't crash
+        // Emergency profile creation - FIXED: Always provide email fallback
+        const emergencyProfile: Profile = {
+          id: userObject.id,
+          email: userObject.email || '', // FIXED: Always provide empty string as fallback
+          full_name: userObject.user_metadata?.full_name || null,
+          user_type: 'particular',
+          phone: null,
+          avatar_url: null,
+          address: null,
+          city: null,
+          postal_code: null,
+          country: 'Spain',
+          language: 'es',
+          timezone: 'Europe/Madrid',
+          email_notifications: true,
+          sms_notifications: false,
+          is_verified: false,
+          verification_code: null,
+          last_login: null,
+          created_at: userObject.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        setProfile(emergencyProfile);
         setUserRoles([]);
         setActiveRole(null);
       }
-
     } catch (error) {
       console.error("❌ CONTEXT: Critical error in fetchUserData:", error);
       
