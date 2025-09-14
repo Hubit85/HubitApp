@@ -594,9 +594,128 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           loadingMethod = 'service';
           console.log(`📊 Service result: ${roles.length} roles found`);
           
-          // ENHANCED: Additional validation for BORJAPIPAON case
+          // ENHANCED: Automatic role recovery for zero-role users
+          if (roles.length === 0) {
+            console.log('🔍 ZERO ROLES DETECTED - Starting automatic recovery...');
+            
+            // Check if this is a newly registered user that should have roles
+            const { data: profileCheck, error: profileCheckError } = await supabase
+              .from('profiles')
+              .select('created_at, user_type, full_name')
+              .eq('id', userObject.id)
+              .single();
+            
+            if (!profileCheckError && profileCheck) {
+              const profileAge = new Date(profileCheck.created_at);
+              const now = new Date();
+              const ageHours = (now.getTime() - profileAge.getTime()) / (1000 * 60 * 60);
+              
+              console.log(`🔍 Profile age: ${ageHours.toFixed(1)} hours, user_type: ${profileCheck.user_type}`);
+              
+              // If profile is less than 24 hours old and has a user_type, this suggests incomplete registration
+              if (ageHours < 24 && profileCheck.user_type && profileCheck.user_type !== 'particular') {
+                console.log('🚨 INCOMPLETE REGISTRATION DETECTED - Creating missing role automatically');
+                
+                try {
+                  // Create the missing primary role
+                  const roleInsertData: UserRoleInsert = {
+                    user_id: userObject.id,
+                    role_type: profileCheck.user_type,
+                    is_verified: true,
+                    is_active: true,
+                    role_specific_data: {
+                      full_name: profileCheck.full_name || 'Usuario',
+                      phone: '',
+                      address: '',
+                      city: '',
+                      postal_code: '',
+                      country: 'Spain'
+                    },
+                    verification_confirmed_at: new Date().toISOString(),
+                    verification_token: null,
+                    verification_expires_at: null,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
+
+                  const { data: newRole, error: insertError } = await supabase
+                    .from('user_roles')
+                    .insert(roleInsertData)
+                    .select()
+                    .single();
+
+                  if (!insertError && newRole) {
+                    console.log('✅ AUTOMATIC RECOVERY SUCCESS - Role created:', newRole.role_type);
+                    roles = [newRole as UserRole];
+                    loadingMethod = 'auto_recovery';
+                    
+                    // Create success notification for user
+                    try {
+                      await supabase
+                        .from('notifications')
+                        .insert({
+                          user_id: userObject.id,
+                          title: '¡Perfil completado automáticamente!',
+                          message: `Tu rol de ${SupabaseUserRoleService.getRoleDisplayName(profileCheck.user_type)} ha sido configurado correctamente.`,
+                          type: 'success' as const,
+                          category: 'system' as const,
+                          read: false
+                        });
+                    } catch (notificationError) {
+                      console.warn('Could not create recovery notification:', notificationError);
+                    }
+                  } else {
+                    console.error('❌ AUTOMATIC RECOVERY FAILED:', insertError);
+                  }
+                } catch (recoveryError) {
+                  console.error('❌ Role recovery exception:', recoveryError);
+                }
+              } else if (ageHours < 24) {
+                // For very recent particular users with no explicit user_type, create a basic particular role
+                console.log('🔄 Creating basic particular role for new user');
+                
+                try {
+                  const basicRoleData: UserRoleInsert = {
+                    user_id: userObject.id,
+                    role_type: 'particular',
+                    is_verified: true,
+                    is_active: true,
+                    role_specific_data: {
+                      full_name: profileCheck.full_name || userObject.user_metadata?.full_name || 'Usuario',
+                      phone: userObject.user_metadata?.phone || '',
+                      address: '',
+                      city: '',
+                      postal_code: '',
+                      country: 'Spain'
+                    },
+                    verification_confirmed_at: new Date().toISOString(),
+                    verification_token: null,
+                    verification_expires_at: null,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
+
+                  const { data: basicRole, error: basicInsertError } = await supabase
+                    .from('user_roles')
+                    .insert(basicRoleData)
+                    .select()
+                    .single();
+
+                  if (!basicInsertError && basicRole) {
+                    console.log('✅ BASIC ROLE RECOVERY SUCCESS - Created particular role');
+                    roles = [basicRole as UserRole];
+                    loadingMethod = 'basic_recovery';
+                  }
+                } catch (basicRecoveryError) {
+                  console.error('❌ Basic role recovery failed:', basicRecoveryError);
+                }
+              }
+            }
+          }
+          
+          // ENHANCED: Additional validation for specific problematic cases
           if (userObject.email?.includes('borjapipaon') && roles.length === 0) {
-            console.log('🔍 BORJAPIPAON CASE: Zero roles from service, attempting recovery...');
+            console.log('🔍 BORJAPIPAON CASE: Zero roles after initial recovery attempts...');
             
             // Direct database check with comprehensive error handling
             const { data: directCheck, error: directError } = await supabase
@@ -721,31 +840,39 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setUserRoles(roles);
         console.log(`📋 CONTEXT: Final roles set: ${roles.length} roles via ${loadingMethod}`);
 
-        // ENHANCED logging for the borjapipaon case
-        if (userObject.email === 'borjapipaon@gmail.com' || userObject.email?.includes('pipaon')) {
-          console.log("🎯 BORJAPIPAON CASE ANALYSIS:");
-          console.log("- Current session user ID:", userObject.id);
-          console.log("- Email:", userObject.email);
-          console.log("- Roles found:", roles.length);
-          console.log("- Loading method:", loadingMethod);
-          console.log("- Role types:", roles.map(r => r.role_type));
-          console.log("- Role verification status:", roles.map(r => ({
-            type: r.role_type,
-            verified: r.is_verified,
-            active: r.is_active
-          })));
+        // ENHANCED logging for zero-role cases with specific user feedback
+        if (roles.length === 0) {
+          console.error("🚨 ZERO ROLES DETECTED FOR USER:", userObject.email);
+          console.error("This indicates an incomplete registration or system issue");
+          console.error("Possible causes:");
+          console.error("1. Registration failed to create roles");
+          console.error("2. User ID mismatch between auth and database");
+          console.error("3. Roles were created but database query is failing");
+          console.error("4. User is using different account than registered");
+          console.error("5. Manual intervention may be required");
           
-          if (roles.length === 0) {
-            console.error("🚨 ZERO ROLES DETECTED FOR BORJAPIPAON");
-            console.error("This user should have multiple roles from registration");
-            console.error("Possible causes:");
-            console.error("1. Registration failed to create roles");
-            console.error("2. User ID mismatch between auth and database");
-            console.error("3. Roles were created but database query is failing");
-            console.error("4. User is using different account than registered");
-          } else {
-            console.log("✅ BORJAPIPAON ROLES FOUND SUCCESSFULLY:", roles.length);
+          // Create a user notification about the issue
+          try {
+            await supabase
+              .from('notifications')
+              .insert({
+                user_id: userObject.id,
+                title: 'Configuración de cuenta incompleta',
+                message: 'Tu cuenta necesita configuración adicional. Contacta con soporte si el problema persiste.',
+                type: 'warning' as const,
+                category: 'system' as const,
+                read: false
+              });
+          } catch (notificationError) {
+            console.warn('Could not create issue notification:', notificationError);
           }
+        } else {
+          console.log("✅ USER ROLES LOADED SUCCESSFULLY:", {
+            total: roles.length,
+            types: roles.map(r => r.role_type),
+            verified: roles.filter(r => r.is_verified).length,
+            active: roles.filter(r => r.is_active).length
+          });
         }
 
         // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT
