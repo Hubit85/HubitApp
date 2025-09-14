@@ -63,7 +63,7 @@ export default function Dashboard() {
     
     try {
       // Show loading state visually
-      const roleSelector = document.querySelector('[data-role-selector]');
+      const roleSelector = document.querySelector('[data-role-selector]') as HTMLElement;
       if (roleSelector) {
         roleSelector.style.opacity = '0.6';
         roleSelector.style.pointerEvents = 'none';
@@ -156,7 +156,7 @@ export default function Dashboard() {
       }, 5000);
     } finally {
       // Restore role selector state
-      const roleSelector = document.querySelector('[data-role-selector]');
+      const roleSelector = document.querySelector('[data-role-selector]') as HTMLElement;
       if (roleSelector) {
         roleSelector.style.opacity = '1';
         roleSelector.style.pointerEvents = 'auto';
