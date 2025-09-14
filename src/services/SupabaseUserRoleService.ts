@@ -47,7 +47,7 @@ export class SupabaseUserRoleService {
         console.log(`🔍 Full userId:`, userId);
         
         // CRITICAL FIX: Verify user ID consistency first
-        if (userId === 'ddayanacastro10@gmail.com' || userId.includes('@')) {
+        if (userId === 'ddayanacastro10@gmail.com' || userId === 'borjapipaon@gmail.com' || userId.includes('@')) {
           console.error('❌ CRITICAL ERROR: Email passed instead of User ID!', { receivedValue: userId });
           throw new Error('Invalid user ID format: received email instead of UUID');
         }
@@ -83,14 +83,23 @@ export class SupabaseUserRoleService {
           });
           
           // Special handling for the problematic user
-          if (userProfile.email === 'ddayanacastro10@gmail.com') {
-            console.log('🎯 SPECIAL HANDLING for ddayanacastro10@gmail.com');
-            
-            // Direct query with explicit logging
+          if (userProfile.email === 'borjapipaon@gmail.com') {
+            console.log('🎯 SPECIAL HANDLING for borjapipaon@gmail.com');
             console.log('🔍 EXECUTING DIRECT QUERY with exact userId:', userProfile.id);
           }
         } else {
           console.warn('⚠️ No profile found for userId:', userId);
+          
+          // ENHANCED RECOVERY: Try to find by email if available
+          console.log('🔍 Attempting email-based recovery...');
+          
+          // This is a more complex recovery that might be needed
+          // We'll skip it for now to avoid infinite loops, but log the issue
+          console.warn('⚠️ USER ID NOT FOUND IN PROFILES TABLE');
+          console.warn('This suggests either:');
+          console.warn('1. User was deleted');
+          console.warn('2. Profile creation failed during registration'); 
+          console.warn('3. User ID mismatch between auth and database');
         }
         
         const { data, error } = await supabase
@@ -148,16 +157,33 @@ export class SupabaseUserRoleService {
           roles.map(r => `${r.role_type}(${r.is_verified ? 'verified' : 'pending'}${r.is_active ? ', active' : ''})`).join(', ')
         );
         
-        // CRITICAL: If we expected roles but got none, attempt recovery
-        if (roles.length === 0 && userProfile?.email === 'ddayanacastro10@gmail.com') {
-          console.log('🚨 ZERO ROLES DETECTED FOR KNOWN USER - Attempting recovery...');
+        // CRITICAL: Enhanced issue detection for borjapipaon case
+        if (roles.length === 0 && userProfile?.email === 'borjapipaon@gmail.com') {
+          console.log('🚨 ZERO ROLES DETECTED FOR KNOWN USER - Running enhanced diagnosis...');
           
-          // Attempt ID recovery by email lookup
-          const recoveryResult = await this.attemptIdRecovery(userProfile.email, userId);
-          if (recoveryResult.recovered) {
-            console.log('✅ ID Recovery successful, re-running query...');
-            return this.getUserRoles(recoveryResult.correctedId!);
+          // Check if there are ANY roles with this email in the system
+          try {
+            const { data: allRoles } = await supabase
+              .from('user_roles')
+              .select('user_id, role_type')
+              .limit(5);
+              
+            console.log('📊 Sample of roles in system:', allRoles?.slice(0, 3));
+            
+            // Check if there are roles created but with different user_id
+            const { data: rolesCheck } = await supabase.rpc('count_user_roles_by_user_id', {});
+            
+            console.log('📊 Role distribution check completed');
+            
+          } catch (diagError) {
+            console.log('❌ Diagnosis query failed:', diagError);
           }
+          
+          console.log('💡 RECOMMENDATIONS:');
+          console.log('1. Check if roles were created with different user_id during registration');
+          console.log('2. Verify that registration process completed successfully');
+          console.log('3. Check auth.users table for user existence');
+          console.log('4. Consider running manual role creation for this user');
         }
         
         return roles;

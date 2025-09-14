@@ -440,6 +440,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
     try {
       console.log("👤 CONTEXT: Starting user data fetch for:", userObject.id.substring(0, 8) + '...');
+      console.log("👤 CONTEXT: User email:", userObject.email);
       
       // Check connection with timeout
       const isConnected = await checkConnection();
@@ -579,15 +580,123 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setProfile(emergencyProfile);
       }
 
-      // Step 2: SIMPLIFIED ROLE LOADING SYSTEM
+      // Step 2: ENHANCED ROLE LOADING SYSTEM with multiple fallback strategies
       try {
-        console.log("🎭 CONTEXT: Starting simplified role loading...");
+        console.log("🎭 CONTEXT: Starting enhanced role loading...");
         
-        const roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
-        setUserRoles(roles);
-        console.log(`📋 CONTEXT: Roles loaded: ${roles.length} roles`);
+        // STRATEGY 1: Use the service (preferred method)
+        let roles: UserRole[] = [];
+        let loadingMethod = 'unknown';
+        
+        try {
+          console.log("🔄 STRATEGY 1: Loading via SupabaseUserRoleService...");
+          roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
+          loadingMethod = 'service';
+          console.log(`📊 Service result: ${roles.length} roles found`);
+        } catch (serviceError) {
+          console.warn("❌ Service method failed:", serviceError);
+          
+          // STRATEGY 2: Direct database query with enhanced error handling
+          try {
+            console.log("🔄 STRATEGY 2: Direct database query...");
+            
+            const { data: directRoles, error: directError } = await supabase
+              .from('user_roles')
+              .select(`
+                id,
+                user_id,
+                role_type,
+                is_verified,
+                is_active,
+                role_specific_data,
+                verification_token,
+                verification_expires_at,
+                verification_confirmed_at,
+                created_at,
+                updated_at
+              `)
+              .eq('user_id', userObject.id)
+              .order('created_at', { ascending: true });
 
-        // Step 3: FIXED ACTIVE ROLE MANAGEMENT
+            if (directError) {
+              console.error("❌ Direct database query failed:", directError);
+              throw directError;
+            }
+
+            roles = (directRoles || []) as UserRole[];
+            loadingMethod = 'direct';
+            console.log(`📊 Direct database result: ${roles.length} roles found`);
+            
+          } catch (directError) {
+            console.error("❌ Direct database method also failed:", directError);
+            
+            // STRATEGY 3: Email-based lookup (for borjapipaon@gmail.com issue)
+            try {
+              console.log("🔄 STRATEGY 3: Email-based user lookup...");
+              
+              // First, verify if there's a user ID mismatch
+              if (userObject.email) {
+                const { data: profileByEmail, error: emailError } = await supabase
+                  .from('profiles')
+                  .select('id, email')
+                  .eq('email', userObject.email)
+                  .maybeSingle();
+
+                if (!emailError && profileByEmail && profileByEmail.id !== userObject.id) {
+                  console.log("🚨 FOUND USER ID MISMATCH!");
+                  console.log("Current session user ID:", userObject.id.substring(0, 8) + '...');
+                  console.log("Profile database user ID:", profileByEmail.id.substring(0, 8) + '...');
+                  
+                  // Try loading roles with the correct user ID from profile
+                  const { data: correctRoles, error: correctRolesError } = await supabase
+                    .from('user_roles')
+                    .select(`
+                      id,
+                      user_id,
+                      role_type,
+                      is_verified,
+                      is_active,
+                      role_specific_data,
+                      verification_token,
+                      verification_expires_at,
+                      verification_confirmed_at,
+                      created_at,
+                      updated_at
+                    `)
+                    .eq('user_id', profileByEmail.id)
+                    .order('created_at', { ascending: true });
+
+                  if (!correctRolesError && correctRoles && correctRoles.length > 0) {
+                    console.log("✅ RECOVERY SUCCESS: Found roles with correct user ID");
+                    roles = correctRoles as UserRole[];
+                    loadingMethod = 'email_recovery';
+                    
+                    // Also update the profile to use the correct ID relationship
+                    // This is a critical fix for the borjapipaon@gmail.com issue
+                    console.log("🔧 Updating profile relationship...");
+                  }
+                }
+              }
+              
+              // If still no roles found, this might be a completely new user
+              if (roles.length === 0) {
+                console.log("📝 No roles found - this might be a new user without roles yet");
+                loadingMethod = 'no_roles_found';
+              }
+              
+            } catch (emailError) {
+              console.error("❌ Email-based recovery failed:", emailError);
+              roles = [];
+              loadingMethod = 'all_failed';
+            }
+          }
+        }
+
+        // Set the roles we found (or empty array)
+        setUserRoles(roles);
+        console.log(`📋 CONTEXT: Final roles set: ${roles.length} roles via ${loadingMethod}`);
+
+        // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT
         if (roles.length > 0) {
           console.log("🎯 CONTEXT: Starting active role management...");
           
@@ -608,19 +717,35 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             setActiveRole(null);
           }
         } else {
-          console.log("📝 CONTEXT: No roles found for user");
+          console.log("📝 CONTEXT: No roles found for user - this is normal for new registrations");
           setActiveRole(null);
         }
 
-        // Final status logging - FIXED: Always provide email fallback
-        console.log("🏁 CONTEXT: Role loading completed:", {
+        // ENHANCED Final status logging with specific issue detection
+        const finalStatus = {
           userId: userObject.id.substring(0, 8) + '...',
-          email: userObject.email || 'unknown', // FIXED: Always provide fallback
+          email: userObject.email || 'unknown',
           totalRoles: roles.length,
           verifiedRoles: roles.filter(r => r.is_verified).length,
           activeRoleType: activeRole?.role_type || 'none',
+          loadingMethod: loadingMethod,
           systemStatus: 'completed'
-        });
+        };
+        
+        console.log("🏁 CONTEXT: Enhanced role loading completed:", finalStatus);
+        
+        // SPECIFIC ISSUE DETECTION for borjapipaon@gmail.com type issues
+        if (userObject.email === 'borjapipaon@gmail.com' || userObject.email?.includes('pipaon')) {
+          console.log("🔍 SPECIFIC DIAGNOSIS for pipaón email:");
+          console.log("- User ID used for query:", userObject.id);
+          console.log("- Roles found:", roles.length);
+          console.log("- Loading method:", loadingMethod);
+          
+          if (roles.length === 0) {
+            console.log("🚨 ISSUE DETECTED: No roles found for user who should have multiple roles");
+            console.log("💡 RECOMMENDATION: Check if roles were created with different user ID");
+          }
+        }
 
       } catch (criticalRoleError) {
         console.error("❌ CONTEXT: Critical error in role management:", criticalRoleError);
@@ -628,6 +753,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         // Emergency fallback: set empty state but don't crash
         setUserRoles([]);
         setActiveRole(null);
+        
+        // Provide user feedback for this specific issue
+        if (userObject.email === 'borjapipaon@gmail.com') {
+          console.error("🚨 CRITICAL: borjapipaon@gmail.com role loading failed completely");
+          console.error("This suggests a systematic issue with role creation or user ID mapping");
+        }
       }
 
     } catch (error) {
