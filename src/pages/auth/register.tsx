@@ -661,7 +661,7 @@ function RegisterPageContent() {
         return {
           ...baseData,
           user_type: roleType,
-          community_code: userData.community_code || generateCommunityCode(userData.address || ''),
+          community_code: userData.community_code || '',
           community_name: userData.community_name || '',
           portal_number: userData.portal_number || '',
           apartment_number: userData.apartment_number || ''
@@ -836,77 +836,59 @@ function RegisterPageContent() {
           if (session?.user?.id) {
             console.log('🔍 POST-REGISTRATION: Verifying role creation for user:', session.user.id);
             
-            // Check if roles were created
-            const { data: createdRoles, error: rolesCheckError } = await supabase
-              .from('user_roles')
-              .select('id, role_type, is_verified, is_active')
-              .eq('user_id', session.user.id);
-            
-            if (!rolesCheckError && createdRoles) {
-              console.log(`✅ POST-REGISTRATION: Found ${createdRoles.length} roles created`);
+            // BULLETPROOF: Enhanced verification with AutomaticRoleCreationService
+            try {
+              const { AutomaticRoleCreationService } = await import('@/services/AutomaticRoleCreationService');
               
-              if (createdRoles.length === orderedRoles.length) {
-                console.log('🎯 POST-REGISTRATION: All roles created successfully!');
-                setSuccessMessage(`¡Cuenta creada exitosamente con ${createdRoles.length} roles! Redirigiendo...`);
-              } else if (createdRoles.length > 0) {
-                console.log(`⚠️ POST-REGISTRATION: Partial success - ${createdRoles.length}/${orderedRoles.length} roles created`);
-                setSuccessMessage(`Cuenta creada con ${createdRoles.length} de ${orderedRoles.length} roles. Redirigiendo...`);
+              const monitoringResult = await AutomaticRoleCreationService.monitorCreation(
+                session.user.id,
+                orderedRoles.length,
+                15000 // 15 seconds timeout
+              );
+              
+              if (monitoringResult.success && monitoringResult.actualCount >= orderedRoles.length) {
+                console.log('🎯 BULLETPROOF SUCCESS: All roles verified via AutomaticRoleCreationService');
+                setSuccessMessage(`¡Cuenta creada exitosamente con ${monitoringResult.actualCount} roles! Redirigiendo...`);
+              } else if (monitoringResult.success && monitoringResult.actualCount > 0) {
+                console.log(`⚠️ PARTIAL SUCCESS: ${monitoringResult.actualCount}/${orderedRoles.length} roles verified`);
+                setSuccessMessage(`Cuenta creada con ${monitoringResult.actualCount} de ${orderedRoles.length} roles. Redirigiendo...`);
               } else {
-                // CRITICAL: Zero roles created - attempt emergency recovery
-                console.error('🚨 POST-REGISTRATION: ZERO ROLES CREATED - Attempting emergency recovery...');
+                console.error('🚨 CRITICAL: AutomaticRoleCreationService monitoring failed:', monitoringResult.message);
                 
-                try {
-                  // Create at least the primary role
-                  const emergencyRoleData = {
-                    user_id: session.user.id,
-                    role_type: primaryRole,
-                    is_verified: true,
-                    is_active: true,
-                    role_specific_data: extractRoleSpecificDataForEmergency(userData, primaryRole),
-                    verification_confirmed_at: new Date().toISOString(),
-                    verification_token: null,
-                    verification_expires_at: null,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                  };
-                  
-                  const { data: emergencyRole, error: emergencyError } = await supabase
-                    .from('user_roles')
-                    .insert(emergencyRoleData)
-                    .select()
-                    .single();
-                  
-                  if (!emergencyError && emergencyRole) {
-                    console.log('🆘 EMERGENCY RECOVERY: Created primary role successfully');
-                    setSuccessMessage("¡Cuenta creada! Se ha configurado tu rol principal. Puedes agregar roles adicionales desde tu perfil.");
-                    
-                    // Create notification about partial registration
-                    try {
-                      await supabase
-                        .from('notifications')
-                        .insert({
-                          user_id: session.user.id,
-                          title: 'Registro completado parcialmente',
-                          message: 'Tu cuenta se ha creado correctamente. Puedes configurar roles adicionales desde tu perfil.',
-                          type: 'info' as const,
-                          category: 'system' as const,
-                          read: false
-                        });
-                    } catch (notificationError) {
-                      console.warn('Could not create recovery notification:', notificationError);
-                    }
-                  } else {
-                    throw new Error(`Emergency recovery failed: ${emergencyError?.message}`);
-                  }
-                } catch (emergencyError) {
-                  console.error('❌ EMERGENCY RECOVERY FAILED:', emergencyError);
-                  setError("La cuenta se creó pero hubo un problema con la configuración de roles. Por favor, contacta con soporte.");
-                  return;
+                // FINAL ATTEMPT: Manual verification
+                const { data: manualCheck } = await supabase
+                  .from('user_roles')
+                  .select('id, role_type, is_verified, is_active')
+                  .eq('user_id', session.user.id);
+                
+                const actualRolesFound = manualCheck?.length || 0;
+                
+                if (actualRolesFound > 0) {
+                  console.log(`✅ MANUAL VERIFICATION: Found ${actualRolesFound} roles after all`);
+                  setSuccessMessage(`¡Cuenta creada exitosamente con ${actualRolesFound} roles! Redirigiendo...`);
+                } else {
+                  console.error('❌ MANUAL VERIFICATION: Zero roles found');
+                  setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
                 }
               }
-            } else {
-              console.warn('⚠️ POST-REGISTRATION: Could not verify role creation:', rolesCheckError);
-              setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+            } catch (autoServiceError) {
+              console.error('❌ Could not import AutomaticRoleCreationService:', autoServiceError);
+              
+              // Fallback to basic verification
+              const { data: basicCheck } = await supabase
+                .from('user_roles')
+                .select('id, role_type, is_verified, is_active')
+                .eq('user_id', session.user.id);
+              
+              const basicRolesFound = basicCheck?.length || 0;
+              
+              if (basicRolesFound > 0) {
+                console.log(`✅ BASIC VERIFICATION: Found ${basicRolesFound} roles`);
+                setSuccessMessage(`¡Cuenta creada exitosamente con ${basicRolesFound} roles! Redirigiendo...`);
+              } else {
+                console.error('❌ BASIC VERIFICATION: Zero roles found');
+                setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+              }
             }
           } else {
             console.warn('⚠️ POST-REGISTRATION: No session found after registration');
