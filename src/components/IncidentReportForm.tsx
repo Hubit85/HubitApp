@@ -468,10 +468,13 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         try {
           const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
           
+          // FIXED: Remove problematic email reference and use fallback
+          const reporterName = profile?.full_name || 'Un miembro de comunidad';
+          
           const notification = {
             user_id: targetAdministrator.user_id,
             title: `Nueva incidencia reportada - ${urgencyLevel?.label || 'Normal'}`,
-            message: `${profile?.full_name || 'Un miembro de comunidad'} ha reportado una incidencia: "${formData.title}". Propiedad: ${formData.selectedProperty?.name || 'No especificada'}. Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
+            message: `${reporterName} ha reportado una incidencia: "${formData.title}". Propiedad: ${formData.selectedProperty?.name || 'No especificada'}. Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
             type: (formData.urgency === 'emergency' ? 'error' : 'info') as 'error' | 'info',
             category: 'incident' as const,
             related_entity_type: 'incident',
