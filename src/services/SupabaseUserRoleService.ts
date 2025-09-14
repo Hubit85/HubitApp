@@ -47,12 +47,38 @@ export class SupabaseUserRoleService {
     issue?: string;
   }> {
     try {
-      console.log('🔧 ATTEMPTING ID RECOVERY for:', { 
-        email, 
-        providedUserId: providedUserId.substring(0, 8) + '...' 
-      });
-      
-      // ENHANCED: Multiple recovery strategies
+      console.log('🔧 ENHANCED ID RECOVERY for:', { email, providedUserId: providedUserId.substring(0, 8) + '...' });
+
+      // Step 1: Check auth.users table for the correct ID
+      try {
+        const { data: authUser, error: authError } = await supabase.auth.admin.listUsers();
+        
+        if (!authError && authUser) {
+          const matchingAuthUser = authUser.users.find(u => u.email === email);
+          if (matchingAuthUser && matchingAuthUser.id !== providedUserId) {
+            console.log('🔍 AUTH USER MISMATCH FOUND:', {
+              providedId: providedUserId.substring(0, 8) + '...',
+              authId: matchingAuthUser.id.substring(0, 8) + '...'
+            });
+            
+            // Check if this corrected ID has roles
+            const { data: rolesWithAuthId } = await supabase
+              .from('user_roles')
+              .select('id')
+              .eq('user_id', matchingAuthUser.id);
+              
+            if (rolesWithAuthId && rolesWithAuthId.length > 0) {
+              console.log('✅ ROLES FOUND WITH AUTH ID - RECOVERY SUCCESSFUL');
+              return {
+                recovered: true,
+                correctedId: matchingAuthUser.id
+              };
+            }
+          }
+        }
+      } catch (authAdminError) {
+        console.log('ℹ️ Auth admin access not available, trying alternative methods');
+      }
       
       // Strategy 1: Look up user by email in profiles
       const { data: profileByEmail, error: emailError } = await supabase
@@ -148,8 +174,8 @@ export class SupabaseUserRoleService {
       return { recovered: false, issue: 'No roles found with any ID' };
       
     } catch (recoveryError) {
-      console.error('❌ ID recovery failed:', recoveryError);
-      return { recovered: false, issue: 'Recovery process failed' };
+      console.error('❌ Enhanced ID recovery failed:', recoveryError);
+      return { recovered: false, issue: 'Enhanced recovery process failed' };
     }
   }
 
@@ -259,25 +285,29 @@ export class SupabaseUserRoleService {
               });
               
               // Check if this user just registered recently
-              const profileAge = new Date(profile.created_at);
-              const now = new Date();
-              const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
-              
-              if (ageMinutes < 30) { // Recently created
-                console.log('🕐 RECENT REGISTRATION detected - this might be a timing issue');
-                console.log('💡 RECOMMENDATION: Try refreshing or logging out and back in');
+              if (profile.created_at) {
+                const profileAge = new Date(profile.created_at);
+                const now = new Date();
+                const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
                 
-                // Try one more direct search for very recent roles
-                const { data: veryRecentRoles } = await supabase
-                  .from('user_roles')
-                  .select('*')
-                  .eq('user_id', userId)
-                  .gte('created_at', profile.created_at);
-                
-                if (veryRecentRoles && veryRecentRoles.length > 0) {
-                  console.log('🎯 FOUND VERY RECENT ROLES:', veryRecentRoles.length);
-                  return veryRecentRoles as UserRole[];
+                if (ageMinutes < 30) { // Recently created
+                  console.log('🕐 RECENT REGISTRATION detected - this might be a timing issue');
+                  console.log('💡 RECOMMENDATION: Try refreshing or logging out and back in');
+                  
+                  // Try one more direct search for very recent roles
+                  const { data: veryRecentRoles } = await supabase
+                    .from('user_roles')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .gte('created_at', profile.created_at);
+                  
+                  if (veryRecentRoles && veryRecentRoles.length > 0) {
+                    console.log('🎯 FOUND VERY RECENT ROLES:', veryRecentRoles.length);
+                    return veryRecentRoles as UserRole[];
+                  }
                 }
+              } else {
+                console.log('🕐 No creation date available for profile');
               }
               
               // BORJAPIPAON specific case
@@ -289,6 +319,36 @@ export class SupabaseUserRoleService {
                 console.log('2. User ID mismatch between auth and database');
                 console.log('3. Roles were created but database query is failing');
                 console.log('4. User is using different account than registered');
+                
+                // CRITICAL FIX: Check for ID mismatch between auth and profiles
+                const { data: userProfile } = await supabase
+                  .from('profiles')
+                  .select('id, email')
+                  .eq('email', profile.email)
+                  .single();
+
+                if (userProfile) {
+                  console.log('✅ User profile found:', {
+                    userId: userProfile.id.substring(0, 8) + '...',
+                    email: userProfile.email
+                  });
+
+                  // CRITICAL FIX: Check for ID mismatch between auth and profiles
+                  if (userProfile.id !== userId) {
+                    console.log('🔍 ID MISMATCH DETECTED:', {
+                      providedId: userId.substring(0, 8) + '...',
+                      actualId: userProfile.id.substring(0, 8) + '...',
+                      email: userProfile.email
+                    });
+                    
+                    // Attempt automatic recovery using the correct ID
+                    const recoveryResult = await this.attemptIdRecovery(userProfile.email, userId);
+                    if (recoveryResult.recovered && recoveryResult.correctedId) {
+                      console.log('🔄 RETRYING with corrected ID:', recoveryResult.correctedId.substring(0, 8) + '...');
+                      return await this.getUserRoles(recoveryResult.correctedId);
+                    }
+                  }
+                }
                 
                 // Try alternative searches
                 const alternativeSearches = [
