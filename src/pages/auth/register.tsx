@@ -639,11 +639,77 @@ function RegisterPageContent() {
     }
   };
 
-  const generateCommunityCode = (address: string): string => {
+  // Helper function to extract role-specific data for emergency recovery
+  function extractRoleSpecificDataForEmergency(userData: any, roleType: RoleType): any {
+    const baseData = {
+      full_name: userData.full_name || 'Usuario',
+      phone: userData.phone || '',
+      address: userData.address || '',
+      city: userData.city || '',
+      postal_code: userData.postal_code || '',
+      country: userData.country || 'España'
+    };
+
+    switch (roleType) {
+      case 'particular':
+        return {
+          ...baseData,
+          user_type: roleType
+        };
+      
+      case 'community_member':
+        return {
+          ...baseData,
+          user_type: roleType,
+          community_code: userData.community_code || generateCommunityCode(userData.address || ''),
+          community_name: userData.community_name || '',
+          portal_number: userData.portal_number || '',
+          apartment_number: userData.apartment_number || ''
+        };
+      
+      case 'service_provider':
+        return {
+          company_name: userData.company_name || userData.full_name || baseData.full_name,
+          company_address: userData.company_address || userData.address || baseData.address,
+          company_postal_code: userData.company_postal_code || userData.postal_code || baseData.postal_code,
+          company_city: userData.company_city || userData.city || baseData.city,
+          company_country: userData.company_country || userData.country || baseData.country,
+          cif: userData.cif || '',
+          business_email: userData.business_email || userData.email || '',
+          business_phone: userData.business_phone || userData.phone || baseData.phone,
+          selected_services: userData.selected_services || [],
+          service_costs: userData.service_costs || {},
+          user_type: roleType
+        };
+      
+      case 'property_administrator':
+        return {
+          company_name: userData.company_name || userData.full_name || baseData.full_name,
+          company_address: userData.company_address || userData.address || baseData.address,
+          company_postal_code: userData.company_postal_code || userData.postal_code || baseData.postal_code,
+          company_city: userData.company_city || userData.city || baseData.city,
+          company_country: userData.company_country || userData.country || baseData.country,
+          cif: userData.cif || '',
+          business_email: userData.business_email || userData.email || '',
+          business_phone: userData.business_phone || userData.phone || baseData.phone,
+          professional_number: userData.professional_number || '',
+          user_type: roleType
+        };
+      
+      default:
+        return {
+          ...baseData,
+          user_type: 'particular'
+        };
+    }
+  }
+
+  // Helper function to generate community code based on address
+  function generateCommunityCode(address: string): string {
     const hash = address.toLowerCase().replace(/\s+/g, '').slice(0, 10);
     const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     return `COM-${hash}-${randomNum}`.toUpperCase();
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -2007,69 +2073,4 @@ function RegisterPageContent() {
       </div>
     </>
   );
-}
-
-// Helper function to extract role-specific data for emergency recovery
-function extractRoleSpecificDataForEmergency(userData: any, roleType: RoleType): any {
-  const baseData = {
-    full_name: userData.full_name || 'Usuario',
-    phone: userData.phone || '',
-    address: userData.address || '',
-    city: userData.city || '',
-    postal_code: userData.postal_code || '',
-    country: userData.country || 'España'
-  };
-
-  switch (roleType) {
-    case 'particular':
-      return {
-        ...baseData,
-        user_type: roleType
-      };
-      
-    case 'community_member':
-      return {
-        ...baseData,
-        user_type: roleType,
-        community_code: userData.community_code || generateCommunityCode(userData.address || ''),
-        community_name: userData.community_name || '',
-        portal_number: userData.portal_number || '',
-        apartment_number: userData.apartment_number || ''
-      };
-      
-    case 'service_provider':
-      return {
-        company_name: userData.company_name || userData.full_name || baseData.full_name,
-        company_address: userData.company_address || userData.address || baseData.address,
-        company_postal_code: userData.company_postal_code || userData.postal_code || baseData.postal_code,
-        company_city: userData.company_city || userData.city || baseData.city,
-        company_country: userData.company_country || userData.country || baseData.country,
-        cif: userData.cif || '',
-        business_email: userData.business_email || userData.email || '',
-        business_phone: userData.business_phone || userData.phone || baseData.phone,
-        selected_services: userData.selected_services || [],
-        service_costs: userData.service_costs || {},
-        user_type: roleType
-      };
-      
-    case 'property_administrator':
-      return {
-        company_name: userData.company_name || userData.full_name || baseData.full_name,
-        company_address: userData.company_address || userData.address || baseData.address,
-        company_postal_code: userData.company_postal_code || userData.postal_code || baseData.postal_code,
-        company_city: userData.company_city || userData.city || baseData.city,
-        company_country: userData.company_country || userData.country || baseData.country,
-        cif: userData.cif || '',
-        business_email: userData.business_email || userData.email || '',
-        business_phone: userData.business_phone || userData.phone || baseData.phone,
-        professional_number: userData.professional_number || '',
-        user_type: roleType
-      };
-      
-    default:
-      return {
-        ...baseData,
-        user_type: 'particular'
-      };
-  }
 }
