@@ -803,7 +803,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           email: userObject.email || 'unknown',
           totalRoles: roles.length,
           verifiedRoles: roles.filter(r => r.is_verified).length,
-          activeRoleType: finalActiveRole?.role_type || 'none',
+          activeRoleType: finalActiveRole?.role_type ?? 'none',
           loadingMethod: loadingMethod,
           systemStatus: 'completed'
         };
