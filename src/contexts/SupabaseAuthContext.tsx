@@ -1042,10 +1042,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   try {
                     const { AutomaticRoleCreationService } = await import('@/services/AutomaticRoleCreationService');
                     
-                    const emergencyResult = await AutomaticRoleCreationService.emergencyRoleCreation(
+                    const emergencyResult = await AutomaticRoleCreationService.emergencyRoleCreationEnhanced(
                       userObject.id,
                       profileCheck.email || userObject.email || '',
-                      profileCheck.user_type as 'particular'
+                      profileCheck.user_type as 'particular' | 'community_member' | 'service_provider' | 'property_administrator'
                     );
                     
                     if (emergencyResult.success && emergencyResult.roleCreated) {
