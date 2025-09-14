@@ -201,139 +201,150 @@ export function CommunityAdministratorAssignment() {
 
       console.log('✅ Supabase connection verified');
 
-      // STEP 1: Query user_roles for property administrators with FIXED relationship query
-      const { data: adminRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select(`
-          id,
-          user_id,
-          role_specific_data
-        `)
-        .eq('role_type', 'property_administrator')
-        .eq('is_verified', true);
+      // STEP 1: Try to load from property_administrators table first (most accurate data)
+      console.log('🔄 STEP 1: Checking property_administrators table...');
+      const { data: propertyAdmins, error: propertyAdminsError } = await supabase
+        .from('property_administrators')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      console.log('📋 Query result from user_roles:', {
-        success: !rolesError,
-        error: rolesError?.message || 'none',
-        dataCount: adminRoles?.length || 0
-      });
+      let adminList: PropertyAdministrator[] = [];
 
-      if (rolesError) {
-        console.error('❌ Error querying user_roles:', rolesError);
-        setError('Error al cargar administradores desde la tabla de roles: ' + rolesError.message);
-        return;
-      }
-
-      // STEP 2: Get profiles separately to avoid relationship errors
-      let profilesData: any[] = [];
-      if (adminRoles && adminRoles.length > 0) {
-        const userIds = adminRoles.map(role => role.user_id);
+      if (!propertyAdminsError && propertyAdmins && propertyAdmins.length > 0) {
+        console.log(`📋 Found ${propertyAdmins.length} administrators in property_administrators table`);
         
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, full_name, email, phone')
-          .in('id', userIds);
-
-        if (profilesError) {
-          console.warn('⚠️ Error loading profiles:', profilesError);
-        } else {
-          profilesData = profiles || [];
-        }
-      }
-
-      console.log('📋 Profiles loaded:', profilesData.length);
-
-      // STEP 3: Combine the data manually
-      const adminList: PropertyAdministrator[] = [];
-
-      if (adminRoles && adminRoles.length > 0) {
-        console.log(`🔄 Processing ${adminRoles.length} admin roles...`);
-        
-        adminRoles.forEach((adminRole, index) => {
-          // Find matching profile
-          const matchingProfile = profilesData.find(profile => profile.id === adminRole.user_id);
-          
-          if (matchingProfile && matchingProfile.email) {
-            let adminData: PropertyAdministrator = {
-              id: adminRole.id,
-              user_id: adminRole.user_id,
-              company_name: matchingProfile.full_name || 'Administrador de Fincas',
-              company_cif: `CIF-${adminRole.user_id.substring(0, 8)}`,
-              contact_email: matchingProfile.email,
-              contact_phone: matchingProfile.phone || undefined,
-              license_number: undefined,
+        propertyAdmins.forEach((admin, index) => {
+          // Only add administrators with valid contact information
+          if (admin.contact_email && admin.company_name) {
+            adminList.push({
+              id: admin.id,
+              user_id: admin.user_id,
+              company_name: admin.company_name, // USE EXACT NAME FROM DATABASE
+              company_cif: admin.company_cif,
+              contact_email: admin.contact_email,
+              contact_phone: admin.contact_phone || undefined,
+              license_number: admin.license_number || undefined,
               profile: {
-                full_name: matchingProfile.full_name || 'Administrador de Fincas',
-                email: matchingProfile.email
+                full_name: admin.company_name, // USE COMPANY NAME AS FULL NAME
+                email: admin.contact_email
               }
-            };
-
-            // Apply role-specific data if available
-            if (adminRole.role_specific_data && 
-                typeof adminRole.role_specific_data === 'object' &&
-                adminRole.role_specific_data !== null) {
-              
-              const roleData = adminRole.role_specific_data as Record<string, any>;
-              
-              if (roleData.company_name && typeof roleData.company_name === 'string') {
-                adminData.company_name = roleData.company_name;
-              }
-              if (roleData.cif && typeof roleData.cif === 'string') {
-                adminData.company_cif = roleData.cif;
-              }
-              if (roleData.business_email && typeof roleData.business_email === 'string') {
-                adminData.contact_email = roleData.business_email;
-              }
-              if (roleData.business_phone && typeof roleData.business_phone === 'string') {
-                adminData.contact_phone = roleData.business_phone;
-              }
-              if (roleData.professional_number && typeof roleData.professional_number === 'string') {
-                adminData.license_number = roleData.professional_number;
-              }
-            }
-
-            console.log(`✅ Added admin ${index + 1}:`, {
-              name: adminData.company_name,
-              email: adminData.contact_email,
-              userId: adminData.user_id.substring(0, 8) + '...'
             });
-
-            adminList.push(adminData);
+            
+            console.log(`✅ Added admin ${index + 1} from property_administrators:`, {
+              name: admin.company_name,
+              email: admin.contact_email
+            });
           } else {
-            console.warn(`⚠️ Skipping admin ${index + 1}: no profile or email`);
+            console.warn(`⚠️ Skipping admin ${index + 1}: missing company_name or contact_email`);
           }
         });
+      } else {
+        console.log('📋 No administrators found in property_administrators table, trying user_roles...');
       }
 
-      // STEP 4: Fallback - try to get property administrators from property_administrators table
+      // STEP 2: If no admins found in property_administrators, try user_roles approach
       if (adminList.length === 0) {
-        console.log('🔄 Trying fallback: property_administrators table...');
+        console.log('🔄 STEP 2: Loading from user_roles...');
         
-        const { data: propertyAdmins, error: propertyAdminsError } = await supabase
-          .from('property_administrators')
-          .select('*');
+        const { data: adminRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select(`
+            id,
+            user_id,
+            role_specific_data
+          `)
+          .eq('role_type', 'property_administrator')
+          .eq('is_verified', true);
 
-        if (!propertyAdminsError && propertyAdmins && propertyAdmins.length > 0) {
-          propertyAdmins.forEach((admin, index) => {
-            if (admin.contact_email) {
-              adminList.push({
-                id: admin.id,
-                user_id: admin.user_id,
-                company_name: admin.company_name,
-                company_cif: admin.company_cif,
-                contact_email: admin.contact_email,
-                contact_phone: admin.contact_phone || undefined,
-                license_number: admin.license_number || undefined,
-                profile: {
-                  full_name: admin.company_name,
-                  email: admin.contact_email
+        if (rolesError) {
+          console.error('❌ Error querying user_roles:', rolesError);
+          setError('Error al cargar administradores desde la tabla de roles: ' + rolesError.message);
+          return;
+        }
+
+        // Get profiles separately to avoid relationship errors
+        let profilesData: any[] = [];
+        if (adminRoles && adminRoles.length > 0) {
+          const userIds = adminRoles.map(role => role.user_id);
+          
+          const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, phone')
+            .in('id', userIds);
+
+          if (profilesError) {
+            console.warn('⚠️ Error loading profiles:', profilesError);
+          } else {
+            profilesData = profiles || [];
+          }
+        }
+
+        // Combine the data manually, prioritizing role_specific_data for names
+        if (adminRoles && adminRoles.length > 0) {
+          console.log(`🔄 Processing ${adminRoles.length} admin roles...`);
+          
+          adminRoles.forEach((adminRole, index) => {
+            // Find matching profile
+            const matchingProfile = profilesData.find(profile => profile.id === adminRole.user_id);
+            
+            if (matchingProfile && matchingProfile.email) {
+              // PRIORITY: Use company_name from role_specific_data first, then profile full_name
+              let companyName = matchingProfile.full_name || 'Administrador de Fincas';
+              let contactEmail = matchingProfile.email;
+              let contactPhone = matchingProfile.phone || undefined;
+              let companyCif = `CIF-${adminRole.user_id.substring(0, 8)}`;
+              let licenseNumber = undefined;
+
+              // Extract role-specific data with priority on actual company information
+              if (adminRole.role_specific_data && 
+                  typeof adminRole.role_specific_data === 'object' &&
+                  adminRole.role_specific_data !== null) {
+                
+                const roleData = adminRole.role_specific_data as Record<string, any>;
+                
+                // HIGHEST PRIORITY: Use company_name from role_specific_data if available
+                if (roleData.company_name && typeof roleData.company_name === 'string' && roleData.company_name.trim()) {
+                  companyName = roleData.company_name.trim();
                 }
+                
+                if (roleData.cif && typeof roleData.cif === 'string') {
+                  companyCif = roleData.cif;
+                }
+                if (roleData.business_email && typeof roleData.business_email === 'string') {
+                  contactEmail = roleData.business_email;
+                }
+                if (roleData.business_phone && typeof roleData.business_phone === 'string') {
+                  contactPhone = roleData.business_phone;
+                }
+                if (roleData.professional_number && typeof roleData.professional_number === 'string') {
+                  licenseNumber = roleData.professional_number;
+                }
+              }
+
+              const adminData: PropertyAdministrator = {
+                id: adminRole.id,
+                user_id: adminRole.user_id,
+                company_name: companyName, // This should now show "Administración Castro" correctly
+                company_cif: companyCif,
+                contact_email: contactEmail,
+                contact_phone: contactPhone,
+                license_number: licenseNumber,
+                profile: {
+                  full_name: companyName,
+                  email: contactEmail
+                }
+              };
+
+              console.log(`✅ Added admin ${index + 1} from user_roles:`, {
+                name: adminData.company_name,
+                email: adminData.contact_email,
+                userId: adminData.user_id.substring(0, 8) + '...',
+                source: 'role_specific_data'
               });
-              
-              console.log(`✅ Fallback admin ${index + 1}:`, {
-                name: admin.company_name,
-                email: admin.contact_email
-              });
+
+              adminList.push(adminData);
+            } else {
+              console.warn(`⚠️ Skipping admin ${index + 1}: no profile or email found`);
             }
           });
         }
@@ -344,8 +355,8 @@ export function CommunityAdministratorAssignment() {
       // Set the administrators list
       setAvailableAdministrators(adminList);
 
-      // Enhanced search for expected administrators (Pipaón, Castro)
-      const searchTerms = ['pipaón', 'pipan', 'castro'];
+      // Enhanced search for expected administrators (Castro, Pipaón, etc.)
+      const searchTerms = ['castro', 'pipaón', 'pipan', 'administración'];
       const foundExpectedAdmins = adminList.filter(admin => {
         const searchText = `${admin.company_name} ${admin.contact_email}`.toLowerCase();
         return searchTerms.some(term => searchText.includes(term.toLowerCase()));
@@ -360,16 +371,23 @@ export function CommunityAdministratorAssignment() {
         }))
       });
 
+      // Detailed logging of all found administrators
+      console.log('📋 All administrators found:', adminList.map(admin => ({
+        name: admin.company_name,
+        email: admin.contact_email,
+        cif: admin.company_cif
+      })));
+
       // Provide feedback
       if (adminList.length === 0) {
         console.warn('❌ NO ADMINISTRATORS FOUND');
-        setError('No se encontraron administradores de fincas. Asegúrate de que hay administradores registrados y verificados en el sistema.');
+        setError('No se encontraron administradores de fincas registrados en el sistema. Los administradores deben completar su registro primero.');
       } else {
         console.log(`✅ Successfully loaded ${adminList.length} administrators`);
         setError(''); // Clear any previous errors
         
         if (foundExpectedAdmins.length === 0) {
-          console.log('ℹ️ Expected administrators (Pipaón, Castro) not found in current list');
+          console.log('ℹ️ Expected administrators (Castro, Pipaón) not found in current list. Available administrators:', adminList.map(a => a.company_name).join(', '));
         }
       }
 
