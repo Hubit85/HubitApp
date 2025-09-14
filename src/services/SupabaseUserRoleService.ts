@@ -170,10 +170,7 @@ export class SupabaseUserRoleService {
               
             console.log('📊 Sample of roles in system:', allRoles?.slice(0, 3));
             
-            // Check if there are roles created but with different user_id
-            const { data: rolesCheck } = await supabase.rpc('count_user_roles_by_user_id', {});
-            
-            console.log('📊 Role distribution check completed');
+            console.log('📊 Basic system diagnosis completed');
             
           } catch (diagError) {
             console.log('❌ Diagnosis query failed:', diagError);
