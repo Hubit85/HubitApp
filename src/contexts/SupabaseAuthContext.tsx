@@ -745,126 +745,97 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               loadingMethod = 'all_failed';
             }
           }
+        }
 
-          // Set the roles we found (or empty array)
-          setUserRoles(roles);
-          console.log(`📋 CONTEXT: Final roles set: ${roles.length} roles via ${loadingMethod}`);
+        // Set the roles we found (or empty array)
+        setUserRoles(roles);
+        console.log(`📋 CONTEXT: Final roles set: ${roles.length} roles via ${loadingMethod}`);
 
-          // ENHANCED logging for the borjapipaon case
-          if (userObject.email === 'borjapipaon@gmail.com' || userObject.email?.includes('pipaon')) {
-            console.log("🎯 BORJAPIPAON CASE ANALYSIS:");
-            console.log("- Current session user ID:", userObject.id);
-            console.log("- Email:", userObject.email);
-            console.log("- Roles found:", roles.length);
-            console.log("- Loading method:", loadingMethod);
-            console.log("- Role types:", roles.map(r => r.role_type));
-            
-            if (roles.length === 0) {
-              console.error("🚨 ZERO ROLES DETECTED FOR BORJAPIPAON");
-              console.error("This user should have multiple roles from registration");
-              console.error("Possible causes:");
-              console.error("1. Registration failed to create roles");
-              console.error("2. User ID mismatch between auth and database");
-              console.error("3. Roles were created but database query is failing");
-              console.error("4. User is using different account than registered");
-            }
-          }
-
-          // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT
-          if (roles.length > 0) {
-            console.log("🎯 CONTEXT: Starting active role management...");
-            
-            const finalActiveRole = await ensureActiveRole(userObject.id, roles);
-            
-            if (finalActiveRole) {
-              console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
-              setActiveRole(finalActiveRole);
-              
-              // Update local roles state to reflect any changes
-              const updatedRoles = roles.map(r => ({
-                ...r,
-                is_active: r.id === finalActiveRole.id
-              }));
-              setUserRoles(updatedRoles);
-            } else {
-              console.warn("⚠️ CONTEXT: Could not establish active role");
-              setActiveRole(null);
-            }
-          } else {
-            console.log("📝 CONTEXT: No roles found for user - this is normal for new registrations");
-            setActiveRole(null);
-          }
-
-          // ENHANCED Final status logging with specific issue detection
-          const finalStatus = {
-            userId: userObject.id.substring(0, 8) + '...',
-            email: userObject.email || 'unknown',
-            totalRoles: roles.length,
-            verifiedRoles: roles.filter(r => r.is_verified).length,
-            activeRoleType: activeRole?.role_type || 'none',
-            loadingMethod: loadingMethod,
-            systemStatus: 'completed'
-          };
+        // ENHANCED logging for the borjapipaon case
+        if (userObject.email === 'borjapipaon@gmail.com' || userObject.email?.includes('pipaon')) {
+          console.log("🎯 BORJAPIPAON CASE ANALYSIS:");
+          console.log("- Current session user ID:", userObject.id);
+          console.log("- Email:", userObject.email);
+          console.log("- Roles found:", roles.length);
+          console.log("- Loading method:", loadingMethod);
+          console.log("- Role types:", roles.map(r => r.role_type));
           
-          console.log("🏁 CONTEXT: Enhanced role loading completed:", finalStatus);
-          
-          // SPECIFIC ISSUE DETECTION for borjapipaon@gmail.com type issues
-          if (userObject.email === 'borjapipaon@gmail.com' || userObject.email?.includes('pipaon')) {
-            console.log("🔍 SPECIFIC DIAGNOSIS for pipaón email:");
-            console.log("- User ID used for query:", userObject.id);
-            console.log("- Roles found:", roles.length);
-            console.log("- Loading method:", loadingMethod);
-            
-            if (roles.length === 0) {
-              console.log("🚨 ISSUE DETECTED: No roles found for user who should have multiple roles");
-              console.log("💡 RECOMMENDATION: Check if roles were created with different user ID");
-            }
-          }
-
-        } catch (criticalRoleError) {
-          console.error("❌ CONTEXT: Critical error in role management:", criticalRoleError);
-          
-          // Emergency fallback: set empty state but don't crash
-          setUserRoles([]);
-          setActiveRole(null);
-          
-          // Provide user feedback for this specific issue
-          if (userObject.email === 'borjapipaon@gmail.com') {
-            console.error("🚨 CRITICAL: borjapipaon@gmail.com role loading failed completely");
-            console.error("This suggests a systematic issue with role creation or user ID mapping");
+          if (roles.length === 0) {
+            console.error("🚨 ZERO ROLES DETECTED FOR BORJAPIPAON");
+            console.error("This user should have multiple roles from registration");
+            console.error("Possible causes:");
+            console.error("1. Registration failed to create roles");
+            console.error("2. User ID mismatch between auth and database");
+            console.error("3. Roles were created but database query is failing");
+            console.error("4. User is using different account than registered");
           }
         }
 
-      } catch (error) {
-        console.error("❌ CONTEXT: Critical error in fetchUserData:", error);
-        
-        // Emergency profile creation - FIXED: Always provide email fallback
-        const emergencyProfile: Profile = {
-          id: userObject.id,
-          email: userObject.email || '', // FIXED: Always provide empty string as fallback
-          full_name: userObject.user_metadata?.full_name || null,
-          user_type: 'particular',
-          phone: null,
-          avatar_url: null,
-          address: null,
-          city: null,
-          postal_code: null,
-          country: 'Spain',
-          language: 'es',
-          timezone: 'Europe/Madrid',
-          email_notifications: true,
-          sms_notifications: false,
-          is_verified: false,
-          verification_code: null,
-          last_login: null,
-          created_at: userObject.created_at || new Date().toISOString(),
-          updated_at: new Date().toISOString()
+        // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT
+        if (roles.length > 0) {
+          console.log("🎯 CONTEXT: Starting active role management...");
+          
+          const finalActiveRole = await ensureActiveRole(userObject.id, roles);
+          
+          if (finalActiveRole) {
+            console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
+            setActiveRole(finalActiveRole);
+            
+            // Update local roles state to reflect any changes
+            const updatedRoles = roles.map(r => ({
+              ...r,
+              is_active: r.id === finalActiveRole.id
+            }));
+            setUserRoles(updatedRoles);
+          } else {
+            console.warn("⚠️ CONTEXT: Could not establish active role");
+            setActiveRole(null);
+          }
+        } else {
+          console.log("📝 CONTEXT: No roles found for user - this is normal for new registrations");
+          setActiveRole(null);
+        }
+
+        // ENHANCED Final status logging with specific issue detection
+        const finalStatus = {
+          userId: userObject.id.substring(0, 8) + '...',
+          email: userObject.email || 'unknown',
+          totalRoles: roles.length,
+          verifiedRoles: roles.filter(r => r.is_verified).length,
+          activeRoleType: finalActiveRole?.role_type || 'none',
+          loadingMethod: loadingMethod,
+          systemStatus: 'completed'
         };
         
-        setProfile(emergencyProfile);
+        console.log("🏁 CONTEXT: Enhanced role loading completed:", finalStatus);
+        
+        // SPECIFIC ISSUE DETECTION for borjapipaon@gmail.com type issues
+        if (userObject.email === 'borjapipaon@gmail.com' || userObject.email?.includes('pipaon')) {
+          console.log("🔍 SPECIFIC DIAGNOSIS for pipaón email:");
+          console.log("- User ID used for query:", userObject.id);
+          console.log("- Roles found:", roles.length);
+          console.log("- Loading method:", loadingMethod);
+          
+          if (roles.length === 0) {
+            console.log("🚨 ISSUE DETECTED: No roles found for user who should have multiple roles");
+            console.log("💡 RECOMMENDATION: Check if roles were created with different user ID");
+          }
+        }
+
+      } catch (criticalRoleError) {
+        console.error("❌ CONTEXT: Critical error in role management:", criticalRoleError);
+        
+        // Emergency fallback: set empty state but don't crash
         setUserRoles([]);
         setActiveRole(null);
+        
+        // Provide user feedback for this specific issue
+        if (userObject.email === 'borjapipaon@gmail.com') {
+          console.error("🚨 CRITICAL: borjapipaon@gmail.com role loading failed completely");
+          console.error("This suggests a systematic issue with role creation or user ID mapping");
+        }
       }
+
     } catch (error) {
       console.error("❌ CONTEXT: Critical error in fetchUserData:", error);
       
