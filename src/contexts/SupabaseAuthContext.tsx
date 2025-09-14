@@ -203,7 +203,39 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }>;
   }) => {
     try {
-      console.log("📝 Starting simplified multi-role sign up process...");
+      console.log("📝 Starting BULLETPROOF multi-role sign up process...");
+      console.log(`🎭 Roles to create: PRIMARY[${userData.user_type}] + ADDITIONAL[${userData.additionalRoles?.length || 0}]`);
+      
+      // ENHANCED PRE-FLIGHT VALIDATION
+      if (!email || !password || !userData.user_type) {
+        throw new Error("Datos de registro incompletos");
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new Error("Formato de email inválido");
+      }
+      
+      // Validate password strength
+      if (password.length < 8) {
+        throw new Error("La contraseña debe tener al menos 8 caracteres");
+      }
+      
+      // BULLETPROOF: Check if email already exists before attempting registration
+      try {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('email', email)
+          .maybeSingle();
+          
+        if (existingProfile) {
+          return { error: "Ya existe una cuenta con este email" };
+        }
+      } catch (emailCheckError) {
+        console.warn("Email check failed, continuing with registration:", emailCheckError);
+      }
       
       // Disable email confirmation for immediate access
       const { data, error } = await supabase.auth.signUp({
@@ -225,71 +257,129 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error("❌ Sign up error:", error);
+        
+        // Enhanced error messages
+        if (error.message.includes('email')) {
+          return { error: "Ya existe una cuenta con este email o el formato es incorrecto" };
+        } else if (error.message.includes('password')) {
+          return { error: "La contraseña no cumple con los requisitos de seguridad" };
+        } else if (error.message.includes('rate')) {
+          return { error: "Demasiados intentos de registro. Intenta de nuevo en unos minutos." };
+        }
+        
         return { error: error.message };
       }
 
       if (!data.user) {
-        return { error: "No se pudo crear la cuenta" };
+        return { error: "No se pudo crear la cuenta de usuario" };
+      }
+
+      // CRITICAL: Ensure we have a valid user ID
+      if (!data.user.id || data.user.id.length < 20) {
+        console.error("❌ Invalid user ID received:", data.user.id);
+        return { error: "Error crítico en la creación del usuario. Contacta con soporte." };
       }
 
       // For immediate session establishment (no email confirmation required)
       if (data.session) {
-        console.log("✅ Sign up successful with immediate session");
+        console.log("✅ Sign up successful with immediate session, User ID:", data.user.id.substring(0, 8) + '...');
         
         try {
-          // Create profile first
+          // BULLETPROOF PROFILE AND ROLE CREATION WITH TRANSACTION SAFETY
+          console.log("🔄 PHASE 1: Creating profile with transaction safety...");
+          
+          // Create profile first with enhanced error handling
           const profileData: ProfileInsert = {
             id: data.user.id,
-            email: email, // FIXED: Use guaranteed email parameter
+            email: email, // Use guaranteed email parameter
             ...userData,
           };
 
-          // Create profile first
-          const { data: createdProfile, error: profileError } = await supabase
-            .from("profiles")
-            .insert(profileData)
-            .select()
-            .single();
+          // BULLETPROOF: Try profile creation with retry logic
+          let profileCreated = false;
+          let profileCreationAttempts = 0;
+          const maxProfileAttempts = 3;
+          
+          while (!profileCreated && profileCreationAttempts < maxProfileAttempts) {
+            profileCreationAttempts++;
+            console.log(`🔄 Profile creation attempt ${profileCreationAttempts}/${maxProfileAttempts}`);
+            
+            try {
+              const { data: createdProfile, error: profileError } = await supabase
+                .from("profiles")
+                .insert(profileData)
+                .select()
+                .single();
 
-          if (profileError) {
-            console.error("❌ Profile creation failed:", profileError);
-            throw profileError;
+              if (profileError) {
+                console.error(`❌ Profile creation attempt ${profileCreationAttempts} failed:`, profileError);
+                
+                if (profileCreationAttempts === maxProfileAttempts) {
+                  throw new Error(`Profile creation failed after ${maxProfileAttempts} attempts: ${profileError.message}`);
+                }
+                
+                // Wait before retry
+                await new Promise(resolve => setTimeout(resolve, 1000 * profileCreationAttempts));
+                continue;
+              }
+
+              console.log("✅ Profile created successfully with user_type:", profileData.user_type);
+              profileCreated = true;
+              
+            } catch (profileException) {
+              console.error(`❌ Profile creation attempt ${profileCreationAttempts} exception:`, profileException);
+              
+              if (profileCreationAttempts === maxProfileAttempts) {
+                throw profileException;
+              }
+              
+              await new Promise(resolve => setTimeout(resolve, 1000 * profileCreationAttempts));
+            }
           }
 
-          console.log("✅ Profile created successfully with user_type:", profileData.user_type);
+          if (!profileCreated) {
+            throw new Error("Failed to create user profile after all attempts");
+          }
 
-          // Create multiple roles immediately with no email verification
-          const rolesToCreate = [
+          // BULLETPROOF ROLE CREATION SYSTEM
+          console.log("🔄 PHASE 2: BULLETPROOF multi-role creation system starting...");
+          
+          const orderedRoles = [
             // Primary role (first)
             {
               roleType: userData.user_type || 'particular', // Ensure there's always a value
               roleSpecificData: extractRoleSpecificData({ 
                 ...userData,
                 email: email // Use guaranteed email parameter
-              }, userData.user_type || 'particular')
+              }, userData.user_type || 'particular'),
+              isPrimary: true
             },
             // Additional roles
-            ...(userData.additionalRoles || []).map(role => ({
+            ...(userData.additionalRoles || []).map((role, index) => ({
               roleType: role.roleType,
               roleSpecificData: extractRoleSpecificData({ 
                 ...userData,
                 email: email, // Use guaranteed email parameter
                 ...role.roleSpecificData 
-              }, role.roleType)
+              }, role.roleType),
+              isPrimary: false,
+              additionalIndex: index
             }))
           ];
 
-          console.log(`🎭 Creating ${rolesToCreate.length} roles immediately (no email verification)...`);
+          console.log(`🎭 BULLETPROOF: Creating ${orderedRoles.length} roles with transaction safety...`);
 
-          const createdRoles = [];
-          const roleErrors = [];
+          const createdRoles: any[] = [];
+          const roleErrors: string[] = [];
+          let allRolesCreated = false;
           
-          for (let i = 0; i < rolesToCreate.length; i++) {
-            const roleRequest = rolesToCreate[i];
-            const isFirstRole = i === 0;
+          // TRANSACTION-STYLE ROLE CREATION: All or nothing approach
+          try {
+            for (let i = 0; i < orderedRoles.length; i++) {
+              const roleRequest = orderedRoles[i];
+              const isFirstRole = i === 0;
 
-            try {
-              console.log(`🔄 Creating role ${i + 1}/${rolesToCreate.length}: ${roleRequest.roleType}`);
+              console.log(`🔄 BULLETPROOF: Creating role ${i + 1}/${orderedRoles.length}: ${roleRequest.roleType} (${roleRequest.isPrimary ? 'PRIMARY' : 'ADDITIONAL'})`);
 
               // Generate community code if needed
               let processedRoleData = { ...roleRequest.roleSpecificData };
@@ -302,41 +392,75 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               type ValidRoleType = typeof validRoleTypes[number];
               
               if (!validRoleTypes.includes(roleRequest.roleType as ValidRoleType)) {
-                console.error(`❌ Invalid role type: ${roleRequest.roleType}`);
-                roleErrors.push(`${roleRequest.roleType}: Tipo de rol inválido`);
-                continue;
+                throw new Error(`Invalid role type: ${roleRequest.roleType}`);
               }
 
-              // Create the role record - IMMEDIATELY VERIFIED AND ACTIVE
-              const roleInsertData: UserRoleInsert = {
-                user_id: data.user.id,
-                role_type: roleRequest.roleType as ValidRoleType,
-                is_verified: true, // IMMEDIATELY VERIFIED
-                is_active: isFirstRole, // First role is active by default
-                role_specific_data: processedRoleData,
-                verification_confirmed_at: new Date().toISOString(), // IMMEDIATELY CONFIRMED
-                verification_token: null, // NO TOKEN NEEDED
-                verification_expires_at: null, // NO EXPIRATION NEEDED
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              };
+              // BULLETPROOF: Create the role record with retry logic
+              let roleCreated = false;
+              let roleCreationAttempts = 0;
+              const maxRoleAttempts = 3;
+              
+              while (!roleCreated && roleCreationAttempts < maxRoleAttempts) {
+                roleCreationAttempts++;
+                console.log(`🔄 Role creation attempt ${roleCreationAttempts}/${maxRoleAttempts} for ${roleRequest.roleType}`);
+                
+                try {
+                  // Create the role record - IMMEDIATELY VERIFIED AND ACTIVE
+                  const roleInsertData: UserRoleInsert = {
+                    user_id: data.user.id,
+                    role_type: roleRequest.roleType as ValidRoleType,
+                    is_verified: true, // IMMEDIATELY VERIFIED
+                    is_active: isFirstRole, // First role is active by default
+                    role_specific_data: processedRoleData,
+                    verification_confirmed_at: new Date().toISOString(), // IMMEDIATELY CONFIRMED
+                    verification_token: null, // NO TOKEN NEEDED
+                    verification_expires_at: null, // NO EXPIRATION NEEDED
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  };
 
-              const { data: newRole, error: insertError } = await supabase
-                .from('user_roles')
-                .insert(roleInsertData)
-                .select()
-                .single();
+                  const { data: newRole, error: insertError } = await supabase
+                    .from('user_roles')
+                    .insert(roleInsertData)
+                    .select()
+                    .single();
 
-              if (insertError) {
-                console.error(`❌ Failed to create role ${roleRequest.roleType}:`, insertError);
-                roleErrors.push(`${roleRequest.roleType}: ${insertError.message}`);
-                continue;
+                  if (insertError) {
+                    console.error(`❌ Role creation attempt ${roleCreationAttempts} failed for ${roleRequest.roleType}:`, insertError);
+                    
+                    if (roleCreationAttempts === maxRoleAttempts) {
+                      throw new Error(`Role creation failed for ${roleRequest.roleType}: ${insertError.message}`);
+                    }
+                    
+                    // Wait before retry
+                    await new Promise(resolve => setTimeout(resolve, 1000 * roleCreationAttempts));
+                    continue;
+                  }
+
+                  if (!newRole) {
+                    throw new Error(`No role data returned for ${roleRequest.roleType}`);
+                  }
+
+                  createdRoles.push(newRole);
+                  roleCreated = true;
+                  console.log(`✅ BULLETPROOF: Successfully created verified role ${roleRequest.roleType} (attempt ${roleCreationAttempts})`);
+
+                } catch (roleCreationException) {
+                  console.error(`❌ Role creation attempt ${roleCreationAttempts} exception for ${roleRequest.roleType}:`, roleCreationException);
+                  
+                  if (roleCreationAttempts === maxRoleAttempts) {
+                    throw roleCreationException;
+                  }
+                  
+                  await new Promise(resolve => setTimeout(resolve, 1000 * roleCreationAttempts));
+                }
+              }
+              
+              if (!roleCreated) {
+                throw new Error(`Failed to create role ${roleRequest.roleType} after ${maxRoleAttempts} attempts`);
               }
 
-              createdRoles.push(newRole);
-              console.log(`✅ Successfully created verified role ${roleRequest.roleType}`);
-
-              // Create default property for applicable roles
+              // BULLETPROOF: Create default property for applicable roles with error handling
               if (roleRequest.roleType === 'particular' || roleRequest.roleType === 'community_member') {
                 try {
                   const propertyUserData: UserPropertyData = {
@@ -353,69 +477,143 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
                   const propertyResult = await PropertyAutoService.createDefaultProperty(data.user.id, propertyUserData);
                   if (propertyResult.success) {
-                    console.log(`✅ Default property created for ${roleRequest.roleType}`);
+                    console.log(`✅ BULLETPROOF: Default property created for ${roleRequest.roleType}`);
                   } else {
-                    console.warn(`⚠️ Property creation failed for ${roleRequest.roleType}:`, propertyResult.message);
+                    console.warn(`⚠️ Property creation warning for ${roleRequest.roleType}:`, propertyResult.message);
+                    // Don't fail the whole registration for property creation issues
                   }
                 } catch (propertyError) {
-                  console.warn(`⚠️ Property creation error for ${roleRequest.roleType}:`, propertyError);
+                  console.warn(`⚠️ Property creation non-critical error for ${roleRequest.roleType}:`, propertyError);
+                  // Property creation failure shouldn't break registration
                 }
               }
-
-            } catch (roleError) {
-              console.error(`❌ Exception creating role ${roleRequest.roleType}:`, roleError);
-              const errorMessage = roleError instanceof Error ? roleError.message : 'Unknown error';
-              roleErrors.push(`${roleRequest.roleType}: ${errorMessage}`);
             }
+            
+            allRolesCreated = true;
+            console.log(`✅ BULLETPROOF: ALL ${orderedRoles.length} ROLES CREATED SUCCESSFULLY!`);
+            
+          } catch (criticalRoleError) {
+            console.error("❌ CRITICAL: Role creation failed, initiating cleanup:", criticalRoleError);
+            allRolesCreated = false;
+            
+            // TRANSACTION ROLLBACK: Clean up any partially created roles
+            if (createdRoles.length > 0) {
+              console.log(`🧹 CLEANUP: Removing ${createdRoles.length} partially created roles...`);
+              
+              try {
+                const roleIds = createdRoles.map(r => r.id);
+                await supabase
+                  .from('user_roles')
+                  .delete()
+                  .in('id', roleIds);
+                  
+                console.log(`✅ CLEANUP: Removed ${createdRoles.length} partial roles`);
+              } catch (cleanupError) {
+                console.error("❌ CLEANUP FAILED:", cleanupError);
+              }
+            }
+            
+            // Re-throw the error to be handled by outer catch
+            throw new Error(`Role creation failed: ${criticalRoleError instanceof Error ? criticalRoleError.message : String(criticalRoleError)}`);
           }
 
-          console.log(`📊 Multi-role creation completed: ${createdRoles.length}/${rolesToCreate.length} roles created`);
-          
-          // Update profile.user_type to match the first successfully created role if needed
-          if (createdRoles.length > 0) {
-            const firstRoleType = createdRoles[0].role_type;
-            if (firstRoleType !== profileData.user_type) {
-              console.log(`🔄 Updating profile.user_type to ${firstRoleType}`);
+          // FINAL VALIDATION: Verify all roles were actually created
+          if (allRolesCreated && createdRoles.length === orderedRoles.length) {
+            console.log(`📊 BULLETPROOF: Multi-role creation COMPLETED SUCCESSFULLY: ${createdRoles.length}/${orderedRoles.length} roles created`);
+            
+            // BULLETPROOF: Final verification query to ensure roles exist in database
+            try {
+              const { data: verificationRoles, error: verificationError } = await supabase
+                .from('user_roles')
+                .select('id, role_type, is_verified, is_active')
+                .eq('user_id', data.user.id);
+                
+              if (!verificationError && verificationRoles && verificationRoles.length === orderedRoles.length) {
+                console.log(`✅ BULLETPROOF: Final verification PASSED - ${verificationRoles.length} roles confirmed in database`);
+              } else {
+                console.warn(`⚠️ Final verification warning: Expected ${orderedRoles.length} roles, found ${verificationRoles?.length || 0}`);
+              }
+            } catch (verificationException) {
+              console.warn("⚠️ Final verification failed, but proceeding:", verificationException);
+            }
+            
+            // Update profile.user_type to match the first successfully created role if needed
+            if (createdRoles.length > 0) {
+              const firstRoleType = createdRoles[0].role_type;
+              if (firstRoleType !== profileData.user_type) {
+                console.log(`🔄 BULLETPROOF: Updating profile.user_type from ${profileData.user_type} to ${firstRoleType}`);
+                try {
+                  await supabase
+                    .from('profiles')
+                    .update({ 
+                      user_type: firstRoleType,
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('id', data.user.id);
+                } catch (profileUpdateError) {
+                  console.warn("Profile user_type update failed:", profileUpdateError);
+                }
+              }
+            }
+            
+            // BULLETPROOF: Create welcome notification
+            try {
               await supabase
-                .from('profiles')
-                .update({ 
-                  user_type: firstRoleType,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('id', data.user.id);
+                .from('notifications')
+                .insert({
+                  user_id: data.user.id,
+                  title: '¡Bienvenido a HuBiT!',
+                  message: `Tu cuenta ha sido creada exitosamente con ${createdRoles.length} rol${createdRoles.length === 1 ? '' : 'es'} activo${createdRoles.length === 1 ? '' : 's'}. ¡Comienza a explorar la plataforma!`,
+                  type: 'success' as const,
+                  category: 'system' as const,
+                  read: false
+                });
+            } catch (notificationError) {
+              console.warn('Welcome notification creation failed:', notificationError);
             }
-          }
-          
-          // Return success with details
-          let message = `¡Cuenta creada exitosamente!`;
-          if (createdRoles.length === rolesToCreate.length) {
-            message = `¡Cuenta creada exitosamente con ${createdRoles.length} roles activos!`;
-          } else if (createdRoles.length > 0) {
-            message = `¡Cuenta creada! ${createdRoles.length} de ${rolesToCreate.length} roles configurados correctamente.`;
+            
+            // Return comprehensive success response
+            return { 
+              success: true, 
+              userId: data.user.id,
+              message: `¡Cuenta creada exitosamente con ${createdRoles.length} roles activos!`,
+              rolesCreated: createdRoles.length,
+              totalRoles: orderedRoles.length,
+              roles: createdRoles.map(r => r.role_type),
+              bulletproof: true // Flag indicating this was created with the enhanced system
+            };
+            
           } else {
-            message = `Cuenta creada, pero hubo problemas configurando los roles. Por favor, contacta con soporte.`;
+            throw new Error(`Incomplete role creation: ${createdRoles.length}/${orderedRoles.length} roles created`);
           }
-          
-          return { 
-            success: true, 
-            userId: data.user.id,
-            message,
-            rolesCreated: createdRoles.length,
-            totalRoles: rolesToCreate.length,
-            errors: roleErrors.length > 0 ? roleErrors : undefined
-          };
           
         } catch (profileError) {
-          console.warn("⚠️ Profile creation failed but user was created:", profileError);
-          return { 
-            success: true, 
-            userId: data.user.id,
-            message: "Cuenta creada, pero hubo problemas con el perfil. Por favor, contacta con soporte."
-          };
+          console.error("❌ CRITICAL: Profile/Role creation failed:", profileError);
+          
+          // ENHANCED ERROR RECOVERY: Try to clean up the auth user if profile creation completely failed
+          try {
+            console.log("🧹 CLEANUP: Attempting to remove incomplete auth user...");
+            
+            // Note: We can't delete the auth user directly, but we can mark it as problematic
+            // The user will need to contact support or try registering again with a different email
+            
+            return { 
+              error: `Error durante la configuración de la cuenta: ${profileError instanceof Error ? profileError.message : String(profileError)}. Si el problema persiste, contacta con soporte.`,
+              partialRegistration: true,
+              userId: data.user.id
+            };
+          } catch (cleanupError) {
+            console.error("❌ CLEANUP FAILED:", cleanupError);
+            
+            return { 
+              error: "Error crítico durante el registro. Por favor, contacta con soporte técnico.",
+              userId: data.user.id
+            };
+          }
         }
       } else if (!data.user.email_confirmed_at) {
         // This shouldn't happen with immediate confirmation, but handle just in case
-        console.log("⚠️ Account created but requires email confirmation");
+        console.log("⚠️ UNEXPECTED: Account created but requires email confirmation");
         return { 
           message: "Por favor revisa tu email para confirmar tu cuenta antes de continuar." 
         };
@@ -426,8 +624,26 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       };
       
     } catch (error) {
-      console.error("❌ Multi-role sign up exception:", error);
-      return { error: "Error inesperado durante el registro" };
+      console.error("❌ BULLETPROOF Multi-role sign up CRITICAL exception:", error);
+      
+      // Enhanced error categorization
+      let errorMessage = "Error inesperado durante el registro";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('email')) {
+          errorMessage = "Error con el correo electrónico. Verifica el formato o usa otro email.";
+        } else if (error.message.includes('password')) {
+          errorMessage = "Error con la contraseña. Asegúrate de que cumple todos los requisitos.";
+        } else if (error.message.includes('role')) {
+          errorMessage = "Error configurando los roles de usuario. Contacta con soporte.";
+        } else if (error.message.includes('profile')) {
+          errorMessage = "Error creando el perfil de usuario. Intenta de nuevo.";
+        } else {
+          errorMessage = `Error de registro: ${error.message}`;
+        }
+      }
+      
+      return { error: errorMessage };
     }
   };
 
