@@ -382,7 +382,7 @@ export default function UserRoleManager() {
                             <h3 className="font-medium text-neutral-900">Cambio Rápido de Rol</h3>
                             <div className="flex flex-wrap gap-2">
                                 {userRoles
-                                    .filter(role => role.is_verified)
+                                    .filter(role => role.is_verified === true)
                                     .map((role) => (
                                         <Button
                                             key={role.id}
