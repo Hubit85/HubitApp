@@ -604,6 +604,124 @@ export class AutomaticRoleCreationService {
   }
 
   /**
+   * Monitor role creation with enhanced timeout and verification
+   * This method is called from the authentication context to verify roles were created
+   */
+  static async monitorCreation(
+    userId: string,
+    expectedRolesCount: number,
+    timeoutMs: number = 15000
+  ): Promise<{
+    success: boolean;
+    message: string;
+    actualCount: number;
+    expectedCount: number;
+  }> {
+    console.log(`🔍 MONITOR: Starting enhanced role creation monitoring for ${expectedRolesCount} expected roles...`);
+    
+    const startTime = Date.now();
+    let attempts = 0;
+    const checkInterval = 2000; // Check every 2 seconds
+    const maxAttempts = Math.floor(timeoutMs / checkInterval);
+
+    while (attempts < maxAttempts && (Date.now() - startTime) < timeoutMs) {
+      attempts++;
+      
+      try {
+        const { data: roles, error } = await supabase
+          .from('user_roles')
+          .select('id, role_type, is_verified, is_active')
+          .eq('user_id', userId);
+
+        if (error) {
+          console.warn(`🔍 MONITOR: Attempt ${attempts} database error:`, error);
+          await new Promise(resolve => setTimeout(resolve, checkInterval));
+          continue;
+        }
+
+        const actualCount = roles?.length || 0;
+        console.log(`🔍 MONITOR: Attempt ${attempts}/${maxAttempts} - Found ${actualCount}/${expectedRolesCount} roles`);
+
+        // Success condition: found expected number of roles or more
+        if (actualCount >= expectedRolesCount) {
+          console.log(`✅ MONITOR: Success! Found ${actualCount} roles (expected ${expectedRolesCount})`);
+          return {
+            success: true,
+            message: `All expected roles found: ${actualCount}/${expectedRolesCount}`,
+            actualCount,
+            expectedCount: expectedRolesCount
+          };
+        }
+
+        // Partial success condition: found some roles after several attempts
+        if (actualCount > 0 && attempts >= Math.floor(maxAttempts * 0.6)) {
+          console.log(`⚠️ MONITOR: Partial success - Found ${actualCount} roles after ${attempts} attempts`);
+          return {
+            success: true,
+            message: `Partial success: ${actualCount}/${expectedRolesCount} roles found`,
+            actualCount,
+            expectedCount: expectedRolesCount
+          };
+        }
+
+        // Wait before next attempt
+        if (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, checkInterval));
+        }
+
+      } catch (error) {
+        console.error(`🔍 MONITOR: Attempt ${attempts} exception:`, error);
+        await new Promise(resolve => setTimeout(resolve, checkInterval));
+      }
+    }
+
+    // Timeout reached
+    console.error(`❌ MONITOR: Timeout after ${attempts} attempts and ${timeoutMs}ms`);
+    
+    // Final count check
+    try {
+      const { data: finalRoles } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', userId);
+      
+      const finalCount = finalRoles?.length || 0;
+      return {
+        success: false,
+        message: `Monitoring timeout: Found ${finalCount}/${expectedRolesCount} roles after ${timeoutMs}ms`,
+        actualCount: finalCount,
+        expectedCount: expectedRolesCount
+      };
+    } catch (finalError) {
+      return {
+        success: false,
+        message: `Monitoring failed with timeout and final check error`,
+        actualCount: 0,
+        expectedCount: expectedRolesCount
+      };
+    }
+  }
+
+  /**
+   * Emergency role creation method (legacy compatibility)
+   * This method is called from various contexts when basic role creation fails
+   */
+  static async emergencyRoleCreation(
+    userId: string,
+    email: string,
+    fallbackRole: 'particular' | 'community_member' | 'service_provider' | 'property_administrator' = 'particular'
+  ): Promise<{
+    success: boolean;
+    message: string;
+    roleCreated?: any;
+  }> {
+    console.log(`🆘 EMERGENCY: Legacy emergency role creation called for ${fallbackRole}...`);
+    
+    // Delegate to the enhanced version
+    return this.emergencyRoleCreationEnhanced(userId, email, fallbackRole);
+  }
+
+  /**
    * Get display name for role type
    */
   private static getRoleDisplayName(roleType: string): string {
