@@ -100,13 +100,13 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     try {
       setLoading(true);
       
-      // Find property administrators for notifications
+      // Find property administrators for notifications - FIXED QUERY
       const { data: admins, error } = await supabase
         .from('user_roles')
         .select(`
           id,
           user_id,
-          profiles!inner(full_name, email)
+          profiles!user_roles_user_id_fkey(full_name, email)
         `)
         .eq('role_type', 'property_administrator')
         .eq('is_verified', true);
@@ -115,12 +115,23 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         console.error('Error fetching property administrators:', error);
       }
 
-      const adminList = admins ? admins.map(admin => ({
-        id: admin.id,
-        user_id: admin.user_id,
-        company_name: admin.profiles.full_name || 'Administrador de Fincas',
-        contact_email: admin.profiles.email
-      })) : [];
+      // FIXED: Better type handling for the admin list
+      const adminList: PropertyAdministrator[] = [];
+      
+      if (admins) {
+        admins.forEach(admin => {
+          // Safe access to profile data
+          if (admin.profiles && typeof admin.profiles === 'object' && !Array.isArray(admin.profiles)) {
+            const profile = admin.profiles as { full_name: string | null; email: string };
+            adminList.push({
+              id: admin.id,
+              user_id: admin.user_id,
+              company_name: profile.full_name || 'Administrador de Fincas',
+              contact_email: profile.email || ''
+            });
+          }
+        });
+      }
 
       setPropertyAdministrators(adminList);
       
