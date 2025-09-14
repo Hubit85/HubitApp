@@ -921,6 +921,107 @@ export class SupabaseUserRoleService {
       }
     });
   }
+
+  /**
+   * Enhanced debug method to diagnose zero-role users
+   * This is used specifically for troubleshooting users like borjapipaon who should have multiple roles
+   */
+  static async debugUserRoles(userId: string, email: string): Promise<{
+    exactRoles: any[] | null;
+    emailRoles: any[] | null;
+  }> {
+    console.log('🐛 DEBUG STARTED for:', { userId: userId.substring(0, 8) + '...', email });
+    
+    try {
+      // 1. Verify connection to the table
+      const { count: totalRoles } = await supabase
+        .from('user_roles')
+        .select('*', { count: 'exact', head: true });
+      
+      console.log('📊 Total roles en sistema:', totalRoles);
+
+      // 2. Buscar roles por user_id exacto
+      const { data: exactRoles, error: exactError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId);
+
+      console.log('🎯 Roles con user_id exacto:', {
+        count: exactRoles?.length || 0,
+        error: exactError?.message,
+        roles: exactRoles?.map(r => r.role_type) || []
+      });
+
+      // 3. Buscar por email en role_specific_data (ENHANCED SEARCH)
+      let emailRoles: any[] | null = null;
+      
+      try {
+        // Search for roles that might have the email in their specific data
+        const { data: searchRoles, error: searchError } = await supabase
+          .from('user_roles')
+          .select('user_id, role_specific_data, role_type')
+          .contains('role_specific_data', { email: email });
+
+        if (!searchError && searchRoles) {
+          emailRoles = searchRoles;
+          console.log('📧 Roles con email en role_specific_data:', {
+            count: searchRoles.length,
+            roles: searchRoles.map(r => ({ roleType: r.role_type, userId: r.user_id?.substring(0, 8) + '...' }))
+          });
+        } else if (searchError) {
+          console.warn('📧 Email search in role_specific_data failed:', searchError);
+        }
+      } catch (emailSearchError) {
+        console.warn('📧 Email search failed with exception:', emailSearchError);
+      }
+
+      // 4. Alternative search strategies if needed
+      if ((!exactRoles || exactRoles.length === 0) && email) {
+        console.log('🔍 ENHANCED DEBUG: Attempting alternative search strategies...');
+        
+        // Try to find profiles with this email
+        const { data: profileMatches } = await supabase
+          .from('profiles')
+          .select('id, email, user_type, created_at')
+          .eq('email', email);
+
+        if (profileMatches && profileMatches.length > 0) {
+          console.log('👤 PROFILES FOUND with this email:', {
+            count: profileMatches.length,
+            profiles: profileMatches.map(p => ({
+              id: p.id.substring(0, 8) + '...',
+              userType: p.user_type,
+              createdAt: p.created_at
+            }))
+          });
+
+          // Check roles for each matching profile
+          for (const profile of profileMatches) {
+            if (profile.id !== userId) {
+              const { data: altRoles } = await supabase
+                .from('user_roles')
+                .select('*')
+                .eq('user_id', profile.id);
+
+              if (altRoles && altRoles.length > 0) {
+                console.log('🎯 FOUND ROLES with alternative profile ID:', {
+                  profileId: profile.id.substring(0, 8) + '...',
+                  rolesCount: altRoles.length,
+                  roles: altRoles.map(r => r.role_type)
+                });
+              }
+            }
+          }
+        }
+      }
+
+      return { exactRoles, emailRoles };
+      
+    } catch (error) {
+      console.error('❌ DEBUG ERROR:', error);
+      return { exactRoles: null, emailRoles: null };
+    }
+  }
 }
 
 // Re-export UserRole type for convenience

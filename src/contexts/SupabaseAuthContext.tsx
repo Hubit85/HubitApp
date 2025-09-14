@@ -351,7 +351,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             const autoRoleOptions = {
               userId: data.user.id,
               email: email,
-              primaryRole: userData.user_type || 'particular',
+              primaryRole: userData.user_type as 'particular' | 'community_member' | 'service_provider' | 'property_administrator' || 'particular',
               additionalRoles: userData.additionalRoles || [],
               userData: {
                 ...userData,
