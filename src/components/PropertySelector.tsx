@@ -36,19 +36,30 @@ interface PropertyUnit {
   userType: 'owner' | 'tenant';
 }
 
+// Updated interface with all required Property fields
 interface PropertyWithUnits extends Property {
   units?: PropertyUnit[];
   communityName?: string;
   administrator?: string;
+  amenities: string[] | null;
+  description: string | null;
+  images: string[] | null;
+  latitude: number | null;
+  longitude: number | null;
+  postal_code: string | null;
+  property_status: string | null;
+  total_area: number | null;
+  units_count: number | null;
+  year_built: number | null;
 }
 
 interface PropertySelectorProps {
   onPropertySelected: (property: PropertyWithUnits, unit?: PropertyUnit) => void;
   onCancel?: () => void;
   userType?: string | null;
-  mode?: 'incident' | 'budget' | 'full'; // New mode for different use cases
+  mode?: 'incident' | 'budget' | 'full';
   title?: string;
-  allowNoUnitSelection?: boolean; // Allow selecting just the property without specific unit
+  allowNoUnitSelection?: boolean;
 }
 
 export default function PropertySelector({ 
@@ -99,11 +110,23 @@ export default function PropertySelector({
 
       if (queryError) throw queryError;
 
-      // Transform properties to include community information
+      // Transform properties to include community information with all required fields
       const transformedProperties: PropertyWithUnits[] = (data || []).map(property => ({
         ...property,
+        // Add all required Property fields
+        amenities: property.amenities || null,
+        description: property.description || null,
+        images: property.images || null,
+        latitude: property.latitude || null,
+        longitude: property.longitude || null,
+        postal_code: property.postal_code || null,
+        property_status: property.property_status || null,
+        total_area: property.total_area || null,
+        units_count: property.units_count || null,
+        year_built: property.year_built || null,
+        // Add custom fields
         communityName: property.name || `Propiedad en ${property.city}`,
-        administrator: 'Administrador de Fincas', // This should come from the assignment system
+        administrator: 'Administrador de Fincas',
         units: [
           {
             id: `${property.id}-main`,
@@ -156,6 +179,18 @@ export default function PropertySelector({
           user_id: 'community',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          // Add all required Property fields
+          amenities: ['piscina', 'gimnasio'],
+          description: 'Residencial moderno con todas las comodidades',
+          images: null,
+          latitude: 40.4168,
+          longitude: -3.7038,
+          postal_code: '28001',
+          property_status: 'active',
+          total_area: 120,
+          units_count: 24,
+          year_built: 2018,
+          // Add custom fields
           communityName: 'Residencial Los Olivos',
           administrator: 'García & Asociados S.L.',
           units: [
