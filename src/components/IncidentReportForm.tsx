@@ -211,7 +211,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
               id: admin.id,
               user_id: admin.user_id,
               company_name: profile.full_name || 'Administrador de Fincas',
-              contact_email: profile.email || ''
+              contact_email: profile.email || '' // FIXED: Always provide fallback string
             });
           }
         });
