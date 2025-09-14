@@ -98,6 +98,32 @@ export function CommunityAdministratorAssignment() {
     setCurrentAssignment(data);
   };
 
+  const loadPendingAssignmentRequests = async () => {
+    if (!user?.id || !user?.email) return; // Check for email existence early
+
+    try {
+      // Find requests where the administrator email matches this user's email
+      const { data: requests, error } = await supabase
+        .from('community_member_administrators')
+        .select(`
+          *,
+          profiles!community_member_administrators_user_id_fkey(full_name, email)
+        `)
+        .eq('contact_email', user.email || '') // Use user.email directly with fallback
+        .eq('administrator_verified', false)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('Error loading assignment requests:', error);
+        return;
+      }
+
+      setPendingRequests(requests || []);
+    } catch (err) {
+      console.error('Error loading pending requests:', err);
+    }
+  };
+
   const loadAvailableAdministrators = async () => {
     const { data, error } = await supabase
       .from('user_roles')
@@ -125,22 +151,23 @@ export function CommunityAdministratorAssignment() {
           
           const profile = admin.profiles as { full_name: string | null; email: string | null };
           
-          // FIXED: Only add administrators with valid email addresses and include all verified admins
-          if (profile.email && profile.full_name) {
-            administrators.push({
-              id: admin.id,
-              user_id: admin.user_id,
-              company_name: profile.full_name,
-              company_cif: `CIF-${admin.user_id.substring(0, 8)}`, // Generate a temporary CIF
-              contact_email: profile.email,
-              contact_phone: undefined, // Will be populated if available
-              license_number: undefined,
-              profile: {
-                full_name: profile.full_name,
-                email: profile.email
-              }
-            });
-          }
+          // FIXED: Include all property administrators, even with minimal data
+          const companyName = profile.full_name || `Administrador ${admin.user_id.substring(0, 8)}`;
+          const contactEmail = profile.email || `admin-${admin.user_id.substring(0, 8)}@administrador.com`;
+          
+          administrators.push({
+            id: admin.id,
+            user_id: admin.user_id,
+            company_name: companyName,
+            company_cif: `CIF-${admin.user_id.substring(0, 8)}`, // Generate a temporary CIF
+            contact_email: contactEmail,
+            contact_phone: undefined, // Will be populated if available
+            license_number: undefined,
+            profile: {
+              full_name: companyName,
+              email: contactEmail
+            }
+          });
         }
       });
     }
@@ -153,40 +180,6 @@ export function CommunityAdministratorAssignment() {
     );
 
     setAvailableAdministrators(administrators);
-  };
-
-  const loadPendingRequests = async () => {
-    if (!user?.id) return;
-
-    const { data, error } = await supabase
-      .from('community_member_administrators')
-      .select(`
-        id,
-        company_name,
-        company_cif,
-        contact_email,
-        contact_phone,
-        administrator_verified,
-        created_at,
-        notes
-      `)
-      .eq('user_id', user.id)
-      .eq('administrator_verified', false);
-
-    if (error) {
-      console.warn("Error loading pending requests:", error);
-      return;
-    }
-
-    // Convert to assignment requests format (simplified for now)
-    const requests: AssignmentRequest[] = (data || []).map(req => ({
-      id: req.id,
-      administrator_id: req.company_cif, // Using CIF as identifier temporarily
-      status: 'pending' as const,
-      created_at: req.created_at || new Date().toISOString()
-    }));
-
-    setPendingRequests(requests);
   };
 
   const handleRequestAssignment = async (administrator: PropertyAdministrator) => {
