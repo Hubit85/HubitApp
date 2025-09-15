@@ -42,15 +42,30 @@ export default function Dashboard() {
   }, [user, loading, router]);
 
   useEffect(() => {
+    // CORREGIDO: Usar activeRole real en lugar de profile.user_type
     let newRole = "particular";
     
+    // Primera prioridad: rol activo de la tabla user_roles
     if (activeRole?.role_type) {
       newRole = activeRole.role_type;
-    } else if (profile?.user_type) {
+      console.log("🎯 Usando rol activo de user_roles:", newRole);
+    } 
+    // Segunda prioridad: primer rol verificado si no hay activo
+    else if (userRoles?.length > 0) {
+      const verifiedRoles = userRoles.filter(r => r.is_verified);
+      if (verifiedRoles.length > 0) {
+        newRole = verifiedRoles[0].role_type;
+        console.log("🎯 Usando primer rol verificado:", newRole);
+      }
+    }
+    // Última prioridad: profile.user_type (solo como fallback)
+    else if (profile?.user_type) {
       newRole = profile.user_type;
+      console.log("🎯 Usando profile.user_type como fallback:", newRole);
     }
     
     if (newRole !== selectedRole) {
+      console.log(`🔄 Cambiando rol mostrado de "${selectedRole}" a "${newRole}"`);
       setSelectedRole(newRole);
     }
 
@@ -63,7 +78,7 @@ export default function Dashboard() {
       // If there's an incident parameter, we might want to pre-select it
       console.log('Incident parameter detected:', incident);
     }
-  }, [activeRole, profile, router.query]);
+  }, [activeRole, userRoles, profile, router.query]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -1531,7 +1546,8 @@ export default function Dashboard() {
     );
   }
 
-  const currentRole = selectedRole || profile?.user_type || "particular";
+  // CORREGIDO: Usar selectedRole (que ahora refleja el rol activo real) en lugar de profile?.user_type
+  const currentRole = selectedRole || "particular";
   const userTypeInfo = getUserTypeInfo(currentRole);
   const UserTypeIcon = userTypeInfo.icon;
   const navItems = [...baseNavItems, ...getRoleSpecificNavItems(currentRole)];
@@ -1554,8 +1570,8 @@ export default function Dashboard() {
                   <UserTypeIcon className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white">{profile.full_name || "Usuario"}</h3>
-                  <p className="text-gray-300 text-sm">{user.email}</p>
+                  <h3 className="font-bold text-white">{profile?.full_name || "Usuario"}</h3>
+                  <p className="text-gray-300 text-sm">{user?.email}</p>
                 </div>
               </div>
               
