@@ -382,7 +382,7 @@ export function ContractManager() {
         try {
           // Explicit string conversion with guaranteed fallback
           const serviceTitle = selectedQuote.title || 'Servicio';
-          const contractNumber: string = newContract.contract_number || `CON-${Date.now()}`;
+          const contractNumber: string = newContract.contract_number ?? `CON-${Date.now()}`;
           const safeContractNumber: string = typeof contractNumber === 'string' 
             ? contractNumber 
             : String(contractNumber);
