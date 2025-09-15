@@ -4,80 +4,75 @@ export interface CommunityMemberRequest {
   id: string;
   community_member_id: string;
   property_administrator_id: string;
-  community_id?: string;
+  community_id?: string | null;
   status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
-  request_message?: string;
-  response_message?: string;
+  request_message?: string | null;
+  response_message?: string | null;
   requested_at: string;
-  responded_at?: string;
-  responded_by?: string;
+  responded_at?: string | null;
+  responded_by?: string | null;
   created_at: string;
   updated_at: string;
   
-  // Campos expandidos desde las relaciones
   community_member?: {
     id: string;
     role_specific_data: any;
-    user?: {
+    profiles?: {
       id: string;
       full_name: string;
       email: string;
       phone?: string;
     };
-  };
+  } | null;
   property_administrator?: {
     id: string;
     role_specific_data: any;
-    user?: {
+    profiles?: {
       id: string;
       full_name: string;
       email: string;
       phone?: string;
     };
-  };
+  } | null;
   community?: {
     id: string;
     name: string;
     address: string;
     city: string;
-  };
+  } | null;
 }
 
 export interface ManagedCommunity {
   id: string;
   property_administrator_id: string;
   community_member_id: string;
-  community_id?: string;
+  community_id?: string | null;
   relationship_status: 'active' | 'inactive' | 'suspended';
   established_at: string;
-  established_by?: string;
-  notes?: string;
+  established_by?: string | null;
+  notes?: string | null;
   created_at: string;
   updated_at: string;
   
-  // Campos expandidos
   community_member?: {
     id: string;
     role_specific_data: any;
-    user?: {
+    profiles?: {
       id: string;
       full_name: string;
       email: string;
     };
-  };
+  } | null;
   community?: {
     id: string;
     name: string;
     address: string;
     city: string;
-  };
+  } | null;
 }
 
 export class AdministratorRequestService {
   
-  /**
-   * Enviar solicitud de un miembro de comunidad a un administrador de fincas
-   */
   static async sendRequestToAdministrator(options: {
     communityMemberRoleId: string;
     propertyAdministratorRoleId: string;
@@ -94,7 +89,6 @@ export class AdministratorRequestService {
         to: options.propertyAdministratorRoleId.substring(0, 8) + '...'
       });
 
-      // Verificar que no existe ya una solicitud pendiente entre estos usuarios
       const { data: existingRequest } = await supabase
         .from('administrator_requests')
         .select('id, status')
@@ -110,7 +104,6 @@ export class AdministratorRequestService {
         };
       }
 
-      // Crear nueva solicitud
       const { data: newRequest, error } = await supabase
         .from('administrator_requests')
         .insert({
@@ -132,35 +125,27 @@ export class AdministratorRequestService {
         };
       }
 
-      // Crear notificación para el administrador
       try {
         const { data: adminRoleData } = await supabase
           .from('user_roles')
-          .select(`
-            user_id,
-            role_specific_data,
-            profiles:user_id (full_name, email)
-          `)
+          .select(`user_id`)
           .eq('id', options.propertyAdministratorRoleId)
           .single();
 
         const { data: memberRoleData } = await supabase
           .from('user_roles')
-          .select(`
-            user_id,
-            role_specific_data,
-            profiles:user_id (full_name, email)
-          `)
+          .select(`profiles:user_id(full_name)`)
           .eq('id', options.communityMemberRoleId)
           .single();
 
         if (adminRoleData && memberRoleData) {
+          const memberName = (memberRoleData.profiles as any)?.full_name || 'Un miembro de comunidad';
           await supabase
             .from('notifications')
             .insert({
               user_id: adminRoleData.user_id,
               title: '🏢 Nueva solicitud de gestión',
-              message: `${(memberRoleData.profiles as any)?.full_name || 'Un miembro de comunidad'} ha solicitado que gestiones sus incidencias.`,
+              message: `${memberName} ha solicitado que gestiones sus incidencias.`,
               type: 'info' as const,
               category: 'request' as const,
               read: false,
@@ -189,9 +174,6 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Obtener solicitudes recibidas por un administrador de fincas
-   */
   static async getReceivedRequests(propertyAdministratorRoleId: string): Promise<{
     success: boolean;
     requests: CommunityMemberRequest[];
@@ -233,7 +215,7 @@ export class AdministratorRequestService {
 
       return {
         success: true,
-        requests: (requests || []) as CommunityMemberRequest[]
+        requests: (requests || []) as unknown as CommunityMemberRequest[]
       };
 
     } catch (error) {
@@ -246,9 +228,6 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Obtener solicitudes enviadas por un miembro de comunidad
-   */
   static async getSentRequests(communityMemberRoleId: string): Promise<{
     success: boolean;
     requests: CommunityMemberRequest[];
@@ -290,7 +269,7 @@ export class AdministratorRequestService {
 
       return {
         success: true,
-        requests: (requests || []) as CommunityMemberRequest[]
+        requests: (requests || []) as unknown as CommunityMemberRequest[]
       };
 
     } catch (error) {
@@ -303,9 +282,6 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Responder a una solicitud (aceptar o rechazar)
-   */
   static async respondToRequest(options: {
     requestId: string;
     response: 'accepted' | 'rejected';
@@ -318,7 +294,6 @@ export class AdministratorRequestService {
     try {
       console.log('📝 ADMIN REQUEST: Responding to request:', options.requestId, 'with:', options.response);
 
-      // Actualizar la solicitud
       const { data: updatedRequest, error: updateError } = await supabase
         .from('administrator_requests')
         .update({
@@ -331,14 +306,8 @@ export class AdministratorRequestService {
         .eq('id', options.requestId)
         .select(`
           *,
-          community_member:community_member_id (
-            user_id,
-            profiles:user_id (full_name, email)
-          ),
-          property_administrator:property_administrator_id (
-            user_id,
-            profiles:user_id (full_name, email)
-          )
+          community_member:community_member_id(user_id, profiles:user_id(full_name)),
+          property_administrator:property_administrator_id(profiles:user_id(full_name))
         `)
         .single();
 
@@ -350,12 +319,11 @@ export class AdministratorRequestService {
         };
       }
 
-      // Si la solicitud fue aceptada, crear relación de gestión
       if (options.response === 'accepted') {
         const managementResult = await this.createManagementRelationship({
           propertyAdministratorRoleId: updatedRequest.property_administrator_id,
           communityMemberRoleId: updatedRequest.community_member_id,
-          communityId: updatedRequest.community_id,
+          communityId: updatedRequest.community_id ?? undefined,
           establishedBy: options.respondedBy,
           notes: `Relación establecida tras aceptar solicitud del ${new Date().toLocaleDateString()}`
         });
@@ -365,19 +333,19 @@ export class AdministratorRequestService {
         }
       }
 
-      // Crear notificación para el miembro de comunidad
       try {
         const memberData = updatedRequest.community_member as any;
         const adminData = updatedRequest.property_administrator as any;
-
+        
         if (memberData?.user_id) {
+          const adminName = adminData?.profiles?.full_name || 'El administrador de fincas';
           const notificationTitle = options.response === 'accepted' 
             ? '✅ Solicitud aceptada'
             : '❌ Solicitud rechazada';
             
           const notificationMessage = options.response === 'accepted'
-            ? `${adminData?.profiles?.full_name || 'El administrador de fincas'} ha aceptado gestionar tus incidencias. Ahora tus reportes aparecerán en su panel de gestión.`
-            : `${adminData?.profiles?.full_name || 'El administrador de fincas'} ha rechazado tu solicitud de gestión.`;
+            ? `${adminName} ha aceptado gestionar tus incidencias. Ahora tus reportes aparecerán en su panel de gestión.`
+            : `${adminName} ha rechazado tu solicitud de gestión.`;
 
           await supabase
             .from('notifications')
@@ -414,9 +382,6 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Crear relación de gestión entre administrador y miembro
-   */
   private static async createManagementRelationship(options: {
     propertyAdministratorRoleId: string;
     communityMemberRoleId: string;
@@ -429,7 +394,6 @@ export class AdministratorRequestService {
     relationshipId?: string;
   }> {
     try {
-      // Verificar que no existe ya una relación activa
       const { data: existingRelationship } = await supabase
         .from('managed_communities')
         .select('id, relationship_status')
@@ -446,7 +410,6 @@ export class AdministratorRequestService {
         };
       }
 
-      // Crear nueva relación de gestión
       const { data: newRelationship, error } = await supabase
         .from('managed_communities')
         .insert({
@@ -485,9 +448,6 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Obtener miembros de comunidad gestionados por un administrador
-   */
   static async getManagedMembers(propertyAdministratorRoleId: string): Promise<{
     success: boolean;
     members: ManagedCommunity[];
@@ -529,7 +489,7 @@ export class AdministratorRequestService {
 
       return {
         success: true,
-        members: (managedMembers || []) as ManagedCommunity[]
+        members: (managedMembers || []) as unknown as ManagedCommunity[]
       };
 
     } catch (error) {
@@ -542,16 +502,12 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Obtener incidencias de miembros gestionados por un administrador
-   */
   static async getManagedIncidents(propertyAdministratorRoleId: string): Promise<{
     success: boolean;
     incidents: any[];
     message?: string;
   }> {
     try {
-      // Primero obtener los miembros gestionados
       const managedResult = await this.getManagedMembers(propertyAdministratorRoleId);
       
       if (!managedResult.success || managedResult.members.length === 0) {
@@ -561,11 +517,10 @@ export class AdministratorRequestService {
           message: 'No hay miembros gestionados'
         };
       }
-
-      // Obtener los user_ids de los miembros gestionados
+      
       const managedUserIds = managedResult.members
-        .map(member => member.community_member?.user?.id)
-        .filter(Boolean);
+        .map(member => (member.community_member as any)?.profiles?.id)
+        .filter((id): id is string => !!id);
 
       if (managedUserIds.length === 0) {
         return {
@@ -575,7 +530,6 @@ export class AdministratorRequestService {
         };
       }
 
-      // Obtener las incidencias de estos usuarios
       const { data: incidents, error } = await supabase
         .from('incident_reports')
         .select(`
@@ -599,7 +553,6 @@ export class AdministratorRequestService {
         };
       }
 
-      // También marcar estas incidencias como gestionadas por este administrador
       try {
         if (incidents && incidents.length > 0) {
           await supabase
@@ -630,9 +583,6 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Cancelar solicitud pendiente
-   */
   static async cancelRequest(requestId: string): Promise<{
     success: boolean;
     message: string;
@@ -669,9 +619,6 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Buscar administradores de fincas disponibles
-   */
   static async searchPropertyAdministrators(searchTerm?: string): Promise<{
     success: boolean;
     administrators: Array<{
@@ -701,12 +648,6 @@ export class AdministratorRequestService {
         .eq('is_verified', true)
         .eq('is_active', true);
 
-      // Si hay término de búsqueda, filtrar por nombre de empresa o email
-      if (searchTerm && searchTerm.trim()) {
-        // Nota: En PostgreSQL necesitaríamos usar ilike con JSON
-        // Para simplificar, obtenemos todos y filtramos en el cliente
-      }
-
       const { data: administrators, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
@@ -718,7 +659,6 @@ export class AdministratorRequestService {
         };
       }
 
-      // Procesar y filtrar resultados
       let processedAdmins = (administrators || [])
         .map((admin: any) => {
           const roleData = admin.role_specific_data || {};
@@ -735,7 +675,6 @@ export class AdministratorRequestService {
           };
         });
 
-      // Filtrar por término de búsqueda si se proporciona
       if (searchTerm && searchTerm.trim()) {
         const term = searchTerm.toLowerCase();
         processedAdmins = processedAdmins.filter(admin => 
@@ -760,9 +699,6 @@ export class AdministratorRequestService {
     }
   }
 
-  /**
-   * Terminar relación de gestión
-   */
   static async endManagementRelationship(relationshipId: string, reason?: string): Promise<{
     success: boolean;
     message: string;
