@@ -1245,7 +1245,9 @@ export default function Dashboard() {
                   Encuentra oportunidades de negocio, envía cotizaciones profesionales y gestiona tus propuestas
                 </p>
               </div>
-              <ServiceProviderBudgetManager providerId={activeRole?.entity_id || user?.id || ""} />
+              <ServiceProviderBudgetManager 
+                providerId={activeRole?.id || user?.id || ""} 
+              />
             </>
           );
         } else {

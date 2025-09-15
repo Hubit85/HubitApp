@@ -76,7 +76,7 @@ export const ServiceProviderDashboardService = {
       .in("status", ["signed", "in_progress"]);
     
     if (error) throw error;
-    return (data || []) as ExtendedContract[];
+    return (data || []) as unknown as ExtendedContract[];
   },
 
   async getRecentQuotes(providerId: string): Promise<ExtendedQuote[]> {
@@ -97,7 +97,7 @@ export const ServiceProviderDashboardService = {
       .order("created_at", { ascending: false });
     
     if (error) throw error;
-    return (data || []) as ExtendedQuote[];
+    return (data || []) as unknown as ExtendedQuote[];
   },
 
   async getProviderStats(providerId: string) {

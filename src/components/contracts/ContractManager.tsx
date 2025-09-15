@@ -377,17 +377,15 @@ export function ContractManager() {
 
       console.log("✅ Contract created successfully:", newContract.id);
 
-      // Send notification to the contract owner - use null coalescing to prevent null error
-      const notificationContractNumber = newContract.contract_number ?? contractNumber ?? 'CON-DEFAULT';
-      
-      if (requestUserId && user?.id && providerData?.id && notificationContractNumber) {
+      // Send notification to the contract owner with proper null checks
+      if (requestUserId && user?.id && providerData?.id && newContract.contract_number) {
         try {
           await supabase
             .from('notifications')
             .insert({
               user_id: requestUserId,
               title: 'Nuevo contrato disponible',
-              message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}" (${notificationContractNumber})`,
+              message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}" (${newContract.contract_number})`,
               type: 'info' as const,
               category: 'contract' as const,
               related_entity_type: 'contract',

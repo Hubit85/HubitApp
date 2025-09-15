@@ -31,7 +31,7 @@ export const QuoteService = {
       .eq("service_provider_id", providerId);
     
     if (error) throw error;
-    return (data || []) as ExtendedQuote[];
+    return (data || []) as unknown as ExtendedQuote[];
   },
 
   async getQuotesForRequest(requestId: string): Promise<ExtendedQuote[]> {
@@ -50,7 +50,7 @@ export const QuoteService = {
       .eq("budget_request_id", requestId);
     
     if (error) throw error;
-    return (data || []) as ExtendedQuote[];
+    return (data || []) as unknown as ExtendedQuote[];
   },
 
   async createQuote(quoteData: Quote) {

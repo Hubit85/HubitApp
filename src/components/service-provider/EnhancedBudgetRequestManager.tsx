@@ -199,7 +199,7 @@ export function EnhancedBudgetRequestManager() {
 
       if (error) throw error;
 
-      setMyQuotes((quotes as QuoteWithDetails[]) || []);
+      setMyQuotes((quotes as any) || []);
 
     } catch (err) {
       console.error("Error loading my quotes:", err);
