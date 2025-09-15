@@ -83,20 +83,10 @@ export function CommunityAdministratorAssignment() {
       setLoading(true);
       if (!supabase) return;
       
-      // Build the query to get service providers with their profiles
+      // Build the query to get service providers first (no joins to avoid relation errors)
       let query = supabase
         .from("service_providers")
-        .select(`
-          *,
-          profiles:user_id (
-            id,
-            full_name,
-            email,
-            phone,
-            city,
-            avatar_url
-          )
-        `)
+        .select("*")
         .eq("is_active", true);
 
       // Apply search filter if provided
@@ -109,31 +99,60 @@ export function CommunityAdministratorAssignment() {
       // Order by rating and verification status
       query = query.order("rating_average", { ascending: false });
 
-      const { data, error } = await query;
+      const { data: serviceProviders, error } = await query;
 
       if (error) {
         console.error("Supabase error:", error);
         throw error;
       }
-      
-      // Type assertion and filter out providers without profiles
-      const rawData = data as (ServiceProvider & { profiles: Profile | null })[];
-      const filteredData = rawData.filter((admin): admin is ServiceProviderWithProfile => {
-        if (!admin.profiles) return false;
-        
-        if (searchTerm.trim()) {
-          const searchLower = searchTerm.toLowerCase();
-          return (
-            admin.company_name.toLowerCase().includes(searchLower) ||
-            admin.profiles.full_name?.toLowerCase().includes(searchLower) ||
-            admin.profiles.email.toLowerCase().includes(searchLower) ||
-            admin.description?.toLowerCase().includes(searchLower)
-          );
-        }
-        return true;
-      });
 
-      setAvailableAdmins(filteredData);
+      if (!serviceProviders || serviceProviders.length === 0) {
+        setAvailableAdmins([]);
+        return;
+      }
+      
+      // Get profiles separately for each service provider
+      const providersWithProfiles: ServiceProviderWithProfile[] = [];
+      
+      for (const provider of serviceProviders) {
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", provider.user_id)
+            .single();
+          
+          if (!profileError && profile) {
+            // Apply search filter here if needed
+            if (searchTerm.trim()) {
+              const searchLower = searchTerm.toLowerCase();
+              const matchesSearch = (
+                provider.company_name.toLowerCase().includes(searchLower) ||
+                profile.full_name?.toLowerCase().includes(searchLower) ||
+                profile.email.toLowerCase().includes(searchLower) ||
+                provider.description?.toLowerCase().includes(searchLower)
+              );
+              
+              if (matchesSearch) {
+                providersWithProfiles.push({
+                  ...provider,
+                  profiles: profile
+                });
+              }
+            } else {
+              providersWithProfiles.push({
+                ...provider,
+                profiles: profile
+              });
+            }
+          }
+        } catch (profileError) {
+          console.warn(`Failed to fetch profile for provider ${provider.id}:`, profileError);
+          // Continue with next provider
+        }
+      }
+
+      setAvailableAdmins(providersWithProfiles);
 
     } catch (error) {
       console.error("Error fetching administrators:", error);
