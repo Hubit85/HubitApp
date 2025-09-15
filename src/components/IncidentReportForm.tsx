@@ -183,60 +183,75 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     if (!user?.id) return;
 
     try {
-      // CORRECTED: Use property_administrators table directly instead of complex joins
-      console.log('🔍 Loading property administrators for incident notifications...');
+      console.log('🔍 CORRECTED: Loading property administrators for incident notifications...');
       
+      // STEP 1: Simple query to property_administrators table (no joins)
       const { data: propertyAdmins, error } = await supabase
         .from('property_administrators')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching property administrators:', error);
+        console.error('❌ Error fetching property administrators:', error);
         return;
       }
 
-      // ENHANCED: Process administrators with better error handling
+      console.log(`📋 Found ${propertyAdmins?.length || 0} property administrators`);
+
+      // STEP 2: Process administrators with separate profile queries
       const adminList: PropertyAdministrator[] = [];
       
       if (propertyAdmins && propertyAdmins.length > 0) {
-        for (const admin of propertyAdmins) {
+        for (let i = 0; i < propertyAdmins.length; i++) {
+          const admin = propertyAdmins[i];
+          
           try {
-            // Get profile data separately to avoid join issues
-            const { data: profileData, error: profileError } = await supabase
-              .from('profiles')
-              .select('full_name, email')
-              .eq('id', admin.user_id)
-              .single();
+            console.log(`🔄 Processing admin ${i + 1}: ${admin.company_name}`);
+            
+            // STEP 3: Get profile data with separate query
+            let profileData = null;
+            if (admin.user_id) {
+              const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('full_name, email')
+                .eq('id', admin.user_id)
+                .single();
 
-            if (profileError) {
-              console.warn(`Failed to get profile for admin ${admin.id}:`, profileError);
-              continue;
+              if (profileError) {
+                console.warn(`⚠️ Profile query failed for admin ${i + 1}:`, profileError.message);
+              } else {
+                profileData = profile;
+              }
             }
 
-            // Only add administrators with valid email addresses
-            if (profileData?.email) {
-              adminList.push({
+            // STEP 4: Only add administrators with valid email addresses
+            const contactEmail = admin.contact_email || profileData?.email;
+            if (contactEmail) {
+              const adminItem: PropertyAdministrator = {
                 id: admin.id,
                 user_id: admin.user_id,
-                company_name: admin.company_name || profileData.full_name || 'Administrador de Fincas',
-                contact_email: admin.contact_email || profileData.email
-              });
-              
-              console.log(`✅ Added administrator: ${admin.company_name || profileData.full_name}`);
+                company_name: admin.company_name || profileData?.full_name || 'Administrador de Fincas',
+                contact_email: contactEmail
+              };
+
+              adminList.push(adminItem);
+              console.log(`✅ Added administrator ${i + 1}: ${adminItem.company_name} (${adminItem.contact_email})`);
+            } else {
+              console.warn(`⚠️ Skipped admin ${i + 1}: no valid email address`);
             }
+            
           } catch (adminError) {
-            console.warn(`Error processing administrator ${admin.id}:`, adminError);
+            console.warn(`❌ Error processing administrator ${i + 1}:`, adminError);
             continue;
           }
         }
       }
 
-      console.log(`📋 Found ${adminList.length} valid property administrators`);
+      console.log(`📊 Final result: ${adminList.length} valid property administrators loaded`);
       setPropertyAdministrators(adminList);
       
     } catch (err) {
-      console.error('Error setting up property administrators:', err);
+      console.error('❌ Critical error setting up property administrators:', err);
     }
   };
 

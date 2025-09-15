@@ -110,9 +110,9 @@ export function CommunityAdministratorAssignment() {
   const loadAvailableAdministrators = async () => {
     try {
       setError("");
-      console.log('🔍 FIXED QUERY: Loading available property administrators...');
+      console.log('🔍 CORRECTED: Loading available property administrators...');
       
-      // CORRECTED: Simple query without complex joins that don't exist
+      // STEP 1: Load property_administrators table directly (no joins)
       const { data: propertyAdmins, error: propertyError } = await supabase
         .from('property_administrators')
         .select('*')
@@ -125,9 +125,9 @@ export function CommunityAdministratorAssignment() {
         return;
       }
 
-      console.log('🐛 DEBUG - RAW DATABASE RESULTS:', {
-        total_found: propertyAdmins?.length || 0,
-        raw_data: propertyAdmins?.map(admin => ({
+      console.log('🐛 RAW property_administrators data:', {
+        count: propertyAdmins?.length || 0,
+        sample: propertyAdmins?.slice(0, 2)?.map(admin => ({
           id: admin.id?.substring(0, 8) + '...',
           company_name: admin.company_name,
           contact_email: admin.contact_email,
@@ -135,32 +135,42 @@ export function CommunityAdministratorAssignment() {
         }))
       });
 
-      // ENHANCED: Process ALL administrators - no filtering
+      // STEP 2: Process each administrator separately (no complex joins)
       const adminList: PropertyAdministrator[] = [];
       
       if (propertyAdmins && propertyAdmins.length > 0) {
-        // Process each administrator individually
-        for (const admin of propertyAdmins) {
+        console.log(`📋 Processing ${propertyAdmins.length} administrators individually...`);
+        
+        for (let i = 0; i < propertyAdmins.length; i++) {
+          const admin = propertyAdmins[i];
+          
           try {
-            console.log(`🔄 Processing admin: ${admin.company_name}`);
+            console.log(`🔄 Processing admin ${i + 1}: ${admin.company_name}`);
             
-            // Get profile data separately to avoid relationship issues
-            const { data: profileData, error: profileError } = await supabase
-              .from('profiles')
-              .select('full_name, email, phone')
-              .eq('id', admin.user_id)
-              .maybeSingle();
+            // STEP 3: Get profile data with separate simple query
+            let profileData = null;
+            if (admin.user_id) {
+              const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('full_name, email, phone')
+                .eq('id', admin.user_id)
+                .single();
 
-            if (profileError) {
-              console.warn(`⚠️ Profile error for admin ${admin.id}:`, profileError);
-              // Continue without profile data
+              if (profileError) {
+                console.warn(`⚠️ Profile query failed for admin ${i + 1}:`, profileError.message);
+                // Continue without profile data
+              } else {
+                profileData = profile;
+                console.log(`✅ Profile loaded for admin ${i + 1}:`, profile?.full_name);
+              }
             }
 
+            // STEP 4: Create admin object with fallback data
             const adminData: PropertyAdministrator = {
               id: admin.id,
               user_id: admin.user_id,
-              company_name: admin.company_name || 'Administrador Sin Nombre',
-              company_cif: admin.company_cif || `TEMP-${admin.id.substring(0, 8)}`,
+              company_name: admin.company_name || profileData?.full_name || 'Administrador Sin Nombre',
+              company_cif: admin.company_cif || `CIF-${admin.id.substring(0, 8)}`,
               contact_email: admin.contact_email || profileData?.email || 'sin-email@registrado.com',
               contact_phone: admin.contact_phone || profileData?.phone || undefined,
               license_number: admin.license_number || undefined,
@@ -171,52 +181,58 @@ export function CommunityAdministratorAssignment() {
             };
 
             adminList.push(adminData);
-            console.log(`✅ SUCCESSFULLY ADDED: ${adminData.company_name} (${adminData.contact_email})`);
+            console.log(`✅ Admin ${i + 1} processed: ${adminData.company_name} (${adminData.contact_email})`);
             
           } catch (processingError) {
-            console.error(`❌ Error processing admin ${admin.id}:`, processingError);
-            continue; // Skip this admin but continue with others
+            console.error(`❌ Error processing admin ${i + 1}:`, processingError);
+            // Continue with next admin
           }
         }
+      } else {
+        console.warn('📋 No administrators found in property_administrators table');
       }
 
-      console.log('🎯 FINAL RESULT - Administrators to display:', {
+      // STEP 5: Final verification and logging
+      console.log('🎯 FINAL RESULT:', {
         total_processed: adminList.length,
         administrators: adminList.map(admin => ({
           name: admin.company_name,
           email: admin.contact_email,
-          cif: admin.company_cif
+          cif: admin.company_cif,
+          id_prefix: admin.id.substring(0, 8) + '...'
         }))
       });
 
-      // VERIFICATION: Check for expected administrators
+      // STEP 6: Verification against expected administrators
       const expectedEmails = ['borjapipaon@gmail.com', 'ddayanacastro10@gmail.com'];
       const foundEmails = adminList.map(a => a.contact_email.toLowerCase());
       const expectedFound = expectedEmails.filter(email => 
         foundEmails.some(found => found.includes(email.toLowerCase()))
       );
       
-      console.log('🔍 EXPECTED ADMINISTRATORS CHECK:', {
-        expected: expectedEmails,
-        found: foundEmails,
-        matching: expectedFound,
-        missing: expectedEmails.filter(email => !expectedFound.includes(email))
+      console.log('🔍 EXPECTED ADMINISTRATORS VERIFICATION:', {
+        expected_emails: expectedEmails,
+        found_emails: foundEmails,
+        matching_count: expectedFound.length,
+        missing_emails: expectedEmails.filter(email => !expectedFound.includes(email))
       });
 
+      // STEP 7: Set final result
       setAvailableAdministrators(adminList);
 
+      // STEP 8: User feedback
       if (adminList.length === 0) {
-        setError('No se encontraron administradores registrados');
-      } else if (adminList.length < 2) {
-        console.warn(`⚠️ ONLY ${adminList.length} ADMINISTRATOR(S) LOADED, EXPECTED 2`);
-        setError(''); // Don't show error, just log warning
+        setError('No se encontraron administradores registrados en el sistema');
+      } else if (expectedFound.length < expectedEmails.length) {
+        console.warn(`⚠️ Expected ${expectedEmails.length} specific administrators but found ${expectedFound.length}`);
       } else {
         console.log(`✅ Successfully loaded ${adminList.length} administrators`);
-        setError('');
       }
+      
+      setError(''); // Clear any previous errors
 
     } catch (err) {
-      console.error('❌ Critical error loading administrators:', err);
+      console.error('❌ Critical error in loadAvailableAdministrators:', err);
       setError('Error crítico al cargar administradores');
       setAvailableAdministrators([]);
     }
