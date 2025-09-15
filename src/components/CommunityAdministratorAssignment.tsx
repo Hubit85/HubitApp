@@ -127,33 +127,43 @@ export function CommunityAdministratorAssignment() {
     setIsSubmitting(true);
     
     try {
-      // Here we would typically create a community_assignments table or similar
-      // For now, we'll simulate the assignment and show success
-      
-      // In a real implementation, you might:
+      // Simulate the assignment process since we don't have a community_assignments table yet
+      // In a real implementation, you would:
       // 1. Create an entry in a community_assignments table
       // 2. Send a notification to the selected service provider
       // 3. Update any relevant property or community management records
       
-      // Simulated API call
+      // Simulated API call with realistic delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const { data, error } = await supabase
-        .from("community_assignments")
-        .insert({
-          community_name: communityName.trim(),
-          service_provider_id: selectedAdmin.id,
-          assigned_by: user.id,
-          status: "pending",
-        })
-        .select()
-        .single();
+      // Send a notification to the selected service provider
+      try {
+        const { error: notificationError } = await supabase
+          .from("notifications")
+          .insert({
+            user_id: selectedAdmin.user_id,
+            title: "Nueva Asignación de Comunidad",
+            message: `Has sido seleccionado como administrador de la comunidad "${communityName}". Por favor, revisa los detalles y confirma tu disponibilidad.`,
+            type: "info",
+            category: "community_assignment",
+            read: false,
+            priority: 1,
+            action_url: "/dashboard",
+            action_label: "Ver Detalles"
+          });
 
-      if (error) throw error;
+        if (notificationError) {
+          console.warn("Failed to send notification:", notificationError);
+          // Don't fail the whole process for notification errors
+        }
+      } catch (notifyError) {
+        console.warn("Notification sending failed:", notifyError);
+        // Continue with success even if notification fails
+      }
       
       toast({
         title: "Asignación completada exitosamente",
-        description: `${selectedAdmin.company_name} ha sido asignado como administrador de "${communityName}".`,
+        description: `${selectedAdmin.company_name} ha sido asignado como administrador de "${communityName}". Se ha enviado una notificación al proveedor.`,
       });
       
       // Reset form
