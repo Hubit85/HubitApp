@@ -315,6 +315,11 @@ export class AdministratorRequestService {
   }> {
     try {
       console.log('📨 ADMIN REQUEST: Sending request to administrator...');
+      console.log('📨 DETAILS:', {
+        communityMemberRoleId: options.communityMemberRoleId,
+        propertyAdministratorRoleId: options.propertyAdministratorRoleId,
+        hasMessage: !!options.requestMessage
+      });
 
       // Check if request already exists
       const { data: existingRequest } = await supabase
@@ -326,86 +331,143 @@ export class AdministratorRequestService {
         .maybeSingle();
 
       if (existingRequest) {
+        console.log('⚠️ ADMIN REQUEST: Existing request found:', existingRequest.id);
         return { success: false, message: 'Ya tienes una solicitud pendiente con este administrador.' };
       }
 
-      // Create the request
+      // Create the request with enhanced data
+      const requestData = {
+        community_member_id: options.communityMemberRoleId,
+        property_administrator_id: options.propertyAdministratorRoleId,
+        community_id: options.communityId || null,
+        status: 'pending' as const,
+        request_message: options.requestMessage || null,
+        requested_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('📝 ADMIN REQUEST: Creating request with data:', requestData);
+
       const { data: newRequest, error } = await supabase
         .from('administrator_requests')
-        .insert({
-          community_member_id: options.communityMemberRoleId,
-          property_administrator_id: options.propertyAdministratorRoleId,
-          community_id: options.communityId,
-          status: 'pending',
-          request_message: options.requestMessage,
-          requested_at: new Date().toISOString()
-        })
+        .insert(requestData)
         .select('id')
         .single();
 
       if (error) {
-        console.error('❌ ADMIN REQUEST: Error creating request:', error);
-        throw new Error(error.message);
+        console.error('❌ ADMIN REQUEST: Database error creating request:', error);
+        throw new Error(`Error creando solicitud: ${error.message}`);
+      }
+
+      if (!newRequest) {
+        throw new Error('No se recibió confirmación de la creación de la solicitud');
       }
 
       console.log('✅ ADMIN REQUEST: Request created successfully:', newRequest.id);
 
-      // CRITICAL: Get administrator user_id to send notification
+      // CRITICAL: Get administrator user_id for notification
+      console.log('🔍 NOTIFICATION: Looking up administrator user_id...');
+      
       const { data: adminRoleData, error: adminRoleError } = await supabase
         .from('user_roles')
-        .select('user_id')
+        .select('user_id, role_specific_data')
         .eq('id', options.propertyAdministratorRoleId)
+        .eq('role_type', 'property_administrator')
         .single();
 
       if (adminRoleError || !adminRoleData) {
-        console.error('❌ NOTIFICATION: Could not find administrator user_id:', adminRoleError);
-        // Request was created but notification failed
+        console.error('❌ NOTIFICATION: Could not find administrator role:', adminRoleError);
         return { 
           success: true, 
-          message: 'Solicitud enviada (notificación pendiente)', 
+          message: 'Solicitud enviada, pero la notificación no pudo ser enviada', 
           requestId: newRequest.id 
         };
       }
 
-      console.log('📧 NOTIFICATION: Sending to administrator user_id:', adminRoleData.user_id);
+      console.log('✅ NOTIFICATION: Found administrator user_id:', adminRoleData.user_id);
 
       // Get community member info for notification
-      const memberRoleData = await this.getRoleAndProfile(options.communityMemberRoleId);
-      const memberName = memberRoleData?.profiles?.full_name || 'Un miembro de comunidad';
+      const { data: memberRoleData, error: memberError } = await supabase
+        .from('user_roles')
+        .select('user_id, role_specific_data')
+        .eq('id', options.communityMemberRoleId)
+        .eq('role_type', 'community_member')
+        .single();
 
-      // Create notification for administrator
+      let memberName = 'Un miembro de comunidad';
+      if (!memberError && memberRoleData?.role_specific_data?.full_name) {
+        memberName = memberRoleData.role_specific_data.full_name;
+      } else if (!memberError && memberRoleData?.user_id) {
+        // Fallback: get name from profile
+        const { data: memberProfile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', memberRoleData.user_id)
+          .single();
+        
+        if (memberProfile?.full_name) {
+          memberName = memberProfile.full_name;
+        }
+      }
+
+      console.log('📧 NOTIFICATION: Member name for notification:', memberName);
+
+      // Create notification for administrator - ENHANCED
+      const notificationData = {
+        user_id: adminRoleData.user_id,
+        title: '🏢 Nueva Solicitud de Administración',
+        message: `${memberName} ha solicitado que gestiones su comunidad. Esta solicitud incluye la gestión de incidencias y administración de la comunidad. Puedes aceptar o rechazar esta solicitud desde el panel de notificaciones.`,
+        type: 'info' as const,
+        category: 'administrator_request' as const,
+        read: false,
+        priority: 2, // High priority for administrator requests
+        related_entity_type: 'administrator_request' as const,
+        related_entity_id: newRequest.id,
+        action_url: '/dashboard?tab=notificaciones',
+        action_label: 'Ver Solicitud y Responder',
+        created_at: new Date().toISOString()
+      };
+
+      console.log('📧 NOTIFICATION: Creating notification with data:', notificationData);
+
       const { data: notification, error: notificationError } = await supabase
         .from('notifications')
-        .insert({
-          user_id: adminRoleData.user_id,
-          title: '🏢 Nueva Solicitud de Gestión',
-          message: `${memberName} ha solicitado que gestiones sus incidencias. Puedes aceptar o rechazar esta solicitud desde el panel de notificaciones.`,
-          type: 'info',
-          category: 'administrator_request',
-          read: false,
-          related_entity_type: 'administrator_request',
-          related_entity_id: newRequest.id,
-          action_url: '/dashboard?tab=notificaciones',
-          action_label: 'Ver Solicitud'
-        })
+        .insert(notificationData)
         .select('id')
         .single();
 
       if (notificationError) {
         console.error('❌ NOTIFICATION: Failed to create notification:', notificationError);
-        // Request was created but notification failed
         return { 
           success: true, 
-          message: 'Solicitud enviada (notificación no enviada)', 
+          message: 'Solicitud enviada correctamente, pero la notificación no pudo ser entregada. El administrador podrá ver la solicitud en su panel.', 
           requestId: newRequest.id 
         };
       }
 
       console.log('✅ NOTIFICATION: Created successfully:', notification.id);
 
+      // VERIFICATION: Double-check that notification was created
+      const { data: verifyNotification, error: verifyError } = await supabase
+        .from('notifications')
+        .select('id, user_id, title')
+        .eq('id', notification.id)
+        .single();
+
+      if (verifyError || !verifyNotification) {
+        console.warn('⚠️ VERIFICATION: Could not verify notification creation:', verifyError);
+      } else {
+        console.log('✅ VERIFICATION: Notification confirmed in database:', {
+          id: verifyNotification.id,
+          user_id: verifyNotification.user_id,
+          title: verifyNotification.title
+        });
+      }
+
       return { 
         success: true, 
-        message: 'Solicitud enviada correctamente. El administrador recibirá una notificación.', 
+        message: 'Solicitud enviada correctamente. El administrador recibirá una notificación inmediata y podrá responder desde su panel.', 
         requestId: newRequest.id 
       };
 

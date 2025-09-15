@@ -184,64 +184,94 @@ export function CommunityAdministratorAssignment() {
     setIsSubmitting(true);
     
     try {
-      // Create local assignment record
-      const newAssignment: CommunityAssignment = {
-        id: `assign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        service_provider_id: selectedAdmin.id,
-        community_name: communityName.trim(),
-        assigned_date: new Date().toISOString(),
-        status: "pending",
-        assigned_by: user.id
-      };
+      console.log('🔄 COMMUNITY ASSIGNMENT: Starting real administrator request process...');
       
-      // Save to localStorage for demo purposes
-      addLocalAssignment(newAssignment);
-      
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Send notification to the selected service provider
-      try {
-        const { error: notificationError } = await supabase
-          .from("notifications")
-          .insert({
-            user_id: selectedAdmin.user_id,
-            title: "Nueva Asignación de Comunidad",
-            message: `Has sido seleccionado como administrador de la comunidad "${communityName}". Esta es una demostración del sistema de asignaciones. Por favor, revisa los detalles en tu panel de control.`,
-            type: "info",
-            category: "community_assignment",
-            read: false,
-            priority: 1,
-            action_url: "/dashboard",
-            action_label: "Ver Detalles",
-            related_entity_type: "community_assignment",
-            related_entity_id: newAssignment.id
-          });
+      // Get the current user's community_member role ID
+      const { data: communityMemberRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('id, user_id, role_type')
+        .eq('user_id', user.id)
+        .eq('role_type', 'community_member')
+        .eq('is_verified', true)
+        .single();
 
-        if (notificationError) {
-          console.warn("Failed to send notification:", notificationError);
-          // Don't fail the whole process for notification errors
+      if (roleError || !communityMemberRole) {
+        throw new Error('No se encontró tu rol de miembro de comunidad verificado');
+      }
+
+      console.log('✅ Found community member role:', communityMemberRole.id);
+
+      // Get the selected administrator's property_administrator role ID
+      const { data: adminRole, error: adminRoleError } = await supabase
+        .from('user_roles')
+        .select('id, user_id, role_type')
+        .eq('user_id', selectedAdmin.user_id)
+        .eq('role_type', 'property_administrator')
+        .eq('is_verified', true)
+        .single();
+
+      if (adminRoleError || !adminRole) {
+        throw new Error('No se encontró el rol de administrador verificado para el proveedor seleccionado');
+      }
+
+      console.log('✅ Found administrator role:', adminRole.id);
+
+      // Use the real AdministratorRequestService
+      const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+      
+      const result = await AdministratorRequestService.sendRequestToAdministrator({
+        communityMemberRoleId: communityMemberRole.id,
+        propertyAdministratorRoleId: adminRole.id,
+        requestMessage: `Solicito que ${selectedAdmin.company_name} sea asignado como administrador de la comunidad "${communityName}". Esta solicitud se realiza a través del sistema HuBiT para gestión de incidencias y administración de la comunidad.`
+      });
+
+      if (result.success) {
+        console.log('✅ COMMUNITY ASSIGNMENT: Request sent successfully');
+        
+        toast({
+          title: "✅ Solicitud enviada exitosamente",
+          description: `Se ha enviado la solicitud a ${selectedAdmin.company_name} para gestionar la comunidad "${communityName}". Recibirás una notificación cuando responda.`,
+        });
+        
+        // Reset form
+        setSelectedAdmin(null);
+        setCommunityName("");
+        
+        // Simulate processing time for better UX
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Update recent assignments for display (combining real and demo data)
+        const newAssignment: CommunityAssignment = {
+          id: `real_${result.requestId}`,
+          service_provider_id: selectedAdmin.id,
+          community_name: communityName.trim(),
+          assigned_date: new Date().toISOString(),
+          status: "pending",
+          assigned_by: user.id
+        };
+        
+        addLocalAssignment(newAssignment);
+        loadRecentAssignments();
+        
+      } else {
+        throw new Error(result.message || 'Error al enviar la solicitud');
+      }
+      
+    } catch (error) {
+      console.error("❌ COMMUNITY ASSIGNMENT: Error in assignment process:", error);
+      
+      let errorMessage = "No se pudo completar la asignación.";
+      if (error instanceof Error) {
+        if (error.message.includes('rol')) {
+          errorMessage = "Error: " + error.message + ". Verifica que tienes los roles correctos.";
+        } else {
+          errorMessage = error.message;
         }
-      } catch (notifyError) {
-        console.warn("Notification sending failed:", notifyError);
-        // Continue with success even if notification fails
       }
       
       toast({
-        title: "✅ Asignación completada exitosamente",
-        description: `${selectedAdmin.company_name} ha sido asignado como administrador de "${communityName}". Se ha enviado una notificación al proveedor.`,
-      });
-      
-      // Reset form and reload assignments
-      setSelectedAdmin(null);
-      setCommunityName("");
-      loadRecentAssignments();
-      
-    } catch (error) {
-      console.error("Error assigning administrator:", error);
-      toast({
         title: "Error en la asignación",
-        description: "No se pudo completar la asignación. Por favor, intenta nuevamente.",
+        description: errorMessage + " Por favor, intenta nuevamente.",
         variant: "destructive",
       });
     } finally {
