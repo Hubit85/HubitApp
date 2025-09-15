@@ -215,45 +215,58 @@ export function CommunityAdministratorAssignment() {
         return;
       }
 
+      // ENHANCED DEBUGGING: Log raw data from database
+      console.log('📋 RAW DATA FROM DATABASE:', {
+        total_count: propertyAdmins?.length || 0,
+        administrators: propertyAdmins?.map(admin => ({
+          id: admin.id,
+          company_name: admin.company_name,
+          contact_email: admin.contact_email,
+          contact_phone: admin.contact_phone,
+          user_id: admin.user_id?.substring(0, 8) + '...',
+          created_at: admin.created_at
+        }))
+      });
+
       let adminList: PropertyAdministrator[] = [];
 
       if (propertyAdmins && propertyAdmins.length > 0) {
         console.log(`📋 Found ${propertyAdmins.length} administrators in database`);
         
-        // CORRECTED: Process ALL administrators with proper validation
+        // CORRECTED: More flexible validation - accept administrators with basic info
         propertyAdmins.forEach((admin, index) => {
           console.log(`🔍 Processing admin ${index + 1}:`, {
             id: admin.id?.substring(0, 8) + '...',
             company_name: admin.company_name,
             contact_email: admin.contact_email,
-            has_company_name: !!admin.company_name,
-            has_contact_email: !!admin.contact_email,
-            company_name_length: admin.company_name?.length || 0,
-            contact_email_length: admin.contact_email?.length || 0
+            contact_phone: admin.contact_phone,
+            user_id: admin.user_id?.substring(0, 8) + '...'
           });
 
-          // FIXED: More robust validation - check for actual content, not just existence
-          const hasValidCompanyName = admin.company_name && 
-                                     admin.company_name.trim() !== '' && 
-                                     admin.company_name.trim().length > 0;
-          
-          const hasValidContactEmail = admin.contact_email && 
-                                      admin.contact_email.trim() !== '' && 
-                                      admin.contact_email.includes('@') &&
-                                      admin.contact_email.trim().length > 5;
+          // FIXED: More flexible validation - accept any administrator with basic info
+          const hasBasicInfo = (admin.company_name && admin.company_name.trim() !== '') || 
+                              (admin.contact_email && admin.contact_email.trim() !== '');
 
-          if (hasValidCompanyName && hasValidContactEmail) {
+          if (hasBasicInfo) {
+            // Use company name if available, otherwise generate from email
+            const companyName = admin.company_name?.trim() || 
+                              admin.contact_email?.split('@')[0]?.replace(/[^a-zA-Z0-9]/g, ' ') || 
+                              'Administrador de Fincas';
+            
+            // Use contact email if available, otherwise try to get from user profile
+            const contactEmail = admin.contact_email?.trim() || '';
+
             const adminData: PropertyAdministrator = {
               id: admin.id,
               user_id: admin.user_id,
-              company_name: admin.company_name.trim(), // Ensure clean data
+              company_name: companyName,
               company_cif: admin.company_cif || `TEMP-${admin.id.substring(0, 8)}`,
-              contact_email: admin.contact_email.trim(), // Ensure clean data
+              contact_email: contactEmail,
               contact_phone: admin.contact_phone || undefined,
               license_number: admin.license_number || undefined,
               profile: {
-                full_name: admin.company_name.trim(),
-                email: admin.contact_email.trim()
+                full_name: companyName,
+                email: contactEmail
               }
             };
 
@@ -266,16 +279,20 @@ export function CommunityAdministratorAssignment() {
             });
           } else {
             console.warn(`⚠️ SKIPPED admin ${index + 1}:`, {
-              reason: 'Invalid data',
-              hasValidCompanyName,
-              hasValidContactEmail,
+              reason: 'Missing basic information',
               company_name: admin.company_name,
-              contact_email: admin.contact_email
+              contact_email: admin.contact_email,
+              contact_phone: admin.contact_phone
             });
           }
         });
       } else {
         console.log('📋 No administrators found in property_administrators table');
+        
+        // FALLBACK: Try to load from user_roles table as backup
+        console.log('🔄 Trying fallback: loading from user_roles table...');
+        await loadAdministratorsFromUserRolesFallback();
+        return;
       }
 
       // ENHANCED LOGGING: Show the final list
@@ -284,47 +301,106 @@ export function CommunityAdministratorAssignment() {
         administrators: adminList.map(admin => ({
           name: admin.company_name,
           email: admin.contact_email,
-          cif: admin.company_cif
+          cif: admin.company_cif,
+          id: admin.id.substring(0, 8) + '...'
         }))
       });
 
-      // EXPECTED ADMINISTRATORS CHECK
-      const expectedNames = ['castro', 'pipaón', 'pipan', 'borja'];
+      // EXPECTED ADMINISTRATORS CHECK - More flexible matching
+      const expectedTerms = ['castro', 'pipaón', 'pipan', 'borja', 'ddayana', 'administracion'];
       const foundExpectedAdmins = adminList.filter(admin => {
-        const searchText = admin.company_name.toLowerCase();
-        return expectedNames.some(expected => searchText.includes(expected));
+        const searchText = (admin.company_name + ' ' + admin.contact_email).toLowerCase();
+        return expectedTerms.some(expected => searchText.includes(expected.toLowerCase()));
       });
 
       console.log('🔍 EXPECTED ADMINISTRATORS CHECK:', {
-        expected_terms: expectedNames,
+        expected_terms: expectedTerms,
         found_count: foundExpectedAdmins.length,
         found_administrators: foundExpectedAdmins.map(admin => ({
           name: admin.company_name,
-          email: admin.contact_email
+          email: admin.contact_email,
+          id: admin.id.substring(0, 8) + '...'
         }))
       });
 
       // Set the administrators list
       setAvailableAdministrators(adminList);
       
-      // CORRECTED: Better error handling and feedback
+      // Provide feedback based on results
       if (adminList.length === 0) {
-        console.warn('❌ NO VALID ADMINISTRATORS FOUND');
-        setError('No se encontraron administradores válidos. Los administradores deben tener nombre de empresa y email válidos.');
+        console.warn('❌ NO ADMINISTRATORS FOUND AFTER PROCESSING');
+        setError('No se encontraron administradores de fincas en el sistema.');
+      } else if (foundExpectedAdmins.length === 0) {
+        console.warn('⚠️ ADMINISTRATORS FOUND BUT NOT THE EXPECTED ONES');
+        setError(`Se encontraron ${adminList.length} administradores, pero no los esperados. Mostrando todos los disponibles.`);
       } else {
         console.log(`✅ Successfully loaded ${adminList.length} administrators`);
         setError(''); // Clear any previous errors
-        
-        // Success message if we expected administrators but didn't find some
-        if (foundExpectedAdmins.length < adminList.length) {
-          console.log(`ℹ️ Note: Found ${adminList.length} administrators total, ${foundExpectedAdmins.length} match expected names`);
-        }
       }
 
     } catch (err) {
       console.error('❌ Critical error loading administrators:', err);
       setError('Error crítico al cargar administradores: ' + (err instanceof Error ? err.message : 'Error desconocido'));
       setAvailableAdministrators([]);
+    }
+  };
+
+  // FALLBACK METHOD: Load administrators from user_roles table
+  const loadAdministratorsFromUserRolesFallback = async () => {
+    try {
+      console.log('🔄 FALLBACK: Loading from user_roles table...');
+      
+      const { data: adminRoles, error } = await supabase
+        .from('user_roles')
+        .select(`
+          id,
+          user_id,
+          role_specific_data,
+          profiles:user_id (full_name, email)
+        `)
+        .eq('role_type', 'property_administrator')
+        .eq('is_verified', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Fallback loading failed:', error);
+        return;
+      }
+
+      const fallbackAdmins: PropertyAdministrator[] = [];
+
+      if (adminRoles && adminRoles.length > 0) {
+        adminRoles.forEach((role: any) => {
+          const roleData = role.role_specific_data || {};
+          const profile = role.profiles || {};
+          
+          const adminData: PropertyAdministrator = {
+            id: role.id,
+            user_id: role.user_id,
+            company_name: roleData.company_name || profile.full_name || 'Administrador de Fincas',
+            company_cif: roleData.cif || roleData.company_cif || `FALLBACK-${role.id.substring(0, 8)}`,
+            contact_email: roleData.business_email || roleData.contact_email || profile.email || '',
+            contact_phone: roleData.business_phone || roleData.contact_phone || undefined,
+            license_number: roleData.license_number || roleData.professional_number || undefined,
+            profile: {
+              full_name: profile.full_name || 'Administrador',
+              email: profile.email || ''
+            }
+          };
+
+          fallbackAdmins.push(adminData);
+        });
+      }
+
+      console.log('📊 FALLBACK ADMIN LIST:', {
+        count: fallbackAdmins.length,
+        admins: fallbackAdmins.map(a => ({ name: a.company_name, email: a.contact_email }))
+      });
+
+      setAvailableAdministrators(fallbackAdmins);
+
+    } catch (fallbackError) {
+      console.error('❌ Fallback method also failed:', fallbackError);
     }
   };
 
