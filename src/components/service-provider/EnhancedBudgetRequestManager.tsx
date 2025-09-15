@@ -20,56 +20,34 @@ import {
   Briefcase, CheckSquare, XCircle, ArrowRight, Heart,
   BookOpen, Settings, RefreshCw
 } from "lucide-react";
-import { BudgetRequest, Quote, QuoteInsert, ServiceProvider } from "@/integrations/supabase/types";
-import { SupabaseBudgetService } from "@/services/SupabaseBudgetService";
-import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast"
+import { Database } from "@/integrations/supabase/types"
 
-interface BudgetRequestWithDetails extends BudgetRequest {
-  properties?: {
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-  } | null;
-  profiles?: {
-    full_name: string | null;
-    email: string;
-    phone: string | null;
-  } | null;
-}
+type BudgetRequest = Database["public"]["Tables"]["budget_requests"]["Row"];
+type Quote = Database["public"]["Tables"]["quotes"]["Row"];
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type Property = Database["public"]["Tables"]["properties"]["Row"];
 
-interface QuoteWithDetails extends Quote {
-  budget_requests?: BudgetRequestWithDetails;
-}
-
-const SERVICE_CATEGORIES_MAP: { [key: string]: { label: string; icon: string; color: string } } = {
-  "cleaning": { label: "Limpieza", icon: "🧽", color: "bg-blue-100 text-blue-800" },
-  "plumbing": { label: "Fontanería", icon: "🔧", color: "bg-orange-100 text-orange-800" },
-  "electrical": { label: "Electricidad", icon: "⚡", color: "bg-yellow-100 text-yellow-800" },
-  "gardening": { label: "Jardinería", icon: "🌱", color: "bg-green-100 text-green-800" },
-  "painting": { label: "Pintura", icon: "🎨", color: "bg-purple-100 text-purple-800" },
-  "maintenance": { label: "Mantenimiento", icon: "🛠️", color: "bg-gray-100 text-gray-800" },
-  "security": { label: "Seguridad", icon: "🛡️", color: "bg-red-100 text-red-800" },
-  "hvac": { label: "Climatización", icon: "🌡️", color: "bg-indigo-100 text-indigo-800" },
-  "carpentry": { label: "Carpintería", icon: "🪵", color: "bg-amber-100 text-amber-800" },
-  "emergency": { label: "Emergencia", icon: "🚨", color: "bg-red-200 text-red-900" },
-  "other": { label: "Otros", icon: "📋", color: "bg-neutral-100 text-neutral-800" }
+type BudgetRequestWithDetails = BudgetRequest & {
+  profiles: Profile;
+  properties: Property;
+  quotes: Quote[];
 };
 
-const URGENCY_LEVELS = {
-  "low": { label: "Baja Prioridad", icon: "🕐", color: "bg-gray-100 text-gray-700" },
-  "normal": { label: "Normal", icon: "📅", color: "bg-blue-100 text-blue-700" },
-  "high": { label: "Alta Prioridad", icon: "🔥", color: "bg-orange-100 text-orange-700" },
-  "emergency": { label: "Emergencia", icon: "🚨", color: "bg-red-100 text-red-700" }
+type QuoteWithDetails = Quote & {
+  budget_requests: BudgetRequest & {
+    profiles: Profile;
+    properties: Property;
+  }
 };
+
+interface EnhancedBudgetRequestManagerProps {
+  providerId: string
+}
 
 export function EnhancedBudgetRequestManager() {
   const { user, activeRole } = useSupabaseAuth();
-  const [availableRequests, setAvailableRequests] = useState<BudgetRequestWithDetails[]>([]);
-  const [myQuotes, setMyQuotes] = useState<QuoteWithDetails[]>([]);
-  const [serviceProviderProfile, setServiceProviderProfile] = useState<ServiceProvider | null>(null);
+  const [requests, setRequests] = useState<BudgetRequestWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -353,6 +331,185 @@ export function EnhancedBudgetRequestManager() {
       </Card>
     );
   }
+
+  const handleQuoteAction = async (
+    quoteId: string,
+    action: "accept" | "reject"
+  ) => {
+    try {
+      const { data, error } = await supabase
+        .from("quotes")
+        .update({ status: action === "accept" ? "accepted" : "rejected" })
+        .eq("id", quoteId)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setRequests((prev) =>
+        prev.map((req) => ({
+          ...req,
+          quotes: req.quotes.map((q) =>
+            q.id === quoteId ? { ...q, status: data.status } : q
+          ),
+        }))
+      )
+
+      toast({
+        title: `Quote ${action === "accept" ? "accepted" : "rejected"}`,
+      })
+    } catch (err) {
+      console.error(`Error ${action}ing quote:`, err)
+      toast({
+        title: `Error ${action}ing quote`,
+        variant: "destructive",
+      })
+    }
+  }
+
+  const renderRequestDetails = (request: BudgetRequestWithDetails) => (
+    <Card key={request.id}>
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <Badge className="mb-2">{request.category}</Badge>
+            <CardTitle>{request.title}</CardTitle>
+            <CardDescription>
+              From {request.profiles.full_name} for{" "}
+              {request.properties.name}
+            </CardDescription>
+          </div>
+          <Badge variant={request.urgency === "high" ? "destructive" : "outline"}>
+            {request.urgency}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="details">
+          <TabsList>
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="quotes">
+              Quotes ({request.quotes.length})
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="details" className="pt-4">
+            <p className="text-sm">{request.description}</p>
+            <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+              <div>
+                <strong>Budget:</strong> €{request.budget_range_min} - €
+                {request.budget_range_max}
+              </div>
+              <div>
+                <strong>Deadline:</strong>{" "}
+                {request.deadline_date
+                  ? new Date(request.deadline_date).toLocaleDateString()
+                  : "N/A"}
+              </div>
+              <div>
+                <strong>Preferred Date:</strong>{" "}
+                {request.preferred_date
+                  ? new Date(request.preferred_date).toLocaleDateString()
+                  : "N/A"}
+              </div>
+               <div>
+                <strong>Location:</strong> {request.properties.address}, {request.properties.city}
+              </div>
+              {request.special_requirements && <div><strong>Special Requirements:</strong> {request.special_requirements}</div>}
+            </div>
+          </TabsContent>
+          <TabsContent value="quotes" className="pt-4">
+            {request.quotes.length > 0 ? (
+              <div className="space-y-4">
+                {request.quotes.map((quote) => (
+                  <div
+                    key={quote.id}
+                    className="p-4 border rounded-lg"
+                  >
+                    <div className="flex justify-between items-center">
+                      <p className="font-semibold">
+                        €{quote.amount}
+                      </p>
+                      <Badge
+                        variant={
+                          quote.status === "accepted"
+                            ? "default"
+                            : quote.status === "pending"
+                            ? "secondary"
+                            : "destructive"
+                        }
+                      >
+                        {quote.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm mt-2">
+                      {quote.description}
+                    </p>
+                    {quote.status === "pending" && (
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          size="sm"
+                          onClick={() => handleQuoteAction(quote.id, "accept")}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleQuoteAction(quote.id, "reject")}
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No quotes submitted yet.</p>
+            )}
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  )
+
+  const renderActiveQuoteCard = (quote: QuoteWithDetails) => (
+    <Card key={quote.id}>
+      <CardHeader>
+        <CardTitle>{quote.budget_requests.title}</CardTitle>
+        <CardDescription>
+          Quote for {quote.budget_requests.profiles.full_name} at {quote.budget_requests.properties.address}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p>
+          Your quote of €{quote.amount} was{" "}
+          <span
+            className={
+              quote.status === "accepted"
+                ? "font-bold text-green-600"
+                : "font-bold text-red-600"
+            }
+          >
+            {quote.status}
+          </span>
+          .
+        </p>
+        <p className="text-sm text-gray-500 mt-2">
+          {quote.description}
+        </p>
+        <div className="text-xs text-gray-400 mt-4">
+          Submitted on: {new Date(quote.created_at).toLocaleDateString()} | Valid
+          until: {quote.valid_until ? new Date(quote.valid_until).toLocaleDateString() : 'N/A'}
+        </div>
+      </CardContent>
+       {quote.status === "accepted" && (
+        <CardFooter>
+          <Button size="sm">Create Contract</Button>
+        </CardFooter>
+      )}
+    </Card>
+  )
 
   if (loading) {
     return (

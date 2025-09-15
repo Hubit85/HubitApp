@@ -18,6 +18,8 @@ import {
   Loader2, RefreshCw, FileText, Image as ImageIcon, Plus
 } from "lucide-react";
 import { BudgetRequest, Quote } from "@/integrations/supabase/types";
+import { useToast } from "@/hooks/use-toast"
+import { Database } from "@/integrations/supabase/types"
 
 interface ExtendedBudgetRequest extends BudgetRequest {
   user_name?: string;
@@ -42,7 +44,11 @@ interface QuoteFormData {
   terms_and_conditions: string;
 }
 
-export function BudgetRequestManager() {
+export function BudgetRequestManager({
+  providerId,
+}: {
+  providerId: string
+}) {
   const { user, activeRole } = useSupabaseAuth();
   const [budgetRequests, setBudgetRequests] = useState<ExtendedBudgetRequest[]>([]);
   const [myQuotes, setMyQuotes] = useState<Quote[]>([]);
@@ -57,6 +63,7 @@ export function BudgetRequestManager() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [currentTab, setCurrentTab] = useState("available");
   const [serviceProvider, setServiceProvider] = useState<any>(null);
+  const { toast } = useToast();
 
   const [quoteForm, setQuoteForm] = useState<QuoteFormData>({
     amount: 0,
@@ -141,146 +148,26 @@ export function BudgetRequestManager() {
       // IMPROVED QUERY: First get all published requests without category filtering
       const { data: allRequests, error } = await supabase
         .from('budget_requests')
-        .select(`
+        .select(
+          `
           *,
-          properties (
-            name,
-            address,
-            city,
-            user_id
-          ),
-          profiles (
-            full_name
-          )
-        `)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(100);
+          profiles ( * ),
+          properties ( * )
+        `
+        )
+        .order("created_at", { ascending: false })
 
-      console.log("📊 Raw query results:", {
-        total_requests: allRequests?.length || 0,
-        sample_data: allRequests?.slice(0, 2).map(r => ({
-          title: r.title,
-          category: r.category,
-          status: r.status,
-          created: r.created_at?.substring(0, 10)
-        })) || [],
-        query_error: error?.message || 'none'
-      });
-
-      if (error) {
-        console.error("❌ Database query error:", error);
-        throw error;
-      }
-
-      if (!allRequests || allRequests.length === 0) {
-        console.log("⚠️ No published budget requests found in database");
-        return { success: true, data: [], message: "No hay solicitudes publicadas disponibles" };
-      }
-
-      // APPLY FILTERING ONLY AFTER SUCCESSFUL QUERY
-      let filteredRequests = allRequests;
-
-      // Remove expired requests
-      const now = new Date();
-      filteredRequests = filteredRequests.filter(request => {
-        if (!request.expires_at) return true; // No expiration = always valid
-        return new Date(request.expires_at) > now;
-      });
-
-      console.log("⏰ After expiration filter:", filteredRequests.length, "requests remaining");
-
-      // OPTIONAL: Apply service category filter only if provider has specific categories
-      if (provider.service_categories && 
-          Array.isArray(provider.service_categories) && 
-          provider.service_categories.length > 0) {
-        
-        const validCategories = provider.service_categories.filter((cat: string) => 
-          typeof cat === 'string' && cat.trim().length > 0
-        );
-
-        console.log("🔧 Provider service categories:", validCategories);
-
-        if (validCategories.length > 0) {
-          const categoryFiltered = filteredRequests.filter(request => 
-            validCategories.some((cat: string) => 
-              cat.toLowerCase() === request.category.toLowerCase()
-            )
-          );
-
-          console.log("📋 Category filtering results:", {
-            before_filter: filteredRequests.length,
-            after_filter: categoryFiltered.length,
-            showing_all: categoryFiltered.length === 0 ? "YES - too restrictive" : "NO"
-          });
-
-          // If category filtering is too restrictive, show all valid requests
-          if (categoryFiltered.length === 0) {
-            console.log("⚠️ Category filter too restrictive, showing all valid requests");
-          } else {
-            filteredRequests = categoryFiltered;
-          }
-        }
-      } else {
-        console.log("📋 No specific service categories defined, showing all requests");
-      }
-
-      // Enhance requests with additional data
-      const enhancedRequests = await Promise.all(
-        filteredRequests.map(async (request: any) => {
-          try {
-            // Check for existing quote from this provider
-            const { data: existingQuote, error: quoteError } = await supabase
-              .from('quotes')
-              .select('*')
-              .eq('budget_request_id', request.id)
-              .eq('service_provider_id', provider.id)
-              .maybeSingle();
-
-            if (quoteError && quoteError.code !== 'PGRST116') {
-              console.warn(`⚠️ Error checking quote for request ${request.id}:`, quoteError.message);
-            }
-
-            return {
-              ...request,
-              user_name: request.profiles?.full_name || 'Usuario',
-              property_name: request.properties?.name || 'Propiedad',
-              property_address: request.properties?.address || request.work_location || '',
-              my_quote: existingQuote || null,
-              quote_count: 0
-            };
-          } catch (enhanceError) {
-            console.warn(`⚠️ Error enhancing request ${request.id}:`, enhanceError);
-            return {
-              ...request,
-              user_name: 'Usuario',
-              property_name: 'Propiedad',
-              property_address: request.work_location || '',
-              my_quote: null,
-              quote_count: 0
-            };
-          }
-        })
-      );
-
-      console.log("✅ Enhanced requests prepared:", {
-        total: enhancedRequests.length,
-        with_existing_quotes: enhancedRequests.filter(r => r.my_quote).length,
-        categories: Array.from(new Set(enhancedRequests.map(r => r.category))),
-        titles: enhancedRequests.slice(0, 3).map(r => r.title)
-      });
-
-      return { success: true, data: enhancedRequests };
-
-    } catch (error) {
-      console.error("❌ Error loading budget requests:", error);
-      return { 
-        success: false, 
-        data: [], 
-        message: error instanceof Error ? error.message : "Error al cargar solicitudes de presupuesto"
-      };
+      if (error) throw error
+      setBudgetRequests(data as ExtendedBudgetRequest[] || [])
+    } catch (err) {
+      console.error("Error fetching budget requests:", err)
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      )
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   const loadMyQuotes = async (providerId: string) => {
     try {
@@ -512,6 +399,83 @@ export function BudgetRequestManager() {
     );
   }
 
+  const handleViewRequest = async (request: ExtendedBudgetRequest) => {
+    try {
+      const { error } = await supabase
+        .from("budget_requests")
+        .update({ views_count: request.views_count + 1 })
+        .eq("id", request.id)
+      
+      if(error) console.warn("Could not update view count", error);
+
+      setBudgetRequests(prev => prev.map(r => r.id === request.id ? {...r, views_count: r.views_count + 1} : r));
+      setSelectedRequest(request);
+
+    } catch (err) {
+      console.error("Error on viewing request:", err)
+    }
+  }
+
+
+  const renderBudgetRequestCard = (request: ExtendedBudgetRequest) => {
+    return (
+      <Card
+        key={request.id}
+        className="hover:shadow-lg transition-shadow cursor-pointer"
+        onClick={() => handleViewRequest(request)}
+      >
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <Badge variant="secondary" className="mb-2">
+                {request.category}
+              </Badge>
+              <CardTitle>{request.title}</CardTitle>
+              <CardDescription className="flex items-center gap-2 mt-1">
+                <User className="h-4 w-4" />
+                {request.profiles.full_name}
+                <Separator orientation="vertical" className="h-4" />
+                <MapPin className="h-4 w-4" />
+                {request.work_location || request.properties.address}
+              </CardDescription>
+            </div>
+            <Badge variant={request.urgency === "high" ? "destructive" : "outline"}>
+              {request.urgency}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="line-clamp-2 text-sm text-gray-600">
+            {request.description}
+          </p>
+          <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
+            <div className="flex items-center gap-1">
+              <Euro className="h-4 w-4" />
+              <span>
+                {request.budget_range_min && request.budget_range_max
+                  ? `${request.budget_range_min} - ${request.budget_range_max}`
+                  : "Not specified"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              <span>
+                Due:{" "}
+                {request.deadline_date
+                  ? new Date(request.deadline_date).toLocaleDateString()
+                  : "Not specified"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Eye className="h-4 w-4" />
+              <span>{request.views_count || 0} views</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (loading) {
     return (
       <Card>
@@ -526,525 +490,644 @@ export function BudgetRequestManager() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-xl shadow-neutral-900/10">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl">
-                <Building className="h-6 w-6 text-blue-600" />
+    <>
+      <div className="space-y-6">
+        <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-xl shadow-neutral-900/10">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl">
+                  <Building className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-semibold">Gestión de Presupuestos</CardTitle>
+                  <CardDescription className="mt-1">
+                    Encuentra oportunidades de negocio y gestiona tus cotizaciones
+                  </CardDescription>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-xl font-semibold">Gestión de Presupuestos</CardTitle>
-                <CardDescription className="mt-1">
-                  Encuentra oportunidades de negocio y gestiona tus cotizaciones
-                </CardDescription>
-              </div>
+              
+              <Button 
+                onClick={loadServiceProviderData}
+                disabled={loading}
+                variant="outline"
+                size="sm"
+                className="bg-transparent hover:bg-blue-50"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Actualizar
+              </Button>
             </div>
-            
-            <Button 
-              onClick={loadServiceProviderData}
-              disabled={loading}
-              variant="outline"
-              size="sm"
-              className="bg-transparent hover:bg-blue-50"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Actualizar
-            </Button>
-          </div>
-        </CardHeader>
+          </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Status Messages */}
-          {(error || successMessage) && (
-            <Alert className={`border-2 ${
-              error 
-                ? "border-red-200 bg-red-50" 
-                : "border-green-200 bg-green-50"
-            }`}>
-              <AlertDescription className={`font-medium ${
-                error ? "text-red-800" : "text-green-800"
+          <CardContent className="space-y-6">
+            {/* Status Messages */}
+            {(error || successMessage) && (
+              <Alert className={`border-2 ${
+                error 
+                  ? "border-red-200 bg-red-50" 
+                  : "border-green-200 bg-green-50"
               }`}>
-                {error || successMessage}
-              </AlertDescription>
-            </Alert>
-          )}
+                <AlertDescription className={`font-medium ${
+                  error ? "text-red-800" : "text-green-800"
+                }`}>
+                  {error || successMessage}
+                </AlertDescription>
+              </Alert>
+            )}
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/60">
-              <div className="flex items-center gap-3">
-                <Search className="h-8 w-8 text-blue-600" />
-                <div>
-                  <div className="text-2xl font-bold text-blue-900">{filteredRequests.length}</div>
-                  <div className="text-sm text-blue-600">Solicitudes Disponibles</div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200/60">
-              <div className="flex items-center gap-3">
-                <FileText className="h-8 w-8 text-emerald-600" />
-                <div>
-                  <div className="text-2xl font-bold text-emerald-900">{myQuotes.length}</div>
-                  <div className="text-sm text-emerald-600">Mis Cotizaciones</div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200/60">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-8 w-8 text-amber-600" />
-                <div>
-                  <div className="text-2xl font-bold text-amber-900">
-                    {myQuotes.filter(q => q.status === 'accepted').length}
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/60">
+                <div className="flex items-center gap-3">
+                  <Search className="h-8 w-8 text-blue-600" />
+                  <div>
+                    <div className="text-2xl font-bold text-blue-900">{filteredRequests.length}</div>
+                    <div className="text-sm text-blue-600">Solicitudes Disponibles</div>
                   </div>
-                  <div className="text-sm text-amber-600">Cotizaciones Aceptadas</div>
                 </div>
-              </div>
-            </Card>
+              </Card>
 
-            <Card className="p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/60">
-              <div className="flex items-center gap-3">
-                <Euro className="h-8 w-8 text-purple-600" />
-                <div>
-                  <div className="text-2xl font-bold text-purple-900">
-                    €{myQuotes.reduce((sum, q) => sum + (q.status === 'accepted' ? q.amount : 0), 0).toLocaleString()}
+              <Card className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200/60">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-8 w-8 text-emerald-600" />
+                  <div>
+                    <div className="text-2xl font-bold text-emerald-900">{myQuotes.length}</div>
+                    <div className="text-sm text-emerald-600">Mis Cotizaciones</div>
                   </div>
-                  <div className="text-sm text-purple-600">Valor Aceptado</div>
                 </div>
-              </div>
-            </Card>
-          </div>
+              </Card>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
-                <Input
-                  placeholder="Buscar por título o descripción..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+              <Card className="p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200/60">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-8 w-8 text-amber-600" />
+                  <div>
+                    <div className="text-2xl font-bold text-amber-900">
+                      {myQuotes.filter(q => q.status === 'accepted').length}
+                    </div>
+                    <div className="text-sm text-amber-600">Cotizaciones Aceptadas</div>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-200/60">
+                <div className="flex items-center gap-3">
+                  <Euro className="h-8 w-8 text-purple-600" />
+                  <div>
+                    <div className="text-2xl font-bold text-purple-900">
+                      €{myQuotes.reduce((sum, q) => sum + (q.status === 'accepted' ? q.amount : 0), 0).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-purple-600">Valor Aceptado</div>
+                  </div>
+                </div>
+              </Card>
             </div>
-            
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las categorías</SelectItem>
-                <SelectItem value="cleaning">Limpieza</SelectItem>
-                <SelectItem value="plumbing">Fontanería</SelectItem>
-                <SelectItem value="electrical">Electricidad</SelectItem>
-                <SelectItem value="gardening">Jardinería</SelectItem>
-                <SelectItem value="painting">Pintura</SelectItem>
-                <SelectItem value="maintenance">Mantenimiento</SelectItem>
-                <SelectItem value="security">Seguridad</SelectItem>
-                <SelectItem value="hvac">Climatización</SelectItem>
-                <SelectItem value="carpentry">Carpintería</SelectItem>
-                <SelectItem value="emergency">Emergencia</SelectItem>
-                <SelectItem value="other">Otros</SelectItem>
-              </SelectContent>
-            </Select>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="published">Publicadas</SelectItem>
-                <SelectItem value="pending">Pendientes</SelectItem>
-                <SelectItem value="accepted">Aceptadas</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            {/* Search and Filters */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                  <Input
+                    placeholder="Buscar por título o descripción..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las categorías</SelectItem>
+                  <SelectItem value="cleaning">Limpieza</SelectItem>
+                  <SelectItem value="plumbing">Fontanería</SelectItem>
+                  <SelectItem value="electrical">Electricidad</SelectItem>
+                  <SelectItem value="gardening">Jardinería</SelectItem>
+                  <SelectItem value="painting">Pintura</SelectItem>
+                  <SelectItem value="maintenance">Mantenimiento</SelectItem>
+                  <SelectItem value="security">Seguridad</SelectItem>
+                  <SelectItem value="hvac">Climatización</SelectItem>
+                  <SelectItem value="carpentry">Carpintería</SelectItem>
+                  <SelectItem value="emergency">Emergencia</SelectItem>
+                  <SelectItem value="other">Otros</SelectItem>
+                </SelectContent>
+              </Select>
 
-          {/* Main Content Tabs */}
-          <Tabs value={currentTab} onValueChange={setCurrentTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="available">
-                Solicitudes Disponibles ({filteredRequests.length})
-              </TabsTrigger>
-              <TabsTrigger value="my-quotes">
-                Mis Cotizaciones ({filteredQuotes.length})
-              </TabsTrigger>
-            </TabsList>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="published">Publicadas</SelectItem>
+                  <SelectItem value="pending">Pendientes</SelectItem>
+                  <SelectItem value="accepted">Aceptadas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <TabsContent value="available" className="space-y-4 mt-6">
-              {filteredRequests.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <Search className="h-12 w-12 mx-auto mb-4 text-neutral-400" />
-                  <h4 className="font-medium text-neutral-600 mb-2">No hay solicitudes disponibles</h4>
-                  <p className="text-sm text-neutral-500">
-                    {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' 
-                      ? "Ajusta los filtros para ver más resultados"
-                      : "No hay solicitudes de presupuesto disponibles en este momento"
-                    }
-                  </p>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {filteredRequests.map(request => (
-                    <Card key={request.id} className="p-6 border hover:border-neutral-300 transition-colors">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="text-2xl">{getCategoryIcon(request.category)}</div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-neutral-900">{request.title}</h3>
-                              <div className="flex items-center gap-2 text-sm text-neutral-600">
-                                <User className="h-4 w-4" />
-                                <span>{request.user_name}</span>
-                                <Separator orientation="vertical" className="h-4" />
-                                <MapPin className="h-4 w-4" />
-                                <span>{request.property_address || request.work_location}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <p className="text-neutral-700 mb-4 line-clamp-3">{request.description}</p>
-                          
-                          <div className="flex items-center gap-4 text-sm">
-                            {getUrgencyBadge(request.urgency)}
-                            
-                            {request.budget_range_min && request.budget_range_max && (
-                              <div className="flex items-center gap-1 text-green-600">
-                                <Euro className="h-4 w-4" />
-                                <span>€{request.budget_range_min} - €{request.budget_range_max}</span>
-                              </div>
-                            )}
-                            
-                            {request.deadline_date && (
-                              <div className="flex items-center gap-1 text-neutral-600">
-                                <Calendar className="h-4 w-4" />
-                                <span>Fecha límite: {new Date(request.deadline_date).toLocaleDateString()}</span>
-                              </div>
-                            )}
+            {/* Main Content Tabs */}
+            <Tabs value={currentTab} onValueChange={setCurrentTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="available">
+                  Solicitudes Disponibles ({filteredRequests.length})
+                </TabsTrigger>
+                <TabsTrigger value="my-quotes">
+                  Mis Cotizaciones ({filteredQuotes.length})
+                </TabsTrigger>
+              </TabsList>
 
-                            {(request.views_count ?? 0) > 0 && (
-                              <div className="flex items-center gap-1 text-neutral-500">
-                                <Eye className="h-4 w-4" />
-                                <span>{request.views_count} vistas</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2 ml-4">
-                          {request.my_quote ? (
-                            <div className="text-center">
-                              {getStatusBadge(request.my_quote.status)}
-                              <p className="text-sm text-neutral-600 mt-1">
-                                Tu oferta: €{request.my_quote.amount}
-                              </p>
-                            </div>
-                          ) : (
-                            <Dialog open={showQuoteDialog && selectedRequest?.id === request.id} onOpenChange={(open) => {
-                              setShowQuoteDialog(open);
-                              if (!open) setSelectedRequest(null);
-                            }}>
-                              <DialogTrigger asChild>
-                                <Button
-                                  onClick={() => setSelectedRequest(request)}
-                                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                                >
-                                  <Send className="h-4 w-4 mr-2" />
-                                  Cotizar
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                                <DialogHeader>
-                                  <DialogTitle>Crear Cotización</DialogTitle>
-                                  <DialogDescription>
-                                    Envía tu propuesta para "{request.title}"
-                                  </DialogDescription>
-                                </DialogHeader>
-                                
-                                <div className="space-y-6">
-                                  {/* Request Summary */}
-                                  <Card className="p-4 bg-neutral-50">
-                                    <h4 className="font-medium mb-2">Resumen de la solicitud</h4>
-                                    <div className="text-sm space-y-1">
-                                      <p><span className="font-medium">Cliente:</span> {request.user_name}</p>
-                                      <p><span className="font-medium">Ubicación:</span> {request.property_address}</p>
-                                      <p><span className="font-medium">Categoría:</span> {request.category}</p>
-                                      <p><span className="font-medium">Urgencia:</span> {request.urgency || 'No especificada'}</p>
-                                      <p><span className="font-medium">Descripción:</span> {request.description}</p>
-                                    </div>
-                                  </Card>
-
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Pricing Section */}
-                                    <div className="space-y-4">
-                                      <h4 className="font-medium text-lg">Cotización</h4>
-                                      
-                                      <div className="space-y-4">
-                                        <div>
-                                          <Label htmlFor="labor_cost">Costo de Mano de Obra (€)</Label>
-                                          <Input
-                                            id="labor_cost"
-                                            type="number"
-                                            step="0.01"
-                                            value={quoteForm.labor_cost || ""}
-                                            onChange={(e) => {
-                                              const value = parseFloat(e.target.value) || 0;
-                                              setQuoteForm(prev => ({ 
-                                                ...prev, 
-                                                labor_cost: value,
-                                                amount: value + prev.materials_cost
-                                              }));
-                                            }}
-                                          />
-                                        </div>
-
-                                        <div>
-                                          <Label htmlFor="materials_cost">Costo de Materiales (€)</Label>
-                                          <Input
-                                            id="materials_cost"
-                                            type="number"
-                                            step="0.01"
-                                            value={quoteForm.materials_cost || ""}
-                                            onChange={(e) => {
-                                              const value = parseFloat(e.target.value) || 0;
-                                              setQuoteForm(prev => ({ 
-                                                ...prev, 
-                                                materials_cost: value,
-                                                amount: prev.labor_cost + value
-                                              }));
-                                            }}
-                                          />
-                                        </div>
-
-                                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                          <Label className="text-lg font-semibold text-blue-900">
-                                            Total: €{quoteForm.amount.toFixed(2)}
-                                          </Label>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    {/* Details Section */}
-                                    <div className="space-y-4">
-                                      <h4 className="font-medium text-lg">Detalles del Servicio</h4>
-                                      
-                                      <div>
-                                        <Label htmlFor="estimated_duration">Duración Estimada</Label>
-                                        <Input
-                                          id="estimated_duration"
-                                          placeholder="ej: 2-3 días hábiles"
-                                          value={quoteForm.estimated_duration}
-                                          onChange={(e) => setQuoteForm(prev => ({ ...prev, estimated_duration: e.target.value }))}
-                                        />
-                                      </div>
-
-                                      <div>
-                                        <Label htmlFor="estimated_start_date">Fecha de Inicio Estimada</Label>
-                                        <Input
-                                          id="estimated_start_date"
-                                          type="date"
-                                          value={quoteForm.estimated_start_date}
-                                          onChange={(e) => setQuoteForm(prev => ({ ...prev, estimated_start_date: e.target.value }))}
-                                        />
-                                      </div>
-
-                                      <div>
-                                        <Label htmlFor="valid_until">Validez de la Cotización</Label>
-                                        <Input
-                                          id="valid_until"
-                                          type="date"
-                                          value={quoteForm.valid_until}
-                                          onChange={(e) => setQuoteForm(prev => ({ ...prev, valid_until: e.target.value }))}
-                                        />
-                                      </div>
-
-                                      <div>
-                                        <Label htmlFor="warranty_period">Período de Garantía</Label>
-                                        <Input
-                                          id="warranty_period"
-                                          value={quoteForm.warranty_period}
-                                          onChange={(e) => setQuoteForm(prev => ({ ...prev, warranty_period: e.target.value }))}
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="space-y-4">
-                                    <div>
-                                      <Label htmlFor="description">Descripción del Trabajo *</Label>
-                                      <Textarea
-                                        id="description"
-                                        placeholder="Describe detalladamente el trabajo que realizarás..."
-                                        value={quoteForm.description}
-                                        onChange={(e) => setQuoteForm(prev => ({ ...prev, description: e.target.value }))}
-                                        rows={4}
-                                      />
-                                    </div>
-
-                                    <div>
-                                      <Label htmlFor="payment_terms">Términos de Pago</Label>
-                                      <Input
-                                        id="payment_terms"
-                                        value={quoteForm.payment_terms}
-                                        onChange={(e) => setQuoteForm(prev => ({ ...prev, payment_terms: e.target.value }))}
-                                      />
-                                    </div>
-
-                                    <div>
-                                      <Label htmlFor="notes">Notas Adicionales</Label>
-                                      <Textarea
-                                        id="notes"
-                                        placeholder="Información adicional o consideraciones especiales..."
-                                        value={quoteForm.notes}
-                                        onChange={(e) => setQuoteForm(prev => ({ ...prev, notes: e.target.value }))}
-                                        rows={3}
-                                      />
-                                    </div>
-
-                                    <div>
-                                      <Label htmlFor="terms_and_conditions">Términos y Condiciones</Label>
-                                      <Textarea
-                                        id="terms_and_conditions"
-                                        placeholder="Términos específicos del servicio..."
-                                        value={quoteForm.terms_and_conditions}
-                                        onChange={(e) => setQuoteForm(prev => ({ ...prev, terms_and_conditions: e.target.value }))}
-                                        rows={3}
-                                      />
-                                    </div>
-                                  </div>
+              <TabsContent value="available" className="space-y-4 mt-6">
+                {filteredRequests.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <Search className="h-12 w-12 mx-auto mb-4 text-neutral-400" />
+                    <h4 className="font-medium text-neutral-600 mb-2">No hay solicitudes disponibles</h4>
+                    <p className="text-sm text-neutral-500">
+                      {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' 
+                        ? "Ajusta los filtros para ver más resultados"
+                        : "No hay solicitudes de presupuesto disponibles en este momento"
+                      }
+                    </p>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredRequests.map(request => (
+                      <Card key={request.id} className="p-6 border hover:border-neutral-300 transition-colors">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="text-2xl">{getCategoryIcon(request.category)}</div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-neutral-900">{request.title}</h3>
+                                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                  <User className="h-4 w-4" />
+                                  <span>{request.profiles?.full_name || 'Usuario'}</span>
+                                  <Separator orientation="vertical" className="h-4" />
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{request.properties?.address || request.work_location || ''}</span>
                                 </div>
-                                
-                                <DialogFooter className="mt-6">
-                                  <Button 
-                                    variant="outline" 
-                                    onClick={() => setShowQuoteDialog(false)}
-                                    disabled={submitting}
-                                  >
-                                    Cancelar
-                                  </Button>
-                                  <Button 
-                                    onClick={handleCreateQuote}
-                                    disabled={!quoteForm.amount || !quoteForm.description || submitting}
+                              </div>
+                            </div>
+                            
+                            <p className="text-neutral-700 mb-4 line-clamp-3">{request.description}</p>
+                            
+                            <div className="flex items-center gap-4 text-sm">
+                              {getUrgencyBadge(request.urgency)}
+                              
+                              {request.budget_range_min && request.budget_range_max && (
+                                <div className="flex items-center gap-1 text-green-600">
+                                  <Euro className="h-4 w-4" />
+                                  <span>€{request.budget_range_min} - €{request.budget_range_max}</span>
+                                </div>
+                              )}
+                              
+                              {request.deadline_date && (
+                                <div className="flex items-center gap-1 text-neutral-600">
+                                  <Calendar className="h-4 w-4" />
+                                  <span>Fecha límite: {new Date(request.deadline_date).toLocaleDateString()}</span>
+                                </div>
+                              )}
+
+                              {(request.views_count ?? 0) > 0 && (
+                                <div className="flex items-center gap-1 text-neutral-500">
+                                  <Eye className="h-4 w-4" />
+                                  <span>{request.views_count} vistas</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-2 ml-4">
+                            {request.my_quote ? (
+                              <div className="text-center">
+                                {getStatusBadge(request.my_quote.status)}
+                                <p className="text-sm text-neutral-600 mt-1">
+                                  Tu oferta: €{request.my_quote.amount}
+                                </p>
+                              </div>
+                            ) : (
+                              <Dialog open={showQuoteDialog && selectedRequest?.id === request.id} onOpenChange={(open) => {
+                                setShowQuoteDialog(open);
+                                if (!open) setSelectedRequest(null);
+                              }}>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    onClick={() => setSelectedRequest(request)}
                                     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                                   >
-                                    {submitting ? (
-                                      <>
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Enviando...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Send className="h-4 w-4 mr-2" />
-                                        Enviar Cotización (€{quoteForm.amount.toFixed(2)})
-                                      </>
-                                    )}
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Cotizar
                                   </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                          
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver Detalles
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                                  <DialogHeader>
+                                    <DialogTitle>Crear Cotización</DialogTitle>
+                                    <DialogDescription>
+                                      Envía tu propuesta para "{request.title}"
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  
+                                  <div className="space-y-6">
+                                    {/* Request Summary */}
+                                    <Card className="p-4 bg-neutral-50">
+                                      <h4 className="font-medium mb-2">Resumen de la solicitud</h4>
+                                      <div className="text-sm space-y-1">
+                                        <p><span className="font-medium">Cliente:</span> {request.profiles?.full_name || 'Usuario'}</p>
+                                        <p><span className="font-medium">Ubicación:</span> {request.properties?.address || request.work_location}</p>
+                                        <p><span className="font-medium">Categoría:</span> {request.category}</p>
+                                        <p><span className="font-medium">Urgencia:</span> {request.urgency || 'No especificada'}</p>
+                                        <p><span className="font-medium">Descripción:</span> {request.description}</p>
+                                      </div>
+                                    </Card>
 
-            <TabsContent value="my-quotes" className="space-y-4 mt-6">
-              {filteredQuotes.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <FileText className="h-12 w-12 mx-auto mb-4 text-neutral-400" />
-                  <h4 className="font-medium text-neutral-600 mb-2">No has enviado cotizaciones aún</h4>
-                  <p className="text-sm text-neutral-500">
-                    Busca solicitudes de presupuesto en la pestaña anterior para comenzar a enviar cotizaciones.
-                  </p>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {filteredQuotes.map(quote => (
-                    <Card key={quote.id} className="p-6 border hover:border-neutral-300 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="text-2xl">{getCategoryIcon((quote as any).budget_requests?.category || 'other')}</div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-neutral-900">
-                                {(quote as any).budget_requests?.title || 'Solicitud de Presupuesto'}
-                              </h3>
-                              <div className="flex items-center gap-2 text-sm text-neutral-600">
-                                <User className="h-4 w-4" />
-                                <span>{(quote as any).budget_requests?.profiles?.full_name || 'Cliente'}</span>
-                                <Separator orientation="vertical" className="h-4" />
-                                <MapPin className="h-4 w-4" />
-                                <span>{(quote as any).budget_requests?.properties?.address || 'Ubicación'}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <p className="text-neutral-700 mb-4">{quote.description}</p>
-                          
-                          <div className="flex items-center gap-4 text-sm">
-                            {getStatusBadge(quote.status)}
-                            
-                            <div className="flex items-center gap-1 text-green-600 font-semibold">
-                              <Euro className="h-4 w-4" />
-                              <span>€{quote.amount.toLocaleString()}</span>
-                            </div>
-                            
-                            <div className="flex items-center gap-1 text-neutral-600">
-                              <Calendar className="h-4 w-4" />
-                              <span>Enviada: {quote.created_at ? new Date(quote.created_at).toLocaleDateString() : 'Fecha no disponible'}</span>
-                            </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      {/* Pricing Section */}
+                                      <div className="space-y-4">
+                                        <h4 className="font-medium text-lg">Cotización</h4>
+                                      
+                                        <div className="space-y-4">
+                                          <div>
+                                            <Label htmlFor="labor_cost">Costo de Mano de Obra (€)</Label>
+                                            <Input
+                                              id="labor_cost"
+                                              type="number"
+                                              step="0.01"
+                                              value={quoteForm.labor_cost || ""}
+                                              onChange={(e) => {
+                                                const value = parseFloat(e.target.value) || 0;
+                                                setQuoteForm(prev => ({ 
+                                                  ...prev, 
+                                                  labor_cost: value,
+                                                  amount: value + prev.materials_cost
+                                                }));
+                                              }}
+                                            />
+                                          </div>
 
-                            {quote.valid_until && (
-                              <div className="flex items-center gap-1 text-neutral-600">
-                                <Clock className="h-4 w-4" />
-                                <span>Válida hasta: {new Date(quote.valid_until).toLocaleDateString()}</span>
-                              </div>
+                                          <div>
+                                            <Label htmlFor="materials_cost">Costo de Materiales (€)</Label>
+                                            <Input
+                                              id="materials_cost"
+                                              type="number"
+                                              step="0.01"
+                                              value={quoteForm.materials_cost || ""}
+                                              onChange={(e) => {
+                                                const value = parseFloat(e.target.value) || 0;
+                                                setQuoteForm(prev => ({ 
+                                                  ...prev, 
+                                                  materials_cost: value,
+                                                  amount: prev.labor_cost + value
+                                                }));
+                                              }}
+                                            />
+                                          </div>
+
+                                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                            <Label className="text-lg font-semibold text-blue-900">
+                                              Total: €{quoteForm.amount.toFixed(2)}
+                                            </Label>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Details Section */}
+                                      <div className="space-y-4">
+                                        <h4 className="font-medium text-lg">Detalles del Servicio</h4>
+                                      
+                                        <div>
+                                          <Label htmlFor="estimated_duration">Duración Estimada</Label>
+                                          <Input
+                                            id="estimated_duration"
+                                            placeholder="ej: 2-3 días hábiles"
+                                            value={quoteForm.estimated_duration}
+                                            onChange={(e) => setQuoteForm(prev => ({ ...prev, estimated_duration: e.target.value }))}
+                                          />
+                                        </div>
+
+                                        <div>
+                                          <Label htmlFor="estimated_start_date">Fecha de Inicio Estimada</Label>
+                                          <Input
+                                            id="estimated_start_date"
+                                            type="date"
+                                            value={quoteForm.estimated_start_date}
+                                            onChange={(e) => setQuoteForm(prev => ({ ...prev, estimated_start_date: e.target.value }))}
+                                          />
+                                        </div>
+
+                                        <div>
+                                          <Label htmlFor="valid_until">Validez de la Cotización</Label>
+                                          <Input
+                                            id="valid_until"
+                                            type="date"
+                                            value={quoteForm.valid_until}
+                                            onChange={(e) => setQuoteForm(prev => ({ ...prev, valid_until: e.target.value }))}
+                                          />
+                                        </div>
+
+                                        <div>
+                                          <Label htmlFor="warranty_period">Período de Garantía</Label>
+                                          <Input
+                                            id="warranty_period"
+                                            value={quoteForm.warranty_period}
+                                            onChange={(e) => setQuoteForm(prev => ({ ...prev, warranty_period: e.target.value }))}
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                      <div>
+                                        <Label htmlFor="description">Descripción del Trabajo *</Label>
+                                        <Textarea
+                                          id="description"
+                                          placeholder="Describe detalladamente el trabajo que realizarás..."
+                                          value={quoteForm.description}
+                                          onChange={(e) => setQuoteForm(prev => ({ ...prev, description: e.target.value }))}
+                                          rows={4}
+                                        />
+                                      </div>
+
+                                      <div>
+                                        <Label htmlFor="payment_terms">Términos de Pago</Label>
+                                        <Input
+                                          id="payment_terms"
+                                          value={quoteForm.payment_terms}
+                                          onChange={(e) => setQuoteForm(prev => ({ ...prev, payment_terms: e.target.value }))}
+                                        />
+                                      </div>
+
+                                      <div>
+                                        <Label htmlFor="notes">Notas Adicionales</Label>
+                                        <Textarea
+                                          id="notes"
+                                          placeholder="Información adicional o consideraciones especiales..."
+                                          value={quoteForm.notes}
+                                          onChange={(e) => setQuoteForm(prev => ({ ...prev, notes: e.target.value }))}
+                                          rows={3}
+                                        />
+                                      </div>
+
+                                      <div>
+                                        <Label htmlFor="terms_and_conditions">Términos y Condiciones</Label>
+                                        <Textarea
+                                          id="terms_and_conditions"
+                                          placeholder="Términos específicos del servicio..."
+                                          value={quoteForm.terms_and_conditions}
+                                          onChange={(e) => setQuoteForm(prev => ({ ...prev, terms_and_conditions: e.target.value }))}
+                                          rows={3}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  <DialogFooter className="mt-6">
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={() => setShowQuoteDialog(false)}
+                                      disabled={submitting}
+                                    >
+                                      Cancelar
+                                    </Button>
+                                    <Button 
+                                      onClick={handleCreateQuote}
+                                      disabled={!quoteForm.amount || !quoteForm.description || submitting}
+                                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                                    >
+                                      {submitting ? (
+                                        <>
+                                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                          Enviando...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Send className="h-4 w-4 mr-2" />
+                                          Enviar Cotización (€{quoteForm.amount.toFixed(2)})
+                                        </>
+                                      )}
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
                             )}
-
-                            {!quote.viewed_by_client && (
-                              <Badge variant="outline" className="text-blue-600">
-                                <Eye className="h-3 w-3 mr-1" />
-                                No vista
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2 ml-4">
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver Detalles
-                          </Button>
-                          
-                          {quote.status === 'pending' && (
+                            
                             <Button variant="outline" size="sm">
-                              <MessageSquare className="h-4 w-4 mr-2" />
-                              Mensaje Cliente
+                              <Eye className="h-4 w-4 mr-2" />
+                              Ver Detalles
                             </Button>
-                          )}
+                          </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="my-quotes" className="space-y-4 mt-6">
+                {filteredQuotes.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <FileText className="h-12 w-12 mx-auto mb-4 text-neutral-400" />
+                    <h4 className="font-medium text-neutral-600 mb-2">No has enviado cotizaciones aún</h4>
+                    <p className="text-sm text-neutral-500">
+                      Busca solicitudes de presupuesto en la pestaña anterior para comenzar a enviar cotizaciones.
+                    </p>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredQuotes.map(quote => (
+                      <Card key={quote.id} className="p-6 border hover:border-neutral-300 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="text-2xl">{getCategoryIcon((quote as any).budget_requests?.category || 'other')}</div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-neutral-900">
+                                  {(quote as any).budget_requests?.title || 'Solicitud de Presupuesto'}
+                                </h3>
+                                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                  <User className="h-4 w-4" />
+                                  <span>{(quote as any).budget_requests?.profiles?.full_name || 'Cliente'}</span>
+                                  <Separator orientation="vertical" className="h-4" />
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{(quote as any).budget_requests?.properties?.address || 'Ubicación'}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <p className="text-neutral-700 mb-4">{quote.description}</p>
+                            
+                            <div className="flex items-center gap-4 text-sm">
+                              {getStatusBadge(quote.status)}
+                              
+                              <div className="flex items-center gap-1 text-green-600 font-semibold">
+                                <Euro className="h-4 w-4" />
+                                <span>€{quote.amount.toLocaleString()}</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-1 text-neutral-600">
+                                <Calendar className="h-4 w-4" />
+                                <span>Enviada: {quote.created_at ? new Date(quote.created_at).toLocaleDateString() : 'Fecha no disponible'}</span>
+                              </div>
+
+                              {quote.valid_until && (
+                                <div className="flex items-center gap-1 text-neutral-600">
+                                  <Clock className="h-4 w-4" />
+                                  <span>Válida hasta: {new Date(quote.valid_until).toLocaleDateString()}</span>
+                                </div>
+                              )}
+
+                              {!quote.viewed_by_client && (
+                                <Badge variant="outline" className="text-blue-600">
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  No vista
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-2 ml-4">
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4 mr-2" />
+                              Ver Detalles
+                            </Button>
+                            
+                            {quote.status === 'pending' && (
+                              <Button variant="outline" size="sm">
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Mensaje Cliente
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+
+      {selectedRequest && (
+        <Dialog
+          open={!!selectedRequest}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) setSelectedRequest(null)
+          }}
+        >
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <Badge variant="secondary" className="w-fit mb-2">
+                {selectedRequest.category}
+              </Badge>
+              <DialogTitle className="text-2xl">{selectedRequest.title}</DialogTitle>
+              <DialogDescription className="flex flex-col gap-2 pt-2">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>{selectedRequest.work_location || selectedRequest.properties.address}, {selectedRequest.properties.city}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Requested by {selectedRequest.profiles.full_name}</span>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-6 py-4">
+              <p className="text-sm leading-relaxed">
+                {selectedRequest.description}
+              </p>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex flex-col gap-1 p-3 bg-gray-50 rounded-lg">
+                  <Label className="text-gray-500">Urgency</Label>
+                  <p className="font-semibold">{selectedRequest.urgency}</p>
+                </div>
+                <div className="flex flex-col gap-1 p-3 bg-gray-50 rounded-lg">
+                  <Label className="text-gray-500">Budget Range</Label>
+                  <p className="font-semibold">
+                    {selectedRequest.budget_range_min && selectedRequest.budget_range_max
+                      ? `€${selectedRequest.budget_range_min} - €${selectedRequest.budget_range_max}`
+                      : "Not specified"}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1 p-3 bg-gray-50 rounded-lg">
+                  <Label className="text-gray-500">Deadline</Label>
+                  <p className="font-semibold">
+                    {selectedRequest.deadline_date
+                      ? new Date(selectedRequest.deadline_date).toLocaleDateString()
+                      : "Not specified"}
+                  </p>
+                </div>
+                 <div className="flex flex-col gap-1 p-3 bg-gray-50 rounded-lg">
+                  <Label className="text-gray-500">Views</Label>
+                  <p className="font-semibold">{selectedRequest.views_count}</p>
+                </div>
+              </div>
+              
+              {selectedRequest.special_requirements && (
+                <div>
+                  <h4 className="font-semibold mb-2">Special Requirements</h4>
+                  <p className="text-sm p-3 bg-yellow-50 border border-yellow-200 rounded-lg">{selectedRequest.special_requirements}</p>
                 </div>
               )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Submit Your Quote</h3>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="labor_cost">Costo de Mano de Obra (€)</Label>
+                    <Input
+                      id="labor_cost"
+                      type="number"
+                      step="0.01"
+                      value={quoteForm.labor_cost || ""}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        setQuoteForm(prev => ({ 
+                          ...prev, 
+                          labor_cost: value,
+                          amount: value + prev.materials_cost
+                        }));
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="materials_cost">Costo de Materiales (€)</Label>
+                    <Input
+                      id="materials_cost"
+                      type="number"
+                      step="0.01"
+                      value={quoteForm.materials_cost || ""}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        setQuoteForm(prev => ({ 
+                          ...prev, 
+                          materials_cost: value,
+                          amount: prev.labor_cost + value
+                        }));
+                      }}
+                    />
+                  </div>
+
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <Label className="text-lg font-semibold text-blue-900">
+                      Total: €{quoteForm.amount.toFixed(2)}
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }
