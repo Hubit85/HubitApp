@@ -352,6 +352,41 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     }
   };
 
+  const handleCancelRequest = async (requestId: string) => {
+    if (!user) return;
+
+    setResponding(requestId);
+    setError("");
+    setSuccess("");
+
+    try {
+      // Mark the request as cancelled
+      const { error: cancelError } = await supabase
+        .from('administrator_requests')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId)
+        .eq('status', 'pending');
+
+      if (cancelError) {
+        throw cancelError;
+      }
+
+      setSuccess('Solicitud eliminada correctamente');
+
+      // Reload administrator requests
+      await loadAdministratorRequests();
+
+    } catch (err) {
+      console.error('Error cancelling request:', err);
+      setError('Error al eliminar la solicitud');
+    } finally {
+      setResponding(null);
+    }
+  };
+
   const markAsRead = async (notificationId: string) => {
     try {
       await supabase
@@ -412,14 +447,30 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         <div>
           <h2 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
             <Bell className="h-6 w-6" />
-            Centro de Notificaciones
+            Notificaciones
           </h2>
           <p className="text-stone-600">
             {isPropertyAdministrator && userRole === "property_administrator"
-              ? "Gestiona solicitudes de miembros de comunidad y revisa notificaciones del sistema"
+              ? "Gestiona solicitudes de miembros de comunidad y revisa las incidencias bajo tu gestión"
               : "Revisa tus notificaciones y actualizaciones del sistema"}
           </p>
         </div>
+        
+        {/* Quick Stats for Property Administrators */}
+        {isPropertyAdministrator && userRole === "property_administrator" && (
+          <div className="text-right space-y-1">
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1 text-amber-600">
+                <Clock className="h-4 w-4" />
+                <span>{adminRequests.filter(r => r.status === 'pending').length} pendientes</span>
+              </div>
+              <div className="flex items-center gap-1 text-green-600">
+                <AlertCircle className="h-4 w-4" />
+                <span>{managedIncidents.length} incidencias</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -503,7 +554,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
                         </div>
 
                         {request.status === 'pending' && (
-                          <div className="flex gap-2 ml-4">
+                          <div className="flex gap-2 ml-4 flex-col sm:flex-row">
                             <Button
                               size="sm"
                               onClick={() => {
@@ -511,10 +562,48 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
                                 setShowResponseDialog(true);
                               }}
                               className="bg-blue-600 hover:bg-blue-700"
+                              disabled={responding === request.id}
                             >
-                              <MessageSquare className="h-3 w-3 mr-1" />
+                              {responding === request.id ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                              )}
                               Responder
                             </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCancelRequest(request.id)}
+                              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                              disabled={responding === request.id}
+                            >
+                              {responding === request.id ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <X className="h-3 w-3 mr-1" />
+                              )}
+                              Eliminar
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {request.status !== 'pending' && (
+                          <div className="ml-4 text-right">
+                            <p className="text-xs text-stone-500">
+                              {request.responded_at && `Respondido el ${formatDate(request.responded_at)}`}
+                            </p>
+                            {request.status === 'cancelled' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleCancelRequest(request.id)}
+                                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 mt-2"
+                              >
+                                <X className="h-3 w-3 mr-1" />
+                                Eliminar Registro
+                              </Button>
+                            )}
                           </div>
                         )}
                       </div>
