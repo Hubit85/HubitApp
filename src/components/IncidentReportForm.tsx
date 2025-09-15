@@ -13,7 +13,7 @@ import {
   Upload, X, Camera, FileImage, Loader2, Shield, AlertTriangle, 
   CheckCircle, MapPin, Clock, AlertCircle, Image as ImageIcon, Home
 } from "lucide-react";
-import PropertySelector from "./PropertySelector";
+import PropertySelector from "@/components/PropertySelector";
 import type { Property } from "@/integrations/supabase/types";
 
 // Service categories matching those in register.tsx

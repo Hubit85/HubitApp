@@ -116,8 +116,9 @@ export function CommunityAdministratorAssignment() {
         throw error;
       }
       
-      // Filter out providers without profiles and apply additional search logic
-      const filteredData = (data as ServiceProviderWithProfile[] || []).filter(admin => {
+      // Type assertion and filter out providers without profiles
+      const rawData = data as (ServiceProvider & { profiles: Profile | null })[];
+      const filteredData = rawData.filter((admin): admin is ServiceProviderWithProfile => {
         if (!admin.profiles) return false;
         
         if (searchTerm.trim()) {
@@ -388,7 +389,7 @@ export function CommunityAdministratorAssignment() {
                           Verificado
                         </span>
                       )}
-                      {admin.rating_average > 0 && (
+                      {admin.rating_average && admin.rating_average > 0 && (
                         <div className="flex items-center gap-1 text-sm">
                           <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
                           <span className="font-semibold text-neutral-700">
@@ -415,7 +416,7 @@ export function CommunityAdministratorAssignment() {
                         <span>{admin.profiles.city}</span>
                       </div>
                     )}
-                    {admin.response_time_hours > 0 && (
+                    {admin.response_time_hours && admin.response_time_hours > 0 && (
                       <div className="flex items-center gap-2 text-neutral-600">
                         <Clock className="h-4 w-4 text-amber-500" />
                         <span>Responde en {admin.response_time_hours}h promedio</span>
