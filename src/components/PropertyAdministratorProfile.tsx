@@ -273,9 +273,39 @@ export function PropertyAdministratorProfile() {
 
   return (
     <div className="space-y-6">
+      <Card className="border-orange-200 bg-orange-50">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+              <span className="text-orange-800 font-medium">Error al cargar las solicitudes de asignación</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Eliminar todas las solicitudes pendientes
+                supabase
+                  .from('community_member_administrators')
+                  .delete()
+                  .eq('contact_email', user?.email)
+                  .eq('administrator_verified', false)
+                  .then(() => {
+                    window.location.reload();
+                  });
+              }}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Eliminar Solicitud
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Separator />
 
-      {/* Existing Company Information Card */}
+      {/* Company Information Card - Remove duplicate title */}
       <Card className="border-stone-200 shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-between">

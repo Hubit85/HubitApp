@@ -25,6 +25,7 @@ import UserRoleManager from "@/components/UserRoleManager";
 import { IncidentReportForm } from "@/components/IncidentReportForm";
 import { CommunityAdministratorAssignment } from "@/components/CommunityAdministratorAssignment";
 import { PropertyAdministratorProfile } from "@/components/PropertyAdministratorProfile";
+import { SupabaseDataViewer } from "@/components/debug/SuperbaseDataViewer";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
@@ -205,9 +206,15 @@ export default function Dashboard() {
   ];
 
   const getRoleSpecificNavItems = (roleType: string) => {
+    const baseItems = [
+      // Add diagnostic tab
+      { id: "diagnostico", label: "🔧 Diagnóstico Sistema", icon: Settings },
+    ];
+    
     switch (roleType) {
       case "particular":
         return [
+          ...baseItems,
           { id: "propiedades", label: "Mis Propiedades", icon: Home },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores de Servicios", icon: Wrench },
@@ -220,6 +227,7 @@ export default function Dashboard() {
         ];
       case "community_member":
         return [
+          ...baseItems,
           { id: "propiedades", label: "Mis Propiedades", icon: Home },
           { id: "comunidad", label: "Mi Comunidad", icon: Users },
           { id: "servicios", label: "Servicios Disponibles", icon: Store },
@@ -238,6 +246,7 @@ export default function Dashboard() {
         ];
       case "service_provider":
         return [
+          ...baseItems,
           { id: "servicios", label: "Mis Servicios", icon: Store },
           { id: "presupuestos", label: "Gestionar Presupuestos", icon: FileText },
           { id: "clientes", label: "Mis Clientes", icon: Users },
@@ -251,6 +260,7 @@ export default function Dashboard() {
         ];
       case "property_administrator":
         return [
+          ...baseItems,
           { id: "comunidades", label: "Comunidades Gestionadas", icon: Users },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores Autorizados", icon: Store },
@@ -264,6 +274,7 @@ export default function Dashboard() {
         ];
       default:
         return [
+          ...baseItems,
           { id: "propiedades", label: "Mis Propiedades", icon: Home },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores de Servicios", icon: Store },
@@ -1057,6 +1068,20 @@ export default function Dashboard() {
   };
 
   const renderRoleSpecificContent = (tabId: string, roleType: string) => {
+    // Add diagnostic tab for debugging
+    if (tabId === "diagnostico") {
+      return (
+        <>
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-black mb-2">🔧 Diagnóstico de Sistema</h1>
+            <p className="text-stone-600">Información detallada sobre los datos en Supabase</p>
+          </div>
+          
+          <SupabaseDataViewer />
+        </>
+      );
+    }
+    
     switch (tabId) {
       case "propiedades":
         return (
