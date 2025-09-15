@@ -847,9 +847,19 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             user_type: 'particular',
             phone: userObject.user_metadata?.phone || null,
             avatar_url: userObject.user_metadata?.avatar_url || null,
+            address: null,
+            city: null,
+            postal_code: null,
             country: 'Spain',
             language: 'es',
             timezone: 'Europe/Madrid',
+            email_notifications: true,
+            sms_notifications: false,
+            is_verified: false,
+            verification_code: null,
+            last_login: null,
+            created_at: userObject.created_at || new Date().toISOString(),
+            updated_at: new Date().toISOString()
           };
 
           try {
@@ -879,7 +889,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               is_verified: false,
               verification_code: null,
               last_login: null,
-              created_at: userObject.created_at || new Date().toISOString(),
+              created_at: userObject.created_at ? userObject.created_at : new Date().toISOString(),
               updated_at: new Date().toISOString()
             } as Profile;
             
