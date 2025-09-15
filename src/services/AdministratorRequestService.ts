@@ -431,7 +431,10 @@ export class AdministratorRequestService {
       const managedResult = await this.getManagedMembers(propertyAdministratorRoleId);
       if (!managedResult.success || managedResult.members.length === 0) return { success: true, incidents: [] };
       
-      const managedUserIds = managedResult.members.map(member => (member.community_member as any)?.user_id).filter(id => !!id);
+      const managedUserIds = managedResult.members
+        .map(member => (member.community_member as any)?.user_id)
+        .filter((id): id is string => !!id && typeof id === 'string');
+        
       if (managedUserIds.length === 0) return { success: true, incidents: [] };
 
       const { data: incidents, error } = await supabase.from('incident_reports').select('*').in('user_id', managedUserIds).order('reported_at', { ascending: false });

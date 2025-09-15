@@ -1,0 +1,598 @@
+
+import React, { useState, useEffect } from "react";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { 
+  Bell, Check, X, MessageSquare, User, Mail, Phone, 
+  Building, AlertCircle, Loader2, CheckCircle, XCircle, Clock
+} from "lucide-react";
+
+interface NotificationCenterProps {
+  userRole?: "property_administrator" | "community_member" | "service_provider" | "particular";
+}
+
+interface AdminRequest {
+  id: string;
+  community_member_id: string;
+  property_administrator_id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+  request_message?: string;
+  response_message?: string;
+  requested_at: string;
+  responded_at?: string;
+  community_member?: {
+    profiles?: {
+      full_name: string;
+      email: string;
+      phone?: string;
+    };
+    role_specific_data?: any;
+  };
+}
+
+export function NotificationCenter({ userRole = "particular" }: NotificationCenterProps) {
+  const { user, activeRole, userRoles } = useSupabaseAuth();
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [responding, setResponding] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState<AdminRequest | null>(null);
+  const [responseMessage, setResponseMessage] = useState("");
+  const [showResponseDialog, setShowResponseDialog] = useState(false);
+
+  const isPropertyAdministrator = userRoles.some(role => 
+    role.role_type === 'property_administrator' && role.is_verified
+  );
+
+  useEffect(() => {
+    if (user && isPropertyAdministrator && activeRole) {
+      loadNotifications();
+    } else if (user) {
+      loadGeneralNotifications();
+    }
+  }, [user, activeRole, isPropertyAdministrator]);
+
+  const loadNotifications = async () => {
+    if (!user || !activeRole) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // Load general notifications
+      const { data: notifications, error: notifError } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (notifError) {
+        console.warn('Error loading notifications:', notifError);
+      } else {
+        setNotifications(notifications || []);
+      }
+
+      // Load administrator requests if user is property administrator
+      if (isPropertyAdministrator && activeRole.role_type === 'property_administrator') {
+        await loadAdministratorRequests();
+      }
+
+    } catch (err) {
+      console.error('Error loading notifications:', err);
+      setError('Error al cargar las notificaciones');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadGeneralNotifications = async () => {
+    if (!user) return;
+
+    try {
+      const { data: notifications, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.warn('Error loading general notifications:', error);
+      } else {
+        setNotifications(notifications || []);
+      }
+    } catch (err) {
+      console.error('Error loading general notifications:', err);
+    }
+  };
+
+  const loadAdministratorRequests = async () => {
+    if (!activeRole || activeRole.role_type !== 'property_administrator') return;
+
+    try {
+      console.log('🔍 Loading administrator requests for role:', activeRole.id);
+
+      const { data: requests, error } = await supabase
+        .from('administrator_requests')
+        .select('*')
+        .eq('property_administrator_id', activeRole.id)
+        .order('requested_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading administrator requests:', error);
+        return;
+      }
+
+      console.log(`📋 Found ${requests?.length || 0} administrator requests`);
+
+      // Enrich requests with community member data
+      const enrichedRequests = await Promise.all(
+        (requests || []).map(async (request) => {
+          try {
+            // Get community member role data
+            const { data: memberRole, error: memberError } = await supabase
+              .from('user_roles')
+              .select('role_specific_data, user_id')
+              .eq('id', request.community_member_id)
+              .single();
+
+            if (memberError) {
+              console.warn(`Failed to load member role ${request.community_member_id}:`, memberError);
+              return { ...request, community_member: null };
+            }
+
+            // Get profile data
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('full_name, email, phone')
+              .eq('id', memberRole.user_id)
+              .single();
+
+            if (profileError) {
+              console.warn(`Failed to load profile for ${memberRole.user_id}:`, profileError);
+              return { 
+                ...request, 
+                community_member: { 
+                  role_specific_data: memberRole.role_specific_data,
+                  profiles: null 
+                } 
+              };
+            }
+
+            return {
+              ...request,
+              community_member: {
+                role_specific_data: memberRole.role_specific_data,
+                profiles: profile
+              }
+            };
+
+          } catch (enrichError) {
+            console.warn('Error enriching request:', enrichError);
+            return { ...request, community_member: null };
+          }
+        })
+      );
+
+      setAdminRequests(enrichedRequests as AdminRequest[]);
+
+    } catch (err) {
+      console.error('Error loading administrator requests:', err);
+    }
+  };
+
+  const handleRespondToRequest = async (response: 'accepted' | 'rejected') => {
+    if (!selectedRequest || !user || !activeRole) return;
+
+    setResponding(selectedRequest.id);
+    setError("");
+    setSuccess("");
+
+    try {
+      // Update the request
+      const { error: updateError } = await supabase
+        .from('administrator_requests')
+        .update({
+          status: response,
+          response_message: responseMessage.trim() || null,
+          responded_at: new Date().toISOString(),
+          responded_by: user.id
+        })
+        .eq('id', selectedRequest.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // If accepted, create management relationship
+      if (response === 'accepted') {
+        const { error: relationError } = await supabase
+          .from('managed_communities')
+          .insert({
+            property_administrator_id: activeRole.id,
+            community_member_id: selectedRequest.community_member_id,
+            relationship_status: 'active',
+            established_at: new Date().toISOString(),
+            established_by: user.id,
+            notes: `Relación establecida tras aceptar solicitud del ${new Date().toLocaleDateString()}`
+          });
+
+        if (relationError) {
+          console.warn('Failed to create management relationship:', relationError);
+        }
+      }
+
+      // Send notification to community member
+      if (selectedRequest.community_member?.profiles) {
+        const { data: memberRole } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('id', selectedRequest.community_member_id)
+          .single();
+
+        if (memberRole) {
+          await supabase.from('notifications').insert({
+            user_id: memberRole.user_id,
+            title: response === 'accepted' ? '✅ Solicitud Aceptada' : '❌ Solicitud Rechazada',
+            message: response === 'accepted' 
+              ? 'Tu solicitud de gestión de incidencias ha sido aceptada. Ahora tus reportes serán gestionados por el administrador.'
+              : 'Tu solicitud de gestión de incidencias ha sido rechazada.',
+            type: response === 'accepted' ? 'success' as const : 'warning' as const,
+            category: 'request' as const,
+            related_entity_type: 'administrator_request',
+            related_entity_id: selectedRequest.id,
+            read: false
+          });
+        }
+      }
+
+      setSuccess(response === 'accepted' ? 'Solicitud aceptada correctamente' : 'Solicitud rechazada correctamente');
+      setShowResponseDialog(false);
+      setResponseMessage("");
+      setSelectedRequest(null);
+
+      // Reload data
+      await Promise.all([loadNotifications(), loadAdministratorRequests()]);
+
+    } catch (err) {
+      console.error('Error responding to request:', err);
+      setError('Error al procesar la respuesta');
+    } finally {
+      setResponding(null);
+    }
+  };
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', notificationId);
+      
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+      );
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const config = {
+      pending: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+      accepted: { label: 'Aceptada', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+      rejected: { label: 'Rechazada', color: 'bg-red-100 text-red-800', icon: XCircle },
+      cancelled: { label: 'Cancelada', color: 'bg-gray-100 text-gray-800', icon: XCircle }
+    }[status] || { label: status, color: 'bg-gray-100 text-gray-800', icon: Clock };
+
+    const Icon = config.icon;
+
+    return (
+      <Badge className={`${config.color} flex items-center gap-1`}>
+        <Icon className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  if (loading) {
+    return (
+      <Card className="border-stone-200 shadow-lg">
+        <CardContent className="p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-stone-600 mx-auto mb-4" />
+          <p className="text-stone-600">Cargando notificaciones...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-stone-900 flex items-center gap-2">
+            <Bell className="h-6 w-6" />
+            Centro de Notificaciones
+          </h2>
+          <p className="text-stone-600">
+            {isPropertyAdministrator && userRole === "property_administrator"
+              ? "Gestiona solicitudes de miembros de comunidad y revisa notificaciones del sistema"
+              : "Revisa tus notificaciones y actualizaciones del sistema"}
+          </p>
+        </div>
+      </div>
+
+      {error && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-red-800">{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {success && (
+        <Alert className="border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription className="text-green-800">{success}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Administrator Requests Section - Only for Property Administrators */}
+      {isPropertyAdministrator && userRole === "property_administrator" && (
+        <Card className="border-blue-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-900">
+              <MessageSquare className="h-5 w-5" />
+              Solicitudes de Gestión ({adminRequests.filter(r => r.status === 'pending').length} pendientes)
+            </CardTitle>
+            <CardDescription>
+              Miembros de comunidad que solicitan que gestiones sus incidencias
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {adminRequests.length === 0 ? (
+              <div className="text-center py-8">
+                <MessageSquare className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+                <p className="text-stone-600">No hay solicitudes de gestión</p>
+                <p className="text-sm text-stone-500 mt-1">
+                  Las solicitudes de miembros de comunidad aparecerán aquí
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {adminRequests.map((request) => (
+                  <Card key={request.id} className="border border-stone-200 hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-2 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <User className="h-4 w-4 text-stone-600" />
+                            <span className="font-semibold">
+                              {request.community_member?.profiles?.full_name || 'Miembro de Comunidad'}
+                            </span>
+                            {getStatusBadge(request.status)}
+                          </div>
+
+                          <div className="text-sm text-stone-600 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-3 w-3" />
+                              {request.community_member?.profiles?.email || 'Email no disponible'}
+                            </div>
+                            {request.community_member?.profiles?.phone && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-3 w-3" />
+                                {request.community_member.profiles.phone}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3 w-3" />
+                              Solicitado el {formatDate(request.requested_at)}
+                            </div>
+                          </div>
+
+                          {request.request_message && (
+                            <div className="bg-stone-50 p-3 rounded-lg">
+                              <p className="text-sm"><strong>Mensaje:</strong> {request.request_message}</p>
+                            </div>
+                          )}
+
+                          {request.response_message && (
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <p className="text-sm"><strong>Tu respuesta:</strong> {request.response_message}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {request.status === 'pending' && (
+                          <div className="flex gap-2 ml-4">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                setShowResponseDialog(true);
+                              }}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              <MessageSquare className="h-3 w-3 mr-1" />
+                              Responder
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* General Notifications */}
+      <Card className="border-stone-200 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            Notificaciones del Sistema ({notifications.filter(n => !n.read).length} sin leer)
+          </CardTitle>
+          <CardDescription>
+            Actualizaciones y notificaciones importantes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {notifications.length === 0 ? (
+            <div className="text-center py-8">
+              <Bell className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+              <p className="text-stone-600">No hay notificaciones</p>
+              <p className="text-sm text-stone-500 mt-1">
+                Las notificaciones aparecerán aquí cuando haya actualizaciones
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`p-4 rounded-lg border transition-all hover:shadow-sm cursor-pointer ${
+                    notification.read
+                      ? 'bg-gray-50 border-gray-200'
+                      : 'bg-blue-50 border-blue-200 hover:bg-blue-100'
+                  }`}
+                  onClick={() => !notification.read && markAsRead(notification.id)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-stone-900">{notification.title}</h4>
+                        {!notification.read && (
+                          <Badge className="bg-blue-600 text-white text-xs">Nuevo</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-stone-600 mb-2">{notification.message}</p>
+                      <div className="flex items-center gap-4 text-xs text-stone-500">
+                        <span>{formatDate(notification.created_at)}</span>
+                        {notification.category && (
+                          <Badge variant="outline" className="text-xs">
+                            {notification.category}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    {notification.action_url && (
+                      <Button variant="outline" size="sm" className="ml-3">
+                        {notification.action_label || 'Ver'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Response Dialog */}
+      <Dialog open={showResponseDialog} onOpenChange={setShowResponseDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Responder a Solicitud de Gestión</DialogTitle>
+            <DialogDescription>
+              Decide si aceptas o rechazas gestionar las incidencias de este miembro
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRequest && (
+            <div className="space-y-4">
+              <div className="bg-stone-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Detalles del solicitante:</h4>
+                <div className="space-y-1 text-sm text-stone-600">
+                  <p><strong>Nombre:</strong> {selectedRequest.community_member?.profiles?.full_name || 'No disponible'}</p>
+                  <p><strong>Email:</strong> {selectedRequest.community_member?.profiles?.email || 'No disponible'}</p>
+                  <p><strong>Fecha:</strong> {formatDate(selectedRequest.requested_at)}</p>
+                  {selectedRequest.request_message && (
+                    <div className="mt-2">
+                      <strong>Mensaje:</strong>
+                      <p className="mt-1 italic bg-white p-2 rounded">"{selectedRequest.request_message}"</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="response">Mensaje de respuesta (opcional)</Label>
+                <Textarea
+                  id="response"
+                  value={responseMessage}
+                  onChange={(e) => setResponseMessage(e.target.value)}
+                  placeholder="Escribe un mensaje explicando tu decisión..."
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => handleRespondToRequest('accepted')}
+                  disabled={responding !== null}
+                  className="bg-green-600 hover:bg-green-700 flex-1"
+                >
+                  {responding === selectedRequest.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-2" />
+                  )}
+                  Aceptar
+                </Button>
+                <Button
+                  onClick={() => handleRespondToRequest('rejected')}
+                  disabled={responding !== null}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  {responding === selectedRequest.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <X className="h-4 w-4 mr-2" />
+                  )}
+                  Rechazar
+                </Button>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowResponseDialog(false);
+                  setResponseMessage("");
+                  setSelectedRequest(null);
+                }}
+                className="w-full"
+                disabled={responding !== null}
+              >
+                Cancelar
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
