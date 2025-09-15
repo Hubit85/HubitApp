@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -75,7 +76,7 @@ interface ContractFormData {
 }
 
 export function ContractManager() {
-  const { user, supabase } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
   const [contracts, setContracts] = useState<ExtendedContract[]>([]);
   const [loading, setLoading] = useState(true);
@@ -306,7 +307,7 @@ export function ContractManager() {
         })
         .map((quote: any) => ({
           ...quote,
-          user_id: quote.budget_requests?.user_id || '',
+          user_id: quote.budget_requests?.user_id || quote.user_id,
           title: quote.budget_requests?.title || 'Servicio sin título',
           description: quote.description || quote.budget_requests?.description || 'Sin descripción',
           budget_requests: quote.budget_requests
@@ -349,7 +350,7 @@ export function ContractManager() {
       const contractData = {
         quote_id: selectedQuote.id,
         user_id: requestUserId,
-        service_provider_id: providerData?.id || '',
+        service_provider_id: providerData.id,
         contract_number: contractNumber,
         work_description: contractForm.work_scope || selectedQuote.description || 'Descripción del trabajo',
         total_amount: selectedQuote.amount,
