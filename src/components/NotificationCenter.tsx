@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { 
   Bell, Check, X, MessageSquare, User, Mail, Phone, 
-  Building, AlertCircle, Loader2, CheckCircle, XCircle, Clock
+  Building, AlertCircle, Loader2, CheckCircle, XCircle, Clock,
+  UserPlus, Users
 } from "lucide-react";
 
 interface NotificationCenterProps {
@@ -37,18 +38,45 @@ interface AdminRequest {
   };
 }
 
+interface AssignmentRequest {
+  id: string;
+  community_member_id: string;
+  property_administrator_id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+  assignment_type: 'property_management' | 'incident_management' | 'full_management';
+  request_message?: string;
+  response_message?: string;
+  requested_at: string;
+  responded_at?: string;
+  community_member?: {
+    profiles?: {
+      full_name: string;
+      email: string;
+      phone?: string;
+    };
+    role_specific_data?: any;
+  };
+  property_details?: {
+    address?: string;
+    community_name?: string;
+  };
+}
+
 export function NotificationCenter({ userRole = "particular" }: NotificationCenterProps) {
   const { user, activeRole, userRoles } = useSupabaseAuth();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
+  const [assignmentRequests, setAssignmentRequests] = useState<AssignmentRequest[]>([]);
   const [managedIncidents, setManagedIncidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [responding, setResponding] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<AdminRequest | null>(null);
+  const [selectedAssignmentRequest, setSelectedAssignmentRequest] = useState<AssignmentRequest | null>(null);
   const [responseMessage, setResponseMessage] = useState("");
   const [showResponseDialog, setShowResponseDialog] = useState(false);
+  const [showAssignmentResponseDialog, setShowAssignmentResponseDialog] = useState(false);
 
   const isPropertyAdministrator = userRoles.some(role => 
     role.role_type === 'property_administrator' && role.is_verified
@@ -72,6 +100,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       await Promise.all([
         loadGeneralNotifications(),
         loadAdministratorRequests(),
+        loadAssignmentRequests(),
         loadManagedIncidents()
       ]);
     } catch (err) {
@@ -79,6 +108,96 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       setError('Error al cargar los datos del administrador');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAssignmentRequests = async () => {
+    if (!activeRole || activeRole.role_type !== 'property_administrator') return;
+
+    try {
+      console.log('🔍 NOTIFICATIONS: Loading assignment requests for administrator:', activeRole.id);
+
+      // First get assignment requests from the administrator_requests table with assignment type
+      const { data: requests, error } = await supabase
+        .from('administrator_requests')
+        .select('*')
+        .eq('property_administrator_id', activeRole.id)
+        .not('assignment_type', 'is', null) // Only get requests with assignment type
+        .order('requested_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ NOTIFICATIONS: Error loading assignment requests:', error);
+        setAssignmentRequests([]);
+        return;
+      }
+
+      if (!requests || requests.length === 0) {
+        console.log('📝 NOTIFICATIONS: No assignment requests found');
+        setAssignmentRequests([]);
+        return;
+      }
+
+      // Enrich the requests with community member data
+      const enrichedRequests = await Promise.all(
+        requests.map(async (request) => {
+          try {
+            // Get community member data
+            const { data: memberData } = await supabase
+              .from('user_roles')
+              .select(`
+                id,
+                user_id,
+                role_specific_data,
+                profiles:user_id (
+                  full_name,
+                  email,
+                  phone
+                )
+              `)
+              .eq('id', request.community_member_id)
+              .single();
+
+            return {
+              id: request.id,
+              community_member_id: request.community_member_id,
+              property_administrator_id: request.property_administrator_id,
+              status: request.status,
+              assignment_type: request.assignment_type || 'full_management',
+              request_message: request.request_message,
+              response_message: request.response_message,
+              requested_at: request.requested_at,
+              responded_at: request.responded_at,
+              community_member: memberData,
+              property_details: {
+                address: memberData?.role_specific_data?.property_address,
+                community_name: memberData?.role_specific_data?.community_name
+              }
+            } as AssignmentRequest;
+          } catch (err) {
+            console.error('Error enriching assignment request:', err);
+            return {
+              id: request.id,
+              community_member_id: request.community_member_id,
+              property_administrator_id: request.property_administrator_id,
+              status: request.status,
+              assignment_type: request.assignment_type || 'full_management',
+              request_message: request.request_message,
+              response_message: request.response_message,
+              requested_at: request.requested_at,
+              responded_at: request.responded_at,
+              community_member: null,
+              property_details: {}
+            } as AssignmentRequest;
+          }
+        })
+      );
+
+      console.log(`✅ NOTIFICATIONS: Found ${enrichedRequests.length} assignment requests`);
+      setAssignmentRequests(enrichedRequests);
+
+    } catch (err) {
+      console.error('❌ NOTIFICATIONS: Exception loading assignment requests:', err);
+      setAssignmentRequests([]);
     }
   };
 
@@ -145,8 +264,10 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       const result = await AdministratorRequestService.getReceivedRequests(activeRole.id);
       
       if (result.success) {
-        console.log(`✅ NOTIFICATIONS: Found ${result.requests.length} administrator requests`);
-        setAdminRequests(result.requests as AdminRequest[]);
+        // Filter out requests with assignment_type - those go to assignmentRequests
+        const managementRequests = result.requests.filter(req => !req.assignment_type);
+        console.log(`✅ NOTIFICATIONS: Found ${managementRequests.length} management requests`);
+        setAdminRequests(managementRequests as AdminRequest[]);
       } else {
         console.error('❌ NOTIFICATIONS: Error loading administrator requests:', result.message);
         setAdminRequests([]);
@@ -156,6 +277,112 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       console.error('❌ NOTIFICATIONS: Exception loading administrator requests:', err);
       setAdminRequests([]);
     }
+  };
+
+  const handleRespondToAssignmentRequest = async (response: 'accepted' | 'rejected') => {
+    if (!selectedAssignmentRequest || !user || !activeRole) return;
+
+    setResponding(selectedAssignmentRequest.id);
+    setError("");
+    setSuccess("");
+
+    try {
+      console.log('📝 NOTIFICATIONS: Responding to assignment request:', selectedAssignmentRequest.id, 'with:', response);
+
+      // Use the AdministratorRequestService for consistency
+      const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+      
+      const result = await AdministratorRequestService.respondToRequest({
+        requestId: selectedAssignmentRequest.id,
+        response: response,
+        responseMessage: responseMessage.trim() || undefined,
+        respondedBy: user.id
+      });
+
+      if (result.success) {
+        console.log('✅ NOTIFICATIONS: Assignment response processed successfully');
+        
+        setSuccess(result.message);
+        setShowAssignmentResponseDialog(false);
+        setResponseMessage("");
+        setSelectedAssignmentRequest(null);
+
+        // Reload all administrator data to reflect changes
+        await loadAllAdministratorData();
+
+      } else {
+        console.error('❌ NOTIFICATIONS: Error responding to assignment request:', result.message);
+        setError(result.message);
+      }
+
+    } catch (err) {
+      console.error('❌ NOTIFICATIONS: Exception responding to assignment request:', err);
+      setError('Error inesperado al procesar la respuesta');
+    } finally {
+      setResponding(null);
+    }
+  };
+
+  const handleCancelAssignmentRequest = async (requestId: string) => {
+    if (!user) return;
+
+    setResponding(requestId);
+    setError("");
+    setSuccess("");
+
+    try {
+      console.log('🗑️ NOTIFICATIONS: Cancelling assignment request:', requestId);
+
+      // Use the AdministratorRequestService for consistency
+      const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+      
+      const result = await AdministratorRequestService.cancelRequest(requestId);
+
+      if (result.success) {
+        console.log('✅ NOTIFICATIONS: Assignment request cancelled successfully');
+        
+        setSuccess(result.message);
+        
+        // Reload assignment requests to reflect changes
+        await loadAssignmentRequests();
+
+      } else {
+        console.error('❌ NOTIFICATIONS: Error cancelling assignment request:', result.message);
+        setError(result.message);
+      }
+
+    } catch (err) {
+      console.error('❌ NOTIFICATIONS: Exception cancelling assignment request:', err);
+      setError('Error inesperado al eliminar la solicitud de asignación');
+    } finally {
+      setResponding(null);
+    }
+  };
+
+  const getAssignmentTypeLabel = (type: string) => {
+    const types = {
+      property_management: 'Gestión de Propiedad',
+      incident_management: 'Gestión de Incidencias',
+      full_management: 'Gestión Completa'
+    };
+    return types[type as keyof typeof types] || type;
+  };
+
+  const getAssignmentTypeBadge = (type: string) => {
+    const config = {
+      property_management: { color: 'bg-blue-100 text-blue-800', icon: Building },
+      incident_management: { color: 'bg-orange-100 text-orange-800', icon: AlertCircle },
+      full_management: { color: 'bg-purple-100 text-purple-800', icon: Users }
+    }[type] || { color: 'bg-gray-100 text-gray-800', icon: Building };
+
+    const Icon = config.icon;
+
+    return (
+      <Badge className={`${config.color} flex items-center gap-1`}>
+        <Icon className="h-3 w-3" />
+        {getAssignmentTypeLabel(type)}
+      </Badge>
+    );
   };
 
   const handleRespondToRequest = async (response: 'accepted' | 'rejected') => {
@@ -313,7 +540,11 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1 text-amber-600">
                 <Clock className="h-4 w-4" />
-                <span>{adminRequests.filter(r => r.status === 'pending').length} pendientes</span>
+                <span>{adminRequests.filter(r => r.status === 'pending').length} gestión</span>
+              </div>
+              <div className="flex items-center gap-1 text-purple-600">
+                <UserPlus className="h-4 w-4" />
+                <span>{assignmentRequests.filter(r => r.status === 'pending').length} asignación</span>
               </div>
               <div className="flex items-center gap-1 text-green-600">
                 <AlertCircle className="h-4 w-4" />
