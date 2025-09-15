@@ -53,7 +53,7 @@ export const ServiceProviderDashboardService = {
       .eq("status", "published");
     // In a real app, you'd filter by categories the provider is subscribed to
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
   async getActiveContracts(providerId: string): Promise<ExtendedContract[]> {
@@ -72,10 +72,11 @@ export const ServiceProviderDashboardService = {
         )
       `
       )
-      .eq("provider_id", providerId)
+      .eq("service_provider_id", providerId)
       .in("status", ["signed", "in_progress"]);
+    
     if (error) throw error;
-    return data as ExtendedContract[];
+    return (data || []) as ExtendedContract[];
   },
 
   async getRecentQuotes(providerId: string): Promise<ExtendedQuote[]> {
@@ -91,11 +92,12 @@ export const ServiceProviderDashboardService = {
         )
       `
       )
-      .eq("provider_id", providerId)
+      .eq("service_provider_id", providerId)
       .limit(5)
       .order("created_at", { ascending: false });
+    
     if (error) throw error;
-    return data as ExtendedQuote[];
+    return (data || []) as ExtendedQuote[];
   },
 
   async getProviderStats(providerId: string) {

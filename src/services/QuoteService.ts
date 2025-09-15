@@ -5,14 +5,14 @@ import {
   Profile,
   Property,
   Quote,
-} from "@/integrations/supabase/types"
+} from "@/integrations/supabase/types";
 
 export type ExtendedQuote = Quote & {
   budget_requests: BudgetRequest & {
-    profiles: Profile
-    properties: Property
-  }
-}
+    profiles: Profile;
+    properties: Property;
+  };
+};
 
 export const QuoteService = {
   async getQuotesForProvider(providerId: string): Promise<ExtendedQuote[]> {
@@ -28,9 +28,10 @@ export const QuoteService = {
         )
       `
       )
-      .eq("provider_id", providerId)
-    if (error) throw error
-    return data as ExtendedQuote[]
+      .eq("service_provider_id", providerId);
+    
+    if (error) throw error;
+    return (data || []) as ExtendedQuote[];
   },
 
   async getQuotesForRequest(requestId: string): Promise<ExtendedQuote[]> {
@@ -46,9 +47,10 @@ export const QuoteService = {
         )
       `
       )
-      .eq("budget_request_id", requestId)
-    if (error) throw error
-    return data as ExtendedQuote[]
+      .eq("budget_request_id", requestId);
+    
+    if (error) throw error;
+    return (data || []) as ExtendedQuote[];
   },
 
   async createQuote(quoteData: Quote) {
@@ -56,9 +58,9 @@ export const QuoteService = {
       .from("quotes")
       .insert(quoteData)
       .select()
-      .single()
-    if (error) throw error
-    return data
+      .single();
+    if (error) throw error;
+    return data;
   },
 
   async updateQuoteStatus(
@@ -70,24 +72,24 @@ export const QuoteService = {
       .update({ status })
       .eq("id", quoteId)
       .select()
-      .single()
-    if (error) throw error
-    return data
+      .single();
+    if (error) throw error;
+    return data;
   },
 
   calculateQuoteStats: (quotes: ExtendedQuote[]) => {
-    const totalQuotes = quotes.length
+    const totalQuotes = quotes.length;
     const acceptedQuotes = quotes.filter(
       (q) => q.status === "accepted"
-    ).length
-    const pendingQuotes = quotes.filter((q) => q.status === "pending").length
-    const rejectedQuotes = quotes.filter((q) => q.status === "rejected").length
+    ).length;
+    const pendingQuotes = quotes.filter((q) => q.status === "pending").length;
+    const rejectedQuotes = quotes.filter((q) => q.status === "rejected").length;
     const averageAmount =
       totalQuotes > 0
         ? quotes.reduce((acc, q) => acc + q.amount, 0) / totalQuotes
-        : 0
+        : 0;
     const acceptanceRate =
-      totalQuotes > 0 ? (acceptedQuotes / totalQuotes) * 100 : 0
+      totalQuotes > 0 ? (acceptedQuotes / totalQuotes) * 100 : 0;
 
     return {
       totalQuotes,
@@ -96,6 +98,6 @@ export const QuoteService = {
       rejectedQuotes,
       averageAmount,
       acceptanceRate,
-    }
+    };
   },
-}
+};
