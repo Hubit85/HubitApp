@@ -418,7 +418,7 @@ export function CommunityAdministratorAssignment() {
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {error && (
+        {error && !success && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
