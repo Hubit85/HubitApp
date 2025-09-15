@@ -889,7 +889,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               is_verified: false,
               verification_code: null,
               last_login: null,
-              created_at: userObject.created_at ? userObject.created_at : new Date().toISOString(),
+              created_at: userObject.created_at || new Date().toISOString(),
               updated_at: new Date().toISOString()
             } as Profile;
             
