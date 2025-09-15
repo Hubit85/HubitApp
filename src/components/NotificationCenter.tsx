@@ -41,6 +41,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
   const { user, activeRole, userRoles } = useSupabaseAuth();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
+  const [managedIncidents, setManagedIncidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [responding, setResponding] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -55,43 +56,122 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
 
   useEffect(() => {
     if (user && isPropertyAdministrator && activeRole) {
-      loadNotifications();
+      loadAllAdministratorData();
     } else if (user) {
       loadGeneralNotifications();
     }
   }, [user, activeRole, isPropertyAdministrator]);
 
-  const loadNotifications = async () => {
+  const loadAllAdministratorData = async () => {
     if (!user || !activeRole) return;
 
     setLoading(true);
     setError("");
 
     try {
-      // Load general notifications
-      const { data: notifications, error: notifError } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
+      await Promise.all([
+        loadGeneralNotifications(),
+        loadAdministratorRequests(),
+        loadManagedIncidents()
+      ]);
+    } catch (err) {
+      console.error('Error loading administrator data:', err);
+      setError('Error al cargar los datos del administrador');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      if (notifError) {
-        console.warn('Error loading notifications:', notifError);
-      } else {
-        setNotifications(notifications || []);
+  const loadManagedIncidents = async () => {
+    if (!activeRole || activeRole.role_type !== 'property_administrator') return;
+
+    try {
+      console.log('🔍 Loading managed incidents for administrator...');
+
+      // First, get managed community members
+      const { data: managedMembers, error: managedError } = await supabase
+        .from('managed_communities')
+        .select('community_member_id, community_member:user_roles!managed_communities_community_member_id_fkey(user_id)')
+        .eq('property_administrator_id', activeRole.id)
+        .eq('relationship_status', 'active');
+
+      if (managedError) {
+        console.warn('Error loading managed members:', managedError);
+        return;
       }
 
-      // Load administrator requests if user is property administrator
-      if (isPropertyAdministrator && activeRole.role_type === 'property_administrator') {
-        await loadAdministratorRequests();
+      if (!managedMembers || managedMembers.length === 0) {
+        console.log('No managed members found');
+        setManagedIncidents([]);
+        return;
+      }
+
+      // Extract user IDs from managed members
+      const managedUserIds = managedMembers
+        .map(member => {
+          const communityMember = member.community_member as any;
+          return communityMember?.user_id;
+        })
+        .filter((id): id is string => !!id && typeof id === 'string');
+
+      if (managedUserIds.length === 0) {
+        console.log('No valid user IDs found');
+        setManagedIncidents([]);
+        return;
+      }
+
+      console.log(`📋 Loading incidents for ${managedUserIds.length} managed users`);
+
+      // Get incidents from managed users
+      const { data: incidents, error: incidentsError } = await supabase
+        .from('incident_reports')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            email,
+            phone
+          )
+        `)
+        .in('user_id', managedUserIds)
+        .order('reported_at', { ascending: false })
+        .limit(20);
+
+      if (incidentsError) {
+        console.error('Error loading incidents:', incidentsError);
+        return;
+      }
+
+      console.log(`✅ Loaded ${incidents?.length || 0} incidents`);
+      setManagedIncidents(incidents || []);
+
+      // Auto-assign administrator to unassigned incidents
+      try {
+        const unassignedIncidents = incidents?.filter(incident => 
+          !incident.managing_administrator_id
+        ) || [];
+
+        if (unassignedIncidents.length > 0) {
+          console.log(`🔄 Auto-assigning ${unassignedIncidents.length} incidents to administrator`);
+          
+          const incidentIds = unassignedIncidents.map(i => i.id);
+          
+          await supabase
+            .from('incident_reports')
+            .update({
+              managing_administrator_id: activeRole.id,
+              updated_at: new Date().toISOString()
+            })
+            .in('id', incidentIds);
+
+          console.log('✅ Auto-assignment completed');
+        }
+      } catch (assignError) {
+        console.warn('Could not auto-assign incidents:', assignError);
       }
 
     } catch (err) {
-      console.error('Error loading notifications:', err);
-      setError('Error al cargar las notificaciones');
-    } finally {
-      setLoading(false);
+      console.error('Error loading managed incidents:', err);
     }
   };
 
@@ -104,7 +184,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
 
       if (error) {
         console.warn('Error loading general notifications:', error);
@@ -262,7 +342,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       setSelectedRequest(null);
 
       // Reload data
-      await Promise.all([loadNotifications(), loadAdministratorRequests()]);
+      await loadAllAdministratorData();
 
     } catch (err) {
       console.error('Error responding to request:', err);

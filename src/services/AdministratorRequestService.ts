@@ -188,7 +188,7 @@ export class AdministratorRequestService {
       return { success: false, requests: [], message: 'Error inesperado al obtener las solicitudes enviadas' };
     }
   }
-  
+
   static async searchPropertyAdministrators(searchTerm?: string): Promise<{
     success: boolean;
     administrators: Array<{
