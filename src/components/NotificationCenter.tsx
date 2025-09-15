@@ -265,7 +265,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       
       if (result.success) {
         // Filter out requests with assignment_type - those go to assignmentRequests
-        const managementRequests = result.requests.filter(req => !req.assignment_type);
+        const managementRequests = result.requests.filter(req => !(req as any).assignment_type);
         console.log(`✅ NOTIFICATIONS: Found ${managementRequests.length} management requests`);
         setAdminRequests(managementRequests as AdminRequest[]);
       } else {
