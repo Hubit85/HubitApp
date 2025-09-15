@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { 
@@ -55,7 +55,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
   );
 
   useEffect(() => {
-    if (user && isPropertyAdministrator && activeRole) {
+    if (user && isPropertyAdministrator && activeRole?.role_type === 'property_administrator') {
       loadAllAdministratorData();
     } else if (user) {
       loadGeneralNotifications();
@@ -86,92 +86,24 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     if (!activeRole || activeRole.role_type !== 'property_administrator') return;
 
     try {
-      console.log('🔍 Loading managed incidents for administrator...');
+      console.log('🔍 NOTIFICATIONS: Loading managed incidents...');
 
-      // First, get managed community members
-      const { data: managedMembers, error: managedError } = await supabase
-        .from('managed_communities')
-        .select('community_member_id, community_member:user_roles!managed_communities_community_member_id_fkey(user_id)')
-        .eq('property_administrator_id', activeRole.id)
-        .eq('relationship_status', 'active');
-
-      if (managedError) {
-        console.warn('Error loading managed members:', managedError);
-        return;
-      }
-
-      if (!managedMembers || managedMembers.length === 0) {
-        console.log('No managed members found');
+      // Use the AdministratorRequestService for consistency
+      const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+      
+      const result = await AdministratorRequestService.getManagedIncidents(activeRole.id);
+      
+      if (result.success) {
+        console.log(`✅ NOTIFICATIONS: Found ${result.incidents.length} managed incidents`);
+        setManagedIncidents(result.incidents);
+      } else {
+        console.warn('⚠️ NOTIFICATIONS: Error loading managed incidents:', result.message);
         setManagedIncidents([]);
-        return;
-      }
-
-      // Extract user IDs from managed members
-      const managedUserIds = managedMembers
-        .map(member => {
-          const communityMember = member.community_member as any;
-          return communityMember?.user_id;
-        })
-        .filter((id): id is string => !!id && typeof id === 'string');
-
-      if (managedUserIds.length === 0) {
-        console.log('No valid user IDs found');
-        setManagedIncidents([]);
-        return;
-      }
-
-      console.log(`📋 Loading incidents for ${managedUserIds.length} managed users`);
-
-      // Get incidents from managed users
-      const { data: incidents, error: incidentsError } = await supabase
-        .from('incident_reports')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            email,
-            phone
-          )
-        `)
-        .in('user_id', managedUserIds)
-        .order('reported_at', { ascending: false })
-        .limit(20);
-
-      if (incidentsError) {
-        console.error('Error loading incidents:', incidentsError);
-        return;
-      }
-
-      console.log(`✅ Loaded ${incidents?.length || 0} incidents`);
-      setManagedIncidents(incidents || []);
-
-      // Auto-assign administrator to unassigned incidents
-      try {
-        const unassignedIncidents = incidents?.filter(incident => 
-          !incident.managing_administrator_id
-        ) || [];
-
-        if (unassignedIncidents.length > 0) {
-          console.log(`🔄 Auto-assigning ${unassignedIncidents.length} incidents to administrator`);
-          
-          const incidentIds = unassignedIncidents.map(i => i.id);
-          
-          await supabase
-            .from('incident_reports')
-            .update({
-              managing_administrator_id: activeRole.id,
-              updated_at: new Date().toISOString()
-            })
-            .in('id', incidentIds);
-
-          console.log('✅ Auto-assignment completed');
-        }
-      } catch (assignError) {
-        console.warn('Could not auto-assign incidents:', assignError);
       }
 
     } catch (err) {
-      console.error('Error loading managed incidents:', err);
+      console.error('❌ NOTIFICATIONS: Exception loading managed incidents:', err);
+      setManagedIncidents([]);
     }
   };
 
@@ -179,6 +111,8 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     if (!user) return;
 
     try {
+      console.log('🔍 NOTIFICATIONS: Loading general notifications for user:', user.id);
+
       const { data: notifications, error } = await supabase
         .from('notifications')
         .select('*')
@@ -187,12 +121,15 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         .limit(20);
 
       if (error) {
-        console.warn('Error loading general notifications:', error);
+        console.warn('⚠️ NOTIFICATIONS: Error loading general notifications:', error);
+        setNotifications([]);
       } else {
+        console.log(`✅ NOTIFICATIONS: Found ${notifications?.length || 0} general notifications`);
         setNotifications(notifications || []);
       }
     } catch (err) {
-      console.error('Error loading general notifications:', err);
+      console.error('❌ NOTIFICATIONS: Exception loading general notifications:', err);
+      setNotifications([]);
     }
   };
 
@@ -202,7 +139,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     try {
       console.log('🔍 NOTIFICATIONS: Loading administrator requests for role:', activeRole.id);
 
-      // CORRECTED: Use the AdministratorRequestService for consistent data loading
+      // Use the AdministratorRequestService for consistent data loading
       const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
       
       const result = await AdministratorRequestService.getReceivedRequests(activeRole.id);
@@ -229,74 +166,37 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     setSuccess("");
 
     try {
-      // Update the request
-      const { error: updateError } = await supabase
-        .from('administrator_requests')
-        .update({
-          status: response,
-          response_message: responseMessage.trim() || null,
-          responded_at: new Date().toISOString(),
-          responded_by: user.id
-        })
-        .eq('id', selectedRequest.id);
+      console.log('📝 NOTIFICATIONS: Responding to request:', selectedRequest.id, 'with:', response);
 
-      if (updateError) {
-        throw updateError;
+      // CORRECTED: Use the AdministratorRequestService for consistency
+      const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+      
+      const result = await AdministratorRequestService.respondToRequest({
+        requestId: selectedRequest.id,
+        response: response,
+        responseMessage: responseMessage.trim() || undefined,
+        respondedBy: user.id
+      });
+
+      if (result.success) {
+        console.log('✅ NOTIFICATIONS: Response processed successfully');
+        
+        setSuccess(result.message);
+        setShowResponseDialog(false);
+        setResponseMessage("");
+        setSelectedRequest(null);
+
+        // Reload all administrator data to reflect changes
+        await loadAllAdministratorData();
+
+      } else {
+        console.error('❌ NOTIFICATIONS: Error responding to request:', result.message);
+        setError(result.message);
       }
-
-      // If accepted, create management relationship
-      if (response === 'accepted') {
-        const { error: relationError } = await supabase
-          .from('managed_communities')
-          .insert({
-            property_administrator_id: activeRole.id,
-            community_member_id: selectedRequest.community_member_id,
-            relationship_status: 'active',
-            established_at: new Date().toISOString(),
-            established_by: user.id,
-            notes: `Relación establecida tras aceptar solicitud del ${new Date().toLocaleDateString()}`
-          });
-
-        if (relationError) {
-          console.warn('Failed to create management relationship:', relationError);
-        }
-      }
-
-      // Send notification to community member
-      if (selectedRequest.community_member?.profiles) {
-        const { data: memberRole } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('id', selectedRequest.community_member_id)
-          .single();
-
-        if (memberRole) {
-          await supabase.from('notifications').insert({
-            user_id: memberRole.user_id,
-            title: response === 'accepted' ? '✅ Solicitud Aceptada' : '❌ Solicitud Rechazada',
-            message: response === 'accepted' 
-              ? 'Tu solicitud de gestión de incidencias ha sido aceptada. Ahora tus reportes serán gestionados por el administrador.'
-              : 'Tu solicitud de gestión de incidencias ha sido rechazada.',
-            type: response === 'accepted' ? 'success' as const : 'warning' as const,
-            category: 'request' as const,
-            related_entity_type: 'administrator_request',
-            related_entity_id: selectedRequest.id,
-            read: false
-          });
-        }
-      }
-
-      setSuccess(response === 'accepted' ? 'Solicitud aceptada correctamente' : 'Solicitud rechazada correctamente');
-      setShowResponseDialog(false);
-      setResponseMessage("");
-      setSelectedRequest(null);
-
-      // Reload data
-      await loadAllAdministratorData();
 
     } catch (err) {
-      console.error('Error responding to request:', err);
-      setError('Error al procesar la respuesta');
+      console.error('❌ NOTIFICATIONS: Exception responding to request:', err);
+      setError('Error inesperado al procesar la respuesta');
     } finally {
       setResponding(null);
     }
@@ -310,28 +210,29 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     setSuccess("");
 
     try {
-      // Mark the request as cancelled
-      const { error: cancelError } = await supabase
-        .from('administrator_requests')
-        .update({
-          status: 'cancelled',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', requestId)
-        .eq('status', 'pending');
+      console.log('🗑️ NOTIFICATIONS: Cancelling request:', requestId);
 
-      if (cancelError) {
-        throw cancelError;
+      // Use the AdministratorRequestService for consistency
+      const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+      
+      const result = await AdministratorRequestService.cancelRequest(requestId);
+
+      if (result.success) {
+        console.log('✅ NOTIFICATIONS: Request cancelled successfully');
+        
+        setSuccess(result.message);
+        
+        // Reload administrator requests to reflect changes
+        await loadAdministratorRequests();
+
+      } else {
+        console.error('❌ NOTIFICATIONS: Error cancelling request:', result.message);
+        setError(result.message);
       }
 
-      setSuccess('Solicitud eliminada correctamente');
-
-      // Reload administrator requests
-      await loadAdministratorRequests();
-
     } catch (err) {
-      console.error('Error cancelling request:', err);
-      setError('Error al eliminar la solicitud');
+      console.error('❌ NOTIFICATIONS: Exception cancelling request:', err);
+      setError('Error inesperado al eliminar la solicitud');
     } finally {
       setResponding(null);
     }
@@ -543,14 +444,19 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
                             <p className="text-xs text-stone-500">
                               {request.responded_at && `Respondido el ${formatDate(request.responded_at)}`}
                             </p>
-                            {request.status === 'cancelled' && (
+                            {(request.status === 'cancelled' || request.status === 'rejected') && (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleCancelRequest(request.id)}
                                 className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 mt-2"
+                                disabled={responding === request.id}
                               >
-                                <X className="h-3 w-3 mr-1" />
+                                {responding === request.id ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <X className="h-3 w-3 mr-1" />
+                                )}
                                 Eliminar Registro
                               </Button>
                             )}
