@@ -678,7 +678,7 @@ export function ContractManager() {
                                 <User className="h-4 w-4" />
                                 <span>{contract.client_name || contract.provider_name}</span>
                                 <Separator orientation="vertical" className="h-4" />
-                                <span>#{contract.contract_number ?? 'N/A'}</span>
+                                <span>#{contract.contract_number ? contract.contract_number : 'N/A'}</span>
                               </div>
                             </div>
                           </div>
