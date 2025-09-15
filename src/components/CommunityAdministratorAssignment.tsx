@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { 
   Building, CheckCircle, Loader2, AlertCircle, Phone, 
   Mail, Building2, User, Users, Clock, Send, Star
@@ -35,7 +34,7 @@ interface AssignmentRequest {
 }
 
 export function CommunityAdministratorAssignment() {
-  const { user, profile, userRoles } = useSupabaseAuth();
+  const { user, userRoles } = useSupabaseAuth();
   const [currentAssignment, setCurrentAssignment] = useState<CommunityMemberAdministrator | null>(null);
   const [availableAdministrators, setAvailableAdministrators] = useState<PropertyAdministrator[]>([]);
   const [pendingRequests, setPendingRequests] = useState<AssignmentRequest[]>([]);
@@ -51,7 +50,7 @@ export function CommunityAdministratorAssignment() {
   useEffect(() => {
     if (user && isCommunityMember) {
       initializeComponent();
-    } else if (!loading) {
+    } else {
       setLoading(false);
     }
   }, [user, isCommunityMember]);
@@ -102,7 +101,7 @@ export function CommunityAdministratorAssignment() {
     setPendingRequests((data || []).map(req => ({
       id: req.id,
       administrator_id: req.company_cif,
-      created_at: req.created_at,
+      created_at: req.created_at || new Date().toISOString(), // FIX: Handle null created_at
       status: 'pending',
       company_name: req.company_name,
     })));
@@ -162,7 +161,6 @@ export function CommunityAdministratorAssignment() {
 
       if (insertError) throw insertError;
 
-      // Optimistic UI update and notification
       setSuccess(`✅ Solicitud enviada a ${administrator.company_name}.`);
       await initializeComponent();
 
