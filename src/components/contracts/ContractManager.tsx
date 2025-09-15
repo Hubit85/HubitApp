@@ -385,21 +385,13 @@ export function ContractManager() {
       // Send notification to the contract owner with proper null checks and fallback
       if (requestUserId && user?.id && providerData?.id && newContract) {
         try {
-          // Safe string conversion with explicit type checking
           const serviceTitle = selectedQuote.title || 'Servicio';
-          const contractNumber = newContract.contract_number;
           
-          // Ensure we have a proper string value for the message
-          let displayContractNumber: string;
-          if (contractNumber && typeof contractNumber === 'string') {
-            displayContractNumber = contractNumber;
-          } else if (contractNumber && typeof contractNumber === 'number') {
-            displayContractNumber = contractNumber.toString();
-          } else {
-            displayContractNumber = `CON-${Date.now()}`;
-          }
+          // Safe contract number handling with explicit type conversion
+          const contractNumberRaw = newContract.contract_number;
+          const contractNumber = contractNumberRaw ? String(contractNumberRaw) : `CON-${Date.now()}`;
           
-          const messageContent = `Se ha generado un contrato para tu solicitud "${serviceTitle}" (${displayContractNumber})`;
+          const messageContent = `Se ha generado un contrato para tu solicitud "${serviceTitle}" (${contractNumber})`;
             
           await supabase
             .from('notifications')
