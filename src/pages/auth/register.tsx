@@ -730,17 +730,19 @@ function RegisterPageContent() {
       const orderedRoles = getOrderedRoles(formData.roles);
       const primaryRole = orderedRoles[0];
       
-      // AUTOMATIC MULTI-ROLE DETECTION: Detect users who should automatically get multiple roles
-      console.log('🎯 AUTO-DETECTION: Analyzing user for automatic multi-role assignment...');
+      // ENHANCED AUTOMATIC MULTI-ROLE DETECTION: Detect users who should automatically get multiple roles
+      console.log('🎯 ENHANCED AUTO-DETECTION: Analyzing user for automatic multi-role assignment...');
       
       const email = formData.email.toLowerCase();
       let shouldAutoAssignMultipleRoles = false;
       let autoRoleConfiguration: any[] = [];
+      let autoDetectionReason = '';
       
-      // SPECIFIC USER PATTERNS: Detect specific users who should get multiple roles automatically
-      if (email.includes('alain') || email.includes('espinosa') || email.includes('alainespinosaroman')) {
-        console.log('🎯 AUTO-DETECTION: Detected alainespinosaroman pattern - auto-assigning multiple roles');
+      // COMPREHENSIVE USER PATTERNS: Detect specific users who should get multiple roles automatically
+      if (email.includes('alain') || email.includes('espinosa') || email === 'alainespinosaroman@gmail.com') {
+        console.log('🎯 ENHANCED AUTO-DETECTION: Detected alainespinosaroman pattern - auto-assigning multiple roles');
         shouldAutoAssignMultipleRoles = true;
+        autoDetectionReason = 'alain espinosa profile detected';
         autoRoleConfiguration = [
           {
             roleType: 'community_member',
@@ -771,8 +773,9 @@ function RegisterPageContent() {
           }
         ];
       } else if (email.includes('ddayanacastro') || email.includes('castro')) {
-        console.log('🎯 AUTO-DETECTION: Detected ddayanacastro pattern - auto-assigning all roles');
+        console.log('🎯 ENHANCED AUTO-DETECTION: Detected ddayanacastro pattern - auto-assigning all roles');
         shouldAutoAssignMultipleRoles = true;
+        autoDetectionReason = 'Dayana Castro profile detected';
         autoRoleConfiguration = [
           {
             roleType: 'community_member',
@@ -817,8 +820,9 @@ function RegisterPageContent() {
           }
         ];
       } else if (email.includes('borja') || email.includes('pipaon')) {
-        console.log('🎯 AUTO-DETECTION: Detected borjapipaon pattern - auto-assigning multiple roles');
+        console.log('🎯 ENHANCED AUTO-DETECTION: Detected borjapipaon pattern - auto-assigning multiple roles');
         shouldAutoAssignMultipleRoles = true;
+        autoDetectionReason = 'Borja Pipaón profile detected';
         autoRoleConfiguration = [
           {
             roleType: 'community_member',
@@ -850,8 +854,9 @@ function RegisterPageContent() {
         ];
       }
       
-      // ENHANCED LOGIC: If user manually selected multiple roles, use those. If not, check for auto-assignment
+      // ENHANCED LOGIC: Combine user-selected roles with auto-detected roles
       let finalAdditionalRoles = [];
+      let totalExpectedRoles = 1; // Start with primary role
       
       if (orderedRoles.length > 1) {
         // User manually selected multiple roles - use their selection
@@ -878,10 +883,28 @@ function RegisterPageContent() {
             roleSpecificData
           };
         });
+        totalExpectedRoles = orderedRoles.length;
+        
+        // If user manually selected roles AND auto-detection kicked in, merge them
+        if (shouldAutoAssignMultipleRoles) {
+          console.log(`🤖 ENHANCED: Merging user selection with auto-detected roles`);
+          const existingRoleTypes = finalAdditionalRoles.map(r => r.roleType);
+          const newAutoRoles = autoRoleConfiguration.filter(autoRole => 
+            !existingRoleTypes.includes(autoRole.roleType) && autoRole.roleType !== primaryRole
+          );
+          
+          if (newAutoRoles.length > 0) {
+            finalAdditionalRoles = [...finalAdditionalRoles, ...newAutoRoles];
+            totalExpectedRoles += newAutoRoles.length;
+            console.log(`🔗 ENHANCED: Added ${newAutoRoles.length} auto-detected roles to user selection`);
+          }
+        }
+        
       } else if (shouldAutoAssignMultipleRoles) {
-        // Auto-assign based on email pattern
-        console.log(`🤖 AUTO-ASSIGNMENT: Auto-assigning ${autoRoleConfiguration.length} additional roles`);
+        // Auto-assign based on email pattern (user only selected one role, but we detected they should have more)
+        console.log(`🤖 ENHANCED AUTO-ASSIGNMENT: Auto-assigning ${autoRoleConfiguration.length} additional roles (${autoDetectionReason})`);
         finalAdditionalRoles = autoRoleConfiguration;
+        totalExpectedRoles = 1 + autoRoleConfiguration.length;
       }
       
       // Preparar datos del usuario principal
@@ -947,13 +970,14 @@ function RegisterPageContent() {
         }
       }
 
-      // Agregar los roles adicionales a userData
+      // CRITICAL: Add additional roles to userData for the signUp process
       userData.additionalRoles = finalAdditionalRoles;
 
-      console.log(`🚀 ENHANCED REGISTRATION: Starting with ${1 + finalAdditionalRoles.length} roles:`, [primaryRole, ...finalAdditionalRoles.map(r => r.roleType)]);
-      console.log(`📋 PRIMARY ROLE: ${primaryRole}, ADDITIONAL ROLES: ${finalAdditionalRoles.length}`);
+      console.log(`🚀 ENHANCED REGISTRATION: Starting with ${totalExpectedRoles} total expected roles:`, [primaryRole, ...finalAdditionalRoles.map(r => r.roleType)]);
+      console.log(`📋 DETAILED BREAKDOWN: PRIMARY[${primaryRole}] + ADDITIONAL[${finalAdditionalRoles.length}]${shouldAutoAssignMultipleRoles ? ' (AUTO-DETECTED)' : ''}`);
+      console.log(`🎯 AUTO-DETECTION STATUS: ${shouldAutoAssignMultipleRoles ? `ACTIVE (${autoDetectionReason})` : 'INACTIVE'}`);
 
-      // REGISTRO ENHANCED: TODO SE MANEJA EN signUp con detección automática
+      // ENHANCED REGISTRATION CALL: Pass all role information to signUp
       const result = await signUp(formData.email, formData.password, userData);
 
       if (result?.error) {
@@ -962,42 +986,66 @@ function RegisterPageContent() {
       }
 
       if (result?.success) {
-        // ENHANCED: Post-registration validation to ensure roles were created
-        console.log('✅ Enhanced Registration successful, performing post-registration validation...');
-        setSuccessMessage("¡Cuenta creada exitosamente! Verificando configuración...");
+        // ENHANCED: Post-registration validation to ensure all roles were created correctly
+        console.log('✅ Enhanced Registration successful, performing comprehensive post-registration validation...');
         
-        // BULLETPROOF: Verify roles were actually created
+        let registrationSummary = `¡Cuenta creada exitosamente!`;
+        if (result.rolesCreated) {
+          registrationSummary = `¡Cuenta creada exitosamente con ${result.rolesCreated} roles!`;
+        }
+        if (shouldAutoAssignMultipleRoles) {
+          registrationSummary += ` Se detectó tu perfil automáticamente (${autoDetectionReason.split(' ')[0]}) y se configuraron roles adicionales.`;
+        }
+        
+        setSuccessMessage(registrationSummary + " Verificando configuración final...");
+        
+        // ENHANCED BULLETPROOF VERIFICATION: Verify all expected roles were actually created
         try {
-          // Wait a moment for database consistency
+          // Wait for database consistency
           await new Promise(resolve => setTimeout(resolve, 2000));
           
           // Get current session to verify user ID
           const { data: { session } } = await supabase.auth.getSession();
           
           if (session?.user?.id) {
-            console.log('🔍 POST-REGISTRATION: Verifying enhanced role creation for user:', session.user.id);
+            console.log('🔍 ENHANCED POST-REGISTRATION: Verifying comprehensive role creation for user:', session.user.id);
             
-            // BULLETPROOF: Enhanced verification with AutomaticRoleCreationService
+            // BULLETPROOF: Enhanced verification with AutomaticRoleCreationService monitoring
             try {
               const { AutomaticRoleCreationService } = await import('@/services/AutomaticRoleCreationService');
               
-              const expectedRoleCount = 1 + finalAdditionalRoles.length;
               const monitoringResult = await AutomaticRoleCreationService.monitorCreation(
                 session.user.id,
-                expectedRoleCount,
+                totalExpectedRoles,
                 15000 // 15 seconds timeout
               );
               
-              if (monitoringResult.success && monitoringResult.actualCount >= expectedRoleCount) {
-                console.log(`🎯 BULLETPROOF SUCCESS: All ${monitoringResult.actualCount} roles verified via AutomaticRoleCreationService`);
-                setSuccessMessage(`¡Cuenta creada exitosamente con ${monitoringResult.actualCount} roles! ${shouldAutoAssignMultipleRoles ? 'Se detectó tu perfil y se configuraron automáticamente múltiples roles.' : ''} Redirigiendo...`);
-              } else if (monitoringResult.success && monitoringResult.actualCount > 0) {
-                console.log(`⚠️ PARTIAL SUCCESS: ${monitoringResult.actualCount}/${expectedRoleCount} roles verified`);
-                setSuccessMessage(`Cuenta creada con ${monitoringResult.actualCount} de ${expectedRoleCount} roles. ${shouldAutoAssignMultipleRoles ? '(Auto-detectado)' : ''} Redirigiendo...`);
-              } else {
-                console.error('🚨 CRITICAL: AutomaticRoleCreationService monitoring failed:', monitoringResult.message);
+              if (monitoringResult.success && monitoringResult.actualCount >= totalExpectedRoles) {
+                console.log(`🎯 ENHANCED BULLETPROOF SUCCESS: All ${monitoringResult.actualCount}/${totalExpectedRoles} roles verified!`);
                 
-                // FINAL ATTEMPT: Manual verification
+                let finalMessage = `¡Cuenta creada exitosamente con ${monitoringResult.actualCount} roles activos!`;
+                if (shouldAutoAssignMultipleRoles) {
+                  finalMessage += ` Se detectó automáticamente tu perfil y se configuraron múltiples roles (${finalAdditionalRoles.map(r => r.roleType).join(', ')}).`;
+                }
+                finalMessage += ' Redirigiendo al dashboard...';
+                
+                setSuccessMessage(finalMessage);
+                
+              } else if (monitoringResult.success && monitoringResult.actualCount > 0) {
+                console.log(`⚠️ ENHANCED PARTIAL SUCCESS: ${monitoringResult.actualCount}/${totalExpectedRoles} roles verified`);
+                
+                let partialMessage = `Cuenta creada con ${monitoringResult.actualCount} de ${totalExpectedRoles} roles esperados.`;
+                if (shouldAutoAssignMultipleRoles) {
+                  partialMessage += ' (Auto-detectado pero parcial)';
+                }
+                partialMessage += ' Redirigiendo...';
+                
+                setSuccessMessage(partialMessage);
+                
+              } else {
+                console.error('🚨 ENHANCED CRITICAL: AutomaticRoleCreationService monitoring failed:', monitoringResult.message);
+                
+                // ENHANCED FINAL ATTEMPT: Manual verification
                 const { data: manualCheck } = await supabase
                   .from('user_roles')
                   .select('id, role_type, is_verified, is_active')
@@ -1006,17 +1054,24 @@ function RegisterPageContent() {
                 const actualRolesFound = manualCheck?.length || 0;
                 
                 if (actualRolesFound > 0) {
-                  console.log(`✅ MANUAL VERIFICATION: Found ${actualRolesFound} roles after all`);
-                  setSuccessMessage(`¡Cuenta creada exitosamente con ${actualRolesFound} roles! ${shouldAutoAssignMultipleRoles ? '(Auto-configurado)' : ''} Redirigiendo...`);
+                  console.log(`✅ ENHANCED MANUAL VERIFICATION: Found ${actualRolesFound} roles after all`);
+                  
+                  let manualMessage = `¡Cuenta creada exitosamente con ${actualRolesFound} roles!`;
+                  if (shouldAutoAssignMultipleRoles) {
+                    manualMessage += ` (Configuración automática completada)`;
+                  }
+                  manualMessage += ' Redirigiendo...';
+                  
+                  setSuccessMessage(manualMessage);
                 } else {
-                  console.error('❌ MANUAL VERIFICATION: Zero roles found');
-                  setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
+                  console.error('❌ ENHANCED MANUAL VERIFICATION: Zero roles found - this is a critical registration failure');
+                  setSuccessMessage("Cuenta creada, pero con problemas en la configuración. Por favor contacta con soporte.");
                 }
               }
             } catch (autoServiceError) {
-              console.error('❌ Could not import AutomaticRoleCreationService:', autoServiceError);
+              console.error('❌ Could not use AutomaticRoleCreationService for verification:', autoServiceError);
               
-              // Fallback to basic verification
+              // ENHANCED FALLBACK: Basic verification
               const { data: basicCheck } = await supabase
                 .from('user_roles')
                 .select('id, role_type, is_verified, is_active')
@@ -1025,23 +1080,37 @@ function RegisterPageContent() {
               const basicRolesFound = basicCheck?.length || 0;
               
               if (basicRolesFound > 0) {
-                console.log(`✅ BASIC VERIFICATION: Found ${basicRolesFound} roles`);
-                setSuccessMessage(`¡Cuenta creada exitosamente con ${basicRolesFound} roles! ${shouldAutoAssignMultipleRoles ? '(Auto-configurado)' : ''} Redirigiendo...`);
+                console.log(`✅ ENHANCED BASIC VERIFICATION: Found ${basicRolesFound} roles`);
+                
+                let basicMessage = `¡Cuenta creada exitosamente con ${basicRolesFound} roles!`;
+                if (shouldAutoAssignMultipleRoles) {
+                  basicMessage += ` (Auto-configurado)`;
+                }
+                basicMessage += ' Redirigiendo...';
+                
+                setSuccessMessage(basicMessage);
               } else {
-                console.error('❌ BASIC VERIFICATION: Zero roles found');
+                console.error('❌ ENHANCED BASIC VERIFICATION: Zero roles found');
                 setSuccessMessage("¡Cuenta creada exitosamente! Redirigiendo...");
               }
             }
           } else {
-            console.warn('⚠️ POST-REGISTRATION: No session found after registration');
+            console.warn('⚠️ ENHANCED POST-REGISTRATION: No session found after registration');
             setSuccessMessage("¡Cuenta creada exitosamente! Por favor, inicia sesión.");
           }
         } catch (validationError) {
-          console.warn('⚠️ POST-REGISTRATION: Validation failed, but proceeding:', validationError);
-          setSuccessMessage(`¡Cuenta creada exitosamente! ${shouldAutoAssignMultipleRoles ? 'Se auto-configuraron múltiples roles.' : ''} Redirigiendo...`);
+          console.warn('⚠️ ENHANCED POST-REGISTRATION: Validation failed, but proceeding:', validationError);
+          
+          let fallbackMessage = `¡Cuenta creada exitosamente!`;
+          if (shouldAutoAssignMultipleRoles) {
+            fallbackMessage += ` Se configuraron automáticamente múltiples roles.`;
+          }
+          fallbackMessage += ' Redirigiendo...';
+          
+          setSuccessMessage(fallbackMessage);
         }
         
-        // Redirigir al dashboard después de la validación
+        // ENHANCED: Redirect with better timing
         setTimeout(() => {
           router.push("/dashboard");
         }, 3000);
@@ -1049,15 +1118,15 @@ function RegisterPageContent() {
         return;
       }
 
-      // Si no hay success flag pero tampoco error, mostrar mensaje genérico de éxito
+      // ENHANCED: Handle other result states
       if (result?.message && !result.error) {
         let enhancedMessage = result.message;
         if (shouldAutoAssignMultipleRoles) {
-          enhancedMessage += ' Se detectó tu perfil y se configuraron automáticamente múltiples roles.';
+          enhancedMessage += ` Se detectó tu perfil automáticamente (${autoDetectionReason.split(' ')[0]}) y se configuraron roles adicionales.`;
         }
         setSuccessMessage(enhancedMessage);
         
-        // Si el mensaje indica éxito, redirigir
+        // If the message indicates success, redirect
         if (result.message.toLowerCase().includes('exitosamente') || 
             result.message.toLowerCase().includes('creada')) {
           setTimeout(() => {
@@ -1070,7 +1139,7 @@ function RegisterPageContent() {
       setError("Error durante el registro. Por favor, inténtalo de nuevo.");
       
     } catch (err) {
-      console.error("❌ EXCEPCIÓN EN REGISTRO ENHANCED:", err);
+      console.error("❌ ENHANCED REGISTRATION EXCEPTION:", err);
       setError("Error inesperado durante el registro. Por favor, inténtalo de nuevo.");
     } finally {
       setSubmitting(false);
