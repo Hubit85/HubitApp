@@ -74,7 +74,17 @@ export interface ManagedCommunity {
 
 export class AdministratorRequestService {
   
-  private static async getRoleAndProfile(roleId: string) {
+  private static async getRoleAndProfile(roleId: string): Promise<{
+    id: string;
+    user_id: string;
+    role_specific_data: any;
+    profiles?: {
+      id: string;
+      full_name: string;
+      email: string;
+      phone?: string;
+    } | null;
+  } | null> {
     if (!roleId) return null;
     
     try {
@@ -97,10 +107,20 @@ export class AdministratorRequestService {
       
       if (profileError || !profile) {
         console.warn(`Could not fetch profile for userId ${role.user_id}:`, profileError?.message);
-        return { ...role, profiles: null };
+        return { 
+          id: role.id, 
+          user_id: role.user_id, 
+          role_specific_data: role.role_specific_data, 
+          profiles: null 
+        };
       }
 
-      return { ...role, profiles: profile };
+      return { 
+        id: role.id, 
+        user_id: role.user_id, 
+        role_specific_data: role.role_specific_data, 
+        profiles: profile 
+      };
     } catch (error) {
       console.warn(`Exception in getRoleAndProfile for ${roleId}:`, error);
       return null;
@@ -127,7 +147,7 @@ export class AdministratorRequestService {
         (requests || []).map(async (request) => {
           const [communityMember, community] = await Promise.all([
             this.getRoleAndProfile(request.community_member_id),
-            request.community_id ? supabase.from('communities').select('*').eq('id', request.community_id).single().then(res => res.data) : Promise.resolve(null)
+            request.community_id ? this.getCommunityById(request.community_id) : Promise.resolve(null)
           ]);
           return {
             ...request,
@@ -139,7 +159,7 @@ export class AdministratorRequestService {
       
       return {
         success: true,
-        requests: enrichedRequests as unknown as CommunityMemberRequest[],
+        requests: enrichedRequests as CommunityMemberRequest[],
       };
 
     } catch (error) {
@@ -168,7 +188,7 @@ export class AdministratorRequestService {
         (requests || []).map(async (request) => {
           const [propertyAdministrator, community] = await Promise.all([
             this.getRoleAndProfile(request.property_administrator_id),
-            request.community_id ? supabase.from('communities').select('*').eq('id', request.community_id).single().then(res => res.data) : Promise.resolve(null)
+            request.community_id ? this.getCommunityById(request.community_id) : Promise.resolve(null)
           ]);
           return {
             ...request,
@@ -186,6 +206,26 @@ export class AdministratorRequestService {
     } catch (error) {
       console.error('❌ ADMIN REQUEST: Exception fetching sent requests:', error);
       return { success: false, requests: [], message: 'Error inesperado al obtener las solicitudes enviadas' };
+    }
+  }
+
+  private static async getCommunityById(communityId: string): Promise<{
+    id: string;
+    name: string;
+    address: string;
+    city: string;
+  } | null> {
+    try {
+      const { data: community, error } = await supabase
+        .from('communities')
+        .select('*')
+        .eq('id', communityId)
+        .single();
+      
+      return error ? null : community;
+    } catch (error) {
+      console.warn(`Could not fetch community ${communityId}:`, error);
+      return null;
     }
   }
 
@@ -254,7 +294,6 @@ export class AdministratorRequestService {
     }
   }
 
-  // --- OTRAS FUNCIONES ---
   static async sendRequestToAdministrator(options: {
     communityMemberRoleId: string;
     propertyAdministratorRoleId: string;
@@ -298,7 +337,7 @@ export class AdministratorRequestService {
       }
 
       const { data: adminRoleData } = await supabase.from('user_roles').select(`user_id`).eq('id', options.propertyAdministratorRoleId).single();
-      const { data: memberRoleData } = await this.getRoleAndProfile(options.communityMemberRoleId);
+      const memberRoleData = await this.getRoleAndProfile(options.communityMemberRoleId);
 
       if (adminRoleData?.user_id && memberRoleData?.profiles?.full_name) {
           await supabase.from('notifications').insert({
@@ -307,7 +346,7 @@ export class AdministratorRequestService {
             message: `${memberRoleData.profiles.full_name} ha solicitado que gestiones sus incidencias.`,
             type: 'info' as const, category: 'request' as const, read: false,
             related_entity_type: 'administrator_request', related_entity_id: newRequest.id,
-            action_url: '/dashboard?tab=perfil', action_label: 'Ver solicitud'
+            action_url: '/dashboard?tab=notificaciones', action_label: 'Ver solicitud'
           });
       }
 
@@ -414,12 +453,12 @@ export class AdministratorRequestService {
         (managed || []).map(async (member) => {
           const [communityMember, community] = await Promise.all([
             this.getRoleAndProfile(member.community_member_id),
-            member.community_id ? supabase.from('communities').select('*').eq('id', member.community_id).single().then(res => res.data) : Promise.resolve(null)
+            member.community_id ? this.getCommunityById(member.community_id) : Promise.resolve(null)
           ]);
           return { ...member, community_member: communityMember, community };
         })
       );
-      return { success: true, members: enrichedMembers as unknown as ManagedCommunity[] };
+      return { success: true, members: enrichedMembers as ManagedCommunity[] };
     } catch (error) {
       console.error('❌ MANAGEMENT: Exception fetching managed members:', error);
       return { success: false, members: [], message: 'Error al obtener miembros gestionados' };
@@ -432,7 +471,7 @@ export class AdministratorRequestService {
       if (!managedResult.success || managedResult.members.length === 0) return { success: true, incidents: [] };
       
       const managedUserIds = managedResult.members
-        .map(member => (member.community_member as any)?.user_id)
+        .map(member => member.community_member?.user_id)
         .filter((id): id is string => !!id && typeof id === 'string');
         
       if (managedUserIds.length === 0) return { success: true, incidents: [] };
