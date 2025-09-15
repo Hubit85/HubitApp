@@ -845,7 +845,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               console.log("📝 Creating new profile...");
               
               const now = new Date().toISOString();
-              const profileCreatedAt = userObject.created_at || now; // FIXED: Always provide fallback
+              const profileCreatedAt = userObject.created_at ? userObject.created_at : now; // FIXED: Explicit null check
 
               const newProfileData: ProfileInsert = {
                 id: userObject.id,
@@ -908,7 +908,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.warn("⚠️ Profile fetch timeout, using emergency profile");
             
             const now = new Date().toISOString();
-            const emergencyCreatedAt = userObject.created_at || now; // FIXED: Always provide fallback
+            const emergencyCreatedAt = userObject.created_at ? userObject.created_at : now; // FIXED: Explicit null check
             
             const emergencyProfile: Profile = {
               id: userObject.id,
@@ -941,7 +941,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         console.warn("⚠️ Profile fetch timeout, using emergency profile");
         
         const now = new Date().toISOString();
-        const emergencyCreatedAt = userObject.created_at || now; // FIXED: Always provide fallback
+        const emergencyCreatedAt = userObject.created_at ? userObject.created_at : now; // FIXED: Explicit null check
         
         const emergencyProfile: Profile = {
           id: userObject.id,
