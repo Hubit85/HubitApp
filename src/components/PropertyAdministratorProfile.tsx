@@ -116,25 +116,51 @@ export function PropertyAdministratorProfile() {
     if (!user?.id) return;
 
     try {
-      // Find requests where the administrator email matches this user's email
+      console.log('🔄 Loading pending assignment requests for admin user:', user.id);
+
+      // CORRECTED: Get the property administrator record for this user first
+      const { data: adminRecord, error: adminError } = await supabase
+        .from('property_administrators')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (adminError && adminError.code !== 'PGRST116') {
+        console.error('Error loading admin record:', adminError);
+        return;
+      }
+
+      if (!adminRecord) {
+        console.log('No property administrator record found for this user');
+        setPendingRequests([]);
+        return;
+      }
+
+      console.log('✅ Property administrator record found:', adminRecord.contact_email);
+
+      // CORRECTED: Find requests where the administrator email matches this admin's contact email
       const { data: requests, error } = await supabase
         .from('community_member_administrators')
         .select(`
           *,
           profiles!community_member_administrators_user_id_fkey(full_name, email)
         `)
-        .eq('contact_email', user.email || '') // FIXED: Added fallback empty string
+        .eq('contact_email', adminRecord.contact_email) // Use the admin's contact email
         .eq('administrator_verified', false)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.warn('Error loading assignment requests:', error);
+        console.error('❌ Error loading assignment requests:', error);
+        setError('Error al cargar las solicitudes de asignación');
         return;
       }
 
+      console.log(`✅ Found ${requests?.length || 0} pending assignment requests`);
       setPendingRequests(requests || []);
+
     } catch (err) {
-      console.error('Error loading pending requests:', err);
+      console.error('❌ Critical error loading pending requests:', err);
+      setError('Error crítico al cargar las solicitudes');
     }
   };
 
