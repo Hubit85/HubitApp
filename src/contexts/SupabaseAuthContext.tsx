@@ -916,385 +916,176 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         setProfile(emergencyProfile);
       }
 
-      // Step 2: ENHANCED BULLETPROOF ROLE LOADING SYSTEM with comprehensive error recovery and BORJAPIPAON-specific fixes
+      // Step 2: CRITICAL FIX - ENHANCED ROLE LOADING SYSTEM
       try {
-        console.log("🎭 CONTEXT: Starting ENHANCED bulletproof role loading system...");
+        console.log("🎭 CONTEXT: Starting CRITICAL role loading system...");
         
-        // STRATEGY 1: Use the service (preferred method) with error recovery
-        let roles: UserRole[] = [];
-        let loadingMethod = 'unknown';
-        let requiresManualIntervention = false;
-        let recoveryAttempted = false;
-        
-        try {
-          console.log("🔄 ENHANCED STRATEGY 1: Loading via SupabaseUserRoleService...");
-          roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
-          loadingMethod = 'service';
-          console.log(`📊 Service result: ${roles.length} roles found`);
-          
-          // ENHANCED: Comprehensive automatic role recovery for zero-role users
-          if (roles.length === 0) {
-            console.log('🚨 ENHANCED ZERO ROLES DETECTED - Starting comprehensive recovery system...');
-            recoveryAttempted = true;
-            
-            // Enhanced profile analysis for automatic recovery
-            const { data: profileCheck, error: profileCheckError } = await supabase
-              .from('profiles')
-              .select('created_at, user_type, full_name, email')
-              .eq('id', userObject.id)
-              .single();
-            
-            if (!profileCheckError && profileCheck && profileCheck.created_at) {
-              const profileAge = new Date(profileCheck.created_at);
-              const now = new Date();
-              const ageHours = (now.getTime() - profileAge.getTime()) / (1000 * 60 * 60);
-              
-              console.log(`🔍 ENHANCED profile analysis:`, {
-                age: `${ageHours.toFixed(1)} hours`,
-                userType: profileCheck.user_type,
-                email: profileCheck.email,
-                hasFullName: !!profileCheck.full_name,
-                isRecentRegistration: ageHours < 24,
-                isBorjapipaonCase: profileCheck.email?.includes('borjapipaon') || profileCheck.email?.includes('pipaon')
-              });
-              
-              // BORJAPIPAON-SPECIFIC CASE: Enhanced recovery for specific users who should have multiple roles
-              if (profileCheck.email?.includes('borjapipaon') || profileCheck.email?.includes('pipaon')) {
-                console.log('🎯 BORJAPIPAON-SPECIFIC ENHANCED RECOVERY: Detected specific user case');
-                console.log('This user should have multiple roles from registration - applying enhanced recovery');
-                
-                try {
-                  // Use AutomaticRoleCreationService for comprehensive role recovery
-                  const { AutomaticRoleCreationService } = await import('@/services/AutomaticRoleCreationService');
-                  
-                  // Create all 4 roles that should exist for this user
-                  const recoveryRoles = ['particular', 'community_member', 'service_provider', 'property_administrator'];
-                  const additionalRoles = recoveryRoles.slice(1).map(roleType => ({
-                    roleType: roleType as any,
-                    roleSpecificData: {
-                      full_name: profileCheck.full_name || 'Usuario',
-                      phone: '',
-                      address: '',
-                      city: '',
-                      postal_code: '',
-                      country: 'España'
-                    }
-                  }));
-                  
-                  const autoRoleOptions = {
-                    userId: userObject.id,
-                    email: profileCheck.email,
-                    primaryRole: 'particular' as const,
-                    additionalRoles: additionalRoles,
-                    userData: {
-                      full_name: profileCheck.full_name || 'Usuario',
-                      phone: '',
-                      address: '',
-                      city: '',
-                      postal_code: '',
-                      country: 'España',
-                      email: profileCheck.email
-                    }
-                  };
+        // DIRECT DATABASE QUERY - Use direct query instead of service to avoid cached issues
+        console.log("🔄 CRITICAL: Loading roles directly from database...");
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('user_roles')
+          .select(`
+            id,
+            user_id,
+            role_type,
+            is_verified,
+            is_active,
+            role_specific_data,
+            verification_token,
+            verification_expires_at,
+            verification_confirmed_at,
+            created_at,
+            updated_at
+          `)
+          .eq('user_id', userObject.id)
+          .order('created_at', { ascending: true });
 
-                  console.log('🤖 BORJAPIPAON-SPECIFIC: Using AutomaticRoleCreationService for comprehensive recovery');
-                  const recoveryResult = await AutomaticRoleCreationService.createAllRolesAutomatically(autoRoleOptions);
-                  
-                  if (recoveryResult.success && recoveryResult.rolesCreated > 0) {
-                    console.log('✅ BORJAPIPAON-SPECIFIC RECOVERY SUCCESS:', {
-                      created: recoveryResult.rolesCreated,
-                      total: recoveryResult.totalRolesRequested
-                    });
-                    
-                    // Reload roles after recovery
-                    roles = await SupabaseUserRoleService.getUserRoles(userObject.id);
-                    loadingMethod = 'borjapipaon_specific_recovery';
-                    
-                    // Create specific recovery notification
-                    try {
-                      await supabase
-                        .from('notifications')
-                        .insert({
-                          user_id: userObject.id,
-                          title: '¡Cuenta restaurada correctamente! 🔧',
-                          message: `Se han recuperado ${recoveryResult.rolesCreated} roles para tu cuenta. Tu perfil está ahora completamente configurado.`,
-                          type: 'success' as const,
-                          category: 'system' as const,
-                          read: false
-                        });
-                    } catch (notificationError) {
-                      console.warn('Could not create borjapipaon recovery notification:', notificationError);
-                    }
-                  } else {
-                    console.error('❌ BORJAPIPAON-SPECIFIC RECOVERY FAILED:', recoveryResult.message);
-                    requiresManualIntervention = true;
-                  }
-                } catch (borjaRecoveryError) {
-                  console.error('❌ BORJAPIPAON-SPECIFIC RECOVERY EXCEPTION:', borjaRecoveryError);
-                  requiresManualIntervention = true;
-                }
-              } else {
-                // GENERAL ENHANCED: Standard recovery conditions for other users
-                if (ageHours < 48 && profileCheck.user_type) { // Extended to 48 hours for better coverage
-                  console.log('🔧 ENHANCED AUTOMATIC REGISTRATION RECOVERY - Creating missing primary role...');
-                  
-                  // Import AutomaticRoleCreationService for enhanced recovery
-                  try {
-                    const { AutomaticRoleCreationService } = await import('@/services/AutomaticRoleCreationService');
-                    
-                    const emergencyResult = await AutomaticRoleCreationService.emergencyRoleCreationEnhanced(
-                      userObject.id,
-                      profileCheck.email || userObject.email || '',
-                      profileCheck.user_type as 'particular' | 'community_member' | 'service_provider' | 'property_administrator'
-                    );
-                    
-                    if (emergencyResult.success && emergencyResult.roleCreated) {
-                      console.log('✅ ENHANCED RECOVERY SUCCESS - Role created via AutomaticRoleCreationService');
-                      roles = [emergencyResult.roleCreated as UserRole];
-                      loadingMethod = 'enhanced_auto_recovery';
-                    } else {
-                      console.error('❌ Enhanced automatic recovery failed:', emergencyResult.message);
-                      requiresManualIntervention = true;
-                    }
-                  } catch (autoServiceError) {
-                    console.error('❌ Could not import AutomaticRoleCreationService:', autoServiceError);
-                    
-                    // Fallback to basic role creation
-                    const basicRoleData: UserRoleInsert = {
-                      user_id: userObject.id,
-                      role_type: profileCheck.user_type as 'particular' | 'community_member' | 'service_provider' | 'property_administrator',
-                      is_verified: true,
-                      is_active: true,
-                      role_specific_data: {
-                        full_name: profileCheck.full_name || userObject.user_metadata?.full_name || 'Usuario',
-                        phone: userObject.user_metadata?.phone || '',
-                        address: '',
-                        city: '',
-                        postal_code: '',
-                        country: 'España'
-                      },
-                      verification_confirmed_at: new Date().toISOString(),
-                      verification_token: null,
-                      verification_expires_at: null,
-                      created_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString()
-                    };
-
-                    const { data: basicRole, error: basicInsertError } = await supabase
-                      .from('user_roles')
-                      .insert(basicRoleData)
-                      .select()
-                      .single();
-
-                    if (!basicInsertError && basicRole) {
-                      console.log('✅ ENHANCED BASIC RECOVERY SUCCESS - Created role manually');
-                      roles = [basicRole as UserRole];
-                      loadingMethod = 'basic_recovery';
-                    } else {
-                      console.error('❌ Basic recovery also failed:', basicInsertError);
-                      requiresManualIntervention = true;
-                    }
-                  }
-                }
-              }
-            }
-            
-            // BULLETPROOF: ID Recovery for specific problematic cases (only if no roles found yet)
-            if (roles.length === 0 && userObject.email && !recoveryAttempted) {
-              console.log("🔄 ENHANCED: Attempting comprehensive ID recovery...");
-              
-              try {
-                const recoveryResult = await SupabaseUserRoleService.attemptIdRecovery(
-                  userObject.email, 
-                  userObject.id
-                );
-                
-                if (recoveryResult.recovered && recoveryResult.correctedId) {
-                  console.log('🎯 ENHANCED ID RECOVERY SUCCESS: Found correct user ID, loading roles...');
-                  
-                  const { data: correctedRoles, error: correctedError } = await supabase
-                    .from('user_roles')
-                    .select('*')
-                    .eq('user_id', recoveryResult.correctedId);
-                  
-                  if (!correctedError && correctedRoles && correctedRoles.length > 0) {
-                    roles = correctedRoles as UserRole[];
-                    loadingMethod = 'enhanced_id_recovery';
-                    console.log(`✅ ENHANCED ID RECOVERY SUCCESS: ${roles.length} roles found with corrected ID`);
-                  }
-                } else {
-                  console.log('❌ Enhanced ID recovery failed:', recoveryResult.issue);
-                  requiresManualIntervention = true;
-                }
-              } catch (recoveryError) {
-                console.error("❌ Enhanced ID recovery exception:", recoveryError);
-                requiresManualIntervention = true;
-              }
-            }
-          }
-          
-        } catch (serviceError) {
-          console.warn("❌ Enhanced service method failed:", serviceError);
-          requiresManualIntervention = true;
+        if (rolesError) {
+          console.warn("❌ CRITICAL: Direct roles query error:", rolesError);
+          throw new Error(`Roles query failed: ${rolesError.message}`);
         }
 
-        // Set the roles we found (or empty array)
+        const roles = (rolesData || []) as UserRole[];
+        console.log(`📊 CRITICAL: Found ${roles.length} roles in database:`, 
+          roles.map(r => `${r.role_type}(verified:${r.is_verified}, active:${r.is_active})`));
+
+        // CRITICAL: Set all roles immediately
         setUserRoles(roles);
-        console.log(`📋 CONTEXT: Final roles set: ${roles.length} roles via ${loadingMethod}`);
 
-        // ENHANCED: Comprehensive logging and user notification for zero-role cases
         if (roles.length === 0) {
-          console.error("🚨 ENHANCED SYSTEM: COMPREHENSIVE ZERO ROLES ANALYSIS");
-          console.error("User:", userObject.email);
-          console.error("User ID:", userObject.id);
-          console.error("Loading method attempted:", loadingMethod);
-          console.error("Recovery attempted:", recoveryAttempted);
-          console.error("Manual intervention required:", requiresManualIntervention);
-          console.error("System diagnosis: Potential registration incomplete or system issue detected");
+          console.log('🚨 CRITICAL: ZERO ROLES DETECTED - User should have roles from registration');
           
-          // Create enhanced user notification with guidance
-          try {
-            await supabase
-              .from('notifications')
-              .insert({
-                user_id: userObject.id,
-                title: 'Configuración de cuenta pendiente',
-                message: requiresManualIntervention 
-                  ? 'Tu cuenta requiere configuración manual. Nuestro equipo de soporte ha sido notificado y te contactará pronto.'
-                  : 'Tu cuenta se está configurando automáticamente. Si el problema persiste, contacta con soporte.',
-                type: 'warning' as const,
-                category: 'system' as const,
-                read: false
-              });
-          } catch (notificationError) {
-            console.warn('Could not create enhanced issue notification:', notificationError);
-          }
+          // DEBUG: Check if this is a recent registration
+          const { data: profileCheck } = await supabase
+            .from('profiles')
+            .select('created_at, email')
+            .eq('id', userObject.id)
+            .single();
           
-          // ENHANCED: System monitoring alert for admin
-          if (requiresManualIntervention) {
-            try {
-              console.log('📧 ENHANCED: Creating system alert for admin review...');
+          if (profileCheck) {
+            const profileAge = new Date(profileCheck.created_at);
+            const now = new Date();
+            const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
+            
+            console.log(`🔍 CRITICAL: Profile analysis - Age: ${ageMinutes.toFixed(1)} minutes, Email: ${profileCheck.email}`);
+            
+            if (ageMinutes < 60) { // Recent registration - create basic role
+              console.log('🔧 CRITICAL: Creating emergency role for recent registration...');
               
-              // This would trigger admin notification in a real system
-              const systemAlert = {
+              const emergencyRoleData: UserRoleInsert = {
                 user_id: userObject.id,
-                email: userObject.email,
-                issue: 'Zero roles after comprehensive enhanced recovery attempts',
-                timestamp: new Date().toISOString(),
-                recovery_methods_attempted: [loadingMethod, 'enhanced_id_recovery', 'enhanced_auto_recovery', 'borjapipaon_specific_recovery'],
-                recovery_attempted: recoveryAttempted,
-                requires_manual_review: true,
-                system_version: 'enhanced'
+                role_type: 'particular',
+                is_verified: true,
+                is_active: true,
+                role_specific_data: {
+                  full_name: userObject.user_metadata?.full_name || 'Usuario',
+                  phone: '',
+                  address: '',
+                  city: '',
+                  postal_code: '',
+                  country: 'España'
+                },
+                verification_confirmed_at: new Date().toISOString(),
+                verification_token: null,
+                verification_expires_at: null
               };
-              
-              console.log('🚨 ENHANCED SYSTEM ALERT CREATED:', systemAlert);
-              
-            } catch (alertError) {
-              console.error('❌ Could not create enhanced system alert:', alertError);
-            }
-          }
-        } else {
-          console.log("✅ ENHANCED SUCCESS: User roles loaded successfully:", {
-            total: roles.length,
-            types: roles.map(r => r.role_type),
-            verified: roles.filter(r => r.is_verified).length,
-            active: roles.filter(r => r.is_active).length,
-            method: loadingMethod,
-            recovery_used: recoveryAttempted
-          });
-          
-          // Success notification for recovered users
-          if (loadingMethod.includes('recovery')) {
-            try {
-              await supabase
-                .from('notifications')
-                .insert({
-                  user_id: userObject.id,
-                  title: '¡Cuenta configurada correctamente! ✅',
-                  message: `Tu cuenta ha sido configurada automáticamente con ${roles.length} rol${roles.length === 1 ? '' : 'es'}. ¡Todo está listo para usar!`,
-                  type: 'success' as const,
-                  category: 'system' as const,
-                  read: false
-                });
-            } catch (notificationError) {
-              console.warn('Could not create recovery success notification:', notificationError);
-            }
-          }
-        }
 
-        // Step 3: ENHANCED ACTIVE ROLE MANAGEMENT
-        if (roles.length > 0) {
-          console.log("🎯 CONTEXT: Starting enhanced active role management...");
-          
-          const finalActiveRole: UserRole | null = await ensureActiveRole(userObject.id, roles);
-          
-          if (finalActiveRole !== null && finalActiveRole !== undefined) {
-            console.log("✅ CONTEXT: Active role established:", finalActiveRole.role_type);
-            setActiveRole(finalActiveRole);
-            
-            // Update local roles state to reflect any changes
-            const updatedRoles = roles.map(r => ({
-              ...r,
-              is_active: r.id === finalActiveRole.id
-            }));
-            setUserRoles(updatedRoles);
-            
-            // Check if finalActiveRole is property_administrator
-            if (finalActiveRole.role_type === 'property_administrator') {
-              console.log("✅ CONTEXT: Active role is property_administrator");
+              const { data: emergencyRole, error: emergencyError } = await supabase
+                .from('user_roles')
+                .insert(emergencyRoleData)
+                .select()
+                .single();
+
+              if (!emergencyError && emergencyRole) {
+                console.log('✅ CRITICAL: Emergency role created successfully');
+                setUserRoles([emergencyRole as UserRole]);
+                setActiveRole(emergencyRole as UserRole);
+              } else {
+                console.error('❌ CRITICAL: Emergency role creation failed:', emergencyError);
+                setActiveRole(null);
+              }
+            } else {
+              console.error('❌ CRITICAL: Old profile with zero roles - requires manual intervention');
+              setActiveRole(null);
             }
           } else {
-            console.warn("⚠️ CONTEXT: Could not establish active role");
+            console.error('❌ CRITICAL: Cannot analyze profile - no profile data');
             setActiveRole(null);
           }
         } else {
-          console.log("📝 CONTEXT: No roles available for active role management");
-          setActiveRole(null);
+          console.log("✅ CRITICAL: User roles loaded successfully:", {
+            total: roles.length,
+            types: roles.map(r => r.role_type),
+            verified: roles.filter(r => r.is_verified).length,
+            active: roles.filter(r => r.is_active).length
+          });
+
+          // CRITICAL: Establish active role
+          const verifiedRoles = roles.filter(r => r.is_verified);
+          
+          if (verifiedRoles.length > 0) {
+            // Check if there's already an active verified role
+            const currentActiveRole = verifiedRoles.find(r => r.is_active);
+            
+            if (currentActiveRole) {
+              console.log("🎯 CRITICAL: Found existing active role:", currentActiveRole.role_type);
+              setActiveRole(currentActiveRole);
+            } else {
+              console.log("🚨 CRITICAL: No active role found - Activating first verified role");
+              
+              // Activate the first verified role
+              const roleToActivate = verifiedRoles[0];
+              
+              try {
+                // Deactivate all roles first
+                await supabase
+                  .from('user_roles')
+                  .update({ is_active: false, updated_at: new Date().toISOString() })
+                  .eq('user_id', userObject.id);
+
+                // Activate the selected role
+                const { error: activateError } = await supabase
+                  .from('user_roles')
+                  .update({ is_active: true, updated_at: new Date().toISOString() })
+                  .eq('id', roleToActivate.id);
+
+                if (!activateError) {
+                  const activatedRole = { ...roleToActivate, is_active: true };
+                  setActiveRole(activatedRole);
+                  
+                  // Update local roles state
+                  const updatedRoles = roles.map(r => ({
+                    ...r,
+                    is_active: r.id === roleToActivate.id
+                  }));
+                  setUserRoles(updatedRoles);
+                  
+                  console.log("✅ CRITICAL: Role activated successfully:", roleToActivate.role_type);
+                } else {
+                  console.error("❌ CRITICAL: Role activation failed:", activateError);
+                  setActiveRole(roleToActivate); // Set locally anyway
+                }
+              } catch (activationError) {
+                console.error("❌ CRITICAL: Role activation exception:", activationError);
+                setActiveRole(roleToActivate); // Set locally anyway
+              }
+            }
+          } else {
+            console.warn("⚠️ CRITICAL: No verified roles available");
+            setActiveRole(null);
+          }
         }
 
-        // ENHANCED: Comprehensive final status logging
-        const currentActiveRole = activeRole;
-        const finalStatus = {
-          userId: userObject.id.substring(0, 8) + '...',
-          email: userObject.email || 'unknown',
-          totalRoles: roles.length,
-          verifiedRoles: roles.filter(r => r.is_verified).length,
-          activeRoleType: currentActiveRole ? currentActiveRole.role_type : 'none',
-          loadingMethod: loadingMethod,
-          recoveryAttempted: recoveryAttempted,
-          systemStatus: requiresManualIntervention ? 'needs_manual_review' : 'completed',
-          recoveryRequired: loadingMethod.includes('recovery'),
-          systemVersion: 'enhanced'
-        };
-        
-        console.log("🏁 ENHANCED SYSTEM: Role loading completed:", finalStatus);
-
       } catch (criticalRoleError) {
-        console.error("❌ CONTEXT: Critical error in enhanced bulletproof role system:", criticalRoleError);
+        console.error("❌ CONTEXT: Critical error in role loading:", criticalRoleError);
         
         // Emergency fallback: set empty state but don't crash
         setUserRoles([]);
         setActiveRole(null);
-        
-        // ENHANCED: Critical error notification
-        try {
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: userObject.id,
-              title: 'Error crítico del sistema',
-              message: 'Se ha producido un error crítico al cargar tu cuenta. Nuestro equipo técnico ha sido notificado automáticamente.',
-              type: 'error' as const,
-              category: 'system' as const,
-              read: false
-            });
-        } catch (criticalNotificationError) {
-          console.error('Could not create critical error notification:', criticalNotificationError);
-        }
       }
 
     } catch (error) {
-      console.error("❌ CONTEXT: Critical error in enhanced fetchUserData:", error);
+      console.error("❌ CONTEXT: Critical error in fetchUserData:", error);
       
       // Emergency profile creation - FIXED: Always provide email fallback
       const emergencyProfile: Profile = {
@@ -1327,7 +1118,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // SIMPLIFIED refreshRoles
+  // CRITICAL FIX: Enhanced refreshRoles to load all user roles properly
   const refreshRoles = async () => {
     if (!user?.id) {
       console.log("⚠️ CONTEXT: No user ID available for role refresh");
@@ -1335,10 +1126,35 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      console.log("🔄 CONTEXT: Starting role refresh...");
+      console.log("🔄 CONTEXT: Starting CRITICAL role refresh...");
       
-      const updatedRoles = await SupabaseUserRoleService.getUserRoles(user.id);
-      console.log(`📋 CONTEXT: Fetched ${updatedRoles.length} roles from database`);
+      // DIRECT DATABASE QUERY - Avoid service layer cache issues
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select(`
+          id,
+          user_id,
+          role_type,
+          is_verified,
+          is_active,
+          role_specific_data,
+          verification_token,
+          verification_expires_at,
+          verification_confirmed_at,
+          created_at,
+          updated_at
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (rolesError) {
+        console.error("❌ CRITICAL: Role refresh query failed:", rolesError);
+        return;
+      }
+
+      const updatedRoles = (rolesData || []) as UserRole[];
+      console.log(`📊 CRITICAL: Role refresh found ${updatedRoles.length} roles:`, 
+        updatedRoles.map(r => `${r.role_type}(verified:${r.is_verified}, active:${r.is_active})`));
       
       setUserRoles(updatedRoles);
       
@@ -1349,30 +1165,57 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         const currentActiveRole = verifiedRoles.find(r => r.is_active);
         
         if (!currentActiveRole) {
-          console.log("🎯 CONTEXT: No active role found, establishing one...");
+          console.log("🎯 CRITICAL: No active role found during refresh, establishing one...");
           
-          const establishedRole = await ensureActiveRole(user.id, verifiedRoles);
+          // Activate the first verified role
+          const roleToActivate = verifiedRoles[0];
           
-          if (establishedRole) {
-            setActiveRole(establishedRole);
-            console.log("✅ CONTEXT: Active role established during refresh:", establishedRole.role_type);
-          } else {
-            console.warn("⚠️ CONTEXT: Could not establish active role during refresh");
-            setActiveRole(null);
+          try {
+            // Deactivate all first
+            await supabase
+              .from('user_roles')
+              .update({ is_active: false, updated_at: new Date().toISOString() })
+              .eq('user_id', user.id);
+
+            // Activate the selected role
+            const { error: activateError } = await supabase
+              .from('user_roles')
+              .update({ is_active: true, updated_at: new Date().toISOString() })
+              .eq('id', roleToActivate.id);
+
+            if (!activateError) {
+              const activatedRole = { ...roleToActivate, is_active: true };
+              setActiveRole(activatedRole);
+              
+              // Update local state with activated role
+              const updatedRolesWithActive = updatedRoles.map(r => ({
+                ...r,
+                is_active: r.id === roleToActivate.id
+              }));
+              setUserRoles(updatedRolesWithActive);
+              
+              console.log("✅ CRITICAL: Active role established during refresh:", roleToActivate.role_type);
+            } else {
+              console.error("❌ CRITICAL: Role activation failed during refresh:", activateError);
+              setActiveRole(roleToActivate); // Set locally anyway
+            }
+          } catch (activationError) {
+            console.error("❌ CRITICAL: Role activation exception during refresh:", activationError);
+            setActiveRole(roleToActivate); // Set locally anyway
           }
         } else {
           setActiveRole(currentActiveRole);
-          console.log("✅ CONTEXT: Active role confirmed:", currentActiveRole.role_type);
+          console.log("✅ CRITICAL: Active role confirmed during refresh:", currentActiveRole.role_type);
         }
       } else {
-        console.log("⚠️ CONTEXT: No verified roles available");
+        console.log("⚠️ CRITICAL: No verified roles available during refresh");
         setActiveRole(null);
       }
       
-      console.log("✅ CONTEXT: Role refresh completed successfully");
+      console.log("✅ CRITICAL: Role refresh completed successfully");
       
     } catch (error) {
-      console.error("❌ CONTEXT: Error during role refresh:", error);
+      console.error("❌ CRITICAL: Error during role refresh:", error);
     }
   };
 
