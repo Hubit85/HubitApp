@@ -381,7 +381,7 @@ export function ContractManager() {
       if (requestUserId && user?.id && providerData?.id && newContract) {
         try {
           // Safely handle contract_number which might be null from database types
-          const safeContractNumber = newContract.contract_number ?? `CON-${Date.now()}`;
+          const safeContractNumber = String(newContract.contract_number || `CON-${Date.now()}`);
           const serviceTitle = selectedQuote.title || 'Servicio';
           const messageContent = `Se ha generado un contrato para tu solicitud "${serviceTitle}" (${safeContractNumber})`;
             
