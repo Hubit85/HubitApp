@@ -502,99 +502,153 @@ La empresa recibirá una notificación y podrá aprobar tu solicitud desde su pa
                   Administradores de Fincas Disponibles ({availableAdministrators.length})
                 </h4>
 
-                {availableAdministrators.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Building2 className="h-12 w-12 mx-auto mb-4 text-stone-400" />
-                    <p className="text-stone-600 mb-2">No hay administradores disponibles</p>
-                    <p className="text-sm text-stone-500">
-                      Los administradores de fincas aparecerán aquí cuando se registren en la plataforma
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-4">
-                    {availableAdministrators.map((admin) => {
-                      const hasPendingRequest = pendingRequests.some(req => 
-                        req.administrator_id === admin.company_cif
-                      );
-
-                      return (
-                        <Card key={admin.id} className="border-stone-200 hover:shadow-md transition-shadow">
+                {/* Resultados de búsqueda */}
+                {availableAdministrators.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-stone-900">Administradores disponibles ({availableAdministrators.length})</h3>
+                    <div className="grid gap-4 max-h-60 overflow-y-auto">
+                      {availableAdministrators
+                        .filter(admin => {
+                          if (!searchTerm.trim()) return true;
+                          const term = searchTerm.toLowerCase();
+                          return admin.company_name.toLowerCase().includes(term) ||
+                                 admin.contact_email.toLowerCase().includes(term);
+                        })
+                        .map((admin) => (
+                        <Card 
+                          key={admin.id}
+                          className={`cursor-pointer transition-all hover:shadow-md ${
+                            selectedAdmin?.id === admin.id ? 'ring-2 ring-stone-800' : ''
+                          }`}
+                          onClick={() => setSelectedAdmin(admin)}
+                        >
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Building2 className="h-5 w-5 text-blue-600" />
-                                  <h5 className="font-semibold text-stone-900">
-                                    {admin.company_name}
-                                  </h5>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <Building className="h-4 w-4 text-stone-600" />
+                                  <span className="font-semibold">{admin.company_name}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-stone-600">
+                                  <User className="h-3 w-3" />
+                                  {admin.profile?.full_name || 'Usuario'}
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-stone-600">
+                                  <Mail className="h-3 w-3" />
+                                  {admin.contact_email}
+                                </div>
+                                {admin.contact_phone && (
+                                  <div className="flex items-center gap-2 text-sm text-stone-600">
+                                    <Phone className="h-3 w-3" />
+                                    {admin.contact_phone}
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-2 text-sm text-stone-500">
                                   <Badge className="bg-blue-100 text-blue-800 text-xs">
-                                    <Star className="h-3 w-3 mr-1" />
-                                    Verificado
+                                    CIF: {admin.company_cif}
                                   </Badge>
                                 </div>
-
-                                <div className="space-y-1 text-sm text-stone-600 mb-3">
-                                  <p>CIF: {admin.company_cif}</p>
-                                  
-                                  <div className="flex items-center gap-2">
-                                    <Mail className="h-3 w-3" />
-                                    <span>{admin.contact_email}</span>
-                                  </div>
-                                  
-                                  {admin.contact_phone && (
-                                    <div className="flex items-center gap-2">
-                                      <Phone className="h-3 w-3" />
-                                      <span>{admin.contact_phone}</span>
-                                    </div>
-                                  )}
-
-                                  {admin.license_number && (
-                                    <p className="text-xs">
-                                      Colegiado: {admin.license_number}
-                                    </p>
-                                  )}
-                                </div>
-
-                                <div className="flex items-center gap-2 text-xs text-stone-500">
-                                  <User className="h-3 w-3" />
-                                  <span>
-                                    Contacto: {admin.profile?.full_name || 'Administrador'}
-                                  </span>
-                                </div>
                               </div>
-
-                              <div className="ml-4">
-                                <Button
-                                  onClick={() => handleRequestAssignment(admin)}
-                                  disabled={requesting || hasPendingRequest}
-                                  size="sm"
-                                  className={`${
-                                    hasPendingRequest 
-                                      ? "bg-orange-100 text-orange-800 border-orange-300" 
-                                      : "bg-blue-600 hover:bg-blue-700 text-white"
-                                  }`}
-                                  variant={hasPendingRequest ? "outline" : "default"}
-                                >
-                                  {requesting ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                  ) : hasPendingRequest ? (
-                                    <>
-                                      <Clock className="h-3 w-3 mr-1" />
-                                      Pendiente
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Send className="h-3 w-3 mr-1" />
-                                      Solicitar
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
+                              {selectedAdmin?.id === admin.id && (
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                              )}
                             </div>
                           </CardContent>
                         </Card>
-                      );
-                    })}
+                      ))}
+                    </div>
+                    
+                    {searchTerm.trim() && availableAdministrators
+                      .filter(admin => {
+                        const term = searchTerm.toLowerCase();
+                        return admin.company_name.toLowerCase().includes(term) ||
+                               admin.contact_email.toLowerCase().includes(term);
+                      }).length === 0 && (
+                      <div className="text-center py-4 text-stone-500">
+                        <p>No se encontraron administradores que coincidan con "{searchTerm}"</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-center py-8">
+                      <Building2 className="h-12 w-12 mx-auto mb-4 text-stone-400" />
+                      <p className="text-stone-600 mb-2">No hay administradores disponibles</p>
+                      <p className="text-sm text-stone-500">
+                        Los administradores de fincas aparecerán aquí cuando se registren en la plataforma
+                      </p>
+                    </div>
+                    
+                    {/* Fallback search option */}
+                    <div className="border-t pt-4">
+                      <Button 
+                        onClick={searchAdministrators} 
+                        disabled={searchLoading}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {searchLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Buscando...
+                          </>
+                        ) : (
+                          <>
+                            <Search className="h-4 w-4 mr-2" />
+                            Buscar en toda la base de datos
+                          </>
+                        )}
+                      </Button>
+                      
+                      {/* Show search results if any */}
+                      {administrators.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          <h4 className="font-medium text-stone-900">Resultados de búsqueda:</h4>
+                          {administrators.map((admin) => (
+                            <Card 
+                              key={admin.role_id}
+                              className={`cursor-pointer transition-all hover:shadow-md ${
+                                selectedAdmin?.id === admin.role_id ? 'ring-2 ring-stone-800' : ''
+                              }`}
+                              onClick={() => setSelectedAdmin({
+                                id: admin.role_id,
+                                user_id: admin.user_id,
+                                company_name: admin.company_name,
+                                company_cif: 'SEARCH-' + admin.role_id.substring(0, 8),
+                                contact_email: admin.business_email,
+                                contact_phone: admin.business_phone,
+                                profile: {
+                                  full_name: admin.user_name,
+                                  email: admin.user_email
+                                }
+                              })}
+                            >
+                              <CardContent className="p-3">
+                                <div className="flex items-start justify-between">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <Building className="h-4 w-4 text-stone-600" />
+                                      <span className="font-semibold">{admin.company_name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-stone-600">
+                                      <User className="h-3 w-3" />
+                                      {admin.user_name}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-stone-600">
+                                      <Mail className="h-3 w-3" />
+                                      {admin.business_email}
+                                    </div>
+                                  </div>
+                                  {selectedAdmin?.id === admin.role_id && (
+                                    <CheckCircle className="h-5 w-5 text-green-600" />
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
