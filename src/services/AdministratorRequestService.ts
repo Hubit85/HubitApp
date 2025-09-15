@@ -180,7 +180,7 @@ export class AdministratorRequestService {
   
       return {
         success: true,
-        requests: enrichedRequests as unknown as CommunityMemberRequest[],
+        requests: enrichedRequests as CommunityMemberRequest[],
       };
   
     } catch (error) {
