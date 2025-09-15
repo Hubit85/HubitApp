@@ -1,9 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useRouter } from "next/router";
 import { supabase } from "@/integrations/supabase/client";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
+import { AdministratorRequestManager } from "@/components/AdministratorRequestManager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +12,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle, UserCheck, Clock, User, Users, Building, Settings, Home, Edit3, Mail, Phone, MapPin, Calendar, Shield, ArrowLeft, RefreshCw } from "lucide-react";
+import { CheckCircle, UserCheck, Clock, User, Users, Building, Settings, Home, Edit3, Mail, Phone, MapPin, Calendar, Shield, ArrowLeft, RefreshCw, MessageSquare } from "lucide-react";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -202,148 +203,239 @@ export default function ProfilePage() {
           </Alert>
         )}
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Profile Information */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Basic Info Card */}
-            <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={profile.avatar_url || undefined} />
-                    <AvatarFallback className="bg-emerald-100 text-emerald-700 text-lg font-semibold">
-                      {getInitials(profile.full_name || profile.email || "U")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-2xl">{profile.full_name || "Usuario"}</CardTitle>
-                    <CardDescription className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      {profile.email}
-                    </CardDescription>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="bg-transparent hover:bg-neutral-100"
-                >
-                  <Edit3 className="h-4 w-4 mr-2" />
-                  {isEditing ? "Cancelar" : "Editar"}
-                </Button>
-              </CardHeader>
+        {/* Main Content with Tabs */}
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Información Personal
+            </TabsTrigger>
+            <TabsTrigger value="roles" className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4" />
+              Gestión de Roles
+            </TabsTrigger>
+            {/* Mostrar pestaña de gestión solo para community_member y property_administrator */}
+            {activeRole && (activeRole.role_type === 'community_member' || activeRole.role_type === 'property_administrator') && (
+              <TabsTrigger value="management" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                {activeRole.role_type === 'community_member' ? 'Solicitar Gestión' : 'Panel de Gestión'}
+              </TabsTrigger>
+            )}
+          </TabsList>
 
-              <CardContent className="space-y-6">
-                {isEditing ? (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="full_name">Nombre completo</Label>
-                      <Input
-                        id="full_name"
-                        value={editForm.full_name}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                        placeholder="Tu nombre completo"
-                      />
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-6">
+            <div className="grid gap-8 lg:grid-cols-3">
+              {/* Profile Information */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Basic Info Card */}
+                <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={profile.avatar_url || undefined} />
+                        <AvatarFallback className="bg-emerald-100 text-emerald-700 text-lg font-semibold">
+                          {getInitials(profile.full_name || profile.email || "U")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-2xl">{profile.full_name || "Usuario"}</CardTitle>
+                        <CardDescription className="flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          {profile.email}
+                        </CardDescription>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Teléfono</Label>
-                      <Input
-                        id="phone"
-                        value={editForm.phone}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="+34 600 000 000"
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="address">Dirección</Label>
-                      <Input
-                        id="address"
-                        value={editForm.address}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
-                        placeholder="Tu dirección"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="city">Ciudad</Label>
-                      <Input
-                        id="city"
-                        value={editForm.city}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, city: e.target.value }))}
-                        placeholder="Tu ciudad"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="postal_code">Código postal</Label>
-                      <Input
-                        id="postal_code"
-                        value={editForm.postal_code}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, postal_code: e.target.value }))}
-                        placeholder="28001"
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="country">País</Label>
-                      <Input
-                        id="country"
-                        value={editForm.country}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, country: e.target.value }))}
-                        placeholder="España"
-                      />
-                    </div>
-                    <div className="flex gap-3 md:col-span-2">
-                      <Button
-                        onClick={handleSaveProfile}
-                        disabled={submitting}
-                        className="bg-emerald-600 hover:bg-emerald-700"
-                      >
-                        {submitting ? "Guardando..." : "Guardar cambios"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditing(false)}
-                        disabled={submitting}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {profile.phone && (
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-4 w-4 text-neutral-500" />
-                        <span>{profile.phone}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditing(!isEditing)}
+                      className="bg-transparent hover:bg-neutral-100"
+                    >
+                      <Edit3 className="h-4 w-4 mr-2" />
+                      {isEditing ? "Cancelar" : "Editar"}
+                    </Button>
+                  </CardHeader>
+
+                  <CardContent className="space-y-6">
+                    {isEditing ? (
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="full_name">Nombre completo</Label>
+                          <Input
+                            id="full_name"
+                            value={editForm.full_name}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
+                            placeholder="Tu nombre completo"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Teléfono</Label>
+                          <Input
+                            id="phone"
+                            value={editForm.phone}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                            placeholder="+34 600 000 000"
+                          />
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="address">Dirección</Label>
+                          <Input
+                            id="address"
+                            value={editForm.address}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                            placeholder="Tu dirección"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="city">Ciudad</Label>
+                          <Input
+                            id="city"
+                            value={editForm.city}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, city: e.target.value }))}
+                            placeholder="Tu ciudad"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="postal_code">Código postal</Label>
+                          <Input
+                            id="postal_code"
+                            value={editForm.postal_code}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, postal_code: e.target.value }))}
+                            placeholder="28001"
+                          />
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="country">País</Label>
+                          <Input
+                            id="country"
+                            value={editForm.country}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, country: e.target.value }))}
+                            placeholder="España"
+                          />
+                        </div>
+                        <div className="flex gap-3 md:col-span-2">
+                          <Button
+                            onClick={handleSaveProfile}
+                            disabled={submitting}
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                          >
+                            {submitting ? "Guardando..." : "Guardar cambios"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsEditing(false)}
+                            disabled={submitting}
+                          >
+                            Cancelar
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {profile.phone && (
+                          <div className="flex items-center gap-3">
+                            <Phone className="h-4 w-4 text-neutral-500" />
+                            <span>{profile.phone}</span>
+                          </div>
+                        )}
+                        {profile.address && (
+                          <div className="flex items-center gap-3 md:col-span-2">
+                            <MapPin className="h-4 w-4 text-neutral-500" />
+                            <span>
+                              {profile.address}
+                              {profile.city && `, ${profile.city}`}
+                              {profile.postal_code && ` - ${profile.postal_code}`}
+                              {profile.country && `, ${profile.country}`}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3">
+                          <Calendar className="h-4 w-4 text-neutral-500" />
+                          <span>
+                            Miembro desde {profile.created_at ? new Date(profile.created_at).toLocaleDateString('es-ES') : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Shield className="h-4 w-4 text-neutral-500" />
+                          <span className={profile.is_verified ? "text-green-600" : "text-amber-600"}>
+                            {profile.is_verified ? "Perfil verificado" : "Perfil no verificado"}
+                          </span>
+                        </div>
                       </div>
                     )}
-                    {profile.address && (
-                      <div className="flex items-center gap-3 md:col-span-2">
-                        <MapPin className="h-4 w-4 text-neutral-500" />
-                        <span>
-                          {profile.address}
-                          {profile.city && `, ${profile.city}`}
-                          {profile.postal_code && ` - ${profile.postal_code}`}
-                          {profile.country && `, ${profile.country}`}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-3">
-                      <Calendar className="h-4 w-4 text-neutral-500" />
-                      <span>
-                        Miembro desde {profile.created_at ? new Date(profile.created_at).toLocaleDateString('es-ES') : 'N/A'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Shield className="h-4 w-4 text-neutral-500" />
-                      <span className={profile.is_verified ? "text-green-600" : "text-amber-600"}>
-                        {profile.is_verified ? "Perfil verificado" : "Perfil no verificado"}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
 
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Quick Stats */}
+                <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Resumen de tu cuenta</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-neutral-600">Roles totales</span>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        {userRoles.length}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-neutral-600">Roles verificados</span>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        {verifiedRoles.length}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-neutral-600">Rol activo</span>
+                      <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">
+                        {activeRole ? SupabaseUserRoleService.getRoleDisplayName(activeRole.role_type) : 'Ninguno'}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Actions */}
+                <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Acciones rápidas</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-transparent hover:bg-neutral-100"
+                      onClick={() => router.push('/dashboard')}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Ir al Dashboard
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-transparent hover:bg-neutral-100"
+                      onClick={refreshRoles}
+                      disabled={submitting}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Actualizar roles
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-transparent hover:bg-neutral-100"
+                      onClick={() => router.push('/help')}
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      Obtener ayuda
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Roles Tab */}
+          <TabsContent value="roles" className="space-y-6">
             {/* Role Management Section */}
             <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
               <CardHeader>
@@ -507,72 +599,21 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Stats */}
-            <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
-              <CardHeader>
-                <CardTitle className="text-lg">Resumen de tu cuenta</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-neutral-600">Roles totales</span>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                    {userRoles.length}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-neutral-600">Roles verificados</span>
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                    {verifiedRoles.length}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-neutral-600">Rol activo</span>
-                  <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">
-                    {activeRole ? SupabaseUserRoleService.getRoleDisplayName(activeRole.role_type) : 'Ninguno'}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
-              <CardHeader>
-                <CardTitle className="text-lg">Acciones rápidas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-transparent hover:bg-neutral-100"
-                  onClick={() => router.push('/dashboard')}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Ir al Dashboard
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-transparent hover:bg-neutral-100"
-                  onClick={refreshRoles}
-                  disabled={submitting}
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Actualizar roles
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start bg-transparent hover:bg-neutral-100"
-                  onClick={() => router.push('/help')}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Obtener ayuda
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+          {/* Administrator Request Management Tab - Solo visible para community_member y property_administrator */}
+          {activeRole && (activeRole.role_type === 'community_member' || activeRole.role_type === 'property_administrator') && (
+            <TabsContent value="management" className="space-y-6">
+              <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
+                <CardContent className="p-6">
+                  <AdministratorRequestManager 
+                    userRole={activeRole.role_type === 'community_member' ? 'community_member' : 'property_administrator'}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+        </Tabs>
 
         {/* Role Switch Confirmation Dialog */}
         <Dialog open={showRoleSwitchDialog} onOpenChange={setShowRoleSwitchDialog}>
