@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -20,13 +19,14 @@ import {
   Briefcase, CheckSquare, XCircle, ArrowRight, Heart,
   BookOpen, Settings, RefreshCw
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast"
-import { Database } from "@/integrations/supabase/types"
+import { useToast } from "@/hooks/use-toast";
+import { Database } from "@/integrations/supabase/types";
 
 type BudgetRequest = Database["public"]["Tables"]["budget_requests"]["Row"];
 type Quote = Database["public"]["Tables"]["quotes"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Property = Database["public"]["Tables"]["properties"]["Row"];
+type ServiceProvider = Database["public"]["Tables"]["service_providers"]["Row"];
 
 type BudgetRequestWithDetails = BudgetRequest & {
   profiles: Profile;
@@ -41,13 +41,33 @@ type QuoteWithDetails = Quote & {
   }
 };
 
-interface EnhancedBudgetRequestManagerProps {
-  providerId: string
-}
+const SERVICE_CATEGORIES_MAP = {
+  cleaning: { label: "Limpieza", icon: "🧹", color: "bg-blue-100 text-blue-800" },
+  plumbing: { label: "Fontanería", icon: "🔧", color: "bg-indigo-100 text-indigo-800" },
+  electrical: { label: "Electricidad", icon: "⚡", color: "bg-yellow-100 text-yellow-800" },
+  gardening: { label: "Jardinería", icon: "🌱", color: "bg-green-100 text-green-800" },
+  painting: { label: "Pintura", icon: "🎨", color: "bg-purple-100 text-purple-800" },
+  maintenance: { label: "Mantenimiento", icon: "🔨", color: "bg-orange-100 text-orange-800" },
+  security: { label: "Seguridad", icon: "🛡️", color: "bg-red-100 text-red-800" },
+  hvac: { label: "Climatización", icon: "❄️", color: "bg-cyan-100 text-cyan-800" },
+  carpentry: { label: "Carpintería", icon: "🪚", color: "bg-amber-100 text-amber-800" },
+  emergency: { label: "Emergencia", icon: "🚨", color: "bg-red-100 text-red-800" },
+  other: { label: "Otros", icon: "📋", color: "bg-gray-100 text-gray-800" }
+};
+
+const URGENCY_LEVELS = {
+  low: { label: "Baja", icon: "🟢", color: "bg-green-100 text-green-800" },
+  normal: { label: "Normal", icon: "🟡", color: "bg-yellow-100 text-yellow-800" },
+  high: { label: "Alta", icon: "🟠", color: "bg-orange-100 text-orange-800" },
+  emergency: { label: "Emergencia", icon: "🔴", color: "bg-red-100 text-red-800" }
+};
 
 export function EnhancedBudgetRequestManager() {
-  const { user, activeRole } = useSupabaseAuth();
-  const [requests, setRequests] = useState<BudgetRequestWithDetails[]>([]);
+  const { user, supabase } = useSupabaseAuth();
+  const { toast } = useToast();
+  const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
+  const [availableRequests, setAvailableRequests] = useState<BudgetRequestWithDetails[]>([]);
+  const [myQuotes, setMyQuotes] = useState<QuoteWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -56,7 +76,6 @@ export function EnhancedBudgetRequestManager() {
   // Filter states
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [urgencyFilter, setUrgencyFilter] = useState("all");
-  const [locationFilter, setLocationFilter] = useState("");
   const [budgetFilter, setBudgetFilter] = useState({ min: "", max: "" });
   
   // Quote creation states
@@ -74,10 +93,10 @@ export function EnhancedBudgetRequestManager() {
   });
 
   useEffect(() => {
-    if (user && activeRole?.role_type === 'service_provider') {
+    if (user) {
       loadServiceProviderData();
     }
-  }, [user, activeRole]);
+  }, [user]);
 
   const loadServiceProviderData = async () => {
     try {
@@ -95,13 +114,13 @@ export function EnhancedBudgetRequestManager() {
         throw new Error("Error loading service provider profile");
       }
 
-      setServiceProviderProfile(providerData);
+      setServiceProvider(providerData);
 
-      // Load available budget requests
-      await loadAvailableRequests(providerData);
-
-      // Load my quotes
-      await loadMyQuotes(providerData.id);
+      // Load available budget requests and my quotes
+      await Promise.all([
+        loadAvailableRequests(providerData),
+        loadMyQuotes(providerData.id)
+      ]);
 
     } catch (err) {
       console.error("Error loading service provider data:", err);
@@ -113,97 +132,77 @@ export function EnhancedBudgetRequestManager() {
 
   const loadAvailableRequests = async (provider?: ServiceProvider) => {
     try {
-      const currentProvider = provider || serviceProviderProfile;
+      const currentProvider = provider || serviceProvider;
       if (!currentProvider) return;
 
-      const filters: any = {};
+      let query = supabase
+        .from('budget_requests')
+        .select(`
+          *,
+          profiles!budget_requests_user_id_fkey (full_name, email, phone),
+          properties (name, address, city)
+        `)
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
 
-      // Filter by service categories
-      if (currentProvider.service_categories && currentProvider.service_categories.length > 0) {
-        filters.serviceCategories = currentProvider.service_categories;
-      }
-
-      // Apply additional filters
+      // Apply filters
       if (categoryFilter !== "all") {
-        filters.category = categoryFilter;
+        query = query.eq('category', categoryFilter);
       }
       if (urgencyFilter !== "all") {
-        filters.urgency = urgencyFilter;
+        query = query.eq('urgency', urgencyFilter);
       }
       if (budgetFilter.min) {
-        filters.minBudget = parseFloat(budgetFilter.min);
+        query = query.gte('budget_range_min', parseFloat(budgetFilter.min));
       }
       if (budgetFilter.max) {
-        filters.maxBudget = parseFloat(budgetFilter.max);
+        query = query.lte('budget_range_max', parseFloat(budgetFilter.max));
       }
 
-      const requests = await SupabaseBudgetService.getPublishedBudgetRequests(filters);
+      const { data: requests, error } = await query;
+
+      if (error) throw error;
 
       // Filter out requests where I already submitted a quote
       const myQuoteRequestIds = myQuotes.map(q => q.budget_request_id);
-      const filteredRequests = requests.filter(r => !myQuoteRequestIds.includes(r.id));
+      const filteredRequests = (requests || []).filter(r => !myQuoteRequestIds.includes(r.id));
 
-      // Enrich with client information
-      const enrichedRequests = await Promise.all(
-        filteredRequests.map(async (request) => {
-          try {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('full_name, email, phone')
-              .eq('id', request.user_id)
-              .single();
-
-            return { ...request, profiles: profile || null };
-          } catch (error) {
-            return { ...request, profiles: null };
-          }
-        })
-      );
-
-      setAvailableRequests(enrichedRequests as BudgetRequestWithDetails[]);
+      setAvailableRequests(filteredRequests.map(req => ({
+        ...req,
+        quotes: [] // Initialize empty quotes array
+      })) as BudgetRequestWithDetails[]);
 
     } catch (err) {
       console.error("Error loading available requests:", err);
+      setError("Error al cargar solicitudes disponibles");
     }
   };
 
   const loadMyQuotes = async (providerId?: string) => {
     try {
-      const currentProviderId = providerId || serviceProviderProfile?.id;
+      const currentProviderId = providerId || serviceProvider?.id;
       if (!currentProviderId) return;
 
-      const quotes = await SupabaseBudgetService.getProviderQuotes(currentProviderId);
+      const { data: quotes, error } = await supabase
+        .from('quotes')
+        .select(`
+          *,
+          budget_requests!quotes_budget_request_id_fkey (
+            *,
+            profiles!budget_requests_user_id_fkey (full_name, email, phone),
+            properties (name, address, city)
+          )
+        `)
+        .eq('service_provider_id', currentProviderId)
+        .order('created_at', { ascending: false });
 
-      // Enrich quotes with budget request details
-      const enrichedQuotes = await Promise.all(
-        quotes.map(async (quote) => {
-          try {
-            const request = await SupabaseBudgetService.getBudgetRequest(quote.budget_request_id);
-            
-            // Get client profile
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('full_name, email, phone')
-              .eq('id', request.user_id)
-              .single();
+      if (error) throw error;
 
-            return {
-              ...quote,
-              budget_requests: {
-                ...request,
-                profiles: profile || null
-              }
-            };
-          } catch (error) {
-            return { ...quote, budget_requests: null };
-          }
-        })
-      );
-
-      setMyQuotes(enrichedQuotes as QuoteWithDetails[]);
+      setMyQuotes(quotes as QuoteWithDetails[] || []);
 
     } catch (err) {
       console.error("Error loading my quotes:", err);
+      setError("Error al cargar mis cotizaciones");
     }
   };
 
@@ -223,32 +222,34 @@ export function EnhancedBudgetRequestManager() {
       labor_cost: "",
       description: "",
       terms_and_conditions: "",
-      valid_until: format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
+      valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       notes: ""
     });
     setShowQuoteDialog(true);
   };
 
   const handleSubmitQuote = async () => {
-    if (!selectedRequest || !serviceProviderProfile) return;
+    if (!selectedRequest || !serviceProvider) return;
 
     try {
       setSubmittingQuote(true);
       setError("");
 
-      const quoteInsert: QuoteInsert = {
-        service_provider_id: serviceProviderProfile.id,
-        budget_request_id: selectedRequest.id,
-        amount: parseFloat(quoteData.amount),
-        materials_cost: parseFloat(quoteData.materials_cost) || undefined,
-        labor_cost: parseFloat(quoteData.labor_cost),
-        description: quoteData.description,
-        terms_and_conditions: quoteData.terms_and_conditions || null,
-        valid_until: quoteData.valid_until ? new Date(quoteData.valid_until).toISOString() : null,
-        notes: quoteData.notes || null
-      };
+      const { error } = await supabase
+        .from('quotes')
+        .insert({
+          service_provider_id: serviceProvider.id,
+          budget_request_id: selectedRequest.id,
+          amount: parseFloat(quoteData.amount),
+          materials_cost: parseFloat(quoteData.materials_cost) || 0,
+          labor_cost: parseFloat(quoteData.labor_cost) || parseFloat(quoteData.amount),
+          description: quoteData.description,
+          terms_and_conditions: quoteData.terms_and_conditions || null,
+          valid_until: quoteData.valid_until || null,
+          notes: quoteData.notes || null
+        });
 
-      await SupabaseBudgetService.createQuote(quoteInsert);
+      if (error) throw error;
 
       setSuccessMessage(`¡Cotización enviada exitosamente para "${selectedRequest.title}"!`);
       setShowQuoteDialog(false);
@@ -273,7 +274,7 @@ export function EnhancedBudgetRequestManager() {
   };
 
   const getCategoryDisplay = (category: string) => {
-    return SERVICE_CATEGORIES_MAP[category] || SERVICE_CATEGORIES_MAP.other;
+    return SERVICE_CATEGORIES_MAP[category as keyof typeof SERVICE_CATEGORIES_MAP] || SERVICE_CATEGORIES_MAP.other;
   };
 
   const getStatusBadge = (status: string | null) => {
@@ -305,7 +306,7 @@ export function EnhancedBudgetRequestManager() {
   };
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd MMM yyyy', { locale: es });
+    return new Date(dateString).toLocaleDateString('es-ES');
   };
 
   const calculateQuoteStats = () => {
@@ -318,198 +319,19 @@ export function EnhancedBudgetRequestManager() {
     return { total, pending, accepted, rejected, acceptanceRate };
   };
 
-  if (!activeRole || activeRole.role_type !== 'service_provider') {
+  if (!user) {
     return (
       <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60">
         <CardContent className="text-center p-8">
           <Users className="h-12 w-12 mx-auto mb-4 text-amber-600" />
-          <h3 className="text-lg font-semibold text-amber-900 mb-2">Acceso Restringido</h3>
+          <h3 className="text-lg font-semibold text-amber-900 mb-2">Acceso Requerido</h3>
           <p className="text-sm text-amber-700">
-            Esta funcionalidad está disponible solo para proveedores de servicios.
+            Debes iniciar sesión para acceder a esta funcionalidad.
           </p>
         </CardContent>
       </Card>
     );
   }
-
-  const handleQuoteAction = async (
-    quoteId: string,
-    action: "accept" | "reject"
-  ) => {
-    try {
-      const { data, error } = await supabase
-        .from("quotes")
-        .update({ status: action === "accept" ? "accepted" : "rejected" })
-        .eq("id", quoteId)
-        .select()
-        .single()
-
-      if (error) throw error
-
-      setRequests((prev) =>
-        prev.map((req) => ({
-          ...req,
-          quotes: req.quotes.map((q) =>
-            q.id === quoteId ? { ...q, status: data.status } : q
-          ),
-        }))
-      )
-
-      toast({
-        title: `Quote ${action === "accept" ? "accepted" : "rejected"}`,
-      })
-    } catch (err) {
-      console.error(`Error ${action}ing quote:`, err)
-      toast({
-        title: `Error ${action}ing quote`,
-        variant: "destructive",
-      })
-    }
-  }
-
-  const renderRequestDetails = (request: BudgetRequestWithDetails) => (
-    <Card key={request.id}>
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <Badge className="mb-2">{request.category}</Badge>
-            <CardTitle>{request.title}</CardTitle>
-            <CardDescription>
-              From {request.profiles.full_name} for{" "}
-              {request.properties.name}
-            </CardDescription>
-          </div>
-          <Badge variant={request.urgency === "high" ? "destructive" : "outline"}>
-            {request.urgency}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="details">
-          <TabsList>
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="quotes">
-              Quotes ({request.quotes.length})
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="details" className="pt-4">
-            <p className="text-sm">{request.description}</p>
-            <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-              <div>
-                <strong>Budget:</strong> €{request.budget_range_min} - €
-                {request.budget_range_max}
-              </div>
-              <div>
-                <strong>Deadline:</strong>{" "}
-                {request.deadline_date
-                  ? new Date(request.deadline_date).toLocaleDateString()
-                  : "N/A"}
-              </div>
-              <div>
-                <strong>Preferred Date:</strong>{" "}
-                {request.preferred_date
-                  ? new Date(request.preferred_date).toLocaleDateString()
-                  : "N/A"}
-              </div>
-               <div>
-                <strong>Location:</strong> {request.properties.address}, {request.properties.city}
-              </div>
-              {request.special_requirements && <div><strong>Special Requirements:</strong> {request.special_requirements}</div>}
-            </div>
-          </TabsContent>
-          <TabsContent value="quotes" className="pt-4">
-            {request.quotes.length > 0 ? (
-              <div className="space-y-4">
-                {request.quotes.map((quote) => (
-                  <div
-                    key={quote.id}
-                    className="p-4 border rounded-lg"
-                  >
-                    <div className="flex justify-between items-center">
-                      <p className="font-semibold">
-                        €{quote.amount}
-                      </p>
-                      <Badge
-                        variant={
-                          quote.status === "accepted"
-                            ? "default"
-                            : quote.status === "pending"
-                            ? "secondary"
-                            : "destructive"
-                        }
-                      >
-                        {quote.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm mt-2">
-                      {quote.description}
-                    </p>
-                    {quote.status === "pending" && (
-                      <div className="flex gap-2 mt-4">
-                        <Button
-                          size="sm"
-                          onClick={() => handleQuoteAction(quote.id, "accept")}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleQuoteAction(quote.id, "reject")}
-                        >
-                          Reject
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>No quotes submitted yet.</p>
-            )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
-  )
-
-  const renderActiveQuoteCard = (quote: QuoteWithDetails) => (
-    <Card key={quote.id}>
-      <CardHeader>
-        <CardTitle>{quote.budget_requests.title}</CardTitle>
-        <CardDescription>
-          Quote for {quote.budget_requests.profiles.full_name} at {quote.budget_requests.properties.address}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p>
-          Your quote of €{quote.amount} was{" "}
-          <span
-            className={
-              quote.status === "accepted"
-                ? "font-bold text-green-600"
-                : "font-bold text-red-600"
-            }
-          >
-            {quote.status}
-          </span>
-          .
-        </p>
-        <p className="text-sm text-gray-500 mt-2">
-          {quote.description}
-        </p>
-        <div className="text-xs text-gray-400 mt-4">
-          Submitted on: {new Date(quote.created_at).toLocaleDateString()} | Valid
-          until: {quote.valid_until ? new Date(quote.valid_until).toLocaleDateString() : 'N/A'}
-        </div>
-      </CardContent>
-       {quote.status === "accepted" && (
-        <CardFooter>
-          <Button size="sm">Create Contract</Button>
-        </CardFooter>
-      )}
-    </Card>
-  )
 
   if (loading) {
     return (
@@ -538,7 +360,7 @@ export function EnhancedBudgetRequestManager() {
             </div>
             <Button 
               variant="outline" 
-              className="bg-white/10 border-white/20 hover:bg-white/20"
+              className="bg-white/10 border-white/20 hover:bg-white/20 text-white hover:text-white"
               onClick={handleRefresh}
               disabled={refreshing}
             >
