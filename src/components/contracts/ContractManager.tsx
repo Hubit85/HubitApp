@@ -27,20 +27,46 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { Database } from "@/integrations/supabase/types"
+import { Database, Contract, Quote, BudgetRequest, Profile, ServiceProvider } from "@/integrations/supabase/types"
 
-type Contract = Database["public"]["Tables"]["contracts"]["Row"]
-type Quote = Database["public"]["Tables"]["quotes"]["Row"]
-type BudgetRequest = Database["public"]["Tables"]["budget_requests"]["Row"]
-type Profile = Database["public"]["Tables"]["profiles"]["Row"]
+type ExtendedQuote = Quote & {
+  user_id: string;
+  title: string;
+  description: string;
+  budget_requests: BudgetRequest & {
+    user_id: string;
+    properties: { address: string };
+    profiles: { full_name: string };
+  };
+};
 
 type ExtendedContract = Contract & {
-  quotes: Quote & {
-    budget_requests: BudgetRequest
-  }
-  profiles: Profile
+  provider_name?: string;
+  client_name?: string;
+  quote_title?: string;
+  budget_title?: string;
+  property_address?: string;
+  service_providers?: { company_name: string };
+  profiles?: { full_name: string };
+  quotes?: {
+    title: string;
+    description: string;
+    budget_requests: {
+      title: string;
+      properties: { address: string };
+    };
+  };
+};
+
+interface ContractFormData {
+  title: string;
+  description: string;
+  work_scope: string;
+  payment_terms: string;
+  deadline: string;
+  warranty_period: string;
+  special_terms: string;
 }
 
 interface ContractManagerProps {
