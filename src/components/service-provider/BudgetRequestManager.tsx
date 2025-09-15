@@ -145,27 +145,50 @@ export function BudgetRequestManager({
     try {
       console.log("🔍 Loading available budget requests...");
 
-      // IMPROVED QUERY: First get all published requests without category filtering
+      // Get all published requests with proper joins
       const { data: allRequests, error } = await supabase
         .from('budget_requests')
-        .select(
-          `
+        .select(`
           *,
-          profiles ( * ),
-          properties ( * )
-        `
-        )
-        .order("created_at", { ascending: false })
+          profiles!budget_requests_user_id_fkey ( * ),
+          properties!budget_requests_property_id_fkey ( * )
+        `)
+        .eq('status', 'published')
+        .order("created_at", { ascending: false });
 
-      if (error) throw error
-      setBudgetRequests(data as ExtendedBudgetRequest[] || [])
+      if (error) {
+        console.error("❌ Error loading budget requests:", error);
+        throw error;
+      }
+
+      console.log("✅ Budget requests loaded successfully:", {
+        total: allRequests?.length || 0,
+        categories: allRequests?.reduce((acc: any, req: any) => {
+          acc[req.category] = (acc[req.category] || 0) + 1;
+          return acc;
+        }, {}) || {}
+      });
+
+      // Transform data to match ExtendedBudgetRequest interface
+      const extendedRequests: ExtendedBudgetRequest[] = (allRequests || []).map(request => ({
+        ...request,
+        user_name: request.profiles?.full_name || 'Usuario desconocido',
+        property_name: request.properties?.name || 'Propiedad',
+        property_address: request.properties?.address || request.work_location || 'Dirección no especificada',
+        distance: 0, // Could be calculated based on provider location
+        quote_count: 0, // Would need separate query to get accurate count
+        my_quote: null // Would need separate query to check existing quotes
+      }));
+
+      return { success: true, data: extendedRequests, message: "Solicitudes cargadas exitosamente" };
+
     } catch (err) {
-      console.error("Error fetching budget requests:", err)
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      )
-    } finally {
-      setLoading(false)
+      console.error("❌ Error fetching budget requests:", err);
+      return { 
+        success: false, 
+        data: [], 
+        message: err instanceof Error ? err.message : "Error desconocido al cargar solicitudes" 
+      };
     }
   }
 
@@ -401,18 +424,22 @@ export function BudgetRequestManager({
 
   const handleViewRequest = async (request: ExtendedBudgetRequest) => {
     try {
+      const currentViewsCount = request.views_count || 0;
       const { error } = await supabase
         .from("budget_requests")
-        .update({ views_count: request.views_count + 1 })
-        .eq("id", request.id)
+        .update({ views_count: currentViewsCount + 1 })
+        .eq("id", request.id);
       
       if(error) console.warn("Could not update view count", error);
 
-      setBudgetRequests(prev => prev.map(r => r.id === request.id ? {...r, views_count: r.views_count + 1} : r));
+      setBudgetRequests(prev => prev.map(r => r.id === request.id ? {
+        ...r, 
+        views_count: currentViewsCount + 1
+      } : r));
       setSelectedRequest(request);
 
     } catch (err) {
-      console.error("Error on viewing request:", err)
+      console.error("Error on viewing request:", err);
     }
   }
 
@@ -433,10 +460,10 @@ export function BudgetRequestManager({
               <CardTitle>{request.title}</CardTitle>
               <CardDescription className="flex items-center gap-2 mt-1">
                 <User className="h-4 w-4" />
-                {request.profiles.full_name}
+                <span>{request.profiles?.full_name || 'Usuario desconocido'}</span>
                 <Separator orientation="vertical" className="h-4" />
                 <MapPin className="h-4 w-4" />
-                {request.work_location || request.properties.address}
+                <span>{request.properties?.address || request.work_location || 'Ubicación no especificada'}</span>
               </CardDescription>
             </div>
             <Badge variant={request.urgency === "high" ? "destructive" : "outline"}>
@@ -736,8 +763,8 @@ export function BudgetRequestManager({
                                     <Card className="p-4 bg-neutral-50">
                                       <h4 className="font-medium mb-2">Resumen de la solicitud</h4>
                                       <div className="text-sm space-y-1">
-                                        <p><span className="font-medium">Cliente:</span> {request.profiles?.full_name || 'Usuario'}</p>
-                                        <p><span className="font-medium">Ubicación:</span> {request.properties?.address || request.work_location}</p>
+                                        <p><span className="font-medium">Cliente:</span> {request.profiles?.full_name || 'Usuario desconocido'}</p>
+                                        <p><span className="font-medium">Ubicación:</span> {request.properties?.address || request.work_location || 'Ubicación no especificada'}</p>
                                         <p><span className="font-medium">Categoría:</span> {request.category}</p>
                                         <p><span className="font-medium">Urgencia:</span> {request.urgency || 'No especificada'}</p>
                                         <p><span className="font-medium">Descripción:</span> {request.description}</p>
