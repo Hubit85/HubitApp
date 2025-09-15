@@ -527,6 +527,111 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         </Card>
       )}
 
+      {/* Managed Incidents Section - Only for Property Administrators */}
+      {isPropertyAdministrator && userRole === "property_administrator" && managedIncidents.length > 0 && (
+        <Card className="border-green-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-900">
+              <AlertCircle className="h-5 w-5" />
+              Incidencias Gestionadas ({managedIncidents.length})
+            </CardTitle>
+            <CardDescription>
+              Incidencias reportadas por miembros bajo tu gestión
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {managedIncidents.slice(0, 5).map((incident) => (
+                <Card key={incident.id} className="border border-stone-200 hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <AlertCircle className="h-4 w-4 text-stone-600" />
+                          <span className="font-semibold">{incident.title}</span>
+                          <Badge className={`text-xs ${
+                            incident.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            incident.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                            incident.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {incident.status === 'pending' ? 'Pendiente' :
+                             incident.status === 'in_progress' ? 'En Proceso' :
+                             incident.status === 'resolved' ? 'Resuelto' :
+                             incident.status}
+                          </Badge>
+                        </div>
+
+                        <div className="text-sm text-stone-600 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <User className="h-3 w-3" />
+                            {incident.profiles?.full_name || 'Usuario'}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Building className="h-3 w-3" />
+                            {incident.service_category || 'Categoría no especificada'}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-3 w-3" />
+                            {formatDate(incident.reported_at)}
+                          </div>
+                        </div>
+
+                        {incident.description && (
+                          <div className="bg-stone-50 p-3 rounded-lg">
+                            <p className="text-sm">{incident.description.substring(0, 150)}
+                              {incident.description.length > 150 && '...'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 ml-4">
+                        {incident.status === 'pending' && (
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              // Navigate to budget request creation
+                              window.location.href = `/dashboard?tab=gestionar-incidencias&incident=${incident.id}`;
+                            }}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Building className="h-3 w-3 mr-1" />
+                            Solicitar Presupuesto
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            window.location.href = `/dashboard?tab=gestionar-incidencias&incident=${incident.id}`;
+                          }}
+                        >
+                          Ver Detalles
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {managedIncidents.length > 5 && (
+                <div className="text-center pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      window.location.href = '/dashboard?tab=gestionar-incidencias';
+                    }}
+                  >
+                    Ver todas las incidencias ({managedIncidents.length})
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* General Notifications */}
       <Card className="border-stone-200 shadow-lg">
         <CardHeader>
