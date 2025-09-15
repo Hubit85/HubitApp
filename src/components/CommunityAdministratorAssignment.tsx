@@ -108,44 +108,96 @@ export function CommunityAdministratorAssignment() {
   };
 
   const loadAvailableAdministrators = async () => {
-    // CORRECTED: Avoid the problematic JOIN by loading administrators without profiles initially
-    const { data, error } = await supabase
-      .from('property_administrators')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      setError("");
+      console.log('🔍 Loading available property administrators...');
+      
+      // CORRECTED: Load ALL administrators without any filtering
+      const { data: propertyAdmins, error: propertyError } = await supabase
+        .from('property_administrators')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('❌ Error loading property administrators:', error);
-      setError('Error al cargar la lista de administradores.');
-      setAvailableAdministrators([]);
-      return;
-    }
-    
-    console.log(`[DEBUG] Found ${data?.length || 0} administrators in database.`);
-
-    const adminList: PropertyAdministrator[] = (data || []).map((admin: any) => ({
-      id: admin.id,
-      user_id: admin.user_id,
-      company_name: admin.company_name || 'Administrador sin nombre',
-      company_cif: admin.company_cif || `TEMP-${admin.id.substring(0,8)}`,
-      contact_email: admin.contact_email || 'sin-email@registrado.com',
-      contact_phone: admin.contact_phone || undefined,
-      license_number: admin.license_number || undefined,
-      profile: {
-        full_name: admin.company_name || 'Administrador',
-        email: admin.contact_email || ''
+      if (propertyError) {
+        console.error('❌ Error loading property administrators:', propertyError);
+        setError('Error al cargar administradores de fincas');
+        setAvailableAdministrators([]);
+        return;
       }
-    }));
 
-    setAvailableAdministrators(adminList);
-    console.log(`[DEBUG] Processed and set ${adminList.length} administrators to state.`);
-    
-    // Log the final list for debugging
-    console.log(`[DEBUG] FINAL ADMINISTRATOR LIST:`, adminList.map(a => ({
-      name: a.company_name,
-      email: a.contact_email,
-      cif: a.company_cif
-    })));
+      console.log('📋 RAW DATA FROM DATABASE:', {
+        total_count: propertyAdmins?.length || 0,
+        administrators: propertyAdmins?.map(admin => ({
+          id: admin.id?.substring(0, 8) + '...',
+          company_name: admin.company_name,
+          contact_email: admin.contact_email,
+          contact_phone: admin.contact_phone
+        }))
+      });
+
+      // ENHANCED: Process ALL administrators without filtering
+      const adminList: PropertyAdministrator[] = (propertyAdmins || []).map((admin: any) => {
+        const companyName = admin.company_name || 'Administrador sin nombre';
+        const contactEmail = admin.contact_email || 'sin-email@registrado.com';
+        
+        console.log(`✅ PROCESSING admin: ${companyName} (${contactEmail})`);
+        
+        return {
+          id: admin.id,
+          user_id: admin.user_id,
+          company_name: companyName,
+          company_cif: admin.company_cif || `TEMP-${admin.id.substring(0, 8)}`,
+          contact_email: contactEmail,
+          contact_phone: admin.contact_phone || undefined,
+          license_number: admin.license_number || undefined,
+          profile: {
+            full_name: companyName,
+            email: contactEmail
+          }
+        };
+      });
+
+      console.log('🎯 FINAL ADMINISTRATOR LIST TO DISPLAY:', {
+        total_count: adminList.length,
+        administrators: adminList.map(admin => ({
+          name: admin.company_name,
+          email: admin.contact_email,
+          cif: admin.company_cif,
+          id: admin.id.substring(0, 8) + '...'
+        }))
+      });
+
+      // EXPECTED ADMINISTRATORS CHECK
+      const expectedTerms = ['castro', 'pipaón', 'pipaon', 'administracion'];
+      const foundExpectedAdmins = adminList.filter(admin => {
+        const searchText = (admin.company_name + ' ' + admin.contact_email).toLowerCase();
+        return expectedTerms.some(expected => searchText.includes(expected.toLowerCase()));
+      });
+
+      console.log('🔍 EXPECTED ADMINISTRATORS FOUND:', {
+        expected_terms: expectedTerms,
+        found_count: foundExpectedAdmins.length,
+        found_administrators: foundExpectedAdmins.map(admin => ({
+          name: admin.company_name,
+          email: admin.contact_email
+        }))
+      });
+
+      // Set ALL administrators
+      setAvailableAdministrators(adminList);
+
+      if (adminList.length === 0) {
+        setError('No se encontraron administradores registrados');
+      } else {
+        console.log(`✅ Successfully loaded ${adminList.length} administrators`);
+        setError(''); // Clear any previous errors
+      }
+
+    } catch (err) {
+      console.error('❌ Critical error loading administrators:', err);
+      setError('Error crítico al cargar administradores');
+      setAvailableAdministrators([]);
+    }
   };
 
   const handleRequestAssignment = async (administrator: PropertyAdministrator) => {
