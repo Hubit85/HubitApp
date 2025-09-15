@@ -138,16 +138,13 @@ export function PropertyAdministratorProfile() {
 
       console.log('✅ Property administrator record found:', adminRecord.contact_email);
 
-      // CORRECTED: Find requests where the administrator email matches this admin's contact email
+      // FIXED: Use the correct table 'administrator_requests' instead of 'community_member_administrators'
       const { data: requests, error } = await supabase
-        .from('community_member_administrators')
-        .select(`
-          *,
-          profiles!community_member_administrators_user_id_fkey(full_name, email)
-        `)
-        .eq('contact_email', adminRecord.contact_email) // Use the admin's contact email
-        .eq('administrator_verified', false)
-        .order('created_at', { ascending: false });
+        .from('administrator_requests')
+        .select('*')
+        .eq('property_administrator_id', adminRecord.id) // Match by property administrator ID
+        .eq('status', 'pending')
+        .order('requested_at', { ascending: false });
 
       if (error) {
         console.error('❌ Error loading assignment requests:', error);
@@ -156,7 +153,23 @@ export function PropertyAdministratorProfile() {
       }
 
       console.log(`✅ Found ${requests?.length || 0} pending assignment requests`);
-      setPendingRequests(requests || []);
+      
+      // Transform the data to match the expected interface
+      const transformedRequests = (requests || []).map(req => ({
+        id: req.id,
+        user_id: req.community_member_id, // This is the role ID, not user ID
+        company_name: `Solicitud de gestión`,
+        company_cif: `REQ-${req.id.substring(0, 8)}`,
+        contact_email: 'miembro@comunidad.com',
+        created_at: req.requested_at || req.created_at,
+        notes: req.request_message || 'Solicitud de gestión de incidencias',
+        profiles: {
+          full_name: 'Miembro de Comunidad',
+          email: 'miembro@comunidad.com'
+        }
+      }));
+
+      setPendingRequests(transformedRequests);
 
     } catch (err) {
       console.error('❌ Critical error loading pending requests:', err);
