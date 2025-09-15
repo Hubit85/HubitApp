@@ -17,23 +17,25 @@ export interface CommunityMemberRequest {
   
   community_member?: {
     id: string;
+    user_id: string;
     role_specific_data: any;
     profiles?: {
       id: string;
-      full_name: string;
+      full_name: string | null;
       email: string;
-      phone?: string;
-    };
+      phone?: string | null;
+    } | null;
   } | null;
   property_administrator?: {
     id: string;
+    user_id: string;
     role_specific_data: any;
     profiles?: {
       id: string;
-      full_name: string;
+      full_name: string | null;
       email: string;
-      phone?: string;
-    };
+      phone?: string | null;
+    } | null;
   } | null;
   community?: {
     id: string;
@@ -57,12 +59,14 @@ export interface ManagedCommunity {
   
   community_member?: {
     id: string;
+    user_id: string;
     role_specific_data: any;
     profiles?: {
       id: string;
-      full_name: string;
+      full_name: string | null;
       email: string;
-    };
+      phone?: string | null;
+    } | null;
   } | null;
   community?: {
     id: string;
@@ -80,9 +84,9 @@ export class AdministratorRequestService {
     role_specific_data: any;
     profiles?: {
       id: string;
-      full_name: string;
+      full_name: string | null;
       email: string;
-      phone?: string;
+      phone?: string | null;
     } | null;
   } | null> {
     if (!roleId) return null;
@@ -119,7 +123,12 @@ export class AdministratorRequestService {
         id: role.id, 
         user_id: role.user_id, 
         role_specific_data: role.role_specific_data, 
-        profiles: profile 
+        profiles: {
+          id: profile.id,
+          full_name: profile.full_name,
+          email: profile.email,
+          phone: profile.phone
+        }
       };
     } catch (error) {
       console.warn(`Exception in getRoleAndProfile for ${roleId}:`, error);
