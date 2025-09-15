@@ -108,9 +108,10 @@ export function CommunityAdministratorAssignment() {
   };
 
   const loadAvailableAdministrators = async () => {
+    // CORRECTED: Avoid the problematic JOIN by loading administrators without profiles initially
     const { data, error } = await supabase
       .from('property_administrators')
-      .select('*, profiles:user_id(full_name, email)')
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -131,13 +132,20 @@ export function CommunityAdministratorAssignment() {
       contact_phone: admin.contact_phone || undefined,
       license_number: admin.license_number || undefined,
       profile: {
-        full_name: admin.profiles?.full_name || admin.company_name || 'Administrador',
-        email: admin.profiles?.email || admin.contact_email || ''
+        full_name: admin.company_name || 'Administrador',
+        email: admin.contact_email || ''
       }
     }));
 
     setAvailableAdministrators(adminList);
     console.log(`[DEBUG] Processed and set ${adminList.length} administrators to state.`);
+    
+    // Log the final list for debugging
+    console.log(`[DEBUG] FINAL ADMINISTRATOR LIST:`, adminList.map(a => ({
+      name: a.company_name,
+      email: a.contact_email,
+      cif: a.company_cif
+    })));
   };
 
   const handleRequestAssignment = async (administrator: PropertyAdministrator) => {
