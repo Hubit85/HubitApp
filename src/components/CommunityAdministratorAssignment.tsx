@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import { UserPlus, Building, Mail, Phone, Search, Loader2, Badge, MapPin, Star, Clock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 type ServiceProvider = Database["public"]["Tables"]["service_providers"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -24,7 +25,7 @@ interface CommunityAssignment {
 }
 
 export function CommunityAdministratorAssignment() {
-  const { user, supabase } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
 
   const [availableAdmins, setAvailableAdmins] = useState<ServiceProviderWithProfile[]>([]);
@@ -35,10 +36,10 @@ export function CommunityAdministratorAssignment() {
   const [communityName, setCommunityName] = useState("");
 
   useEffect(() => {
-    if (user && supabase) {
+    if (user) {
       fetchAvailableAdmins();
     }
-  }, [user, supabase]);
+  }, [user, searchTerm]);
 
   const fetchAvailableAdmins = async () => {
     try {
@@ -123,15 +124,6 @@ export function CommunityAdministratorAssignment() {
       return;
     }
     
-    if (!supabase) {
-      toast({
-        title: "Error de conexión",
-        description: "No se pudo conectar con la base de datos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     
     try {
@@ -145,6 +137,19 @@ export function CommunityAdministratorAssignment() {
       
       // Simulated API call
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const { data, error } = await supabase
+        .from("community_assignments")
+        .insert({
+          community_name: communityName.trim(),
+          service_provider_id: selectedAdmin.id,
+          assigned_by: user.id,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       
       toast({
         title: "Asignación completada exitosamente",
