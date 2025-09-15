@@ -385,10 +385,11 @@ export function ContractManager() {
       // Send notification to the contract owner with proper null checks and fallback
       if (requestUserId && user?.id && providerData?.id && newContract) {
         try {
-          // Explicit string conversion with guaranteed fallback - safe approach
+          // Explicit string conversion with guaranteed fallback and null safety
           const serviceTitle = selectedQuote.title || 'Servicio';
-          const contractNumber = newContract.contract_number ? String(newContract.contract_number) : `CON-${Date.now()}`;
-          const messageContent = `Se ha generado un contrato para tu solicitud "${serviceTitle}" (${contractNumber})`;
+          const contractNumberValue = newContract.contract_number;
+          const safeContractNumber: string = contractNumberValue !== null ? String(contractNumberValue) : `CON-${Date.now()}`;
+          const messageContent = `Se ha generado un contrato para tu solicitud "${serviceTitle}" (${safeContractNumber})`;
             
           await supabase
             .from('notifications')
