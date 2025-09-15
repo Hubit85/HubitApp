@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,9 +24,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { useToast } from "@/hooks/use-toast"
-import { Database, Contract, Quote, BudgetRequest, Profile, ServiceProvider } from "@/integrations/supabase/types"
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import { Database } from "@/integrations/supabase/types";
+
+type Contract = Database["public"]["Tables"]["contracts"]["Row"];
+type Quote = Database["public"]["Tables"]["quotes"]["Row"];
+type BudgetRequest = Database["public"]["Tables"]["budget_requests"]["Row"];
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type ServiceProvider = Database["public"]["Tables"]["service_providers"]["Row"];
+type Property = Database["public"]["Tables"]["properties"]["Row"];
 
 type ExtendedQuote = Quote & {
   user_id: string;
@@ -36,8 +41,8 @@ type ExtendedQuote = Quote & {
   description: string;
   budget_requests: BudgetRequest & {
     user_id: string;
-    properties: { address: string };
-    profiles: { full_name: string };
+    properties: Property;
+    profiles: Profile;
   };
 };
 
@@ -47,14 +52,14 @@ type ExtendedContract = Contract & {
   quote_title?: string;
   budget_title?: string;
   property_address?: string;
-  service_providers?: { company_name: string };
-  profiles?: { full_name: string };
+  service_providers?: ServiceProvider;
+  profiles?: Profile;
   quotes?: {
     title: string;
     description: string;
     budget_requests: {
       title: string;
-      properties: { address: string };
+      properties: Property;
     };
   };
 };
@@ -69,13 +74,9 @@ interface ContractFormData {
   special_terms: string;
 }
 
-interface ContractManagerProps {
-  userId: string
-  role: "client" | "provider"
-}
-
 export function ContractManager() {
-  const { user, activeRole } = useSupabaseAuth();
+  const { user, supabase } = useSupabaseAuth();
+  const { toast } = useToast();
   const [contracts, setContracts] = useState<ExtendedContract[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -89,6 +90,7 @@ export function ContractManager() {
   const [currentTab, setCurrentTab] = useState("my-contracts");
   const [availableQuotes, setAvailableQuotes] = useState<ExtendedQuote[]>([]);
   const [selectedQuote, setSelectedQuote] = useState<ExtendedQuote | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const [contractForm, setContractForm] = useState<ContractFormData>({
     title: "",
@@ -102,9 +104,31 @@ export function ContractManager() {
 
   useEffect(() => {
     if (user) {
+      loadUserRole();
       loadContractsData();
     }
-  }, [user, activeRole]);
+  }, [user]);
+
+  const loadUserRole = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error("Error loading user profile:", error);
+        return;
+      }
+
+      setUserRole(profile?.user_type || 'particular');
+    } catch (err) {
+      console.error("Error loading user role:", err);
+    }
+  };
 
   const loadContractsData = async () => {
     if (!user?.id) return;
@@ -115,7 +139,7 @@ export function ContractManager() {
 
       console.log("🔍 Loading contracts data for user:", user.id.substring(0, 8) + '...');
 
-      if (activeRole?.role_type === 'service_provider') {
+      if (userRole === 'service_provider') {
         await Promise.all([
           loadProviderContracts(),
           loadAvailableQuotes()
@@ -144,7 +168,6 @@ export function ContractManager() {
             company_name
           ),
           quotes (
-            title,
             description,
             budget_requests (
               title,
@@ -165,7 +188,7 @@ export function ContractManager() {
       const enhancedContracts = (data || []).map((contract: any) => ({
         ...contract,
         provider_name: contract.service_providers?.company_name || 'Proveedor',
-        quote_title: contract.quotes?.title || 'Servicio',
+        quote_title: contract.quotes?.budget_requests?.title || 'Servicio',
         budget_title: contract.quotes?.budget_requests?.title || '',
         property_address: contract.quotes?.budget_requests?.properties?.address || ''
       }));
@@ -202,7 +225,6 @@ export function ContractManager() {
             full_name
           ),
           quotes (
-            title,
             description,
             budget_requests (
               title,
@@ -223,7 +245,7 @@ export function ContractManager() {
       const enhancedContracts = (data || []).map((contract: any) => ({
         ...contract,
         client_name: contract.profiles?.full_name || 'Cliente',
-        quote_title: contract.quotes?.title || 'Servicio',
+        quote_title: contract.quotes?.budget_requests?.title || 'Servicio',
         budget_title: contract.quotes?.budget_requests?.title || '',
         property_address: contract.quotes?.budget_requests?.properties?.address || ''
       }));
@@ -270,7 +292,6 @@ export function ContractManager() {
         `)
         .eq('service_provider_id', providerData.id)
         .eq('status', 'accepted')
-        .is('contract_id', null)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -278,13 +299,18 @@ export function ContractManager() {
         return;
       }
 
-      const transformedQuotes: ExtendedQuote[] = (data || []).map((quote: any) => ({
-        ...quote,
-        user_id: quote.budget_requests?.user_id || quote.user_id || '',
-        title: quote.title || quote.budget_requests?.title || 'Servicio sin título',
-        description: quote.description || quote.budget_requests?.description || 'Sin descripción',
-        budget_requests: quote.budget_requests
-      }));
+      const transformedQuotes: ExtendedQuote[] = (data || [])
+        .filter((quote: any) => {
+          // Filter out quotes that already have contracts
+          return !contracts.some(contract => contract.quote_id === quote.id);
+        })
+        .map((quote: any) => ({
+          ...quote,
+          user_id: quote.budget_requests?.user_id || '',
+          title: quote.budget_requests?.title || 'Servicio sin título',
+          description: quote.description || quote.budget_requests?.description || 'Sin descripción',
+          budget_requests: quote.budget_requests
+        }));
 
       setAvailableQuotes(transformedQuotes);
       console.log("✅ Available quotes loaded:", transformedQuotes.length);
@@ -378,9 +404,20 @@ export function ContractManager() {
       await loadContractsData();
       setTimeout(() => setSuccessMessage(""), 5000);
 
+      toast({
+        title: "Contrato creado exitosamente",
+        description: "El contrato ha sido enviado al cliente para su revisión.",
+      });
+
     } catch (err) {
       console.error("❌ Error creating contract:", err);
-      setError(err instanceof Error ? err.message : "Error al crear el contrato");
+      const errorMessage = err instanceof Error ? err.message : "Error al crear el contrato";
+      setError(errorMessage);
+      toast({
+        title: "Error al crear contrato",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -400,10 +437,8 @@ export function ContractManager() {
   };
 
   const getStatusBadge = (status: string | null) => {
-    const statusValue = status || 'draft'; // Default to 'draft' if status is null
+    const statusValue = status || 'pending';
     switch (statusValue) {
-      case 'draft':
-        return <Badge className="bg-gray-100 text-gray-800 border-gray-200">📝 Borrador</Badge>;
       case 'pending':
         return <Badge className="bg-amber-100 text-amber-800 border-amber-200">⏳ Pendiente Firma</Badge>;
       case 'signed':
@@ -421,9 +456,20 @@ export function ContractManager() {
     }
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-ES', { 
+      style: 'currency', 
+      currency: 'EUR' 
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES');
+  };
+
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = (contract.quote_title || contract.work_description || '')?.toLowerCase().includes(searchTerm.toLowerCase());
-    const contractStatus = contract.status || 'draft'; // Handle null status
+    const contractStatus = contract.status || 'pending';
     const matchesStatus = statusFilter === 'all' || contractStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -433,6 +479,20 @@ export function ContractManager() {
                          quote.description?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
+
+  if (!user) {
+    return (
+      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60">
+        <CardContent className="text-center p-8">
+          <User className="h-12 w-12 mx-auto mb-4 text-amber-600" />
+          <h3 className="text-lg font-semibold text-amber-900 mb-2">Acceso Requerido</h3>
+          <p className="text-sm text-amber-700">
+            Debes iniciar sesión para acceder a la gestión de contratos.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (loading) {
     return (
@@ -508,7 +568,7 @@ export function ContractManager() {
                 <CheckCircle className="h-8 w-8 text-green-600" />
                 <div>
                   <div className="text-2xl font-bold text-green-900">
-                    {contracts.filter(c => (c.status || 'draft') === 'active').length}
+                    {contracts.filter(c => (c.status || 'pending') === 'active').length}
                   </div>
                   <div className="text-sm text-green-600">Contratos Activos</div>
                 </div>
@@ -520,7 +580,7 @@ export function ContractManager() {
                 <Award className="h-8 w-8 text-blue-600" />
                 <div>
                   <div className="text-2xl font-bold text-blue-900">
-                    {contracts.filter(c => (c.status || 'draft') === 'completed').length}
+                    {contracts.filter(c => (c.status || 'pending') === 'completed').length}
                   </div>
                   <div className="text-sm text-blue-600">Completados</div>
                 </div>
@@ -532,7 +592,7 @@ export function ContractManager() {
                 <DollarSign className="h-8 w-8 text-amber-600" />
                 <div>
                   <div className="text-2xl font-bold text-amber-900">
-                    €{contracts.reduce((sum, c) => sum + (c.total_amount || 0), 0).toLocaleString()}
+                    {formatCurrency(contracts.reduce((sum, c) => sum + (c.total_amount || 0), 0))}
                   </div>
                   <div className="text-sm text-amber-600">Valor Total</div>
                 </div>
@@ -559,7 +619,6 @@ export function ContractManager() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="draft">Borrador</SelectItem>
                 <SelectItem value="pending">Pendiente Firma</SelectItem>
                 <SelectItem value="signed">Firmado</SelectItem>
                 <SelectItem value="active">Activo</SelectItem>
@@ -575,7 +634,7 @@ export function ContractManager() {
               <TabsTrigger value="my-contracts">
                 Mis Contratos ({filteredContracts.length})
               </TabsTrigger>
-              {activeRole?.role_type === 'service_provider' && (
+              {userRole === 'service_provider' && (
                 <TabsTrigger value="create-contracts">
                   Crear Contratos ({filteredQuotes.length})
                 </TabsTrigger>
@@ -621,18 +680,18 @@ export function ContractManager() {
                             {getStatusBadge(contract.status)}
                             <div className="flex items-center gap-1 text-green-600 font-semibold">
                               <Euro className="h-4 w-4" />
-                              <span>€{contract.total_amount?.toLocaleString()}</span>
+                              <span>{formatCurrency(contract.total_amount || 0)}</span>
                             </div>
                             
                             <div className="flex items-center gap-1 text-neutral-600">
                               <Calendar className="h-4 w-4" />
-                              <span>Creado: {contract.created_at ? new Date(contract.created_at).toLocaleDateString() : 'Fecha desconocida'}</span>
+                              <span>Creado: {contract.created_at ? formatDate(contract.created_at) : 'Fecha desconocida'}</span>
                             </div>
 
                             {contract.end_date && (
                               <div className="flex items-center gap-1 text-orange-600">
                                 <Clock className="h-4 w-4" />
-                                <span>Fecha límite: {new Date(contract.end_date).toLocaleDateString()}</span>
+                                <span>Fecha límite: {formatDate(contract.end_date)}</span>
                               </div>
                             )}
                           </div>
@@ -644,21 +703,21 @@ export function ContractManager() {
                             Ver Detalles
                           </Button>
                           
-                          {(contract.status || 'draft') === 'pending' && (
+                          {(contract.status || 'pending') === 'pending' && (
                             <Button size="sm" className="bg-gradient-to-r from-purple-600 to-indigo-600">
                               <Edit className="h-4 w-4 mr-2" />
                               Editar
                             </Button>
                           )}
 
-                          {(contract.status || 'draft') === 'pending' && (
+                          {(contract.status || 'pending') === 'pending' && (
                             <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600">
                               <Signature className="h-4 w-4 mr-2" />
                               Firmar
                             </Button>
                           )}
 
-                          {(contract.status || 'draft') === 'active' && (
+                          {(contract.status || 'pending') === 'active' && (
                             <Button size="sm" className="bg-gradient-to-r from-amber-600 to-orange-600">
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Completar
@@ -672,7 +731,7 @@ export function ContractManager() {
               )}
             </TabsContent>
 
-            {activeRole?.role_type === 'service_provider' && (
+            {userRole === 'service_provider' && (
               <TabsContent value="create-contracts" className="space-y-4 mt-6">
                 {filteredQuotes.length === 0 ? (
                   <Card className="p-8 text-center">
@@ -709,12 +768,12 @@ export function ContractManager() {
                               
                               <div className="flex items-center gap-1 text-green-600 font-semibold">
                                 <Euro className="h-4 w-4" />
-                                <span>€{quote.amount.toLocaleString()}</span>
+                                <span>{formatCurrency(quote.amount)}</span>
                               </div>
                               
                               <div className="flex items-center gap-1 text-neutral-600">
                                 <Calendar className="h-4 w-4" />
-                                <span>Aceptada: {new Date(quote.created_at).toLocaleDateString()}</span>
+                                <span>Aceptada: {formatDate(quote.created_at)}</span>
                               </div>
                             </div>
                           </div>
@@ -733,6 +792,7 @@ export function ContractManager() {
                                     setSelectedQuote(quote);
                                     setContractForm(prev => ({
                                       ...prev,
+                                      title: `Contrato - ${quote.title}`,
                                       work_scope: quote.description || ''
                                     }));
                                   }}
@@ -756,7 +816,7 @@ export function ContractManager() {
                                     <div className="text-sm space-y-1">
                                       <p><span className="font-medium">Cliente:</span> {quote.budget_requests?.profiles?.full_name}</p>
                                       <p><span className="font-medium">Servicio:</span> {quote.title}</p>
-                                      <p><span className="font-medium">Monto:</span> €{quote.amount.toLocaleString()}</p>
+                                      <p><span className="font-medium">Monto:</span> {formatCurrency(quote.amount)}</p>
                                       <p><span className="font-medium">Descripción:</span> {quote.description}</p>
                                     </div>
                                   </Card>
