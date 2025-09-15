@@ -378,7 +378,7 @@ export function ContractManager() {
       console.log("✅ Contract created successfully:", newContract.id);
 
       // Send notification to the contract owner with proper null checks
-      if (requestUserId && user?.id && providerData?.id && newContract.contract_number) {
+      if (requestUserId && user?.id && providerData?.id && newContract?.contract_number) {
         try {
           await supabase
             .from('notifications')
