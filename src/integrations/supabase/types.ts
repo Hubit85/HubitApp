@@ -6,1070 +6,1851 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
-      budget_requests: {
+      administrator_requests: {
         Row: {
+          community_id: string | null
+          community_member_id: string
+          created_at: string | null
           id: string
-          user_id: string
-          property_id: string | null
-          service_category_id: string | null
-          title: string
-          description: string
-          category: string
-          urgency: string
+          property_administrator_id: string
+          request_message: string | null
+          responded_at: string | null
+          responded_by: string | null
+          requested_at: string | null
+          response_message: string | null
           status: string
-          budget_range_min: number | null
-          budget_range_max: number | null
-          preferred_date: string | null
-          deadline_date: string | null
-          work_location: string | null
-          special_requirements: string | null
-          images: string[] | null
-          documents: string[] | null
-          quotes_count: number
-          views_count: number
-          published_at: string | null
-          expires_at: string | null
-          created_at: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
+          community_id?: string | null
+          community_member_id: string
+          created_at?: string | null
           id?: string
-          user_id: string
-          property_id?: string | null
-          service_category_id?: string | null
-          title: string
-          description: string
-          category: string
-          urgency?: string
-          status?: string
-          budget_range_min?: number | null
-          budget_range_max?: number | null
-          preferred_date?: string | null
-          deadline_date?: string | null
-          work_location?: string | null
-          special_requirements?: string | null
-          images?: string[] | null
-          documents?: string[] | null
-          quotes_count?: number
-          views_count?: number
-          published_at?: string | null
-          expires_at?: string | null
-          created_at?: string
-          updated_at?: string
+          property_administrator_id: string
+          request_message?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          requested_at?: string | null
+          response_message?: string | null
+          status: string
+          updated_at?: string | null
         }
         Update: {
+          community_id?: string | null
+          community_member_id?: string
+          created_at?: string | null
           id?: string
-          user_id?: string
-          property_id?: string | null
-          service_category_id?: string | null
-          title?: string
-          description?: string
-          category?: string
-          urgency?: string
+          property_administrator_id?: string
+          request_message?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          requested_at?: string | null
+          response_message?: string | null
           status?: string
-          budget_range_min?: number | null
-          budget_range_max?: number | null
-          preferred_date?: string | null
-          deadline_date?: string | null
-          work_location?: string | null
-          special_requirements?: string | null
-          images?: string[] | null
-          documents?: string[] | null
-          quotes_count?: number
-          views_count?: number
-          published_at?: string | null
-          expires_at?: string | null
-          created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "administrator_requests_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "administrator_requests_community_member_id_fkey"
+            columns: ["community_member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "administrator_requests_property_administrator_id_fkey"
+            columns: ["property_administrator_id"]
+            isOneToOne: false
+            referencedRelation: "property_administrators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "administrator_requests_responded_by_fkey"
+            columns: ["responded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_requests: {
+        Row: {
+          budget_range_max: number | null
+          budget_range_min: number | null
+          category: string
+          created_at: string | null
+          deadline_date: string | null
+          description: string
+          documents: string[] | null
+          expires_at: string | null
+          id: string
+          images: string[] | null
+          incident_id: string | null
+          preferred_date: string | null
+          property_id: string | null
+          published_at: string | null
+          quotes_count: number | null
+          service_category_id: string | null
+          special_requirements: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          urgency: string | null
+          user_id: string
+          views_count: number | null
+          work_location: string | null
+        }
+        Insert: {
+          budget_range_max?: number | null
+          budget_range_min?: number | null
+          category?: string
+          created_at?: string | null
+          deadline_date?: string | null
+          description: string
+          documents?: string[] | null
+          expires_at?: string | null
+          id?: string
+          images?: string[] | null
+          incident_id?: string | null
+          preferred_date?: string | null
+          property_id?: string | null
+          published_at?: string | null
+          quotes_count?: number | null
+          service_category_id?: string | null
+          special_requirements?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          urgency?: string | null
+          user_id: string
+          views_count?: number | null
+          work_location?: string | null
+        }
+        Update: {
+          budget_range_max?: number | null
+          budget_range_min?: number | null
+          category?: string
+          created_at?: string | null
+          deadline_date?: string | null
+          description?: string
+          documents?: string[] | null
+          expires_at?: string | null
+          id?: string
+          images?: string[] | null
+          incident_id?: string | null
+          preferred_date?: string | null
+          property_id?: string | null
+          published_at?: string | null
+          quotes_count?: number | null
+          service_category_id?: string | null
+          special_requirements?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          urgency?: string | null
+          user_id?: string
+          views_count?: number | null
+          work_location?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_requests_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_requests_service_category_id_fkey"
+            columns: ["service_category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communities: {
+        Row: {
+          address: string
+          administrator_id: string
+          city: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          postal_code: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          administrator_id: string
+          city: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          postal_code?: string | null
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          administrator_id?: string
+          city?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          postal_code?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communities_administrator_id_fkey"
+            columns: ["administrator_id"]
+            isOneToOne: false
+            referencedRelation: "property_administrators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_member_administrators: {
+        Row: {
+          administrator_verified: boolean | null
+          company_cif: string
+          company_name: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          administrator_verified?: boolean | null
+          company_cif: string
+          company_name: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          administrator_verified?: boolean | null
+          company_cif?: string
+          company_name?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_member_administrators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contracts: {
         Row: {
-          id: string
-          quote_id: string
-          user_id: string
-          service_provider_id: string
-          contract_number: string
-          status: string
-          start_date: string | null
-          end_date: string | null
-          completion_date: string | null
-          total_amount: number
-          payment_schedule: string
-          terms: string | null
-          work_description: string
-          deliverables: string[] | null
-          milestones: Json | null
-          client_signature: string | null
-          provider_signature: string | null
-          signed_date: string | null
-          progress_percentage: number
-          last_update: string | null
           cancellation_reason: string | null
+          client_signature: string | null
+          completion_date: string | null
+          contract_number: string
+          created_at: string | null
+          deliverables: string[] | null
           dispute_reason: string | null
-          created_at: string
-          updated_at: string
+          end_date: string | null
+          id: string
+          last_update: string | null
+          milestones: Json | null
+          payment_schedule: string | null
+          progress_percentage: number | null
+          provider_signature: string | null
+          quote_id: string
+          service_provider_id: string
+          signed_date: string | null
+          start_date: string | null
+          status: string | null
+          terms: string | null
+          total_amount: number
+          updated_at: string | null
+          user_id: string
+          work_description: string
         }
         Insert: {
-          id?: string
-          quote_id: string
-          user_id: string
-          service_provider_id: string
-          contract_number: string
-          status?: string
-          start_date?: string | null
-          end_date?: string | null
-          completion_date?: string | null
-          total_amount: number
-          payment_schedule?: string
-          terms?: string | null
-          work_description: string
-          deliverables?: string[] | null
-          milestones?: Json | null
-          client_signature?: string | null
-          provider_signature?: string | null
-          signed_date?: string | null
-          progress_percentage?: number
-          last_update?: string | null
           cancellation_reason?: string | null
+          client_signature?: string | null
+          completion_date?: string | null
+          contract_number: string
+          created_at?: string | null
+          deliverables?: string[] | null
           dispute_reason?: string | null
-          created_at?: string
-          updated_at?: string
+          end_date?: string | null
+          id?: string
+          last_update?: string | null
+          milestones?: Json | null
+          payment_schedule?: string | null
+          progress_percentage?: number | null
+          provider_signature?: string | null
+          quote_id: string
+          service_provider_id: string
+          signed_date?: string | null
+          start_date?: string | null
+          status?: string | null
+          terms?: string | null
+          total_amount: number
+          updated_at?: string | null
+          user_id: string
+          work_description: string
         }
         Update: {
-          id?: string
-          quote_id?: string
-          user_id?: string
-          service_provider_id?: string
-          contract_number?: string
-          status?: string
-          start_date?: string | null
-          end_date?: string | null
-          completion_date?: string | null
-          total_amount?: number
-          payment_schedule?: string
-          terms?: string | null
-          work_description?: string
-          deliverables?: string[] | null
-          milestones?: Json | null
-          client_signature?: string | null
-          provider_signature?: string | null
-          signed_date?: string | null
-          progress_percentage?: number
-          last_update?: string | null
           cancellation_reason?: string | null
+          client_signature?: string | null
+          completion_date?: string | null
+          contract_number?: string
+          created_at?: string | null
+          deliverables?: string[] | null
           dispute_reason?: string | null
-          created_at?: string
-          updated_at?: string
+          end_date?: string | null
+          id?: string
+          last_update?: string | null
+          milestones?: Json | null
+          payment_schedule?: string | null
+          progress_percentage?: number | null
+          provider_signature?: string | null
+          quote_id?: string
+          service_provider_id?: string
+          signed_date?: string | null
+          start_date?: string | null
+          status?: string | null
+          terms?: string | null
+          total_amount?: number
+          updated_at?: string | null
+          user_id?: string
+          work_description?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: true
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversations: {
         Row: {
-          id: string
           budget_request_id: string | null
-          quote_id: string | null
           contract_id: string | null
-          user_id: string
-          service_provider_id: string
-          subject: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
           last_message: string | null
           last_message_at: string | null
-          unread_count_user: number
-          unread_count_provider: number
-          is_active: boolean
-          created_at: string
-          updated_at: string
+          quote_id: string | null
+          service_provider_id: string
+          subject: string | null
+          unread_count_provider: number | null
+          unread_count_user: number | null
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          id?: string
           budget_request_id?: string | null
-          quote_id?: string | null
           contract_id?: string | null
-          user_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_message?: string | null
+          last_message_at?: string | null
+          quote_id?: string | null
           service_provider_id: string
           subject?: string | null
-          last_message?: string | null
-          last_message_at?: string | null
-          unread_count_user?: number
-          unread_count_provider?: number
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
+          unread_count_provider?: number | null
+          unread_count_user?: number | null
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          id?: string
           budget_request_id?: string | null
-          quote_id?: string | null
           contract_id?: string | null
-          user_id?: string
-          service_provider_id?: string
-          subject?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
           last_message?: string | null
           last_message_at?: string | null
-          unread_count_user?: number
-          unread_count_provider?: number
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
+          quote_id?: string | null
+          service_provider_id?: string
+          subject?: string | null
+          unread_count_provider?: number | null
+          unread_count_user?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_budget_request_id_fkey"
+            columns: ["budget_request_id"]
+            isOneToOne: false
+            referencedRelation: "budget_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       documents: {
         Row: {
-          id: string
-          user_id: string
-          related_entity_type: string
-          related_entity_id: string
-          document_type: string
-          name: string
+          created_at: string | null
           description: string | null
+          document_type: string
           file_path: string
           file_size: number | null
+          id: string
+          is_public: boolean | null
           mime_type: string | null
-          is_public: boolean
+          name: string
+          related_entity_id: string
+          related_entity_type: string
           uploaded_by: string | null
-          created_at: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          related_entity_type: string
-          related_entity_id: string
-          document_type: string
-          name: string
+          created_at?: string | null
           description?: string | null
+          document_type: string
           file_path: string
           file_size?: number | null
+          id?: string
+          is_public?: boolean | null
           mime_type?: string | null
-          is_public?: boolean
+          name: string
+          related_entity_id: string
+          related_entity_type: string
           uploaded_by?: string | null
-          created_at?: string
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          related_entity_type?: string
-          related_entity_id?: string
-          document_type?: string
-          name?: string
+          created_at?: string | null
           description?: string | null
+          document_type?: string
           file_path?: string
           file_size?: number | null
+          id?: string
+          is_public?: boolean | null
           mime_type?: string | null
-          is_public?: boolean
+          name?: string
+          related_entity_id?: string
+          related_entity_type?: string
           uploaded_by?: string | null
-          created_at?: string
+          user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       emergency_requests: {
         Row: {
-          id: string
-          user_id: string
-          property_id: string | null
-          service_category_id: string | null
-          title: string
-          description: string
-          urgency_level: string
-          location_details: string | null
-          contact_phone: string
-          status: string
-          assigned_provider_id: string | null
-          estimated_cost: number | null
           actual_cost: number | null
-          response_time_minutes: number | null
-          resolution_time_minutes: number | null
+          assigned_provider_id: string | null
+          contact_phone: string
+          created_at: string | null
+          description: string
+          estimated_cost: number | null
+          id: string
           images: string[] | null
-          priority_score: number
-          created_at: string
-          updated_at: string
+          location_details: string | null
+          priority_score: number | null
+          property_id: string | null
+          resolution_time_minutes: number | null
+          response_time_minutes: number | null
+          service_category_id: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          urgency_level: string | null
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          property_id?: string | null
-          service_category_id?: string | null
-          title: string
-          description: string
-          urgency_level?: string
-          location_details?: string | null
-          contact_phone: string
-          status?: string
-          assigned_provider_id?: string | null
-          estimated_cost?: number | null
           actual_cost?: number | null
-          response_time_minutes?: number | null
-          resolution_time_minutes?: number | null
+          assigned_provider_id?: string | null
+          contact_phone: string
+          created_at?: string | null
+          description: string
+          estimated_cost?: number | null
+          id?: string
           images?: string[] | null
-          priority_score?: number
-          created_at?: string
-          updated_at?: string
+          location_details?: string | null
+          priority_score?: number | null
+          property_id?: string | null
+          resolution_time_minutes?: number | null
+          response_time_minutes?: number | null
+          service_category_id?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          urgency_level?: string | null
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          property_id?: string | null
-          service_category_id?: string | null
-          title?: string
-          description?: string
-          urgency_level?: string
-          location_details?: string | null
-          contact_phone?: string
-          status?: string
-          assigned_provider_id?: string | null
-          estimated_cost?: number | null
           actual_cost?: number | null
-          response_time_minutes?: number | null
-          resolution_time_minutes?: number | null
+          assigned_provider_id?: string | null
+          contact_phone?: string
+          created_at?: string | null
+          description?: string
+          estimated_cost?: number | null
+          id?: string
           images?: string[] | null
-          priority_score?: number
-          created_at?: string
-          updated_at?: string
+          location_details?: string | null
+          priority_score?: number | null
+          property_id?: string | null
+          resolution_time_minutes?: number | null
+          response_time_minutes?: number | null
+          service_category_id?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          urgency_level?: string | null
+          user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_requests_assigned_provider_id_fkey"
+            columns: ["assigned_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_requests_service_category_id_fkey"
+            columns: ["service_category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emergency_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incident_reports: {
+        Row: {
+          budget_request_id: string | null
+          category: string
+          created_at: string | null
+          description: string
+          id: string
+          location: string | null
+          managing_administrator_id: string | null
+          photo_urls: string[] | null
+          property_admin_id: string | null
+          reported_at: string | null
+          resolved_at: string | null
+          resolution_notes: string | null
+          status: string
+          title: string
+          updated_at: string | null
+          urgency: string
+          user_id: string
+        }
+        Insert: {
+          budget_request_id?: string | null
+          category: string
+          created_at?: string | null
+          description: string
+          id?: string
+          location?: string | null
+          managing_administrator_id?: string | null
+          photo_urls?: string[] | null
+          property_admin_id?: string | null
+          reported_at?: string | null
+          resolved_at?: string | null
+          resolution_notes?: string | null
+          status: string
+          title: string
+          updated_at?: string | null
+          urgency: string
+          user_id: string
+        }
+        Update: {
+          budget_request_id?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          location?: string | null
+          managing_administrator_id?: string | null
+          photo_urls?: string[] | null
+          property_admin_id?: string | null
+          reported_at?: string | null
+          resolved_at?: string | null
+          resolution_notes?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          urgency?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_reports_budget_request_id_fkey"
+            columns: ["budget_request_id"]
+            isOneToOne: false
+            referencedRelation: "budget_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_managing_administrator_id_fkey"
+            columns: ["managing_administrator_id"]
+            isOneToOne: false
+            referencedRelation: "property_administrators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_property_admin_id_fkey"
+            columns: ["property_admin_id"]
+            isOneToOne: false
+            referencedRelation: "property_administrators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incidents: {
+        Row: {
+          administrator_id: string
+          admin_notes: string | null
+          category: string
+          community_id: string
+          created_at: string | null
+          description: string
+          documents: string[] | null
+          id: string
+          images: string[] | null
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          special_requirements: string | null
+          status: string
+          title: string
+          updated_at: string | null
+          urgency: string
+          work_location: string | null
+        }
+        Insert: {
+          administrator_id: string
+          admin_notes?: string | null
+          category: string
+          community_id: string
+          created_at?: string | null
+          description: string
+          documents?: string[] | null
+          id?: string
+          images?: string[] | null
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          special_requirements?: string | null
+          status: string
+          title: string
+          updated_at?: string | null
+          urgency: string
+          work_location?: string | null
+        }
+        Update: {
+          administrator_id?: string
+          admin_notes?: string | null
+          category?: string
+          community_id?: string
+          created_at?: string | null
+          description?: string
+          documents?: string[] | null
+          id?: string
+          images?: string[] | null
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          special_requirements?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          urgency?: string
+          work_location?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidents_administrator_id_fkey"
+            columns: ["administrator_id"]
+            isOneToOne: false
+            referencedRelation: "property_administrators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {
-          id: string
-          contract_id: string | null
-          quote_id: string | null
-          user_id: string
-          service_provider_id: string
-          invoice_number: string
           amount: number
-          tax_amount: number
-          total_amount: number
-          currency: string
-          status: string
-          due_date: string
-          paid_date: string | null
+          contract_id: string | null
+          created_at: string | null
+          currency: string | null
           description: string | null
+          due_date: string
+          id: string
+          invoice_number: string
           line_items: Json | null
+          notes: string | null
+          paid_date: string | null
+          pdf_url: string | null
           payment_method: string | null
           payment_reference: string | null
-          notes: string | null
-          pdf_url: string | null
-          created_at: string
-          updated_at: string
+          quote_id: string | null
+          service_provider_id: string
+          status: string | null
+          tax_amount: number | null
+          total_amount: number
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          id?: string
-          contract_id?: string | null
-          quote_id?: string | null
-          user_id: string
-          service_provider_id: string
-          invoice_number: string
           amount: number
-          tax_amount?: number
-          total_amount: number
-          currency?: string
-          status?: string
-          due_date: string
-          paid_date?: string | null
+          contract_id?: string | null
+          created_at?: string | null
+          currency?: string | null
           description?: string | null
+          due_date: string
+          id?: string
+          invoice_number: string
           line_items?: Json | null
+          notes?: string | null
+          paid_date?: string | null
+          pdf_url?: string | null
           payment_method?: string | null
           payment_reference?: string | null
-          notes?: string | null
-          pdf_url?: string | null
-          created_at?: string
-          updated_at?: string
+          quote_id?: string | null
+          service_provider_id: string
+          status?: string | null
+          tax_amount?: number | null
+          total_amount: number
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          id?: string
-          contract_id?: string | null
-          quote_id?: string | null
-          user_id?: string
-          service_provider_id?: string
-          invoice_number?: string
           amount?: number
-          tax_amount?: number
-          total_amount?: number
-          currency?: string
-          status?: string
-          due_date?: string
-          paid_date?: string | null
+          contract_id?: string | null
+          created_at?: string | null
+          currency?: string | null
           description?: string | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
           line_items?: Json | null
+          notes?: string | null
+          paid_date?: string | null
+          pdf_url?: string | null
           payment_method?: string | null
           payment_reference?: string | null
-          notes?: string | null
-          pdf_url?: string | null
-          created_at?: string
-          updated_at?: string
+          quote_id?: string | null
+          service_provider_id?: string
+          status?: string | null
+          tax_amount?: number | null
+          total_amount?: number
+          updated_at?: string | null
+          user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      managed_communities: {
+        Row: {
+          community_id: string | null
+          community_member_id: string
+          created_at: string | null
+          established_at: string | null
+          established_by: string | null
+          id: string
+          notes: string | null
+          property_administrator_id: string
+          relationship_status: string
+          updated_at: string | null
+        }
+        Insert: {
+          community_id?: string | null
+          community_member_id: string
+          created_at?: string | null
+          established_at?: string | null
+          established_by?: string | null
+          id?: string
+          notes?: string | null
+          property_administrator_id: string
+          relationship_status: string
+          updated_at?: string | null
+        }
+        Update: {
+          community_id?: string | null
+          community_member_id?: string
+          created_at?: string | null
+          established_at?: string | null
+          established_by?: string | null
+          id?: string
+          notes?: string | null
+          property_administrator_id?: string
+          relationship_status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managed_communities_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managed_communities_community_member_id_fkey"
+            columns: ["community_member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managed_communities_established_by_fkey"
+            columns: ["established_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managed_communities_property_administrator_id_fkey"
+            columns: ["property_administrator_id"]
+            isOneToOne: false
+            referencedRelation: "property_administrators"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
-          id: string
-          conversation_id: string
-          sender_id: string
-          message: string
-          message_type: string
           attachments: string[] | null
-          is_read: boolean
+          conversation_id: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          message_type: string | null
           read_at: string | null
-          created_at: string
+          sender_id: string
         }
         Insert: {
-          id?: string
-          conversation_id: string
-          sender_id: string
-          message: string
-          message_type?: string
           attachments?: string[] | null
-          is_read?: boolean
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          message_type?: string | null
           read_at?: string | null
-          created_at?: string
+          sender_id: string
         }
         Update: {
-          id?: string
-          conversation_id?: string
-          sender_id?: string
-          message?: string
-          message_type?: string
           attachments?: string[] | null
-          is_read?: boolean
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          message_type?: string | null
           read_at?: string | null
-          created_at?: string
+          sender_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
-          id: string
-          user_id: string
-          title: string
-          message: string
-          type: string
-          category: string | null
-          read: boolean
-          read_at: string | null
-          action_url: string | null
           action_label: string | null
-          related_entity_type: string | null
-          related_entity_id: string | null
+          action_url: string | null
+          category: string | null
+          created_at: string | null
           expires_at: string | null
-          priority: number
-          sent_email: boolean
-          sent_sms: boolean
-          created_at: string
+          id: string
+          message: string
+          priority: number | null
+          read: boolean | null
+          read_at: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          sent_email: boolean | null
+          sent_sms: boolean | null
+          title: string
+          type: string | null
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          title: string
-          message: string
-          type?: string
-          category?: string | null
-          read?: boolean
-          read_at?: string | null
-          action_url?: string | null
           action_label?: string | null
-          related_entity_type?: string | null
-          related_entity_id?: string | null
+          action_url?: string | null
+          category?: string | null
+          created_at?: string | null
           expires_at?: string | null
-          priority?: number
-          sent_email?: boolean
-          sent_sms?: boolean
-          created_at?: string
+          id?: string
+          message: string
+          priority?: number | null
+          read?: boolean | null
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          sent_email?: boolean | null
+          sent_sms?: boolean | null
+          title: string
+          type?: string | null
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          title?: string
-          message?: string
-          type?: string
-          category?: string | null
-          read?: boolean
-          read_at?: string | null
-          action_url?: string | null
           action_label?: string | null
-          related_entity_type?: string | null
-          related_entity_id?: string | null
+          action_url?: string | null
+          category?: string | null
+          created_at?: string | null
           expires_at?: string | null
-          priority?: number
-          sent_email?: boolean
-          sent_sms?: boolean
-          created_at?: string
+          id?: string
+          message?: string
+          priority?: number | null
+          read?: boolean | null
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          sent_email?: boolean | null
+          sent_sms?: boolean | null
+          title?: string
+          type?: string | null
+          user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
           id: string
           invoice_id: string | null
-          user_id: string
-          service_provider_id: string
-          amount: number
-          currency: string
-          payment_method: string
-          payment_status: string
-          payment_intent_id: string | null
-          transaction_id: string | null
-          reference_number: string | null
-          payment_date: string | null
-          refunded_amount: number
-          refund_reason: string | null
-          processing_fee: number
-          net_amount: number | null
           metadata: Json | null
-          created_at: string
-          updated_at: string
+          net_amount: number | null
+          payment_date: string | null
+          payment_intent_id: string | null
+          payment_method: string
+          payment_status: string | null
+          processing_fee: number | null
+          reference_number: string | null
+          refund_reason: string | null
+          refunded_amount: number | null
+          service_provider_id: string
+          transaction_id: string | null
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
           id?: string
           invoice_id?: string | null
-          user_id: string
-          service_provider_id: string
-          amount: number
-          currency?: string
-          payment_method: string
-          payment_status?: string
-          payment_intent_id?: string | null
-          transaction_id?: string | null
-          reference_number?: string | null
-          payment_date?: string | null
-          refunded_amount?: number
-          refund_reason?: string | null
-          processing_fee?: number
-          net_amount?: number | null
           metadata?: Json | null
-          created_at?: string
-          updated_at?: string
+          net_amount?: number | null
+          payment_date?: string | null
+          payment_intent_id?: string | null
+          payment_method: string
+          payment_status?: string | null
+          processing_fee?: number | null
+          reference_number?: string | null
+          refund_reason?: string | null
+          refunded_amount?: number | null
+          service_provider_id: string
+          transaction_id?: string | null
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
           id?: string
           invoice_id?: string | null
-          user_id?: string
-          service_provider_id?: string
-          amount?: number
-          currency?: string
-          payment_method?: string
-          payment_status?: string
-          payment_intent_id?: string | null
-          transaction_id?: string | null
-          reference_number?: string | null
-          payment_date?: string | null
-          refunded_amount?: number
-          refund_reason?: string | null
-          processing_fee?: number
-          net_amount?: number | null
           metadata?: Json | null
-          created_at?: string
-          updated_at?: string
+          net_amount?: number | null
+          payment_date?: string | null
+          payment_intent_id?: string | null
+          payment_method?: string
+          payment_status?: string | null
+          processing_fee?: number | null
+          reference_number?: string | null
+          refund_reason?: string | null
+          refunded_amount?: number | null
+          service_provider_id?: string
+          transaction_id?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
-          id: string
-          email: string
-          full_name: string | null
-          phone: string | null
-          user_type: string
-          avatar_url: string | null
           address: string | null
+          avatar_url: string | null
           city: string | null
-          postal_code: string | null
-          country: string
-          language: string
-          timezone: string
-          email_notifications: boolean
-          sms_notifications: boolean
-          is_verified: boolean
-          verification_code: string | null
+          country: string | null
+          created_at: string | null
+          email: string
+          email_notifications: boolean | null
+          full_name: string | null
+          id: string
+          is_verified: boolean | null
+          language: string | null
           last_login: string | null
-          created_at: string
-          updated_at: string
+          phone: string | null
+          postal_code: string | null
+          sms_notifications: boolean | null
+          timezone: string | null
+          updated_at: string | null
+          user_type: string
+          verification_code: string | null
         }
         Insert: {
-          id: string
-          email: string
-          full_name?: string | null
-          phone?: string | null
-          user_type: string
-          avatar_url?: string | null
           address?: string | null
+          avatar_url?: string | null
           city?: string | null
-          postal_code?: string | null
-          country?: string
-          language?: string
-          timezone?: string
-          email_notifications?: boolean
-          sms_notifications?: boolean
-          is_verified?: boolean
-          verification_code?: string | null
+          country?: string | null
+          created_at?: string | null
+          email: string
+          email_notifications?: boolean | null
+          full_name?: string | null
+          id: string
+          is_verified?: boolean | null
+          language?: string | null
           last_login?: string | null
-          created_at?: string
-          updated_at?: string
+          phone?: string | null
+          postal_code?: string | null
+          sms_notifications?: boolean | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_type: string
+          verification_code?: string | null
         }
         Update: {
-          id?: string
-          email?: string
-          full_name?: string | null
-          phone?: string | null
-          user_type?: string
-          avatar_url?: string | null
           address?: string | null
+          avatar_url?: string | null
           city?: string | null
-          postal_code?: string | null
-          country?: string
-          language?: string
-          timezone?: string
-          email_notifications?: boolean
-          sms_notifications?: boolean
-          is_verified?: boolean
-          verification_code?: string | null
+          country?: string | null
+          created_at?: string | null
+          email?: string
+          email_notifications?: boolean | null
+          full_name?: string | null
+          id?: string
+          is_verified?: boolean | null
+          language?: string | null
           last_login?: string | null
-          created_at?: string
-          updated_at?: string
+          phone?: string | null
+          postal_code?: string | null
+          sms_notifications?: boolean | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_type?: string
+          verification_code?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       properties: {
         Row: {
-          id: string
-          user_id: string
-          name: string
           address: string
+          amenities: string[] | null
           city: string
-          postal_code: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          images: string[] | null
           latitude: number | null
           longitude: number | null
-          property_type: string
-          description: string | null
-          units_count: number
-          total_area: number | null
-          year_built: number | null
-          property_status: string
-          images: string[] | null
-          amenities: string[] | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
           name: string
-          address: string
-          city: string
-          postal_code?: string | null
-          latitude?: number | null
-          longitude?: number | null
+          postal_code: string | null
+          property_status: string | null
           property_type: string
-          description?: string | null
-          units_count?: number
-          total_area?: number | null
-          year_built?: number | null
-          property_status?: string
-          images?: string[] | null
-          amenities?: string[] | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          address?: string
-          city?: string
-          postal_code?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          property_type?: string
-          description?: string | null
-          units_count?: number
-          total_area?: number | null
-          year_built?: number | null
-          property_status?: string
-          images?: string[] | null
-          amenities?: string[] | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      property_units: {
-        Row: {
-          id: string
-          property_id: string
-          unit_number: string | null
-          description: string | null
-          created_at: string
+          total_area: number | null
+          units_count: number | null
+          updated_at: string | null
+          user_id: string
+          year_built: number | null
         }
         Insert: {
-          id?: string
-          property_id: string
-          unit_number?: string | null
+          address: string
+          amenities?: string[] | null
+          city: string
+          created_at?: string | null
           description?: string | null
-          created_at?: string
+          id?: string
+          images?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          postal_code?: string | null
+          property_status?: string | null
+          property_type: string
+          total_area?: number | null
+          units_count?: number | null
+          updated_at?: string | null
+          user_id: string
+          year_built?: number | null
         }
         Update: {
-          id?: string
-          property_id?: string
-          unit_number?: string | null
+          address?: string
+          amenities?: string[] | null
+          city?: string
+          created_at?: string | null
           description?: string | null
-          created_at?: string
+          id?: string
+          images?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          postal_code?: string | null
+          property_status?: string | null
+          property_type?: string
+          total_area?: number | null
+          units_count?: number | null
+          updated_at?: string | null
+          user_id?: string
+          year_built?: number | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_administrators: {
+        Row: {
+          company_cif: string
+          company_name: string
+          contact_email: string
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          license_number: string | null
+          notes: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          company_cif: string
+          company_name: string
+          contact_email: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          license_number?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          company_cif?: string
+          company_name?: string
+          contact_email?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          license_number?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_administrators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quotes: {
         Row: {
-          id: string
-          budget_request_id: string
-          service_provider_id: string
           amount: number
+          attachments: string[] | null
+          budget_request_id: string
+          created_at: string | null
           description: string
-          materials_cost: number
-          labor_cost: number
-          travel_cost: number
           estimated_duration: string | null
           estimated_start_date: string | null
-          warranty_period: string | null
-          terms_and_conditions: string | null
-          valid_until: string | null
-          status: string
-          payment_terms: string
-          attachments: string[] | null
+          id: string
+          labor_cost: number
+          materials_cost: number | null
           notes: string | null
-          viewed_by_client: boolean
-          created_at: string
-          updated_at: string
+          payment_terms: string | null
+          service_provider_id: string
+          status: string | null
+          terms_and_conditions: string | null
+          travel_cost: number | null
+          updated_at: string | null
+          valid_until: string | null
+          viewed_by_client: boolean | null
+          warranty_period: string | null
         }
         Insert: {
-          id?: string
-          budget_request_id: string
-          service_provider_id: string
           amount: number
+          attachments?: string[] | null
+          budget_request_id: string
+          created_at?: string | null
           description: string
-          materials_cost?: number
-          labor_cost: number
-          travel_cost?: number
           estimated_duration?: string | null
           estimated_start_date?: string | null
-          warranty_period?: string | null
-          terms_and_conditions?: string | null
-          valid_until?: string | null
-          status?: string
-          payment_terms?: string
-          attachments?: string[] | null
+          id?: string
+          labor_cost: number
+          materials_cost?: number | null
           notes?: string | null
-          viewed_by_client?: boolean
-          created_at?: string
-          updated_at?: string
+          payment_terms?: string | null
+          service_provider_id: string
+          status?: string | null
+          terms_and_conditions?: string | null
+          travel_cost?: number | null
+          updated_at?: string | null
+          valid_until?: string | null
+          viewed_by_client?: boolean | null
+          warranty_period?: string | null
         }
         Update: {
-          id?: string
-          budget_request_id?: string
-          service_provider_id?: string
           amount?: number
+          attachments?: string[] | null
+          budget_request_id?: string
+          created_at?: string | null
           description?: string
-          materials_cost?: number
-          labor_cost?: number
-          travel_cost?: number
           estimated_duration?: string | null
           estimated_start_date?: string | null
-          warranty_period?: string | null
-          terms_and_conditions?: string | null
-          valid_until?: string | null
-          status?: string
-          payment_terms?: string
-          attachments?: string[] | null
+          id?: string
+          labor_cost?: number
+          materials_cost?: number | null
           notes?: string | null
-          viewed_by_client?: boolean
-          created_at?: string
-          updated_at?: string
+          payment_terms?: string | null
+          service_provider_id?: string
+          status?: string | null
+          terms_and_conditions?: string | null
+          travel_cost?: number | null
+          updated_at?: string | null
+          valid_until?: string | null
+          viewed_by_client?: boolean | null
+          warranty_period?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_budget_request_id_fkey"
+            columns: ["budget_request_id"]
+            isOneToOne: false
+            referencedRelation: "budget_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ratings: {
         Row: {
-          id: string
-          service_provider_id: string
-          user_id: string
-          quote_id: string | null
-          contract_id: string | null
-          rating: number
-          comment: string | null
-          service_quality: number | null
-          punctuality: number | null
-          communication: number | null
-          value_for_money: number | null
           cleanliness: number | null
-          would_recommend: boolean | null
+          comment: string | null
+          communication: number | null
+          contract_id: string | null
+          created_at: string | null
+          helpful_votes: number | null
+          id: string
           images: string[] | null
+          is_verified: boolean | null
+          punctuality: number | null
+          quote_id: string | null
+          rating: number
           response_from_provider: string | null
-          is_verified: boolean
-          helpful_votes: number
-          created_at: string
-          updated_at: string
+          service_provider_id: string
+          service_quality: number | null
+          updated_at: string | null
+          user_id: string
+          value_for_money: number | null
+          would_recommend: boolean | null
         }
         Insert: {
-          id?: string
-          service_provider_id: string
-          user_id: string
-          quote_id?: string | null
-          contract_id?: string | null
-          rating: number
-          comment?: string | null
-          service_quality?: number | null
-          punctuality?: number | null
-          communication?: number | null
-          value_for_money?: number | null
           cleanliness?: number | null
-          would_recommend?: boolean | null
+          comment?: string | null
+          communication?: number | null
+          contract_id?: string | null
+          created_at?: string | null
+          helpful_votes?: number | null
+          id?: string
           images?: string[] | null
+          is_verified?: boolean | null
+          punctuality?: number | null
+          quote_id?: string | null
+          rating: number
           response_from_provider?: string | null
-          is_verified?: boolean
-          helpful_votes?: number
-          created_at?: string
-          updated_at?: string
+          service_provider_id: string
+          service_quality?: number | null
+          updated_at?: string | null
+          user_id: string
+          value_for_money?: number | null
+          would_recommend?: boolean | null
         }
         Update: {
-          id?: string
-          service_provider_id?: string
-          user_id?: string
-          quote_id?: string | null
-          contract_id?: string | null
-          rating?: number
-          comment?: string | null
-          service_quality?: number | null
-          punctuality?: number | null
-          communication?: number | null
-          value_for_money?: number | null
           cleanliness?: number | null
-          would_recommend?: boolean | null
+          comment?: string | null
+          communication?: number | null
+          contract_id?: string | null
+          created_at?: string | null
+          helpful_votes?: number | null
+          id?: string
           images?: string[] | null
+          is_verified?: boolean | null
+          punctuality?: number | null
+          quote_id?: string | null
+          rating?: number
           response_from_provider?: string | null
-          is_verified?: boolean
-          helpful_votes?: number
-          created_at?: string
-          updated_at?: string
+          service_provider_id?: string
+          service_quality?: number | null
+          updated_at?: string | null
+          user_id?: string
+          value_for_money?: number | null
+          would_recommend?: boolean | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_categories: {
         Row: {
-          id: string
-          name: string
+          color: string | null
+          created_at: string | null
           description: string | null
-          parent_id: string | null
+          emergency_available: boolean | null
           icon: string | null
-          color: string
-          is_active: boolean
-          sort_order: number
-          emergency_available: boolean
-          created_at: string
-          updated_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          parent_id: string | null
+          sort_order: number | null
+          updated_at: string | null
         }
         Insert: {
-          id?: string
-          name: string
+          color?: string | null
+          created_at?: string | null
           description?: string | null
-          parent_id?: string | null
+          emergency_available?: boolean | null
           icon?: string | null
-          color?: string
-          is_active?: boolean
-          sort_order?: number
-          emergency_available?: boolean
-          created_at?: string
-          updated_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
         }
         Update: {
-          id?: string
-          name?: string
+          color?: string | null
+          created_at?: string | null
           description?: string | null
-          parent_id?: string | null
+          emergency_available?: boolean | null
           icon?: string | null
-          color?: string
-          is_active?: boolean
-          sort_order?: number
-          emergency_available?: boolean
-          created_at?: string
-          updated_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "service_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_providers: {
         Row: {
-          id: string
-          user_id: string
-          company_name: string
-          business_license: string | null
-          tax_id: string | null
-          description: string | null
-          website: string | null
-          specialties: string[] | null
-          service_categories: string[] | null
-          service_area: string[] | null
-          service_radius: number
-          verified: boolean
-          insurance_verified: boolean
-          background_check: boolean
-          rating_average: number
-          rating_count: number
-          total_jobs_completed: number
-          response_time_hours: number
           availability_schedule: Json | null
-          emergency_services: boolean
-          min_project_amount: number
-          travel_cost_per_km: number
+          background_check: boolean | null
           base_hourly_rate: number | null
-          portfolio_images: string[] | null
+          business_license: string | null
           certifications: string[] | null
+          company_name: string
+          created_at: string | null
+          description: string | null
+          emergency_services: boolean | null
+          id: string
+          insurance_verified: boolean | null
+          is_active: boolean | null
           languages: string[] | null
-          is_active: boolean
-          created_at: string
-          updated_at: string
+          min_project_amount: number | null
+          portfolio_images: string[] | null
+          rating_average: number | null
+          rating_count: number | null
+          response_time_hours: number | null
+          service_area: string[] | null
+          service_categories: string[] | null
+          service_radius: number | null
+          specialties: string[] | null
+          tax_id: string | null
+          total_jobs_completed: number | null
+          travel_cost_per_km: number | null
+          updated_at: string | null
+          user_id: string
+          verified: boolean | null
+          website: string | null
         }
         Insert: {
-          id?: string
-          user_id: string
-          company_name: string
-          business_license?: string | null
-          tax_id?: string | null
-          description?: string | null
-          website?: string | null
-          specialties?: string[] | null
-          service_categories?: string[] | null
-          service_area?: string[] | null
-          service_radius?: number
-          verified?: boolean
-          insurance_verified?: boolean
-          background_check?: boolean
-          rating_average?: number
-          rating_count?: number
-          total_jobs_completed?: number
-          response_time_hours?: number
           availability_schedule?: Json | null
-          emergency_services?: boolean
-          min_project_amount?: number
-          travel_cost_per_km?: number
+          background_check?: boolean | null
           base_hourly_rate?: number | null
-          portfolio_images?: string[] | null
+          business_license?: string | null
           certifications?: string[] | null
+          company_name: string
+          created_at?: string | null
+          description?: string | null
+          emergency_services?: boolean | null
+          id?: string
+          insurance_verified?: boolean | null
+          is_active?: boolean | null
           languages?: string[] | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
+          min_project_amount?: number | null
+          portfolio_images?: string[] | null
+          rating_average?: number | null
+          rating_count?: number | null
+          response_time_hours?: number | null
+          service_area?: string[] | null
+          service_categories?: string[] | null
+          service_radius?: number | null
+          specialties?: string[] | null
+          tax_id?: string | null
+          total_jobs_completed?: number | null
+          travel_cost_per_km?: number | null
+          updated_at?: string | null
+          user_id: string
+          verified?: boolean | null
+          website?: string | null
         }
         Update: {
-          id?: string
-          user_id?: string
-          company_name?: string
-          business_license?: string | null
-          tax_id?: string | null
-          description?: string | null
-          website?: string | null
-          specialties?: string[] | null
-          service_categories?: string[] | null
-          service_area?: string[] | null
-          service_radius?: number
-          verified?: boolean
-          insurance_verified?: boolean
-          background_check?: boolean
-          rating_average?: number
-          rating_count?: number
-          total_jobs_completed?: number
-          response_time_hours?: number
           availability_schedule?: Json | null
-          emergency_services?: boolean
-          min_project_amount?: number
-          travel_cost_per_km?: number
+          background_check?: boolean | null
           base_hourly_rate?: number | null
-          portfolio_images?: string[] | null
+          business_license?: string | null
           certifications?: string[] | null
+          company_name?: string
+          created_at?: string | null
+          description?: string | null
+          emergency_services?: boolean | null
+          id?: string
+          insurance_verified?: boolean | null
+          is_active?: boolean | null
           languages?: string[] | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
+          min_project_amount?: number | null
+          portfolio_images?: string[] | null
+          rating_average?: number | null
+          rating_count?: number | null
+          response_time_hours?: number | null
+          service_area?: string[] | null
+          service_categories?: string[] | null
+          service_radius?: number | null
+          specialties?: string[] | null
+          tax_id?: string | null
+          total_jobs_completed?: number | null
+          travel_cost_per_km?: number | null
+          updated_at?: string | null
+          user_id?: string
+          verified?: boolean | null
+          website?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "service_providers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
+          created_at: string | null
           id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          role_specific_data: Json | null
+          role_type: string
+          updated_at: string | null
           user_id: string
-          role: string
-          is_active: boolean
+          verification_confirmed_at: string | null
+          verification_expires_at: string | null
+          verification_token: string | null
         }
         Insert: {
+          created_at?: string | null
           id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          role_specific_data?: Json | null
+          role_type: string
+          updated_at?: string | null
           user_id: string
-          role: string
-          is_active?: boolean
+          verification_confirmed_at?: string | null
+          verification_expires_at?: string | null
+          verification_token?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          role_specific_data?: Json | null
+          role_type?: string
+          updated_at?: string | null
           user_id?: string
-          role?: string
-          is_active?: boolean
+          verification_confirmed_at?: string | null
+          verification_expires_at?: string | null
+          verification_token?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       work_sessions: {
         Row: {
-          id: string
+          client_approved: boolean | null
+          client_notes: string | null
           contract_id: string
-          service_provider_id: string
-          start_time: string
-          end_time: string | null
-          duration_minutes: number | null
+          created_at: string | null
           description: string | null
-          work_performed: string | null
-          materials_used: Json | null
+          duration_minutes: number | null
+          end_time: string | null
+          hourly_rate: number | null
+          id: string
           images: string[] | null
           location_lat: number | null
           location_lng: number | null
-          client_approved: boolean
-          client_notes: string | null
-          hourly_rate: number | null
-          total_cost: number | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          contract_id: string
+          materials_used: Json | null
           service_provider_id: string
           start_time: string
-          end_time?: string | null
-          duration_minutes?: number | null
+          total_cost: number | null
+          updated_at: string | null
+          work_performed: string | null
+        }
+        Insert: {
+          client_approved?: boolean | null
+          client_notes?: string | null
+          contract_id: string
+          created_at?: string | null
           description?: string | null
-          work_performed?: string | null
-          materials_used?: Json | null
+          duration_minutes?: number | null
+          end_time?: string | null
+          hourly_rate?: number | null
+          id?: string
           images?: string[] | null
           location_lat?: number | null
           location_lng?: number | null
-          client_approved?: boolean
-          client_notes?: string | null
-          hourly_rate?: number | null
+          materials_used?: Json | null
+          service_provider_id: string
+          start_time: string
           total_cost?: number | null
-          created_at?: string
-          updated_at?: string
+          updated_at?: string | null
+          work_performed?: string | null
         }
         Update: {
-          id?: string
+          client_approved?: boolean | null
+          client_notes?: string | null
           contract_id?: string
-          service_provider_id?: string
-          start_time?: string
-          end_time?: string | null
-          duration_minutes?: number | null
+          created_at?: string | null
           description?: string | null
-          work_performed?: string | null
-          materials_used?: Json | null
+          duration_minutes?: number | null
+          end_time?: string | null
+          hourly_rate?: number | null
+          id?: string
           images?: string[] | null
           location_lat?: number | null
           location_lng?: number | null
-          client_approved?: boolean
-          client_notes?: string | null
-          hourly_rate?: number | null
+          materials_used?: Json | null
+          service_provider_id?: string
+          start_time?: string
           total_cost?: number | null
-          created_at?: string
-          updated_at?: string
+          updated_at?: string | null
+          work_performed?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "work_sessions_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_sessions_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_user_roles: {
-        Args: {
-          user_id: string
-        }
-        Returns: Json
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
@@ -1080,10 +1861,11 @@ export interface Database {
   }
 }
 
-// Exported type aliases for easier usage
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
@@ -1096,10 +1878,10 @@ export type Tables<
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-        Database["public"]["Views"])
-    ? (Database["public"]["Tables"] &
-        Database["public"]["Views"])[PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1108,7 +1890,7 @@ export type Tables<
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
@@ -1119,8 +1901,8 @@ export type TablesInsert<
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1129,7 +1911,7 @@ export type TablesInsert<
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
@@ -1140,8 +1922,8 @@ export type TablesUpdate<
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-    ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1150,13 +1932,74 @@ export type TablesUpdate<
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof Database["public"]["Enums"]
+    | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-    ? Database["public"]["Enums"][PublicEnumNameOrOptions]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
+
+// Custom types based on tables
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
+export type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
+
+export type UserRole = Database["public"]["Tables"]["user_roles"]["Row"];
+export type UserRoleInsert = Database["public"]["Tables"]["user_roles"]["Insert"];
+export type UserRoleUpdate = Database["public"]["Tables"]["user_roles"]["Update"];
+
+export type Property = Database["public"]["Tables"]["properties"]["Row"];
+export type PropertyInsert = Database["public"]["Tables"]["properties"]["Insert"];
+export type PropertyUpdate = Database["public"]["Tables"]["properties"]["Update"];
+
+export type ServiceProvider = Database["public"]["Tables"]["service_providers"]["Row"];
+export type ServiceProviderInsert = Database["public"]["Tables"]["service_providers"]["Insert"];
+export type ServiceProviderUpdate = Database["public"]["Tables"]["service_providers"]["Update"];
+
+export type BudgetRequest = Database["public"]["Tables"]["budget_requests"]["Row"];
+export type BudgetRequestInsert = Database["public"]["Tables"]["budget_requests"]["Insert"];
+export type BudgetRequestUpdate = Database["public"]["Tables"]["budget_requests"]["Update"];
+
+export type Quote = Database["public"]["Tables"]["quotes"]["Row"];
+export type QuoteInsert = Database["public"]["Tables"]["quotes"]["Insert"];
+export type QuoteUpdate = Database["public"]["Tables"]["quotes"]["Update"];
+
+export type Contract = Database["public"]["Tables"]["contracts"]["Row"];
+export type ContractInsert = Database["public"]["Tables"]["contracts"]["Insert"];
+export type ContractUpdate = Database["public"]["Tables"]["contracts"]["Update"];
+
+export type WorkSession = Database["public"]["Tables"]["work_sessions"]["Row"];
+export type WorkSessionInsert = Database["public"]["Tables"]["work_sessions"]["Insert"];
+export type WorkSessionUpdate = Database["public"]["Tables"]["work_sessions"]["Update"];
+
+export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
+export type NotificationInsert = Database["public"]["Tables"]["notifications"]["Insert"];
+export type NotificationUpdate = Database["public"]["Tables"]["notifications"]["Update"];
+
+export type Document = Database["public"]["Tables"]["documents"]["Row"];
+export type DocumentInsert = Database["public"]["Tables"]["documents"]["Insert"];
+export type DocumentUpdate = Database["public"]["Tables"]["documents"]["Update"];
+
+export type Conversation = Database["public"]["Tables"]["conversations"]["Row"];
+export type ConversationInsert = Database["public"]["Tables"]["conversations"]["Insert"];
+export type ConversationUpdate = Database["public"]["Tables"]["conversations"]["Update"];
+
+export type Message = Database["public"]["Tables"]["messages"]["Row"];
+export type MessageInsert = Database["public"]["Tables"]["messages"]["Insert"];
+export type MessageUpdate = Database["public"]["Tables"]["messages"]["Update"];
+
+export type Rating = Database["public"]["Tables"]["ratings"]["Row"];
+export type RatingInsert = Database["public"]["Tables"]["ratings"]["Insert"];
+export type RatingUpdate = Database["public"]["Tables"]["ratings"]["Update"];
+
+export type ServiceCategory = Database["public"]["Tables"]["service_categories"]["Row"];
+export type ServiceCategoryInsert = Database["public"]["Tables"]["service_categories"]["Insert"];
+export type ServiceCategoryUpdate = Database["public"]["Tables"]["service_categories"]["Update"];
+
+export type Incident = Database["public"]["Tables"]["incidents"]["Row"];
+export type IncidentInsert = Database["public"]["Tables"]["incidents"]["Insert"];
+export type IncidentUpdate = Database["public"]["Tables"]["incidents"]["Update"];
