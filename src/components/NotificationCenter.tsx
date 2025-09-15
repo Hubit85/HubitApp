@@ -170,8 +170,8 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
                 role_specific_data: roleRow?.role_specific_data,
               },
               property_details: {
-                address: roleRow?.role_specific_data?.property_address,
-                community_name: roleRow?.role_specific_data?.community_name,
+                address: (roleRow?.role_specific_data as any)?.property_address,
+                community_name: (roleRow?.role_specific_data as any)?.community_name,
               },
             } as AssignmentRequest;
           } catch (err) {
