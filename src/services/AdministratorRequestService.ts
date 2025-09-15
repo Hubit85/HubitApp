@@ -633,25 +633,22 @@ export class AdministratorRequestService {
     message?: string;
   }> {
     try {
-      let query = supabase
-        .from('user_roles')
+      console.log('🔍 SEARCH: Loading administrators from property_administrators table...');
+      
+      // CORRECTED: Load directly from property_administrators table (the right table!)
+      const { data: propertyAdmins, error: propertyError } = await supabase
+        .from('property_administrators')
         .select(`
-          id,
-          user_id,
-          role_specific_data,
+          *,
           profiles:user_id (
             full_name,
             email
           )
         `)
-        .eq('role_type', 'property_administrator')
-        .eq('is_verified', true)
-        .eq('is_active', true);
+        .order('created_at', { ascending: false });
 
-      const { data: administrators, error } = await query.order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ SEARCH: Error searching administrators:', error);
+      if (propertyError) {
+        console.error('❌ SEARCH: Error loading property administrators:', propertyError);
         return {
           success: false,
           administrators: [],
@@ -659,30 +656,63 @@ export class AdministratorRequestService {
         };
       }
 
-      let processedAdmins = (administrators || [])
+      console.log('📋 RAW ADMINISTRATORS DATA:', {
+        total_count: propertyAdmins?.length || 0,
+        administrators: propertyAdmins?.map(admin => ({
+          id: admin.id?.substring(0, 8) + '...',
+          company_name: admin.company_name,
+          contact_email: admin.contact_email
+        }))
+      });
+
+      // CORRECTED: Process administrators from property_administrators table
+      let processedAdmins = (propertyAdmins || [])
         .map((admin: any) => {
-          const roleData = admin.role_specific_data || {};
           const profile = admin.profiles || {};
           
-          return {
-            role_id: admin.id,
+          // Create a unique role_id using the property administrator ID
+          // Since we need to map to the role system, we'll use the property admin ID
+          const administrator = {
+            role_id: admin.id, // Use property administrator ID as role_id
             user_id: admin.user_id,
-            company_name: roleData.company_name || 'Empresa no especificada',
-            business_email: roleData.business_email || profile.email || '',
-            business_phone: roleData.business_phone || '',
+            company_name: admin.company_name || 'Empresa no especificada',
+            business_email: admin.contact_email || profile.email || '',
+            business_phone: admin.contact_phone || '',
             user_name: profile.full_name || 'Usuario',
             user_email: profile.email || ''
           };
+
+          console.log(`✅ PROCESSED admin:`, {
+            company_name: administrator.company_name,
+            business_email: administrator.business_email,
+            user_name: administrator.user_name
+          });
+
+          return administrator;
         });
 
+      // IMPROVED: Apply search filter if provided
       if (searchTerm && searchTerm.trim()) {
         const term = searchTerm.toLowerCase();
+        const originalCount = processedAdmins.length;
+        
         processedAdmins = processedAdmins.filter(admin => 
           admin.company_name.toLowerCase().includes(term) ||
           admin.business_email.toLowerCase().includes(term) ||
           admin.user_name.toLowerCase().includes(term)
         );
+
+        console.log(`🔍 SEARCH FILTER: "${term}" reduced ${originalCount} to ${processedAdmins.length} results`);
       }
+
+      console.log('🎯 FINAL SEARCH RESULTS:', {
+        total_found: processedAdmins.length,
+        administrators: processedAdmins.map(admin => ({
+          company_name: admin.company_name,
+          business_email: admin.business_email,
+          user_name: admin.user_name
+        }))
+      });
 
       return {
         success: true,
