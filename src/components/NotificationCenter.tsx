@@ -112,81 +112,82 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
   };
 
   const loadAssignmentRequests = async () => {
-    if (!activeRole || activeRole.role_type !== 'property_administrator') return;
+    if (!activeRole || activeRole.role_type !== "property_administrator") return;
 
     try {
-      console.log('🔍 NOTIFICATIONS: Loading assignment requests for administrator:', activeRole.id);
+      console.log("🔍 NOTIFICATIONS: Loading assignment requests for administrator:", activeRole.id);
 
-      // First get assignment requests from the administrator_requests table with assignment type
       const { data: requests, error } = await supabase
-        .from('administrator_requests')
-        .select('*')
-        .eq('property_administrator_id', activeRole.id)
-        .not('assignment_type', 'is', null) // Only get requests with assignment type
-        .order('requested_at', { ascending: false });
+        .from("administrator_requests")
+        .select("*")
+        .eq("property_administrator_id", activeRole.id)
+        .not("assignment_type", "is", null)
+        .order("requested_at", { ascending: false });
 
       if (error) {
-        console.error('❌ NOTIFICATIONS: Error loading assignment requests:', error);
+        console.error("❌ NOTIFICATIONS: Error loading assignment requests:", error);
         setAssignmentRequests([]);
         return;
       }
 
       if (!requests || requests.length === 0) {
-        console.log('📝 NOTIFICATIONS: No assignment requests found');
+        console.log("📝 NOTIFICATIONS: No assignment requests found");
         setAssignmentRequests([]);
         return;
       }
 
-      // Enrich the requests with community member data
       const enrichedRequests = await Promise.all(
         requests.map(async (request) => {
           try {
-            // Get community member data
-            const { data: memberData } = await supabase
-              .from('user_roles')
-              .select(`
-                id,
-                user_id,
-                role_specific_data,
-                profiles:user_id (
-                  full_name,
-                  email,
-                  phone
-                )
-              `)
-              .eq('id', request.community_member_id)
+            const { data: roleRow } = await supabase
+              .from("user_roles")
+              .select("id, user_id, role_specific_data")
+              .eq("id", request.community_member_id)
               .single();
+
+            let profile: any = null;
+            if (roleRow?.user_id) {
+              const { data: profileRow } = await supabase
+                .from("profiles")
+                .select("id, full_name, email, phone")
+                .eq("id", roleRow.user_id)
+                .single();
+              profile = profileRow;
+            }
 
             return {
               id: request.id,
               community_member_id: request.community_member_id,
               property_administrator_id: request.property_administrator_id,
               status: request.status,
-              assignment_type: request.assignment_type || 'full_management',
+              assignment_type: (request as any).assignment_type || "full_management",
               request_message: request.request_message,
               response_message: request.response_message,
               requested_at: request.requested_at,
               responded_at: request.responded_at,
-              community_member: memberData,
+              community_member: {
+                profiles: profile || undefined,
+                role_specific_data: roleRow?.role_specific_data,
+              },
               property_details: {
-                address: memberData?.role_specific_data?.property_address,
-                community_name: memberData?.role_specific_data?.community_name
-              }
+                address: roleRow?.role_specific_data?.property_address,
+                community_name: roleRow?.role_specific_data?.community_name,
+              },
             } as AssignmentRequest;
           } catch (err) {
-            console.error('Error enriching assignment request:', err);
+            console.error("Error enriching assignment request:", err);
             return {
               id: request.id,
               community_member_id: request.community_member_id,
               property_administrator_id: request.property_administrator_id,
               status: request.status,
-              assignment_type: request.assignment_type || 'full_management',
+              assignment_type: (request as any).assignment_type || "full_management",
               request_message: request.request_message,
               response_message: request.response_message,
               requested_at: request.requested_at,
               responded_at: request.responded_at,
-              community_member: null,
-              property_details: {}
+              community_member: undefined,
+              property_details: {},
             } as AssignmentRequest;
           }
         })
@@ -194,9 +195,8 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
 
       console.log(`✅ NOTIFICATIONS: Found ${enrichedRequests.length} assignment requests`);
       setAssignmentRequests(enrichedRequests);
-
     } catch (err) {
-      console.error('❌ NOTIFICATIONS: Exception loading assignment requests:', err);
+      console.error("❌ NOTIFICATIONS: Exception loading assignment requests:", err);
       setAssignmentRequests([]);
     }
   };
@@ -703,6 +703,140 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         </Card>
       )}
 
+      {/* Assignment Requests Section - Only for Property Administrators */}
+      {isPropertyAdministrator && userRole === "property_administrator" && (
+        <Card className="border-purple-200 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-900">
+              <UserPlus className="h-5 w-5" />
+              Solicitudes de Asignación ({assignmentRequests.filter(r => r.status === 'pending').length} pendientes)
+            </CardTitle>
+            <CardDescription>
+              Miembros de comunidad que quieren asignarte como su administrador
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {assignmentRequests.length === 0 ? (
+              <div className="text-center py-8">
+                <UserPlus className="h-12 w-12 text-stone-400 mx-auto mb-4" />
+                <p className="text-stone-600">No hay solicitudes de asignación</p>
+                <p className="text-sm text-stone-500 mt-1">
+                  Cuando un miembro te asigne como su administrador, aparecerá aquí
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {assignmentRequests.map((request) => (
+                  <Card key={request.id} className="border border-stone-200 hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-2 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <User className="h-4 w-4 text-stone-600" />
+                            <span className="font-semibold">
+                              {request.community_member?.profiles?.full_name || 'Miembro de Comunidad'}
+                            </span>
+                            {getAssignmentTypeBadge(request.assignment_type)}
+                            {getStatusBadge(request.status)}
+                          </div>
+                          <div className="text-sm text-stone-600 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-3 w-3" />
+                              {request.community_member?.profiles?.email || 'Email no disponible'}
+                            </div>
+                            {request.community_member?.profiles?.phone && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-3 w-3" />
+                                {request.community_member.profiles.phone}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3 w-3" />
+                              Solicitado el {formatDate(request.requested_at)}
+                            </div>
+                          </div>
+                          {request.request_message && (
+                            <div className="bg-stone-50 p-3 rounded-lg">
+                              <p className="text-sm">
+                                <strong>Mensaje:</strong> {request.request_message}
+                              </p>
+                            </div>
+                          )}
+                          {request.response_message && (
+                            <div className="bg-purple-50 p-3 rounded-lg">
+                              <p className="text-sm">
+                                <strong>Tu respuesta:</strong> {request.response_message}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        {request.status === 'pending' && (
+                          <div className="flex gap-2 ml-4 flex-col sm:flex-row">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedAssignmentRequest(request);
+                                setShowAssignmentResponseDialog(true);
+                              }}
+                              className="bg-purple-600 hover:bg-purple-700"
+                              disabled={responding === request.id}
+                            >
+                              {responding === request.id ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                              )}
+                              Responder
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCancelAssignmentRequest(request.id)}
+                              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                              disabled={responding === request.id}
+                            >
+                              {responding === request.id ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <X className="h-3 w-3 mr-1" />
+                              )}
+                              Eliminar
+                            </Button>
+                          </div>
+                        )}
+                        {request.status !== 'pending' && (
+                          <div className="ml-4 text-right">
+                            <p className="text-xs text-stone-500">
+                              {request.responded_at && `Respondido el ${formatDate(request.responded_at)}`}
+                            </p>
+                            {(request.status === 'cancelled' || request.status === 'rejected') && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleCancelAssignmentRequest(request.id)}
+                                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 mt-2"
+                                disabled={responding === request.id}
+                              >
+                                {responding === request.id ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <X className="h-3 w-3 mr-1" />
+                                )}
+                                Eliminar Registro
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Managed Incidents Section - Only for Property Administrators */}
       {isPropertyAdministrator && userRole === "property_administrator" && managedIncidents.length > 0 && (
         <Card className="border-green-200 shadow-lg">
@@ -944,6 +1078,102 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
                   setShowResponseDialog(false);
                   setResponseMessage("");
                   setSelectedRequest(null);
+                }}
+                className="w-full"
+                disabled={responding !== null}
+              >
+                Cancelar
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Assignment Response Dialog */}
+      <Dialog open={showAssignmentResponseDialog} onOpenChange={setShowAssignmentResponseDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Responder a Solicitud de Asignación</DialogTitle>
+            <DialogDescription>
+              Decide si aceptas o rechazas la asignación como administrador de este miembro
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedAssignmentRequest && (
+            <div className="space-y-4">
+              <div className="bg-stone-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Detalles del solicitante:</h4>
+                <div className="space-y-1 text-sm text-stone-600">
+                  <p>
+                    <strong>Nombre:</strong>{" "}
+                    {selectedAssignmentRequest.community_member?.profiles?.full_name || "No disponible"}
+                  </p>
+                  <p>
+                    <strong>Email:</strong>{" "}
+                    {selectedAssignmentRequest.community_member?.profiles?.email || "No disponible"}
+                  </p>
+                  <p>
+                    <strong>Tipo de asignación:</strong>{" "}
+                    {getAssignmentTypeLabel(selectedAssignmentRequest.assignment_type)}
+                  </p>
+                  <p><strong>Fecha:</strong> {formatDate(selectedAssignmentRequest.requested_at)}</p>
+                  {selectedAssignmentRequest.request_message && (
+                    <div className="mt-2">
+                      <strong>Mensaje:</strong>
+                      <p className="mt-1 italic bg-white p-2 rounded">
+                        "{selectedAssignmentRequest.request_message}"
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="assignment-response">Mensaje de respuesta (opcional)</Label>
+                <Textarea
+                  id="assignment-response"
+                  value={responseMessage}
+                  onChange={(e) => setResponseMessage(e.target.value)}
+                  placeholder="Escribe un mensaje explicando tu decisión..."
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => handleRespondToAssignmentRequest("accepted")}
+                  disabled={responding !== null}
+                  className="bg-green-600 hover:bg-green-700 flex-1"
+                >
+                  {responding === selectedAssignmentRequest.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-2" />
+                  )}
+                  Aceptar
+                </Button>
+                <Button
+                  onClick={() => handleRespondToAssignmentRequest("rejected")}
+                  disabled={responding !== null}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  {responding === selectedAssignmentRequest.id ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <X className="h-4 w-4 mr-2" />
+                  )}
+                  Rechazar
+                </Button>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAssignmentResponseDialog(false);
+                  setResponseMessage("");
+                  setSelectedAssignmentRequest(null);
                 }}
                 className="w-full"
                 disabled={responding !== null}
