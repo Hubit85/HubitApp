@@ -53,7 +53,17 @@ export default function Dashboard() {
     if (newRole !== selectedRole) {
       setSelectedRole(newRole);
     }
-  }, [activeRole, profile]);
+
+    // Handle URL parameters for specific tabs
+    const { tab, incident } = router.query;
+    if (tab && typeof tab === 'string') {
+      setActiveTab(tab);
+    }
+    if (incident && typeof incident === 'string') {
+      // If there's an incident parameter, we might want to pre-select it
+      console.log('Incident parameter detected:', incident);
+    }
+  }, [activeRole, profile, router.query]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -1384,6 +1394,7 @@ export default function Dashboard() {
         );
 
       case "incidencias":
+      case "gestionar-incidencias":
         return (
           <>
             <div className="mb-6">
