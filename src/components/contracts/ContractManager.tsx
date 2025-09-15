@@ -477,7 +477,8 @@ export function ContractManager() {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Fecha desconocida';
     return new Date(dateString).toLocaleDateString('es-ES');
   };
 
