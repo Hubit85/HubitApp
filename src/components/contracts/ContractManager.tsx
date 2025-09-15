@@ -340,6 +340,10 @@ export function ContractManager() {
         throw new Error("Error al obtener datos del proveedor");
       }
 
+      if (!providerData?.id) {
+        throw new Error("No se pudo obtener el ID del proveedor de servicios");
+      }
+
       const contractNumber = `CON-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const requestUserId = selectedQuote.budget_requests?.user_id || selectedQuote.user_id;
       
@@ -359,10 +363,6 @@ export function ContractManager() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
-
-      if (!providerData?.id) {
-        throw new Error("No se pudo obtener el ID del proveedor de servicios");
-      }
 
       const { data: newContract, error: createError } = await supabase
         .from('contracts')
