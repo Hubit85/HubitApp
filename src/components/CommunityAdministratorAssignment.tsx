@@ -110,9 +110,9 @@ export function CommunityAdministratorAssignment() {
   const loadAvailableAdministrators = async () => {
     try {
       setError("");
-      console.log('🔍 Loading available property administrators...');
+      console.log('🔍 FIXED QUERY: Loading available property administrators...');
       
-      // CORRECTED: Load ALL administrators without any filtering
+      // CORRECTED: Simple query without complex joins that don't exist
       const { data: propertyAdmins, error: propertyError } = await supabase
         .from('property_administrators')
         .select('*')
@@ -125,72 +125,94 @@ export function CommunityAdministratorAssignment() {
         return;
       }
 
-      console.log('📋 RAW DATA FROM DATABASE:', {
-        total_count: propertyAdmins?.length || 0,
-        administrators: propertyAdmins?.map(admin => ({
+      console.log('🐛 DEBUG - RAW DATABASE RESULTS:', {
+        total_found: propertyAdmins?.length || 0,
+        raw_data: propertyAdmins?.map(admin => ({
           id: admin.id?.substring(0, 8) + '...',
           company_name: admin.company_name,
           contact_email: admin.contact_email,
-          contact_phone: admin.contact_phone
+          user_id: admin.user_id?.substring(0, 8) + '...'
         }))
       });
 
-      // ENHANCED: Process ALL administrators without filtering
-      const adminList: PropertyAdministrator[] = (propertyAdmins || []).map((admin: any) => {
-        const companyName = admin.company_name || 'Administrador sin nombre';
-        const contactEmail = admin.contact_email || 'sin-email@registrado.com';
-        
-        console.log(`✅ PROCESSING admin: ${companyName} (${contactEmail})`);
-        
-        return {
-          id: admin.id,
-          user_id: admin.user_id,
-          company_name: companyName,
-          company_cif: admin.company_cif || `TEMP-${admin.id.substring(0, 8)}`,
-          contact_email: contactEmail,
-          contact_phone: admin.contact_phone || undefined,
-          license_number: admin.license_number || undefined,
-          profile: {
-            full_name: companyName,
-            email: contactEmail
-          }
-        };
-      });
+      // ENHANCED: Process ALL administrators - no filtering
+      const adminList: PropertyAdministrator[] = [];
+      
+      if (propertyAdmins && propertyAdmins.length > 0) {
+        // Process each administrator individually
+        for (const admin of propertyAdmins) {
+          try {
+            console.log(`🔄 Processing admin: ${admin.company_name}`);
+            
+            // Get profile data separately to avoid relationship issues
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('full_name, email, phone')
+              .eq('id', admin.user_id)
+              .maybeSingle();
 
-      console.log('🎯 FINAL ADMINISTRATOR LIST TO DISPLAY:', {
-        total_count: adminList.length,
+            if (profileError) {
+              console.warn(`⚠️ Profile error for admin ${admin.id}:`, profileError);
+              // Continue without profile data
+            }
+
+            const adminData: PropertyAdministrator = {
+              id: admin.id,
+              user_id: admin.user_id,
+              company_name: admin.company_name || 'Administrador Sin Nombre',
+              company_cif: admin.company_cif || `TEMP-${admin.id.substring(0, 8)}`,
+              contact_email: admin.contact_email || profileData?.email || 'sin-email@registrado.com',
+              contact_phone: admin.contact_phone || profileData?.phone || undefined,
+              license_number: admin.license_number || undefined,
+              profile: {
+                full_name: profileData?.full_name || admin.company_name || 'Usuario',
+                email: profileData?.email || admin.contact_email || ''
+              }
+            };
+
+            adminList.push(adminData);
+            console.log(`✅ SUCCESSFULLY ADDED: ${adminData.company_name} (${adminData.contact_email})`);
+            
+          } catch (processingError) {
+            console.error(`❌ Error processing admin ${admin.id}:`, processingError);
+            continue; // Skip this admin but continue with others
+          }
+        }
+      }
+
+      console.log('🎯 FINAL RESULT - Administrators to display:', {
+        total_processed: adminList.length,
         administrators: adminList.map(admin => ({
           name: admin.company_name,
           email: admin.contact_email,
-          cif: admin.company_cif,
-          id: admin.id.substring(0, 8) + '...'
+          cif: admin.company_cif
         }))
       });
 
-      // EXPECTED ADMINISTRATORS CHECK
-      const expectedTerms = ['castro', 'pipaón', 'pipaon', 'administracion'];
-      const foundExpectedAdmins = adminList.filter(admin => {
-        const searchText = (admin.company_name + ' ' + admin.contact_email).toLowerCase();
-        return expectedTerms.some(expected => searchText.includes(expected.toLowerCase()));
+      // VERIFICATION: Check for expected administrators
+      const expectedEmails = ['borjapipaon@gmail.com', 'ddayanacastro10@gmail.com'];
+      const foundEmails = adminList.map(a => a.contact_email.toLowerCase());
+      const expectedFound = expectedEmails.filter(email => 
+        foundEmails.some(found => found.includes(email.toLowerCase()))
+      );
+      
+      console.log('🔍 EXPECTED ADMINISTRATORS CHECK:', {
+        expected: expectedEmails,
+        found: foundEmails,
+        matching: expectedFound,
+        missing: expectedEmails.filter(email => !expectedFound.includes(email))
       });
 
-      console.log('🔍 EXPECTED ADMINISTRATORS FOUND:', {
-        expected_terms: expectedTerms,
-        found_count: foundExpectedAdmins.length,
-        found_administrators: foundExpectedAdmins.map(admin => ({
-          name: admin.company_name,
-          email: admin.contact_email
-        }))
-      });
-
-      // Set ALL administrators
       setAvailableAdministrators(adminList);
 
       if (adminList.length === 0) {
         setError('No se encontraron administradores registrados');
+      } else if (adminList.length < 2) {
+        console.warn(`⚠️ ONLY ${adminList.length} ADMINISTRATOR(S) LOADED, EXPECTED 2`);
+        setError(''); // Don't show error, just log warning
       } else {
         console.log(`✅ Successfully loaded ${adminList.length} administrators`);
-        setError(''); // Clear any previous errors
+        setError('');
       }
 
     } catch (err) {
