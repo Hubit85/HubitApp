@@ -1015,7 +1015,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             .single();
           
           if (profileCheck) {
-            const profileAge = new Date(profileCheck.created_at);
+            // CORRECCIÓN: Usar valor por defecto si created_at es null
+            const profileAge = new Date(profileCheck.created_at || new Date().toISOString());
             const now = new Date();
             const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
             
