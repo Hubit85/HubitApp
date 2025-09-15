@@ -1045,26 +1045,26 @@ function RegisterPageContent() {
               } else {
                 console.error('🚨 ENHANCED CRITICAL: AutomaticRoleCreationService monitoring failed:', monitoringResult.message);
                 
-                // ENHANCED FINAL ATTEMPT: Manual verification
-                const { data: manualCheck } = await supabase
+                // ENHANCED FALLBACK: Basic verification
+                const { data: basicCheck } = await supabase
                   .from('user_roles')
                   .select('id, role_type, is_verified, is_active')
                   .eq('user_id', session.user.id);
                 
-                const actualRolesFound = manualCheck?.length || 0;
+                const basicRolesFound = basicCheck?.length || 0;
                 
-                if (actualRolesFound > 0) {
-                  console.log(`✅ ENHANCED MANUAL VERIFICATION: Found ${actualRolesFound} roles after all`);
+                if (basicRolesFound > 0) {
+                  console.log(`✅ ENHANCED BASIC VERIFICATION: Found ${basicRolesFound} roles`);
                   
-                  let manualMessage = `¡Cuenta creada exitosamente con ${actualRolesFound} roles!`;
+                  let basicMessage = `¡Cuenta creada exitosamente con ${basicRolesFound} roles!`;
                   if (shouldAutoAssignMultipleRoles) {
-                    manualMessage += ` (Configuración automática completada)`;
+                    basicMessage += ` (Auto-configurado)`;
                   }
-                  manualMessage += ' Redirigiendo...';
+                  basicMessage += ' Redirigiendo...';
                   
-                  setSuccessMessage(manualMessage);
+                  setSuccessMessage(basicMessage);
                 } else {
-                  console.error('❌ ENHANCED MANUAL VERIFICATION: Zero roles found - this is a critical registration failure');
+                  console.error('❌ ENHANCED BASIC VERIFICATION: Zero roles found - this is a critical registration failure');
                   setSuccessMessage("Cuenta creada, pero con problemas en la configuración. Por favor contacta con soporte.");
                 }
               }
