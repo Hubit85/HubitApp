@@ -1,6 +1,6 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { UserRoleInsert } from "@/integrations/supabase/types";
+import { PropertyAdministratorSyncService } from "./PropertyAdministratorSyncService";
 
 export interface AutoRoleCreationOptions {
   userId: string;
@@ -18,6 +18,7 @@ export class AutomaticRoleCreationService {
   /**
    * ENHANCED BULLETPROOF automatic role creation for new registrations
    * This service ensures that ALL roles are created during registration with multiple fallback strategies
+   * INCLUDES: Automatic property administrator synchronization
    */
   static async createAllRolesAutomatically(options: AutoRoleCreationOptions): Promise<{
     success: boolean;
@@ -26,6 +27,7 @@ export class AutomaticRoleCreationService {
     totalRolesRequested: number;
     createdRoles: any[];
     errors: string[];
+    syncResults?: any;
   }> {
     console.log('🤖 ENHANCED AUTO-ROLE: Starting bulletproof automatic role creation service...');
     
@@ -33,6 +35,7 @@ export class AutomaticRoleCreationService {
     const errors: string[] = [];
     let rolesCreated = 0;
     const createdRoles: any[] = [];
+    let syncResults: any = null;
 
     // Calculate total roles to create
     const totalRolesRequested = 1 + additionalRoles.length; // 1 primary + additionals
@@ -93,14 +96,23 @@ export class AutomaticRoleCreationService {
           console.log(`📊 ENHANCED AUTO-ROLE: ${missingRoles.length} missing roles need to be created:`, missingRoles);
           
           if (missingRoles.length === 0) {
-            console.log('✅ ENHANCED AUTO-ROLE: All roles already exist, returning existing roles');
+            console.log('✅ ENHANCED AUTO-ROLE: All roles already exist, checking sync status...');
+            
+            // PROPERTY ADMINISTRATOR SYNC CHECK: Even if roles exist, ensure sync
+            const hasPropertyAdmin = existingRoleTypes.includes('property_administrator');
+            if (hasPropertyAdmin) {
+              console.log('🔄 ENHANCED AUTO-ROLE: Property administrator role exists, verifying sync...');
+              syncResults = await PropertyAdministratorSyncService.syncSingleAdministrator(userId);
+            }
+            
             return {
               success: true,
               message: `All ${existingCount} roles already exist`,
               rolesCreated: 0,
               totalRolesRequested,
               createdRoles: existingRoles || [],
-              errors: []
+              errors: [],
+              syncResults
             };
           }
         }
@@ -122,6 +134,23 @@ export class AutomaticRoleCreationService {
         createdRoles.push(primaryRoleResult.role);
         rolesCreated++;
         console.log(`✅ ENHANCED AUTO-ROLE: Primary role ${primaryRole} created successfully`);
+        
+        // AUTOMATIC SYNC: If primary role is property_administrator, sync immediately
+        if (primaryRole === 'property_administrator') {
+          console.log('🔄 ENHANCED AUTO-ROLE: Auto-syncing property administrator...');
+          try {
+            syncResults = await PropertyAdministratorSyncService.syncSingleAdministrator(userId);
+            if (syncResults.success) {
+              console.log('✅ ENHANCED AUTO-ROLE: Property administrator sync successful');
+            } else {
+              console.warn('⚠️ ENHANCED AUTO-ROLE: Property administrator sync warning:', syncResults.message);
+            }
+          } catch (syncError) {
+            console.error('❌ ENHANCED AUTO-ROLE: Property administrator sync error:', syncError);
+            errors.push(`Sync error: ${syncError instanceof Error ? syncError.message : String(syncError)}`);
+          }
+        }
+        
       } else {
         const errorMsg = `Failed to create primary role ${primaryRole}: ${primaryRoleResult.error}`;
         errors.push(errorMsg);
@@ -135,6 +164,16 @@ export class AutomaticRoleCreationService {
           createdRoles.push(emergencyResult.roleCreated);
           rolesCreated++;
           console.log('✅ ENHANCED AUTO-ROLE: Emergency recovery successful for primary role');
+          
+          // EMERGENCY SYNC: If emergency recovery created property_administrator, sync
+          if (primaryRole === 'property_administrator') {
+            try {
+              syncResults = await PropertyAdministratorSyncService.syncSingleAdministrator(userId);
+              console.log('✅ ENHANCED AUTO-ROLE: Emergency recovery sync completed');
+            } catch (syncError) {
+              console.error('❌ ENHANCED AUTO-ROLE: Emergency recovery sync failed:', syncError);
+            }
+          }
         } else {
           console.error('❌ ENHANCED AUTO-ROLE: Emergency recovery also failed for primary role');
         }
@@ -158,6 +197,22 @@ export class AutomaticRoleCreationService {
           createdRoles.push(additionalRoleResult.role);
           rolesCreated++;
           console.log(`✅ ENHANCED AUTO-ROLE: Additional role ${additionalRole.roleType} created successfully`);
+          
+          // AUTOMATIC SYNC: If additional role is property_administrator, sync immediately
+          if (additionalRole.roleType === 'property_administrator') {
+            console.log('🔄 ENHANCED AUTO-ROLE: Auto-syncing additional property administrator...');
+            try {
+              const additionalSyncResults = await PropertyAdministratorSyncService.syncSingleAdministrator(userId);
+              if (additionalSyncResults.success) {
+                console.log('✅ ENHANCED AUTO-ROLE: Additional property administrator sync successful');
+                // Store sync results (overwrite if multiple property admin roles)
+                syncResults = additionalSyncResults;
+              }
+            } catch (syncError) {
+              console.error('❌ ENHANCED AUTO-ROLE: Additional property administrator sync error:', syncError);
+            }
+          }
+          
         } else {
           const errorMsg = `Failed to create additional role ${additionalRole.roleType}: ${additionalRoleResult.error}`;
           errors.push(errorMsg);
@@ -171,6 +226,16 @@ export class AutomaticRoleCreationService {
             createdRoles.push(recoveryResult.roleCreated);
             rolesCreated++;
             console.log(`✅ ENHANCED AUTO-ROLE: Recovery successful for ${additionalRole.roleType}`);
+            
+            // RECOVERY SYNC: If recovery created property_administrator, sync
+            if (additionalRole.roleType === 'property_administrator') {
+              try {
+                syncResults = await PropertyAdministratorSyncService.syncSingleAdministrator(userId);
+                console.log('✅ ENHANCED AUTO-ROLE: Recovery sync completed');
+              } catch (syncError) {
+                console.error('❌ ENHANCED AUTO-ROLE: Recovery sync failed:', syncError);
+              }
+            }
           } else {
             console.error(`❌ ENHANCED AUTO-ROLE: Recovery also failed for ${additionalRole.roleType}`);
           }
@@ -183,6 +248,23 @@ export class AutomaticRoleCreationService {
       // ENHANCED: Ensure at least one role is active with better logic
       if (rolesCreated > 0) {
         await this.ensureActiveRoleEnhanced(userId, createdRoles);
+      }
+
+      // PHASE 4: FINAL PROPERTY ADMINISTRATOR SYNC CHECK
+      console.log('🔍 ENHANCED AUTO-ROLE: Running final sync verification...');
+      const hasPropertyAdminRole = createdRoles.some(role => role.role_type === 'property_administrator');
+      
+      if (hasPropertyAdminRole && !syncResults) {
+        console.log('🔄 ENHANCED AUTO-ROLE: Running final property administrator sync...');
+        try {
+          syncResults = await PropertyAdministratorSyncService.syncSingleAdministrator(userId);
+          if (syncResults.success) {
+            console.log('✅ ENHANCED AUTO-ROLE: Final sync verification successful');
+          }
+        } catch (finalSyncError) {
+          console.error('❌ ENHANCED AUTO-ROLE: Final sync verification failed:', finalSyncError);
+          errors.push(`Final sync error: ${finalSyncError instanceof Error ? finalSyncError.message : String(finalSyncError)}`);
+        }
       }
 
       // ENHANCED: Final verification with database query
@@ -201,9 +283,16 @@ export class AutomaticRoleCreationService {
           ? '¡Registro completado exitosamente! 🎉' 
           : 'Registro completado con configuración parcial ⚠️';
         
-        const notificationMessage = rolesCreated === totalRolesRequested
+        let notificationMessage = rolesCreated === totalRolesRequested
           ? `Tu cuenta se ha configurado perfectamente con ${rolesCreated} rol${rolesCreated === 1 ? '' : 'es'} activo${rolesCreated === 1 ? '' : 's'}. ¡Bienvenido a HuBiT!`
           : `Se crearon ${rolesCreated} de ${totalRolesRequested} roles solicitados. Los roles restantes pueden agregarse desde tu perfil en cualquier momento.`;
+        
+        // Add sync info to notification if applicable
+        if (syncResults && hasPropertyAdminRole) {
+          notificationMessage += syncResults.success 
+            ? ` Sincronización de administrador de fincas completada.`
+            : ` Nota: La sincronización de administrador requiere verificación adicional.`;
+        }
 
         try {
           await supabase
@@ -225,16 +314,17 @@ export class AutomaticRoleCreationService {
       // ENHANCED: Success criteria - we need at least the primary role
       const success = rolesCreated >= 1 && actualFinalCount >= 1;
 
-      // ENHANCED: Comprehensive result object
+      // ENHANCED: Comprehensive result object with sync results
       const result = {
         success,
         message: success 
-          ? `Creación automática exitosa: ${rolesCreated}/${totalRolesRequested} roles configurados (${actualFinalCount} total en BD)`
+          ? `Creación automática exitosa: ${rolesCreated}/${totalRolesRequested} roles configurados (${actualFinalCount} total en BD)${syncResults ? '. Sincronización: ' + syncResults.message : ''}`
           : `Error en creación automática: solo ${rolesCreated}/${totalRolesRequested} roles creados`,
         rolesCreated,
         totalRolesRequested,
         createdRoles,
-        errors
+        errors,
+        syncResults
       };
 
       console.log('📊 ENHANCED AUTO-ROLE: Final service result:', result);
@@ -250,13 +340,25 @@ export class AutomaticRoleCreationService {
           const lastDitchResult = await this.emergencyRoleCreationEnhanced(userId, email, primaryRole);
           if (lastDitchResult.success) {
             console.log('✅ ENHANCED AUTO-ROLE: Last-ditch recovery successful');
+            
+            // LAST-DITCH SYNC: If emergency created property_administrator, sync
+            if (primaryRole === 'property_administrator') {
+              try {
+                syncResults = await PropertyAdministratorSyncService.syncSingleAdministrator(userId);
+                console.log('✅ ENHANCED AUTO-ROLE: Last-ditch sync completed');
+              } catch (syncError) {
+                console.error('❌ ENHANCED AUTO-ROLE: Last-ditch sync failed:', syncError);
+              }
+            }
+            
             return {
               success: true,
               message: 'Recuperación de emergencia exitosa',
               rolesCreated: 1,
               totalRolesRequested,
               createdRoles: [lastDitchResult.roleCreated],
-              errors: [...errors, 'Used emergency recovery']
+              errors: [...errors, 'Used emergency recovery'],
+              syncResults
             };
           }
         } catch (emergencyError) {
@@ -270,7 +372,8 @@ export class AutomaticRoleCreationService {
         rolesCreated,
         totalRolesRequested,
         createdRoles,
-        errors: [...errors, error instanceof Error ? error.message : String(error)]
+        errors: [...errors, error instanceof Error ? error.message : String(error)],
+        syncResults
       };
     }
   }
