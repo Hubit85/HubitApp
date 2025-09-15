@@ -428,12 +428,12 @@ export class AdministratorRequestService {
       const managedUserIds = managedResult.members.map(member => (member.community_member as any)?.user_id).filter(id => !!id);
       if (managedUserIds.length === 0) return { success: true, incidents: [] };
 
-      const { data: incidents, error } = await supabase.from('incident_reports').select('*').in('reporter_id', managedUserIds).order('reported_at', { ascending: false });
+      const { data: incidents, error } = await supabase.from('incident_reports').select('*').in('user_id', managedUserIds).order('reported_at', { ascending: false });
       if (error) throw new Error(error.message);
 
       const enrichedIncidents = await Promise.all(
         (incidents || []).map(async (incident) => {
-          const { data: profile } = await supabase.from('profiles').select('*').eq('id', incident.reporter_id).single();
+          const { data: profile } = await supabase.from('profiles').select('*').eq('id', incident.user_id).single();
           return { ...incident, profiles: profile };
         })
       );
