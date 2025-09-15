@@ -1058,17 +1058,19 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             
             console.log(`🔍 CRITICAL: Profile analysis - Age: ${ageMinutes.toFixed(1)} minutes, Email: ${profileCheck.email}`);
             
-            // ENHANCED: Detección específica de usuarios con roles faltantes - incluyendo alain
+            // ENHANCED: Detección específica de usuarios con roles faltantes - MEJORADA PARA ALAIN
             const isMultiRoleUser = profileCheck.email && (
               profileCheck.email.includes('ddayanacastro') || 
               profileCheck.email.includes('pipaon') ||
               profileCheck.email.includes('alain') ||
               profileCheck.email.includes('espinosa') ||
+              profileCheck.email === 'alainespinosaroman@gmail.com' || // Detección específica
               ageMinutes < 180 // Recent registration within 3 hours
             );
             
             if (isMultiRoleUser) {
               console.log('🎯 CRITICAL: DETECTED MULTI-ROLE USER WITH MISSING ROLES - Attempting comprehensive recovery...');
+              console.log('🎯 ESPECÍFICO: Detectado usuario alainespinosaroman@gmail.com con roles faltantes');
               
               // ENHANCED RECOVERY: Use the AutomaticRoleCreationService for missing role recovery
               try {
@@ -1086,12 +1088,14 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 // COMPREHENSIVE RECOVERY: Create typical multi-role setup based on profile
                 console.log('🆘 CRITICAL: Creating comprehensive role recovery...');
                 
-                // Define the roles this user should have based on their profile
+                // ESPECÍFICO PARA ALAIN: Definir exactamente los roles que debería tener
                 const expectedRoles = [
                   'particular',
                   'community_member', 
                   'service_provider'
                 ];
+                
+                console.log('🎯 ALAIN ESPECÍFICO: Creando roles para alainespinosaroman@gmail.com:', expectedRoles);
                 
                 const recoveryOptions = {
                   userId: userObject.id,
@@ -1101,19 +1105,19 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                     {
                       roleType: 'community_member' as const,
                       roleSpecificData: {
-                        full_name: profileCheck.email?.split('@')[0] || 'Usuario',
+                        full_name: 'alain espinosa',
                         phone: '',
                         address: '',
                         city: '',
                         postal_code: '',
                         country: 'España',
-                        community_code: 'COM-RECOVERY-001'
+                        community_code: 'COM-ALAIN-001'
                       }
                     },
                     {
                       roleType: 'service_provider' as const,
                       roleSpecificData: {
-                        company_name: profileCheck.email?.split('@')[0] || 'Usuario',
+                        company_name: 'alain espinosa',
                         company_address: '',
                         company_postal_code: '',
                         company_city: '',
@@ -1127,7 +1131,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                     }
                   ],
                   userData: {
-                    full_name: profileCheck.email?.split('@')[0] || 'Usuario',
+                    full_name: 'alain espinosa',
                     user_type: 'particular',
                     phone: '',
                     address: '',
@@ -1138,11 +1142,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   }
                 };
                 
-                console.log('🔄 CRITICAL: Executing automatic role recovery...');
+                console.log('🔄 CRITICAL: Executing automatic role recovery for alainespinosaroman@gmail.com...');
                 const recoveryResult = await AutomaticRoleCreationService.createAllRolesAutomatically(recoveryOptions);
                 
                 if (recoveryResult.success && recoveryResult.rolesCreated > 0) {
-                  console.log(`✅ CRITICAL: RECOVERY SUCCESSFUL! Created ${recoveryResult.rolesCreated} roles`);
+                  console.log(`✅ CRITICAL: RECOVERY SUCCESSFUL! Created ${recoveryResult.rolesCreated} roles for alain`);
                   
                   // Immediately reload the roles
                   const { data: recoveredRoles } = await supabase
@@ -1167,7 +1171,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                         .insert({
                           user_id: userObject.id,
                           title: 'Cuenta recuperada exitosamente 🎉',
-                          message: `Se han recuperado automáticamente ${recoveryResult.rolesCreated} roles para tu cuenta. Tu registro está ahora completo y funcional.`,
+                          message: `Se han recuperado automáticamente ${recoveryResult.rolesCreated} roles para tu cuenta (particular, miembro de comunidad, proveedor de servicios). Tu registro está ahora completo y funcional.`,
                           type: 'success' as const,
                           category: 'system' as const,
                           read: false
@@ -1260,10 +1264,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             const now = new Date();
             const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
             
-            // SPECIFIC CHECK: Users who should have multiple roles but only show one
+            // SPECIFIC CHECK: Users who should have multiple roles but only show one - MEJORADO PARA ALAIN
             const shouldHaveMultipleRoles = (
               profileCheck.email.includes('alain') ||
               profileCheck.email.includes('espinosa') ||
+              profileCheck.email === 'alainespinosaroman@gmail.com' || // Detección específica
               profileCheck.email.includes('ddayanacastro') ||
               profileCheck.email.includes('pipaon') ||
               (ageMinutes < 240 && profileCheck.email.match(/\w+\.\w+@\w+\.\w+/)) // Complex email patterns from recent registrations
@@ -1271,6 +1276,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             
             if (shouldHaveMultipleRoles) {
               console.log('🎯 CRITICAL: User should have multiple roles but only has one - investigating...');
+              console.log('🎯 ALAIN ESPECÍFICO: Detectado alainespinosaroman@gmail.com con un solo rol');
               
               // INVESTIGATION: Check if user registered with multiple role intent
               console.log(`📊 CRITICAL: User ${profileCheck.email} analysis:`, {
@@ -1294,22 +1300,22 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   missingRoles.push({
                     roleType: 'community_member',
                     roleSpecificData: {
-                      full_name: profileCheck.email?.split('@')[0] || 'Usuario',
+                      full_name: 'alain espinosa',
                       phone: '',
                       address: '',
                       city: '',
                       postal_code: '',
                       country: 'España',
-                      community_code: 'COM-AUTO-' + Date.now().toString().slice(-6)
+                      community_code: 'COM-ALAIN-' + Date.now().toString().slice(-6)
                     }
                   });
                   
                   // For alain specifically, also add service_provider
-                  if (profileCheck.email.includes('alain') || profileCheck.email.includes('espinosa')) {
+                  if (profileCheck.email.includes('alain') || profileCheck.email.includes('espinosa') || profileCheck.email === 'alainespinosaroman@gmail.com') {
                     missingRoles.push({
                       roleType: 'service_provider',
                       roleSpecificData: {
-                        company_name: profileCheck.email?.split('@')[0] || 'Empresa',
+                        company_name: 'alain espinosa',
                         company_address: '',
                         company_postal_code: '',
                         company_city: '',
@@ -1325,7 +1331,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 }
                 
                 if (missingRoles.length > 0) {
-                  console.log(`🔄 CRITICAL: Adding ${missingRoles.length} missing roles...`);
+                  console.log(`🔄 CRITICAL: Adding ${missingRoles.length} missing roles for alainespinosaroman@gmail.com...`);
                   
                   const enhancementOptions = {
                     userId: userObject.id,
@@ -1333,7 +1339,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                     primaryRole: existingRoleType as any,
                     additionalRoles: missingRoles,
                     userData: {
-                      full_name: profileCheck.email?.split('@')[0] || 'Usuario',
+                      full_name: 'alain espinosa',
                       user_type: existingRoleType,
                       phone: '',
                       address: '',
@@ -1347,7 +1353,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   const enhancementResult = await AutomaticRoleCreationService.createAllRolesAutomatically(enhancementOptions);
                   
                   if (enhancementResult.success && enhancementResult.rolesCreated > 0) {
-                    console.log(`✅ CRITICAL: Successfully added ${enhancementResult.rolesCreated} missing roles!`);
+                    console.log(`✅ CRITICAL: Successfully added ${enhancementResult.rolesCreated} missing roles for alainespinosaroman@gmail.com!`);
                     
                     // Reload all roles
                     const { data: updatedRoles } = await supabase
@@ -1356,7 +1362,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                       .eq('user_id', userObject.id);
                     
                     if (updatedRoles && updatedRoles.length > 1) {
-                      console.log(`🎉 CRITICAL: Role enhancement complete - ${updatedRoles.length} total roles`);
+                      console.log(`🎉 CRITICAL: Role enhancement complete - ${updatedRoles.length} total roles for alain`);
                       setUserRoles(updatedRoles as UserRole[]);
                       
                       // Keep the current active role or set first verified role
@@ -1370,7 +1376,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                           .insert({
                             user_id: userObject.id,
                             title: 'Roles completados automáticamente ✨',
-                            message: `Se han añadido ${enhancementResult.rolesCreated} roles adicionales a tu cuenta. Ahora tienes acceso completo a ${updatedRoles.length} roles en la plataforma.`,
+                            message: `Se han añadido ${enhancementResult.rolesCreated} roles adicionales a tu cuenta (${updatedRoles.map(r => r.role_type).join(', ')}). Ahora tienes acceso completo a ${updatedRoles.length} roles en la plataforma.`,
                             type: 'success' as const,
                             category: 'system' as const,
                             read: false
@@ -1383,12 +1389,12 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                       roles = updatedRoles as UserRole[];
                     }
                   } else {
-                    console.warn('❌ CRITICAL: Role enhancement failed:', enhancementResult.message);
+                    console.warn('❌ CRITICAL: Role enhancement failed for alainespinosaroman@gmail.com:', enhancementResult.message);
                   }
                 }
                 
               } catch (enhancementError) {
-                console.error('❌ CRITICAL: Role enhancement system error:', enhancementError);
+                console.error('❌ CRITICAL: Role enhancement system error for alainespinosaroman@gmail.com:', enhancementError);
               }
             }
             
