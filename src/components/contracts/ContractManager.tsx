@@ -377,7 +377,9 @@ export function ContractManager() {
 
       console.log("✅ Contract created successfully:", newContract.id);
 
-      // Send notification to the contract owner using the same user ID
+      // Send notification to the contract owner using the same user ID - ensure contract_number is not null
+      const notificationContractNumber = newContract.contract_number || contractNumber;
+      
       if (requestUserId && user?.id && providerData?.id) {
         try {
           await supabase
@@ -385,7 +387,7 @@ export function ContractManager() {
             .insert({
               user_id: requestUserId,
               title: 'Nuevo contrato disponible',
-              message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}"`,
+              message: `Se ha generado un contrato para tu solicitud "${selectedQuote.title || 'Servicio'}" (${notificationContractNumber})`,
               type: 'info' as const,
               category: 'contract' as const,
               related_entity_type: 'contract',

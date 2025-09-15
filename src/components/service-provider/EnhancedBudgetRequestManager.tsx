@@ -63,7 +63,7 @@ const URGENCY_LEVELS = {
 };
 
 export function EnhancedBudgetRequestManager() {
-  const { user, supabase } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
   const [availableRequests, setAvailableRequests] = useState<BudgetRequestWithDetails[]>([]);
