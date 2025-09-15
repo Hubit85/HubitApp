@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
-import { UserPlus, Building, Mail, Phone, Search, Loader2, Badge, MapPin, Star, Clock } from "lucide-react";
+import { UserPlus, Building, Mail, Phone, Search, Loader2, Badge, MapPin, Star, Clock, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type ServiceProvider = Database["public"]["Tables"]["service_providers"]["Row"];
@@ -16,13 +16,41 @@ type ServiceProviderWithProfile = ServiceProvider & {
   profiles: Profile | null;
 };
 
+// Local storage management for simulated assignments
 interface CommunityAssignment {
   id: string;
   service_provider_id: string;
   community_name: string;
   assigned_date: string;
-  status: "active" | "inactive" | "pending";
+  status: "active" | "pending" | "completed";
+  assigned_by: string;
 }
+
+const LOCAL_ASSIGNMENTS_KEY = "hubit_community_assignments";
+
+// Utility functions for local storage management
+const getLocalAssignments = (): CommunityAssignment[] => {
+  try {
+    const stored = localStorage.getItem(LOCAL_ASSIGNMENTS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveLocalAssignments = (assignments: CommunityAssignment[]) => {
+  try {
+    localStorage.setItem(LOCAL_ASSIGNMENTS_KEY, JSON.stringify(assignments));
+  } catch (error) {
+    console.warn("Failed to save assignments to localStorage:", error);
+  }
+};
+
+const addLocalAssignment = (assignment: CommunityAssignment) => {
+  const assignments = getLocalAssignments();
+  assignments.push(assignment);
+  saveLocalAssignments(assignments);
+};
 
 export function CommunityAdministratorAssignment() {
   const { user } = useSupabaseAuth();
@@ -34,12 +62,21 @@ export function CommunityAdministratorAssignment() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [communityName, setCommunityName] = useState("");
+  const [recentAssignments, setRecentAssignments] = useState<CommunityAssignment[]>([]);
 
   useEffect(() => {
     if (user) {
       fetchAvailableAdmins();
+      loadRecentAssignments();
     }
   }, [user, searchTerm]);
+
+  const loadRecentAssignments = () => {
+    const assignments = getLocalAssignments();
+    // Show only recent assignments (last 10)
+    const recent = assignments.slice(-10).reverse();
+    setRecentAssignments(recent);
+  };
 
   const fetchAvailableAdmins = async () => {
     try {
@@ -127,29 +164,38 @@ export function CommunityAdministratorAssignment() {
     setIsSubmitting(true);
     
     try {
-      // Simulate the assignment process since we don't have a community_assignments table yet
-      // In a real implementation, you would:
-      // 1. Create an entry in a community_assignments table
-      // 2. Send a notification to the selected service provider
-      // 3. Update any relevant property or community management records
+      // Create local assignment record
+      const newAssignment: CommunityAssignment = {
+        id: `assign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        service_provider_id: selectedAdmin.id,
+        community_name: communityName.trim(),
+        assigned_date: new Date().toISOString(),
+        status: "pending",
+        assigned_by: user.id
+      };
       
-      // Simulated API call with realistic delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Save to localStorage for demo purposes
+      addLocalAssignment(newAssignment);
       
-      // Send a notification to the selected service provider
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Send notification to the selected service provider
       try {
         const { error: notificationError } = await supabase
           .from("notifications")
           .insert({
             user_id: selectedAdmin.user_id,
             title: "Nueva Asignación de Comunidad",
-            message: `Has sido seleccionado como administrador de la comunidad "${communityName}". Por favor, revisa los detalles y confirma tu disponibilidad.`,
+            message: `Has sido seleccionado como administrador de la comunidad "${communityName}". Esta es una demostración del sistema de asignaciones. Por favor, revisa los detalles en tu panel de control.`,
             type: "info",
             category: "community_assignment",
             read: false,
             priority: 1,
             action_url: "/dashboard",
-            action_label: "Ver Detalles"
+            action_label: "Ver Detalles",
+            related_entity_type: "community_assignment",
+            related_entity_id: newAssignment.id
           });
 
         if (notificationError) {
@@ -162,13 +208,14 @@ export function CommunityAdministratorAssignment() {
       }
       
       toast({
-        title: "Asignación completada exitosamente",
+        title: "✅ Asignación completada exitosamente",
         description: `${selectedAdmin.company_name} ha sido asignado como administrador de "${communityName}". Se ha enviado una notificación al proveedor.`,
       });
       
-      // Reset form
+      // Reset form and reload assignments
       setSelectedAdmin(null);
       setCommunityName("");
+      loadRecentAssignments();
       
     } catch (error) {
       console.error("Error assigning administrator:", error);
@@ -199,6 +246,43 @@ export function CommunityAdministratorAssignment() {
 
   return (
     <div className="space-y-6">
+      {/* Recent Assignments Preview */}
+      {recentAssignments.length > 0 && (
+        <Card className="shadow-lg border-green-200/60 bg-gradient-to-br from-green-50/50 to-white">
+          <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-3 text-lg">
+              <CheckCircle className="h-5 w-5" />
+              Asignaciones Recientes
+            </CardTitle>
+            <CardDescription className="text-green-100">
+              Últimas asignaciones de administradores realizadas (demostración local)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="space-y-3 max-h-48 overflow-y-auto">
+              {recentAssignments.slice(0, 5).map((assignment) => (
+                <div key={assignment.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200/60 shadow-sm">
+                  <div>
+                    <p className="font-medium text-neutral-800">{assignment.community_name}</p>
+                    <p className="text-sm text-neutral-600">
+                      {new Date(assignment.assigned_date).toLocaleDateString("es-ES", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })}
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full">
+                    {assignment.status === "pending" ? "Pendiente" : "Activo"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="shadow-xl border-neutral-200/60 bg-gradient-to-br from-white to-neutral-50/50">
         <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-3 text-xl">
@@ -206,7 +290,10 @@ export function CommunityAdministratorAssignment() {
             Asignar Administrador de Comunidad
           </CardTitle>
           <CardDescription className="text-blue-100">
-            Busca y selecciona un administrador de fincas certificado para gestionar una comunidad de propietarios.
+            Busca y selecciona un administrador de fincas certificado para gestionar una comunidad de propietarios. 
+            <span className="block mt-1 text-blue-200 text-sm font-medium">
+              🔄 Modo Demostración: Las asignaciones se almacenan localmente
+            </span>
           </CardDescription>
         </CardHeader>
         
@@ -221,7 +308,7 @@ export function CommunityAdministratorAssignment() {
               placeholder="Ej: Comunidad Residencial Los Jardines"
               value={communityName}
               onChange={(e) => setCommunityName(e.target.value)}
-              className="transition-all duration-200 focus:ring-2 focus:ring-blue-500/20"
+              className="transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 border-neutral-300 focus:border-blue-500"
             />
           </div>
 
@@ -235,7 +322,7 @@ export function CommunityAdministratorAssignment() {
                 placeholder="Buscar por empresa, nombre, email o especialidad..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20"
+                className="flex-1 transition-all duration-200 focus:ring-2 focus:ring-blue-500/20 border-neutral-300 focus:border-blue-500"
               />
               <Button 
                 type="submit" 
@@ -280,7 +367,7 @@ export function CommunityAdministratorAssignment() {
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         {admin.company_name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -337,7 +424,7 @@ export function CommunityAdministratorAssignment() {
                   </div>
                   
                   {admin.description && (
-                    <p className="mt-3 text-sm text-neutral-600 line-clamp-2 bg-neutral-50/50 p-3 rounded-lg">
+                    <p className="mt-3 text-sm text-neutral-600 line-clamp-2 bg-neutral-50/50 p-3 rounded-lg border border-neutral-200/30">
                       {admin.description}
                     </p>
                   )}
@@ -360,7 +447,7 @@ export function CommunityAdministratorAssignment() {
           <Button 
             onClick={handleAssignAdmin} 
             disabled={!selectedAdmin || !communityName.trim() || isSubmitting}
-            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
