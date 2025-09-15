@@ -28,6 +28,17 @@ interface ExtendedBudgetRequest extends BudgetRequest {
   distance?: number;
   quote_count?: number;
   my_quote?: Quote | null;
+  profiles?: {
+    full_name?: string | null;
+    email?: string;
+    [key: string]: any;
+  } | null;
+  properties?: {
+    name?: string | null;
+    address?: string | null;
+    city?: string | null;
+    [key: string]: any;
+  } | null;
 }
 
 interface QuoteFormData {
