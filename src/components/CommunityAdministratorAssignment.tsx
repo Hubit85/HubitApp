@@ -178,36 +178,52 @@ export function CommunityAdministratorAssignment() {
 
   const loadCurrentAssignment = async () => {
     if (!user?.id) return;
-    const { data, error } = await supabase
-      .from('community_member_administrators')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('administrator_verified', true)
-      .maybeSingle();
-    if (error && error.code !== 'PGRST116') throw error;
-    setCurrentAssignment(data as CommunityMemberAdministrator | null);
+    
+    try {
+      const { data, error } = await supabase
+        .from('community_member_administrators')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('administrator_verified', true)
+        .maybeSingle();
+        
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading current assignment:', error);
+        return;
+      }
+      
+      setCurrentAssignment(data as CommunityMemberAdministrator | null);
+    } catch (err) {
+      console.error('Exception loading current assignment:', err);
+    }
   };
 
   const loadPendingAssignmentRequests = async () => {
     if (!user?.id) return;
-    const { data, error } = await supabase
-      .from('community_member_administrators')
-      .select('id, company_cif, created_at, company_name')
-      .eq('user_id', user.id)
-      .eq('administrator_verified', false)
-      .order('created_at', { ascending: false });
+    
+    try {
+      const { data, error } = await supabase
+        .from('community_member_administrators')
+        .select('id, company_cif, created_at, company_name')
+        .eq('user_id', user.id)
+        .eq('administrator_verified', false)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.warn('Error loading pending assignment requests:', error);
-      return;
+      if (error) {
+        console.warn('Error loading pending assignment requests:', error);
+        return;
+      }
+      
+      setPendingRequests((data || []).map(req => ({
+        id: req.id,
+        administrator_id: req.company_cif,
+        created_at: req.created_at || new Date().toISOString(),
+        status: 'pending',
+        company_name: req.company_name,
+      })));
+    } catch (err) {
+      console.error('Exception loading pending requests:', err);
     }
-    setPendingRequests((data || []).map(req => ({
-      id: req.id,
-      administrator_id: req.company_cif,
-      created_at: req.created_at || new Date().toISOString(), // FIX: Handle null created_at
-      status: 'pending',
-      company_name: req.company_name,
-    })));
   };
 
   const handleRequestAssignment = async (administrator: PropertyAdministrator) => {
@@ -242,6 +258,29 @@ export function CommunityAdministratorAssignment() {
     }
   };
 
+  const handleDeleteRequest = async (requestId: string, companyName?: string) => {
+    try {
+      setError("");
+      setSuccess("");
+      
+      const { error } = await supabase
+        .from('community_member_administrators')
+        .delete()
+        .eq('id', requestId);
+      
+      if (error) {
+        console.error('Error deleting request:', error);
+        setError('Error al eliminar la solicitud');
+      } else {
+        setSuccess(`Solicitud a ${companyName || 'la empresa'} eliminada correctamente`);
+        await initializeComponent();
+      }
+    } catch (error) {
+      console.error('Exception deleting request:', error);
+      setError('Error al eliminar la solicitud');
+    }
+  };
+
   if (!isCommunityMember) {
     return (
       <Card className="bg-amber-50 border-amber-200">
@@ -254,60 +293,101 @@ export function CommunityAdministratorAssignment() {
   }
 
   if (loading) {
-    return <Card className="p-6 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></Card>;
+    return (
+      <Card className="p-6 text-center">
+        <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+        <p className="text-sm text-stone-600 mt-2">Cargando administradores...</p>
+      </Card>
+    );
   }
 
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-black"><Building /> Administrador de Fincas</CardTitle>
-        <CardDescription>Asigna la empresa que administra tu comunidad</CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-black">
+              <Building /> Administrador de Fincas
+            </CardTitle>
+            <CardDescription>Asigna la empresa que administra tu comunidad</CardDescription>
+          </div>
+          
+          {/* BOTÓN DE SINCRONIZACIÓN MANUAL */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => runSynchronization(true)}
+            disabled={syncing || loading}
+            className="ml-4"
+          >
+            {syncing ? (
+              <>
+                <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                Sincronizando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-3 w-3 mr-2" />
+                Actualizar Lista
+              </>
+            )}
+          </Button>
+        </div>
       </CardHeader>
+      
       <CardContent className="space-y-6">
-        {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-        {success && <Alert className="border-green-200 bg-green-50 text-green-800"><CheckCircle className="h-4 w-4" /><AlertDescription>{success}</AlertDescription></Alert>}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        {success && (
+          <Alert className="border-green-200 bg-green-50 text-green-800">
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        )}
 
         {currentAssignment ? (
           <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-            <h4 className="font-semibold text-green-900 mb-2">Administrador Asignado</h4>
+            <h4 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Administrador Asignado
+            </h4>
             <p><strong>Empresa:</strong> {currentAssignment.company_name}</p>
             <p><strong>Email:</strong> {currentAssignment.contact_email}</p>
+            {currentAssignment.contact_phone && (
+              <p><strong>Teléfono:</strong> {currentAssignment.contact_phone}</p>
+            )}
           </div>
         ) : (
           <>
             {pendingRequests.length > 0 && (
               <div className="space-y-3">
-                <h4 className="font-medium text-stone-900">Solicitudes Pendientes ({pendingRequests.length})</h4>
+                <h4 className="font-medium text-stone-900 flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-orange-600" />
+                  Solicitudes Pendientes ({pendingRequests.length})
+                </h4>
                 {pendingRequests.map(req => (
                   <div key={req.id} className="p-3 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <p className="font-medium text-orange-900">{req.company_name}</p>
-                        <p className="text-xs text-orange-700">Enviado: {new Date(req.created_at).toLocaleDateString('es-ES')}</p>
-                        <Badge variant="outline" className="text-orange-800 border-orange-300 mt-2">Pendiente</Badge>
+                        <p className="text-xs text-orange-700">
+                          Enviado: {new Date(req.created_at).toLocaleDateString('es-ES')}
+                        </p>
+                        <Badge variant="outline" className="text-orange-800 border-orange-300 mt-2">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Esperando confirmación del administrador
+                        </Badge>
                       </div>
                       
-                      {/* ADDED: Delete request button */}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={async () => {
-                          try {
-                            const { error } = await supabase
-                              .from('community_member_administrators')
-                              .delete()
-                              .eq('id', req.id);
-                            
-                            if (error) {
-                              setError('Error al eliminar la solicitud');
-                            } else {
-                              setSuccess('Solicitud eliminada correctamente');
-                              await initializeComponent(); // Reload data
-                            }
-                          } catch (error) {
-                            setError('Error al eliminar la solicitud');
-                          }
-                        }}
+                        onClick={() => handleDeleteRequest(req.id, req.company_name)}
                         className="ml-3 text-red-600 hover:text-red-700 hover:bg-red-50"
                         disabled={requesting !== null}
                       >
@@ -321,9 +401,36 @@ export function CommunityAdministratorAssignment() {
             )}
 
             <div className="space-y-4">
-              <h4 className="font-medium text-stone-900">Administradores de Fincas Disponibles ({availableAdministrators.length})</h4>
+              <h4 className="font-medium text-stone-900 flex items-center gap-2">
+                <Users className="h-4 w-4 text-blue-600" />
+                Administradores Disponibles ({availableAdministrators.length})
+              </h4>
+              
+              {syncing && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 text-blue-800">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Sincronizando administradores...</span>
+                  </div>
+                </div>
+              )}
+              
               {availableAdministrators.length === 0 ? (
-                <p className="text-sm text-stone-500 text-center py-4">No hay administradores registrados en la plataforma.</p>
+                <div className="text-center py-8">
+                  <Building2 className="h-12 w-12 mx-auto mb-3 text-stone-400" />
+                  <p className="text-sm text-stone-500 mb-3">
+                    No hay administradores registrados en la plataforma.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => runSynchronization(true)}
+                    disabled={syncing}
+                  >
+                    <RefreshCw className="h-3 w-3 mr-2" />
+                    Buscar Administradores
+                  </Button>
+                </div>
               ) : (
                 <div className="grid gap-4">
                   {availableAdministrators.map(admin => {
@@ -332,23 +439,58 @@ export function CommunityAdministratorAssignment() {
                       <Card key={admin.id} className="hover:shadow-md transition-shadow">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between">
-                            <div className="flex-1 space-y-1 text-sm">
-                              <p className="font-semibold text-base text-black">{admin.company_name}</p>
-                              <p className="text-stone-600">CIF: {admin.company_cif}</p>
-                              <p className="flex items-center gap-2 text-stone-600"><Mail className="h-3 w-3" /> {admin.contact_email}</p>
-                              {admin.contact_phone && <p className="flex items-center gap-2 text-stone-600"><Phone className="h-3 w-3" /> {admin.contact_phone}</p>}
-                              <p className="flex items-center gap-2 text-stone-600 text-xs"><User className="h-3 w-3" /> Contacto: {admin.company_name}</p>
+                            <div className="flex-1 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4 text-blue-600" />
+                                <p className="font-semibold text-base text-black">{admin.company_name}</p>
+                                <Badge variant="secondary" className="text-xs">
+                                  <Star className="h-3 w-3 mr-1" />
+                                  Verificado
+                                </Badge>
+                              </div>
+                              
+                              <div className="space-y-1 text-sm">
+                                <p className="text-stone-600 flex items-center gap-2">
+                                  <span className="font-medium">CIF:</span> {admin.company_cif}
+                                </p>
+                                <p className="text-stone-600 flex items-center gap-2">
+                                  <Mail className="h-3 w-3" /> {admin.contact_email}
+                                </p>
+                                {admin.contact_phone && (
+                                  <p className="text-stone-600 flex items-center gap-2">
+                                    <Phone className="h-3 w-3" /> {admin.contact_phone}
+                                  </p>
+                                )}
+                                {admin.license_number && (
+                                  <p className="text-stone-600 flex items-center gap-2">
+                                    <span className="font-medium text-xs">Nº Licencia:</span> 
+                                    {admin.license_number}
+                                  </p>
+                                )}
+                              </div>
                             </div>
+                            
                             <div className="ml-4">
                               <Button
                                 onClick={() => handleRequestAssignment(admin)}
                                 disabled={requesting === admin.id || isPending}
                                 size="sm"
                                 variant={isPending ? "outline" : "default"}
+                                className={isPending ? "bg-orange-50 border-orange-200 text-orange-800" : ""}
                               >
-                                {requesting === admin.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 
-                                 isPending ? <><Clock className="h-3 w-3 mr-1" />Pendiente</> : 
-                                 <><Send className="h-3 w-3 mr-1" />Solicitar</>}
+                                {requesting === admin.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : isPending ? (
+                                  <>
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Pendiente
+                                  </>
+                                ) : (
+                                  <>
+                                    <Send className="h-3 w-3 mr-1" />
+                                    Solicitar
+                                  </>
+                                )}
                               </Button>
                             </div>
                           </div>
