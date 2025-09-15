@@ -181,21 +181,25 @@ export function BudgetRequestManager({
       });
 
       // Transform data to match ExtendedBudgetRequest interface
-      const extendedRequests: ExtendedBudgetRequest[] = (allRequests || []).map(request => ({
-        ...request,
-        user_name: (request.profiles && typeof request.profiles === 'object' && 'full_name' in request.profiles) 
-          ? request.profiles.full_name || 'Usuario desconocido' 
-          : 'Usuario desconocido',
-        property_name: (request.properties && typeof request.properties === 'object' && 'name' in request.properties)
-          ? request.properties.name || 'Propiedad'
-          : 'Propiedad',
-        property_address: (request.properties && typeof request.properties === 'object' && 'address' in request.properties)
-          ? request.properties.address || request.work_location || 'Dirección no especificada'
-          : request.work_location || 'Dirección no especificada',
-        distance: 0, // Could be calculated based on provider location
-        quote_count: 0, // Would need separate query to get accurate count
-        my_quote: null // Would need separate query to check existing quotes
-      }));
+      const extendedRequests: ExtendedBudgetRequest[] = (allRequests || []).map(request => {
+        // Safe access to profiles data
+        const profileData = request.profiles && typeof request.profiles === 'object' && !Array.isArray(request.profiles) 
+          ? request.profiles as any : null;
+        
+        // Safe access to properties data
+        const propertyData = request.properties && typeof request.properties === 'object' && !Array.isArray(request.properties)
+          ? request.properties as any : null;
+
+        return {
+          ...request,
+          user_name: profileData?.full_name || 'Usuario desconocido',
+          property_name: propertyData?.name || 'Propiedad',
+          property_address: propertyData?.address || request.work_location || 'Dirección no especificada',
+          distance: 0, // Could be calculated based on provider location
+          quote_count: 0, // Would need separate query to get accurate count
+          my_quote: null // Would need separate query to check existing quotes
+        };
+      });
 
       return { success: true, data: extendedRequests, message: "Solicitudes cargadas exitosamente" };
 
