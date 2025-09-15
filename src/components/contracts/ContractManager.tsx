@@ -380,9 +380,9 @@ export function ContractManager() {
       // Send notification to the contract owner with proper null checks and fallback
       if (requestUserId && user?.id && providerData?.id && newContract) {
         try {
-          // Explicit string conversion with guaranteed non-null result
-          const contractNumber = newContract.contract_number;
-          const safeContractNumber = contractNumber ? String(contractNumber) : `CON-${Date.now()}`;
+          // Guarantee string type with explicit conversion and fallback
+          const rawContractNumber = newContract.contract_number;
+          const safeContractNumber: string = rawContractNumber !== null ? String(rawContractNumber) : `CON-${Date.now()}`;
           const serviceTitle = selectedQuote.title || 'Servicio';
           const messageContent = `Se ha generado un contrato para tu solicitud "${serviceTitle}" (${safeContractNumber})`;
             
