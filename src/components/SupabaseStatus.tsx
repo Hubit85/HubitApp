@@ -18,13 +18,16 @@ export default function SupabaseStatus() {
       return false;
     }
     try {
-      const timeoutPromise = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000));
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout')), 3000) // Reduced timeout
+      );
       const connectionPromise = supabase.from('profiles').select('id').limit(0);
+      
       const { error } = await Promise.race([connectionPromise, timeoutPromise]);
       const connected = !error || error.code === 'PGRST116';
       return connected;
     } catch (error) {
-      console.warn('🚨 Connection check failed:', error);
+      // Silent handling - don't log to console to avoid user-visible errors
       return false;
     }
   }, [configured]);
@@ -36,12 +39,16 @@ export default function SupabaseStatus() {
     }
     try {
       setDbStatus('checking');
-      const timeoutPromise = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Database check timeout')), 8000));
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Database check timeout')), 5000) // Reduced timeout
+      );
+      
       const checksPromise = Promise.allSettled([
         supabase.from('profiles').select('count', { count: 'exact' }).limit(1),
         supabase.from('properties').select('count', { count: 'exact' }).limit(1),
         supabase.from('budget_requests').select('count', { count: 'exact' }).limit(1),
       ]);
+      
       const results = await Promise.race([checksPromise, timeoutPromise]);
       const hasFailures = results.some((result: any) => {
         if (result.status === 'rejected') return true;
@@ -53,7 +60,7 @@ export default function SupabaseStatus() {
       });
       setDbStatus(hasFailures ? 'error' : 'ready');
     } catch (error) {
-      console.warn('⚠️ Database tables check exception:', error);
+      // Silent handling - don't log to console to avoid user-visible errors
       setDbStatus('error');
     }
   }, [configured]);
@@ -62,23 +69,34 @@ export default function SupabaseStatus() {
     let mounted = true;
     let checkInterval: NodeJS.Timeout;
 
-    const runChecks = () => {
+    const runChecks = async () => {
       if (!mounted) return;
       if (!configured) {
         setConnectionStatus('placeholder');
         setDbStatus('placeholder');
         return;
       }
-      checkConnection().then(connected => {
-        if(mounted) setConnectionStatus(connected ? 'connected' : 'error');
-      });
-      checkDatabaseTables();
+      
+      try {
+        const connected = await checkConnection();
+        if (mounted) setConnectionStatus(connected ? 'connected' : 'error');
+      } catch (error) {
+        if (mounted) setConnectionStatus('error');
+      }
+      
+      try {
+        await checkDatabaseTables();
+      } catch (error) {
+        if (mounted) setDbStatus('error');
+      }
     };
     
     runChecks();
 
     if (configured) {
-      checkInterval = setInterval(runChecks, 30000);
+      checkInterval = setInterval(() => {
+        if (mounted) runChecks();
+      }, 45000); // Increased interval to reduce frequent checks
     }
 
     return () => {
