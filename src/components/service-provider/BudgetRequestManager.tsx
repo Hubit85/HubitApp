@@ -183,9 +183,15 @@ export function BudgetRequestManager({
       // Transform data to match ExtendedBudgetRequest interface
       const extendedRequests: ExtendedBudgetRequest[] = (allRequests || []).map(request => ({
         ...request,
-        user_name: request.profiles?.full_name || 'Usuario desconocido',
-        property_name: request.properties?.name || 'Propiedad',
-        property_address: request.properties?.address || request.work_location || 'Dirección no especificada',
+        user_name: (request.profiles && typeof request.profiles === 'object' && 'full_name' in request.profiles) 
+          ? request.profiles.full_name || 'Usuario desconocido' 
+          : 'Usuario desconocido',
+        property_name: (request.properties && typeof request.properties === 'object' && 'name' in request.properties)
+          ? request.properties.name || 'Propiedad'
+          : 'Propiedad',
+        property_address: (request.properties && typeof request.properties === 'object' && 'address' in request.properties)
+          ? request.properties.address || request.work_location || 'Dirección no especificada'
+          : request.work_location || 'Dirección no especificada',
         distance: 0, // Could be calculated based on provider location
         quote_count: 0, // Would need separate query to get accurate count
         my_quote: null // Would need separate query to check existing quotes
@@ -474,7 +480,7 @@ export function BudgetRequestManager({
                 <span>{request.profiles?.full_name || 'Usuario desconocido'}</span>
                 <Separator orientation="vertical" className="h-4" />
                 <MapPin className="h-4 w-4" />
-                <span>{request.properties?.address || request.work_location || 'Ubicación no especificada'}</span>
+                <span>{request.properties?.address || request.work_location || 'Dirección no especificada'}</span>
               </CardDescription>
             </div>
             <Badge variant={request.urgency === "high" ? "destructive" : "outline"}>
@@ -1066,11 +1072,11 @@ export function BudgetRequestManager({
               <DialogDescription className="flex flex-col gap-2 pt-2">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  <span>{selectedRequest.work_location || selectedRequest.properties.address}, {selectedRequest.properties.city}</span>
+                  <span>{selectedRequest.work_location || selectedRequest.properties?.address || 'Ubicación no especificada'}, {selectedRequest.properties?.city || 'Ciudad'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  <span>Requested by {selectedRequest.profiles.full_name}</span>
+                  <span>Solicitado por {selectedRequest.profiles?.full_name || 'Usuario'}</span>
                 </div>
               </DialogDescription>
             </DialogHeader>
