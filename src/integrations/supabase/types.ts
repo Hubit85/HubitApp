@@ -619,6 +619,7 @@ export type Database = {
           description: string
           id: string
           location: string | null
+          managing_administrator_id: string | null
           photo_urls: string[] | null
           property_admin_id: string | null
           reported_at: string | null
@@ -637,6 +638,7 @@ export type Database = {
           description: string
           id?: string
           location?: string | null
+          managing_administrator_id?: string | null
           photo_urls?: string[] | null
           property_admin_id?: string | null
           reported_at?: string | null
@@ -655,6 +657,7 @@ export type Database = {
           description?: string
           id?: string
           location?: string | null
+          managing_administrator_id?: string | null
           photo_urls?: string[] | null
           property_admin_id?: string | null
           reported_at?: string | null
@@ -872,55 +875,6 @@ export type Database = {
           },
         ]
       }
-      messages: {
-        Row: {
-          attachments: string[] | null
-          conversation_id: string
-          created_at: string | null
-          id: string
-          is_read: boolean | null
-          message: string
-          message_type: string | null
-          read_at: string | null
-          sender_id: string
-        }
-        Insert: {
-          attachments?: string[] | null
-          conversation_id: string
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          message: string
-          message_type?: string | null
-          read_at?: string | null
-          sender_id: string
-        }
-        Update: {
-          attachments?: string[] | null
-          conversation_id?: string
-          created_at?: string | null
-          id?: string
-          is_read?: boolean | null
-          message?: string
-          message_type?: string | null
-          read_at?: string | null
-          sender_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       managed_communities: {
         Row: {
           id: string
@@ -981,6 +935,55 @@ export type Database = {
             foreignKeyName: "managed_communities_property_administrator_id_fkey"
             columns: ["property_administrator_id"]
             referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          attachments: string[] | null
+          conversation_id: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          message_type: string | null
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          message_type?: string | null
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          attachments?: string[] | null
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          message_type?: string | null
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1347,6 +1350,7 @@ export type Database = {
           updated_at: string | null
           valid_until: string | null
           viewed_by_client: boolean | null
+          warranty_period: string | null
         }
         Insert: {
           amount: number
@@ -1368,6 +1372,7 @@ export type Database = {
           updated_at?: string | null
           valid_until?: string | null
           viewed_by_client?: boolean | null
+          warranty_period?: string | null
         }
         Update: {
           amount?: number
@@ -1389,6 +1394,7 @@ export type Database = {
           updated_at?: string | null
           valid_until?: string | null
           viewed_by_client?: boolean | null
+          warranty_period?: string | null
         }
         Relationships: [
           {
@@ -1796,6 +1802,11 @@ export type Enums<T extends keyof Database["public"]["Enums"]> =
 export type Functions<T extends keyof Database["public"]["Functions"]> =
   Database["public"]["Functions"][T]
 
+// Export administrator request types
+export type AdministratorRequest = Tables<'administrator_requests'>;
+export type AdministratorRequestInsert = Database["public"]["Tables"]["administrator_requests"]["Insert"];
+export type AdministratorRequestUpdate = Database["public"]["Tables"]["administrator_requests"]["Update"];
+
 export type BudgetRequest = Tables<'budget_requests'>;
 export type BudgetRequestInsert = Database["public"]["Tables"]["budget_requests"]["Insert"];
 export type BudgetRequestUpdate = Database["public"]["Tables"]["budget_requests"]["Update"];
@@ -1818,6 +1829,11 @@ export type DocumentUpdate = Database["public"]["Tables"]["documents"]["Update"]
 export type Incident = Tables<'incidents'>;
 export type IncidentInsert = Database["public"]["Tables"]["incidents"]["Insert"];
 export type IncidentUpdate = Database["public"]["Tables"]["incidents"]["Update"];
+
+// Export managed community types
+export type ManagedCommunity = Tables<'managed_communities'>;
+export type ManagedCommunityInsert = Database["public"]["Tables"]["managed_communities"]["Insert"];
+export type ManagedCommunityUpdate = Database["public"]["Tables"]["managed_communities"]["Update"];
 
 export type Message = Tables<'messages'>;
 export type MessageInsert = Database["public"]["Tables"]["messages"]["Insert"];
@@ -1896,4 +1912,3 @@ export type UserRoleUpdate = {
 export type WorkSession = Tables<'work_sessions'>;
 export type WorkSessionInsert = Database["public"]["Tables"]["work_sessions"]["Insert"];
 export type WorkSessionUpdate = Database["public"]["Tables"]["work_sessions"]["Update"];
-
