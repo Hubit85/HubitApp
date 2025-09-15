@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://djkrzbmgzfwagmripozi.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqa3J6Ym1nemZ3YWdtcmlwb3ppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMjIyODgsImV4cCI6MjA2Njc5ODI4OH0.P6gVuh5Vi-EP9hSm1WooCXjJKiy8sCl4wZcC_N2KehY";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -12,12 +12,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 
 // Function to check if Supabase is properly configured
 export const isSupabaseConfigured = (): boolean => {
-  const url = SUPABASE_URL;
-  const key = SUPABASE_PUBLISHABLE_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
-  // Check if we have valid URL and key (not placeholder values)
-  const hasValidUrl = url && url !== "https://placeholder-supabase-url.supabase.co" && url.includes('.supabase.co');
-  const hasValidKey = key && key !== "invalid_anon_key" && key.length > 20;
+  const hasValidUrl = !!(url && !url.includes('placeholder-supabase-url'));
+  const hasValidKey = !!(key && !key.includes('invalid_anon_key'));
   
   return hasValidUrl && hasValidKey;
 };
