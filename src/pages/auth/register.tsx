@@ -990,9 +990,6 @@ function RegisterPageContent() {
         console.log('✅ Enhanced Registration successful, performing comprehensive post-registration validation...');
         
         let registrationSummary = `¡Cuenta creada exitosamente!`;
-        if (result.rolesCreated) {
-          registrationSummary = `¡Cuenta creada exitosamente con ${result.rolesCreated} roles!`;
-        }
         if (shouldAutoAssignMultipleRoles) {
           registrationSummary += ` Se detectó tu perfil automáticamente (${autoDetectionReason.split(' ')[0]}) y se configuraron roles adicionales.`;
         }
@@ -1947,7 +1944,7 @@ function RegisterPageContent() {
                                 </div>
 
                                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                  <div className="flex items-start gap-3">
+                                  <div className="flex items-start gap-2 text-amber-800">
                                     <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                                     <div>
                                       <h5 className="font-medium text-blue-900 mb-1">
