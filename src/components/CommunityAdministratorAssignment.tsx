@@ -126,16 +126,18 @@ export function CommunityAdministratorAssignment() {
   };
 
   /**
-   * CARGAR ADMINISTRADORES SINCRONIZADOS
+   * CARGAR ADMINISTRADORES SINCRONIZADOS - VERSIÓN CORREGIDA
+   * Ahora que sabemos que hay 2 administradores en la BD, asegurémonos de que se muestren ambos
    */
   const loadSynchronizedAdministrators = async () => {
     try {
       console.log('🔍 SYNC LOAD: Cargando administradores sincronizados...');
       
+      // PRIMERA ESTRATEGIA: Usar el servicio de sincronización mejorado
       const result = await PropertyAdministratorSyncService.getAllSynchronizedAdministrators();
       
       if (result.success && result.administrators.length > 0) {
-        console.log(`✅ SYNC LOAD: Cargados ${result.administrators.length} administradores sincronizados`);
+        console.log(`✅ SYNC LOAD: Cargados ${result.administrators.length} administradores desde servicio`);
         
         // Convertir a formato del componente
         const adminList: PropertyAdministrator[] = result.administrators.map(admin => ({
@@ -154,24 +156,104 @@ export function CommunityAdministratorAssignment() {
         
         setAvailableAdministrators(adminList);
         
-        // Verificación para logging
-        console.log('🎯 SYNC LOAD: Administradores configurados:', adminList.map(a => ({
-          name: a.company_name,
-          email: a.contact_email,
-          cif: a.company_cif
-        })));
+        // VERIFICACIÓN ESPECÍFICA: Buscar los dos administradores esperados
+        const pipaonAdmin = adminList.find(a => a.contact_email.includes('borjapipaon'));
+        const castroAdmin = adminList.find(a => a.contact_email.includes('ddayanacastro'));
         
-        setError('');
+        console.log('🎯 SYNC LOAD: Verificación de administradores específicos:', {
+          pipaon_found: !!pipaonAdmin,
+          castro_found: !!castroAdmin,
+          pipaon_name: pipaonAdmin?.company_name,
+          castro_name: castroAdmin?.company_name,
+          total_loaded: adminList.length
+        });
+        
+        if (adminList.length >= 2 && pipaonAdmin && castroAdmin) {
+          console.log('🎉 SYNC LOAD: ¡AMBOS administradores encontrados correctamente!');
+          setError('');
+          setSuccess(`✅ Cargados ${adminList.length} administradores disponibles`);
+        } else if (adminList.length >= 1) {
+          console.warn('⚠️ SYNC LOAD: Solo se encontró 1 administrador, esperábamos 2');
+          setError(`⚠️ Solo se cargó ${adminList.length} administrador. Esperábamos 2. Intenta "Actualizar Lista"`);
+        } else {
+          console.warn('❌ SYNC LOAD: No se encontraron administradores');
+          setError('No se encontraron administradores disponibles');
+        }
+        
+        return;
         
       } else {
-        console.warn('⚠️ SYNC LOAD: No se encontraron administradores sincronizados');
+        console.warn('⚠️ SYNC LOAD: Servicio no devolvió administradores, probando método directo...');
+      }
+      
+      // ESTRATEGIA ALTERNATIVA: Consulta directa a la base de datos
+      console.log('🔄 SYNC LOAD: Intentando carga directa desde property_administrators...');
+      
+      const { data: directPropertyAdmins, error: directError } = await supabase
+        .from('property_administrators')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (directError) {
+        console.error('❌ SYNC LOAD: Error en carga directa:', directError);
+        setError(`Error cargando administradores: ${directError.message}`);
         setAvailableAdministrators([]);
-        setError(result.message || 'No se encontraron administradores sincronizados');
+        return;
+      }
+
+      if (!directPropertyAdmins || directPropertyAdmins.length === 0) {
+        console.warn('⚠️ SYNC LOAD: Carga directa no encontró administradores');
+        setError('No se encontraron administradores en la base de datos');
+        setAvailableAdministrators([]);
+        return;
+      }
+
+      console.log(`📋 SYNC LOAD: Carga directa encontró ${directPropertyAdmins.length} administradores:`, 
+        directPropertyAdmins.map(a => ({ name: a.company_name, email: a.contact_email })));
+
+      // PROCESAR ADMINISTRADORES DE CARGA DIRECTA
+      const directAdminList: PropertyAdministrator[] = directPropertyAdmins.map(admin => ({
+        id: admin.id,
+        user_id: admin.user_id,
+        company_name: admin.company_name || 'Administrador de Fincas',
+        company_cif: admin.company_cif || 'SIN-CIF',
+        contact_email: admin.contact_email || 'sin-email@temp.com',
+        contact_phone: admin.contact_phone || undefined,
+        license_number: admin.license_number || undefined,
+        profile: {
+          full_name: admin.company_name || 'Administrador',
+          email: admin.contact_email || ''
+        }
+      }));
+
+      setAvailableAdministrators(directAdminList);
+      
+      // VERIFICACIÓN FINAL
+      const finalPipaonAdmin = directAdminList.find(a => a.contact_email.includes('borjapipaon'));
+      const finalCastroAdmin = directAdminList.find(a => a.contact_email.includes('ddayanacastro'));
+      
+      console.log('🎯 SYNC LOAD: Verificación final tras carga directa:', {
+        total_administrators: directAdminList.length,
+        pipaon_found: !!finalPipaonAdmin,
+        castro_found: !!finalCastroAdmin,
+        all_emails: directAdminList.map(a => a.contact_email)
+      });
+
+      if (directAdminList.length >= 2 && finalPipaonAdmin && finalCastroAdmin) {
+        console.log('🎉 SYNC LOAD: ¡ÉXITO! Ambos administradores cargados via método directo');
+        setError('');
+        setSuccess(`✅ Cargados ${directAdminList.length} administradores (método directo)`);
+      } else if (directAdminList.length >= 1) {
+        console.warn(`⚠️ SYNC LOAD: Solo ${directAdminList.length} administrador cargado via método directo`);
+        setError(`⚠️ Cargado ${directAdminList.length} de 2 administradores esperados`);
+      } else {
+        console.error('❌ SYNC LOAD: No se pudieron cargar administradores');
+        setError('Error: No se pudieron cargar administradores');
       }
       
     } catch (err) {
-      console.error('❌ SYNC LOAD: Error cargando administradores sincronizados:', err);
-      setError('Error al cargar administradores sincronizados');
+      console.error('❌ SYNC LOAD: Error crítico cargando administradores:', err);
+      setError('Error crítico al cargar administradores sincronizados');
       setAvailableAdministrators([]);
     }
   };
