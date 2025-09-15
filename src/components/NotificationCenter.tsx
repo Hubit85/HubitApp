@@ -200,74 +200,24 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     if (!activeRole || activeRole.role_type !== 'property_administrator') return;
 
     try {
-      console.log('🔍 Loading administrator requests for role:', activeRole.id);
+      console.log('🔍 NOTIFICATIONS: Loading administrator requests for role:', activeRole.id);
 
-      const { data: requests, error } = await supabase
-        .from('administrator_requests')
-        .select('*')
-        .eq('property_administrator_id', activeRole.id)
-        .order('requested_at', { ascending: false });
-
-      if (error) {
-        console.error('Error loading administrator requests:', error);
-        return;
+      // CORRECTED: Use the AdministratorRequestService for consistent data loading
+      const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+      
+      const result = await AdministratorRequestService.getReceivedRequests(activeRole.id);
+      
+      if (result.success) {
+        console.log(`✅ NOTIFICATIONS: Found ${result.requests.length} administrator requests`);
+        setAdminRequests(result.requests as AdminRequest[]);
+      } else {
+        console.error('❌ NOTIFICATIONS: Error loading administrator requests:', result.message);
+        setAdminRequests([]);
       }
 
-      console.log(`📋 Found ${requests?.length || 0} administrator requests`);
-
-      // Enrich requests with community member data
-      const enrichedRequests = await Promise.all(
-        (requests || []).map(async (request) => {
-          try {
-            // Get community member role data
-            const { data: memberRole, error: memberError } = await supabase
-              .from('user_roles')
-              .select('role_specific_data, user_id')
-              .eq('id', request.community_member_id)
-              .single();
-
-            if (memberError) {
-              console.warn(`Failed to load member role ${request.community_member_id}:`, memberError);
-              return { ...request, community_member: null };
-            }
-
-            // Get profile data
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('full_name, email, phone')
-              .eq('id', memberRole.user_id)
-              .single();
-
-            if (profileError) {
-              console.warn(`Failed to load profile for ${memberRole.user_id}:`, profileError);
-              return { 
-                ...request, 
-                community_member: { 
-                  role_specific_data: memberRole.role_specific_data,
-                  profiles: null 
-                } 
-              };
-            }
-
-            return {
-              ...request,
-              community_member: {
-                role_specific_data: memberRole.role_specific_data,
-                profiles: profile
-              }
-            };
-
-          } catch (enrichError) {
-            console.warn('Error enriching request:', enrichError);
-            return { ...request, community_member: null };
-          }
-        })
-      );
-
-      setAdminRequests(enrichedRequests as AdminRequest[]);
-
     } catch (err) {
-      console.error('Error loading administrator requests:', err);
+      console.error('❌ NOTIFICATIONS: Exception loading administrator requests:', err);
+      setAdminRequests([]);
     }
   };
 
