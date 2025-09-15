@@ -76,29 +76,35 @@ export class AdministratorRequestService {
   
   private static async getRoleAndProfile(roleId: string) {
     if (!roleId) return null;
-    const { data: role, error: roleError } = await supabase
-      .from('user_roles')
-      .select('id, user_id, role_specific_data')
-      .eq('id', roleId)
-      .single();
+    
+    try {
+      const { data: role, error: roleError } = await supabase
+        .from('user_roles')
+        .select('id, user_id, role_specific_data')
+        .eq('id', roleId)
+        .single();
 
-    if (roleError || !role) {
-      console.warn(`Could not fetch role for roleId ${roleId}:`, roleError?.message);
+      if (roleError || !role) {
+        console.warn(`Could not fetch role for roleId ${roleId}:`, roleError?.message);
+        return null;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, phone')
+        .eq('id', role.user_id)
+        .single();
+      
+      if (profileError || !profile) {
+        console.warn(`Could not fetch profile for userId ${role.user_id}:`, profileError?.message);
+        return { ...role, profiles: null };
+      }
+
+      return { ...role, profiles: profile };
+    } catch (error) {
+      console.warn(`Exception in getRoleAndProfile for ${roleId}:`, error);
       return null;
     }
-
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, full_name, email, phone')
-      .eq('id', role.user_id)
-      .single();
-    
-    if (profileError || !profile) {
-      console.warn(`Could not fetch profile for userId ${role.user_id}:`, profileError?.message);
-      return { ...role, profiles: null };
-    }
-
-    return { ...role, profiles: profile };
   }
 
   static async getReceivedRequests(propertyAdministratorRoleId: string): Promise<{
