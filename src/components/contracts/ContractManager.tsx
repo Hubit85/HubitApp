@@ -381,10 +381,9 @@ export function ContractManager() {
       if (requestUserId && user?.id && providerData?.id && newContract) {
         try {
           // Guarantee string type with explicit conversion and fallback
-          const rawContractNumber = newContract.contract_number;
-          const safeContractNumber: string = rawContractNumber !== null ? String(rawContractNumber) : `CON-${Date.now()}`;
           const serviceTitle = selectedQuote.title || 'Servicio';
-          const messageContent = `Se ha generado un contrato para tu solicitud "${serviceTitle}" (${safeContractNumber})`;
+          const contractNum = newContract.contract_number ? String(newContract.contract_number) : `CON-${Date.now()}`;
+          const messageContent = `Se ha generado un contrato para tu solicitud "${serviceTitle}" (${contractNum})`;
             
           await supabase
             .from('notifications')
