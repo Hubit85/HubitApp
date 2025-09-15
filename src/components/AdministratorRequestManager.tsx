@@ -450,7 +450,7 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
                           <div className="text-sm text-stone-600">
                             <div className="flex items-center gap-2 mb-1">
                               <User className="h-3 w-3" />
-                              {request.property_administrator?.user?.full_name || 'Usuario'}
+                              {request.property_administrator?.profiles?.full_name || 'Usuario'}
                             </div>
                             <div className="flex items-center gap-2 mb-1">
                               <Clock className="h-3 w-3" />
@@ -560,7 +560,7 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-stone-600" />
                           <span className="font-semibold">
-                            {request.community_member?.user?.full_name || 'Miembro de Comunidad'}
+                            {request.community_member?.profiles?.full_name || 'Miembro de Comunidad'}
                           </span>
                           {getStatusBadge(request.status)}
                         </div>
@@ -568,12 +568,12 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
                         <div className="text-sm text-stone-600 space-y-1">
                           <div className="flex items-center gap-2">
                             <Mail className="h-3 w-3" />
-                            {request.community_member?.user?.email}
+                            {request.community_member?.profiles?.email}
                           </div>
-                          {request.community_member?.user?.phone && (
+                          {request.community_member?.profiles?.phone && (
                             <div className="flex items-center gap-2">
                               <Phone className="h-3 w-3" />
-                              {request.community_member?.user?.phone}
+                              {request.community_member?.profiles?.phone}
                             </div>
                           )}
                           <div className="flex items-center gap-2">
@@ -637,14 +637,14 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-stone-600" />
                           <span className="font-semibold">
-                            {member.community_member?.user?.full_name || 'Miembro de Comunidad'}
+                            {member.community_member?.profiles?.full_name || 'Miembro de Comunidad'}
                           </span>
                         </div>
 
                         <div className="text-sm text-stone-600 space-y-1">
                           <div className="flex items-center gap-2">
                             <Mail className="h-3 w-3" />
-                            {member.community_member?.user?.email}
+                            {member.community_member?.profiles?.email}
                           </div>
                           <div className="flex items-center gap-2">
                             <Clock className="h-3 w-3" />
@@ -764,8 +764,8 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
               <div className="bg-stone-50 p-4 rounded-lg">
                 <h4 className="font-medium mb-2">Detalles de la solicitud:</h4>
                 <div className="space-y-1 text-sm text-stone-600">
-                  <p><strong>Solicitante:</strong> {selectedRequest.community_member?.user?.full_name}</p>
-                  <p><strong>Email:</strong> {selectedRequest.community_member?.user?.email}</p>
+                  <p><strong>Solicitante:</strong> {selectedRequest.community_member?.profiles?.full_name}</p>
+                  <p><strong>Email:</strong> {selectedRequest.community_member?.profiles?.email}</p>
                   <p><strong>Fecha:</strong> {formatDate(selectedRequest.requested_at)}</p>
                   {selectedRequest.request_message && (
                     <div className="mt-2">
