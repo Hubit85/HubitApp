@@ -284,11 +284,15 @@ export function PropertyAdministratorProfile() {
               variant="outline"
               size="sm"
               onClick={() => {
+                if (!user?.email) {
+                  console.error("No se puede eliminar la solicitud sin el email del usuario.");
+                  return;
+                }
                 // Eliminar todas las solicitudes pendientes
                 supabase
                   .from('community_member_administrators')
                   .delete()
-                  .eq('contact_email', user?.email)
+                  .eq('contact_email', user.email)
                   .eq('administrator_verified', false)
                   .then(() => {
                     window.location.reload();
