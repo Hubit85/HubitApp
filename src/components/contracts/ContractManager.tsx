@@ -19,59 +19,33 @@ import {
   Loader2, RefreshCw, Download, Upload, Edit, Trash2, Plus, BookOpen,
   Shield, Award, Target, ClipboardList, DollarSign
 } from "lucide-react";
-import { Contract, Quote, BudgetRequest } from "@/integrations/supabase/types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
+import { Database } from "@/integrations/supabase/types"
 
-interface ExtendedContract extends Contract {
-  client_name?: string;
-  provider_name?: string;
-  quote_title?: string;
-  budget_title?: string;
-  property_address?: string;
+type Contract = Database["public"]["Tables"]["contracts"]["Row"]
+type Quote = Database["public"]["Tables"]["quotes"]["Row"]
+type BudgetRequest = Database["public"]["Tables"]["budget_requests"]["Row"]
+type Profile = Database["public"]["Tables"]["profiles"]["Row"]
+
+type ExtendedContract = Contract & {
+  quotes: Quote & {
+    budget_requests: BudgetRequest
+  }
+  profiles: Profile
 }
 
-interface ExtendedQuote {
-  id: string;
-  amount: number;
-  attachments: string[] | null;
-  budget_request_id: string;
-  created_at: string;
-  description?: string;
-  estimated_duration: string | null;
-  estimated_start_date: string | null;
-  labor_cost: number;
-  materials_cost: number;
-  notes: string | null;
-  payment_terms: string;
-  service_provider_id: string;
-  status: "pending" | "accepted" | "rejected" | "expired" | "cancelled";
-  terms_and_conditions: string | null;
-  updated_at: string;
-  valid_until: string | null;
-  viewed_by_client: boolean;
-  warranty_period: string | null;
-  user_id: string;
-  title?: string;
-  budget_requests?: {
-    title: string;
-    description?: string;
-    user_id: string;
-    profiles: {
-      full_name: string;
-    };
-    properties: {
-      address: string;
-    };
-  };
-}
-
-interface ContractFormData {
-  title: string;
-  description: string;
-  work_scope: string;
-  payment_terms: string;
-  deadline: string;
-  warranty_period: string;
-  special_terms: string;
+interface ContractManagerProps {
+  userId: string
+  role: "client" | "provider"
 }
 
 export function ContractManager() {

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
 import { BudgetRequestInsert, Property, BudgetRequest } from "@/integrations/supabase/types";
 import { SupabaseBudgetService } from "@/services/SupabaseBudgetService";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ServiceCategoryOption {
   value: string;
@@ -841,30 +842,9 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
             <Separator />
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-neutral-900">Vista Previa de Proveedores</h3>
-                </div>
-                
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePreviewProviders}
-                  disabled={previewLoading || !formData.title || !formData.category}
-                >
-                  {previewLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Cargando...
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="h-4 w-4 mr-2" />
-                      Ver Proveedores
-                    </>
-                  )}
-                </Button>
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-blue-600" />
+                <h3 className="text-lg font-semibold text-neutral-900">Vista Previa de Proveedores</h3>
               </div>
 
               {providerPreview && (
