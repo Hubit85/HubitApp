@@ -183,44 +183,56 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     if (!user?.id) return;
 
     try {
-      // Find property administrators for notifications
-      const { data: admins, error } = await supabase
-        .from('user_roles')
-        .select(`
-          id,
-          user_id,
-          profiles!user_roles_user_id_fkey(full_name, email)
-        `)
-        .eq('role_type', 'property_administrator')
-        .eq('is_verified', true);
+      // CORRECTED: Use property_administrators table directly instead of complex joins
+      console.log('🔍 Loading property administrators for incident notifications...');
+      
+      const { data: propertyAdmins, error } = await supabase
+        .from('property_administrators')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching property administrators:', error);
         return;
       }
 
-      // FIXED: Better type handling for the admin list with comprehensive null checking
+      // ENHANCED: Process administrators with better error handling
       const adminList: PropertyAdministrator[] = [];
       
-      if (admins) {
-        admins.forEach(admin => {
-          // Safe access to profile data with proper null checking
-          if (admin.profiles && typeof admin.profiles === 'object' && !Array.isArray(admin.profiles)) {
-            const profile = admin.profiles as { full_name: string | null; email: string | null };
-            
-            // FIXED: Only add administrators with valid email addresses
-            if (profile.email) {
+      if (propertyAdmins && propertyAdmins.length > 0) {
+        for (const admin of propertyAdmins) {
+          try {
+            // Get profile data separately to avoid join issues
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('full_name, email')
+              .eq('id', admin.user_id)
+              .single();
+
+            if (profileError) {
+              console.warn(`Failed to get profile for admin ${admin.id}:`, profileError);
+              continue;
+            }
+
+            // Only add administrators with valid email addresses
+            if (profileData?.email) {
               adminList.push({
                 id: admin.id,
                 user_id: admin.user_id,
-                company_name: profile.full_name || 'Administrador de Fincas',
-                contact_email: profile.email // Now guaranteed to be non-null
+                company_name: admin.company_name || profileData.full_name || 'Administrador de Fincas',
+                contact_email: admin.contact_email || profileData.email
               });
+              
+              console.log(`✅ Added administrator: ${admin.company_name || profileData.full_name}`);
             }
+          } catch (adminError) {
+            console.warn(`Error processing administrator ${admin.id}:`, adminError);
+            continue;
           }
-        });
+        }
       }
 
+      console.log(`📋 Found ${adminList.length} valid property administrators`);
       setPropertyAdministrators(adminList);
       
     } catch (err) {
