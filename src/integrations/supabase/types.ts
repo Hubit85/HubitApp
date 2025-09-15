@@ -9,6 +9,76 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      administrator_requests: {
+        Row: {
+          id: string
+          community_member_id: string
+          property_administrator_id: string
+          community_id: string | null
+          status: string
+          request_message: string | null
+          response_message: string | null
+          requested_at: string | null
+          responded_at: string | null
+          responded_by: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          community_member_id: string
+          property_administrator_id: string
+          community_id?: string | null
+          status?: string
+          request_message?: string | null
+          response_message?: string | null
+          requested_at?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          community_member_id?: string
+          property_administrator_id?: string
+          community_id?: string | null
+          status?: string
+          request_message?: string | null
+          response_message?: string | null
+          requested_at?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "administrator_requests_community_id_fkey"
+            columns: ["community_id"]
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "administrator_requests_community_member_id_fkey"
+            columns: ["community_member_id"]
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "administrator_requests_property_administrator_id_fkey"
+            columns: ["property_administrator_id"]
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "administrator_requests_responded_by_fkey"
+            columns: ["responded_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_requests: {
         Row: {
           budget_range_max: number | null
@@ -847,6 +917,70 @@ export type Database = {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      managed_communities: {
+        Row: {
+          id: string
+          property_administrator_id: string
+          community_member_id: string
+          community_id: string | null
+          relationship_status: string
+          established_at: string | null
+          established_by: string | null
+          notes: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          property_administrator_id: string
+          community_member_id: string
+          community_id?: string | null
+          relationship_status?: string
+          established_at?: string | null
+          established_by?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          property_administrator_id?: string
+          community_member_id?: string
+          community_id?: string | null
+          relationship_status?: string
+          established_at?: string | null
+          established_by?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managed_communities_community_id_fkey"
+            columns: ["community_id"]
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managed_communities_community_member_id_fkey"
+            columns: ["community_member_id"]
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managed_communities_established_by_fkey"
+            columns: ["established_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managed_communities_property_administrator_id_fkey"
+            columns: ["property_administrator_id"]
+            referencedRelation: "user_roles"
             referencedColumns: ["id"]
           },
         ]
