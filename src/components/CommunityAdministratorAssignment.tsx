@@ -80,7 +80,7 @@ export function CommunityAdministratorAssignment() {
   };
 
   /**
-   * EJECUTAR SINCRONIZACIÓN COMPLETA
+   * EJECUTAR SINCRONIZACIÓN SIMPLIFICADA
    */
   const runSynchronization = async (showProgress = true) => {
     if (showProgress) {
@@ -90,17 +90,16 @@ export function CommunityAdministratorAssignment() {
     }
 
     try {
-      console.log('🔄 SYNC: Ejecutando sincronización de administradores...');
+      console.log('🔄 SYNC: Ejecutando sincronización...');
       
       const syncResult = await PropertyAdministratorSyncService.syncAllPropertyAdministrators();
       
       if (syncResult.success) {
-        console.log('✅ SYNC: Sincronización exitosa:', syncResult.message);
+        console.log('✅ SYNC: Sincronización exitosa');
         
-        if (showProgress) {
-          if (syncResult.created_in_property_administrators > 0 || syncResult.created_in_user_roles > 0) {
-            setSuccess(`🔄 Sincronización completada: ${syncResult.created_in_property_administrators} en property_administrators, ${syncResult.created_in_user_roles} en user_roles`);
-          }
+        // Solo mostrar mensaje si es muy relevante
+        if (showProgress && (syncResult.created_in_property_administrators > 0 || syncResult.created_in_user_roles > 0)) {
+          setSuccess(`Sincronización completada`);
         }
         
         // Recargar administradores después de la sincronización
@@ -108,111 +107,71 @@ export function CommunityAdministratorAssignment() {
         
       } else {
         console.warn('⚠️ SYNC: Sincronización con errores:', syncResult.errors);
-        if (showProgress) {
-          setError(`Sincronización parcial: ${syncResult.errors.join(', ')}`);
+        
+        // Solo mostrar error si es crítico
+        if (showProgress && syncResult.errors.length > 0 && syncResult.synced_count === 0) {
+          setError('Error durante la sincronización');
         }
+        
+        // Intentar cargar administradores de todos modos
+        await loadSynchronizedAdministrators();
       }
       
     } catch (syncError) {
       console.error('❌ SYNC: Error en sincronización:', syncError);
+      
       if (showProgress) {
-        setError('Error durante la sincronización de administradores');
+        setError('Error durante la sincronización');
       }
+      
+      // Intentar cargar administradores de todos modos
+      await loadSynchronizedAdministrators();
+      
     } finally {
       if (showProgress) {
         setSyncing(false);
+        
+        // Limpiar mensajes después de 3 segundos
+        setTimeout(() => {
+          setSuccess("");
+          setError("");
+        }, 3000);
       }
     }
   };
 
   /**
-   * CARGAR ADMINISTRADORES SINCRONIZADOS - VERSIÓN CORREGIDA
-   * Ahora que sabemos que hay 2 administradores en la BD, asegurémonos de que se muestren ambos
+   * CARGAR ADMINISTRADORES SINCRONIZADOS - VERSIÓN SIMPLIFICADA
+   * Mostrar administradores sin validaciones confusas
    */
   const loadSynchronizedAdministrators = async () => {
     try {
-      console.log('🔍 SYNC LOAD: Cargando administradores sincronizados...');
+      console.log('🔍 LOAD: Cargando administradores disponibles...');
       
-      // PRIMERA ESTRATEGIA: Usar el servicio de sincronización mejorado
-      const result = await PropertyAdministratorSyncService.getAllSynchronizedAdministrators();
-      
-      if (result.success && result.administrators.length > 0) {
-        console.log(`✅ SYNC LOAD: Cargados ${result.administrators.length} administradores desde servicio`);
-        
-        // Convertir a formato del componente
-        const adminList: PropertyAdministrator[] = result.administrators.map(admin => ({
-          id: admin.id,
-          user_id: admin.user_id,
-          company_name: admin.company_name,
-          company_cif: admin.company_cif,
-          contact_email: admin.contact_email,
-          contact_phone: admin.contact_phone,
-          license_number: admin.license_number,
-          profile: {
-            full_name: admin.company_name,
-            email: admin.contact_email
-          }
-        }));
-        
-        setAvailableAdministrators(adminList);
-        
-        // VERIFICACIÓN ESPECÍFICA: Buscar los dos administradores esperados
-        const pipaonAdmin = adminList.find(a => a.contact_email.includes('borjapipaon'));
-        const castroAdmin = adminList.find(a => a.contact_email.includes('ddayanacastro'));
-        
-        console.log('🎯 SYNC LOAD: Verificación de administradores específicos:', {
-          pipaon_found: !!pipaonAdmin,
-          castro_found: !!castroAdmin,
-          pipaon_name: pipaonAdmin?.company_name,
-          castro_name: castroAdmin?.company_name,
-          total_loaded: adminList.length
-        });
-        
-        if (adminList.length >= 2 && pipaonAdmin && castroAdmin) {
-          console.log('🎉 SYNC LOAD: ¡AMBOS administradores encontrados correctamente!');
-          setError('');
-          setSuccess(`✅ Cargados ${adminList.length} administradores disponibles`);
-        } else if (adminList.length >= 1) {
-          console.warn('⚠️ SYNC LOAD: Solo se encontró 1 administrador, esperábamos 2');
-          setError(`⚠️ Solo se cargó ${adminList.length} administrador. Esperábamos 2. Intenta "Actualizar Lista"`);
-        } else {
-          console.warn('❌ SYNC LOAD: No se encontraron administradores');
-          setError('No se encontraron administradores disponibles');
-        }
-        
-        return;
-        
-      } else {
-        console.warn('⚠️ SYNC LOAD: Servicio no devolvió administradores, probando método directo...');
-      }
-      
-      // ESTRATEGIA ALTERNATIVA: Consulta directa a la base de datos
-      console.log('🔄 SYNC LOAD: Intentando carga directa desde property_administrators...');
-      
+      // ESTRATEGIA SIMPLE: Consulta directa sin validaciones complejas
       const { data: directPropertyAdmins, error: directError } = await supabase
         .from('property_administrators')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (directError) {
-        console.error('❌ SYNC LOAD: Error en carga directa:', directError);
+        console.error('❌ LOAD: Error cargando administradores:', directError);
         setError(`Error cargando administradores: ${directError.message}`);
         setAvailableAdministrators([]);
         return;
       }
 
       if (!directPropertyAdmins || directPropertyAdmins.length === 0) {
-        console.warn('⚠️ SYNC LOAD: Carga directa no encontró administradores');
-        setError('No se encontraron administradores en la base de datos');
+        console.log('📋 LOAD: No se encontraron administradores en la base de datos');
         setAvailableAdministrators([]);
+        setError(''); // No mostrar error si no hay administradores
         return;
       }
 
-      console.log(`📋 SYNC LOAD: Carga directa encontró ${directPropertyAdmins.length} administradores:`, 
-        directPropertyAdmins.map(a => ({ name: a.company_name, email: a.contact_email })));
+      console.log(`📋 LOAD: Encontrados ${directPropertyAdmins.length} administradores en la base de datos`);
 
-      // PROCESAR ADMINISTRADORES DE CARGA DIRECTA
-      const directAdminList: PropertyAdministrator[] = directPropertyAdmins.map(admin => ({
+      // PROCESAR ADMINISTRADORES DIRECTAMENTE
+      const adminList: PropertyAdministrator[] = directPropertyAdmins.map(admin => ({
         id: admin.id,
         user_id: admin.user_id,
         company_name: admin.company_name || 'Administrador de Fincas',
@@ -226,34 +185,20 @@ export function CommunityAdministratorAssignment() {
         }
       }));
 
-      setAvailableAdministrators(directAdminList);
-      
-      // VERIFICACIÓN FINAL
-      const finalPipaonAdmin = directAdminList.find(a => a.contact_email.includes('borjapipaon'));
-      const finalCastroAdmin = directAdminList.find(a => a.contact_email.includes('ddayanacastro'));
-      
-      console.log('🎯 SYNC LOAD: Verificación final tras carga directa:', {
-        total_administrators: directAdminList.length,
-        pipaon_found: !!finalPipaonAdmin,
-        castro_found: !!finalCastroAdmin,
-        all_emails: directAdminList.map(a => a.contact_email)
-      });
+      console.log('📋 LOAD: Administradores procesados:', adminList.map(a => ({ 
+        name: a.company_name, 
+        email: a.contact_email 
+      })));
 
-      if (directAdminList.length >= 2 && finalPipaonAdmin && finalCastroAdmin) {
-        console.log('🎉 SYNC LOAD: ¡ÉXITO! Ambos administradores cargados via método directo');
-        setError('');
-        setSuccess(`✅ Cargados ${directAdminList.length} administradores (método directo)`);
-      } else if (directAdminList.length >= 1) {
-        console.warn(`⚠️ SYNC LOAD: Solo ${directAdminList.length} administrador cargado via método directo`);
-        setError(`⚠️ Cargado ${directAdminList.length} de 2 administradores esperados`);
-      } else {
-        console.error('❌ SYNC LOAD: No se pudieron cargar administradores');
-        setError('Error: No se pudieron cargar administradores');
-      }
+      setAvailableAdministrators(adminList);
+      setError(''); // Limpiar cualquier error previo
+      
+      // NO MOSTRAR MENSAJES DE ÉXITO/ERROR CONFUSOS - Solo log interno
+      console.log(`✅ LOAD: ${adminList.length} administradores cargados correctamente`);
       
     } catch (err) {
-      console.error('❌ SYNC LOAD: Error crítico cargando administradores:', err);
-      setError('Error crítico al cargar administradores sincronizados');
+      console.error('❌ LOAD: Error crítico cargando administradores:', err);
+      setError('Error al cargar administradores');
       setAvailableAdministrators([]);
     }
   };
@@ -394,7 +339,7 @@ export function CommunityAdministratorAssignment() {
             <CardDescription>Asigna la empresa que administra tu comunidad</CardDescription>
           </div>
           
-          {/* BOTÓN DE SINCRONIZACIÓN MANUAL */}
+          {/* BOTÓN DE ACTUALIZACIÓN */}
           <Button
             variant="outline"
             size="sm"
@@ -405,7 +350,7 @@ export function CommunityAdministratorAssignment() {
             {syncing ? (
               <>
                 <Loader2 className="h-3 w-3 mr-2 animate-spin" />
-                Sincronizando...
+                Actualizando...
               </>
             ) : (
               <>
