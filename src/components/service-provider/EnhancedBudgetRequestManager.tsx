@@ -165,10 +165,10 @@ export function EnhancedBudgetRequestManager() {
       if (error) throw error;
 
       // Filter out requests where I already submitted a quote
-      const myQuoteRequestIds = myQuotes.map(q => q.budget_request_id);
-      const filteredRequests = (requests || []).filter(r => !myQuoteRequestIds.includes(r.id));
+      const myQuoteRequestIds = myQuotes.map((q: QuoteWithDetails) => q.budget_request_id);
+      const filteredRequests = (requests || []).filter((r: any) => !myQuoteRequestIds.includes(r.id));
 
-      setAvailableRequests(filteredRequests.map(req => ({
+      setAvailableRequests(filteredRequests.map((req: any) => ({
         ...req,
         quotes: [] // Initialize empty quotes array
       })) as BudgetRequestWithDetails[]);
@@ -199,7 +199,7 @@ export function EnhancedBudgetRequestManager() {
 
       if (error) throw error;
 
-      setMyQuotes(quotes as QuoteWithDetails[] || []);
+      setMyQuotes((quotes as QuoteWithDetails[]) || []);
 
     } catch (err) {
       console.error("Error loading my quotes:", err);
