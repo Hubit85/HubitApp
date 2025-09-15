@@ -7,9 +7,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { 
   Building, CheckCircle, Loader2, AlertCircle, Phone, 
-  Mail, Building2, User, Users, Clock, Send, Star, X
+  Mail, Building2, User, Users, Clock, Send, Star, X, RefreshCw
 } from "lucide-react";
 import type { CommunityMemberAdministrator } from "@/integrations/supabase/types";
+import { PropertyAdministratorSyncService } from "@/services/PropertyAdministratorSyncService";
 
 interface PropertyAdministrator {
   id: string;
@@ -39,6 +40,7 @@ export function CommunityAdministratorAssignment() {
   const [availableAdministrators, setAvailableAdministrators] = useState<PropertyAdministrator[]>([]);
   const [pendingRequests, setPendingRequests] = useState<AssignmentRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [requesting, setRequesting] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -60,16 +62,117 @@ export function CommunityAdministratorAssignment() {
     setError("");
     setSuccess("");
     try {
+      // PASO 1: Ejecutar sincronización automática primero
+      await runSynchronization(false); // false = silenciosa
+      
+      // PASO 2: Cargar datos después de la sincronización
       await Promise.all([
         loadCurrentAssignment(),
         loadPendingAssignmentRequests(),
-        loadAvailableAdministrators()
+        loadSynchronizedAdministrators()
       ]);
     } catch (err) {
       console.error('Error initializing component:', err);
       setError("Error al inicializar el formulario de asignación.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * EJECUTAR SINCRONIZACIÓN COMPLETA
+   */
+  const runSynchronization = async (showProgress = true) => {
+    if (showProgress) {
+      setSyncing(true);
+      setError("");
+      setSuccess("");
+    }
+
+    try {
+      console.log('🔄 SYNC: Ejecutando sincronización de administradores...');
+      
+      const syncResult = await PropertyAdministratorSyncService.syncAllPropertyAdministrators();
+      
+      if (syncResult.success) {
+        console.log('✅ SYNC: Sincronización exitosa:', syncResult.message);
+        
+        if (showProgress) {
+          if (syncResult.created_in_property_administrators > 0 || syncResult.created_in_user_roles > 0) {
+            setSuccess(`🔄 Sincronización completada: ${syncResult.created_in_property_administrators} en property_administrators, ${syncResult.created_in_user_roles} en user_roles`);
+          }
+        }
+        
+        // Recargar administradores después de la sincronización
+        await loadSynchronizedAdministrators();
+        
+      } else {
+        console.warn('⚠️ SYNC: Sincronización con errores:', syncResult.errors);
+        if (showProgress) {
+          setError(`Sincronización parcial: ${syncResult.errors.join(', ')}`);
+        }
+      }
+      
+    } catch (syncError) {
+      console.error('❌ SYNC: Error en sincronización:', syncError);
+      if (showProgress) {
+        setError('Error durante la sincronización de administradores');
+      }
+    } finally {
+      if (showProgress) {
+        setSyncing(false);
+      }
+    }
+  };
+
+  /**
+   * CARGAR ADMINISTRADORES SINCRONIZADOS
+   */
+  const loadSynchronizedAdministrators = async () => {
+    try {
+      console.log('🔍 SYNC LOAD: Cargando administradores sincronizados...');
+      
+      const result = await PropertyAdministratorSyncService.getAllSynchronizedAdministrators();
+      
+      if (result.success && result.administrators.length > 0) {
+        console.log(`✅ SYNC LOAD: Cargados ${result.administrators.length} administradores sincronizados`);
+        
+        // Convertir a formato del componente
+        const adminList: PropertyAdministrator[] = result.administrators.map(admin => ({
+          id: admin.id,
+          user_id: admin.user_id,
+          company_name: admin.company_name,
+          company_cif: admin.company_cif,
+          contact_email: admin.contact_email,
+          contact_phone: admin.contact_phone,
+          license_number: admin.license_number,
+          profile: {
+            full_name: admin.company_name,
+            email: admin.contact_email
+          }
+        }));
+        
+        setAvailableAdministrators(adminList);
+        
+        // Verificación para logging
+        console.log('🎯 SYNC LOAD: Administradores configurados:', adminList.map(a => ({
+          name: a.company_name,
+          email: a.contact_email,
+          cif: a.company_cif
+        })));
+        
+        setError('');
+        
+      } else {
+        console.warn('⚠️ SYNC LOAD: No se encontraron administradores sincronizados');
+        setAvailableAdministrators([]);
+        setError(result.message || 'No se encontraron administradores sincronizados');
+      }
+      
+    } catch (err) {
+      console.error('❌ SYNC LOAD: Error cargando administradores sincronizados:', err);
+      setError('Error al cargar administradores sincronizados');
+      setAvailableAdministrators([]);
     }
   };
 
@@ -105,137 +208,6 @@ export function CommunityAdministratorAssignment() {
       status: 'pending',
       company_name: req.company_name,
     })));
-  };
-
-  const loadAvailableAdministrators = async () => {
-    try {
-      setError("");
-      console.log('🔍 CORRECTED: Loading available property administrators...');
-      
-      // STEP 1: Load property_administrators table directly (no joins)
-      const { data: propertyAdmins, error: propertyError } = await supabase
-        .from('property_administrators')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (propertyError) {
-        console.error('❌ Error loading property administrators:', propertyError);
-        setError('Error al cargar administradores de fincas');
-        setAvailableAdministrators([]);
-        return;
-      }
-
-      console.log('🐛 RAW property_administrators data:', {
-        count: propertyAdmins?.length || 0,
-        sample: propertyAdmins?.slice(0, 2)?.map(admin => ({
-          id: admin.id?.substring(0, 8) + '...',
-          company_name: admin.company_name,
-          contact_email: admin.contact_email,
-          user_id: admin.user_id?.substring(0, 8) + '...'
-        }))
-      });
-
-      // STEP 2: Process each administrator separately (no complex joins)
-      const adminList: PropertyAdministrator[] = [];
-      
-      if (propertyAdmins && propertyAdmins.length > 0) {
-        console.log(`📋 Processing ${propertyAdmins.length} administrators individually...`);
-        
-        for (let i = 0; i < propertyAdmins.length; i++) {
-          const admin = propertyAdmins[i];
-          
-          try {
-            console.log(`🔄 Processing admin ${i + 1}: ${admin.company_name}`);
-            
-            // STEP 3: Get profile data with separate simple query
-            let profileData = null;
-            if (admin.user_id) {
-              const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('full_name, email, phone')
-                .eq('id', admin.user_id)
-                .single();
-
-              if (profileError) {
-                console.warn(`⚠️ Profile query failed for admin ${i + 1}:`, profileError.message);
-                // Continue without profile data
-              } else {
-                profileData = profile;
-                console.log(`✅ Profile loaded for admin ${i + 1}:`, profile?.full_name);
-              }
-            }
-
-            // STEP 4: Create admin object with fallback data
-            const adminData: PropertyAdministrator = {
-              id: admin.id,
-              user_id: admin.user_id,
-              company_name: admin.company_name || profileData?.full_name || 'Administrador Sin Nombre',
-              company_cif: admin.company_cif || `CIF-${admin.id.substring(0, 8)}`,
-              contact_email: admin.contact_email || profileData?.email || 'sin-email@registrado.com',
-              contact_phone: admin.contact_phone || profileData?.phone || undefined,
-              license_number: admin.license_number || undefined,
-              profile: {
-                full_name: profileData?.full_name || admin.company_name || 'Usuario',
-                email: profileData?.email || admin.contact_email || ''
-              }
-            };
-
-            adminList.push(adminData);
-            console.log(`✅ Admin ${i + 1} processed: ${adminData.company_name} (${adminData.contact_email})`);
-            
-          } catch (processingError) {
-            console.error(`❌ Error processing admin ${i + 1}:`, processingError);
-            // Continue with next admin
-          }
-        }
-      } else {
-        console.warn('📋 No administrators found in property_administrators table');
-      }
-
-      // STEP 5: Final verification and logging
-      console.log('🎯 FINAL RESULT:', {
-        total_processed: adminList.length,
-        administrators: adminList.map(admin => ({
-          name: admin.company_name,
-          email: admin.contact_email,
-          cif: admin.company_cif,
-          id_prefix: admin.id.substring(0, 8) + '...'
-        }))
-      });
-
-      // STEP 6: Verification against expected administrators
-      const expectedEmails = ['borjapipaon@gmail.com', 'ddayanacastro10@gmail.com'];
-      const foundEmails = adminList.map(a => a.contact_email.toLowerCase());
-      const expectedFound = expectedEmails.filter(email => 
-        foundEmails.some(found => found.includes(email.toLowerCase()))
-      );
-      
-      console.log('🔍 EXPECTED ADMINISTRATORS VERIFICATION:', {
-        expected_emails: expectedEmails,
-        found_emails: foundEmails,
-        matching_count: expectedFound.length,
-        missing_emails: expectedEmails.filter(email => !expectedFound.includes(email))
-      });
-
-      // STEP 7: Set final result
-      setAvailableAdministrators(adminList);
-
-      // STEP 8: User feedback
-      if (adminList.length === 0) {
-        setError('No se encontraron administradores registrados en el sistema');
-      } else if (expectedFound.length < expectedEmails.length) {
-        console.warn(`⚠️ Expected ${expectedEmails.length} specific administrators but found ${expectedFound.length}`);
-      } else {
-        console.log(`✅ Successfully loaded ${adminList.length} administrators`);
-      }
-      
-      setError(''); // Clear any previous errors
-
-    } catch (err) {
-      console.error('❌ Critical error in loadAvailableAdministrators:', err);
-      setError('Error crítico al cargar administradores');
-      setAvailableAdministrators([]);
-    }
   };
 
   const handleRequestAssignment = async (administrator: PropertyAdministrator) => {
