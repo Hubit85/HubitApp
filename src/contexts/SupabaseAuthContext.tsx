@@ -815,95 +815,137 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Step 1: Load or create profile
-      try {        
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Profile fetch timeout')), 15000);
-        });
-
-        const profilePromise = supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", userObject.id)
-          .maybeSingle();
-
-        const result = await Promise.race([profilePromise, timeoutPromise]) as any;
-        const { data: profileData, error: profileError } = result;
-
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.warn("⚠️ Profile fetch error:", profileError.message);
-        }
-
-        if (profileData) {
-          setProfile(profileData);
-          console.log("✅ Profile loaded from database with user_type:", profileData.user_type);
-        } else {
-          // Create new profile if it doesn't exist - FIXED: Always provide email fallback
-          console.log("📝 Creating new profile...");
+      try {
+        const loadUserProfile = async (userObject: User) => {
+          console.log("👤 CONTEXT: Starting ENHANCED user data fetch for:", userObject.id.substring(0, 8) + '...');
           
-          const newProfileData: ProfileInsert = {
-            id: userObject.id,
-            email: userObject.email || '', // FIXED: Always provide empty string as fallback
-            full_name: userObject.user_metadata?.full_name || null,
-            user_type: 'particular',
-            phone: userObject.user_metadata?.phone || null,
-            avatar_url: userObject.user_metadata?.avatar_url || null,
-            address: null,
-            city: null,
-            postal_code: null,
-            country: 'Spain',
-            language: 'es',
-            timezone: 'Europe/Madrid',
-            email_notifications: true,
-            sms_notifications: false,
-            is_verified: false,
-            verification_code: null,
-            last_login: null,
-            created_at: userObject.created_at || new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
+          try {        
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => reject(new Error('Profile fetch timeout')), 15000);
+            });
 
-          try {
-            const { data: createdProfile, error: createError } = await supabase
+            const profilePromise = supabase
               .from("profiles")
-              .insert(newProfileData)
-              .select()
-              .single();
+              .select("*")
+              .eq("id", userObject.id)
+              .maybeSingle();
 
-            if (!createError && createdProfile) {
-              setProfile(createdProfile);
-              console.log("✅ Profile created successfully");
-            } else {
-              throw new Error(`Profile creation failed: ${createError?.message || 'Unknown error'}`);
+            const result = await Promise.race([profilePromise, timeoutPromise]) as any;
+            const { data: profileData, error: profileError } = result;
+
+            if (profileError && profileError.code !== 'PGRST116') {
+              console.warn("⚠️ Profile fetch error:", profileError.message);
             }
-          } catch (createProfileError) {
-            console.warn("⚠️ Profile creation failed, using fallback:", createProfileError);
+
+            if (profileData) {
+              setProfile(profileData);
+              console.log("✅ Profile loaded from database with user_type:", profileData.user_type);
+            } else {
+              // Create new profile if it doesn't exist - FIXED: Handle null dates properly
+              console.log("📝 Creating new profile...");
+              
+              const now = new Date().toISOString();
+              const profileCreatedAt = userObject.created_at || now; // FIXED: Always provide fallback
+
+              const newProfileData: ProfileInsert = {
+                id: userObject.id,
+                email: userObject.email || '',
+                full_name: userObject.user_metadata?.full_name || null,
+                user_type: 'particular',
+                phone: userObject.user_metadata?.phone || null,
+                avatar_url: userObject.user_metadata?.avatar_url || null,
+                address: null,
+                city: null,
+                postal_code: null,
+                country: 'Spain',
+                language: 'es',
+                timezone: 'Europe/Madrid',
+                email_notifications: true,
+                sms_notifications: false,
+                is_verified: false,
+                verification_code: null,
+                last_login: null,
+                created_at: profileCreatedAt, // FIXED: Always provide valid string
+                updated_at: now
+              };
+
+              try {
+                const { data: createdProfile, error: createError } = await supabase
+                  .from("profiles")
+                  .insert(newProfileData)
+                  .select()
+                  .single();
+
+                if (!createError && createdProfile) {
+                  setProfile(createdProfile);
+                  console.log("✅ Profile created successfully");
+                } else {
+                  throw new Error(`Profile creation failed: ${createError?.message || 'Unknown error'}`);
+                }
+              } catch (createProfileError) {
+                console.warn("⚠️ Profile creation failed, using fallback:", createProfileError);
+                
+                const fallbackProfile: Profile = {
+                  ...newProfileData,
+                  address: null,
+                  city: null,
+                  postal_code: null,
+                  country: 'Spain',
+                  email_notifications: true,
+                  sms_notifications: false,
+                  is_verified: false,
+                  verification_code: null,
+                  last_login: null,
+                  created_at: profileCreatedAt, // FIXED: Always provide valid string
+                  updated_at: now
+                } as Profile;
+                
+                setProfile(fallbackProfile);
+                console.log("✅ Using fallback profile");
+              }
+            }
+          } catch (profileFetchError) {
+            console.warn("⚠️ Profile fetch timeout, using emergency profile");
             
-            const fallbackProfile: Profile = {
-              ...newProfileData,
+            const now = new Date().toISOString();
+            const emergencyCreatedAt = userObject.created_at || now; // FIXED: Always provide fallback
+            
+            const emergencyProfile: Profile = {
+              id: userObject.id,
+              email: userObject.email || '',
+              full_name: userObject.user_metadata?.full_name || null,
+              user_type: 'particular',
+              phone: null,
+              avatar_url: null,
               address: null,
               city: null,
               postal_code: null,
               country: 'Spain',
+              language: 'es',
+              timezone: 'Europe/Madrid',
               email_notifications: true,
               sms_notifications: false,
               is_verified: false,
               verification_code: null,
               last_login: null,
-              created_at: userObject.created_at || new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            } as Profile;
+              created_at: emergencyCreatedAt, // FIXED: Always provide valid string
+              updated_at: now
+            };
             
-            setProfile(fallbackProfile);
-            console.log("✅ Using fallback profile");
+            setProfile(emergencyProfile);
           }
-        }
+        };
+
+        await loadUserProfile(userObject);
       } catch (profileFetchError) {
         console.warn("⚠️ Profile fetch timeout, using emergency profile");
         
-        // FIXED: Always provide email fallback
+        const now = new Date().toISOString();
+        const emergencyCreatedAt = userObject.created_at || now; // FIXED: Always provide fallback
+        
         const emergencyProfile: Profile = {
           id: userObject.id,
-          email: userObject.email || '', // FIXED: Always provide empty string as fallback
+          email: userObject.email || '',
           full_name: userObject.user_metadata?.full_name || null,
           user_type: 'particular',
           phone: null,
@@ -919,8 +961,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           is_verified: false,
           verification_code: null,
           last_login: null,
-          created_at: userObject.created_at || new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          created_at: emergencyCreatedAt, // FIXED: Always provide valid string
+          updated_at: now
         };
         
         setProfile(emergencyProfile);
