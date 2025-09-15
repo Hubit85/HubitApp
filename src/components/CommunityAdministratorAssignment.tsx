@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { 
   Building, CheckCircle, Loader2, AlertCircle, Phone, 
-  Mail, Building2, User, Users, Clock, Send, Star
+  Mail, Building2, User, Users, Clock, Send, Star, X
 } from "lucide-react";
 import type { CommunityMemberAdministrator } from "@/integrations/supabase/types";
 
@@ -251,7 +251,7 @@ export function CommunityAdministratorAssignment() {
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-black"><Building /> Administrador de Fincas</CardTitle>
-        <CardDescription>Asigna la empresa que administra tu comunidad.</CardDescription>
+        <CardDescription>Asigna la empresa que administra tu comunidad</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
@@ -267,21 +267,51 @@ export function CommunityAdministratorAssignment() {
           <>
             {pendingRequests.length > 0 && (
               <div className="space-y-3">
-                <h4 className="font-medium text-stone-900">Solicitudes Pendientes</h4>
+                <h4 className="font-medium text-stone-900">Solicitudes Pendientes ({pendingRequests.length})</h4>
                 {pendingRequests.map(req => (
-                  <div key={req.id} className="p-3 bg-orange-50 rounded-lg border border-orange-200 flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-orange-900">{req.company_name}</p>
-                      <p className="text-xs text-orange-700">Enviado: {new Date(req.created_at).toLocaleDateString('es-ES')}</p>
+                  <div key={req.id} className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <p className="font-medium text-orange-900">{req.company_name}</p>
+                        <p className="text-xs text-orange-700">Enviado: {new Date(req.created_at).toLocaleDateString('es-ES')}</p>
+                        <Badge variant="outline" className="text-orange-800 border-orange-300 mt-2">Pendiente</Badge>
+                      </div>
+                      
+                      {/* ADDED: Delete request button */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const { error } = await supabase
+                              .from('community_member_administrators')
+                              .delete()
+                              .eq('id', req.id);
+                            
+                            if (error) {
+                              setError('Error al eliminar la solicitud');
+                            } else {
+                              setSuccess('Solicitud eliminada correctamente');
+                              await initializeComponent(); // Reload data
+                            }
+                          } catch (error) {
+                            setError('Error al eliminar la solicitud');
+                          }
+                        }}
+                        className="ml-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={requesting !== null}
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Eliminar
+                      </Button>
                     </div>
-                    <Badge variant="outline" className="text-orange-800 border-orange-300">Pendiente</Badge>
                   </div>
                 ))}
               </div>
             )}
 
             <div className="space-y-4">
-              <h4 className="font-medium text-stone-900">Administradores Disponibles ({availableAdministrators.length})</h4>
+              <h4 className="font-medium text-stone-900">Administradores de Fincas Disponibles ({availableAdministrators.length})</h4>
               {availableAdministrators.length === 0 ? (
                 <p className="text-sm text-stone-500 text-center py-4">No hay administradores registrados en la plataforma.</p>
               ) : (
@@ -297,6 +327,7 @@ export function CommunityAdministratorAssignment() {
                               <p className="text-stone-600">CIF: {admin.company_cif}</p>
                               <p className="flex items-center gap-2 text-stone-600"><Mail className="h-3 w-3" /> {admin.contact_email}</p>
                               {admin.contact_phone && <p className="flex items-center gap-2 text-stone-600"><Phone className="h-3 w-3" /> {admin.contact_phone}</p>}
+                              <p className="flex items-center gap-2 text-stone-600 text-xs"><User className="h-3 w-3" /> Contacto: {admin.company_name}</p>
                             </div>
                             <div className="ml-4">
                               <Button
