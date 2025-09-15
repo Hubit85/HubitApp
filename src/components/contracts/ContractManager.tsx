@@ -103,6 +103,11 @@ export function ContractManager() {
     special_terms: ""
   });
 
+  // Helper function to safely handle contract numbers
+  const getContractNumber = (contract: ExtendedContract): string => {
+    return contract.contract_number || 'N/A';
+  };
+
   useEffect(() => {
     if (user) {
       loadUserRole();
@@ -678,7 +683,7 @@ export function ContractManager() {
                                 <User className="h-4 w-4" />
                                 <span>{contract.client_name || contract.provider_name}</span>
                                 <Separator orientation="vertical" className="h-4" />
-                                <span>#{contract.contract_number ? contract.contract_number : 'N/A'}</span>
+                                <span>#{getContractNumber(contract)}</span>
                               </div>
                             </div>
                           </div>
