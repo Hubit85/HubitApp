@@ -216,7 +216,16 @@ export function CommunityAdministratorAssignment() {
   };
 
   const handleAssignAdmin = async () => {
+    console.log('🔄 BUTTON CLICK: Starting assignment process...');
+    console.log('🔍 VALIDATION CHECK:', {
+      selectedAdmin: !!selectedAdmin,
+      user: !!user,
+      communityName: communityName.trim(),
+      isSubmitting
+    });
+
     if (!selectedAdmin || !user || !communityName.trim()) {
+      console.log('❌ VALIDATION FAILED: Missing required data');
       toast({
         title: "Información requerida",
         description: "Por favor, selecciona un administrador e introduce el nombre de la comunidad.",
@@ -230,47 +239,73 @@ export function CommunityAdministratorAssignment() {
     try {
       console.log('🔄 COMMUNITY ASSIGNMENT: Starting real administrator request process...');
       
-      // Get the current user's community_member role ID
+      // Get the current user's community_member role ID with enhanced logging
+      console.log('🔍 ROLE SEARCH: Looking for community_member role for user:', user.id);
+      
       const { data: communityMemberRole, error: roleError } = await supabase
         .from('user_roles')
-        .select('id, user_id, role_type')
+        .select('id, user_id, role_type, is_verified')
         .eq('user_id', user.id)
         .eq('role_type', 'community_member')
         .eq('is_verified', true)
         .single();
 
+      console.log('🔍 COMMUNITY ROLE RESULT:', {
+        data: communityMemberRole,
+        error: roleError,
+        foundRole: !!communityMemberRole
+      });
+
       if (roleError || !communityMemberRole) {
-        throw new Error('No se encontró tu rol de miembro de comunidad verificado');
+        console.error('❌ COMMUNITY ROLE ERROR:', roleError);
+        throw new Error('No se encontró tu rol de miembro de comunidad verificado. Asegúrate de que tu cuenta tenga este rol habilitado.');
       }
 
       console.log('✅ Found community member role:', communityMemberRole.id);
 
-      // Get the selected administrator's property_administrator role ID
+      // Get the selected administrator's property_administrator role ID with enhanced logging  
+      console.log('🔍 ADMIN ROLE SEARCH: Looking for property_administrator role for user:', selectedAdmin.user_id);
+      
       const { data: adminRole, error: adminRoleError } = await supabase
         .from('user_roles')
-        .select('id, user_id, role_type')
+        .select('id, user_id, role_type, is_verified')
         .eq('user_id', selectedAdmin.user_id)
         .eq('role_type', 'property_administrator')
         .eq('is_verified', true)
         .single();
 
+      console.log('🔍 ADMIN ROLE RESULT:', {
+        data: adminRole,
+        error: adminRoleError,
+        foundRole: !!adminRole
+      });
+
       if (adminRoleError || !adminRole) {
-        throw new Error('No se encontró el rol de administrador verificado para el proveedor seleccionado');
+        console.error('❌ ADMIN ROLE ERROR:', adminRoleError);
+        throw new Error('No se encontró el rol de administrador verificado para el proveedor seleccionado. Es posible que este usuario no tenga el rol de administrador de fincas.');
       }
 
       console.log('✅ Found administrator role:', adminRole.id);
 
-      // Use the real AdministratorRequestService
+      // Use the real AdministratorRequestService with enhanced logging
+      console.log('📤 SERVICE CALL: Calling AdministratorRequestService...');
+      
       const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
       
-      const result = await AdministratorRequestService.sendRequestToAdministrator({
+      const requestOptions = {
         communityMemberRoleId: communityMemberRole.id,
         propertyAdministratorRoleId: adminRole.id,
         requestMessage: `Solicito que ${selectedAdmin.company_name} sea asignado como administrador de la comunidad "${communityName}". Esta solicitud se realiza a través del sistema HuBiT para gestión de incidencias y administración de la comunidad.`
-      });
+      };
+      
+      console.log('📤 REQUEST OPTIONS:', requestOptions);
+      
+      const result = await AdministratorRequestService.sendRequestToAdministrator(requestOptions);
+
+      console.log('📥 SERVICE RESULT:', result);
 
       if (result.success) {
-        console.log('✅ COMMUNITY ASSIGNMENT: Request sent successfully');
+        console.log('✅ COMMUNITY ASSIGNMENT: Request sent successfully with ID:', result.requestId);
         
         toast({
           title: "✅ Solicitud enviada exitosamente",
@@ -282,6 +317,7 @@ export function CommunityAdministratorAssignment() {
         setCommunityName("");
         
         // Simulate processing time for better UX
+        console.log('⏳ PROCESSING DELAY: Simulating processing time...');
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Update recent assignments for display (combining real and demo data)
@@ -294,11 +330,15 @@ export function CommunityAdministratorAssignment() {
           assigned_by: user.id
         };
         
+        console.log('💾 STORAGE: Adding to localStorage:', newAssignment);
         addLocalAssignment(newAssignment);
         loadRecentAssignments();
         
+        console.log('✅ ASSIGNMENT COMPLETE: Process finished successfully');
+        
       } else {
-        throw new Error(result.message || 'Error al enviar la solicitud');
+        console.error('❌ SERVICE ERROR:', result.message);
+        throw new Error(result.message || 'Error desconocido al enviar la solicitud');
       }
       
     } catch (error) {
@@ -307,7 +347,9 @@ export function CommunityAdministratorAssignment() {
       let errorMessage = "No se pudo completar la asignación.";
       if (error instanceof Error) {
         if (error.message.includes('rol')) {
-          errorMessage = "Error: " + error.message + ". Verifica que tienes los roles correctos.";
+          errorMessage = "Error de roles: " + error.message + ". Verifica que tienes los roles correctos configurados en tu perfil.";
+        } else if (error.message.includes('verificado')) {
+          errorMessage = "Error de verificación: " + error.message + " Contacta con soporte si el problema persiste.";
         } else {
           errorMessage = error.message;
         }
@@ -315,10 +357,24 @@ export function CommunityAdministratorAssignment() {
       
       toast({
         title: "Error en la asignación",
-        description: errorMessage + " Por favor, intenta nuevamente.",
+        description: errorMessage + " Por favor, revisa la consola del navegador para más detalles e intenta nuevamente.",
         variant: "destructive",
       });
+      
+      // Additional error logging for debugging
+      console.error("FULL ERROR CONTEXT:", {
+        error,
+        selectedAdmin: selectedAdmin ? {
+          id: selectedAdmin.id,
+          company_name: selectedAdmin.company_name,
+          user_id: selectedAdmin.user_id
+        } : null,
+        user: user ? { id: user.id } : null,
+        communityName
+      });
+      
     } finally {
+      console.log('🏁 ASSIGNMENT CLEANUP: Setting isSubmitting to false');
       setIsSubmitting(false);
     }
   };
