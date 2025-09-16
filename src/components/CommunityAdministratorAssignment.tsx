@@ -353,6 +353,10 @@ export function CommunityAdministratorAssignment() {
         try {
           console.log('🔍 VERIFICATION: Double-checking request creation in database...');
           
+          if (!result.requestId) {
+            throw new Error('No se recibió el ID de la solicitud creada');
+          }
+          
           const { data: verificationQuery, error: verificationError } = await supabase
             .from('administrator_requests')
             .select('id, assignment_type, status, requested_at')
