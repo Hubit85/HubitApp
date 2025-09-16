@@ -43,7 +43,7 @@ interface AssignmentRequest {
   community_member_id: string;
   property_administrator_id: string;
   status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
-  assignment_type: 'property_management' | 'incident_management' | 'full_management';
+  assignment_type?: 'property_management' | 'incident_management' | 'full_management'; // FIXED: Made optional
   request_message?: string;
   response_message?: string;
   requested_at: string;
@@ -147,7 +147,14 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       );
 
       console.log(`✅ NOTIFICATIONS: Found ${enrichedRequests.length} assignment requests`);
-      setAssignmentRequests(enrichedRequests as AssignmentRequest[]);
+      
+      // FIXED: Safe type conversion with proper type assertion
+      const safeAssignmentRequests = enrichedRequests.map(request => ({
+        ...request,
+        assignment_type: request.assignment_type || 'full_management' as const
+      }));
+      
+      setAssignmentRequests(safeAssignmentRequests as AssignmentRequest[]);
 
     } catch (err) {
       console.error("❌ NOTIFICATIONS: Exception loading assignment requests:", err);
@@ -330,7 +337,9 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     }
   };
 
-  const getAssignmentTypeLabel = (type: string) => {
+  const getAssignmentTypeLabel = (type?: string) => {
+    if (!type) return 'Gestión Completa'; // FIXED: Safe fallback when type is undefined
+    
     const types = {
       property_management: 'Gestión de Propiedad',
       incident_management: 'Gestión de Incidencias',
@@ -339,19 +348,21 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     return types[type as keyof typeof types] || type;
   };
 
-  const getAssignmentTypeBadge = (type: string) => {
+  const getAssignmentTypeBadge = (type?: string) => {
+    const safeType = type || 'full_management'; // FIXED: Safe fallback when type is undefined
+    
     const config = {
       property_management: { color: 'bg-blue-100 text-blue-800', icon: Building },
       incident_management: { color: 'bg-orange-100 text-orange-800', icon: AlertCircle },
       full_management: { color: 'bg-purple-100 text-purple-800', icon: Users }
-    }[type] || { color: 'bg-gray-100 text-gray-800', icon: Building };
+    }[safeType] || { color: 'bg-purple-100 text-purple-800', icon: Users }; // FIXED: Safe fallback
 
     const Icon = config.icon;
 
     return (
       <Badge className={`${config.color} flex items-center gap-1`}>
         <Icon className="h-3 w-3" />
-        {getAssignmentTypeLabel(type)}
+        {getAssignmentTypeLabel(safeType)}
       </Badge>
     );
   };
