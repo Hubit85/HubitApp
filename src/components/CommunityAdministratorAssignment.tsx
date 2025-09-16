@@ -52,7 +52,33 @@ const addLocalAssignment = (assignment: CommunityAssignment) => {
   saveLocalAssignments(assignments);
 };
 
-const removeLocalAssignment = (assignmentId: string) => {
+export function CommunityAdministratorAssignment() {
+  const { user } = useSupabaseAuth();
+  const { toast } = useToast();
+
+  const [availableAdmins, setAvailableAdmins] = useState<ServiceProviderWithProfile[]>([]);
+  const [selectedAdmin, setSelectedAdmin] = useState<ServiceProviderWithProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [communityName, setCommunityName] = useState("");
+  const [recentAssignments, setRecentAssignments] = useState<CommunityAssignment[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchAvailableAdmins();
+      loadRecentAssignments();
+    }
+  }, [user, searchTerm]);
+
+  const loadRecentAssignments = () => {
+    const assignments = getLocalAssignments();
+    // Show only recent assignments (last 10)
+    const recent = assignments.slice(-10).reverse();
+    setRecentAssignments(recent);
+  };
+
+  const removeLocalAssignment = (assignmentId: string) => {
     const assignments = getLocalAssignments();
     const filtered = assignments.filter(a => a.id !== assignmentId);
     saveLocalAssignments(filtered);
@@ -94,32 +120,6 @@ const removeLocalAssignment = (assignmentId: string) => {
         variant: "destructive",
       });
     }
-  };
-
-export function CommunityAdministratorAssignment() {
-  const { user } = useSupabaseAuth();
-  const { toast } = useToast();
-
-  const [availableAdmins, setAvailableAdmins] = useState<ServiceProviderWithProfile[]>([]);
-  const [selectedAdmin, setSelectedAdmin] = useState<ServiceProviderWithProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [communityName, setCommunityName] = useState("");
-  const [recentAssignments, setRecentAssignments] = useState<CommunityAssignment[]>([]);
-
-  useEffect(() => {
-    if (user) {
-      fetchAvailableAdmins();
-      loadRecentAssignments();
-    }
-  }, [user, searchTerm]);
-
-  const loadRecentAssignments = () => {
-    const assignments = getLocalAssignments();
-    // Show only recent assignments (last 10)
-    const recent = assignments.slice(-10).reverse();
-    setRecentAssignments(recent);
   };
 
   const fetchAvailableAdmins = async () => {
