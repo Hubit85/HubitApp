@@ -142,12 +142,11 @@ export class AdministratorRequestService {
     message?: string;
   }> {
     try {
-      // FIXED: Get only management requests (without assignment_type) for "Solicitudes de Gestión"
+      // SIMPLIFIED: Get all administrator requests (both management and assignment)
       const { data: requests, error } = await supabase
         .from('administrator_requests')
         .select('*')
         .eq('property_administrator_id', propertyAdministratorRoleId)
-        .is('assignment_type', null) // CRITICAL: Only requests WITHOUT assignment_type
         .order('requested_at', { ascending: false });
 
       if (error) {
@@ -342,7 +341,7 @@ export class AdministratorRequestService {
         community_member_id: options.communityMemberRoleId,
         property_administrator_id: options.propertyAdministratorRoleId,
         community_id: options.communityId || null,
-        assignment_type: 'full_management' as const, // CRITICAL: Mark as assignment request
+        // assignment_type: 'full_management' as const, // REMOVED: This was causing the issue
         status: 'pending' as const,
         request_message: options.requestMessage || null,
         requested_at: new Date().toISOString(),
@@ -350,7 +349,7 @@ export class AdministratorRequestService {
         updated_at: new Date().toISOString()
       };
 
-      console.log('📝 ADMIN REQUEST: Creating assignment request with data:', requestData);
+      console.log('📝 ADMIN REQUEST: Creating request with data (WITHOUT assignment_type):', requestData);
 
       const { data: newRequest, error } = await supabase
         .from('administrator_requests')
@@ -367,7 +366,7 @@ export class AdministratorRequestService {
         throw new Error('No se recibió confirmación de la creación de la solicitud');
       }
 
-      console.log('✅ ADMIN REQUEST: Assignment request created successfully:', newRequest.id);
+      console.log('✅ ADMIN REQUEST: Request created successfully:', newRequest.id);
 
       // CRITICAL: Get administrator user_id for notification
       console.log('🔍 NOTIFICATION: Looking up administrator user_id...');
@@ -422,19 +421,19 @@ export class AdministratorRequestService {
 
       console.log('📧 NOTIFICATION: Member name for notification:', memberName);
 
-      // Create notification for administrator - ENHANCED for assignment requests
+      // Create notification for administrator - UPDATED for assignment requests that appear in management
       const notificationData = {
         user_id: adminRoleData.user_id,
         title: '🏢 Nueva Solicitud de Asignación como Administrador',
-        message: `${memberName} quiere asignarte como administrador de fincas de su comunidad. Esta solicitud incluye la gestión completa de la propiedad y administración de incidencias. Revisa los detalles y responde desde la sección de "Solicitudes de Asignación".`,
+        message: `${memberName} quiere asignarte como administrador de fincas de su comunidad "${options.communityId || 'su propiedad'}". Esta solicitud incluye la gestión completa de la propiedad y administración de incidencias. Revisa los detalles y responde desde la sección de "Solicitudes de Gestión".`,
         type: 'info' as const,
-        category: 'administrator_assignment' as const, // Different category for assignment requests
+        category: 'administrator_assignment' as const, // Keep this category for identification
         read: false,
         priority: 2, // High priority for administrator requests
         related_entity_type: 'administrator_request' as const,
         related_entity_id: newRequest.id,
         action_url: '/dashboard?tab=notificaciones',
-        action_label: 'Ver Solicitud de Asignación',
+        action_label: 'Ver Solicitud',
         created_at: new Date().toISOString()
       };
 
@@ -476,7 +475,7 @@ export class AdministratorRequestService {
 
       return { 
         success: true, 
-        message: 'Solicitud de asignación enviada correctamente. El administrador la verá en la sección "Solicitudes de Asignación" y recibirá una notificación inmediata.', 
+        message: 'Solicitud de asignación enviada correctamente. El administrador la verá en la sección "Solicitudes de Gestión" y recibirá una notificación inmediata.', 
         requestId: newRequest.id 
       };
 

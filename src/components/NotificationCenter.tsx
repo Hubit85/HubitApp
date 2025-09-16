@@ -117,87 +117,12 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     try {
       console.log("🔍 NOTIFICATIONS: Loading assignment requests for administrator:", activeRole.id);
 
-      // FIXED: Get requests WITH assignment_type for "Solicitudes de Asignación"
-      const { data: requests, error } = await supabase
-        .from("administrator_requests")
-        .select("*")
-        .eq("property_administrator_id", activeRole.id)
-        .not("assignment_type", "is", null) // CRITICAL: Only requests WITH assignment_type
-        .order("requested_at", { ascending: false });
+      // REVERTED: Since we removed assignment_type from the service, this section will be empty for now
+      // We'll handle this properly in a future update when we have a clear separation of concerns
+      console.log("📝 NOTIFICATIONS: Assignment requests temporarily disabled - using management requests");
+      setAssignmentRequests([]);
+      return;
 
-      if (error) {
-        console.error("❌ NOTIFICATIONS: Error loading assignment requests:", error);
-        setAssignmentRequests([]);
-        return;
-      }
-
-      if (!requests || requests.length === 0) {
-        console.log("📝 NOTIFICATIONS: No assignment requests found");
-        setAssignmentRequests([]);
-        return;
-      }
-
-      console.log(`🔍 NOTIFICATIONS: Found ${requests.length} assignment requests`);
-
-      const enrichedRequests = await Promise.all(
-        requests.map(async (request) => {
-          try {
-            const { data: roleRow } = await supabase
-              .from("user_roles")
-              .select("id, user_id, role_specific_data")
-              .eq("id", request.community_member_id)
-              .single();
-
-            let profile: any = null;
-            if (roleRow?.user_id) {
-              const { data: profileRow } = await supabase
-                .from("profiles")
-                .select("id, full_name, email, phone")
-                .eq("id", roleRow.user_id)
-                .single();
-              profile = profileRow;
-            }
-
-            return {
-              id: request.id,
-              community_member_id: request.community_member_id,
-              property_administrator_id: request.property_administrator_id,
-              status: request.status,
-              assignment_type: (request as any).assignment_type || "full_management",
-              request_message: request.request_message,
-              response_message: request.response_message,
-              requested_at: request.requested_at,
-              responded_at: request.responded_at,
-              community_member: {
-                profiles: profile || undefined,
-                role_specific_data: roleRow?.role_specific_data,
-              },
-              property_details: {
-                address: (roleRow?.role_specific_data as any)?.property_address,
-                community_name: (roleRow?.role_specific_data as any)?.community_name,
-              },
-            } as AssignmentRequest;
-          } catch (err) {
-            console.error("Error enriching assignment request:", err);
-            return {
-              id: request.id,
-              community_member_id: request.community_member_id,
-              property_administrator_id: request.property_administrator_id,
-              status: request.status,
-              assignment_type: (request as any).assignment_type || "full_management",
-              request_message: request.request_message,
-              response_message: request.response_message,
-              requested_at: request.requested_at,
-              responded_at: request.responded_at,
-              community_member: undefined,
-              property_details: {},
-            } as AssignmentRequest;
-          }
-        })
-      );
-
-      console.log(`✅ NOTIFICATIONS: Successfully processed ${enrichedRequests.length} assignment requests`);
-      setAssignmentRequests(enrichedRequests);
     } catch (err) {
       console.error("❌ NOTIFICATIONS: Exception loading assignment requests:", err);
       setAssignmentRequests([]);
@@ -267,8 +192,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       const result = await AdministratorRequestService.getReceivedRequests(activeRole.id);
       
       if (result.success) {
-        // FIXED: Now getReceivedRequests already filters OUT requests with assignment_type
-        console.log(`✅ NOTIFICATIONS: Found ${result.requests.length} management requests (without assignment_type)`);
+        console.log(`✅ NOTIFICATIONS: Found ${result.requests.length} management requests`);
         setAdminRequests(result.requests as AdminRequest[]);
       } else {
         console.error('❌ NOTIFICATIONS: Error loading administrator requests:', result.message);
