@@ -148,13 +148,11 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
 
       console.log(`✅ NOTIFICATIONS: Found ${enrichedRequests.length} assignment requests`);
       
-      // FIXED: Safe type conversion with proper type assertion
-      const safeAssignmentRequests = enrichedRequests.map(request => ({
+      // FIXED: Properly handle the assignment requests without problematic type conversion
+      setAssignmentRequests(enrichedRequests.map(request => ({
         ...request,
-        assignment_type: request.assignment_type || 'full_management' as const
-      }));
-      
-      setAssignmentRequests(safeAssignmentRequests as AssignmentRequest[]);
+        assignment_type: request.assignment_type || 'full_management'
+      })) as AssignmentRequest[]);
 
     } catch (err) {
       console.error("❌ NOTIFICATIONS: Exception loading assignment requests:", err);
