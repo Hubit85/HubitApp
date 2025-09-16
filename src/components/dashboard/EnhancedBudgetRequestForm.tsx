@@ -752,92 +752,90 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                 <h3 className="text-lg font-semibold text-neutral-900">Archivos y Documentos</h3>
               </div>
 
-              <div className="space-y-4">
-                <div className="p-6 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
-                  <div className="text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                    <div className="flex flex-col items-center gap-2">
-                      <Label htmlFor="file-upload" className="cursor-pointer">
-                        <span className="text-sm font-medium text-blue-900">
-                          Haz clic para subir archivos
-                        </span>
-                        <span className="text-xs text-blue-700 block">
-                          o arrastra y suelta aquí
-                        </span>
-                      </Label>
-                      <Input
-                        id="file-upload"
-                        type="file"
-                        multiple
-                        accept={Object.keys(ACCEPTED_FILE_TYPES).join(',')}
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        disabled={uploadingFiles || uploadedFiles.length >= MAX_FILES}
-                      />
-                      <div className="text-xs text-neutral-600 space-y-1">
-                        <div>Tipos permitidos: JPG, PNG, GIF, PDF, DOC, DOCX, TXT</div>
-                        <div>Tamaño máximo: 10MB por archivo • Máximo {MAX_FILES} archivos</div>
-                      </div>
+              <div className="p-6 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                <div className="text-center">
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                  <div className="flex flex-col items-center gap-2">
+                    <Label htmlFor="file-upload" className="cursor-pointer">
+                      <span className="text-sm font-medium text-blue-900">
+                        Haz clic para subir archivos
+                      </span>
+                      <span className="text-xs text-blue-700 block">
+                        o arrastra y suelta aquí
+                      </span>
+                    </Label>
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      accept={Object.keys(ACCEPTED_FILE_TYPES).join(',')}
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      disabled={uploadingFiles || uploadedFiles.length >= MAX_FILES}
+                    />
+                    <div className="text-xs text-neutral-600 space-y-1">
+                      <div>Tipos permitidos: JPG, PNG, GIF, PDF, DOC, DOCX, TXT</div>
+                      <div>Tamaño máximo: 10MB por archivo • Máximo {MAX_FILES} archivos</div>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {uploadingFiles && (
-                  <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin text-blue-600" />
-                    <span className="text-sm text-blue-800">Subiendo archivos...</span>
-                  </div>
-                )}
+              {uploadingFiles && (
+                <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin text-blue-600" />
+                  <span className="text-sm text-blue-800">Subiendo archivos...</span>
+                </div>
+              )}
 
-                {uploadedFiles.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-neutral-700">
-                      Archivos adjuntos ({uploadedFiles.length}/{MAX_FILES})
-                    </h4>
-                    <div className="grid gap-2">
-                      {uploadedFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border border-neutral-200 shadow-sm">
-                          <div className="flex items-center gap-3">
-                            <div className="p-1 bg-neutral-100 rounded">
-                              {getFileIcon(file.type)}
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-neutral-700">
+                    Archivos adjuntos ({uploadedFiles.length}/{MAX_FILES})
+                  </h4>
+                  <div className="grid gap-2">
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border border-neutral-200 shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="p-1 bg-neutral-100 rounded">
+                            {getFileIcon(file.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-neutral-900 truncate">
+                              {file.name}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-neutral-900 truncate">
-                                {file.name}
-                              </div>
-                              <div className="text-xs text-neutral-500">
-                                {formatFileSize(file.size)} • {file.type.split('/')[1].toUpperCase()}
-                              </div>
+                            <div className="text-xs text-neutral-500">
+                              {formatFileSize(file.size)} • {file.type.split('/')[1].toUpperCase()}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {file.type.startsWith('image/') && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => window.open(file.url, '_blank')}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {file.type.startsWith('image/') && (
                             <Button
                               type="button"
                               variant="ghost"
                               size="sm"
-                              onClick={() => removeFile(index)}
-                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => window.open(file.url, '_blank')}
+                              className="h-8 w-8 p-0"
                             >
-                              <X className="h-4 w-4" />
+                              <Eye className="h-4 w-4" />
                             </Button>
-                          </div>
+                          )}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFile(index)}
+                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <Separator />
