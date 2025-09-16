@@ -396,10 +396,16 @@ export class AdministratorRequestService {
         .single();
 
       let memberName = 'Un miembro de comunidad';
-      if (!memberError && memberRoleData?.role_specific_data?.full_name) {
-        memberName = memberRoleData.role_specific_data.full_name;
-      } else if (!memberError && memberRoleData?.user_id) {
-        // Fallback: get name from profile
+      if (!memberError && memberRoleData?.role_specific_data) {
+        // FIXED: Safe access to role_specific_data with proper type checking
+        const roleData = memberRoleData.role_specific_data as any; // Type assertion for safe access
+        if (roleData && typeof roleData === 'object' && 'full_name' in roleData && roleData.full_name) {
+          memberName = String(roleData.full_name); // Ensure it's a string
+        }
+      }
+      
+      // Fallback: get name from profile if role_specific_data doesn't have it
+      if (memberName === 'Un miembro de comunidad' && !memberError && memberRoleData?.user_id) {
         const { data: memberProfile } = await supabase
           .from('profiles')
           .select('full_name')
