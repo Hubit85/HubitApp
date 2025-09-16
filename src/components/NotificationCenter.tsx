@@ -172,20 +172,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       // FIXED: Load requests that have assignment_type (for Assignment Requests window)
       const { data: assignmentRequests, error } = await supabase
         .from('administrator_requests')
-        .select(`
-          *,
-          community_member:community_member_id(
-            id,
-            user_id,
-            role_specific_data,
-            profiles:user_id(
-              id,
-              full_name,
-              email,
-              phone
-            )
-          )
-        `)
+        .select('*')
         .eq('property_administrator_id', activeRole.id)
         .not('assignment_type', 'is', null) // Only requests with assignment_type
         .order('requested_at', { ascending: false });
@@ -199,8 +186,60 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       console.log(`✅ NOTIFICATIONS: Found ${assignmentRequests?.length || 0} assignment requests`);
       console.log("📋 ASSIGNMENT REQUESTS RAW DATA:", assignmentRequests);
       
+      // ENHANCED: Manually get profile data for each request
+      const enrichedRequests = await Promise.all(
+        (assignmentRequests || []).map(async (request) => {
+          try {
+            // Get the community member role data first
+            const { data: memberRole, error: memberRoleError } = await supabase
+              .from('user_roles')
+              .select('user_id, role_specific_data')
+              .eq('id', request.community_member_id)
+              .single();
+
+            if (memberRoleError || !memberRole) {
+              console.warn(`Could not fetch role for ${request.community_member_id}:`, memberRoleError);
+              return { ...request, community_member: null };
+            }
+
+            // Then get the profile data
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('id, full_name, email, phone')
+              .eq('id', memberRole.user_id)
+              .single();
+
+            if (profileError || !profile) {
+              console.warn(`Could not fetch profile for ${memberRole.user_id}:`, profileError);
+              return {
+                ...request,
+                community_member: {
+                  id: request.community_member_id,
+                  user_id: memberRole.user_id,
+                  role_specific_data: memberRole.role_specific_data,
+                  profiles: null
+                }
+              };
+            }
+
+            return {
+              ...request,
+              community_member: {
+                id: request.community_member_id,
+                user_id: memberRole.user_id,
+                role_specific_data: memberRole.role_specific_data,
+                profiles: profile
+              }
+            };
+          } catch (enrichError) {
+            console.error(`Error enriching request ${request.id}:`, enrichError);
+            return { ...request, community_member: null };
+          }
+        })
+      );
+      
       // Log each request's assignment_type for debugging
-      assignmentRequests?.forEach((req, index) => {
+      enrichedRequests?.forEach((req, index) => {
         console.log(`📌 ASSIGNMENT REQUEST ${index + 1}:`, {
           id: req.id,
           assignment_type: req.assignment_type,
@@ -212,13 +251,13 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       });
       
       // ENHANCED: Verify profile data is being loaded correctly
-      const requestsWithoutProfiles = assignmentRequests?.filter(req => !req.community_member?.profiles) || [];
+      const requestsWithoutProfiles = enrichedRequests?.filter(req => !req.community_member?.profiles) || [];
       if (requestsWithoutProfiles.length > 0) {
         console.warn(`⚠️ NOTIFICATIONS: ${requestsWithoutProfiles.length} requests missing profile data`);
       }
       
       // Handle the data safely
-      setAssignmentRequests((assignmentRequests || []) as AssignmentRequest[]);
+      setAssignmentRequests((enrichedRequests || []) as AssignmentRequest[]);
 
     } catch (err) {
       console.error("❌ NOTIFICATIONS: Exception loading assignment requests:", err);
@@ -287,20 +326,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       // FIXED: Load requests WITHOUT assignment_type (for Management Requests window)  
       const { data: managementRequests, error } = await supabase
         .from('administrator_requests')
-        .select(`
-          *,
-          community_member:community_member_id(
-            id,
-            user_id,
-            role_specific_data,
-            profiles:user_id(
-              id,
-              full_name,
-              email,
-              phone
-            )
-          )
-        `)
+        .select('*')
         .eq('property_administrator_id', activeRole.id)
         .is('assignment_type', null) // Only requests without assignment_type
         .order('requested_at', { ascending: false });
@@ -314,8 +340,60 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       console.log(`✅ NOTIFICATIONS: Found ${managementRequests?.length || 0} management requests`);
       console.log("📋 MANAGEMENT REQUESTS RAW DATA:", managementRequests);
       
+      // ENHANCED: Manually get profile data for each request
+      const enrichedRequests = await Promise.all(
+        (managementRequests || []).map(async (request) => {
+          try {
+            // Get the community member role data first
+            const { data: memberRole, error: memberRoleError } = await supabase
+              .from('user_roles')
+              .select('user_id, role_specific_data')
+              .eq('id', request.community_member_id)
+              .single();
+
+            if (memberRoleError || !memberRole) {
+              console.warn(`Could not fetch role for ${request.community_member_id}:`, memberRoleError);
+              return { ...request, community_member: null };
+            }
+
+            // Then get the profile data
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('id, full_name, email, phone')
+              .eq('id', memberRole.user_id)
+              .single();
+
+            if (profileError || !profile) {
+              console.warn(`Could not fetch profile for ${memberRole.user_id}:`, profileError);
+              return {
+                ...request,
+                community_member: {
+                  id: request.community_member_id,
+                  user_id: memberRole.user_id,
+                  role_specific_data: memberRole.role_specific_data,
+                  profiles: null
+                }
+              };
+            }
+
+            return {
+              ...request,
+              community_member: {
+                id: request.community_member_id,
+                user_id: memberRole.user_id,
+                role_specific_data: memberRole.role_specific_data,
+                profiles: profile
+              }
+            };
+          } catch (enrichError) {
+            console.error(`Error enriching request ${request.id}:`, enrichError);
+            return { ...request, community_member: null };
+          }
+        })
+      );
+      
       // Log each request's assignment_type for debugging
-      managementRequests?.forEach((req, index) => {
+      enrichedRequests?.forEach((req, index) => {
         console.log(`📌 MANAGEMENT REQUEST ${index + 1}:`, {
           id: req.id,
           assignment_type: req.assignment_type,
@@ -325,7 +403,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       });
       
       // Handle the data safely
-      setAdminRequests((managementRequests || []) as AdminRequest[]);
+      setAdminRequests((enrichedRequests || []) as AdminRequest[]);
 
     } catch (err) {
       console.error('❌ NOTIFICATIONS: Exception loading management requests:', err);
