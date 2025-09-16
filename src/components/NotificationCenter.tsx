@@ -117,11 +117,12 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     try {
       console.log("🔍 NOTIFICATIONS: Loading assignment requests for administrator:", activeRole.id);
 
+      // FIXED: Get requests WITH assignment_type for "Solicitudes de Asignación"
       const { data: requests, error } = await supabase
         .from("administrator_requests")
         .select("*")
         .eq("property_administrator_id", activeRole.id)
-        .not("assignment_type", "is", null)
+        .not("assignment_type", "is", null) // CRITICAL: Only requests WITH assignment_type
         .order("requested_at", { ascending: false });
 
       if (error) {
@@ -135,6 +136,8 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         setAssignmentRequests([]);
         return;
       }
+
+      console.log(`🔍 NOTIFICATIONS: Found ${requests.length} assignment requests`);
 
       const enrichedRequests = await Promise.all(
         requests.map(async (request) => {
@@ -193,7 +196,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         })
       );
 
-      console.log(`✅ NOTIFICATIONS: Found ${enrichedRequests.length} assignment requests`);
+      console.log(`✅ NOTIFICATIONS: Successfully processed ${enrichedRequests.length} assignment requests`);
       setAssignmentRequests(enrichedRequests);
     } catch (err) {
       console.error("❌ NOTIFICATIONS: Exception loading assignment requests:", err);
@@ -264,10 +267,9 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       const result = await AdministratorRequestService.getReceivedRequests(activeRole.id);
       
       if (result.success) {
-        // Filter out requests with assignment_type - those go to assignmentRequests
-        const managementRequests = result.requests.filter(req => !(req as any).assignment_type);
-        console.log(`✅ NOTIFICATIONS: Found ${managementRequests.length} management requests`);
-        setAdminRequests(managementRequests as AdminRequest[]);
+        // FIXED: Now getReceivedRequests already filters OUT requests with assignment_type
+        console.log(`✅ NOTIFICATIONS: Found ${result.requests.length} management requests (without assignment_type)`);
+        setAdminRequests(result.requests as AdminRequest[]);
       } else {
         console.error('❌ NOTIFICATIONS: Error loading administrator requests:', result.message);
         setAdminRequests([]);
