@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
-import { UserPlus, Building, Mail, Phone, Search, Loader2, Badge, MapPin, Star, Clock, CheckCircle } from "lucide-react";
+import { UserPlus, Building, Mail, Phone, Search, Loader2, Badge, MapPin, Star, Clock, CheckCircle, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type ServiceProvider = Database["public"]["Tables"]["service_providers"]["Row"];
@@ -51,6 +51,50 @@ const addLocalAssignment = (assignment: CommunityAssignment) => {
   assignments.push(assignment);
   saveLocalAssignments(assignments);
 };
+
+const removeLocalAssignment = (assignmentId: string) => {
+    const assignments = getLocalAssignments();
+    const filtered = assignments.filter(a => a.id !== assignmentId);
+    saveLocalAssignments(filtered);
+    loadRecentAssignments();
+  };
+
+  const handleDeleteAssignment = async (assignment: CommunityAssignment) => {
+    try {
+      // Si es una asignación real (con prefijo 'real_'), intentar cancelar la solicitud
+      if (assignment.id.startsWith('real_')) {
+        const requestId = assignment.id.replace('real_', '');
+        const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+        
+        const result = await AdministratorRequestService.cancelRequest(requestId);
+        
+        if (result.success) {
+          toast({
+            title: "✅ Solicitud eliminada",
+            description: result.message,
+          });
+        } else {
+          throw new Error(result.message);
+        }
+      }
+      
+      // Eliminar de localStorage (tanto para reales como simuladas)
+      removeLocalAssignment(assignment.id);
+      
+      toast({
+        title: "✅ Asignación eliminada",
+        description: "La asignación ha sido eliminada exitosamente.",
+      });
+      
+    } catch (error) {
+      console.error("Error eliminando asignación:", error);
+      toast({
+        title: "Error al eliminar",
+        description: "No se pudo eliminar la asignación. Por favor, intenta nuevamente.",
+        variant: "destructive",
+      });
+    }
+  };
 
 export function CommunityAdministratorAssignment() {
   const { user } = useSupabaseAuth();
@@ -323,9 +367,26 @@ export function CommunityAdministratorAssignment() {
                       })}
                     </p>
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full">
-                    {assignment.status === "pending" ? "Pendiente" : "Activo"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full ${
+                      assignment.status === "pending" 
+                        ? "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white" 
+                        : "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                    }`}>
+                      {assignment.status === "pending" ? "Pendiente" : "Activo"}
+                    </span>
+                    {assignment.status === "pending" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDeleteAssignment(assignment)}
+                        className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-all duration-200"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Eliminar
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
