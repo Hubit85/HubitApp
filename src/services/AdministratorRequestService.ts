@@ -78,7 +78,8 @@ export interface ManagedCommunity {
 
 export class AdministratorRequestService {
   
-  private static async getRoleAndProfile(roleId: string): Promise<{
+  // Make these methods public so they can be used from NotificationCenter
+  static async getRoleAndProfile(roleId: string): Promise<{
     id: string;
     user_id: string;
     role_specific_data: any;
@@ -136,18 +137,45 @@ export class AdministratorRequestService {
     }
   }
 
-  static async getReceivedRequests(propertyAdministratorRoleId: string): Promise<{
+  static async getCommunityById(communityId: string): Promise<{
+    id: string;
+    name: string;
+    address: string;
+    city: string;
+  } | null> {
+    try {
+      const { data: community, error } = await supabase
+        .from('communities')
+        .select('*')
+        .eq('id', communityId)
+        .single();
+      
+      return error ? null : community;
+    } catch (error) {
+      console.warn(`Could not fetch community ${communityId}:`, error);
+      return null;
+    }
+  }
+
+  static async getReceivedRequests(propertyAdministratorRoleId: string, requestType: 'management' | 'assignment' = 'management'): Promise<{
     success: boolean;
     requests: CommunityMemberRequest[];
     message?: string;
   }> {
     try {
-      // SIMPLIFIED: Get all administrator requests (both management and assignment)
-      const { data: requests, error } = await supabase
+      // UPDATED: Filter by assignment_type to separate management and assignment requests
+      let query = supabase
         .from('administrator_requests')
         .select('*')
-        .eq('property_administrator_id', propertyAdministratorRoleId)
-        .order('requested_at', { ascending: false });
+        .eq('property_administrator_id', propertyAdministratorRoleId);
+
+      if (requestType === 'assignment') {
+        query = query.not('assignment_type', 'is', null); // Requests with assignment_type
+      } else {
+        query = query.is('assignment_type', null); // Requests without assignment_type
+      }
+
+      const { data: requests, error } = await query.order('requested_at', { ascending: false });
 
       if (error) {
         throw new Error(error.message);
@@ -216,26 +244,6 @@ export class AdministratorRequestService {
     } catch (error) {
       console.error('❌ ADMIN REQUEST: Exception fetching sent requests:', error);
       return { success: false, requests: [], message: 'Error inesperado al obtener las solicitudes enviadas' };
-    }
-  }
-
-  private static async getCommunityById(communityId: string): Promise<{
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-  } | null> {
-    try {
-      const { data: community, error } = await supabase
-        .from('communities')
-        .select('*')
-        .eq('id', communityId)
-        .single();
-      
-      return error ? null : community;
-    } catch (error) {
-      console.warn(`Could not fetch community ${communityId}:`, error);
-      return null;
     }
   }
 
@@ -341,7 +349,7 @@ export class AdministratorRequestService {
         community_member_id: options.communityMemberRoleId,
         property_administrator_id: options.propertyAdministratorRoleId,
         community_id: options.communityId || null,
-        // assignment_type: 'full_management' as const, // REMOVED: This was causing the issue
+        assignment_type: 'full_management' as const, // ADDED: This will make it appear in Assignment Requests
         status: 'pending' as const,
         request_message: options.requestMessage || null,
         requested_at: new Date().toISOString(),
@@ -349,7 +357,7 @@ export class AdministratorRequestService {
         updated_at: new Date().toISOString()
       };
 
-      console.log('📝 ADMIN REQUEST: Creating request with data (WITHOUT assignment_type):', requestData);
+      console.log('📝 ADMIN REQUEST: Creating request with assignment_type for Assignment Requests:', requestData);
 
       const { data: newRequest, error } = await supabase
         .from('administrator_requests')
@@ -421,13 +429,13 @@ export class AdministratorRequestService {
 
       console.log('📧 NOTIFICATION: Member name for notification:', memberName);
 
-      // Create notification for administrator - UPDATED for assignment requests that appear in management
+      // Create notification for administrator - UPDATED for assignment requests that appear in Assignment Requests
       const notificationData = {
         user_id: adminRoleData.user_id,
         title: '🏢 Nueva Solicitud de Asignación como Administrador',
-        message: `${memberName} quiere asignarte como administrador de fincas de su comunidad "${options.communityId || 'su propiedad'}". Esta solicitud incluye la gestión completa de la propiedad y administración de incidencias. Revisa los detalles y responde desde la sección de "Solicitudes de Gestión".`,
+        message: `${memberName} quiere asignarte como administrador de fincas de su comunidad "${options.communityId || 'su propiedad'}". Esta solicitud incluye la gestión completa de la propiedad y administración de incidencias. Revisa los detalles y responde desde la sección de "Solicitudes de Asignación".`,
         type: 'info' as const,
-        category: 'administrator_assignment' as const, // Keep this category for identification
+        category: 'administrator_assignment' as const,
         read: false,
         priority: 2, // High priority for administrator requests
         related_entity_type: 'administrator_request' as const,
@@ -475,7 +483,7 @@ export class AdministratorRequestService {
 
       return { 
         success: true, 
-        message: 'Solicitud de asignación enviada correctamente. El administrador la verá en la sección "Solicitudes de Gestión" y recibirá una notificación inmediata.', 
+        message: 'Solicitud de asignación enviada correctamente. El administrador la verá en la sección "Solicitudes de Asignación" y recibirá una notificación inmediata.', 
         requestId: newRequest.id 
       };
 
