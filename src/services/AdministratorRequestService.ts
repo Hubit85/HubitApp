@@ -621,7 +621,7 @@ export class AdministratorRequestService {
     }
   }
 
-  private static async createManagementRelationship(options: {
+  static async createManagementRelationship(options: {
     propertyAdministratorRoleId: string;
     communityMemberRoleId: string;
     communityId?: string;
