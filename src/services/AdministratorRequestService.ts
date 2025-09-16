@@ -344,12 +344,12 @@ export class AdministratorRequestService {
         return { success: false, message: 'Ya tienes una solicitud pendiente con este administrador.' };
       }
 
-      // FIXED: Create the request with assignment_type for administrator assignment requests
+      // CRITICAL: Create the request with assignment_type for administrator assignment requests
       const requestData = {
         community_member_id: options.communityMemberRoleId,
         property_administrator_id: options.propertyAdministratorRoleId,
         community_id: options.communityId || null,
-        assignment_type: 'full_management' as const, // ADDED: This will make it appear in Assignment Requests
+        assignment_type: 'full_management' as const, // CRITICAL: This determines where it appears
         status: 'pending' as const,
         request_message: options.requestMessage || null,
         requested_at: new Date().toISOString(),
@@ -358,11 +358,12 @@ export class AdministratorRequestService {
       };
 
       console.log('📝 ADMIN REQUEST: Creating request with assignment_type for Assignment Requests:', requestData);
+      console.log('🎯 CRITICAL: assignment_type is:', requestData.assignment_type);
 
       const { data: newRequest, error } = await supabase
         .from('administrator_requests')
         .insert(requestData)
-        .select('id')
+        .select('*') // CHANGED: Select all fields to verify the data
         .single();
 
       if (error) {
@@ -374,7 +375,27 @@ export class AdministratorRequestService {
         throw new Error('No se recibió confirmación de la creación de la solicitud');
       }
 
-      console.log('✅ ADMIN REQUEST: Request created successfully:', newRequest.id);
+      console.log('✅ ADMIN REQUEST: Request created successfully with full data:', newRequest);
+      console.log('🔍 VERIFICATION: Checking assignment_type in created request:', newRequest.assignment_type);
+
+      // CRITICAL VERIFICATION: Double-check the record was created correctly
+      const { data: verifyRequest, error: verifyError } = await supabase
+        .from('administrator_requests')
+        .select('*')
+        .eq('id', newRequest.id)
+        .single();
+
+      if (verifyError || !verifyRequest) {
+        console.error('❌ VERIFICATION: Could not verify request creation:', verifyError);
+      } else {
+        console.log('✅ VERIFICATION: Request confirmed in database:', {
+          id: verifyRequest.id,
+          assignment_type: verifyRequest.assignment_type,
+          status: verifyRequest.status,
+          community_member_id: verifyRequest.community_member_id,
+          property_administrator_id: verifyRequest.property_administrator_id
+        });
+      }
 
       // CRITICAL: Get administrator user_id for notification
       console.log('🔍 NOTIFICATION: Looking up administrator user_id...');
@@ -450,7 +471,7 @@ export class AdministratorRequestService {
       const { data: notification, error: notificationError } = await supabase
         .from('notifications')
         .insert(notificationData)
-        .select('id')
+        .select('*') // CHANGED: Select all fields to verify
         .single();
 
       if (notificationError) {
@@ -462,23 +483,24 @@ export class AdministratorRequestService {
         };
       }
 
-      console.log('✅ NOTIFICATION: Created successfully:', notification.id);
+      console.log('✅ NOTIFICATION: Created successfully with full data:', notification);
 
-      // VERIFICATION: Double-check that notification was created
-      const { data: verifyNotification, error: verifyError } = await supabase
-        .from('notifications')
-        .select('id, user_id, title')
-        .eq('id', notification.id)
-        .single();
+      // FINAL VERIFICATION: Check that everything is correctly created and will be found by queries
+      console.log('🔍 FINAL CHECK: Testing assignment requests query...');
+      
+      const { data: testQuery, error: testError } = await supabase
+        .from('administrator_requests')
+        .select('id, assignment_type, status')
+        .eq('property_administrator_id', options.propertyAdministratorRoleId)
+        .not('assignment_type', 'is', null); // Same query as NotificationCenter
 
-      if (verifyError || !verifyNotification) {
-        console.warn('⚠️ VERIFICATION: Could not verify notification creation:', verifyError);
+      console.log('🔍 FINAL CHECK: Query result:', testQuery);
+      
+      if (testError) {
+        console.error('❌ FINAL CHECK: Query failed:', testError);
       } else {
-        console.log('✅ VERIFICATION: Notification confirmed in database:', {
-          id: verifyNotification.id,
-          user_id: verifyNotification.user_id,
-          title: verifyNotification.title
-        });
+        const foundNewRequest = testQuery?.find(req => req.id === newRequest.id);
+        console.log(foundNewRequest ? '✅ FINAL CHECK: New request found in assignment query' : '❌ FINAL CHECK: New request NOT found in assignment query');
       }
 
       return { 
