@@ -116,6 +116,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
 
     try {
       console.log("🔍 NOTIFICATIONS: Loading assignment requests for administrator:", activeRole.id);
+      console.log("🔍 QUERY: Using filter NOT assignment_type IS NULL (should have assignment_type)");
 
       // FIXED: Load requests that have assignment_type (for Assignment Requests window)
       const { data: assignmentRequests, error } = await supabase
@@ -145,7 +146,17 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       }
 
       console.log(`✅ NOTIFICATIONS: Found ${assignmentRequests?.length || 0} assignment requests`);
-      console.log("📋 ASSIGNMENT REQUESTS DATA:", assignmentRequests);
+      console.log("📋 ASSIGNMENT REQUESTS RAW DATA:", assignmentRequests);
+      
+      // Log each request's assignment_type for debugging
+      assignmentRequests?.forEach((req, index) => {
+        console.log(`📌 ASSIGNMENT REQUEST ${index + 1}:`, {
+          id: req.id,
+          assignment_type: req.assignment_type,
+          status: req.status,
+          created: req.requested_at
+        });
+      });
       
       // Handle the data safely
       setAssignmentRequests((assignmentRequests || []) as AssignmentRequest[]);
@@ -212,6 +223,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
 
     try {
       console.log('🔍 NOTIFICATIONS: Loading management requests for role:', activeRole.id);
+      console.log('🔍 QUERY: Using filter assignment_type IS NULL (should NOT have assignment_type)');
 
       // FIXED: Load requests WITHOUT assignment_type (for Management Requests window)  
       const { data: managementRequests, error } = await supabase
@@ -241,7 +253,17 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       }
 
       console.log(`✅ NOTIFICATIONS: Found ${managementRequests?.length || 0} management requests`);
-      console.log("📋 MANAGEMENT REQUESTS DATA:", managementRequests);
+      console.log("📋 MANAGEMENT REQUESTS RAW DATA:", managementRequests);
+      
+      // Log each request's assignment_type for debugging
+      managementRequests?.forEach((req, index) => {
+        console.log(`📌 MANAGEMENT REQUEST ${index + 1}:`, {
+          id: req.id,
+          assignment_type: req.assignment_type,
+          status: req.status,
+          created: req.requested_at
+        });
+      });
       
       // Handle the data safely
       setAdminRequests((managementRequests || []) as AdminRequest[]);
