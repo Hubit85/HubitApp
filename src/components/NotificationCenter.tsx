@@ -148,11 +148,8 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
 
       console.log(`✅ NOTIFICATIONS: Found ${enrichedRequests.length} assignment requests`);
       
-      // FIXED: Properly handle the assignment requests without problematic type conversion
-      setAssignmentRequests(enrichedRequests.map(request => ({
-        ...request,
-        assignment_type: request.assignment_type || 'full_management'
-      })) as AssignmentRequest[]);
+      // FIXED: Handle enriched requests safely without accessing assignment_type from database
+      setAssignmentRequests(enrichedRequests as AssignmentRequest[]);
 
     } catch (err) {
       console.error("❌ NOTIFICATIONS: Exception loading assignment requests:", err);
