@@ -316,9 +316,24 @@ export function CommunityAdministratorAssignment() {
         setSelectedAdmin(null);
         setCommunityName("");
         
+        // ENHANCED: Add notification refresh mechanism
+        console.log('🔄 ASSIGNMENT: Triggering notification refresh...');
+        
+        // Send a custom event to notify other components
+        const refreshEvent = new CustomEvent('adminRequestCreated', {
+          detail: {
+            requestId: result.requestId,
+            type: 'assignment',
+            timestamp: new Date().toISOString()
+          }
+        });
+        
+        window.dispatchEvent(refreshEvent);
+        console.log('📡 ASSIGNMENT: Refresh event dispatched:', refreshEvent.detail);
+        
         // Simulate processing time for better UX
         console.log('⏳ PROCESSING DELAY: Simulating processing time...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Increased to 1.5 seconds
         
         // Update recent assignments for display (combining real and demo data)
         const newAssignment: CommunityAssignment = {
@@ -333,6 +348,31 @@ export function CommunityAdministratorAssignment() {
         console.log('💾 STORAGE: Adding to localStorage:', newAssignment);
         addLocalAssignment(newAssignment);
         loadRecentAssignments();
+        
+        // FINAL VERIFICATION: Check if the request was actually created in database
+        try {
+          console.log('🔍 VERIFICATION: Double-checking request creation in database...');
+          
+          const { data: verificationQuery, error: verificationError } = await supabase
+            .from('administrator_requests')
+            .select('id, assignment_type, status, requested_at')
+            .eq('id', result.requestId)
+            .single();
+            
+          if (verificationError || !verificationQuery) {
+            console.error('❌ VERIFICATION: Request not found in database after creation:', verificationError);
+            throw new Error('La solicitud no se guardó correctamente en la base de datos');
+          } else {
+            console.log('✅ VERIFICATION: Request confirmed in database:', verificationQuery);
+          }
+        } catch (verificationError) {
+          console.error('❌ VERIFICATION: Database verification failed:', verificationError);
+          toast({
+            title: "⚠️ Advertencia",
+            description: "La solicitud se envió pero no se pudo verificar en la base de datos. Por favor, revisa las notificaciones del administrador.",
+            variant: "destructive",
+          });
+        }
         
         console.log('✅ ASSIGNMENT COMPLETE: Process finished successfully');
         

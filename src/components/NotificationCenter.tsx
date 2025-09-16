@@ -88,6 +88,28 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     } else if (user) {
       loadGeneralNotifications();
     }
+
+    // ENHANCED: Add listener for assignment request creation events
+    const handleAdminRequestCreated = (event: CustomEvent) => {
+      console.log('📡 NOTIFICATIONS: Received refresh event:', event.detail);
+      
+      if (event.detail.type === 'assignment' && isPropertyAdministrator && activeRole?.role_type === 'property_administrator') {
+        console.log('🔄 NOTIFICATIONS: Refreshing assignment requests due to new request creation...');
+        
+        // Add a small delay to allow database transaction to complete
+        setTimeout(() => {
+          loadAssignmentRequests();
+        }, 2000); // 2 second delay to ensure database consistency
+      }
+    };
+
+    // Add event listener for refresh events
+    window.addEventListener('adminRequestCreated', handleAdminRequestCreated as EventListener);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('adminRequestCreated', handleAdminRequestCreated as EventListener);
+    };
   }, [user, activeRole, isPropertyAdministrator]);
 
   const loadAllAdministratorData = async () => {
@@ -117,6 +139,35 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     try {
       console.log("🔍 NOTIFICATIONS: Loading assignment requests for administrator:", activeRole.id);
       console.log("🔍 QUERY: Using filter NOT assignment_type IS NULL (should have assignment_type)");
+
+      // ENHANCED: First, run a diagnostic query to see ALL requests for this administrator
+      const { data: allRequests, error: allError } = await supabase
+        .from('administrator_requests')
+        .select('id, assignment_type, status, requested_at, community_member_id')
+        .eq('property_administrator_id', activeRole.id)
+        .order('requested_at', { ascending: false });
+
+      if (allError) {
+        console.error("❌ DIAGNOSTICS: Error in diagnostic query:", allError);
+      } else {
+        console.log("🔍 DIAGNOSTICS: ALL requests for this administrator:", allRequests);
+        console.log(`📊 DIAGNOSTICS: Total requests: ${allRequests?.length || 0}`);
+        
+        const withAssignmentType = allRequests?.filter(req => req.assignment_type !== null) || [];
+        const withoutAssignmentType = allRequests?.filter(req => req.assignment_type === null) || [];
+        
+        console.log(`📊 DIAGNOSTICS: Requests WITH assignment_type: ${withAssignmentType.length}`);
+        console.log(`📊 DIAGNOSTICS: Requests WITHOUT assignment_type: ${withoutAssignmentType.length}`);
+        
+        if (withAssignmentType.length > 0) {
+          console.log("📋 DIAGNOSTICS: Requests with assignment_type:", withAssignmentType.map(r => ({
+            id: r.id,
+            assignment_type: r.assignment_type,
+            status: r.status,
+            requested_at: r.requested_at
+          })));
+        }
+      }
 
       // FIXED: Load requests that have assignment_type (for Assignment Requests window)
       const { data: assignmentRequests, error } = await supabase
@@ -154,9 +205,17 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
           id: req.id,
           assignment_type: req.assignment_type,
           status: req.status,
-          created: req.requested_at
+          created: req.requested_at,
+          member_id: req.community_member_id,
+          has_profile_data: !!req.community_member?.profiles
         });
       });
+      
+      // ENHANCED: Verify profile data is being loaded correctly
+      const requestsWithoutProfiles = assignmentRequests?.filter(req => !req.community_member?.profiles) || [];
+      if (requestsWithoutProfiles.length > 0) {
+        console.warn(`⚠️ NOTIFICATIONS: ${requestsWithoutProfiles.length} requests missing profile data`);
+      }
       
       // Handle the data safely
       setAssignmentRequests((assignmentRequests || []) as AssignmentRequest[]);
