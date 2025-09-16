@@ -117,10 +117,23 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     try {
       console.log("🔍 NOTIFICATIONS: Loading assignment requests for administrator:", activeRole.id);
 
-      // REACTIVATED: Load requests that have assignment_type (for Assignment Requests window)
+      // FIXED: Load requests that have assignment_type (for Assignment Requests window)
       const { data: assignmentRequests, error } = await supabase
         .from('administrator_requests')
-        .select('*')
+        .select(`
+          *,
+          community_member:community_member_id(
+            id,
+            user_id,
+            role_specific_data,
+            profiles:user_id(
+              id,
+              full_name,
+              email,
+              phone
+            )
+          )
+        `)
         .eq('property_administrator_id', activeRole.id)
         .not('assignment_type', 'is', null) // Only requests with assignment_type
         .order('requested_at', { ascending: false });
@@ -131,25 +144,11 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         return;
       }
 
-      // Enrich the requests with member data
-      const enrichedRequests = await Promise.all(
-        (assignmentRequests || []).map(async (request) => {
-          const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
-          const memberRole = await (AdministratorRequestService as any).getRoleAndProfile?.(request.community_member_id);
-          const community = request.community_id ? await (AdministratorRequestService as any).getCommunityById?.(request.community_id) : null;
-          
-          return {
-            ...request,
-            community_member: memberRole,
-            community: community,
-          };
-        })
-      );
-
-      console.log(`✅ NOTIFICATIONS: Found ${enrichedRequests.length} assignment requests`);
+      console.log(`✅ NOTIFICATIONS: Found ${assignmentRequests?.length || 0} assignment requests`);
+      console.log("📋 ASSIGNMENT REQUESTS DATA:", assignmentRequests);
       
-      // FIXED: Handle enriched requests safely without accessing assignment_type from database
-      setAssignmentRequests(enrichedRequests as AssignmentRequest[]);
+      // Handle the data safely
+      setAssignmentRequests((assignmentRequests || []) as AssignmentRequest[]);
 
     } catch (err) {
       console.error("❌ NOTIFICATIONS: Exception loading assignment requests:", err);
@@ -214,10 +213,23 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
     try {
       console.log('🔍 NOTIFICATIONS: Loading management requests for role:', activeRole.id);
 
-      // UPDATED: Load requests WITHOUT assignment_type (for Management Requests window)
+      // FIXED: Load requests WITHOUT assignment_type (for Management Requests window)  
       const { data: managementRequests, error } = await supabase
         .from('administrator_requests')
-        .select('*')
+        .select(`
+          *,
+          community_member:community_member_id(
+            id,
+            user_id,
+            role_specific_data,
+            profiles:user_id(
+              id,
+              full_name,
+              email,
+              phone
+            )
+          )
+        `)
         .eq('property_administrator_id', activeRole.id)
         .is('assignment_type', null) // Only requests without assignment_type
         .order('requested_at', { ascending: false });
@@ -228,23 +240,11 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
         return;
       }
 
-      // Enrich the requests with member data
-      const enrichedRequests = await Promise.all(
-        (managementRequests || []).map(async (request) => {
-          const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
-          const memberRole = await (AdministratorRequestService as any).getRoleAndProfile?.(request.community_member_id);
-          const community = request.community_id ? await (AdministratorRequestService as any).getCommunityById?.(request.community_id) : null;
-          
-          return {
-            ...request,
-            community_member: memberRole,
-            community: community,
-          };
-        })
-      );
-
-      console.log(`✅ NOTIFICATIONS: Found ${enrichedRequests.length} management requests`);
-      setAdminRequests(enrichedRequests as AdminRequest[]);
+      console.log(`✅ NOTIFICATIONS: Found ${managementRequests?.length || 0} management requests`);
+      console.log("📋 MANAGEMENT REQUESTS DATA:", managementRequests);
+      
+      // Handle the data safely
+      setAdminRequests((managementRequests || []) as AdminRequest[]);
 
     } catch (err) {
       console.error('❌ NOTIFICATIONS: Exception loading management requests:', err);
