@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Database, Users, Building, Eye, RefreshCw, 
-  CheckCircle, AlertCircle, Search, FileText, Home
+  CheckCircle, AlertCircle, Search, FileText
 } from "lucide-react";
 
 export function SupabaseDataViewer() {
@@ -193,7 +192,7 @@ export function SupabaseDataViewer() {
             Tabla: user_roles (property_administrator) ({data.admin_user_roles?.length || 0} registros)
           </CardTitle>
           <CardDescription>
-            Roles de usuario tipo "property_administrator" con datos del perfil
+            Roles de usuario tipo &quot;property_administrator&quot; con datos del perfil
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -201,8 +200,8 @@ export function SupabaseDataViewer() {
             <p className="text-gray-600">No hay roles de property_administrator</p>
           ) : (
             <div className="space-y-3">
-              {data.admin_user_roles?.map((role: any, index: number) => (
-                <Card key={role.id || index} className="bg-purple-50 border-purple-200">
+              {data.admin_user_roles?.map((role: any) => (
+                <Card key={role.id} className="bg-purple-50 border-purple-200">
                   <CardContent className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -266,7 +265,7 @@ export function SupabaseDataViewer() {
               {/* Lista de roles de property_administrator */}
               <div className="space-y-2">
                 <h4 className="font-semibold text-orange-900">Administradores de fincas encontrados:</h4>
-                {data.all_user_roles?.filter((r: any) => r.role_type === 'property_administrator').map((role: any, index: number) => (
+                {data.all_user_roles?.filter((r: any) => r.role_type === 'property_administrator').map((role: any) => (
                   <div key={role.id} className="flex items-center gap-2 p-2 bg-orange-100 rounded">
                     <Badge variant={role.is_verified ? "default" : "secondary"}>
                       {role.is_verified ? '✅ Verificado' : '⏳ Pendiente'}
@@ -362,7 +361,7 @@ export function SupabaseDataViewer() {
               <strong>Ubicación de los administradores de fincas:</strong>
               <ul className="mt-2 space-y-1 text-sm">
                 <li>• <strong>property_administrators</strong>: {data.property_administrators?.length || 0} registros con datos de empresa</li>
-                <li>• <strong>user_roles</strong>: {data.admin_user_roles?.length || 0} roles verificados de tipo "property_administrator"</li>
+                <li>• <strong>user_roles</strong>: {data.admin_user_roles?.length || 0} roles verificados de tipo &quot;property_administrator&quot;</li>
                 <li>• <strong>profiles</strong>: {data.profiles?.length || 0} perfiles de usuario con información básica</li>
                 <li>• <strong>administrator_requests</strong>: {data.administrator_requests?.length || 0} solicitudes de gestión</li>
               </ul>

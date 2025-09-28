@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { 
-  AlertTriangle, CheckCircle, Clock, Eye, FileText, 
+  AlertTriangle, CheckCircle, Clock, Eye, 
   Image as ImageIcon, MapPin, MessageCircle, Send, 
   User, Calendar, ArrowRight, RefreshCw, Filter,
   Loader2, AlertCircle

@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,15 +12,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { 
-  Send, Eye, Star, Building, MapPin, Clock, Euro, AlertTriangle, 
-  CheckCircle, Loader2, Calendar, Image as ImageIcon, FileText,
+  Send, Eye, Star, Building, MapPin, Euro, AlertTriangle, 
+  CheckCircle, Loader2, Image as ImageIcon, FileText,
   Users, Zap, Info, Target, ArrowRight, Upload, X, File, Paperclip
 } from "lucide-react";
 import { BudgetRequestInsert, Property, BudgetRequest } from "@/integrations/supabase/types";
 import { SupabaseBudgetService } from "@/services/SupabaseBudgetService";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { toast } from "sonner";
 
 interface ServiceCategoryOption {
   value: string;
@@ -100,15 +97,15 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
   const { user, activeRole } = useSupabaseAuth();
   const [properties, setProperties] = useState<Property[]>([]);
   const [communities, setCommunities] = useState<Community[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewLoading, setPreviewLoading] = useState(false);
+  const [, setShowPreview] = useState(false);
+  const [, setPreviewLoading] = useState(false);
   const [providerPreview, setProviderPreview] = useState<ProviderPreviewResults | null>(null);
 
   const [formData, setFormData] = useState<BudgetRequestInsert>({
@@ -283,7 +280,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         const fileExt = file.name.split('.').pop();
         const fileName = `budget-request-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
         
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('budget-attachments')
           .upload(fileName, file);
 
@@ -367,34 +364,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const handlePreviewProviders = async () => {
-    if (!formData.category || !formData.title || !formData.description) {
-      setError("Por favor completa título, descripción y categoría para ver la vista previa de proveedores");
-      return;
-    }
-
-    try {
-      setPreviewLoading(true);
-      setError("");
-
-      const tempRequest: any = {
-        id: 'temp-preview',
-        ...formData,
-        status: 'published'
-      };
-
-      const preview = await SupabaseBudgetService.findEligibleProvidersPreview(tempRequest);
-      setProviderPreview(preview);
-      setShowPreview(true);
-
-    } catch (err) {
-      console.error("Error previewing providers:", err);
-      setError("Error al obtener vista previa de proveedores");
-    } finally {
-      setPreviewLoading(false);
-    }
   };
 
   const handleSubmit = async () => {

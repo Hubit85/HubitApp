@@ -1,11 +1,10 @@
-
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { LogOut, FileText, HelpCircle, Mail, Settings as SettingsIcon } from "lucide-react";
+import { LogOut, FileText, HelpCircle } from "lucide-react";
 import { authService } from "@/services/AuthService";
 import Image from "next/image";
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Plus, Building, Trash2, Edit } from "lucide-react";
-import { Property, PropertyInsert, PropertyUpdate } from "@/integrations/supabase/types";
+import { Property, PropertyInsert } from "@/integrations/supabase/types";
 
 export default function PropertyManager() {
   const { user } = useSupabaseAuth();
@@ -80,7 +79,7 @@ export default function PropertyManager() {
       
       let res;
       if (isEditing) {
-        const { id, created_at, user_id, ...updateData } = propertyData as Property;
+        const { ...updateData } = propertyData as Property;
         res = await supabase.from("properties").update(updateData).eq("id", currentProperty.id!);
       } else {
         const insertData: PropertyInsert = {
