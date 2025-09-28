@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -137,7 +136,7 @@ export default function ServiceHistoryCard({
                 </div>
                 {service.comment && (
                   <div className="text-sm text-gray-600 italic">
-                    "{service.comment}"
+                    &quot;{service.comment}&quot;
                   </div>
                 )}
                 <Button 

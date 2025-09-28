@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, Shield, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -82,7 +81,7 @@ export default function RatingDisplay({ rating, showEvaluatorInfo = true }: Rati
           {/* Comment */}
           {rating.comment && (
             <p className="text-gray-700 text-sm leading-relaxed">
-              "{rating.comment}"
+              &quot;{rating.comment}&quot;
             </p>
           )}
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -17,12 +16,6 @@ export default function RatingStats({ serviceRating }: RatingStatsProps) {
     if (rating >= 4) return 'text-green-600';
     if (rating >= 3) return 'text-yellow-600';
     return 'text-red-600';
-  };
-
-  const getProgressColor = (rating: number) => {
-    if (rating >= 4) return 'bg-green-500';
-    if (rating >= 3) return 'bg-yellow-500';
-    return 'bg-red-500';
   };
 
   return (
