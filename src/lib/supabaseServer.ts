@@ -84,13 +84,13 @@ export default supabaseServer;
 
 export const addUserToRole = async (userId: string, role: string) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data, error } = await supabase.from("user_roles").insert([{ user_id: userId, role_type: role }]);
+  const { data, error } = await supabaseServer.from("user_roles").insert([{ user_id: userId, role_type: role }]);
   if (error) throw error;
   return data;
 };
 
 export const getUserRoles = async (userId: string) => {
-  const { data, error } = await supabase.from("user_roles").select().eq("user_id", userId);
+  const { data, error } = await supabaseServer.from("user_roles").select().eq("user_id", userId);
   if (error) throw error;
   return data;
 };

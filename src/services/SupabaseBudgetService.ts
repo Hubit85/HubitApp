@@ -540,7 +540,7 @@ export class SupabaseBudgetService {
   }> {
     try {
       // Esta es una versión simplificada de la lógica de elegibilidad
-      let query = supabase
+      const query = supabase
         .from('service_providers')
         .select('company_name, rating_average, total_jobs_completed, service_categories')
         .eq('is_active', true)

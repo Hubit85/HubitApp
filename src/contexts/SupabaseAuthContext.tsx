@@ -423,7 +423,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 console.log(`🔄 FALLBACK: Creating role ${i + 1}/${orderedRoles.length}: ${roleRequest.roleType} (${roleRequest.isPrimary ? 'PRIMARY' : 'ADDITIONAL'})`);
 
                 // Generate community code if needed
-                let processedRoleData = { ...roleRequest.roleSpecificData };
+                const processedRoleData = { ...roleRequest.roleSpecificData };
                 if (roleRequest.roleType === 'community_member' && processedRoleData.address) {
                   processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
                 }

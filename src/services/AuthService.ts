@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 
 export interface User {
   id: string;
@@ -157,12 +158,15 @@ class AuthService {
   }
 
   static async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _email } = { _email: email };
-    // This would use Supabase Auth to send a password reset link.
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/update-password`,
     });
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+    
+    return { success: true, message: "Si existe una cuenta con este email, se ha enviado un enlace para restablecer la contraseña." };
   }
 
   getToken(): string | null {

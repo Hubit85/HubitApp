@@ -174,7 +174,7 @@ export class SupabasePropertyService {
     // For now, returning all properties as a placeholder
     const { data, error } = await supabase.from("properties").select("*");
     if (error) return { success: false, message: error.message };
-    return { success: true, properties: data };
+    return { success: true, properties: data, message: `Found ${data?.length || 0} properties.` };
   }
 
   // Statistics and analytics

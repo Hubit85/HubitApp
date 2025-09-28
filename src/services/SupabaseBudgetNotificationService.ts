@@ -116,7 +116,7 @@ export class SupabaseBudgetNotificationService {
       }
 
       // Buscar proveedores activos y verificados
-      let query = supabase
+      const query = supabase
         .from('service_providers')
         .select('*')
         .eq('is_active', true)

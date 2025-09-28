@@ -374,7 +374,7 @@ export class PropertyAutoService {
 
         // Actualizar información de comunidad si aplica - usando descripción en su lugar
         if (updatedUserData.user_type === "community_member") {
-          let communityDescription = property.description || '';
+          const communityDescription = property.description || '';
           
           if (updatedUserData.community_name || updatedUserData.portal_number || updatedUserData.apartment_number) {
             const newCommunityDescription = `${updatedUserData.community_name || ''}${updatedUserData.portal_number ? ` - Portal ${updatedUserData.portal_number}` : ''}${updatedUserData.apartment_number ? ` - Apto ${updatedUserData.apartment_number}` : ''}`;

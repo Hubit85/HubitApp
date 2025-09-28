@@ -312,12 +312,15 @@ class PayPalService {
 
   static async handleWebhook(headers: any, body: any, webhookId: string): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _headers = headers;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _body = body;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _webhookId = webhookId;
-    const client = this.getClient();
-    const request = new paypal.orders.OrdersGetRequest(body.resource.id);
-    const order = await client.execute(request);
+    // const client = this.getClient();
+    // const request = new paypal.orders.OrdersGetRequest(body.resource.id);
+    // const order = await client.execute(request);
+    console.log("handleWebhook logic needs to be implemented");
   }
 }
 

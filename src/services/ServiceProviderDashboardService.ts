@@ -45,16 +45,6 @@ export const ServiceProviderDashboardService = {
     };
   },
 
-  static async getDashboardData(providerId: string): Promise<any> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _providerId = providerId;
-    // Placeholder data
-    return {
-      activeQuotes: 5,
-      acceptedQuotes: 12,
-    };
-  },
-
   async getOpenBudgetRequests(_providerId: string): Promise<BudgetRequest[]> {
     const { data, error } = await supabase
       .from("budget_requests")
