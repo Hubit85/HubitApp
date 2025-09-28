@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { 
   X, Camera, Loader2, Shield, 
-  CheckCircle, MapPin, Clock, AlertCircle, Home
+  CheckCircle, MapPin, Clock, AlertCircle, Home, FileImage
 } from "lucide-react";
 import PropertySelector from "@/components/PropertySelector";
 import type { Property } from "@/integrations/supabase/types";

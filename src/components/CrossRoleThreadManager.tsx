@@ -38,6 +38,7 @@ export function CrossRoleThreadManager() {
   const [currentThread, setCurrentThread] = useState<string>('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     if (user) {

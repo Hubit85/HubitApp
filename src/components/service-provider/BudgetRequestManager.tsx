@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Search, MapPin, Clock, Euro, CheckCircle, 
   Send, Eye, MessageSquare, Calendar, User,
-  Loader2, RefreshCw, FileText
+  Loader2, RefreshCw, FileText, Building
 } from "lucide-react";
 import { BudgetRequest, Quote } from "@/integrations/supabase/types";
 
@@ -435,28 +435,6 @@ export function BudgetRequestManager() {
       </Card>
     );
   }
-
-  const handleViewRequest = async (request: ExtendedBudgetRequest) => {
-    try {
-      const currentViewsCount = request.views_count || 0;
-      const { error } = await supabase
-        .from("budget_requests")
-        .update({ views_count: currentViewsCount + 1 })
-        .eq("id", request.id);
-      
-      if(error) console.warn("Could not update view count", error);
-
-      setBudgetRequests(prev => prev.map(r => r.id === request.id ? {
-        ...r, 
-        views_count: currentViewsCount + 1
-      } : r));
-      setSelectedRequest(request);
-
-    } catch (err) {
-      console.error("Error on viewing request:", err);
-    }
-  }
-
 
   if (loading) {
     return (

@@ -16,7 +16,7 @@ import {
   FileText, Search, Euro, CheckCircle, 
   Eye, Calendar, User, Signature,
   Loader2, RefreshCw, Edit,
-  Award, MapPin, DollarSign
+  Award, MapPin, DollarSign, Clock, BookOpen
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
