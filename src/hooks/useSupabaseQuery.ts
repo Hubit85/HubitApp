@@ -1,6 +1,4 @@
-
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { PostgrestError } from "@supabase/supabase-js";
 
 interface UseSupabaseQueryOptions {

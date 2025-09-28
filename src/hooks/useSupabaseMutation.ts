@@ -1,15 +1,14 @@
-
 import { useState } from "react";
 import { PostgrestError } from "@supabase/supabase-js";
 
-interface MutationOptions<T, R> {
+interface MutationOptions<R> {
   onSuccess?: (data: R) => void;
   onError?: (error: PostgrestError) => void;
 }
 
 export function useSupabaseMutation<T = any, R = any>(
   mutationFn: (variables: T) => Promise<{ data: R | null; error: PostgrestError | null }>,
-  options: MutationOptions<T, R> = {}
+  options: MutationOptions<R> = {}
 ) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<PostgrestError | null>(null);
