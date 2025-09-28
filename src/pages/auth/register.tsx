@@ -516,16 +516,16 @@ function RegisterPageContent() {
   };
 
   // Calculate total cost for selected services
-  const calculateTotalServiceCost = () => {
-    const costs = formData.service_provider.service_costs;
-    return Object.values(costs).reduce((sum, cost) => sum + cost, 0);
-  };
+  // const calculateTotalServiceCost = () => {
+  //   const costs = formData.service_provider.service_costs;
+  //   return Object.values(costs).reduce((sum, cost) => sum + cost, 0);
+  // };
 
   // Get service name by ID
-  const getServiceNameById = (serviceId: string) => {
-    const service = SERVICE_CATEGORIES.find(s => s.id === serviceId);
-    return service ? service.name : serviceId;
-  };
+  // const getServiceNameById = (serviceId: string) => {
+  //   const service = SERVICE_CATEGORIES.find(s => s.id === serviceId);
+  //   return service ? service.name : serviceId;
+  // };
 
   // Validar datos del rol actual
   const validateCurrentRole = (): boolean => {

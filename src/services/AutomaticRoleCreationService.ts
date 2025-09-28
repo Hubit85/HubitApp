@@ -37,6 +37,23 @@ export class AutomaticRoleCreationService {
     const createdRoles: any[] = [];
     let syncResults: any = null;
 
+    // BULLETPROOF: Check if email already exists before attempting registration
+    try {
+      const { data: existingProfile, error: emailCheckError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', email)
+        .maybeSingle();
+        
+      if (emailCheckError) {
+        console.warn("Email check failed, but continuing:", emailCheckError);
+      } else if (existingProfile) {
+        return { error: "Ya existe una cuenta con este email" };
+      }
+    } catch (emailCheckError) {
+      console.warn("Email check failed, but continuing:", emailCheckError);
+    }
+
     // ENHANCED: Automatic detection of multi-role users during registration
     console.log('🎯 AUTO-DETECTION: Analyzing email pattern for automatic multi-role assignment...');
     

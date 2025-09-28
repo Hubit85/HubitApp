@@ -542,7 +542,6 @@ export class CrossRoleDataService {
       for (const role of userRoles.filter(r => r.is_verified)) {
         const roleData = (role.role_specific_data as Record<string, any>) || {};
         const propertyAssociations = roleData.property_associations || [];
-        const syncMetadata = roleData.sync_metadata || {};
         const syncHistory = roleData.sync_history || [];
 
         // Find sync partners

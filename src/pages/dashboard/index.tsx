@@ -1335,14 +1335,8 @@ export default function Dashboard() {
         return (
           <>
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-black mb-2">
-                {roleType === "service_provider" ? "Evaluaciones Recibidas" : "Evaluación de Servicios"}
-              </h1>
-              <p className="text-stone-600">
-                {roleType === "service_provider" 
-                  ? "Revisa las calificaciones y comentarios de tus clientes"
-                  : "Califica los servicios recibidos"}
-              </p>
+              <h1 className="text-3xl font-bold text-black mb-2">Evaluación de Servicios</h1>
+              <p className="text-stone-600">Califica los servicios recibidos</p>
             </div>
             
             <Card className="border-stone-200 shadow-lg mt-6">
@@ -1351,61 +1345,10 @@ export default function Dashboard() {
                   <StarIcon className="h-8 w-8 text-amber-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-black mb-2">
-                  Sistema de Evaluaciones{roleType === "service_provider" ? " - Recibidas" : ""}
+                  Sistema de Evaluaciones
                 </h3>
-                <p className="text-stone-600 mb-6">
-                  {roleType === "service_provider"
-                    ? "Aquí podrás ver todas las evaluaciones que tus clientes han dejado sobre tus servicios, tanto calificaciones como comentarios detallados."
-                    : "Aquí podrás calificar los servicios que has recibido, ayudando a otros usuarios a encontrar los mejores proveedores."}
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="p-4 bg-stone-50 rounded-lg">
-                    <div className="flex items-center justify-center mb-2">
-                      {[1,2,3,4,5].map((star) => (
-                        <Star key={star} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <p className="text-sm font-medium text-stone-900">
-                      {roleType === "service_provider" ? "Promedio General" : "Calificación"}
-                    </p>
-                    <p className="text-xs text-stone-600">
-                      {roleType === "service_provider" ? "4.8/5.0" : "Puntúa del 1 al 5"}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-stone-50 rounded-lg">
-                    {roleType === "service_provider" ? (
-                      <>
-                        <Award className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                        <p className="text-sm font-medium text-stone-900">Servicios Completados</p>
-                        <p className="text-xs text-stone-600">47 trabajos</p>
-                      </>
-                    ) : (
-                      <>
-                        <FileText className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                        <p className="text-sm font-medium text-stone-900">Comentarios</p>
-                        <p className="text-xs text-stone-600">Comparte tu experiencia</p>
-                      </>
-                    )}
-                  </div>
-                  <div className="p-4 bg-stone-50 rounded-lg">
-                    {roleType === "service_provider" ? (
-                      <>
-                        <Target className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                        <p className="text-sm font-medium text-stone-900">Tasa de Satisfacción</p>
-                        <p className="text-xs text-stone-600">96%</p>
-                      </>
-                    ) : (
-                      <>
-                        <ThumbsUp className="h-6 w-6 text-stone-600 mx-auto mb-2" />
-                        <p className="text-sm font-medium text-stone-900">Recomendación</p>
-                        <p className="text-xs text-stone-600">¿Lo recomendarías?</p>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
-                  Próximamente disponible
-                </Badge>
+                {/* This is a temporary placeholder, actual implementation will be more complex */}
+                <ProviderServiceHistoryCard />
               </CardContent>
             </Card>
           </>

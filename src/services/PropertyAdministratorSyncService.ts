@@ -162,7 +162,7 @@ export class PropertyAdministratorSyncService {
                 .maybeSingle();
 
               if (!existingUserRole) {
-                const { data: newUserRole, error: createRoleError } = await supabase
+                const { error: createRoleError } = await supabase
                   .from('user_roles')
                   .insert({
                     user_id: propertyAdmin.user_id,
@@ -181,9 +181,7 @@ export class PropertyAdministratorSyncService {
                       company_country: 'España'
                     },
                     verification_confirmed_at: new Date().toISOString()
-                  })
-                  .select()
-                  .single();
+                  });
 
                 if (createRoleError) {
                   // MANEJAR ERROR DE DUPLICATE KEY más graciosamente
