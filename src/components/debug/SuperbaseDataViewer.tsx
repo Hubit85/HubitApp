@@ -294,7 +294,7 @@ export function SupabaseDataViewer() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {data.profiles?.map((profile: any, index: number) => (
+            {data.profiles?.map((profile: any) => (
               <div key={profile.id} className="flex items-center gap-2 p-2 bg-indigo-50 rounded text-sm">
                 <span className="font-medium">{profile.full_name || 'Sin nombre'}</span>
                 <span className="text-gray-600">({profile.email})</span>

@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -104,8 +103,6 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   
-  const [, setShowPreview] = useState(false);
-  const [, setPreviewLoading] = useState(false);
   const [providerPreview, setProviderPreview] = useState<ProviderPreviewResults | null>(null);
 
   const [formData, setFormData] = useState<BudgetRequestInsert>({
