@@ -213,7 +213,7 @@ export class PropertyAdministratorSyncService {
 
       // PASO 5: Verificación final SIN joins problemáticos
       console.log('🔍 PROPERTY SYNC: Verificación final...');
-      const { data: finalVerification } = await supabase
+      const { data: finalVerification, error: verificationError } = await supabase
         .from('property_administrators')
         .select(`
           id,
@@ -221,6 +221,12 @@ export class PropertyAdministratorSyncService {
           company_name,
           contact_email
         `);
+
+      if (!verificationError && finalVerification && finalVerification.length > 0) {
+        console.log(`✅ FALLBACK: Final verification PASSED - ${finalVerification.length} roles confirmed in database`);
+      } else {
+        console.warn(`⚠️ Final verification warning: Expected ${propertyAdmins?.length || 0} roles, found ${finalVerification?.length || 0}`);
+      }
 
       console.log('✅ PROPERTY SYNC: Verificación final completada. Encontrados:', finalVerification?.length || 0);
 

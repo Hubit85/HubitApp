@@ -777,18 +777,12 @@ export class AutomaticRoleCreationService {
       try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name, user_type, phone, address, city, postal_code, country')
+          .select('full_name, email, phone')
           .eq('id', userId)
           .single();
-
-        if (profile) {
-          profileData = { ...profileData, ...profile };
-          console.log('✅ ENHANCED EMERGENCY: Profile data retrieved');
-        } else {
-          console.warn('⚠️ ENHANCED EMERGENCY: No profile found, using defaults');
-        }
-      } catch (profileError) {
-        console.warn('⚠️ ENHANCED EMERGENCY: Profile query failed, using defaults:', profileError);
+        profileData = profile;
+      } catch (_profileError) {
+        console.warn(`PROPERTY SYNC: No se pudo obtener perfil para user_role ${userId}`);
       }
 
       // ENHANCED: Check if emergency role already exists
@@ -958,7 +952,7 @@ export class AutomaticRoleCreationService {
         actualCount: finalCount,
         expectedCount: expectedRolesCount
       };
-    } catch (_finalError) {
+    } catch (_error) {
       return {
         success: false,
         message: `Monitoring failed with timeout and final check error`,

@@ -433,7 +433,7 @@ function RegisterPageContent() {
       const isValid = validateCIF(cif) && !['A00000000', 'B00000000'].includes(cif);
       setCifValid(isValid);
       return isValid;
-    } catch (error) {
+    } catch (_error) {
       setCifValid(false);
       return false;
     } finally {
@@ -1510,8 +1510,7 @@ function RegisterPageContent() {
                                         Información pre-rellenada
                                       </h4>
                                       <p className="text-sm text-blue-800">
-                                        Hemos copiado automáticamente tus datos personales del perfil de "Particular". 
-                                        Puedes modificar cualquier campo si es necesario.
+                                        Hemos copiado automáticamente tus datos personales del perfil de &quot;Particular&quot;.
                                       </p>
                                     </div>
                                   </div>

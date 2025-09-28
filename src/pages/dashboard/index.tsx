@@ -1351,16 +1351,20 @@ export default function Dashboard() {
                 <ServiceHistoryCard 
                   service={{
                     id: 'sample-1',
-                    name: 'Servicio de prueba',
-                    provider: 'Proveedor ejemplo',
-                    date: new Date().toISOString(),
-                    status: 'completed',
+                    serviceName: 'Servicio de prueba',
+                    providerName: 'Proveedor ejemplo',
+                    providerImage: '/api/placeholder/64/64',
                     category: 'Fontanería',
+                    date: new Date().toLocaleDateString(),
+                    cost: 150,
+                    status: 'completed',
                     rating: 4.5,
-                    providerId: 'sample-provider-1'
+                    comment: 'Servicio excelente',
+                    location: 'Madrid',
+                    duration: '2 horas'
                   }}
-                  onRate={(serviceId: string, rating: number, comment: string) => {
-                    console.log('Rating submitted:', { serviceId, rating, comment });
+                  onRate={(serviceId: string) => {
+                    console.log('Rating service:', serviceId);
                   }}
                   onViewDetails={(serviceId: string) => {
                     console.log('View details:', serviceId);
