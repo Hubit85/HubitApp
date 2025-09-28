@@ -1356,7 +1356,8 @@ export default function Dashboard() {
                     date: new Date().toISOString(),
                     status: 'completed',
                     category: 'Fontanería',
-                    rating: 4.5
+                    rating: 4.5,
+                    providerId: 'sample-provider-1'
                   }}
                   onRate={(serviceId: string, rating: number, comment: string) => {
                     console.log('Rating submitted:', { serviceId, rating, comment });

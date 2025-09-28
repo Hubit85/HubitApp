@@ -347,7 +347,7 @@ function RegisterPageContent() {
           router.push("/dashboard");
           
         } catch (verificationError) {
-          console.log("❌ Session verification error, clearing state...", verificationError);
+          console.error("❌ Session verification error, clearing state...", verificationError);
           if (typeof window !== 'undefined') {
             localStorage.clear();
             sessionStorage.clear();
@@ -1845,7 +1845,7 @@ function RegisterPageContent() {
                                 </h4>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                  {formData.service_provider.selected_services.map((serviceId) => {
+                                  {formData.service_provider.selected_services.map((serviceId, _index) => {
                                     const service = SERVICE_CATEGORIES.find(s => s.id === serviceId);
                                     if (!service) return null;
                                     
