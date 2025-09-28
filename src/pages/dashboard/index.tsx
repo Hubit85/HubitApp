@@ -1263,7 +1263,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <ServiceProviderBudgetManager 
-                providerId={activeRole?.id || user?.id || ""} 
+                providerId={activeRole?.id || ""}
               />
             </>
           );

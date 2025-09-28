@@ -383,6 +383,7 @@ function RegisterPageContent() {
         return () => clearTimeout(timeoutId);
     }, [user, session, loading, router]);
 
+    /*
     const _DynamicServiceIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
         const iconProps = { className: className || "h-6 w-6 text-white" };
         switch (iconName) {
@@ -403,6 +404,7 @@ function RegisterPageContent() {
             default: return <Wrench {...iconProps} />;
         }
     };
+    */
 
     // Password validation
     useEffect(() => {
@@ -424,7 +426,7 @@ function RegisterPageContent() {
         const orderedRoles = getOrderedRoles(formData.roles);
         return orderedRoles[currentRoleIndex] || null;
     };
-
+    /*
     // Calcular el progreso total del registro
     const _calculateProgress = (): number => {
         if (currentStep === 1) return 20; // Selección de roles
@@ -438,6 +440,7 @@ function RegisterPageContent() {
         if (currentStep === 3) return 90; // Contraseña
         return 100; // Completado
     };
+    */
 
     // CIF validation function
     const validateCIF = (cif: string): boolean => {
