@@ -229,7 +229,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.log(`🔄 Profile creation attempt ${profileCreationAttempts}/${maxProfileAttempts}`);
             
             try {
-              const { data: createdProfile, error: profileError } = await supabase
+              const { error: profileError } = await supabase
                 .from("profiles")
                 .insert(profileData)
                 .select()
@@ -412,7 +412,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.log(`🎭 FALLBACK: Creating ${orderedRoles.length} roles with original system...`);
 
             const createdRoles: any[] = [];
-            const roleErrors: string[] = [];
             let allRolesCreated = false;
             
             // TRANSACTION-STYLE ROLE CREATION: All or nothing approach (ORIGINAL SYSTEM)
@@ -861,7 +860,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         };
 
         await loadUserProfile(userObject);
-      } catch (profileFetchError) {
+      } catch (_profileFetchError) {
         console.warn("⚠️ Profile fetch timeout, using emergency profile");
         
         const now = new Date().toISOString();
@@ -1654,8 +1653,9 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
       await fetchUserData(user);
       return {};
-    } catch (error) {
-      return { error: "An unexpected error occurred while updating profile" };
+    } catch (err) {
+        const error = err as Error
+        return { error: error.message || "An unexpected error occurred while updating profile" };
     }
   };
 
