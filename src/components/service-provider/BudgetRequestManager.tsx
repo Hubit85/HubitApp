@@ -458,65 +458,6 @@ export function BudgetRequestManager() {
   }
 
 
-  const renderBudgetRequestCard = (request: ExtendedBudgetRequest) => {
-    return (
-      <Card
-        key={request.id}
-        className="hover:shadow-lg transition-shadow cursor-pointer"
-        onClick={() => handleViewRequest(request)}
-      >
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <Badge variant="secondary" className="mb-2">
-                {request.category}
-              </Badge>
-              <CardTitle>{request.title}</CardTitle>
-              <CardDescription className="flex items-center gap-2 mt-1">
-                <User className="h-4 w-4" />
-                <span>{request.profiles?.full_name || 'Usuario desconocido'}</span>
-                <Separator orientation="vertical" className="h-4" />
-                <MapPin className="h-4 w-4" />
-                <span>{request.properties?.address || request.work_location || 'Dirección no especificada'}</span>
-              </CardDescription>
-            </div>
-            <Badge variant={request.urgency === "high" ? "destructive" : "outline"}>
-              {request.urgency}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="line-clamp-2 text-sm text-gray-600">
-            {request.description}
-          </p>
-          <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
-            <div className="flex items-center gap-1">
-              <Euro className="h-4 w-4" />
-              <span>
-                {request.budget_range_min && request.budget_range_max
-                  ? `${request.budget_range_min} - ${request.budget_range_max}`
-                  : "Not specified"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>
-                Due:{" "}
-                {request.deadline_date
-                  ? new Date(request.deadline_date).toLocaleDateString()
-                  : "Not specified"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Eye className="h-4 w-4" />
-              <span>{request.views_count || 0} views</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
   if (loading) {
     return (
       <Card>
@@ -768,7 +709,7 @@ export function BudgetRequestManager() {
                                   <DialogHeader>
                                     <DialogTitle>Crear Cotización</DialogTitle>
                                     <DialogDescription>
-                                      Envía tu propuesta para &quot;{request.title}&quot;
+                                      Envía tu propuesta para &ldquo;{request.title}&rdquo;
                                     </DialogDescription>
                                   </DialogHeader>
                                   
