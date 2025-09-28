@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
@@ -12,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Link2, Settings, Users, Building2, Home, ArrowRight, CheckCircle, 
-  Clock, Zap, Info, RefreshCw, Loader2, MessageSquare, FileCheck
+  Clock, Zap, Info, RefreshCw, MessageSquare, FileCheck
 } from "lucide-react";
 
 interface ThreadProgress {
@@ -39,7 +38,6 @@ export function CrossRoleThreadManager() {
   const [currentThread, setCurrentThread] = useState<string>('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     if (user) {

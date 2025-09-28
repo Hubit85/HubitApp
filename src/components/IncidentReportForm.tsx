@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Upload, X, Camera, FileImage, Loader2, Shield, AlertTriangle, 
-  CheckCircle, MapPin, Clock, AlertCircle, Image as ImageIcon, Home
+  X, Camera, FileImage, Loader2, Shield, 
+  CheckCircle, MapPin, Clock, AlertCircle, Home
 } from "lucide-react";
 import PropertySelector from "@/components/PropertySelector";
 import type { Property } from "@/integrations/supabase/types";
@@ -486,67 +486,71 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         }
       }
 
-      console.log('Incident created successfully:', incident.id);
+      if (incident) {
+        console.log('Incident created successfully:', incident.id);
 
-      // Send notifications to the assigned administrator
-      const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
-      
-      if (targetAdministrator) {
-        try {
-          const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
-          
-          // FIXED: Safe handling of profile data with null check
-          const reporterName = profile?.full_name || user?.email?.split('@')[0] || 'Un miembro de comunidad';
-          
-          const notification = {
-            user_id: targetAdministrator.user_id,
-            title: `Nueva incidencia reportada - ${urgencyLevel?.label || 'Normal'}`,
-            message: `${reporterName} ha reportado una incidencia: "${formData.title}". Propiedad: ${formData.selectedProperty?.name || 'No especificada'}. Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
-            type: (formData.urgency === 'emergency' ? 'error' : 'info') as 'error' | 'info',
-            category: 'incident' as const,
-            related_entity_type: 'incident',
-            related_entity_id: incident.id,
-            action_url: `/dashboard?tab=incidencias&incident=${incident.id}`,
-            action_label: 'Ver Incidencia',
-            read: false
-          };
+        // Send notifications to the assigned administrator
+        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+        
+        if (targetAdministrator) {
+          try {
+            const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
+            
+            // FIXED: Safe handling of profile data with null check
+            const reporterName = profile?.full_name || user?.email?.split('@')[0] || 'Un miembro de comunidad';
+            
+            const notification = {
+              user_id: targetAdministrator.user_id,
+              title: `Nueva incidencia reportada - ${urgencyLevel?.label || 'Normal'}`,
+              message: `${reporterName} ha reportado una incidencia: "${formData.title}". Propiedad: ${formData.selectedProperty?.name || 'No especificada'}. Categoría: ${SERVICE_CATEGORIES.find(c => c.id === formData.category)?.name}`,
+              type: (formData.urgency === 'emergency' ? 'error' : 'info') as 'error' | 'info',
+              category: 'incident' as const,
+              related_entity_type: 'incident',
+              related_entity_id: incident.id,
+              action_url: `/dashboard?tab=incidencias&incident=${incident.id}`,
+              action_label: 'Ver Incidencia',
+              read: false
+            };
 
-          const { error: notifError } = await supabase.from('notifications').insert([notification]);
-          
-          if (notifError) {
-            console.warn('Failed to send notification:', notifError);
-          } else {
-            console.log(`Notification sent to administrator: ${targetAdministrator.company_name}`);
+            const { error: notifError } = await supabase.from('notifications').insert([notification]);
+            
+            if (notifError) {
+              console.warn('Failed to send notification:', notifError);
+            } else {
+              console.log(`Notification sent to administrator: ${targetAdministrator.company_name}`);
+            }
+          } catch (notifError) {
+            console.warn('Failed to create notification:', notifError);
           }
-        } catch (notifError) {
-          console.warn('Failed to create notification:', notifError);
         }
-      }
 
-      // Success message
-      setSuccessMessage(
-        targetAdministrator
-          ? `¡Incidencia reportada exitosamente! ${targetAdministrator.company_name} ha sido notificado y revisará tu solicitud.`
-          : "¡Incidencia reportada exitosamente! Se ha creado el reporte y será asignado a un administrador cuando esté disponible."
-      );
-      
-      // Reset form
-      setFormData({
-        title: "",
-        description: "",
-        category: "",
-        location: "",
-        urgency: "normal",
-        photos: [],
-        selectedProperty: undefined,
-        selectedUnit: undefined
-      });
+        // Success message
+        setSuccessMessage(
+          targetAdministrator
+            ? `¡Incidencia reportada exitosamente! ${targetAdministrator.company_name} ha sido notificado y revisará tu solicitud.`
+            : "¡Incidencia reportada exitosamente! Se ha creado el reporte y será asignado a un administrador cuando esté disponible."
+        );
+        
+        // Reset form
+        setFormData({
+          title: "",
+          description: "",
+          category: "",
+          location: "",
+          urgency: "normal",
+          photos: [],
+          selectedProperty: undefined,
+          selectedUnit: undefined
+        });
 
-      // Call success callback
-      if (onSuccess) {
-        setTimeout(() => {
-          onSuccess();
-        }, 2000);
+        // Call success callback
+        if (onSuccess) {
+          setTimeout(() => {
+            onSuccess();
+          }, 2000);
+        }
+      } else {
+         setError("No se pudo crear la incidencia. El resultado fue nulo.");
       }
 
     } catch (err) {
@@ -600,7 +604,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
             Esta funcionalidad está disponible exclusivamente para miembros de comunidad verificados.
           </p>
           <Badge className="bg-amber-100 text-amber-800">
-            Se requiere rol de "Miembro de Comunidad"
+            Se requiere rol de &quot;Miembro de Comunidad&quot;
           </Badge>
         </CardContent>
       </Card>

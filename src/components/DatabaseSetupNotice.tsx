@@ -257,7 +257,7 @@ export default function DatabaseSetupNotice() {
               <li>Ejecuta el archivo: <code className="bg-gray-100 px-1 rounded">docs/complete-database-setup.sql</code></li>
               <li>Ejecuta las políticas RLS: <code className="bg-gray-100 px-1 rounded">docs/basic-rls-policies.sql</code></li>
               <li>Configura las plantillas de email siguiendo: <code className="bg-gray-100 px-1 rounded">docs/supabase-email-templates.md</code></li>
-              <li>Haz clic en "Verificar Configuración" cuando termines</li>
+              <li>Haz clic en &quot;Verificar Configuración&quot; cuando termines</li>
             </ol>
           </div>
 

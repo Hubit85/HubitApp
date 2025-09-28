@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
@@ -36,7 +35,6 @@ export function CrossRoleDataSync() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [showSyncModal, setShowSyncModal] = useState(false);
   const [pendingSync, setPendingSync] = useState<SyncOperation | null>(null);
   const [selectedProperties, setSelectedProperties] = useState<string[]>([]);
 
@@ -126,7 +124,6 @@ export function CrossRoleDataSync() {
       }
 
       setSuccessMessage(`${selectedProperties.length} propiedad(es) sincronizada(s) exitosamente entre roles`);
-      setShowSyncModal(false);
       setSelectedProperties([]);
       
       // Reload data
@@ -177,28 +174,6 @@ export function CrossRoleDataSync() {
 
     // Update the role data
     await SupabaseUserRoleService.updateRoleSpecificData(user.id, toRole, updatedData);
-  };
-
-  const handleUnsyncProperties = async (roleType: UserRole['role_type'], propertyIds: string[]) => {
-    setSyncing(true);
-    setError("");
-
-    try {
-      for (const propertyId of propertyIds) {
-        await updateRolePropertyAssociation(roleType, roleType, propertyId, 'remove');
-      }
-
-      setSuccessMessage(`Propiedades desincronizadas exitosamente`);
-      await loadUserData();
-
-      setTimeout(() => setSuccessMessage(""), 5000);
-
-    } catch (err) {
-      console.error("Error unsyncing properties:", err);
-      setError("Error al desincronizar propiedades");
-    } finally {
-      setSyncing(false);
-    }
   };
 
   const getRoleIcon = (roleType: UserRole['role_type']) => {
@@ -425,7 +400,11 @@ export function CrossRoleDataSync() {
                             <DialogFooter>
                               <Button 
                                 variant="outline" 
-                                onClick={() => setShowSyncModal(false)}
+                                onClick={() => {
+                                    // Manually close by finding the trigger's sibling, not ideal but works for uncontrolled dialog
+                                    const trigger = document.querySelector(`[data-radix-dialog-trigger][aria-expanded="true"]`);
+                                    if(trigger) (trigger as HTMLElement).click();
+                                }}
                                 disabled={syncing}
                               >
                                 Cancelar

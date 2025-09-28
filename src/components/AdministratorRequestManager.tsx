@@ -150,7 +150,7 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
       } else {
         setError(result.message);
       }
-    } catch (error) {
+    } catch (_error) {
       setError('Error inesperado al enviar la solicitud');
     } finally {
       setLoading(false);
@@ -185,7 +185,7 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
       } else {
         setError(result.message);
       }
-    } catch (error) {
+    } catch (_error) {
       setError('Error inesperado al procesar la respuesta');
     } finally {
       setLoading(false);
@@ -205,7 +205,7 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
       } else {
         setError(result.message);
       }
-    } catch (error) {
+    } catch (_error) {
       setError('Error al cancelar la solicitud');
     } finally {
       setLoading(false);
@@ -429,7 +429,7 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
                 <Building className="h-12 w-12 text-stone-400 mx-auto mb-4" />
                 <p className="text-stone-600">No has enviado solicitudes aún</p>
                 <p className="text-sm text-stone-500 mt-1">
-                  Haz clic en "Nueva Solicitud" para comenzar
+                  Haz clic en 'Nueva Solicitud' para comenzar
                 </p>
               </div>
             ) : (
@@ -770,7 +770,7 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
                   {selectedRequest.request_message && (
                     <div className="mt-2">
                       <strong>Mensaje:</strong>
-                      <p className="mt-1 italic">"{selectedRequest.request_message}"</p>
+                      <p className="mt-1 italic">&quot;{selectedRequest.request_message}&quot;</p>
                     </div>
                   )}
                 </div>
