@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useRouter } from "next/router";
-import { supabase } from "@/integrations/supabase/client";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
 import { AdministratorRequestManager } from "@/components/AdministratorRequestManager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { CheckCircle, UserCheck, Clock, User, Users, Building, Settings, Home, Edit3, Mail, Phone, MapPin, Calendar, Shield, ArrowLeft, RefreshCw, MessageSquare } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckCircle, UserCheck, User, Users, Building, Settings, Home, Edit3, Mail, Phone, MapPin, Calendar, Shield, ArrowLeft, RefreshCw, MessageSquare } from "lucide-react";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "@/contexts/LanguageContext";
 

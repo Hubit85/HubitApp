@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('🔧 TEST: Environment variables:', { hasUrl, hasServiceKey, hasAnonKey });
     
     // Test 2: Conexión básica
-    const { data: testData, error: testError } = await supabaseServer
+    const { error: testError } = await supabaseServer
       .from('profiles')
       .select('count')
       .limit(1);

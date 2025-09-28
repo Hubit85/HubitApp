@@ -16,7 +16,6 @@ import {
   Home,
   ArrowLeft
 } from "lucide-react";
-import Link from "next/link";
 
 interface Property {
   id: string;

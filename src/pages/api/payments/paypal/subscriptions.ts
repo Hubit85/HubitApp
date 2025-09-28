@@ -35,7 +35,6 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
     if (req.method === 'POST') {
       try {
         const { planId, subscriberEmail, subscriberName } = req.body;
-        const userId = req.user?.userId;
 
         if (!planId) {
           return res.status(400).json({ message: 'Plan ID is required' });

@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         );
 
-        const { data, error } = await testClient
+        const { error } = await testClient
           .from('profiles')
           .select('id')
           .limit(1);

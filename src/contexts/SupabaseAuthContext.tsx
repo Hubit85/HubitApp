@@ -754,10 +754,10 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               .maybeSingle();
 
             const result = await Promise.race([profilePromise, timeoutPromise]) as any;
-            const { data: profileData, error: profileError } = result;
+            const { data: profileData } = result;
 
-            if (profileError && profileError.code !== 'PGRST116') {
-              console.warn("⚠️ Profile fetch error:", profileError.message);
+            if (result.error && result.error.code !== 'PGRST116') {
+              console.warn("⚠️ Profile fetch error:", result.error.message);
             }
 
             if (profileData) {
@@ -827,7 +827,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 console.log("✅ Using fallback profile");
               }
             }
-          } catch (profileFetchError) {
+          } catch {
             console.warn("⚠️ Profile fetch timeout, using emergency profile");
             
             const now = new Date().toISOString();

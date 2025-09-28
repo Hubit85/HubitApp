@@ -33,9 +33,8 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
   authenticateToken(req, res, () => {
     if (req.method === 'GET') {
       try {
-        const userId = req.user?.userId;
         const userRole = req.user?.role;
-        const { period = 'month' } = req.query;
+        
 
         let dashboardData;
 

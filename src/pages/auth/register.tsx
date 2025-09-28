@@ -16,8 +16,8 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Sparkles, UserCircle,
   Home, Users, Wrench, Building, MapPin, FileText, AlertCircle, CheckCircle, Shield,
-  ArrowLeft, Clock, Star,
-  DollarSign, AlertTriangle, Zap, Trees, Paintbrush, Thermometer, Hammer, Key, Truck, Settings
+  ArrowLeft, Star,
+  AlertTriangle, Zap, Trees, Paintbrush, Thermometer, Hammer, Key, Truck, Settings
 } from "lucide-react";
 
 type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
@@ -1570,7 +1570,7 @@ function RegisterPageContent() {
                               <div className="space-y-2 md:col-span-2">
                                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                                   <div className="flex items-start space-x-3">
-                                    <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                                    <CheckCircle className="w-5 h-5 mr-2 text-blue-600 mt-0.5 flex-shrink-0" />
                                     <div>
                                       <h4 className="font-medium text-blue-900 mb-1">
                                         Información pre-rellenada
@@ -1885,25 +1885,14 @@ function RegisterPageContent() {
                                         <DynamicServiceIcon iconName={service.icon} />
                                       </div>
                                       
-                                      <h4 className={`font-bold text-lg mb-2 ${isSelected ? 'text-stone-800' : 'text-stone-900'}`}>
-                                        {service.name}
-                                      </h4>
+                                      <h4 className={`font-bold text-lg mb-2 ${isSelected ? 'text-stone-800' : 'text-stone-900'}`}>{service.name}</h4>
+                                      <p className="text-sm text-stone-600 mb-3 min-h-[2.5rem]">{service.description}</p>
                                       
-                                      <p className="text-sm text-stone-600 mb-3 min-h-[2.5rem]">
-                                        {service.description}
-                                      </p>
-                                      
-                                      <div className={`text-center p-3 rounded-lg ${
-                                        isSelected ? 'bg-stone-800 text-white' : 'bg-stone-100'
-                                      }`}>
-                                        <p className={`text-lg font-bold ${
-                                          isSelected ? 'text-white' : 'text-stone-900'
-                                        }`}>
+                                      <div className={`text-center p-3 rounded-lg ${isSelected ? 'bg-stone-800 text-white' : 'bg-stone-100'}`}>
+                                        <p className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-stone-900'}`}>
                                           €{service.cost}
                                         </p>
-                                        <p className={`text-xs ${
-                                          isSelected ? 'text-stone-200' : 'text-stone-600'
-                                        }`}>
+                                        <p className={`text-xs ${isSelected ? 'text-stone-200' : 'text-stone-600'}`}>
                                           /mes por servicio
                                         </p>
                                       </div>
@@ -1945,19 +1934,17 @@ function RegisterPageContent() {
 
                                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                                   <div className="flex items-start gap-2 text-amber-800">
-                                    <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                                    <div>
-                                      <h5 className="font-medium text-blue-900 mb-1">
-                                        Información sobre la facturación
-                                      </h5>
-                                      <ul className="text-sm text-blue-800 space-y-1">
-                                        <li>• La facturación comenzará una vez que tu cuenta sea verificada</li>
-                                        <li>• Puedes modificar tus servicios desde tu panel de control</li>
-                                        <li>• El primer mes de cada servicio tiene un 50% de descuento</li>
-                                        <li>• Solo pagas por los servicios que mantengas activos</li>
-                                      </ul>
-                                    </div>
+                                    <AlertCircle className="h-4 w-4" />
+                                    <span className="text-sm font-medium">
+                                      Información sobre la facturación
+                                    </span>
                                   </div>
+                                  <ul className="text-sm text-blue-800 space-y-1 mt-2">
+                                    <li>• La facturación comenzará una vez que tu cuenta sea verificada</li>
+                                    <li>• Puedes modificar tus servicios desde tu panel de control</li>
+                                    <li>• El primer mes de cada servicio tiene un 50% de descuento</li>
+                                    <li>• Solo pagas por los servicios que mantengas activos</li>
+                                  </ul>
                                 </div>
 
                                 {formData.service_provider.selected_services.length === 0 && (
@@ -2209,6 +2196,24 @@ function RegisterPageContent() {
                       </Button>
                     </div>
                   </form>
+
+                  {/* Info Box */}
+                  <div className="mt-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
+                    <div className="flex items-start gap-2 text-stone-600">
+                      <AlertCircle className="h-4 w-4 text-stone-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h5 className="font-medium text-stone-900 mb-1">
+                          Información importante sobre la contraseña
+                        </h5>
+                        <ul className="text-sm space-y-1">
+                          <li>• La contraseña debe tener al menos 8 caracteres</li>
+                          <li>• Debe incluir al menos una mayúscula, una minúscula y un número</li>
+                          <li>• No se permiten espacios en blanco</li>
+                          <li>• No se permiten caracteres especiales</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </>
             )}

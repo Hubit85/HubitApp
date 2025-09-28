@@ -35,7 +35,6 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
     if (req.method === 'POST') {
       try {
         const { paymentIntentId, paymentMethodId } = req.body;
-        const userId = req.user?.userId;
 
         if (!paymentIntentId) {
           return res.status(400).json({ message: 'Payment intent ID is required' });

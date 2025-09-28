@@ -15,7 +15,7 @@ function loadEnvFile() {
       let loadedCount = 0;
       console.log("📄 Processing", envLines.length, "lines from .env.local");
       
-      envLines.forEach((line, index) => {
+      envLines.forEach((line, _index) => {
         const trimmedLine = line.trim();
         if (trimmedLine && !trimmedLine.startsWith("#") && trimmedLine.includes("=")) {
           const equalIndex = trimmedLine.indexOf("=");

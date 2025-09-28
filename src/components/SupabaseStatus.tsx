@@ -25,7 +25,7 @@ export default function SupabaseStatus() {
       
       const { error } = await Promise.race([connectionPromise, timeoutPromise]);
       return !error || error.code === 'PGRST116';
-    } catch (_error) {
+    } catch {
       // Silent handling - don't log to console to avoid user-visible errors
       return false;
     }
@@ -58,7 +58,7 @@ export default function SupabaseStatus() {
         return false;
       });
       setDbStatus(hasFailures ? 'error' : 'ready');
-    } catch (_error) {
+    } catch {
       // Silent handling - don't log to console to avoid user-visible errors
       setDbStatus('error');
     }
@@ -79,13 +79,13 @@ export default function SupabaseStatus() {
       try {
         const connected = await checkConnection();
         if (mounted) setConnectionStatus(connected ? 'connected' : 'error');
-      } catch (_error) {
+      } catch {
         if (mounted) setConnectionStatus('error');
       }
       
       try {
         await checkDatabaseTables();
-      } catch (_error) {
+      } catch {
         if (mounted) setDbStatus('error');
       }
     };

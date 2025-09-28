@@ -1,12 +1,11 @@
-
 import React, { useEffect, useState } from "react";
-import Head from "next/head";
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building, Wrench, Star, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Zap, Gift, Crown, Sparkles, TrendingUp, Shield, Globe } from "lucide-react";
+import { Users, Building, Wrench, Star, CreditCard, Coins, Wallet, ArrowRight, CheckCircle, Gift, Crown, Sparkles, TrendingUp, Shield, Globe } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import Image from "next/image";
 import SupabaseStatus from "@/components/SupabaseStatus";

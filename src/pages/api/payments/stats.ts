@@ -33,9 +33,6 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
   authenticateToken(req, res, () => {
     if (req.method === 'GET') {
       try {
-        const { period } = req.query;
-        const userId = req.user?.userId;
-
         const stats = {
           totalRevenue: 2450.00,
           totalPayments: 12,

@@ -79,7 +79,7 @@ export default function PropertyManager() {
       
       let res;
       if (isEditing) {
-        const { id: _id, created_at: _createdAt, user_id: _userId, ...updateData } = propertyData as Property;
+        const { id, created_at, user_id, ...updateData } = propertyData as Property;
         res = await supabase.from("properties").update(updateData).eq("id", currentProperty.id!);
       } else {
         const insertData: PropertyInsert = {

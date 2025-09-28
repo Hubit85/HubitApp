@@ -7,11 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  Loader2, User, Crown, Star, LogOut, Settings, CheckCircle, ArrowRight, ChevronDown, ChevronRight,
+  Loader2, User, Crown, Star, LogOut, Settings, CheckCircle, ArrowRight, ChevronRight,
   Shield, Home, Wrench, FileText, Mail, Phone, Calendar, Users, Building, Store, Bell, 
-  CreditCard, ThumbsUp, Award, StarIcon, Heart, Clock, Package, MapPin, Briefcase,
-  AlertTriangle, Video, Calculator, BarChart3, Eye, DollarSign, TrendingUp, Target,
-  PieChart, ClipboardList, MessageSquare, FileCheck
+  CreditCard, ThumbsUp, Award, StarIcon, Heart, Clock, Package,
+  AlertTriangle, Video, Calculator, BarChart3, DollarSign, TrendingUp, Target,
+  ClipboardList, MessageSquare, FileCheck
 } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import { Header } from "@/components/layout/Header";
