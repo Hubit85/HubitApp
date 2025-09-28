@@ -89,7 +89,7 @@ class AuthService {
       // Simulate a small delay for better UX
       await new Promise(resolve => setTimeout(resolve, 100));
       
-    } catch (_error) {
+    } catch {
       // Even if there's an error, we should still clear local storage
       this.removeToken();
       throw new Error('Error durante el cierre de sesión');
@@ -112,7 +112,7 @@ class AuthService {
       };
 
       return mockUser;
-    } catch (_error) {
+    } catch {
       this.removeToken();
       return null;
     }

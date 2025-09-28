@@ -85,7 +85,7 @@ export class PropertyAdministratorSyncService {
                 .eq('id', userRole.user_id)
                 .single();
               profileData = profile;
-            } catch (_profileError) {
+            } catch {
               console.warn(`PROPERTY SYNC: No se pudo obtener perfil para user_role ${userRole.id}`);
             }
 

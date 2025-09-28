@@ -38,7 +38,7 @@ export function CrossRoleThreadManager() {
   const [currentThread, setCurrentThread] = useState<string>('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [_successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -242,7 +242,7 @@ export function CrossRoleThreadManager() {
 
         <CardContent className="space-y-6">
           {/* Status Messages */}
-          {(error || successMessage) && (
+          {(error || _successMessage) && (
             <Alert className={`border-2 ${
               error 
                 ? "border-red-200 bg-red-50" 
@@ -251,7 +251,7 @@ export function CrossRoleThreadManager() {
               <AlertDescription className={`font-medium ${
                 error ? "text-red-800" : "text-green-800"
               }`}>
-                {error || successMessage}
+                {error || _successMessage}
               </AlertDescription>
             </Alert>
           )}

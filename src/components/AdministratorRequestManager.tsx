@@ -50,12 +50,6 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
   const [selectedRequest, setSelectedRequest] = useState<CommunityMemberRequest | null>(null);
 
   // Cargar datos iniciales
-  useEffect(() => {
-    if (activeRole) {
-      loadInitialData();
-    }
-  }, [activeRole, userRole]);
-
   const loadInitialData = useCallback(async () => {
     if (!activeRole) return;
 
@@ -87,32 +81,38 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
     }
   }, [activeRole]);
 
-  const loadReceivedRequests = async () => {
+  const loadReceivedRequests = useCallback(async () => {
     if (!activeRole) return;
     
     const result = await AdministratorRequestService.getReceivedRequests(activeRole.id);
     if (result.success) {
       setReceivedRequests(result.requests);
     }
-  };
+  }, [activeRole]);
 
-  const loadManagedMembers = async () => {
+  const loadManagedMembers = useCallback(async () => {
     if (!activeRole) return;
     
     const result = await AdministratorRequestService.getManagedMembers(activeRole.id);
     if (result.success) {
       setManagedMembers(result.members);
     }
-  };
+  }, [activeRole]);
 
-  const loadManagedIncidents = async () => {
+  const loadManagedIncidents = useCallback(async () => {
     if (!activeRole) return;
     
     const result = await AdministratorRequestService.getManagedIncidents(activeRole.id);
     if (result.success) {
       setManagedIncidents(result.incidents);
     }
-  };
+  }, [activeRole]);
+
+  useEffect(() => {
+    if (activeRole) {
+      loadInitialData();
+    }
+  }, [activeRole, loadInitialData]);
 
   const searchAdministrators = async () => {
     setSearchLoading(true);
@@ -250,5 +250,218 @@ setShowResponseDialog(false);
     );
   };
   
-  return <div className="space-y-6">...</div>
+  const renderCommunityMemberView = () => (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Buscar Administrador de Fincas</CardTitle>
+          <CardDescription>Encuentra y solicita un administrador para tu comunidad.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Buscar por nombre o empresa..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              disabled={searchLoading}
+            />
+            <Button onClick={searchAdministrators} disabled={searchLoading}>
+              {searchLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              Buscar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {administrators.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Resultados de la Búsqueda</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {administrators.map((admin) => (
+              <div key={admin.role_id} className="flex items-center justify-between p-2 border rounded-lg">
+                <div>
+                  <p className="font-semibold">{admin.company_name}</p>
+                  <p className="text-sm text-muted-foreground">{admin.user_name} - {admin.business_email}</p>
+                </div>
+                <Button size="sm" onClick={() => {
+                  setSelectedAdmin(admin);
+                  setShowRequestDialog(true);
+                }}>
+                  <Send className="h-4 w-4 mr-2" />
+                  Enviar Solicitud
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Mis Solicitudes Enviadas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {sentRequests.length === 0 ? (
+            <p className="text-muted-foreground">No has enviado ninguna solicitud.</p>
+          ) : (
+            <div className="space-y-2">
+              {sentRequests.map((req) => (
+                <div key={req.id} className="flex items-center justify-between p-2 border rounded-lg">
+                  <div>
+                    <p className="font-semibold">{req.property_administrator?.role_specific_data.company_name}</p>
+                    <p className="text-sm text-muted-foreground">Enviada: {formatDate(req.requested_at)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(req.status)}
+                    {req.status === "pending" && (
+                      <Button variant="destructive" size="sm" onClick={() => cancelRequest(req.id)}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Cancelar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderAdministratorView = () => (
+    <Tabs defaultValue="received-requests" className="w-full">
+      <TabsList>
+        <TabsTrigger value="received-requests">Solicitudes Recibidas</TabsTrigger>
+        <TabsTrigger value="managed-members">Miembros Gestionados</TabsTrigger>
+        <TabsTrigger value="managed-incidents">Incidencias</TabsTrigger>
+      </TabsList>
+      <TabsContent value="received-requests" className="mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Solicitudes de Gestión Recibidas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {receivedRequests.length === 0 ? (
+              <p className="text-muted-foreground">No tienes solicitudes pendientes.</p>
+            ) : (
+              <div className="space-y-2">
+                {receivedRequests.map((req) => (
+                  <div key={req.id} className="flex items-center justify-between p-2 border rounded-lg">
+                    <div>
+                      <p className="font-semibold">{req.community_member?.profiles?.full_name}</p>
+                      <p className="text-sm text-muted-foreground">Recibida: {formatDate(req.requested_at)}</p>
+                    </div>
+                    {req.status === 'pending' ? (
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedRequest(req);
+                          setShowResponseDialog(true);
+                        }}>
+                          Responder
+                        </Button>
+                      </div>
+                    ) : getStatusBadge(req.status)}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="managed-members" className="mt-4">
+        <Card>
+          <CardHeader><CardTitle>Miembros Gestionados</CardTitle></CardHeader>
+          <CardContent>
+            {managedMembers.length === 0 ? <p>No gestionas ningún miembro.</p> : managedMembers.map((member: any) => <div key={member.id}>{member.profiles?.full_name}</div>)}
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="managed-incidents" className="mt-4">
+        <Card>
+          <CardHeader><CardTitle>Incidencias Gestionadas</CardTitle></CardHeader>
+          <CardContent>
+            {managedIncidents.length === 0 ? <p>No hay incidencias.</p> : managedIncidents.map((incident: any) => <div key={incident.id}>{incident.title}</div>)}
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+
+  return (
+    <div className="space-y-6">
+      {success && <Alert variant="default" className="bg-green-100 border-green-200 text-green-800"><CheckCircle className="h-4 w-4" /><AlertDescription>{success}</AlertDescription></Alert>}
+      {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+
+      {loading && <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>}
+
+      {!loading && (userRole === "community_member" ? renderCommunityMemberView() : renderAdministratorView())}
+
+      {/* Dialog para enviar solicitud */}
+      <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enviar Solicitud a {selectedAdmin?.company_name}</DialogTitle>
+            <DialogDescription>
+              Puedes incluir un mensaje opcional con tu solicitud.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="request-message" className="text-right">
+                Mensaje
+              </Label>
+              <Textarea
+                id="request-message"
+                value={requestMessage}
+                onChange={(e) => setRequestMessage(e.target.value)}
+                className="col-span-3"
+                placeholder="Ej: Hola, nos gustaría que gestionaran nuestra comunidad..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRequestDialog(false)}>Cancelar</Button>
+            <Button onClick={sendRequest} disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enviar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Dialog para responder solicitud */}
+      <Dialog open={showResponseDialog} onOpenChange={setShowResponseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Responder a Solicitud</DialogTitle>
+            <DialogDescription>
+              Acepta o rechaza la solicitud de {selectedRequest?.community_member?.profiles?.full_name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="response-message" className="text-right">
+                Respuesta
+              </Label>
+              <Textarea
+                id="response-message"
+                value={responseMessage}
+                onChange={(e) => setResponseMessage(e.target.value)}
+                className="col-span-3"
+                placeholder="Mensaje opcional para el miembro de la comunidad..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResponseDialog(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => respondToRequest('rejected')} disabled={loading}>Rechazar</Button>
+            <Button onClick={() => respondToRequest('accepted')} disabled={loading}>Aceptar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }

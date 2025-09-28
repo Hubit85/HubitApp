@@ -1,21 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Contract,
-  Profile,
-  Property,
-  Quote,
   Rating,
 } from "@/integrations/supabase/types"
-
-type RatingWithRaterProfile = Rating & {
-  profiles: Profile
-}
-
-type ContractWithDetails = Contract & {
-  properties: Property
-  quotes: Quote
-  profiles: Profile
-}
 
 export const supabaseRatingService = {
   async getAverageRatingForUser(userId: string): Promise<number> {

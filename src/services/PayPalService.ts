@@ -283,8 +283,8 @@ class PayPalService {
 
   async verifyWebhookSignature(
     headers: Record<string, string>,
-    body: string,
-    webhookId: string
+    _body: string,
+    _webhookId: string
   ): Promise<boolean> {
     try {
       const authAlgo = headers['paypal-auth-algo'];

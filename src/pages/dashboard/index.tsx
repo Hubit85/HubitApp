@@ -1132,26 +1132,27 @@ export default function Dashboard() {
                   </div>
                   <h3 className="text-2xl font-bold text-black mb-2">Funcionalidad No Disponible</h3>
                   <p className="text-amber-700 mb-4">
-                    La gestión de propiedades está disponible únicamente para los roles "Particular" y "Miembro de Comunidad".
+                    Como miembro de comunidad, no puedes solicitar presupuestos directamente. 
+                    Para servicios en tu comunidad, debes reportar la incidencia al administrador de fincas.
                   </p>
                   <p className="text-amber-600 text-sm mb-6">
-                    Los administradores de fincas gestionan comunidades, no propiedades individuales.
+                    El administrador de fincas será quien gestione los presupuestos en nombre de la comunidad.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Button 
-                      onClick={() => setActiveTab("comunidades")}
-                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+                      onClick={() => setActiveTab("incidencias")}
+                      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
                     >
-                      <Users className="h-4 w-4 mr-2" />
-                      Gestionar Comunidades
+                      <Shield className="h-4 w-4 mr-2" />
+                      Reportar Incidencia
                     </Button>
                     <Button 
                       variant="outline"
-                      onClick={() => setActiveTab("incidencias")}
+                      onClick={() => setActiveTab("administrador")}
                       className="border-amber-300 text-amber-700 hover:bg-amber-50"
                     >
-                      <AlertTriangle className="h-4 w-4 mr-2" />
-                      Gestionar Incidencias
+                      <Mail className="h-4 w-4 mr-2" />
+                      Contactar Administrador
                     </Button>
                   </div>
                 </CardContent>
@@ -1635,7 +1636,7 @@ export default function Dashboard() {
 
             <div className="flex-1 p-4">
               <nav className="space-y-2">
-                {navItems.map((item, index) => (
+                {navItems.map((item) => (
                   <Button
                     key={item.id}
                     variant={activeTab === item.id ? "default" : "ghost"}

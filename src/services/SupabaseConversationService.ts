@@ -309,7 +309,7 @@ export class SupabaseConversationService {
     const conversations = await this.getUserConversations(userId);
     
     // Get unread message count
-    const { count, error } = await supabase
+    const { count } = await supabase
       .from("messages")
       .select("*", { count: "exact", head: true })
       .neq("sender_id", userId)

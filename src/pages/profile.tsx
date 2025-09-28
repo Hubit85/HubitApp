@@ -14,12 +14,11 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle, UserCheck, User, Users, Building, Settings, Home, Edit3, Mail, Phone, MapPin, Calendar, Shield, ArrowLeft, RefreshCw, MessageSquare } from "lucide-react";
-import { translations } from "@/lib/translations";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ProfilePage() {
   const { user, profile, userRoles, activeRole, loading, refreshRoles, activateRole, updateProfile } = useSupabaseAuth();
-  const { language } = useLanguage();
+  const { } = useLanguage();
   const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(false);
