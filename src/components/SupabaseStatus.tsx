@@ -24,8 +24,7 @@ export default function SupabaseStatus() {
       const connectionPromise = supabase.from('profiles').select('id').limit(0);
       
       const { error } = await Promise.race([connectionPromise, timeoutPromise]);
-      const connected = !error || error.code === 'PGRST116';
-      return connected;
+      return !error || error.code === 'PGRST116';
     } catch (_error) {
       // Silent handling - don't log to console to avoid user-visible errors
       return false;
