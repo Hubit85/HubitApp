@@ -1,20 +1,17 @@
-
 {
-  "extends": ["next/core-web-vitals"],
-  "parser": "@typescript-eslint/parser",
+  "extends": "next/core-web-vitals",
   "plugins": ["@typescript-eslint"],
   "rules": {
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-empty-object-type": "off"
-  },
-  "overrides": [
-    {
-      "files": ["src/integrations/supabase/database.types.ts", "src/integrations/supabase/types.ts"],
-      "rules": {
-        "@typescript-eslint/no-empty-object-type": "off",
-        "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "args": "after-used",
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_",
+        "ignoreRestSiblings": true,
+        "vars": "all",
+        "varsIgnorePattern": "^_"
       }
-    }
-  ]
+    ]
+  }
 }
