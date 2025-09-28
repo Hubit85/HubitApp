@@ -11,8 +11,7 @@ import {
   Shield, Home, Wrench, FileText, Mail, Phone, Calendar, Users, Building, Store, Bell, 
   CreditCard, Heart, Clock, Package,
   AlertTriangle, Video, Calculator, BarChart3, DollarSign, TrendingUp,
-  ClipboardList, MessageSquare, FileCheck,
-  MapPin
+  ClipboardList, MessageSquare, FileCheck
 } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import { Header } from "@/components/layout/Header";
@@ -28,8 +27,6 @@ import { CommunityAdministratorAssignment } from "@/components/CommunityAdminist
 import { PropertyAdministratorProfile } from "@/components/PropertyAdministratorProfile";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { SupabaseDataViewer } from "@/components/debug/SuperbaseDataViewer";
-import { useLanguage } from "@/contexts/LanguageContext";
-import PropertySelector from "@/components/PropertySelector";
 import ServiceHistoryCard from "@/components/ratings/ServiceHistoryCard";
 
 export default function Dashboard() {
