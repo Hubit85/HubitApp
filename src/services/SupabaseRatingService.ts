@@ -1,7 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import {
   Contract,
-  Database,
   Profile,
   Property,
   Quote,

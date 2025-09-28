@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Conversation, 
@@ -458,15 +457,11 @@ export class SupabaseConversationService {
   // ===================== UTILITIES =====================
 
   static async getUnreadCount(userId: string): Promise<number> {
-    const { count, error } = await supabase
+    const { count } = await supabase
       .from("messages")
       .select("*", { count: "exact", head: true })
       .neq("sender_id", userId)
       .eq("is_read", false);
-
-    if (error) {
-      throw new Error(error.message);
-    }
 
     return count || 0;
   }

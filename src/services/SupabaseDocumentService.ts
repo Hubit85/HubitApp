@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Document, DocumentInsert, DocumentUpdate, Database } from "@/integrations/supabase/types";
+import { Document, DocumentInsert, DocumentUpdate } from "@/integrations/supabase/types";
 
 export class SupabaseDocumentService {
   // ===================== DOCUMENTS CRUD =====================

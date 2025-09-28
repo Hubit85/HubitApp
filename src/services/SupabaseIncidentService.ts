@@ -273,7 +273,7 @@ export class SupabaseIncidentService {
       const fileExt = file.name.split(".").pop();
       const fileName = `incident-${incidentId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
-      const { data: uploadData, error: uploadError } = await supabase.storage.from("incident-attachments").upload(fileName, file);
+      const { error: uploadError } = await supabase.storage.from("incident-attachments").upload(fileName, file);
 
       if (uploadError) {
         console.error("Error uploading incident file:", uploadError);

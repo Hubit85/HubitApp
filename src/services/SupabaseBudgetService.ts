@@ -246,7 +246,7 @@ export class SupabaseBudgetService {
   /**
    * NUEVA FUNCIONALIDAD: Cancelar solicitud con notificaciones
    */
-  static async cancelBudgetRequest(id: string, reason?: string): Promise<BudgetRequest> {
+  static async cancelBudgetRequest(id: string, _reason?: string): Promise<BudgetRequest> {
     // Actualizar estado y notificar a proveedores
     await SupabaseBudgetNotificationService.updateBudgetRequestStatusNotifications(id, 'cancelled');
 

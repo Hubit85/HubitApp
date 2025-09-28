@@ -1,17 +1,13 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Contract, 
   ContractInsert, 
   ContractUpdate,
   WorkSession,
-  WorkSessionInsert,
   WorkSessionUpdate,
   Profile,
-  ServiceProvider,
-  Database
+  ServiceProvider
 } from "@/integrations/supabase/types";
-import { SupabaseBudgetService } from "./SupabaseBudgetService";
 
 type ContractWithProfiles = Contract & {
   clients: Pick<Profile, 'id' | 'full_name' | 'email' | 'phone'>;
@@ -275,7 +271,6 @@ export class SupabaseContractService {
 
   static async endWorkSession(id: string, workPerformed?: string): Promise<WorkSession> {
     const session = await this.getWorkSession(id);
-    const startTime = new Date(session.start_time);
     const endTime = new Date();
 
     return this.updateWorkSession(id, {
@@ -396,7 +391,7 @@ export class SupabaseContractService {
     return data;
   }
 
-  static async logTimeEntry(timeEntry: { 
+  static async logTimeEntry(_timeEntry: { 
     contract_id: string; 
     service_provider_id: string;
     start_time: string; 

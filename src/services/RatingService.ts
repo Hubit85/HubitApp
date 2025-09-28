@@ -1,5 +1,4 @@
-
-import { Rating, ServiceRating, CommunityRating, RatingFilter, UserProfile } from '@/types/ratings';
+import { Rating, ServiceRating, CommunityRating, RatingFilter } from '@/types/ratings';
 
 class RatingService {
   private baseUrl = '/api/ratings';

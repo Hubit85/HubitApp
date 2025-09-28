@@ -244,8 +244,8 @@ export class CrossRoleDataService {
    */
   private static async syncPropertyDocuments(
     propertyId: string,
-    sourceRole: UserRole['role_type'],
-    targetRole: UserRole['role_type']
+    _sourceRole: UserRole['role_type'],
+    _targetRole: UserRole['role_type']
   ) {
     try {
       // Instead of using non-existent RPC, directly update document access
@@ -272,8 +272,8 @@ export class CrossRoleDataService {
    */
   private static async syncPropertyContracts(
     propertyId: string,
-    sourceRole: UserRole['role_type'],
-    targetRole: UserRole['role_type']
+    _sourceRole: UserRole['role_type'],
+    _targetRole: UserRole['role_type']
   ) {
     try {
       // Instead of using non-existent RPC, find contracts related to this property
@@ -298,7 +298,7 @@ export class CrossRoleDataService {
         if (!quotesError && quotes && quotes.length > 0) {
           const quoteIds = quotes.map(q => q.id);
           
-          const { data: contracts, error: contractError } = await supabase
+          const { data: contracts } = await supabase
             .from('contracts')
             .select('id')
             .in('quote_id', quoteIds);
@@ -318,8 +318,8 @@ export class CrossRoleDataService {
    */
   private static async syncPropertyBudgetHistory(
     propertyId: string,
-    sourceRole: UserRole['role_type'],
-    targetRole: UserRole['role_type']
+    _sourceRole: UserRole['role_type'],
+    _targetRole: UserRole['role_type']
   ) {
     try {
       // Instead of using non-existent RPC, find budget requests for this property

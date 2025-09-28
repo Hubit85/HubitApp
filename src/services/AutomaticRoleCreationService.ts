@@ -941,7 +941,7 @@ export class AutomaticRoleCreationService {
         actualCount: finalCount,
         expectedCount: expectedRolesCount
       };
-    } catch (finalError) {
+    } catch (_finalError) {
       return {
         success: false,
         message: `Monitoring failed with timeout and final check error`,

@@ -20,7 +20,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function ProfilePage() {
   const { user, profile, userRoles, activeRole, loading, refreshRoles, activateRole, updateProfile } = useSupabaseAuth();
   const { language } = useLanguage();
-  const t = translations[language];
   const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(false);

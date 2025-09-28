@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface EmailTemplate {
@@ -92,7 +91,7 @@ export class SupabaseEmailService {
   static async testEmailConfiguration() {
     try {
       // Test basic connectivity
-      const { data, error } = await supabase.auth.getUser();
+      const { error } = await supabase.auth.getUser();
       
       if (error) {
         return {

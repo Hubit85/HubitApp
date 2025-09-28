@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { ServiceProvider, BudgetRequest, Notification } from "@/integrations/supabase/types";
+import { ServiceProvider, BudgetRequest } from "@/integrations/supabase/types";
 
 export interface NotificationToProvider {
   providerId: string;
@@ -248,7 +247,7 @@ export class SupabaseBudgetNotificationService {
   }> {
     try {
       // Obtener información del usuario que creó la solicitud
-      const { data: userProfile, error: profileError } = await supabase
+      const { data: userProfile } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('id', budgetRequest.user_id)
@@ -431,14 +430,14 @@ export class SupabaseBudgetNotificationService {
   }> {
     try {
       // Contar notificaciones totales
-      const { data: notifications, error: notificationsError } = await supabase
+      const { data: notifications } = await supabase
         .from('notifications')
         .select('read')
         .eq('related_entity_id', budgetRequestId)
         .eq('category', 'budget_request');
 
       // Contar cotizaciones recibidas
-      const { data: quotes, error: quotesError } = await supabase
+      const { data: quotes } = await supabase
         .from('quotes')
         .select('id')
         .eq('budget_request_id', budgetRequestId);

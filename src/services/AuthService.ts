@@ -89,7 +89,7 @@ class AuthService {
       // Simulate a small delay for better UX
       await new Promise(resolve => setTimeout(resolve, 100));
       
-    } catch (error) {
+    } catch (_error) {
       // Even if there's an error, we should still clear local storage
       this.removeToken();
       throw new Error('Error durante el cierre de sesión');
@@ -112,7 +112,7 @@ class AuthService {
       };
 
       return mockUser;
-    } catch (error) {
+    } catch (_error) {
       this.removeToken();
       return null;
     }
@@ -134,13 +134,13 @@ class AuthService {
     return updatedUser;
   }
 
-  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  async changePassword(_currentPassword: string, _newPassword: string): Promise<void> {
     // Mock implementation
     await new Promise(resolve => setTimeout(resolve, 500));
     // In a real app, this would validate and update the password
   }
 
-  async resetPassword(email: string): Promise<void> {
+  async resetPassword(_email: string): Promise<void> {
     // Mock implementation
     await new Promise(resolve => setTimeout(resolve, 500));
     // In a real app, this would send a reset email

@@ -156,7 +156,7 @@ export class SupabasePropertyService {
     return data || [];
   }
 
-  static async getNearbyProperties(latitude: number, longitude: number, radius: number): Promise<Property[]> {
+  static async getNearbyProperties(_latitude: number, _longitude: number, _radius: number): Promise<Property[]> {
     try {
       // Simple fallback query without RPC to avoid type errors
       console.warn("Geographic search not available, using simple query");

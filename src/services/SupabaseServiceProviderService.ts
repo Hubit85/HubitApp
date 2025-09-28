@@ -1,9 +1,7 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { 
   ServiceProvider, 
-  ServiceProviderInsert, 
-  ServiceProviderUpdate
+  ServiceProviderInsert
 } from "@/integrations/supabase/types";
 
 export class SupabaseServiceProviderService {
@@ -206,7 +204,7 @@ export class SupabaseServiceProviderService {
     completionRate: number;
   }> {
     // Basic stats from current schema
-    const provider = await this.getServiceProvider(providerId);
+    await this.getServiceProvider(providerId);
     
     // This would need actual queries to quotes and contracts tables for real data
     return {

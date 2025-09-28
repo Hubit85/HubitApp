@@ -573,7 +573,6 @@ function RegisterPageContent() {
     }
   };
 
-  // Manejar navegación entre roles
   const handleNextRole = async () => {
     const currentRole = getCurrentRole();
     
@@ -638,71 +637,6 @@ function RegisterPageContent() {
       setCurrentStep(1);
     }
   };
-
-  // Helper function to extract role-specific data for emergency recovery
-  function extractRoleSpecificDataForEmergency(userData: any, roleType: RoleType): any {
-    const baseData = {
-      full_name: userData.full_name || 'Usuario',
-      phone: userData.phone || '',
-      address: userData.address || '',
-      city: userData.city || '',
-      postal_code: userData.postal_code || '',
-      country: userData.country || 'España'
-    };
-
-    switch (roleType) {
-      case 'particular':
-        return {
-          ...baseData,
-          user_type: roleType
-        };
-      
-      case 'community_member':
-        return {
-          ...baseData,
-          user_type: roleType,
-          community_code: userData.community_code || '',
-          community_name: userData.community_name || '',
-          portal_number: userData.portal_number || '',
-          apartment_number: userData.apartment_number || ''
-        };
-      
-      case 'service_provider':
-        return {
-          company_name: userData.company_name || userData.full_name || baseData.full_name,
-          company_address: userData.company_address || userData.address || baseData.address,
-          company_postal_code: userData.company_postal_code || userData.postal_code || baseData.postal_code,
-          company_city: userData.company_city || userData.city || baseData.city,
-          company_country: userData.company_country || userData.country || baseData.country,
-          cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '',
-          business_phone: userData.business_phone || userData.phone || baseData.phone,
-          selected_services: userData.selected_services || [],
-          service_costs: userData.service_costs || {},
-          user_type: roleType
-        };
-      
-      case 'property_administrator':
-        return {
-          company_name: userData.company_name || userData.full_name || baseData.full_name,
-          company_address: userData.company_address || userData.address || baseData.address,
-          company_postal_code: userData.company_postal_code || userData.postal_code || baseData.postal_code,
-          company_city: userData.company_city || userData.city || baseData.city,
-          company_country: userData.company_country || userData.country || baseData.country,
-          cif: userData.cif || '',
-          business_email: userData.business_email || userData.email || '',
-          business_phone: userData.business_phone || userData.phone || baseData.phone,
-          professional_number: userData.professional_number || '',
-          user_type: roleType
-        };
-      
-      default:
-        return {
-          ...baseData,
-          user_type: 'particular'
-        };
-    }
-  }
 
   // Helper function to generate community code based on address
   function generateCommunityCode(address: string): string {
@@ -1337,7 +1271,7 @@ function RegisterPageContent() {
                   {/* Mostrar roles seleccionados con orden */}
                   {formData.roles.length > 0 && (
                     <div className="p-4 bg-stone-50 rounded-lg border border-stone-200">
-                      <h3 className="font-medium text-stone-900 mb-3">Roles seleccionados (orden de registro):</h3>
+                      <h3 className="font-medium text-stone-900 mb-3 text-center">Roles seleccionados (orden de registro):</h3>
                       <div className="flex flex-wrap gap-2">
                         {getOrderedRoles(formData.roles).map((role, index) => {
                           const roleInfo = getRoleInfo(role);
@@ -2006,7 +1940,7 @@ function RegisterPageContent() {
                       <div className="text-sm space-y-1">
                         {orderedRoles.slice(0, currentRoleIndex).map((role) => (
                           <div key={role} className="flex items-center text-green-700">
-                            <Star className="w-3 h-3 mr-2" />
+                            <CheckCircle className="w-4 h-4 mr-2" />
                             {getRoleInfo(role).label}
                           </div>
                         ))}

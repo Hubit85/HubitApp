@@ -540,7 +540,7 @@ export class AdministratorRequestService {
       }
 
       // Update the request status
-      const { data: updatedRequest, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from('administrator_requests')
         .update({
           status: options.response,
@@ -549,9 +549,7 @@ export class AdministratorRequestService {
           responded_by: options.respondedBy,
           updated_at: new Date().toISOString()
         })
-        .eq('id', options.requestId)
-        .select('*')
-        .single();
+        .eq('id', options.requestId);
 
       if (updateError) {
         console.error('❌ ADMIN REQUEST: Error updating request:', updateError);

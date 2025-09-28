@@ -46,7 +46,7 @@ export const ServiceProviderDashboardService = {
     };
   },
 
-  async getOpenBudgetRequests(providerId: string): Promise<BudgetRequest[]> {
+  async getOpenBudgetRequests(_providerId: string): Promise<BudgetRequest[]> {
     const { data, error } = await supabase
       .from("budget_requests")
       .select("*")

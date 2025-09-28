@@ -314,7 +314,7 @@ export class SupabaseNotificationService {
 
   // ===================== PREFERENCES =====================
 
-  static async shouldSendEmailNotification(userId: string, category: string): Promise<boolean> {
+  static async shouldSendEmailNotification(userId: string, _category: string): Promise<boolean> {
     const { data: profile } = await supabase
       .from("profiles")
       .select("email_notifications")
@@ -324,7 +324,7 @@ export class SupabaseNotificationService {
     return profile?.email_notifications || false;
   }
 
-  static async shouldSendSMSNotification(userId: string, category: string): Promise<boolean> {
+  static async shouldSendSMSNotification(userId: string, _category: string): Promise<boolean> {
     const { data: profile } = await supabase
       .from("profiles")
       .select("sms_notifications")

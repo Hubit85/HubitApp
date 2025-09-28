@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface PropertyAdministratorData {
@@ -86,7 +85,7 @@ export class PropertyAdministratorSyncService {
                 .eq('id', userRole.user_id)
                 .single();
               profileData = profile;
-            } catch (profileError) {
+            } catch (_profileError) {
               console.warn(`PROPERTY SYNC: No se pudo obtener perfil para user_role ${userRole.id}`);
             }
 
@@ -305,7 +304,7 @@ export class PropertyAdministratorSyncService {
             .eq('id', userId)
             .single();
           profileData = profile;
-        } catch (profileError) {
+        } catch (_profileError) {
           console.warn('PROPERTY SYNC: No se pudo obtener perfil para sincronización individual');
         }
       }
@@ -447,8 +446,8 @@ export class PropertyAdministratorSyncService {
                 .eq('id', admin.user_id)
                 .single();
               profileData = profile;
-            } catch (profileError) {
-              console.warn(`PROPERTY SYNC: No se pudo obtener perfil para ${admin.company_name}:`, profileError);
+            } catch (_profileError) {
+              console.warn(`PROPERTY SYNC: No se pudo obtener perfil para ${admin.company_name}:`, _profileError);
             }
           }
 
