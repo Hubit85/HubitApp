@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { 
   FileText, Search, Euro, CheckCircle, 
   Eye, Calendar, User, Signature,
-  Loader2, RefreshCw, Edit, BookOpen,
+  Loader2, RefreshCw, Edit,
   Award, MapPin, DollarSign
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -75,9 +75,7 @@ export function ContractManager() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [, setSelectedContract] = useState<ExtendedContract | null>(null);
   const [showContractDialog, setShowContractDialog] = useState(false);
-  const [, setShowSignatureDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentTab, setCurrentTab] = useState("my-contracts");

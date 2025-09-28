@@ -11,7 +11,6 @@ import { CheckCircle, UserCheck, Clock, User, Users, Building, Settings, Home } 
 export default function UserRoleManager() {
     const { user, profile } = useSupabaseAuth();
     const [userRoles, setUserRoles] = useState < UserRole[] > ([]);
-    const [, setCurrentRole] = useState < UserRole | null > (null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
@@ -110,8 +109,7 @@ export default function UserRoleManager() {
 
             // Find and set current active role
             const activeRole = roles.find(r => r.is_active) || null;
-            setCurrentRole(activeRole);
-
+            
             console.log(`✅ UserRoleManager: Roles loaded successfully via ${loadingMethod}:`, {
                 rolesCount: roles.length,
                 activeRole: activeRole?.role_type || 'none',
