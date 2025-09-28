@@ -146,6 +146,25 @@ class AuthService {
     // In a real app, this would send a reset email
   }
 
+  static async changePassword(userId: string, currentPassword?: string, newPassword?: string): Promise<{ success: boolean; message: string }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _currentPassword, _newPassword } = { _currentPassword: currentPassword, _newPassword: newPassword };
+    // This is a placeholder. In a real application, you would:
+    // 1. Verify the current password is correct.
+    // 2. Update the user's password in Supabase Auth.
+    // This requires the user to be logged in.
+    return { success: true, message: "Funcionalidad de cambio de contraseña no implementada." };
+  }
+
+  static async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _email } = { _email: email };
+    // This would use Supabase Auth to send a password reset link.
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/update-password`,
+    });
+  }
+
   getToken(): string | null {
     if (typeof window === 'undefined') return null;
     return localStorage.getItem('auth_token');

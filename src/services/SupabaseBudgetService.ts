@@ -583,4 +583,17 @@ export class SupabaseBudgetService {
       return { count: 0, preview: [] };
     }
   }
+
+  static async rejectBudget(budgetId: string, reason: string): Promise<{ success: boolean; message: string; }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _reason } = { _reason: reason };
+    const { error } = await supabase
+      .from("budget_requests")
+      .update({ status: "rejected" })
+      .eq("id", budgetId);
+    if (error) {
+      throw new Error(error.message);
+    }
+    return { success: true, message: "Presupuesto rechazado exitosamente" };
+  }
 }

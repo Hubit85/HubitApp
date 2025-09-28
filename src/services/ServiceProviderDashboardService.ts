@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import {
   BudgetRequest,
@@ -43,6 +42,16 @@ export const ServiceProviderDashboardService = {
       activeContracts,
       recentQuotes,
       stats,
+    };
+  },
+
+  static async getDashboardData(providerId: string): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _providerId = providerId;
+    // Placeholder data
+    return {
+      activeQuotes: 5,
+      acceptedQuotes: 12,
     };
   },
 

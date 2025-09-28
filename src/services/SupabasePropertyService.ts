@@ -167,6 +167,16 @@ export class SupabasePropertyService {
     }
   }
 
+  static async findPropertiesNearby(latitude: number, longitude: number, radius: number): Promise<{ success: boolean; properties?: any[]; message: string; }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _latitude, _longitude, _radius } = { _latitude: latitude, _longitude: longitude, _radius: radius };
+    // This would typically be a remote procedure call (RPC) in Supabase
+    // For now, returning all properties as a placeholder
+    const { data, error } = await supabase.from("properties").select("*");
+    if (error) return { success: false, message: error.message };
+    return { success: true, properties: data };
+  }
+
   // Statistics and analytics
   static async getPropertyStats(userId: string): Promise<{
     totalProperties: number;

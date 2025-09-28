@@ -309,6 +309,16 @@ class PayPalService {
     const approvalLink = subscription.links.find(link => link.rel === 'approve');
     return approvalLink?.href || null;
   }
+
+  static async handleWebhook(headers: any, body: any, webhookId: string): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _body = body;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _webhookId = webhookId;
+    const client = this.getClient();
+    const request = new paypal.orders.OrdersGetRequest(body.resource.id);
+    const order = await client.execute(request);
+  }
 }
 
 export const paypalService = new PayPalService();

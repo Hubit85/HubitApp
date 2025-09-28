@@ -452,6 +452,20 @@ export class SupabaseContractService {
       company_name: data.company_name
     };
   }
+
+  static async addTimeEntry(contractId: string, timeEntry: any): Promise<{ success: boolean; message: string; }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _timeEntry } = { _timeEntry: timeEntry };
+    const { error } = await supabase
+      .from("contract_time_entries")
+      .insert({ contract_id: contractId, ...timeEntry });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { success: true, message: "Time entry added successfully" };
+  }
 }
 
 // Export for backward compatibility

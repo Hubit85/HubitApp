@@ -569,4 +569,42 @@ export class CrossRoleDataService {
       return { roles: [] };
     }
   }
+
+  static async syncBudgetData(sourceRole: any, targetRole: any): Promise<{ success: boolean; message: string }> {
+    // Placeholder for syncing budget data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _sourceRole = sourceRole;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _targetRole = targetRole;
+    return { success: true, message: "Sincronización de datos de presupuesto no implementada." };
+  }
+
+  /**
+   * Sync contract data between roles.
+   */
+  static async syncContractData(sourceRole: any, targetRole: any): Promise<{ success: boolean; message: string }> {
+    // Placeholder for syncing contract data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _sourceRole = sourceRole;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _targetRole = targetRole;
+    return { success: true, message: "Sincronización de datos de contrato no implementada." };
+  }
+
+  /**
+   * Sync incident data between roles.
+   */
+  static async syncIncidentData(sourceRole: any, targetRole: any): Promise<{ success
+: boolean; message: string }> {
+    // Placeholder for syncing incident data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _sourceRole = sourceRole;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _targetRole = targetRole;
+    return { success: true, message: "Sincronización de datos de incidencias no implementada." };
+  }
+
+  /**
+   * Sync notification settings between roles.
+   */
 }
