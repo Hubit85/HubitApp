@@ -1353,7 +1353,7 @@ export default function Dashboard() {
                     id: 'sample-1',
                     serviceName: 'Servicio de prueba',
                     providerName: 'Proveedor ejemplo',
-                    providerImage: '/api/placeholder/64/64',
+                    providerImage: '/HuBiT-logo-white.svg',
                     category: 'Fontanería',
                     date: new Date().toLocaleDateString(),
                     cost: 150,

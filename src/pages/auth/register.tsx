@@ -1,23 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Head from "next/head";
-import Link from "next/link";
-import Image from "next/image";
+// import Head from "next/head"; // Unused
+// import Link from "next/link"; // Unused
+// import Image from "next/image"; // Unused
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+// import { Button } from "@/components/ui/button"; // Unused
+// import { Input } from "@/components/ui/input"; // Unused
+// import { Label } from "@/components/ui/label"; // Unused
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // Unused
+// import { Alert, AlertDescription } from "@/components/ui/alert"; // Unused
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Unused
+// import { Badge } from "@/components/ui/badge"; // Unused
+// import { Progress } from "@/components/ui/progress"; // Unused
 import {
-    Loader2, Mail, Lock, Eye, EyeOff, User, Phone, ArrowRight, Sparkles, UserCircle,
-    Home, Users, Wrench, Building, MapPin, FileText, AlertCircle, CheckCircle, Shield,
-    ArrowLeft, Star,
-    AlertTriangle, Zap, Trees, Paintbrush, Thermometer, Hammer, Key, Truck, Settings
+    Loader2, 
+    // Mail, // Unused
+    // Lock, // Unused
+    // Eye, // Unused
+    // EyeOff, // Unused
+    User, 
+    // Phone, // Unused
+    // ArrowRight, // Unused
+    Sparkles, 
+    // UserCircle, // Unused
+    Home, 
+    Users, 
+    Wrench, 
+    // Building, // Unused
+    // MapPin, // Unused
+    // FileText, // Unused
+    // AlertCircle, // Unused
+    // CheckCircle, // Unused
+    Shield,
+    // ArrowLeft, // Unused
+    Star,
+    // AlertTriangle, // Unused
+    Zap, Trees, Paintbrush, Thermometer, Hammer, Key, Truck, Settings
 } from "lucide-react";
 
 type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
@@ -364,7 +383,7 @@ function RegisterPageContent() {
         return () => clearTimeout(timeoutId);
     }, [user, session, loading, router]);
 
-    const DynamicServiceIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
+    const _DynamicServiceIcon = ({ iconName, className }: { iconName: string, className?: string }) => {
         const iconProps = { className: className || "h-6 w-6 text-white" };
         switch (iconName) {
             case "Star": return <Star {...iconProps} />;
@@ -407,7 +426,7 @@ function RegisterPageContent() {
     };
 
     // Calcular el progreso total del registro
-    const calculateProgress = (): number => {
+    const _calculateProgress = (): number => {
         if (currentStep === 1) return 20; // Selección de roles
         if (currentStep === 2) {
             // En el paso 2, calculamos progreso basado en roles completados
@@ -992,7 +1011,7 @@ function RegisterPageContent() {
                                         onChange={() => handleRoleToggle(role)}
                                         className="w-4 h-4 text-blue-600 border-gray-300 rounded"
                                     />
-                                    <span className="text-gray-800">{role.replace('_', ' ')}</span>
+                                    <span className="text-gray-800">{role.replace(/_/g, ' ')}</span>
                                 </div>
                             ))}
                         </div>

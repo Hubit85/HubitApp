@@ -556,7 +556,7 @@ export class AutomaticRoleCreationService {
     role?: any;
     error?: string;
   }> {
-    const { userId, _email, roleType, roleData, isPrimary, attemptNumber } = options;
+    const { userId, email: _email, roleType, roleData, isPrimary, attemptNumber } = options;
     const maxAttempts = 3;
     
     console.log(`🔄 ENHANCED SINGLE ROLE: Attempt ${attemptNumber}/${maxAttempts} for ${roleType} (${isPrimary ? 'PRIMARY' : 'ADDITIONAL'})`);
@@ -650,8 +650,8 @@ export class AutomaticRoleCreationService {
         } else {
           console.warn(`⚠️ ENHANCED SINGLE ROLE: Verification failed for ${roleType}, but proceeding`);
         }
-      } catch (verificationError) {
-        console.warn(`⚠️ ENHANCED SINGLE ROLE: Verification error for ${roleType}:`, verificationError);
+      } catch (_verificationError) {
+        console.warn(`⚠️ ENHANCED SINGLE ROLE: Verification error for ${roleType}:`, _verificationError);
       }
 
       return {
@@ -753,7 +753,7 @@ export class AutomaticRoleCreationService {
    */
   static async emergencyRoleCreationEnhanced(
     userId: string,
-    _email: string,
+    email: string, // Renamed to email to match call sites
     fallbackRole: 'particular' | 'community_member' | 'service_provider' | 'property_administrator' = 'particular'
   ): Promise<{
     success: boolean;
