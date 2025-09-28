@@ -1937,7 +1937,7 @@ function RegisterPageContent() {
                         Roles completados
                       </h4>
                       <div className="text-sm space-y-1">
-                        {orderedRoles.slice(0, currentRoleIndex).map((role) => (
+                        {orderedRoles.slice(0, currentRoleIndex).map((role, _index) => (
                           <div key={role} className="flex items-center text-green-700">
                             <CheckCircle className="w-4 h-4 mr-2" />
                             {getRoleInfo(role).label}
