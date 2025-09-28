@@ -556,7 +556,7 @@ export class AutomaticRoleCreationService {
     role?: any;
     error?: string;
   }> {
-    const { userId, email, roleType, roleData, isPrimary, attemptNumber } = options;
+    const { userId, _email, roleType, roleData, isPrimary, attemptNumber } = options;
     const maxAttempts = 3;
     
     console.log(`🔄 ENHANCED SINGLE ROLE: Attempt ${attemptNumber}/${maxAttempts} for ${roleType} (${isPrimary ? 'PRIMARY' : 'ADDITIONAL'})`);
@@ -753,7 +753,7 @@ export class AutomaticRoleCreationService {
    */
   static async emergencyRoleCreationEnhanced(
     userId: string,
-    email: string,
+    _email: string,
     fallbackRole: 'particular' | 'community_member' | 'service_provider' | 'property_administrator' = 'particular'
   ): Promise<{
     success: boolean;

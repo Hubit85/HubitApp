@@ -949,3 +949,575 @@ function RegisterPageContent() {
                                 session.user.id,
                                 totalExpectedRoles,
                                 15000
+                            );
+                            console.log('✅ ENHANCED POST-REGISTRATION: All roles verified successfully:', monitoringResult);
+                        } catch (monitoringError) {
+                            console.warn('⚠️ ENHANCED POST-REGISTRATION: Monitoring failed, but proceeding:', monitoringError);
+                        }
+                    }
+                } catch (_error) {
+                    console.warn(`⚠️ ENHANCED POST-REGISTRATION: Validation failed, but proceeding:`, _error);
+                }
+            }
+        } catch (error) {
+            console.error('❌ ENHANCED REGISTRATION: Error during enhanced registration:', error);
+            setError("Hubo un error durante el registro. Por favor, inténtalo de nuevo.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="w-full max-w-4xl p-8 bg-white rounded-2xl shadow-2xl">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900">Registro</h1>
+                    <p className="text-gray-600 mt-2">Crea tu cuenta y accede a todos los servicios</p>
+                </div>
+
+                {/* Paso 1: Selección de roles */}
+                {currentStep === 1 && (
+                    <div>
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Selecciona tus roles</h2>
+                            <p className="text-gray-600 mt-2">Selecciona los roles que te identifican</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            {ROLE_ORDER.map(role => (
+                                <div key={role} className="flex items-center gap-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.roles.includes(role)}
+                                        onChange={() => handleRoleToggle(role)}
+                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                                    />
+                                    <span className="text-gray-800">{role.replace('_', ' ')}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="text-center">
+                            <button
+                                onClick={handleConfirmRoles}
+                                className="btn btn-primary"
+                            >
+                                Continuar
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Paso 2: Completar datos de roles */}
+                {currentStep === 2 && (
+                    <div>
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Completa tus datos</h2>
+                            <p className="text-gray-600 mt-2">Completa los datos para tu rol principal</p>
+                        </div>
+
+                        {/* Datos comunes */}
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-bold mb-2">Email</label>
+                            <input
+                                type="email"
+                                value={formData.email}
+                                onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                            />
+                        </div>
+
+                        {/* Datos específicos del rol actual */}
+                        {currentRoleIndex < formData.roles.length && (
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                                    Datos para {getCurrentRole()?.replace('_', ' ') || 'tu rol'}
+                                </h3>
+
+                                {/* Datos específicos del rol */}
+                                {getCurrentRole() === 'particular' && (
+                                    <div>
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Nombre completo</label>
+                                            <input
+                                                type="text"
+                                                value={formData.particular.full_name}
+                                                onChange={e => updateCurrentRoleData('full_name', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Teléfono</label>
+                                            <input
+                                                type="tel"
+                                                value={formData.particular.phone}
+                                                onChange={e => updateCurrentRoleData('phone', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Dirección</label>
+                                            <input
+                                                type="text"
+                                                value={formData.particular.address}
+                                                onChange={e => updateCurrentRoleData('address', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Código postal</label>
+                                            <input
+                                                type="text"
+                                                value={formData.particular.postal_code}
+                                                onChange={e => updateCurrentRoleData('postal_code', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Ciudad</label>
+                                            <input
+                                                type="text"
+                                                value={formData.particular.city}
+                                                onChange={e => updateCurrentRoleData('city', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Provincia</label>
+                                            <input
+                                                type="text"
+                                                value={formData.particular.province}
+                                                onChange={e => updateCurrentRoleData('province', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">País</label>
+                                            <input
+                                                type="text"
+                                                value={formData.particular.country}
+                                                onChange={e => updateCurrentRoleData('country', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Datos específicos del rol */}
+                                {getCurrentRole() === 'community_member' && (
+                                    <div>
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Nombre completo</label>
+                                            <input
+                                                type="text"
+                                                value={formData.community_member.full_name}
+                                                onChange={e => updateCurrentRoleData('full_name', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Teléfono</label>
+                                            <input
+                                                type="tel"
+                                                value={formData.community_member.phone}
+                                                onChange={e => updateCurrentRoleData('phone', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Dirección</label>
+                                            <input
+                                                type="text"
+                                                value={formData.community_member.address}
+                                                onChange={e => updateCurrentRoleData('address', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Código postal</label>
+                                            <input
+                                                type="text"
+                                                value={formData.community_member.postal_code}
+                                                onChange={e => updateCurrentRoleData('postal_code', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Ciudad</label>
+                                            <input
+                                                type="text"
+                                                value={formData.community_member.city}
+                                                onChange={e => updateCurrentRoleData('city', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Provincia</label>
+                                            <input
+                                                type="text"
+                                                value={formData.community_member.province}
+                                                onChange={e => updateCurrentRoleData('province', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">País</label>
+                                            <input
+                                                type="text"
+                                                value={formData.community_member.country}
+                                                onChange={e => updateCurrentRoleData('country', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Código de comunidad</label>
+                                            <input
+                                                type="text"
+                                                value={formData.community_member.community_code || ''}
+                                                onChange={e => updateCurrentRoleData('community_code', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Datos específicos del rol */}
+                                {getCurrentRole() === 'service_provider' && (
+                                    <div>
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Nombre de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.service_provider.company_name}
+                                                onChange={e => updateCurrentRoleData('company_name', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Dirección de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.service_provider.company_address}
+                                                onChange={e => updateCurrentRoleData('company_address', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Código postal de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.service_provider.company_postal_code}
+                                                onChange={e => updateCurrentRoleData('company_postal_code', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Ciudad de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.service_provider.company_city}
+                                                onChange={e => updateCurrentRoleData('company_city', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Provincia de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.service_provider.company_province}
+                                                onChange={e => updateCurrentRoleData('company_province', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">País de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.service_provider.company_country}
+                                                onChange={e => updateCurrentRoleData('company_country', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">CIF</label>
+                                            <input
+                                                type="text"
+                                                value={formData.service_provider.cif}
+                                                onChange={e => updateCurrentRoleData('cif', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                            {cifValidating && <p className="text-gray-600 mt-2">Verificando CIF...</p>}
+                                            {cifValid !== null && (
+                                                <p className="text-gray-600 mt-2">
+                                                    {cifValid ? 'CIF válido' : 'CIF no válido'}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Email de la empresa</label>
+                                            <input
+                                                type="email"
+                                                value={formData.service_provider.business_email}
+                                                onChange={e => updateCurrentRoleData('business_email', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Teléfono de la empresa</label>
+                                            <input
+                                                type="tel"
+                                                value={formData.service_provider.business_phone}
+                                                onChange={e => updateCurrentRoleData('business_phone', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Servicios ofrecidos</label>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                                {SERVICE_CATEGORIES.map(service => (
+                                                    <div
+                                                        key={service.id}
+                                                        className="flex items-center gap-2"
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={formData.service_provider.selected_services.includes(service.id)}
+                                                            onChange={() => handleServiceToggle(service.id, service.name, service.cost)}
+                                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                                                        />
+                                                        <span className="text-gray-800">{service.name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Datos específicos del rol */}
+                                {getCurrentRole() === 'property_administrator' && (
+                                    <div>
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Nombre de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.property_administrator.company_name}
+                                                onChange={e => updateCurrentRoleData('company_name', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Dirección de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.property_administrator.company_address}
+                                                onChange={e => updateCurrentRoleData('company_address', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Código postal de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.property_administrator.company_postal_code}
+                                                onChange={e => updateCurrentRoleData('company_postal_code', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Ciudad de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.property_administrator.company_city}
+                                                onChange={e => updateCurrentRoleData('company_city', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Provincia de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.property_administrator.company_province}
+                                                onChange={e => updateCurrentRoleData('company_province', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">País de la empresa</label>
+                                            <input
+                                                type="text"
+                                                value={formData.property_administrator.company_country}
+                                                onChange={e => updateCurrentRoleData('company_country', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">CIF</label>
+                                            <input
+                                                type="text"
+                                                value={formData.property_administrator.cif}
+                                                onChange={e => updateCurrentRoleData('cif', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                            {cifValidating && <p className="text-gray-600 mt-2">Verificando CIF...</p>}
+                                            {cifValid !== null && (
+                                                <p className="text-gray-600 mt-2">
+                                                    {cifValid ? 'CIF válido' : 'CIF no válido'}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Email de la empresa</label>
+                                            <input
+                                                type="email"
+                                                value={formData.property_administrator.business_email}
+                                                onChange={e => updateCurrentRoleData('business_email', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Teléfono de la empresa</label>
+                                            <input
+                                                type="tel"
+                                                value={formData.property_administrator.business_phone}
+                                                onChange={e => updateCurrentRoleData('business_phone', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label className="block text-gray-700 font-bold mb-2">Número profesional</label>
+                                            <input
+                                                type="text"
+                                                value={formData.property_administrator.professional_number}
+                                                onChange={e => updateCurrentRoleData('professional_number', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Navegación entre roles */}
+                        <div className="mt-6 flex justify-between">
+                            {currentRoleIndex > 0 && (
+                                <button
+                                    onClick={handlePrevRole}
+                                    className="btn btn-secondary"
+                                >
+                                    Atrás
+                                </button>
+                            )}
+
+                            {currentRoleIndex < formData.roles.length - 1 && (
+                                <button
+                                    onClick={handleNextRole}
+                                    className="btn btn-primary"
+                                >
+                                    Siguiente
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Paso 3: Contraseña */}
+                {currentStep === 3 && (
+                    <div>
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Establece tu contraseña</h2>
+                            <p className="text-gray-600 mt-2">Crea una contraseña segura</p>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-bold mb-2">Contraseña</label>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={formData.password}
+                                onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="mt-2 text-blue-600 text-sm"
+                            >
+                                {showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                            </button>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-bold mb-2">Confirmar contraseña</label>
+                            <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={formData.confirmPassword}
+                                onChange={e => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="mt-2 text-blue-600 text-sm"
+                            >
+                                {showConfirmPassword ? "Ocultar confirmación" : "Mostrar confirmación"}
+                            </button>
+                        </div>
+
+                        <div className="text-center">
+                            <button
+                                onClick={handleSubmit}
+                                className="btn btn-primary"
+                            >
+                                {submitting ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Registrando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <User className="w-4 h-4 mr-2" />
+                                        Crear cuenta
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Mensajes de error y éxito */}
+                {error && <div className="bg-red-50 p-3 rounded mt-4">{error}</div>}
+                {successMessage && <div className="bg-green-50 p-3 rounded mt-4">{successMessage}</div>}
+            </div>
+        </div>
+    );
+}

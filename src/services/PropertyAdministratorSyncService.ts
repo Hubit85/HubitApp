@@ -222,7 +222,7 @@ export class PropertyAdministratorSyncService {
           contact_email
         `);
 
-      if (!verificationError && finalVerification && finalVerification.length > 0) {
+      if (!verificationError && finalVerification && finalVerification.length && finalVerification.length > 0) {
         console.log(`✅ FALLBACK: Final verification PASSED - ${finalVerification.length} roles confirmed in database`);
       } else {
         console.warn(`⚠️ Final verification warning: Expected ${propertyAdmins?.length || 0} roles, found ${finalVerification?.length || 0}`);
