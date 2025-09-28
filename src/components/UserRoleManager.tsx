@@ -6,14 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CheckCircle, UserCheck, Clock, User, Users, Building, Settings, Home } from "lucide-react";
 
 export default function UserRoleManager() {
     const { user, profile } = useSupabaseAuth();
     const [userRoles, setUserRoles] = useState < UserRole[] > ([]);
-    const [currentRole, setCurrentRole] = useState < UserRole | null > (null);
+    const [, setCurrentRole] = useState < UserRole | null > (null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");

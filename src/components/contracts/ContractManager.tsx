@@ -13,19 +13,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { 
-  FileText, Search, Filter, MapPin, Clock, Euro, AlertTriangle, CheckCircle, 
-  Send, Eye, MessageSquare, Calendar, Building, User, Star, Signature,
-  Loader2, RefreshCw, Download, Upload, Edit, Trash2, Plus, BookOpen,
-  Shield, Award, Target, ClipboardList, DollarSign
+  FileText, Search, Euro, CheckCircle, 
+  Eye, Calendar, User, Signature,
+  Loader2, RefreshCw, Edit, BookOpen,
+  Award, MapPin, DollarSign
 } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 
@@ -83,9 +75,9 @@ export function ContractManager() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedContract, setSelectedContract] = useState<ExtendedContract | null>(null);
+  const [, setSelectedContract] = useState<ExtendedContract | null>(null);
   const [showContractDialog, setShowContractDialog] = useState(false);
-  const [showSignatureDialog, setShowSignatureDialog] = useState(false);
+  const [, setShowSignatureDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentTab, setCurrentTab] = useState("my-contracts");

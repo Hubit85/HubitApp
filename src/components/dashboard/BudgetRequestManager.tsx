@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,10 +20,6 @@ type BudgetRequestWithProperty = BudgetRequest & {
 const CATEGORIES = [
   "cleaning", "plumbing", "electrical", "gardening", "painting", 
   "maintenance", "security", "hvac", "carpentry", "emergency", "other"
-] as const;
-
-const STATUS_OPTIONS = [
-  "pending", "published", "in_progress", "completed", "cancelled", "expired"
 ] as const;
 
 export default function BudgetRequestManager() {
