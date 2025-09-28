@@ -860,8 +860,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         };
 
         await loadUserProfile(userObject);
-      } catch (_profileFetchError) {
-        console.warn("⚠️ Profile fetch timeout, using emergency profile");
+      } catch (e) {
+        console.warn("⚠️ Profile fetch timeout, using emergency profile", e);
         
         const now = new Date().toISOString();
         const emergencyCreatedAt = userObject.created_at ? userObject.created_at : now; // FIXED: Explicit null check

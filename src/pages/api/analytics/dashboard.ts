@@ -35,7 +35,6 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
       try {
         const userRole = req.user?.role;
         
-
         let dashboardData;
 
         switch (userRole) {

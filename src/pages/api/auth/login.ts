@@ -91,7 +91,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       { expiresIn: '24h' }
     );
 
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user };
+    delete (userWithoutPassword as Partial<User>).password;
 
     res.status(200).json({
       message: 'Login successful',

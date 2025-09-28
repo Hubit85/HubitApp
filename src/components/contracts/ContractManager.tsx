@@ -15,8 +15,8 @@ import { Separator } from "@/components/ui/separator";
 import { 
   FileText, Search, Euro, CheckCircle, 
   Eye, Calendar, User, Signature,
-  Loader2, RefreshCw, Edit,
-  Award, MapPin, DollarSign, Clock, BookOpen
+  Loader2, RefreshCw, Edit, BookOpen, Clock,
+  Award, MapPin, DollarSign
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
