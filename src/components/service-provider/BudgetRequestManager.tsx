@@ -13,13 +13,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { 
-  Search, Filter, MapPin, Clock, Euro, AlertTriangle, CheckCircle, 
-  Send, Eye, MessageSquare, Calendar, Building, User, Star,
-  Loader2, RefreshCw, FileText, Image as ImageIcon, Plus
+  Search, MapPin, Clock, Euro, CheckCircle, 
+  Send, Eye, MessageSquare, Calendar, User,
+  Loader2, RefreshCw, FileText
 } from "lucide-react";
 import { BudgetRequest, Quote } from "@/integrations/supabase/types";
-import { useToast } from "@/hooks/use-toast"
-import { Database } from "@/integrations/supabase/types"
 
 interface ExtendedBudgetRequest extends BudgetRequest {
   user_name?: string;
@@ -55,11 +53,7 @@ interface QuoteFormData {
   terms_and_conditions: string;
 }
 
-export function BudgetRequestManager({
-  providerId,
-}: {
-  providerId: string
-}) {
+export function BudgetRequestManager() {
   const { user, activeRole } = useSupabaseAuth();
   const [budgetRequests, setBudgetRequests] = useState<ExtendedBudgetRequest[]>([]);
   const [myQuotes, setMyQuotes] = useState<Quote[]>([]);
@@ -74,7 +68,6 @@ export function BudgetRequestManager({
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [currentTab, setCurrentTab] = useState("available");
   const [serviceProvider, setServiceProvider] = useState<any>(null);
-  const { toast } = useToast();
 
   const [quoteForm, setQuoteForm] = useState<QuoteFormData>({
     amount: 0,
@@ -127,7 +120,7 @@ export function BudgetRequestManager({
 
       // Load budget requests and my quotes in parallel
       const [requestsResult, quotesResult] = await Promise.all([
-        loadAvailableBudgetRequests(providerData),
+        loadAvailableBudgetRequests(),
         loadMyQuotes(providerData.id)
       ]);
 
@@ -152,7 +145,7 @@ export function BudgetRequestManager({
     }
   };
 
-  const loadAvailableBudgetRequests = async (provider: any) => {
+  const loadAvailableBudgetRequests = async () => {
     try {
       console.log("🔍 Loading available budget requests...");
 
@@ -775,7 +768,7 @@ export function BudgetRequestManager({
                                   <DialogHeader>
                                     <DialogTitle>Crear Cotización</DialogTitle>
                                     <DialogDescription>
-                                      Envía tu propuesta para "{request.title}"
+                                      Envía tu propuesta para &quot;{request.title}&quot;
                                     </DialogDescription>
                                   </DialogHeader>
                                   

@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,14 +13,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Send, Eye, Star, Building, MapPin, Clock, Euro, AlertTriangle, 
-  CheckCircle, Loader2, Calendar, Zap, Bell, Target, Filter,
-  TrendingUp, Award, FileText, Users, MessageCircle, Phone,
-  Mail, ExternalLink, ChevronRight, Timer, DollarSign,
-  Briefcase, CheckSquare, XCircle, ArrowRight, Heart,
-  BookOpen, Settings, RefreshCw
+  Send, Eye, MapPin, Clock, Euro, AlertTriangle, 
+  CheckCircle, Loader2, Calendar, Target, Filter,
+  TrendingUp, FileText, Users,
+  Mail, Timer, DollarSign,
+  Briefcase, ArrowRight, RefreshCw
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 
 type BudgetRequest = Database["public"]["Tables"]["budget_requests"]["Row"];
@@ -65,7 +63,6 @@ const URGENCY_LEVELS = {
 
 export function EnhancedBudgetRequestManager() {
   const { user } = useSupabaseAuth();
-  const { toast } = useToast();
   const [serviceProvider, setServiceProvider] = useState<ServiceProvider | null>(null);
   const [availableRequests, setAvailableRequests] = useState<BudgetRequestWithDetails[]>([]);
   const [myQuotes, setMyQuotes] = useState<QuoteWithDetails[]>([]);
