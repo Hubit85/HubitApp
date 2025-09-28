@@ -9,11 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Loader2, User, Crown, Star, LogOut, Settings, CheckCircle, ArrowRight, ChevronRight,
   Shield, Home, Wrench, FileText, Mail, Phone, Calendar, Users, Building, Store, Bell, 
-  CreditCard, ThumbsUp, Award, StarIcon, Heart, Clock, Package,
-  AlertTriangle, Video, Calculator, BarChart3, DollarSign, TrendingUp, Target,
-  ClipboardList, MessageSquare, FileCheck, Building as BuildingIcon, MapPin, Users as UsersIcon, DollarSign as DollarSignIcon, FileText as FileTextIcon,
-  Settings as SettingsIcon, ChevronRight as ChevronRightIcon, BarChart3 as BarChart3Icon, TrendingUp as TrendingUpIcon, HelpCircle as HelpCircleIcon,
-  LogOut as LogOutIcon, Star as StarIcon, User as UserIcon, Home as HomeIcon, Bell as BellIcon
+  CreditCard, Heart, Clock, Package,
+  AlertTriangle, Video, Calculator, BarChart3, DollarSign, TrendingUp,
+  ClipboardList, MessageSquare, FileCheck,
+  MapPin
 } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import { Header } from "@/components/layout/Header";
@@ -251,7 +250,7 @@ export default function Dashboard() {
           { id: "proveedores", label: "Proveedores de Servicios", icon: Wrench },
           { id: "favoritos", label: "Mis Favoritos", icon: Heart },
           { id: "historial", label: "Historial de Servicios", icon: Clock },
-          { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+          { id: "evaluacion", label: "Evaluación de Servicios", icon: Star },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
           { id: "pagos", label: "Mis Pagos", icon: CreditCard },
           { id: "configuracion", label: "Configuración", icon: Settings },
@@ -265,7 +264,7 @@ export default function Dashboard() {
           { id: "proveedores", label: "Proveedores Verificados", icon: Store },
           { id: "favoritos", label: "Mis Favoritos", icon: Heart },
           { id: "historial", label: "Historial de Servicios", icon: Clock },
-          { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+          { id: "evaluacion", label: "Evaluación de Servicios", icon: Star },
           { id: "incidencias", label: "Reportar Incidencias", icon: Shield },
           { id: "chat", label: "Chat Comunitario", icon: MessageSquare },
           { id: "videoconferencia", label: "Videoconferencias", icon: Video },
@@ -283,7 +282,7 @@ export default function Dashboard() {
           { id: "clientes", label: "Mis Clientes", icon: Users },
           { id: "calendario", label: "Calendario", icon: Calendar },
           { id: "contratos", label: "Contratos Activos", icon: ClipboardList },
-          { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+          { id: "evaluacion", label: "Evaluación de Servicios", icon: Star },
           { id: "facturacion", label: "Facturación", icon: CreditCard },
           { id: "estadisticas", label: "Estadísticas", icon: TrendingUp },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
@@ -297,7 +296,7 @@ export default function Dashboard() {
           { id: "proveedores", label: "Proveedores Autorizados", icon: Store },
           { id: "incidencias", label: "Gestión de Incidencias", icon: AlertTriangle },
           { id: "juntas", label: "Juntas y Reuniones", icon: Video },
-          { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+          { id: "evaluacion", label: "Evaluación de Servicios", icon: Star },
           { id: "informes", label: "Informes y Reportes", icon: BarChart3 },
           { id: "facturacion", label: "Facturación", icon: CreditCard },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
@@ -311,7 +310,7 @@ export default function Dashboard() {
           { id: "proveedores", label: "Proveedores de Servicios", icon: Store },
           { id: "favoritos", label: "Mis Favoritos", icon: Star },
           { id: "historial", label: "Historial de Servicios", icon: FileText },
-          { id: "evaluacion", label: "Evaluación de Servicios", icon: StarIcon },
+          { id: "evaluacion", label: "Evaluación de Servicios", icon: Star },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
           { id: "pagos", label: "Mis Pagos", icon: CreditCard },
           { id: "configuracion", label: "Configuración", icon: Settings },
@@ -1347,13 +1346,34 @@ export default function Dashboard() {
             <Card className="border-stone-200 shadow-lg mt-6">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <StarIcon className="h-8 w-8 text-amber-600" />
+                  <Star className="h-8 w-8 text-amber-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-black mb-2">
                   Sistema de Evaluaciones
                 </h3>
-                {/* This is a temporary placeholder, actual implementation will be more complex */}
-                <ServiceHistoryCard />
+                <ServiceHistoryCard 
+                  service={{
+                    id: 'sample-1',
+                    name: 'Servicio de prueba',
+                    provider: 'Proveedor ejemplo',
+                    date: new Date().toISOString(),
+                    status: 'completed',
+                    category: 'Fontanería',
+                    rating: 4.5
+                  }}
+                  onRate={(serviceId: string, rating: number, comment: string) => {
+                    console.log('Rating submitted:', { serviceId, rating, comment });
+                  }}
+                  onViewDetails={(serviceId: string) => {
+                    console.log('View details:', serviceId);
+                  }}
+                  onRepeatService={(serviceId: string) => {
+                    console.log('Repeat service:', serviceId);
+                  }}
+                  onContactProvider={(serviceId: string) => {
+                    console.log('Contact provider:', serviceId);
+                  }}
+                />
               </CardContent>
             </Card>
           </>

@@ -222,7 +222,7 @@ export class PropertyAdministratorSyncService {
           contact_email
         `);
 
-      console.log('✅ PROPERTY SYNC: Verificación final completada. Encontrados:', finalVerification?.length);
+      console.log('✅ PROPERTY SYNC: Verificación final completada. Encontrados:', finalVerification?.length || 0);
 
       // CONSIDERAMOS ÉXITO si hay administradores en ambas tablas, incluso con algunos errores menores
       const success = finalVerification?.length > 0;
@@ -292,7 +292,7 @@ export class PropertyAdministratorSyncService {
             .eq('id', userId)
             .single();
           profileData = profile;
-        } catch (_profileError) {
+        } catch {
           console.warn('PROPERTY SYNC: No se pudo obtener perfil para sincronización individual');
         }
       }
