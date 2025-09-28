@@ -11,7 +11,9 @@ import {
   Shield, Home, Wrench, FileText, Mail, Phone, Calendar, Users, Building, Store, Bell, 
   CreditCard, ThumbsUp, Award, StarIcon, Heart, Clock, Package,
   AlertTriangle, Video, Calculator, BarChart3, DollarSign, TrendingUp, Target,
-  ClipboardList, MessageSquare, FileCheck
+  ClipboardList, MessageSquare, FileCheck, Building as BuildingIcon, MapPin, Users as UsersIcon, DollarSign as DollarSignIcon, FileText as FileTextIcon,
+  Settings as SettingsIcon, ChevronRight as ChevronRightIcon, BarChart3 as BarChart3Icon, TrendingUp as TrendingUpIcon, HelpCircle as HelpCircleIcon,
+  LogOut as LogOutIcon, Star as StarIcon, User as UserIcon, Home as HomeIcon, Bell as BellIcon
 } from "lucide-react";
 import ZoomableSection from "@/components/ZoomableSection";
 import { Header } from "@/components/layout/Header";
@@ -27,6 +29,9 @@ import { CommunityAdministratorAssignment } from "@/components/CommunityAdminist
 import { PropertyAdministratorProfile } from "@/components/PropertyAdministratorProfile";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { SupabaseDataViewer } from "@/components/debug/SuperbaseDataViewer";
+import { useLanguage } from "@/contexts/LanguageContext";
+import PropertySelector from "@/components/PropertySelector";
+import ServiceHistoryCard from "@/components/ratings/ServiceHistoryCard";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
@@ -1348,7 +1353,7 @@ export default function Dashboard() {
                   Sistema de Evaluaciones
                 </h3>
                 {/* This is a temporary placeholder, actual implementation will be more complex */}
-                <ProviderServiceHistoryCard />
+                <ServiceHistoryCard />
               </CardContent>
             </Card>
           </>

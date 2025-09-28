@@ -48,10 +48,10 @@ export class AutomaticRoleCreationService {
       if (emailCheckError) {
         console.warn("Email check failed, but continuing:", emailCheckError);
       } else if (existingProfile) {
-        return { error: "Ya existe una cuenta con este email" };
+        return { success: false, message: "Ya existe una cuenta con este email", rolesCreated: 0, totalRolesRequested: 0, createdRoles: [], errors: ["Email exists"] };
       }
     } catch (emailCheckError) {
-      console.warn("Email check failed, but continuing:", emailCheckError);
+      console.warn("Email check failed, continuing with registration:", emailCheckError);
     }
 
     // ENHANCED: Automatic detection of multi-role users during registration

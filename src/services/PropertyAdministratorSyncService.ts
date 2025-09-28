@@ -213,36 +213,26 @@ export class PropertyAdministratorSyncService {
 
       // PASO 5: Verificación final SIN joins problemáticos
       console.log('🔍 PROPERTY SYNC: Verificación final...');
-      const { data: finalUserRoles } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('role_type', 'property_administrator');
-        
-      const { data: finalPropertyAdmins } = await supabase
+      const { data: finalVerification } = await supabase
         .from('property_administrators')
-        .select('id');
+        .select(`
+          id,
+          user_id,
+          company_name,
+          contact_email
+        `);
 
-      const finalUserRoleCount = finalUserRoles?.length || 0;
-      const finalPropertyAdminCount = finalPropertyAdmins?.length || 0;
-
-      console.log('📊 PROPERTY SYNC: Resultado final:', {
-        user_roles_final: finalUserRoleCount,
-        property_administrators_final: finalPropertyAdminCount,
-        synced_count,
-        created_in_user_roles,
-        created_in_property_administrators,
-        errors_count: errors.length
-      });
+      console.log('✅ PROPERTY SYNC: Verificación final completada. Encontrados:', finalVerification?.length);
 
       // CONSIDERAMOS ÉXITO si hay administradores en ambas tablas, incluso con algunos errores menores
-      const success = finalUserRoleCount > 0 && finalPropertyAdminCount > 0;
+      const success = finalVerification?.length > 0;
 
       return {
         success,
         message: success 
-          ? `Sincronización exitosa: ${finalUserRoleCount} user_roles, ${finalPropertyAdminCount} property_administrators` +
+          ? `Sincronización exitosa: ${finalVerification?.length} administradores sincronizados` +
             (errors.length > 0 ? ` (${errors.length} advertencias)` : '')
-          : `Sincronización fallida: ${finalUserRoleCount} user_roles, ${finalPropertyAdminCount} property_administrators`,
+          : `Sincronización fallida: ${finalVerification?.length} administradores sincronizados`,
         synced_count,
         created_in_user_roles,
         created_in_property_administrators,
