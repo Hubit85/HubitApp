@@ -36,7 +36,6 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
   
   // Estados generales
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
   const [requestMessage, setRequestMessage] = useState("");
@@ -111,17 +110,16 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
 
   const searchAdministrators = async () => {
     setSearchLoading(true);
-    setError("");
     
     try {
       const result = await AdministratorRequestService.searchPropertyAdministrators(searchTerm);
       if (result.success) {
         setAdministrators(result.administrators);
       } else {
-        setError(result.message || 'Error al buscar administradores');
+        setSuccess(result.message || 'Error al buscar administradores');
       }
-    } catch (error) {
-      setError('Error inesperado al buscar administradores');
+    } catch (_error) {
+      setSuccess('Error inesperado al buscar administradores');
     } finally {
       setSearchLoading(false);
     }
@@ -131,7 +129,6 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
     if (!selectedAdmin || !activeRole || !user) return;
     
     setLoading(true);
-    setError("");
     setSuccess("");
     
     try {
@@ -148,10 +145,10 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
         setSelectedAdmin(null);
         await loadSentRequests();
       } else {
-        setError(result.message);
+        setSuccess(result.message);
       }
     } catch (_error) {
-      setError('Error inesperado al enviar la solicitud');
+      setSuccess('Error inesperado al enviar la solicitud');
     } finally {
       setLoading(false);
     }
@@ -161,7 +158,6 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
     if (!selectedRequest || !user) return;
     
     setLoading(true);
-    setError("");
     setSuccess("");
     
     try {
@@ -183,10 +179,10 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
           loadManagedIncidents()
         ]);
       } else {
-        setError(result.message);
+        setSuccess(result.message);
       }
     } catch (_error) {
-      setError('Error inesperado al procesar la respuesta');
+      setSuccess('Error inesperado al procesar la respuesta');
     } finally {
       setLoading(false);
     }
@@ -194,7 +190,6 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
 
   const cancelRequest = async (requestId: string) => {
     setLoading(true);
-    setError("");
     setSuccess("");
     
     try {
@@ -203,10 +198,10 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
         setSuccess(result.message);
         await loadSentRequests();
       } else {
-        setError(result.message);
+        setSuccess(result.message);
       }
     } catch (_error) {
-      setError('Error al cancelar la solicitud');
+      setSuccess('Error al cancelar la solicitud');
     } finally {
       setLoading(false);
     }
@@ -397,13 +392,6 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
           </Dialog>
         </div>
 
-        {error && (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-red-800">{error}</AlertDescription>
-          </Alert>
-        )}
-
         {success && (
           <Alert className="border-green-200 bg-green-50">
             <CheckCircle className="h-4 w-4" />
@@ -509,13 +497,6 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
         <h2 className="text-2xl font-bold text-stone-900">Panel de Gestión</h2>
         <p className="text-stone-600">Gestiona solicitudes de miembros de comunidad y las incidencias asignadas</p>
       </div>
-
-      {error && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-red-800">{error}</AlertDescription>
-        </Alert>
-      )}
 
       {success && (
         <Alert className="border-green-200 bg-green-50">

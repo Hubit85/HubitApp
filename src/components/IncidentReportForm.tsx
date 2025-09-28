@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { 
-  X, Camera, FileImage, Loader2, Shield, 
+  X, Camera, Loader2, Shield, 
   CheckCircle, MapPin, Clock, AlertCircle, Home
 } from "lucide-react";
 import PropertySelector from "@/components/PropertySelector";
@@ -344,7 +344,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
         // Try uploading to a public bucket or create base64 encoded version as fallback
         try {
-          const { data, error } = await supabase.storage
+          const { error } = await supabase.storage
             .from('incident-photos')
             .upload(filePath, photo, {
               cacheControl: '3600',
