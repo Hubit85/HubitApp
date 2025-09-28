@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CheckCircle, ChevronDown, User, Users, Building, Settings, RefreshCw } from "lucide-react";
 

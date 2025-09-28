@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { CrossRoleDataService, RoleSyncMapping, PropertySyncOptions } from "@/services/CrossRoleDataService";
@@ -110,7 +109,6 @@ export function PropertySyncManager() {
     userId: string, 
     roles: UserRole[]
   ): Promise<PropertyWithSyncInfo[]> => {
-    const allProperties: PropertyWithSyncInfo[] = [];
     const propertyMap = new Map<string, PropertyWithSyncInfo>();
 
     for (const role of roles) {

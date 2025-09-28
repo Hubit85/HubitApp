@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase, isSupabaseConfigured } from "@/integrations/supabase/client";
 
 export default function SupabaseStatus() {
-  const { user, profile, session, loading } = useSupabaseAuth();
+  const { user, profile, loading } = useSupabaseAuth();
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'placeholder'>('checking');
   const [dbStatus, setDbStatus] = useState<'checking' | 'ready' | 'error' | 'placeholder'>('checking');
 
@@ -26,7 +26,7 @@ export default function SupabaseStatus() {
       const { error } = await Promise.race([connectionPromise, timeoutPromise]);
       const connected = !error || error.code === 'PGRST116';
       return connected;
-    } catch (error) {
+    } catch (_error) {
       // Silent handling - don't log to console to avoid user-visible errors
       return false;
     }
@@ -59,7 +59,7 @@ export default function SupabaseStatus() {
         return false;
       });
       setDbStatus(hasFailures ? 'error' : 'ready');
-    } catch (error) {
+    } catch (_error) {
       // Silent handling - don't log to console to avoid user-visible errors
       setDbStatus('error');
     }
@@ -80,13 +80,13 @@ export default function SupabaseStatus() {
       try {
         const connected = await checkConnection();
         if (mounted) setConnectionStatus(connected ? 'connected' : 'error');
-      } catch (error) {
+      } catch (_error) {
         if (mounted) setConnectionStatus('error');
       }
       
       try {
         await checkDatabaseTables();
-      } catch (error) {
+      } catch (_error) {
         if (mounted) setDbStatus('error');
       }
     };
@@ -149,7 +149,7 @@ export default function SupabaseStatus() {
               To enable full HuBiT functionality, you need to connect Supabase:
             </p>
             <ul className="text-xs text-amber-700 space-y-1 ml-4 list-disc">
-              <li>Click the "Supabase" button in the Softgen navigation bar</li>
+              <li>Click the &quot;Supabase&quot; button in the Softgen navigation bar</li>
               <li>Follow the instructions to connect your project</li>
               <li>Environment variables will be configured automatically</li>
             </ul>

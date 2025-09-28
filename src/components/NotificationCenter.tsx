@@ -1162,7 +1162,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
                   {selectedRequest.request_message && (
                     <div className="mt-2">
                       <strong>Mensaje:</strong>
-                      <p className="mt-1 italic bg-white p-2 rounded">"{selectedRequest.request_message}"</p>
+                      <p className="mt-1 italic bg-white p-2 rounded">&quot;{selectedRequest.request_message}&quot;</p>
                     </div>
                   )}
                 </div>
@@ -1257,7 +1257,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
                     <div className="mt-2">
                       <strong>Mensaje:</strong>
                       <p className="mt-1 italic bg-white p-2 rounded">
-                        "{selectedAssignmentRequest.request_message}"
+                        &quot;{selectedAssignmentRequest.request_message}&quot;
                       </p>
                     </div>
                   )}

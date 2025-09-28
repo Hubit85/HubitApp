@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,6 @@ interface PropertySelectorProps {
   setSelectedProperty?: (property: PropertyWithUnits | null) => void;
   onPropertySelected?: (property: PropertyWithUnits, unit?: any) => void;
   onCancel?: () => void;
-  userType?: string;
   mode?: string;
   title?: string;
   allowNoUnitSelection?: boolean;
@@ -33,7 +31,6 @@ export function PropertySelector({
   setSelectedProperty,
   onPropertySelected,
   onCancel,
-  userType = "community_member",
   mode = "selection",
   title = "Seleccionar Propiedad",
   allowNoUnitSelection = true,
@@ -428,7 +425,7 @@ export function PropertySelector({
             <CardHeader>
               <CardTitle>Editar Detalles de Propiedad</CardTitle>
               <CardDescription>
-                Actualiza los detalles para "{selectedProperty.name}".
+                Actualiza los detalles para &quot;{selectedProperty.name}&quot;.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
