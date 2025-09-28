@@ -81,7 +81,7 @@ export default function RatingDisplay({ rating, showEvaluatorInfo = true }: Rati
           {/* Comment */}
           {rating.comment && (
             <p className="text-gray-700 text-sm leading-relaxed">
-              &quot;{rating.comment}&quot;
+              &ldquo;{rating.comment}&rdquo;
             </p>
           )}
 

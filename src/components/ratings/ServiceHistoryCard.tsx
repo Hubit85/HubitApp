@@ -136,7 +136,7 @@ export default function ServiceHistoryCard({
                 </div>
                 {service.comment && (
                   <div className="text-sm text-gray-600 italic">
-                    &quot;{service.comment}&quot;
+                    &ldquo;{service.comment}&rdquo;
                   </div>
                 )}
                 <Button 
