@@ -15,28 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 // import { Progress } from "@/components/ui/progress"; // Unused
 import {
     Loader2, 
-    // Mail, // Unused
-    // Lock, // Unused
-    // Eye, // Unused
-    // EyeOff, // Unused
     User, 
-    // Phone, // Unused
-    // ArrowRight, // Unused
-    Sparkles, 
-    // UserCircle, // Unused
-    Home, 
-    Users, 
-    Wrench, 
-    // Building, // Unused
-    // MapPin, // Unused
-    // FileText, // Unused
-    // AlertCircle, // Unused
-    // CheckCircle, // Unused
-    Shield,
-    // ArrowLeft, // Unused
-    Star,
-    // AlertTriangle, // Unused
-    Zap, Trees, Paintbrush, Thermometer, Hammer, Key, Truck, Settings
 } from "lucide-react";
 
 type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';

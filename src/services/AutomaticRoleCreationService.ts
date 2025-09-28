@@ -556,7 +556,7 @@ export class AutomaticRoleCreationService {
     role?: any;
     error?: string;
   }> {
-    const { userId, email: _email, roleType, roleData, isPrimary, attemptNumber } = options;
+    const { userId, roleType, roleData, isPrimary, attemptNumber } = options;
     const maxAttempts = 3;
     
     console.log(`🔄 ENHANCED SINGLE ROLE: Attempt ${attemptNumber}/${maxAttempts} for ${roleType} (${isPrimary ? 'PRIMARY' : 'ADDITIONAL'})`);

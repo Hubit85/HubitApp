@@ -1262,9 +1262,7 @@ export default function Dashboard() {
                   Encuentra oportunidades de negocio, envía cotizaciones profesionales y gestiona tus propuestas
                 </p>
               </div>
-              <ServiceProviderBudgetManager 
-                providerId={activeRole?.id || ""}
-              />
+              <ServiceProviderBudgetManager />
             </>
           );
         } else {
