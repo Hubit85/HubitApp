@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -72,21 +71,21 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
         ]);
       }
     } catch (err: any) {
-      console.error('Error loading initial data:', err);
+      console.error("Error loading initial data:", err);
       setError(err.message || "Error al cargar los datos iniciales");
     } finally {
       setLoading(false);
     }
-  }, [activeRole, userRole]);
+  }, [activeRole, userRole, loadSentRequests, loadReceivedRequests, loadManagedMembers, loadManagedIncidents]);
 
-  const loadSentRequests = async () => {
+  const loadSentRequests = useCallback(async () => {
     if (!activeRole) return;
     
     const result = await AdministratorRequestService.getSentRequests(activeRole.id);
     if (result.success) {
       setSentRequests(result.requests);
     }
-  };
+  }, [activeRole]);
 
   const loadReceivedRequests = async () => {
     if (!activeRole) return;
@@ -124,10 +123,11 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
       if (result.success) {
         setAdministrators(result.administrators);
       } else {
-        setError(result.message || 'Error al buscar administradores');
+        setError(result.message || "Error al buscar administradores");
       }
     } catch (e: any) {
-      setError('Error inesperado al buscar administradores');
+      console.error("Error inesperado al buscar administradores", e);
+      setError("Error inesperado al buscar administradores");
     } finally {
       setSearchLoading(false);
     }
@@ -157,7 +157,8 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
         setError(result.message);
       }
     } catch (e: any) {
-      setError('Error inesperado al enviar la solicitud');
+      console.error("Error inesperado al enviar la solicitud", e);
+      setError("Error inesperado al enviar la solicitud");
     } finally {
       setLoading(false);
     }
@@ -192,7 +193,8 @@ setShowResponseDialog(false);
         setError(result.message);
       }
     } catch (e: any) {
-      setError('Error inesperado al procesar la respuesta');
+      console.error("Error inesperado al procesar la respuesta", e);
+      setError("Error inesperado al procesar la respuesta");
     } finally {
       setLoading(false);
     }
@@ -212,7 +214,8 @@ setShowResponseDialog(false);
         setError(result.message);
       }
     } catch (e: any) {
-      setError('Error al cancelar la solicitud');
+      console.error("Error al cancelar la solicitud", e);
+      setError("Error al cancelar la solicitud");
     } finally {
       setLoading(false);
     }

@@ -936,7 +936,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         <PropertySelector
           onPropertySelected={handlePropertySelection}
           onCancel={() => setShowPropertySelector(false)}
-          userType="community_member"
           mode="incident"
           title="Selecciona la Propiedad para la Incidencia"
           allowNoUnitSelection={true}
