@@ -234,6 +234,53 @@ export type Database = {
         }
         Relationships: []
       }
+      community_codes: {
+        Row: {
+          city: string
+          code: string
+          country: string
+          created_at: string | null
+          created_by: string
+          id: string
+          province: string
+          street: string
+          street_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          city: string
+          code: string
+          country: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          province: string
+          street: string
+          street_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          city?: string
+          code?: string
+          country?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          province?: string
+          street?: string
+          street_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_codes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_member_administrators: {
         Row: {
           administrator_verified: boolean | null
@@ -1152,6 +1199,8 @@ export type Database = {
           address: string
           amenities: string[] | null
           city: string
+          community_code: string | null
+          country: string | null
           created_at: string | null
           description: string | null
           id: string
@@ -1159,9 +1208,13 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           name: string
+          number: string | null
           postal_code: string | null
+          property_photo_url: string | null
           property_status: string | null
           property_type: string
+          province: string | null
+          street: string | null
           total_area: number | null
           units_count: number | null
           updated_at: string | null
@@ -1172,6 +1225,8 @@ export type Database = {
           address: string
           amenities?: string[] | null
           city: string
+          community_code?: string | null
+          country?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -1179,9 +1234,13 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           name: string
+          number?: string | null
           postal_code?: string | null
+          property_photo_url?: string | null
           property_status?: string | null
           property_type: string
+          province?: string | null
+          street?: string | null
           total_area?: number | null
           units_count?: number | null
           updated_at?: string | null
@@ -1192,6 +1251,8 @@ export type Database = {
           address?: string
           amenities?: string[] | null
           city?: string
+          community_code?: string | null
+          country?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -1199,9 +1260,13 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           name?: string
+          number?: string | null
           postal_code?: string | null
+          property_photo_url?: string | null
           property_status?: string | null
           property_type?: string
+          province?: string | null
+          street?: string | null
           total_area?: number | null
           units_count?: number | null
           updated_at?: string | null
