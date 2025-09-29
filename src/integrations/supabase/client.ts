@@ -16,9 +16,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 export const isSupabaseConfigured = (): boolean => {
   return !!(
     SUPABASE_URL && 
-    SUPABASE_URL !== 'invalid_supabase_url' &&
     SUPABASE_PUBLISHABLE_KEY && 
-    SUPABASE_PUBLISHABLE_KEY !== 'invalid_anon_key' &&
     SUPABASE_URL.startsWith('https://') &&
     SUPABASE_PUBLISHABLE_KEY.length > 50
   );

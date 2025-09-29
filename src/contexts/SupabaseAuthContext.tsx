@@ -718,6 +718,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           address: null,
           city: null,
           postal_code: null,
+          province: null, // ADDED: Missing province property
           country: 'Spain',
           language: 'es',
           timezone: 'Europe/Madrid',
@@ -780,6 +781,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 address: null,
                 city: null,
                 postal_code: null,
+                province: null, // ADDED: Missing province property
                 country: 'Spain',
                 language: 'es',
                 timezone: 'Europe/Madrid',
@@ -813,6 +815,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   address: null,
                   city: null,
                   postal_code: null,
+                  province: null, // ADDED: Missing province property
                   country: 'Spain',
                   email_notifications: true,
                   sms_notifications: false,
@@ -843,6 +846,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               address: null,
               city: null,
               postal_code: null,
+              province: null, // ADDED: Missing province property
               country: 'Spain',
               language: 'es',
               timezone: 'Europe/Madrid',
@@ -876,6 +880,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           address: null,
           city: null,
           postal_code: null,
+          province: null, // ADDED: Missing province property
           country: 'Spain',
           language: 'es',
           timezone: 'Europe/Madrid',
@@ -1419,6 +1424,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         address: null,
         city: null,
         postal_code: null,
+        province: null, // ADDED: Missing province property
         country: 'Spain',
         language: 'es',
         timezone: 'Europe/Madrid',

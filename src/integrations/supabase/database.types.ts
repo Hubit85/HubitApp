@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-
 export type Json =
   | string
   | number
@@ -81,7 +80,7 @@ export type Database = {
             foreignKeyName: "administrator_requests_property_administrator_id_fkey"
             columns: ["property_administrator_id"]
             isOneToOne: false
-            referencedRelation: "user_roles"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -664,7 +663,7 @@ export type Database = {
       incidents: {
         Row: {
           admin_notes: string | null
-          administrator_id: string
+          administrator_id: string | null
           category: string
           community_id: string
           created_at: string | null
@@ -684,7 +683,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
-          administrator_id: string
+          administrator_id?: string | null
           category: string
           community_id: string
           created_at?: string | null
@@ -704,7 +703,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
-          administrator_id?: string
+          administrator_id?: string | null
           category?: string
           community_id?: string
           created_at?: string | null
@@ -1095,6 +1094,7 @@ export type Database = {
           last_login: string | null
           phone: string | null
           postal_code: string | null
+          province: string | null
           sms_notifications: boolean | null
           timezone: string | null
           updated_at: string | null
@@ -1116,6 +1116,7 @@ export type Database = {
           last_login?: string | null
           phone?: string | null
           postal_code?: string | null
+          province?: string | null
           sms_notifications?: boolean | null
           timezone?: string | null
           updated_at?: string | null
@@ -1137,6 +1138,7 @@ export type Database = {
           last_login?: string | null
           phone?: string | null
           postal_code?: string | null
+          province?: string | null
           sms_notifications?: boolean | null
           timezone?: string | null
           updated_at?: string | null
@@ -1246,6 +1248,51 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      quote_rejections: {
+        Row: {
+          budget_request_id: string
+          created_at: string | null
+          id: string
+          reason: string
+          rejected_at: string
+          service_provider_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          budget_request_id: string
+          created_at?: string | null
+          id?: string
+          reason: string
+          rejected_at?: string
+          service_provider_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          budget_request_id?: string
+          created_at?: string | null
+          id?: string
+          reason?: string
+          rejected_at?: string
+          service_provider_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_rejections_budget_request_id_fkey"
+            columns: ["budget_request_id"]
+            isOneToOne: false
+            referencedRelation: "budget_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_rejections_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quotes: {
         Row: {
