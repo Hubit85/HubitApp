@@ -219,12 +219,18 @@ export default function PropertyManager() {
 
     try {
       if (isEditing && currentProperty.id) {
-        // Para actualizar, incluir todos los nuevos campos
+        // Para actualizar, incluir TODOS los campos nuevos
         const updateData = {
           name: currentProperty.name || '',
           // Mantener tanto address como los campos separados para compatibilidad
           address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
+          street: currentProperty.street || null,
+          number: currentProperty.number || null,
+          floor: currentProperty.floor || null,
+          door: currentProperty.door || null,
           city: currentProperty.city || '',
+          province: currentProperty.province || null,
+          country: currentProperty.country || 'España',
           postal_code: currentProperty.postal_code || '',
           description: currentProperty.description || '',
           property_type: currentProperty.property_type || 'residential',
@@ -241,12 +247,18 @@ export default function PropertyManager() {
           
         if (error) throw error;
       } else {
-        // Para insertar, crear datos completos con todos los campos
+        // Para insertar, crear datos completos con TODOS los campos nuevos
         const insertData = {
           user_id: user.id,
           name: currentProperty.name || 'Nueva Propiedad',
           address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
+          street: currentProperty.street || null,
+          number: currentProperty.number || null,
+          floor: currentProperty.floor || null,
+          door: currentProperty.door || null,
           city: currentProperty.city || '',
+          province: currentProperty.province || null,
+          country: currentProperty.country || 'España',
           postal_code: currentProperty.postal_code || '',
           property_type: currentProperty.property_type || 'residential',
           description: currentProperty.description || '',
@@ -265,26 +277,64 @@ export default function PropertyManager() {
       setIsDialogOpen(false);
       await fetchProperties();
 
-      // Mostrar notificación de éxito
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      notification.innerHTML = `
-        <div class="flex items-center gap-2">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-          <span>Propiedad ${isEditing ? 'actualizada' : 'creada'} exitosamente</span>
+      // Mostrar notificación de éxito mejorada
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-lg shadow-xl z-50 border border-green-400';
+      successDiv.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold">${isEditing ? '¡Propiedad actualizada!' : '¡Propiedad creada!'}</p>
+            <p class="text-sm text-green-100">Todos los cambios se han guardado correctamente</p>
+          </div>
         </div>
       `;
-      document.body.appendChild(notification);
+      document.body.appendChild(successDiv);
+      
+      // Animación de salida
       setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
+        if (document.body.contains(successDiv)) {
+          successDiv.style.transition = 'all 0.5s ease-out';
+          successDiv.style.transform = 'translateX(100%)';
+          successDiv.style.opacity = '0';
+          setTimeout(() => {
+            if (document.body.contains(successDiv)) {
+              document.body.removeChild(successDiv);
+            }
+          }, 500);
         }
-      }, 3000);
+      }, 4000);
 
     } catch (err: any) {
-        setError(err.message);
+        console.error('Error saving property:', err);
+        setError(`Error guardando la propiedad: ${err.message}`);
+        
+        // Mostrar notificación de error mejorada
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg shadow-xl z-50 border border-red-400';
+        errorDiv.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="font-semibold">Error al guardar</p>
+              <p class="text-sm text-red-100">${err.message}</p>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(errorDiv);
+        setTimeout(() => {
+          if (document.body.contains(errorDiv)) {
+            document.body.removeChild(errorDiv);
+          }
+        }, 5000);
     }
   };
 
@@ -351,17 +401,18 @@ export default function PropertyManager() {
 
         <div className="space-y-6">
           {properties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {properties.map(prop => (
-                <Card key={prop.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white">
-                  {/* Photo Section */}
-                  <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group">
+                <Card key={prop.id} className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white hover:scale-[1.02] transform-gpu">
+                  {/* Enhanced Photo Section - Now More Prominent */}
+                  <div className="relative h-72 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group cursor-pointer">
                     {prop.property_photo_url ? (
                       <>
+                        {/* Main Property Image */}
                         <img 
                           src={prop.property_photo_url} 
                           alt={`Fotografía de ${prop.name}`}
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1"
                           onError={(e) => {
                             const target = e.currentTarget;
                             target.style.display = 'none';
@@ -370,9 +421,11 @@ export default function PropertyManager() {
                               parent.innerHTML = `
                                 <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100">
                                   <div class="text-center">
-                                    <svg class="h-16 w-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                    </svg>
+                                    <div class="w-20 h-20 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                                      <svg class="h-10 w-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                      </svg>
+                                    </div>
                                     <p class="text-slate-400 text-sm font-medium">Error cargando imagen</p>
                                   </div>
                                 </div>
@@ -380,66 +433,94 @@ export default function PropertyManager() {
                             }
                           }}
                         />
-                        {/* Photo Overlay for Better Contrast */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
                         
-                        {/* Enhanced Photo Label */}
-                        <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-                          <div className="bg-white/95 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg">
+                        {/* Gradient Overlays for Better Text Readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
+                        
+                        {/* Floating Photo Badge */}
+                        <div className="absolute bottom-4 left-4 opacity-90 group-hover:opacity-100 transition-all duration-500">
+                          <div className="bg-white/95 backdrop-blur-lg rounded-full px-4 py-2 shadow-2xl border border-white/20">
                             <div className="flex items-center gap-2">
-                              <Camera className="h-4 w-4 text-slate-600" />
-                              <span className="text-sm font-medium text-slate-800">Fotografía principal</span>
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <span className="text-sm font-bold text-slate-800">Fotografía disponible</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Professional Photo Watermark */}
+                        <div className="absolute top-4 left-4 opacity-70 group-hover:opacity-100 transition-all duration-500">
+                          <div className="bg-black/50 backdrop-blur-md rounded-lg px-3 py-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <Camera className="h-3 w-3 text-white" />
+                              <span className="text-xs font-medium text-white">HuBiT</span>
                             </div>
                           </div>
                         </div>
                       </>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 group-hover:from-slate-200 group-hover:via-slate-100 group-hover:to-slate-200 transition-all duration-500">
-                        <div className="text-center transform group-hover:scale-105 transition-transform duration-500">
-                          <div className="w-20 h-20 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg transition-shadow">
-                            <Building className="h-10 w-10 text-slate-400" />
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 group-hover:from-slate-200 group-hover:via-slate-100 group-hover:to-slate-200 transition-all duration-500 relative overflow-hidden">
+                        {/* Subtle Pattern Background */}
+                        <div className="absolute inset-0 opacity-5" style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23334155' fill-opacity='0.4'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+                        }} />
+                        
+                        <div className="text-center transform group-hover:scale-110 transition-all duration-500 z-10">
+                          <div className="w-24 h-24 bg-gradient-to-br from-slate-200 to-slate-400 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl transition-shadow duration-500">
+                            <Building className="h-12 w-12 text-white drop-shadow-lg" />
                           </div>
-                          <p className="text-slate-400 text-sm font-medium mb-1">Sin fotografía</p>
-                          <p className="text-slate-300 text-xs">Haz clic para añadir una imagen</p>
+                          <div className="space-y-2">
+                            <p className="text-slate-500 text-lg font-bold">Sin fotografía</p>
+                            <p className="text-slate-400 text-sm max-w-48 mx-auto leading-relaxed">
+                              Añade una imagen para mostrar tu propiedad de manera profesional
+                            </p>
+                            <div className="mt-4 px-4 py-2 bg-blue-500/10 rounded-full inline-block">
+                              <p className="text-blue-600 text-xs font-medium">Haz clic para editar</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
                     
-                    {/* Community Code Badge - Enhanced */}
+                    {/* Community Code Badge - More Prominent */}
                     {prop.community_code && (
-                      <div className="absolute top-3 left-3 transform group-hover:scale-105 transition-transform duration-300">
-                        <Badge className="font-mono text-xs bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0 shadow-lg backdrop-blur-sm hover:shadow-xl transition-shadow">
-                          <Code className="h-3 w-3 mr-1" />
-                          {prop.community_code}
-                        </Badge>
+                      <div className="absolute top-4 right-4 transform group-hover:scale-110 transition-all duration-300 z-20">
+                        <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 rounded-lg px-3 py-2 shadow-2xl border border-white/20">
+                          <div className="flex items-center gap-2">
+                            <Code className="h-3 w-3 text-white" />
+                            <span className="font-mono text-xs font-bold text-white tracking-wide">
+                              {prop.community_code}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     )}
                     
-                    {/* Enhanced Action Buttons */}
-                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                    {/* Enhanced Action Buttons - More Professional */}
+                    <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleOpenDialog(prop)}
-                        className="h-9 w-9 p-0 bg-white/95 backdrop-blur-md border-0 shadow-lg hover:bg-white hover:scale-110 hover:shadow-xl transition-all duration-300 rounded-full"
+                        className="h-10 w-10 p-0 bg-white/95 backdrop-blur-lg border border-white/30 shadow-2xl hover:bg-white hover:scale-125 hover:shadow-2xl transition-all duration-300 rounded-full group/btn"
                       >
-                        <Edit className="h-4 w-4 text-slate-600" />
+                        <Edit className="h-4 w-4 text-slate-600 group-hover/btn:text-blue-600 transition-colors" />
                       </Button>
                       <Button 
                         variant="destructive" 
                         size="sm" 
                         onClick={() => handleDelete(prop.id)}
-                        className="h-9 w-9 p-0 bg-gradient-to-r from-red-500 to-red-600 backdrop-blur-md border-0 shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-110 hover:shadow-xl transition-all duration-300 rounded-full"
+                        className="h-10 w-10 p-0 bg-gradient-to-r from-red-500 to-red-600 backdrop-blur-lg border border-red-300 shadow-2xl hover:from-red-600 hover:to-red-700 hover:scale-125 hover:shadow-2xl transition-all duration-300 rounded-full"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
 
-                    {/* Property Type Badge */}
-                    <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+                    {/* Property Type Badge - Enhanced Position */}
+                    <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-700 transform translate-y-2 group-hover:translate-y-0 delay-100">
                       <Badge 
                         variant="outline" 
-                        className="bg-white/95 backdrop-blur-md text-slate-700 border-0 shadow-md text-xs font-semibold"
+                        className="bg-white/95 backdrop-blur-lg text-slate-700 border border-white/30 shadow-xl text-xs font-bold px-3 py-1"
                       >
                         {prop.property_type === 'residential' ? '🏠 Residencial' :
                          prop.property_type === 'commercial' ? '🏢 Comercial' :
