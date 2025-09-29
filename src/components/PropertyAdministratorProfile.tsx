@@ -483,18 +483,18 @@ export function PropertyAdministratorProfile() {
                 )}
               </div>
 
-              {/* NUEVO: Selector desplegable para códigos de comunidad */}
+              {/* NUEVO: Selector desplegable para códigos de comunidad - CORREGIDO */}
               <div>
                 <Label htmlFor="community_name" className="text-sm font-medium text-stone-700">
                   Nombre de la Comunidad
                 </Label>
                 {isEditing ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2 mt-1">
                     <Select 
-                      value={formData.community_name} 
+                      value={formData.community_name || ""} 
                       onValueChange={(value) => setFormData(prev => ({ ...prev, community_name: value }))}
                     >
-                      <SelectTrigger className="mt-1">
+                      <SelectTrigger className="h-12 bg-white">
                         <SelectValue placeholder={
                           loadingCommunities 
                             ? "Cargando comunidades..." 
@@ -503,21 +503,17 @@ export function PropertyAdministratorProfile() {
                               : "Selecciona un código de comunidad"
                         } />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-50">
                         {loadingCommunities ? (
-                          <SelectItem value="" disabled>
-                            <div className="flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              <span>Cargando...</span>
-                            </div>
-                          </SelectItem>
+                          <div className="flex items-center gap-2 p-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Cargando comunidades...</span>
+                          </div>
                         ) : communityCodes.length === 0 ? (
-                          <SelectItem value="" disabled>
-                            <div className="flex items-center gap-2 text-amber-600">
-                              <AlertCircle className="h-4 w-4" />
-                              <span>No tienes propiedades con códigos de comunidad</span>
-                            </div>
-                          </SelectItem>
+                          <div className="flex items-center gap-2 p-2 text-amber-600">
+                            <AlertCircle className="h-4 w-4" />
+                            <span className="text-sm">No tienes propiedades con códigos de comunidad</span>
+                          </div>
                         ) : (
                           <>
                             <SelectItem value="">
@@ -525,7 +521,7 @@ export function PropertyAdministratorProfile() {
                             </SelectItem>
                             {communityCodes.map((community) => (
                               <SelectItem key={community.id} value={community.code}>
-                                <div className="flex flex-col">
+                                <div className="flex flex-col py-1">
                                   <div className="font-semibold text-blue-900">
                                     {community.code}
                                   </div>
