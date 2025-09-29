@@ -297,7 +297,7 @@ export default function Dashboard() {
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores de Servicios", icon: Store },
           { id: "favoritos", label: "Mis Favoritos", icon: Heart },
-          { id: "historial", label: "Historial de Servicios", icon: FileText },
+          { id: "historial", label: "Historial de Servicios", icon: Clock },
           { id: "evaluacion", label: "Evaluación de Servicios", icon: Star },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
           { id: "pagos", label: "Mis Pagos", icon: CreditCard },
