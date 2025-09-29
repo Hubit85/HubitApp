@@ -550,7 +550,7 @@ export function PropertyAdministratorProfile() {
                           </span>
                         </div>
                         <p className="text-xs text-amber-600 mt-1">
-                          Los códigos de comunidad se obtienen de las propiedades que has creado en "Mis Propiedades". 
+                          Los códigos de comunidad se obtienen de las propiedades que has creado en &quot;Mis Propiedades&quot;. 
                           Asegúrate de tener propiedades con códigos de comunidad asignados.
                         </p>
                       </div>
