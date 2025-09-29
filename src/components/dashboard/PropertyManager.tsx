@@ -202,26 +202,26 @@ export default function PropertyManager() {
         throw new Error('El archivo debe ser una imagen (JPEG, PNG, WebP)');
       }
 
-      // Validar tamaño máximo (5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      // Validar tamaño máximo (10MB para mejor flexibilidad)
+      const maxSize = 10 * 1024 * 1024; // 10MB
       if (file.size > maxSize) {
-        throw new Error('La imagen es demasiado grande. Máximo 5MB permitido');
+        throw new Error('La imagen es demasiado grande. Máximo 10MB permitido');
       }
 
-      // Crear un nombre único para el archivo
+      // Crear un nombre único para el archivo con mejor estructura
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substring(2, 15);
       const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const fileName = `property_${user.id}_${timestamp}_${randomId}.${fileExtension}`;
-      const filePath = `property-photos/${fileName}`;
+      const cleanFileName = `hubit_property_${user.id}_${timestamp}_${randomId}.${fileExtension}`;
+      const filePath = `property-photos/${cleanFileName}`;
 
-      console.log('📁 Preparando subida:', { fileName, filePath });
+      console.log('📁 Preparando subida:', { cleanFileName, filePath });
 
-      // Subir archivo a Supabase Storage
+      // Subir archivo a Supabase Storage con configuración optimizada
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('uploads')
         .upload(filePath, file, {
-          cacheControl: '3600',
+          cacheControl: '86400', // 24 horas
           upsert: false,
           contentType: file.type
         });
@@ -233,7 +233,7 @@ export default function PropertyManager() {
 
       console.log('✅ Archivo subido exitosamente:', uploadData);
 
-      // Obtener la URL pública de la imagen
+      // Obtener la URL pública de la imagen con validación mejorada
       const { data: urlData } = supabase.storage
         .from('uploads')
         .getPublicUrl(filePath);
@@ -242,92 +242,115 @@ export default function PropertyManager() {
         throw new Error('No se pudo obtener la URL pública de la imagen');
       }
 
-      console.log('🔗 URL pública generada:', urlData.publicUrl);
+      // Construir URL optimizada y verificada
+      const imageUrl = urlData.publicUrl;
+      console.log('🔗 URL pública generada:', imageUrl);
 
-      // Verificar que la imagen sea accesible
-      try {
-        const testResponse = await fetch(urlData.publicUrl, { method: 'HEAD' });
-        if (!testResponse.ok) {
-          console.warn('⚠️ La imagen podría no estar accesible inmediatamente');
-        }
-      } catch (testError) {
-        console.warn('⚠️ No se pudo verificar la accesibilidad de la imagen:', testError);
-      }
+      // Precargar la imagen para asegurar que funciona antes de guardarlam
+      const testImage = new Image();
+      testImage.onload = () => {
+        console.log('✅ Imagen verificada y precargada correctamente');
+        
+        // Actualizar el estado con la nueva URL SOLO después de verificar que funciona
+        setCurrentProperty({
+          ...currentProperty,
+          property_photo_url: imageUrl
+        });
 
-      // Actualizar el estado con la nueva URL
-      setCurrentProperty({
-        ...currentProperty,
-        property_photo_url: urlData.publicUrl
-      });
-
-      // Mostrar notificación de éxito mejorada
-      const successDiv = document.createElement('div');
-      successDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-lg shadow-xl z-50 border border-green-400';
-      successDiv.innerHTML = `
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
+        // Mostrar notificación de éxito mejorada
+        const successDiv = document.createElement('div');
+        successDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white px-8 py-6 rounded-xl shadow-2xl z-50 border border-emerald-300 backdrop-blur-sm';
+        successDiv.innerHTML = `
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-lg font-bold">¡Imagen subida correctamente!</p>
+              <p class="text-sm text-emerald-100 mt-1">La fotografía se ha guardado y está lista para mostrarse</p>
+              <div class="flex items-center gap-2 mt-2">
+                <div class="w-2 h-2 bg-emerald-200 rounded-full animate-pulse"></div>
+                <span class="text-xs text-emerald-200 font-medium">Verificada • ${Math.round(file.size / 1024)}KB</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <p class="font-semibold">¡Imagen subida correctamente!</p>
-            <p class="text-sm text-green-100">La fotografía se ha guardado y se mostrará en la propiedad</p>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(successDiv);
-      
-      // Animación de salida después de 4 segundos
-      setTimeout(() => {
-        if (document.body.contains(successDiv)) {
-          successDiv.style.transition = 'all 0.5s ease-out';
-          successDiv.style.transform = 'translateX(100%)';
-          successDiv.style.opacity = '0';
-          setTimeout(() => {
-            if (document.body.contains(successDiv)) {
-              document.body.removeChild(successDiv);
-            }
-          }, 500);
-        }
-      }, 4000);
+        `;
+        document.body.appendChild(successDiv);
+        
+        // Animación de salida después de 5 segundos
+        setTimeout(() => {
+          if (document.body.contains(successDiv)) {
+            successDiv.style.transition = 'all 0.8s ease-out';
+            successDiv.style.transform = 'translateX(120%) scale(0.9)';
+            successDiv.style.opacity = '0';
+            setTimeout(() => {
+              if (document.body.contains(successDiv)) {
+                document.body.removeChild(successDiv);
+              }
+            }, 800);
+          }
+        }, 5000);
+      };
+
+      testImage.onerror = () => {
+        console.error('❌ Error verificando imagen después de subida');
+        throw new Error('La imagen se subió pero no se puede verificar su accesibilidad');
+      };
+
+      // Iniciar verificación de imagen
+      testImage.src = imageUrl;
 
     } catch (err: any) {
       console.error('❌ Error completo al subir imagen:', err);
       setError(`Error subiendo imagen: ${err.message}`);
       
-      // Mostrar notificación de error específica para imágenes
+      // Mostrar notificación de error mejorada
       const errorDiv = document.createElement('div');
-      errorDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg shadow-xl z-50 border border-red-400';
+      errorDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-6 rounded-xl shadow-2xl z-50 border border-red-400 backdrop-blur-sm max-w-md';
       errorDiv.innerHTML = `
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
-          <div>
-            <p class="font-semibold">Error al subir imagen</p>
-            <p class="text-sm text-red-100">${err.message}</p>
-            <p class="text-xs text-red-200 mt-1">Verifica que el archivo sea una imagen válida (máximo 5MB)</p>
+          <div class="flex-1">
+            <p class="text-lg font-bold">Error al subir imagen</p>
+            <p class="text-sm text-red-100 mt-1 leading-relaxed">${err.message}</p>
+            <div class="mt-3 p-3 bg-red-800/30 rounded-lg border border-red-500/30">
+              <p class="text-xs text-red-200 font-medium">💡 Consejos:</p>
+              <ul class="text-xs text-red-200 mt-1 space-y-1">
+                <li>• Usa imágenes JPG, PNG o WebP</li>
+                <li>• Tamaño máximo: 10MB</li>
+                <li>• Verifica tu conexión a internet</li>
+              </ul>
+            </div>
           </div>
         </div>
       `;
       document.body.appendChild(errorDiv);
+      
+      // Remover después de 10 segundos con animación
       setTimeout(() => {
         if (document.body.contains(errorDiv)) {
-          errorDiv.style.transition = 'all 0.5s ease-out';
+          errorDiv.style.transition = 'all 0.8s ease-out';
+          errorDiv.style.transform = 'translateX(120%) scale(0.9)';
           errorDiv.style.opacity = '0';
           setTimeout(() => {
             if (document.body.contains(errorDiv)) {
               document.body.removeChild(errorDiv);
             }
-          }, 500);
+          }, 800);
         }
-      }, 8000);
+      }, 10000);
       
     } finally {
       setUploadingPhoto(false);
+      // Limpiar el input file
+      const fileInput = event.target;
+      fileInput.value = '';
     }
   };
 
@@ -520,7 +543,7 @@ export default function PropertyManager() {
           {properties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {properties.map(prop => (
-                <Card key={prop.id} className="group hover:shadow-2xl transition-all duration-700 border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white hover:scale-[1.03] transform-gpu backdrop-blur-sm">
+                <Card key={prop.id} className="group hover:shadow-2xl transition-all duration-700 border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white via-gray-50 to-gray-200 hover:scale-[1.03] transform-gpu backdrop-blur-sm">
                   {/* DRAMATICALLY ENHANCED Photo Section - Made Even More Prominent */}
                   <div className="relative h-80 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 overflow-hidden group cursor-pointer">
                     {prop.property_photo_url ? (
