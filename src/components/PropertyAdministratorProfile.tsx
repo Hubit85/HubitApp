@@ -498,102 +498,130 @@ export function PropertyAdministratorProfile() {
                 )}
               </div>
 
-              {/* ENHANCED: Selector desplegable para códigos de comunidad - FUNCIONALIDAD MEJORADA */}
+              {/* CORREGIDO: Selector desplegable para códigos de comunidad - ASEGURADO FUNCIONAMIENTO DESPLEGABLE */}
               <div>
                 <Label htmlFor="community_name" className="text-sm font-medium text-stone-700">
                   Nombre de la Comunidad
                 </Label>
                 {isEditing ? (
-                  <div className="space-y-2 mt-1">
+                  <div className="space-y-3 mt-1">
                     {loadingCommunities ? (
-                      <div className="flex items-center justify-center h-12 bg-gray-50 rounded-lg border border-gray-200">
-                        <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                        <span className="ml-2 text-sm text-gray-500">Cargando comunidades...</span>
+                      <div className="flex items-center justify-center h-12 bg-blue-50 rounded-lg border border-blue-300">
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                        <span className="ml-2 text-sm text-blue-700">Cargando comunidades...</span>
                       </div>
                     ) : communityCodes.length === 0 ? (
-                      <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                        <div className="flex items-center gap-2 text-amber-700">
-                          <AlertCircle className="h-4 w-4" />
-                          <span className="text-sm font-medium">
-                            No se encontraron códigos de comunidad
-                          </span>
-                        </div>
-                        <p className="text-xs text-amber-600 mt-1">
-                          Los códigos de comunidad se obtienen de las propiedades que has creado en &quot;Mis Propiedades&quot;. 
-                          Asegúrate de tener propiedades con códigos de comunidad asignados.
-                        </p>
-                        <div className="mt-2">
-                          <Input
-                            placeholder="O escribe manualmente el código de comunidad"
-                            value={formData.community_name}
-                            onChange={(e) => setFormData(prev => ({ ...prev, community_name: e.target.value }))}
-                            className="h-10 text-sm"
-                          />
+                      <div className="space-y-3">
+                        <div className="p-4 bg-amber-50 rounded-lg border border-amber-300">
+                          <div className="flex items-center gap-2 text-amber-700 mb-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <span className="text-sm font-medium">
+                              No se encontraron códigos de comunidad automáticos
+                            </span>
+                          </div>
+                          <p className="text-xs text-amber-600 mb-3">
+                            Los códigos de comunidad se obtienen automáticamente de las propiedades que has creado en &quot;Mis Propiedades&quot;. 
+                            Si no tienes propiedades registradas, puedes escribir manualmente el código de comunidad.
+                          </p>
+                          <div className="space-y-2">
+                            <Label className="text-xs font-medium text-amber-700">Código de comunidad (manual):</Label>
+                            <Input
+                              placeholder="Ej: COM-RESIDENCIAL-001"
+                              value={formData.community_name}
+                              onChange={(e) => setFormData(prev => ({ ...prev, community_name: e.target.value }))}
+                              className="h-10 text-sm bg-white border-amber-300 focus:border-amber-500"
+                            />
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      <Select 
-                        value={formData.community_name || ""} 
-                        onValueChange={(value) => {
-                          console.log('Community selected:', value);
-                          setFormData(prev => ({ ...prev, community_name: value }));
-                        }}
-                      >
-                        <SelectTrigger className="h-12 bg-white border-stone-300 hover:border-stone-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                          <SelectValue placeholder="Selecciona un código de comunidad">
-                            {formData.community_name ? (
-                              <div className="flex items-center gap-2">
-                                <Building className="h-4 w-4 text-blue-600" />
-                                <span className="font-medium">{formData.community_name}</span>
-                              </div>
-                            ) : (
-                              "Selecciona un código de comunidad"
-                            )}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[300px] z-[100]">
-                          <SelectItem value="" className="text-stone-500">
-                            <div className="flex items-center gap-2">
-                              <X className="h-3 w-3" />
-                              <span>Ninguna comunidad seleccionada</span>
-                            </div>
-                          </SelectItem>
-                          {communityCodes.map((community) => (
-                            <SelectItem key={community.id} value={community.code} className="py-3">
-                              <div className="flex flex-col space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <Building className="h-4 w-4 text-blue-600" />
-                                  <span className="font-semibold text-blue-900">
-                                    {community.code}
+                      <div className="space-y-2">
+                        <Select 
+                          value={formData.community_name || ""} 
+                          onValueChange={(value) => {
+                            console.log('🏘️ Código de comunidad seleccionado:', value);
+                            setFormData(prev => ({ ...prev, community_name: value }));
+                          }}
+                        >
+                          <SelectTrigger className="h-12 bg-white border-stone-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+                            <SelectValue placeholder="Haz clic para seleccionar código de comunidad">
+                              {formData.community_name ? (
+                                <div className="flex items-center gap-2 text-left">
+                                  <Building className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                  <span className="font-medium text-blue-900 truncate">
+                                    {formData.community_name}
                                   </span>
                                 </div>
-                                <div className="text-xs text-stone-600 pl-6">
-                                  {community.street} {community.street_number}, {community.city}
-                                  {community.province && `, ${community.province}`}
-                                </div>
+                              ) : (
+                                <span className="text-stone-500">Haz clic para seleccionar código de comunidad</span>
+                              )}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[300px] z-[150]">
+                            <SelectItem value="" className="text-stone-500 py-2">
+                              <div className="flex items-center gap-2">
+                                <X className="h-3 w-3 text-stone-400" />
+                                <span>Ninguna comunidad seleccionada</span>
                               </div>
                             </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                            {communityCodes.map((community, index) => (
+                              <SelectItem key={community.id} value={community.code} className="py-3 cursor-pointer">
+                                <div className="flex flex-col space-y-1 w-full">
+                                  <div className="flex items-center gap-2">
+                                    <Building className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                    <span className="font-semibold text-blue-900">
+                                      {community.code}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-stone-600 pl-6">
+                                    📍 {community.street} {community.street_number}, {community.city}
+                                    {community.province && `, ${community.province}`}
+                                  </div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        
+                        {/* Información sobre la funcionalidad del selector */}
+                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div className="text-sm">
+                              <p className="text-blue-800 font-medium">
+                                {communityCodes.length} código{communityCodes.length !== 1 ? 's' : ''} de comunidad disponible{communityCodes.length !== 1 ? 's' : ''}
+                              </p>
+                              <p className="text-blue-600 text-xs mt-1">
+                                Códigos obtenidos de las propiedades registradas en tu cuenta. 
+                                Haz clic en el selector para ver todas las opciones.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )}
                     
-                    {formData.community_name && communityCodes.length > 0 && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex items-center gap-2 text-blue-700">
-                          <CheckCircle className="h-4 w-4" />
+                    {/* Confirmación visual de selección */}
+                    {formData.community_name && (
+                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-center gap-2 text-green-700">
+                          <CheckCircle className="h-4 w-4 flex-shrink-0" />
                           <span className="text-sm font-medium">
-                            Comunidad seleccionada: {formData.community_name}
+                            ✅ Código seleccionado: <strong>{formData.community_name}</strong>
                           </span>
                         </div>
                         {(() => {
                           const selectedCommunity = communityCodes.find(c => c.code === formData.community_name);
                           return selectedCommunity ? (
-                            <p className="text-xs text-blue-600 mt-1">
+                            <p className="text-xs text-green-600 mt-1 pl-6">
                               📍 {selectedCommunity.street} {selectedCommunity.street_number}, {selectedCommunity.city}
                               {selectedCommunity.province && `, ${selectedCommunity.province}`}
                             </p>
-                          ) : null;
+                          ) : (
+                            <p className="text-xs text-green-600 mt-1 pl-6">
+                              💼 Código de comunidad configurado manualmente
+                            </p>
+                          );
                         })()}
                       </div>
                     )}
@@ -602,9 +630,9 @@ export function PropertyAdministratorProfile() {
                   <div className="mt-1">
                     {formData.community_name ? (
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                        <Building className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <span className="font-semibold text-blue-900">
+                        <Building className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                        <div className="flex-1">
+                          <span className="font-semibold text-blue-900 block">
                             {formData.community_name}
                           </span>
                           {(() => {
@@ -612,10 +640,11 @@ export function PropertyAdministratorProfile() {
                             return selectedCommunity ? (
                               <p className="text-xs text-blue-700 mt-0.5">
                                 📍 {selectedCommunity.street} {selectedCommunity.street_number}, {selectedCommunity.city}
+                                {selectedCommunity.province && `, ${selectedCommunity.province}`}
                               </p>
                             ) : (
                               <p className="text-xs text-blue-700 mt-0.5">
-                                Código de comunidad personalizado
+                                💼 Código de comunidad personalizado
                               </p>
                             );
                           })()}
@@ -623,7 +652,7 @@ export function PropertyAdministratorProfile() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
-                        <Building className="h-5 w-5 text-stone-400" />
+                        <Building className="h-5 w-5 text-stone-400 flex-shrink-0" />
                         <span className="text-stone-500 italic">
                           Ninguna comunidad seleccionada
                         </span>
