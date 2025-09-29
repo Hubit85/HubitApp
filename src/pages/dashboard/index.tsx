@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useSelectedProperty } from "@/hooks/useSelectedProperty";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ import ServiceHistoryCard from "@/components/ratings/ServiceHistoryCard";
 
 export default function Dashboard() {
   const { user, profile, signOut, loading, userRoles, activeRole, activateRole, refreshRoles } = useSupabaseAuth();
+  const { selectedProperty, isLoading: propertyLoading } = useSelectedProperty();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedRole, setSelectedRole] = useState<string>("particular");
@@ -233,15 +235,9 @@ export default function Dashboard() {
   ];
 
   const getRoleSpecificNavItems = (roleType: string) => {
-    const baseItems = [
-      // Add diagnostic tab
-      { id: "diagnostico", label: "🔧 Diagnóstico Sistema", icon: Settings },
-    ];
-    
     switch (roleType) {
       case "particular":
         return [
-          ...baseItems,
           { id: "propiedades", label: "Mis Propiedades", icon: Home },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores de Servicios", icon: Wrench },
@@ -254,9 +250,7 @@ export default function Dashboard() {
         ];
       case "community_member":
         return [
-          ...baseItems,
           { id: "propiedades", label: "Mis Propiedades", icon: Home },
-          { id: "comunidad", label: "Mi Comunidad", icon: Users },
           { id: "servicios", label: "Servicios Disponibles", icon: Store },
           { id: "proveedores", label: "Proveedores Verificados", icon: Store },
           { id: "favoritos", label: "Mis Favoritos", icon: Heart },
@@ -273,7 +267,6 @@ export default function Dashboard() {
         ];
       case "service_provider":
         return [
-          ...baseItems,
           { id: "servicios", label: "Mis Servicios", icon: Store },
           { id: "presupuestos", label: "Gestionar Presupuestos", icon: FileText },
           { id: "clientes", label: "Mis Clientes", icon: Users },
@@ -287,7 +280,6 @@ export default function Dashboard() {
         ];
       case "property_administrator":
         return [
-          ...baseItems,
           { id: "comunidades", label: "Comunidades Gestionadas", icon: Users },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores Autorizados", icon: Store },
@@ -301,11 +293,10 @@ export default function Dashboard() {
         ];
       default:
         return [
-          ...baseItems,
           { id: "propiedades", label: "Mis Propiedades", icon: Home },
           { id: "presupuesto", label: "Solicitar Presupuesto", icon: FileText },
           { id: "proveedores", label: "Proveedores de Servicios", icon: Store },
-          { id: "favoritos", label: "Mis Favoritos", icon: Star },
+          { id: "favoritos", label: "Mis Favoritos", icon: Heart },
           { id: "historial", label: "Historial de Servicios", icon: FileText },
           { id: "evaluacion", label: "Evaluación de Servicios", icon: Star },
           { id: "notificaciones", label: "Notificaciones", icon: Bell },
@@ -428,8 +419,10 @@ export default function Dashboard() {
                       <Home className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-stone-900 mb-1">Mi Comunidad</h3>
-                      <p className="text-stone-600 text-sm">Residencial Los Olivos</p>
+                      <h3 className="font-bold text-stone-900 mb-1">Mi Propiedad Seleccionada</h3>
+                      <p className="text-stone-600 text-sm" id="selected-property-display">
+                        Selecciona una propiedad para ver tu comunidad
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -442,8 +435,8 @@ export default function Dashboard() {
                       <Shield className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-stone-900 mb-1">Incidencias Activas</h3>
-                      <p className="text-stone-600 text-sm">2 incidencias reportadas</p>
+                      <h3 className="font-bold text-stone-900 mb-1">Incidencias Reportadas</h3>
+                      <p className="text-stone-600 text-sm">Para tu comunidad actual</p>
                     </div>
                   </div>
                 </CardContent>
@@ -457,7 +450,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-stone-900 mb-1">Proveedores Verificados</h3>
-                      <p className="text-stone-600 text-sm">12 proveedores disponibles</p>
+                      <p className="text-stone-600 text-sm">De tu comunidad</p>
                     </div>
                   </div>
                 </CardContent>
@@ -475,14 +468,14 @@ export default function Dashboard() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-semibold text-lg text-blue-900">Junta Extraordinaria Programada</h4>
-                        <p className="text-stone-600 mb-2">Se ha convocado una junta extraordinaria para aprobar las obras de la fachada.</p>
+                        <h4 className="font-semibold text-lg text-blue-900">Información Importante</h4>
+                        <p className="text-stone-600 mb-2">Selecciona una propiedad en "Mis Propiedades" para ver las actualizaciones específicas de tu comunidad.</p>
                         <div className="flex items-center gap-2 text-sm text-stone-500">
-                          <Calendar className="h-4 w-4" />
-                          <span>25 de Febrero, 2025 - 19:00</span>
+                          <Home className="h-4 w-4" />
+                          <span>Todas las funcionalidades se basarán en tu propiedad seleccionada</span>
                         </div>
                       </div>
-                      <Badge className="bg-blue-100 text-blue-800">Importante</Badge>
+                      <Badge className="bg-blue-100 text-blue-800">Info</Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -491,14 +484,14 @@ export default function Dashboard() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-semibold text-lg text-green-900">Nuevos Proveedores Verificados</h4>
-                        <p className="text-stone-600 mb-2">Se han añadido 3 nuevos proveedores de servicios verificados para la comunidad.</p>
+                        <h4 className="font-semibold text-lg text-green-900">Funcionalidades Basadas en Comunidad</h4>
+                        <p className="text-stone-600 mb-2">Chat, videoconferencias, contratos, notificaciones, evaluaciones e historial se filtrarán según tu comunidad.</p>
                         <div className="flex items-center gap-2 text-sm text-stone-500">
-                          <Store className="h-4 w-4" />
-                          <span>Fontanería, Electricidad, Jardinería</span>
+                          <MessageSquare className="h-4 w-4" />
+                          <span>Comunicación y servicios específicos de tu ubicación</span>
                         </div>
                       </div>
-                      <Badge className="bg-green-100 text-green-800">Nuevo</Badge>
+                      <Badge className="bg-green-100 text-green-800">Activo</Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -507,14 +500,14 @@ export default function Dashboard() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-semibold text-lg text-orange-900">Mantenimiento del Ascensor</h4>
-                        <p className="text-stone-600 mb-2">El ascensor principal estará fuera de servicio el próximo martes para mantenimiento.</p>
+                        <h4 className="font-semibold text-lg text-orange-900">Gestión de Incidencias</h4>
+                        <p className="text-stone-600 mb-2">Reporta problemas específicos de tu comunidad y da seguimiento a su resolución.</p>
                         <div className="flex items-center gap-2 text-sm text-stone-500">
-                          <Clock className="h-4 w-4" />
-                          <span>Martes 28 de Febrero - 09:00 a 17:00</span>
+                          <Shield className="h-4 w-4" />
+                          <span>Sistema inteligente de gestión comunitaria</span>
                         </div>
                       </div>
-                      <Badge className="bg-orange-100 text-orange-800">Aviso</Badge>
+                      <Badge className="bg-orange-100 text-orange-800">Disponible</Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -528,6 +521,19 @@ export default function Dashboard() {
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("propiedades")}>
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-700 transition-colors">
+                      <Home className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-black mb-3">Seleccionar Propiedad</h3>
+                    <p className="text-sm text-stone-600 mb-4">
+                      Elige tu propiedad para activar todas las funcionalidades comunitarias
+                    </p>
+                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
+                  </CardContent>
+                </Card>
+
                 <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("incidencias")}>
                   <CardContent className="p-6 text-center">
                     <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-700 transition-colors">
@@ -541,27 +547,14 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("administrador")}>
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-700 transition-colors">
-                      <Mail className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold text-black mb-3">Contactar Administrador</h3>
-                    <p className="text-sm text-stone-600 mb-4">
-                      Comunícate directamente con el administrador de fincas
-                    </p>
-                    <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
-                  </CardContent>
-                </Card>
-
-                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("proveedores")}>
+                <Card className="group border-stone-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" onClick={() => setActiveTab("chat")}>
                   <CardContent className="p-6 text-center">
                     <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-700 transition-colors">
-                      <Store className="h-8 w-8 text-white" />
+                      <MessageSquare className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-black mb-3">Proveedores Verificados</h3>
+                    <h3 className="text-lg font-bold text-black mb-3">Chat Comunitario</h3>
                     <p className="text-sm text-stone-600 mb-4">
-                      Consulta proveedores autorizados por la comunidad
+                      Conecta con otros miembros de tu comunidad
                     </p>
                     <ArrowRight className="w-5 h-5 text-stone-600 group-hover:translate-x-1 transition-transform duration-300 mx-auto" />
                   </CardContent>
@@ -1114,51 +1107,14 @@ export default function Dashboard() {
         return (
           <>
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-black mb-2">
-                {roleType === "community_member" ? "Mi Comunidad" : "Mis Propiedades"}
-              </h1>
+              <h1 className="text-3xl font-bold text-black mb-2">Mis Propiedades</h1>
               <p className="text-stone-600">
-                {roleType === "community_member" ? "Información y gestión de tu comunidad" : "Gestiona tus propiedades residenciales"}
+                Gestiona tus propiedades residenciales y selecciona la activa para todas las funcionalidades
               </p>
             </div>
-            {(roleType === "particular" || roleType === "community_member") ? (
-              <div className="mt-6">
-                <PropertyManager />
-              </div>
-            ) : (
-              <Card className="border-amber-200 shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 mt-6">
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Shield className="h-8 w-8 text-amber-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-black mb-2">Funcionalidad No Disponible</h3>
-                  <p className="text-amber-700 mb-4">
-                    Como miembro de comunidad, no puedes solicitar presupuestos directamente. 
-                    Para servicios en tu comunidad, debes reportar la incidencia al administrador de fincas.
-                  </p>
-                  <p className="text-amber-600 text-sm mb-6">
-                    El administrador de fincas será quien gestione los presupuestos en nombre de la comunidad.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button 
-                      onClick={() => setActiveTab("incidencias")}
-                      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-                    >
-                      <Shield className="h-4 w-4 mr-2" />
-                      Reportar Incidencia
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => setActiveTab("administrador")}
-                      className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Contactar Administrador
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <div className="mt-6">
+              <PropertyManager />
+            </div>
           </>
         );
 
@@ -1330,12 +1286,41 @@ export default function Dashboard() {
           );
         }
 
+      case "notificaciones":
+        // UPDATED: Use actual NotificationCenter component for all users, especially property administrators
+        return (
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
+                <Bell className="h-8 w-8 text-blue-600" />
+                {roleType === "property_administrator" ? "Panel de Notificaciones y Solicitudes" : 
+                 roleType === "community_member" ? "Notificaciones de Mi Comunidad" : "Mis Notificaciones"}
+              </h1>
+              <p className="text-stone-600">
+                {roleType === "property_administrator" 
+                  ? "Gestiona solicitudes de miembros de comunidad y revisa notificaciones importantes del sistema"
+                  : roleType === "community_member"
+                  ? "Mantente al día con las actualizaciones específicas de tu comunidad seleccionada"
+                  : "Mantente al día con las actualizaciones y notificaciones importantes"}
+              </p>
+            </div>
+            
+            <div className="mt-6">
+              <NotificationCenter userRole={roleType as "property_administrator" | "community_member" | "service_provider" | "particular"} />
+            </div>
+          </>
+        );
+
       case "evaluacion":
         return (
           <>
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-black mb-2">Evaluación de Servicios</h1>
-              <p className="text-stone-600">Califica los servicios recibidos</p>
+              <p className="text-stone-600">
+                {roleType === "community_member" 
+                  ? "Califica los servicios recibidos en tu comunidad"
+                  : "Califica los servicios recibidos"}
+              </p>
             </div>
             
             <Card className="border-stone-200 shadow-lg mt-6">
@@ -1346,34 +1331,95 @@ export default function Dashboard() {
                 <h3 className="text-2xl font-bold text-black mb-2">
                   Sistema de Evaluaciones
                 </h3>
-                <ServiceHistoryCard 
-                  service={{
-                    id: 'sample-1',
-                    serviceName: 'Servicio de prueba',
-                    providerName: 'Proveedor ejemplo',
-                    providerImage: '/HuBiT-logo-white.svg',
-                    category: 'Fontanería',
-                    date: new Date().toLocaleDateString(),
-                    cost: 150,
-                    status: 'completed',
-                    rating: 4.5,
-                    comment: 'Servicio excelente',
-                    location: 'Madrid',
-                    duration: '2 horas'
-                  }}
-                  onRate={(serviceId: string) => {
-                    console.log('Rating service:', serviceId);
-                  }}
-                  onViewDetails={(serviceId: string) => {
-                    console.log('View details:', serviceId);
-                  }}
-                  onRepeatService={(serviceId: string) => {
-                    console.log('Repeat service:', serviceId);
-                  }}
-                  onContactProvider={(serviceId: string) => {
-                    console.log('Contact provider:', serviceId);
-                  }}
-                />
+                {roleType === "community_member" ? (
+                  <>
+                    <p className="text-stone-600 mb-4">
+                      Evalúa únicamente los servicios relacionados con tu comunidad seleccionada.
+                      <br />
+                      <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver los servicios de tu comunidad.
+                    </p>
+                    <Badge className="bg-amber-100 text-amber-800 mt-4">
+                      Evaluaciones filtradas por comunidad
+                    </Badge>
+                  </>
+                ) : (
+                  <>
+                    <ServiceHistoryCard 
+                      service={{
+                        id: 'sample-1',
+                        serviceName: 'Servicio de prueba',
+                        providerName: 'Proveedor ejemplo',
+                        providerImage: '/HuBiT-logo-white.svg',
+                        category: 'Fontanería',
+                        date: new Date().toLocaleDateString(),
+                        cost: 150,
+                        status: 'completed',
+                        rating: 4.5,
+                        comment: 'Servicio excelente',
+                        location: 'Madrid',
+                        duration: '2 horas'
+                      }}
+                      onRate={(serviceId: string) => {
+                        console.log('Rating service:', serviceId);
+                      }}
+                      onViewDetails={(serviceId: string) => {
+                        console.log('View details:', serviceId);
+                      }}
+                      onRepeatService={(serviceId: string) => {
+                        console.log('Repeat service:', serviceId);
+                      }}
+                      onContactProvider={(serviceId: string) => {
+                        console.log('Contact provider:', serviceId);
+                      }}
+                    />
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </>
+        );
+
+      case "historial":
+        return (
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2">Historial de Servicios</h1>
+              <p className="text-stone-600">
+                {roleType === "community_member" 
+                  ? "Revisa todos los servicios contratados en tu comunidad"
+                  : "Revisa todos los servicios contratados"}
+              </p>
+            </div>
+            
+            <Card className="border-stone-200 shadow-lg mt-6">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-2">
+                  {roleType === "community_member" ? "Historial Comunitario" : "Historial Personal"}
+                </h3>
+                {roleType === "community_member" ? (
+                  <>
+                    <p className="text-stone-600 mb-4">
+                      Consulta el historial de servicios específico de tu comunidad.
+                      <br />
+                      <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver el historial comunitario.
+                    </p>
+                    <Badge className="bg-blue-100 text-blue-800 mt-4">
+                      Historial filtrado por comunidad
+                    </Badge>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-stone-600 mb-6">
+                      Consulta el historial completo de todos tus servicios contratados.
+                    </p>
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Historial personal disponible
+                    </Badge>
+                  </>
+                )}
               </CardContent>
             </Card>
           </>
@@ -1450,25 +1496,119 @@ export default function Dashboard() {
           </>
         );
 
-      case "notificaciones":
-        // UPDATED: Use actual NotificationCenter component for all users, especially property administrators
+      case "chat":
         return (
           <>
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-black mb-2 flex items-center gap-3">
-                <Bell className="h-8 w-8 text-blue-600" />
-                {roleType === "property_administrator" ? "Panel de Notificaciones y Solicitudes" : "Mis Notificaciones"}
-              </h1>
-              <p className="text-stone-600">
-                {roleType === "property_administrator" 
-                  ? "Gestiona solicitudes de miembros de comunidad y revisa notificaciones importantes del sistema"
-                  : "Mantente al día con las actualizaciones y notificaciones importantes"}
-              </p>
+              <h1 className="text-3xl font-bold text-black mb-2">Chat Comunitario</h1>
+              <p className="text-stone-600">Comunicación en tiempo real con otros miembros de tu comunidad</p>
             </div>
             
-            <div className="mt-6">
-              <NotificationCenter userRole={roleType as "property_administrator" | "community_member" | "service_provider" | "particular"} />
+            <Card className="border-stone-200 shadow-lg mt-6">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-2">
+                  Reuniones Virtuales de Comunidad
+                </h3>
+                <p className="text-stone-600 mb-4" id="community-chat-info">
+                  El chat se filtrará según la comunidad de tu propiedad seleccionada.
+                  <br />
+                  <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver las conversaciones de tu comunidad.
+                </p>
+                <Badge className="bg-green-100 text-green-800 mt-4">
+                  Basado en tu comunidad seleccionada
+                </Badge>
+              </CardContent>
+            </Card>
+          </>
+        );
+
+      case "videoconferencia":
+        return (
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2">Videoconferencias Comunitarias</h1>
+              <p className="text-stone-600">Participa en reuniones virtuales de tu comunidad</p>
             </div>
+            
+            <Card className="border-stone-200 shadow-lg mt-6">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Video className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-2">
+                  Reuniones Virtuales de Comunidad
+                </h3>
+                <p className="text-stone-600 mb-4">
+                  Las videoconferencias se organizarán específicamente para tu comunidad.
+                  <br />
+                  <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver las reuniones programadas.
+                </p>
+                <Badge className="bg-blue-100 text-blue-800 mt-4">
+                  Filtrado por comunidad
+                </Badge>
+              </CardContent>
+            </Card>
+          </>
+        );
+
+      case "presupuesto-comunidad":
+        return (
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2">Presupuesto de Comunidad</h1>
+              <p className="text-stone-600">Consulta el presupuesto y gastos de tu comunidad</p>
+            </div>
+            
+            <Card className="border-stone-200 shadow-lg mt-6">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calculator className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-2">
+                  Transparencia Financiera
+                </h3>
+                <p className="text-stone-600 mb-4">
+                  Visualiza ingresos, gastos y proyecciones específicos de tu comunidad.
+                  <br />
+                  <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver los datos financieros.
+                </p>
+                <Badge className="bg-purple-100 text-purple-800 mt-4">
+                  Datos específicos por comunidad
+                </Badge>
+              </CardContent>
+            </Card>
+          </>
+        );
+
+      case "administrador":
+        return (
+          <>
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-black mb-2">Contactar Administrador</h1>
+              <p className="text-stone-600">Comunícate directamente con el administrador de tu comunidad</p>
+            </div>
+            
+            <Card className="border-stone-200 shadow-lg mt-6">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="h-8 w-8 text-indigo-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-black mb-2">
+                  Comunicación Directa
+                </h3>
+                <p className="text-stone-600 mb-4">
+                  Contacta al administrador de fincas asignado a tu comunidad específica.
+                  <br />
+                  <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver los datos de contacto.
+                </p>
+                <Badge className="bg-indigo-100 text-indigo-800 mt-4">
+                  Administrador de tu comunidad
+                </Badge>
+              </CardContent>
+            </Card>
           </>
         );
 
