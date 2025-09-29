@@ -219,14 +219,18 @@ export default function PropertyManager() {
 
     try {
       if (isEditing && currentProperty.id) {
-        // Para actualizar, usar solo los campos que existen en la tabla
+        // Para actualizar, incluir todos los nuevos campos
         const updateData = {
           name: currentProperty.name || '',
+          // Mantener tanto address como los campos separados para compatibilidad
+          address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
           city: currentProperty.city || '',
           postal_code: currentProperty.postal_code || '',
           description: currentProperty.description || '',
-          // Mantener compatibilidad con address existente
-          address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
+          property_type: currentProperty.property_type || 'residential',
+          units_count: currentProperty.units_count || 1,
+          property_photo_url: currentProperty.property_photo_url || null,
+          community_code: currentProperty.community_code || null,
           updated_at: new Date().toISOString(),
         };
         
@@ -237,16 +241,18 @@ export default function PropertyManager() {
           
         if (error) throw error;
       } else {
-        // Para insertar, crear datos básicos compatibles
+        // Para insertar, crear datos completos con todos los campos
         const insertData = {
           user_id: user.id,
           name: currentProperty.name || 'Nueva Propiedad',
           address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
           city: currentProperty.city || '',
           postal_code: currentProperty.postal_code || '',
-          property_type: 'residential',
+          property_type: currentProperty.property_type || 'residential',
           description: currentProperty.description || '',
-          units_count: 1,
+          units_count: currentProperty.units_count || 1,
+          property_photo_url: currentProperty.property_photo_url || null,
+          community_code: currentProperty.community_code || null,
         };
         
         const { error } = await supabase
