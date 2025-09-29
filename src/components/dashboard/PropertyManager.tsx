@@ -122,6 +122,23 @@ export default function PropertyManager() {
     setSelectedProperty(property);
     setShowSelectionPopup(true);
     
+    // Guardar la propiedad seleccionada en localStorage para usarla en el perfil
+    if (property.id) {
+      localStorage.setItem('selectedProperty', JSON.stringify({
+        id: property.id,
+        name: property.name,
+        community_code: property.community_code,
+        address: property.address,
+        street: property.street,
+        number: property.number,
+        city: property.city,
+        province: property.province,
+        country: property.country
+      }));
+      
+      console.log('🏠 Propiedad seleccionada y guardada:', property.name, property.community_code);
+    }
+    
     // Auto-ocultar el popup después de 5 segundos
     setTimeout(() => {
       setShowSelectionPopup(false);

@@ -35,6 +35,9 @@ export default function ProfilePage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedRoleForSwitch, setSelectedRoleForSwitch] = useState<UserRole | null>(null);
   const [showRoleSwitchDialog, setShowRoleSwitchDialog] = useState(false);
+  
+  // Estado para la propiedad seleccionada
+  const [selectedPropertyData, setSelectedPropertyData] = useState<any>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,7 +55,25 @@ export default function ProfilePage() {
         country: profile.country || ""
       });
     }
+
+    // Cargar la propiedad seleccionada desde localStorage
+    try {
+      const savedProperty = localStorage.getItem('selectedProperty');
+      if (savedProperty) {
+        const propertyData = JSON.parse(savedProperty);
+        setSelectedPropertyData(propertyData);
+        console.log('🏠 Propiedad cargada desde localStorage:', propertyData);
+      }
+    } catch (error) {
+      console.error('Error cargando propiedad seleccionada:', error);
+    }
   }, [user, profile, loading, router]);
+
+  // Función para limpiar la selección de propiedad
+  const clearSelectedProperty = () => {
+    localStorage.removeItem('selectedProperty');
+    setSelectedPropertyData(null);
+  };
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -548,14 +569,62 @@ export default function ProfilePage() {
                                   {role.role_type === 'property_administrator' && 'Administración completa de propiedades'}
                                 </p>
 
-                                {role.role_type === 'community_member' && role.role_specific_data && (
-                                  <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
-                                    <div className="flex items-center gap-1 text-blue-700">
-                                      <Home className="h-3 w-3" />
-                                      <span className="text-xs font-medium">
-                                        Comunidad: {(role.role_specific_data as any)?.community_name || 'No asignada'}
-                                      </span>
-                                    </div>
+                                {role.role_type === 'community_member' && (
+                                  <div className="mt-2 space-y-2">
+                                    {/* Mostrar comunidad basada en propiedad seleccionada */}
+                                    {selectedPropertyData && selectedPropertyData.community_code ? (
+                                      <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            <Home className="h-4 w-4 text-blue-600" />
+                                            <div>
+                                              <span className="text-sm font-bold text-blue-800">
+                                                Comunidad: {selectedPropertyData.community_code}
+                                              </span>
+                                              <p className="text-xs text-blue-600 mt-0.5">
+                                                {selectedPropertyData.name} - {selectedPropertyData.street} {selectedPropertyData.number}
+                                              </p>
+                                              <p className="text-xs text-blue-500">
+                                                {selectedPropertyData.city}, {selectedPropertyData.province}
+                                              </p>
+                                            </div>
+                                          </div>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={clearSelectedProperty}
+                                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-1 h-auto"
+                                          >
+                                            <span className="sr-only">Limpiar selección</span>
+                                            ×
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ) : role.role_specific_data ? (
+                                      <div className="p-2 bg-amber-50 rounded-md border border-amber-200">
+                                        <div className="flex items-center gap-1 text-amber-700">
+                                          <Home className="h-3 w-3" />
+                                          <span className="text-xs font-medium">
+                                            Comunidad: {(role.role_specific_data as any)?.community_name || 'No asignada'}
+                                          </span>
+                                        </div>
+                                        <p className="text-xs text-amber-600 mt-1">
+                                          Selecciona una propiedad en "Mis Propiedades" para mostrar tu comunidad actual
+                                        </p>
+                                      </div>
+                                    ) : (
+                                      <div className="p-2 bg-gray-50 rounded-md border border-gray-200">
+                                        <div className="flex items-center gap-1 text-gray-600">
+                                          <Home className="h-3 w-3" />
+                                          <span className="text-xs font-medium">
+                                            Sin comunidad asignada
+                                          </span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                          Ve a "Mis Propiedades" y selecciona una propiedad para mostrar tu comunidad
+                                        </p>
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -611,6 +680,103 @@ export default function ProfilePage() {
             </TabsContent>
           )}
         </Tabs>
+
+        {/* Community Information Section - Solo para miembros de comunidad */}
+                {activeRole && activeRole.role_type === 'community_member' && (
+                  <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Home className="h-5 w-5 text-blue-600" />
+                        Mi Comunidad
+                      </CardTitle>
+                      <CardDescription>
+                        Información de la comunidad basada en tu propiedad seleccionada
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedPropertyData && selectedPropertyData.community_code ? (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                                <Building className="h-6 w-6 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="font-bold text-blue-900 text-lg">
+                                  {selectedPropertyData.community_code}
+                                </h3>
+                                <p className="text-blue-700 text-sm">
+                                  Código de Comunidad
+                                </p>
+                              </div>
+                            </div>
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                              Activa
+                            </Badge>
+                          </div>
+                          
+                          <div className="grid gap-3">
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                              <span className="text-sm text-gray-600 font-medium">Propiedad:</span>
+                              <span className="text-sm font-semibold">{selectedPropertyData.name}</span>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                              <span className="text-sm text-gray-600 font-medium">Dirección:</span>
+                              <span className="text-sm font-semibold">
+                                {selectedPropertyData.street} {selectedPropertyData.number}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                              <span className="text-sm text-gray-600 font-medium">Ubicación:</span>
+                              <span className="text-sm font-semibold">
+                                {selectedPropertyData.city}, {selectedPropertyData.province}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => router.push('/dashboard?tab=propiedades')}
+                              className="flex-1"
+                            >
+                              <Home className="h-4 w-4 mr-2" />
+                              Ver Propiedades
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={clearSelectedProperty}
+                              className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                            >
+                              Limpiar Selección
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 space-y-4">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                            <Home className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">Sin comunidad seleccionada</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                              Para mostrar la información de tu comunidad, primero selecciona una propiedad
+                            </p>
+                            <Button
+                              onClick={() => router.push('/dashboard?tab=propiedades')}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Home className="h-4 w-4 mr-2" />
+                              Ir a Mis Propiedades
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
         {/* Role Switch Confirmation Dialog */}
         <Dialog open={showRoleSwitchDialog} onOpenChange={setShowRoleSwitchDialog}>
