@@ -638,10 +638,9 @@ function RegisterPageContent() {
                 // Check services selection
                 const servicesSelected = data.selected_services.length > 0;
                 
-                // For CIF validation: if it's a valid format and not currently validating, allow progression
-                // The actual validation will happen in handleNextRole
+                // CORRECCIÓN CRÍTICA: Validación CIF mejorada para service_provider
                 const cifFormatValid = data.cif && validateCIF(data.cif);
-                const cifOk = Boolean(cifValid === true || (cifFormatValid && !cifValidating));
+                const cifOk = cifValid === true || (cifFormatValid && !cifValidating);
 
                 return basicInfoComplete && servicesSelected && cifOk;
             }
@@ -655,10 +654,9 @@ function RegisterPageContent() {
                     data.cif && data.business_email && data.business_phone &&
                     data.professional_number);
 
-                // For CIF validation: if it's a valid format and not currently validating, allow progression
-                // The actual validation will happen in handleNextRole
+                // CORRECCIÓN CRÍTICA: Validación CIF mejorada para property_administrator
                 const cifFormatValid = data.cif && validateCIF(data.cif);
-                const cifOk = Boolean(cifValid === true || (cifFormatValid && !cifValidating));
+                const cifOk = cifValid === true || (cifFormatValid && !cifValidating);
 
                 return basicInfoComplete && cifOk;
             }
