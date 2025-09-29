@@ -17,7 +17,8 @@ import { Database } from "@/integrations/supabase/database.types";
 type Property = Database['public']['Tables']['properties']['Row'];
 type PropertyInsert = Database['public']['Tables']['properties']['Insert'];
 
-interface ExtendedProperty extends Omit<Property, 'community_code'> {
+// Extended property interface with new fields
+interface ExtendedProperty extends Property {
   street?: string | null;
   number?: string | null;
   province?: string | null;

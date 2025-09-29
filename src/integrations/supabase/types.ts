@@ -6,8 +6,6 @@ import type { Database as DB } from './database.types';
 
 export type Database = DB;
 
-export type { Database } from './database.types';
-
 // Re-export commonly used types
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
 export type Inserts<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
