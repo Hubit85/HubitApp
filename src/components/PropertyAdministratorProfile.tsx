@@ -72,70 +72,130 @@ export function PropertyAdministratorProfile() {
 
     try {
       setLoadingCommunities(true);
-      console.log('🏘️ Cargando códigos de comunidad para el usuario:', user.id.substring(0, 8) + '...');
+      console.log('🏘️ [DEBUG] Cargando códigos de comunidad para el usuario:', user.id.substring(0, 8) + '...');
 
-      // ENHANCED: Obtener las propiedades del usuario que tengan community_code
+      // ENHANCED: Obtener las propiedades del usuario - MEJORADO CON MÁS INFORMACIÓN DE DEBUG
       const { data: properties, error } = await supabase
         .from('properties')
         .select(`
           id,
-          community_code,
           name,
           address,
           street,
           number,
           city,
-          province
+          province,
+          community_code,
+          property_type,
+          created_at
         `)
         .eq('user_id', user.id)
-        .not('community_code', 'is', null)
-        .order('community_code');
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Error cargando propiedades:', error);
+        console.error('❌ [DEBUG] Error cargando propiedades:', error);
         setError("Error al cargar los códigos de comunidad: " + error.message);
         return;
       }
 
-      console.log('📊 Propiedades encontradas:', properties?.length || 0);
-      console.log('📋 Datos de propiedades:', properties?.map(p => ({
-        id: p.id.substring(0, 8) + '...',
-        code: p.community_code,
-        address: p.address || p.street + ' ' + p.number
-      })));
+      console.log('📊 [DEBUG] Consulta de propiedades completada:', {
+        total_properties: properties?.length || 0,
+        user_id: user.id.substring(0, 8) + '...',
+        query_success: !error
+      });
 
-      // ENHANCED: Crear lista única de códigos de comunidad con mejor manejo
+      if (!properties || properties.length === 0) {
+        console.log('⚠️ [DEBUG] No se encontraron propiedades para este usuario');
+        console.log('💡 [DEBUG] El usuario necesita crear propiedades en "Mis Propiedades" primero');
+        setCommunityCodes([]);
+        setError("");
+        return;
+      }
+
+      // ENHANCED: Log detallado de cada propiedad
+      properties.forEach((prop, index) => {
+        console.log(`🏠 [DEBUG] Propiedad ${index + 1}:`, {
+          id: prop.id.substring(0, 8) + '...',
+          name: prop.name,
+          address: prop.address,
+          street: prop.street,
+          number: prop.number,
+          city: prop.city,
+          province: prop.province,
+          community_code: prop.community_code,
+          property_type: prop.property_type,
+          has_community_code: !!prop.community_code
+        });
+      });
+
+      // ENHANCED: Filtrar propiedades con community_code
+      const propertiesWithCommunityCode = properties.filter(p => p.community_code);
+      console.log('🔍 [DEBUG] Propiedades con community_code:', {
+        total: propertiesWithCommunityCode.length,
+        codes: propertiesWithCommunityCode.map(p => p.community_code)
+      });
+
+      // ENHANCED: Crear códigos de comunidad únicos - MEJORADO PARA USAR TODOS LOS CAMPOS DISPONIBLES
       const uniqueCommunities: CommunityCode[] = [];
       const seenCodes = new Set<string>();
 
-      if (properties && properties.length > 0) {
-        properties.forEach(property => {
-          if (property.community_code && !seenCodes.has(property.community_code)) {
-            seenCodes.add(property.community_code);
-            uniqueCommunities.push({
-              id: property.id,
-              code: property.community_code,
-              street: property.street || property.address || '',
-              street_number: property.number || '',
-              city: property.city || '',
-              province: property.province || ''
-            });
+      propertiesWithCommunityCode.forEach(property => {
+        if (property.community_code && !seenCodes.has(property.community_code)) {
+          seenCodes.add(property.community_code);
+          
+          // ENHANCED: Construcción inteligente de la dirección
+          let street = property.street || '';
+          const streetNumber = property.number || '';
+          
+          // Si no hay street/number, usar address como fallback
+          if (!street && property.address) {
+            const addressParts = property.address.split(',')[0].trim();
+            street = addressParts;
           }
-        });
-      }
+          
+          const communityData: CommunityCode = {
+            id: property.id,
+            code: property.community_code,
+            street: street,
+            street_number: streetNumber,
+            city: property.city || 'Ciudad no especificada',
+            province: property.province || ''
+          };
+
+          uniqueCommunities.push(communityData);
+          
+          console.log(`✅ [DEBUG] Código de comunidad agregado:`, {
+            code: communityData.code,
+            address: `${communityData.street} ${communityData.street_number}`,
+            city: communityData.city,
+            province: communityData.province
+          });
+        }
+      });
 
       setCommunityCodes(uniqueCommunities);
-      console.log(`✅ Cargados ${uniqueCommunities.length} códigos de comunidad únicos:`, 
-        uniqueCommunities.map(c => c.code));
+      console.log(`🎯 [DEBUG] RESULTADO FINAL:`, {
+        total_communities: uniqueCommunities.length,
+        communities: uniqueCommunities.map(c => ({
+          code: c.code,
+          location: `${c.street} ${c.street_number}, ${c.city}`
+        }))
+      });
 
-      // ENHANCED: Auto-select first community if none selected and communities exist
+      // ENHANCED: Auto-seleccionar primera comunidad si no hay ninguna seleccionada
       if (uniqueCommunities.length > 0 && !formData.community_name) {
-        console.log('🎯 Auto-seleccionando primera comunidad:', uniqueCommunities[0].code);
-        setFormData(prev => ({ ...prev, community_name: uniqueCommunities[0].code }));
+        console.log('🎯 [DEBUG] Auto-seleccionando primera comunidad:', uniqueCommunities[0].code);
+        setFormData(prev => ({ 
+          ...prev, 
+          community_name: uniqueCommunities[0].code 
+        }));
       }
 
+      // Clear any previous errors
+      setError("");
+
     } catch (err) {
-      console.error('❌ Error crítico cargando códigos de comunidad:', err);
+      console.error('❌ [DEBUG] Error crítico cargando códigos de comunidad:', err);
       setError("Error crítico al cargar los códigos de comunidad: " + (err instanceof Error ? err.message : 'Error desconocido'));
     } finally {
       setLoadingCommunities(false);
@@ -516,14 +576,28 @@ export function PropertyAdministratorProfile() {
                           <div className="flex items-center gap-2 text-amber-700 mb-2">
                             <AlertCircle className="h-4 w-4" />
                             <span className="text-sm font-medium">
-                              No se encontraron códigos de comunidad automáticos
+                              No se encontraron códigos de comunidad
                             </span>
                           </div>
-                          <p className="text-xs text-amber-600 mb-3">
-                            Los códigos de comunidad se obtienen automáticamente de las propiedades que has creado en &quot;Mis Propiedades&quot;. 
-                            Si no tienes propiedades registradas, puedes escribir manualmente el código de comunidad.
-                          </p>
-                          <div className="space-y-2">
+                          <div className="space-y-2 text-xs text-amber-600">
+                            <p>
+                              <strong>¿Por qué no aparecen códigos de comunidad?</strong>
+                            </p>
+                            <ul className="list-disc list-inside space-y-1 pl-2">
+                              <li>No tienes propiedades creadas en "Mis Propiedades"</li>
+                              <li>Las propiedades no tienen el campo "Código de Comunidad" rellenado</li>
+                              <li>Las propiedades fueron creadas antes de que se implementara esta funcionalidad</li>
+                            </ul>
+                            <p className="mt-2">
+                              <strong>Soluciones:</strong>
+                            </p>
+                            <ul className="list-disc list-inside space-y-1 pl-2">
+                              <li>Ve a "Mis Propiedades" y crea o edita tus propiedades</li>
+                              <li>Asegúrate de rellenar el campo "Código de Comunidad"</li>
+                              <li>O escribe manualmente el código aquí abajo</li>
+                            </ul>
+                          </div>
+                          <div className="space-y-2 mt-4">
                             <Label className="text-xs font-medium text-amber-700">Código de comunidad (manual):</Label>
                             <Input
                               placeholder="Ej: COM-RESIDENCIAL-001"
@@ -531,6 +605,10 @@ export function PropertyAdministratorProfile() {
                               onChange={(e) => setFormData(prev => ({ ...prev, community_name: e.target.value }))}
                               className="h-10 text-sm bg-white border-amber-300 focus:border-amber-500"
                             />
+                            <p className="text-xs text-amber-600">
+                              💡 Puedes escribir cualquier código de comunidad aquí. 
+                              Se guardará en tu perfil de administrador.
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -539,7 +617,7 @@ export function PropertyAdministratorProfile() {
                         <Select 
                           value={formData.community_name || ""} 
                           onValueChange={(value) => {
-                            console.log('🏘️ Código de comunidad seleccionado:', value);
+                            console.log('🏘️ [DEBUG] Usuario seleccionó código de comunidad:', value);
                             setFormData(prev => ({ ...prev, community_name: value }));
                           }}
                         >
@@ -606,7 +684,7 @@ export function PropertyAdministratorProfile() {
                             
                             <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 border-t border-green-200 mt-1">
                               <p className="text-xs text-green-700 font-medium">
-                                ✅ Total: {communityCodes.length} código{communityCodes.length !== 1 ? 's' : ''} disponible{communityCodes.length !== 1 ? 's' : ''}
+                                ✅ Total: {communityCodes.length} código{communityCodes.length !== 1 ? 's' : ''} disponible{communityCodes.length !== 1 ? 's' : ''} de tus propiedades
                               </p>
                             </div>
                           </SelectContent>
@@ -621,11 +699,30 @@ export function PropertyAdministratorProfile() {
                                 🎯 {communityCodes.length} código{communityCodes.length !== 1 ? 's' : ''} de comunidad disponible{communityCodes.length !== 1 ? 's' : ''}
                               </p>
                               <p className="text-blue-600 text-xs mt-1">
-                                📋 Los códigos se extraen automáticamente de las propiedades en tu cuenta. 
-                                <strong> Haz clic en el selector desplegable</strong> para ver todas las opciones disponibles y seleccionar una.
+                                📋 Los códigos se obtienen automáticamente de las propiedades en "Mis Propiedades". 
+                                <strong> Haz clic en el selector desplegable</strong> para ver todas las opciones disponibles.
                               </p>
                             </div>
                           </div>
+                        </div>
+                        
+                        {/* Botón para recargar códigos de comunidad */}
+                        <div className="flex justify-between items-center">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={loadUserCommunityCodes}
+                            disabled={loadingCommunities}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            {loadingCommunities ? (
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            ) : (
+                              <Building className="h-3 w-3 mr-1" />
+                            )}
+                            Actualizar Códigos
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -636,7 +733,7 @@ export function PropertyAdministratorProfile() {
                         <div className="flex items-center gap-2 text-green-700">
                           <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-600" />
                           <span className="text-sm font-medium">
-                            ✅ <strong>Código seleccionado exitosamente:</strong> {formData.community_name}
+                            ✅ <strong>Código seleccionado:</strong> {formData.community_name}
                           </span>
                         </div>
                         {(() => {
@@ -650,9 +747,12 @@ export function PropertyAdministratorProfile() {
                               </p>
                             </div>
                           ) : (
-                            <p className="text-xs text-green-600 mt-1 pl-7">
-                              💼 Código de comunidad configurado manualmente
-                            </p>
+                            <div className="mt-2 pl-7 p-2 bg-white rounded border border-green-200">
+                              <p className="text-xs text-green-700 font-medium">💼 Código personalizado:</p>
+                              <p className="text-sm text-green-800 mt-1">
+                                Código introducido manualmente por el usuario
+                              </p>
+                            </div>
                           );
                         })()}
                       </div>
