@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -392,7 +391,7 @@ export function CommunityAdministratorAssignment() {
                 <div className="p-3 bg-amber-50 rounded-lg border border-amber-300 text-amber-700 text-sm flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
                   <div>
-                    No se encontraron comunidades en "Mis Propiedades". Puedes introducir un nombre manualmente.
+                    No se encontraron comunidades en &quot;Mis Propiedades&quot;. Puedes introducir un nombre manualmente.
                   </div>
                 </div>
               </div>
