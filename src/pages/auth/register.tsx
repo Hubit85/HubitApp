@@ -304,7 +304,7 @@ function RegisterPageContent() {
             city: "",
             province: "",
             country: "España",
-            community_code: "",
+            community_code: undefined,
         },
         service_provider: {
             company_name: "",
@@ -1271,9 +1271,7 @@ function RegisterPageContent() {
                                 <div className="space-y-6">
                                     {/* Email (común para todos los roles) */}
                                     <div>
-                                        <Label htmlFor="email" className="text-sm font-medium text-stone-700">
-                                            Correo electrónico *
-                                        </Label>
+                                        <Label htmlFor="email" className="text-sm font-medium text-stone-700">Correo electrónico *</Label>
                                         <Input
                                             id="email"
                                             type="email"
