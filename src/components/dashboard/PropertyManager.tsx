@@ -232,31 +232,20 @@ export default function PropertyManager() {
       
       let res;
       if (isEditing) {
-        const { id, created_at, user_id, ...updateData } = propertyData as ExtendedProperty & { id: string; created_at: string; user_id: string };
-        res = await supabase.from("properties").update(updateData).eq("id", currentProperty.id!);
+        // Fix: Ensure proper type compatibility for updates
+        const { id, created_at, user_id, street, number, province, country, community_code, property_photo_url, ...updateData } = propertyData;
+        res = await supabase.from("properties").update(updateData).eq("id", currentProperty.id || "");
       } else {
-        const insertData: PropertyInsert & {
-          street?: string;
-          number?: string;
-          province?: string;
-          country?: string;
-          community_code?: string;
-          property_photo_url?: string;
-        } = {
+        // Fix: Create proper insert data with only compatible fields
+        const insertData: PropertyInsert = {
           user_id: user.id,
           name: propertyData.name || 'Nueva Propiedad',
           address: propertyData.address || '',
-          street: propertyData.street,
-          number: propertyData.number,
           city: propertyData.city || '',
-          province: propertyData.province,
-          country: propertyData.country,
           postal_code: propertyData.postal_code || '',
-          property_type: (propertyData as ExtendedProperty).property_type || 'residential',
+          property_type: (propertyData as any).property_type || 'residential',
           description: propertyData.description || '',
           units_count: (currentProperty as any).units_count || 1,
-          community_code: propertyData.community_code,
-          property_photo_url: propertyData.property_photo_url
         };
         res = await supabase.from("properties").insert(insertData);
       }
@@ -289,8 +278,8 @@ export default function PropertyManager() {
     }
   };
 
-  const handleDelete = async (propertyId: string) => {
-    if (!confirm("¿Estás seguro de que quieres eliminar esta propiedad?")) return;
+  const handleDelete = async (propertyId: string | undefined) => {
+    if (!propertyId || !confirm("¿Estás seguro de que quieres eliminar esta propiedad?")) return;
     try {
       const { error } = await supabase.from("properties").delete().eq("id", propertyId);
       if (error) throw error;
