@@ -482,9 +482,14 @@ function RegisterPageContent() {
     };
 
     const verifyCIFAgainstRegistry = async (cif: string): Promise<boolean> => {
+        if (!cif || cif.length < 9) {
+            setCifValid(null);
+            return false;
+        }
+
         setCifValidating(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Reduced delay
             const isValid = validateCIF(cif) && !['A00000000', 'B00000000'].includes(cif);
             setCifValid(isValid);
             return isValid;
@@ -495,6 +500,26 @@ function RegisterPageContent() {
             setCifValidating(false);
         }
     };
+
+    // Auto-validate CIF when it's complete
+    useEffect(() => {
+        const currentRole = getCurrentRole();
+        if (currentRole === 'service_provider' || currentRole === 'property_administrator') {
+            const roleData = formData[currentRole] as any;
+            if (roleData?.cif && roleData.cif.length === 9) {
+                // Automatically validate CIF when it reaches 9 characters
+                const timeoutId = setTimeout(() => {
+                    if (cifValid === null) {
+                        verifyCIFAgainstRegistry(roleData.cif);
+                    }
+                }, 500);
+                return () => clearTimeout(timeoutId);
+            } else if (roleData?.cif && roleData.cif.length < 9) {
+                // Reset validation if CIF is incomplete
+                setCifValid(null);
+            }
+        }
+    }, [formData.service_provider.cif, formData.property_administrator.cif, getCurrentRole]);
 
     const handleRoleToggle = (role: RoleType) => {
         setFormData(prev => {
@@ -604,23 +629,38 @@ function RegisterPageContent() {
 
             case 'service_provider': {
                 const data = roleData as typeof formData.service_provider;
+                
+                // Check basic info completion
                 const basicInfoComplete = !!(data.company_name && data.company_address && data.company_postal_code &&
                     data.company_city && data.company_province && data.company_country &&
-                    data.cif && data.business_email && data.business_phone &&
-                    cifValid === true);
+                    data.cif && data.business_email && data.business_phone);
 
-                // Also require at least one service to be selected
+                // Check services selection
                 const servicesSelected = data.selected_services.length > 0;
+                
+                // For CIF validation: if it's a valid format and not currently validating, allow progression
+                // The actual validation will happen in handleNextRole
+                const cifFormatValid = data.cif && validateCIF(data.cif);
+                const cifOk = cifValid === true || (cifFormatValid && !cifValidating);
 
-                return basicInfoComplete && servicesSelected;
+                return basicInfoComplete && servicesSelected && cifOk;
             }
 
             case 'property_administrator': {
                 const data = roleData as typeof formData.property_administrator;
-                return !!(data.company_name && data.company_address && data.company_postal_code &&
+                
+                // Check basic info completion
+                const basicInfoComplete = !!(data.company_name && data.company_address && data.company_postal_code &&
                     data.company_city && data.company_province && data.company_country &&
                     data.cif && data.business_email && data.business_phone &&
-                    data.professional_number && cifValid === true);
+                    data.professional_number);
+
+                // For CIF validation: if it's a valid format and not currently validating, allow progression
+                // The actual validation will happen in handleNextRole
+                const cifFormatValid = data.cif && validateCIF(data.cif);
+                const cifOk = cifValid === true || (cifFormatValid && !cifValidating);
+
+                return basicInfoComplete && cifOk;
             }
 
             default:
@@ -631,18 +671,29 @@ function RegisterPageContent() {
     const handleNextRole = async () => {
         const currentRole = getCurrentRole();
 
-        // Validar CIF si es necesario
+        // Validar CIF si es necesario - forzar validación si no se ha hecho
         if ((currentRole === 'service_provider' || currentRole === 'property_administrator')) {
             const roleData = formData[currentRole] as any;
-            if (roleData.cif && cifValid === null) {
-                const isValid = await verifyCIFAgainstRegistry(roleData.cif);
-                if (!isValid) {
-                    setError("El CIF proporcionado no es válido o no está registrado en el registro civil.");
+            if (roleData.cif) {
+                // Si el CIF no ha sido validado aún, validarlo ahora
+                if (cifValid === null && !cifValidating) {
+                    setError("Verificando CIF, por favor espera...");
+                    const isValid = await verifyCIFAgainstRegistry(roleData.cif);
+                    if (!isValid) {
+                        setError("El CIF proporcionado no es válido. Por favor, verifica el formato (ej: A12345678).");
+                        return;
+                    }
+                }
+                
+                // Si ya se validó y es inválido
+                if (cifValid === false) {
+                    setError("El CIF proporcionado no es válido. Por favor, verifica el formato (ej: A12345678).");
                     return;
                 }
             }
         }
 
+        // Validar que todos los campos estén completos
         if (!validateCurrentRole()) {
             setError("Por favor, completa todos los campos requeridos para este rol.");
             return;
@@ -676,6 +727,10 @@ function RegisterPageContent() {
                 }));
             }
 
+            // Reset CIF validation for the next role
+            setCifValid(null);
+            setCifValidating(false);
+            
             // Ir al siguiente rol
             setCurrentRoleIndex(prev => prev + 1);
         } else {
@@ -1142,7 +1197,6 @@ function RegisterPageContent() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {ROLE_ORDER.map((role) => {
                                             const config = ROLE_CONFIG[role];
-                                            const IconComponent = config.icon;
                                             const isSelected = formData.roles.includes(role);
 
                                             return (
@@ -1163,7 +1217,7 @@ function RegisterPageContent() {
                                                                 w-12 h-12 rounded-xl flex items-center justify-center text-white
                                                                 bg-gradient-to-br ${config.gradient}
                                                             `}>
-                                                                <IconComponent className="w-6 h-6" />
+                                                                <config.icon className="w-6 h-6" />
                                                             </div>
                                                             <div className="flex-1">
                                                                 <h4 className="font-semibold text-black mb-1">
@@ -1239,7 +1293,7 @@ function RegisterPageContent() {
                                                     w-10 h-10 rounded-lg flex items-center justify-center text-white
                                                     bg-gradient-to-br ${ROLE_CONFIG[getCurrentRole()!].gradient}
                                                 `}>
-                                                    {React.createElement(ROLE_CONFIG[getCurrentRole()!].icon, { className: "w-5 h-5" })}
+                                                    {React.createElement(ROLE_CONFIG[getCurrentRole()!].icon, { className: "w-6 h-6" })}
                                                 </div>
                                                 <div>
                                                     <h3 className="text-lg font-semibold text-black">
