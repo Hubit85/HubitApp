@@ -214,43 +214,43 @@ export default function PropertyManager() {
     if (!user) return;
 
     try {
-      const propertyData = {
-        ...currentProperty,
-        user_id: user.id,
-        name: currentProperty.name || '',
-        street: currentProperty.street || '',
-        number: currentProperty.number || '',
-        city: currentProperty.city || '',
-        province: currentProperty.province || '',
-        country: currentProperty.country || 'España',
-        postal_code: currentProperty.postal_code || '',
-        community_code: currentProperty.community_code || '',
-        property_photo_url: currentProperty.property_photo_url || '',
-        // Mantener compatibilidad con el campo address existente
-        address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
-      };
-      
-      let res;
-      if (isEditing) {
-        // Fix: Ensure proper type compatibility for updates
-        const { id, created_at, user_id, street, number, province, country, community_code, property_photo_url, ...updateData } = propertyData;
-        res = await supabase.from("properties").update(updateData).eq("id", currentProperty.id || "");
-      } else {
-        // Fix: Create proper insert data with only compatible fields
-        const insertData: PropertyInsert = {
-          user_id: user.id,
-          name: propertyData.name || 'Nueva Propiedad',
-          address: propertyData.address || '',
-          city: propertyData.city || '',
-          postal_code: propertyData.postal_code || '',
-          property_type: (propertyData as any).property_type || 'residential',
-          description: propertyData.description || '',
-          units_count: (currentProperty as any).units_count || 1,
+      if (isEditing && currentProperty.id) {
+        // Para actualizar, usar solo los campos que existen en la tabla
+        const updateData = {
+          name: currentProperty.name || '',
+          city: currentProperty.city || '',
+          postal_code: currentProperty.postal_code || '',
+          description: currentProperty.description || '',
+          // Mantener compatibilidad con address existente
+          address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
+          updated_at: new Date().toISOString(),
         };
-        res = await supabase.from("properties").insert(insertData);
+        
+        const { error } = await supabase
+          .from("properties")
+          .update(updateData)
+          .eq("id", currentProperty.id);
+          
+        if (error) throw error;
+      } else {
+        // Para insertar, crear datos básicos compatibles
+        const insertData = {
+          user_id: user.id,
+          name: currentProperty.name || 'Nueva Propiedad',
+          address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
+          city: currentProperty.city || '',
+          postal_code: currentProperty.postal_code || '',
+          property_type: 'residential',
+          description: currentProperty.description || '',
+          units_count: 1,
+        };
+        
+        const { error } = await supabase
+          .from("properties")
+          .insert(insertData);
+          
+        if (error) throw error;
       }
-
-      if (res.error) throw res.error;
 
       setIsDialogOpen(false);
       await fetchProperties();
@@ -301,7 +301,7 @@ export default function PropertyManager() {
         if (document.body.contains(notification)) {
           document.body.removeChild(notification);
         }
-      }, 3000);
+      }, 5000);
 
     } catch (err: any) {
       setError(err.message);
