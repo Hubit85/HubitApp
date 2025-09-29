@@ -3,125 +3,120 @@
 // Types are generated from the Supabase database schema using the Supabase CLI.
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
-import type { Database as DB } from './database.types';
+import type { Database as DB } from "./database.types";
+
+type PublicSchema = DB["public"];
 
 export type Database = DB;
 
-// Re-export commonly used types for convenience
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
-export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
-export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
-export type Functions<T extends keyof Database['public']['Functions']> = Database['public']['Functions'][T];
+// Generic helpers
+export type Tables<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Row"];
+export type TablesInsert<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Insert"];
+export type TablesUpdate<T extends keyof PublicSchema["Tables"]> = PublicSchema["Tables"][T]["Update"];
+export type Enums<T extends keyof PublicSchema["Enums"]> = PublicSchema["Enums"][T];
+export type Functions<T extends keyof PublicSchema["Functions"]> = PublicSchema["Functions"][T];
 
-// Export specific table types for easier access
-export type BudgetRequest = Tables<'budget_requests'>;
-export type BudgetRequestInsert = TablesInsert<'budget_requests'>;
-export type BudgetRequestUpdate = TablesUpdate<'budget_requests'>;
+// Explicit exports for all tables
+export type AdministratorRequest = Tables<"administrator_requests">;
+export type AdministratorRequestInsert = TablesInsert<"administrator_requests">;
+export type AdministratorRequestUpdate = TablesUpdate<"administrator_requests">;
 
-export type Contract = Tables<'contracts'>;
-export type ContractInsert = TablesInsert<'contracts'>;
-export type ContractUpdate = TablesUpdate<'contracts'>;
+export type BudgetRequest = Tables<"budget_requests">;
+export type BudgetRequestInsert = TablesInsert<"budget_requests">;
+export type BudgetRequestUpdate = TablesUpdate<"budget_requests">;
 
-export type Conversation = Tables<'conversations'>;
-export type ConversationInsert = TablesInsert<'conversations'>;
-export type ConversationUpdate = TablesUpdate<'conversations'>;
+export type Community = Tables<"communities">;
+export type CommunityInsert = TablesInsert<"communities">;
+export type CommunityUpdate = TablesUpdate<"communities">;
 
-export type Document = Tables<'documents'>;
-export type DocumentInsert = TablesInsert<'documents'>;
-export type DocumentUpdate = TablesUpdate<'documents'>;
+export type CommunityCode = Tables<"community_codes">;
+export type CommunityCodeInsert = TablesInsert<"community_codes">;
+export type CommunityCodeUpdate = TablesUpdate<"community_codes">;
 
-export type Message = Tables<'messages'>;
-export type MessageInsert = TablesInsert<'messages'>;
-export type MessageUpdate = TablesUpdate<'messages'>;
+export type CommunityMemberAdministrator = Tables<"community_member_administrators">;
+export type CommunityMemberAdministratorInsert = TablesInsert<"community_member_administrators">;
+export type CommunityMemberAdministratorUpdate = TablesUpdate<"community_member_administrators">;
 
-export type Notification = Tables<'notifications'>;
-export type NotificationInsert = TablesInsert<'notifications'>;
-export type NotificationUpdate = TablesUpdate<'notifications'>;
+export type Contract = Tables<"contracts">;
+export type ContractInsert = TablesInsert<"contracts">;
+export type ContractUpdate = TablesUpdate<"contracts">;
 
-export type Profile = Tables<'profiles'>;
-export type ProfileInsert = TablesInsert<'profiles'>;
-export type ProfileUpdate = TablesUpdate<'profiles'>;
+export type Conversation = Tables<"conversations">;
+export type ConversationInsert = TablesInsert<"conversations">;
+export type ConversationUpdate = TablesUpdate<"conversations">;
 
-export type Property = Tables<'properties'>;
-export type PropertyInsert = TablesInsert<'properties'>;
-export type PropertyUpdate = TablesUpdate<'properties'>;
+export type Document = Tables<"documents">;
+export type DocumentInsert = TablesInsert<"documents">;
+export type DocumentUpdate = TablesUpdate<"documents">;
 
-export type Quote = Tables<'quotes'>;
-export type QuoteInsert = TablesInsert<'quotes'>;
-export type QuoteUpdate = TablesUpdate<'quotes'>;
+export type EmergencyRequest = Tables<"emergency_requests">;
+export type EmergencyRequestInsert = TablesInsert<"emergency_requests">;
+export type EmergencyRequestUpdate = TablesUpdate<"emergency_requests">;
 
-export type Rating = Tables<'ratings'>;
-export type RatingInsert = TablesInsert<'ratings'>;
-export type RatingUpdate = TablesUpdate<'ratings'>;
+export type IncidentReport = Tables<"incident_reports">;
+export type IncidentReportInsert = TablesInsert<"incident_reports">;
+export type IncidentReportUpdate = TablesUpdate<"incident_reports">;
 
-export type ServiceCategory = Tables<'service_categories'>;
-export type ServiceCategoryInsert = TablesInsert<'service_categories'>;
-export type ServiceCategoryUpdate = TablesUpdate<'service_categories'>;
+export type Incident = Tables<"incidents">;
+export type IncidentInsert = TablesInsert<"incidents">;
+export type IncidentUpdate = TablesUpdate<"incidents">;
 
-export type ServiceProvider = Tables<'service_providers'>;
-export type ServiceProviderInsert = TablesInsert<'service_providers'>;
-export type ServiceProviderUpdate = TablesUpdate<'service_providers'>;
+export type Invoice = Tables<"invoices">;
+export type InvoiceInsert = TablesInsert<"invoices">;
+export type InvoiceUpdate = TablesUpdate<"invoices">;
 
-export type UserRole = Tables<'user_roles'>;
-export type UserRoleInsert = TablesInsert<'user_roles'>;
-export type UserRoleUpdate = TablesUpdate<'user_roles'>;
+export type ManagedCommunity = Tables<"managed_communities">;
+export type ManagedCommunityInsert = TablesInsert<"managed_communities">;
+export type ManagedCommunityUpdate = TablesUpdate<"managed_communities">;
 
-export type WorkSession = Tables<'work_sessions'>;
-export type WorkSessionInsert = TablesInsert<'work_sessions'>;
-export type WorkSessionUpdate = TablesUpdate<'work_sessions'>;
+export type Message = Tables<"messages">;
+export type MessageInsert = TablesInsert<"messages">;
+export type MessageUpdate = TablesUpdate<"messages">;
 
-// Community-specific types
-export type Community = Tables<'communities'>;
-export type CommunityInsert = TablesInsert<'communities'>;
-export type CommunityUpdate = TablesUpdate<'communities'>;
+export type Notification = Tables<"notifications">;
+export type NotificationInsert = TablesInsert<"notifications">;
+export type NotificationUpdate = TablesUpdate<"notifications">;
 
-export type CommunityCode = Tables<'community_codes'>;
-export type CommunityCodeInsert = TablesInsert<'community_codes'>;
-export type CommunityCodeUpdate = TablesUpdate<'community_codes'>;
+export type Payment = Tables<"payments">;
+export type PaymentInsert = TablesInsert<"payments">;
+export type PaymentUpdate = TablesUpdate<"payments">;
 
-export type PropertyAdministrator = Tables<'property_administrators'>;
-export type PropertyAdministratorInsert = TablesInsert<'property_administrators'>;
-export type PropertyAdministratorUpdate = TablesUpdate<'property_administrators'>;
+export type Profile = Tables<"profiles">;
+export type ProfileInsert = TablesInsert<"profiles">;
+export type ProfileUpdate = TablesUpdate<"profiles">;
 
-export type AdministratorRequest = Tables<'administrator_requests'>;
-export type AdministratorRequestInsert = TablesInsert<'administrator_requests'>;
-export type AdministratorRequestUpdate = TablesUpdate<'administrator_requests'>;
+export type Property = Tables<"properties">;
+export type PropertyInsert = TablesInsert<"properties">;
+export type PropertyUpdate = TablesUpdate<"properties">;
 
-export type ManagedCommunity = Tables<'managed_communities'>;
-export type ManagedCommunityInsert = TablesInsert<'managed_communities'>;
-export type ManagedCommunityUpdate = TablesUpdate<'managed_communities'>;
+export type PropertyAdministrator = Tables<"property_administrators">;
+export type PropertyAdministratorInsert = TablesInsert<"property_administrators">;
+export type PropertyAdministratorUpdate = TablesUpdate<"property_administrators">;
 
-export type CommunityMemberAdministrator = Tables<'community_member_administrators'>;
-export type CommunityMemberAdministratorInsert = TablesInsert<'community_member_administrators'>;
-export type CommunityMemberAdministratorUpdate = TablesUpdate<'community_member_administrators'>;
+export type QuoteRejection = Tables<"quote_rejections">;
+export type QuoteRejectionInsert = TablesInsert<"quote_rejections">;
+export type QuoteRejectionUpdate = TablesUpdate<"quote_rejections">;
 
-// Incident-specific types
-export type Incident = Tables<'incidents'>;
-export type IncidentInsert = TablesInsert<'incidents'>;
-export type IncidentUpdate = TablesUpdate<'incidents'>;
+export type Quote = Tables<"quotes">;
+export type QuoteInsert = TablesInsert<"quotes">;
+export type QuoteUpdate = TablesUpdate<"quotes">;
 
-export type IncidentReport = Tables<'incident_reports'>;
-export type IncidentReportInsert = TablesInsert<'incident_reports'>;
-export type IncidentReportUpdate = TablesUpdate<'incident_reports'>;
+export type Rating = Tables<"ratings">;
+export type RatingInsert = TablesInsert<"ratings">;
+export type RatingUpdate = TablesUpdate<"ratings">;
 
-export type EmergencyRequest = Tables<'emergency_requests'>;
-export type EmergencyRequestInsert = TablesInsert<'emergency_requests'>;
-export type EmergencyRequestUpdate = TablesUpdate<'emergency_requests'>;
+export type ServiceCategory = Tables<"service_categories">;
+export type ServiceCategoryInsert = TablesInsert<"service_categories">;
+export type ServiceCategoryUpdate = TablesUpdate<"service_categories">;
 
-// Payment and Invoice types
-export type Payment = Tables<'payments'>;
-export type PaymentInsert = TablesInsert<'payments'>;
-export type PaymentUpdate = TablesUpdate<'payments'>;
+export type ServiceProvider = Tables<"service_providers">;
+export type ServiceProviderInsert = TablesInsert<"service_providers">;
+export type ServiceProviderUpdate = TablesUpdate<"service_providers">;
 
-export type Invoice = Tables<'invoices'>;
-export type InvoiceInsert = TablesInsert<'invoices'>;
-export type InvoiceUpdate = TablesUpdate<'invoices'>;
+export type UserRole = Tables<"user_roles">;
+export type UserRoleInsert = TablesInsert<"user_roles">;
+export type UserRoleUpdate = TablesUpdate<"user_roles">;
 
-// Quote rejection types
-export type QuoteRejection = Tables<'quote_rejections'>;
-export type QuoteRejectionInsert = TablesInsert<'quote_rejections'>;
-export type QuoteRejectionUpdate = TablesUpdate<'quote_rejections'>;
-
-// Project reference: djkrzbmgzfwagmripozi
-// Last updated: 2025-09-29T20:21:35.453928
+export type WorkSession = Tables<"work_sessions">;
+export type WorkSessionInsert = TablesInsert<"work_sessions">;
+export type WorkSessionUpdate = TablesUpdate<"work_sessions">;

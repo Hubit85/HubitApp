@@ -139,7 +139,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
   useEffect(() => {
     if (prefilledIncident) {
-      setFormData(prev => ({
+      setFormData((prev: BudgetRequestInsert) => ({
         ...prev,
         title: prefilledIncident.title || "",
         description: prefilledIncident.description || "",
@@ -189,7 +189,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       setProperties(data || []);
       
       if (data && data.length > 0 && !formData.property_id) {
-        setFormData(prev => ({ ...prev, property_id: data[0].id }));
+        setFormData((prev: BudgetRequestInsert) => ({ ...prev, property_id: data[0].id }));
       }
 
     } catch (err) {
@@ -303,7 +303,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       const imageFiles = newFiles.filter(f => f.type.startsWith('image/')).map(f => f.url);
       const documentFiles = newFiles.filter(f => !f.type.startsWith('image/')).map(f => f.url);
       
-      setFormData(prev => ({
+      setFormData((prev: BudgetRequestInsert) => ({
         ...prev,
         images: [...(prev.images || []), ...imageFiles],
         documents: [...(prev.documents || []), ...documentFiles]
@@ -337,7 +337,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       const imageFiles = newFiles.filter(f => f.type.startsWith('image/')).map(f => f.url);
       const documentFiles = newFiles.filter(f => !f.type.startsWith('image/')).map(f => f.url);
       
-      setFormData(prev => ({
+      setFormData((prev: BudgetRequestInsert) => ({
         ...prev,
         images: imageFiles,
         documents: documentFiles
@@ -505,14 +505,14 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                     id="title"
                     placeholder="ej: Reparación de tubería en cocina"
                     value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, title: e.target.value }))}
                     maxLength={100}
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="category">Categoría de Servicio *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as BudgetRequest['category'] }))}>
+                  <Select value={formData.category} onValueChange={(value) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, category: value as BudgetRequest['category'] }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -534,7 +534,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
                 <div>
                   <Label htmlFor="urgency">Nivel de Urgencia</Label>
-                  <Select value={formData.urgency || "normal"} onValueChange={(value) => setFormData(prev => ({ ...prev, urgency: value as BudgetRequest['urgency'] }))}>
+                  <Select value={formData.urgency || "normal"} onValueChange={(value) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, urgency: value as BudgetRequest['urgency'] }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -560,7 +560,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                     id="description"
                     placeholder="Describe detalladamente qué necesitas que se haga..."
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, description: e.target.value }))}
                     rows={4}
                     maxLength={1000}
                   />
@@ -585,7 +585,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                     <Label htmlFor="property_id">Propiedad</Label>
                     <Select 
                       value={formData.property_id || undefined} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, property_id: value }))}
+                      onValueChange={(value) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, property_id: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona una propiedad" />
@@ -636,7 +636,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                         "Dirección donde se realizará el trabajo"
                       }
                       value={formData.work_location || ""}
-                      onChange={(e) => setFormData(prev => ({ ...prev, work_location: e.target.value }))}
+                      onChange={(e) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, work_location: e.target.value }))}
                     />
                   </div>
                 )}
@@ -647,7 +647,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                     id="special_requirements"
                     placeholder="ej: Acceso por escalera, horario específico"
                     value={formData.special_requirements || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, special_requirements: e.target.value }))}
+                    onChange={(e) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, special_requirements: e.target.value }))}
                   />
                 </div>
               </div>
@@ -671,7 +671,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                     step="0.01"
                     placeholder="0"
                     value={formData.budget_range_min || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, budget_range_min: parseFloat(e.target.value) || null }))}
+                    onChange={(e) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, budget_range_min: parseFloat(e.target.value) || null }))}
                   />
                 </div>
 
@@ -684,7 +684,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                     step="0.01"
                     placeholder="0"
                     value={formData.budget_range_max || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, budget_range_max: parseFloat(e.target.value) || null }))}
+                    onChange={(e) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, budget_range_max: parseFloat(e.target.value) || null }))}
                   />
                 </div>
 
@@ -694,7 +694,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                     id="preferred_date"
                     type="date"
                     value={formData.preferred_date || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, preferred_date: e.target.value || null }))}
+                    onChange={(e) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, preferred_date: e.target.value || null }))}
                   />
                 </div>
 
@@ -704,7 +704,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
                     id="deadline_date"
                     type="date"
                     value={formData.deadline_date || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, deadline_date: e.target.value || null }))}
+                    onChange={(e) => setFormData((prev: BudgetRequestInsert) => ({ ...prev, deadline_date: e.target.value || null }))}
                   />
                 </div>
               </div>
