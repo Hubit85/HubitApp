@@ -21,6 +21,7 @@ import {
   X,
   Phone
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PropertyAdministratorData {
   company_name: string;
@@ -32,26 +33,99 @@ interface PropertyAdministratorData {
   notes: string;
 }
 
+interface CommunityCode {
+  id: string;
+  code: string;
+  street: string;
+  street_number: string;
+  city: string;
+  province: string;
+}
+
 export function PropertyAdministratorProfile() {
   const { user, profile } = useSupabaseAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [communityCodes, setCommunityCodes] = useState<CommunityCode[]>([]);
+  const [loadingCommunities, setLoadingCommunities] = useState(false);
   const [formData, setFormData] = useState({
     company_name: profile?.full_name || "",
     company_cif: "",
     contact_email: user?.email || "",
     contact_phone: profile?.phone || "",
     license_number: "",
-    notes: ""
+    notes: "",
+    community_name: ""  // Nuevo campo para el código de comunidad seleccionado
   });
 
   useEffect(() => {
     if (user?.id) {
       loadAdministratorData();
+      loadUserCommunityCodes(); // Cargar los códigos de comunidad del usuario
     }
   }, [user?.id]);
+
+  const loadUserCommunityCodes = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoadingCommunities(true);
+      console.log('🏘️ Cargando códigos de comunidad para el usuario:', user.id.substring(0, 8) + '...');
+
+      // Obtener las propiedades del usuario que tengan community_code
+      const { data: properties, error } = await supabase
+        .from('properties')
+        .select(`
+          id,
+          community_code,
+          name,
+          address,
+          street,
+          number,
+          city,
+          province
+        `)
+        .eq('user_id', user.id)
+        .not('community_code', 'is', null)
+        .order('community_code');
+
+      if (error) {
+        console.error('❌ Error cargando propiedades:', error);
+        setError("Error al cargar los códigos de comunidad");
+        return;
+      }
+
+      // Crear lista única de códigos de comunidad
+      const uniqueCommunities: CommunityCode[] = [];
+      const seenCodes = new Set<string>();
+
+      properties?.forEach(property => {
+        if (property.community_code && !seenCodes.has(property.community_code)) {
+          seenCodes.add(property.community_code);
+          uniqueCommunities.push({
+            id: property.id,
+            code: property.community_code,
+            street: property.street || property.address || '',
+            street_number: property.number || '',
+            city: property.city || '',
+            province: property.province || ''
+          });
+        }
+      });
+
+      setCommunityCodes(uniqueCommunities);
+      console.log(`✅ Cargados ${uniqueCommunities.length} códigos de comunidad únicos:`, 
+        uniqueCommunities.map(c => c.code));
+
+    } catch (err) {
+      console.error('❌ Error crítico cargando códigos de comunidad:', err);
+      setError("Error crítico al cargar los códigos de comunidad");
+    } finally {
+      setLoadingCommunities(false);
+    }
+  };
 
   const loadAdministratorData = async () => {
     if (!user?.id) return;
@@ -81,7 +155,10 @@ export function PropertyAdministratorProfile() {
           contact_email: adminData.contact_email || user?.email || "",
           contact_phone: adminData.contact_phone || profile?.phone || "",
           license_number: adminData.license_number || "",
-          notes: adminData.notes || ""
+          notes: adminData.notes || "",
+          community_name: adminData.notes?.includes('Comunidad:') 
+            ? adminData.notes.split('Comunidad:')[1]?.split('|')[0]?.trim() || ""
+            : ""  // Extraer código de comunidad de las notas si existe
         });
         
         console.log('✅ Administrator data loaded successfully');
@@ -95,7 +172,8 @@ export function PropertyAdministratorProfile() {
           contact_email: user?.email || "",
           contact_phone: profile?.phone || "",
           license_number: "",
-          notes: ""
+          notes: "",
+          community_name: ""
         });
         
         console.log('✅ Default form data set');
@@ -145,6 +223,18 @@ export function PropertyAdministratorProfile() {
         throw checkError;
       }
 
+      // ENHANCED: Include community information in notes
+      let enhancedNotes = formData.notes.trim();
+      if (formData.community_name) {
+        const selectedCommunity = communityCodes.find(c => c.code === formData.community_name);
+        if (selectedCommunity) {
+          const communityInfo = `Comunidad: ${selectedCommunity.code} | Ubicación: ${selectedCommunity.street} ${selectedCommunity.street_number}, ${selectedCommunity.city}`;
+          enhancedNotes = enhancedNotes 
+            ? `${enhancedNotes}\n\n${communityInfo}`
+            : communityInfo;
+        }
+      }
+
       // FIXED: Properly handle null/undefined conversion for Supabase
       const adminData = {
         user_id: user.id,
@@ -153,7 +243,7 @@ export function PropertyAdministratorProfile() {
         contact_email: formData.contact_email.trim(),
         contact_phone: formData.contact_phone.trim() || null,
         license_number: formData.license_number.trim() || null,
-        notes: formData.notes.trim() || null,
+        notes: enhancedNotes || null,
         updated_at: new Date().toISOString()
       };
 
@@ -389,6 +479,130 @@ export function PropertyAdministratorProfile() {
                     <span className="font-semibold text-black">
                       {adminData.company_name}
                     </span>
+                  </div>
+                )}
+              </div>
+
+              {/* NUEVO: Selector desplegable para códigos de comunidad */}
+              <div>
+                <Label htmlFor="community_name" className="text-sm font-medium text-stone-700">
+                  Nombre de la Comunidad
+                </Label>
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <Select 
+                      value={formData.community_name} 
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, community_name: value }))}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder={
+                          loadingCommunities 
+                            ? "Cargando comunidades..." 
+                            : communityCodes.length === 0 
+                              ? "No hay comunidades disponibles" 
+                              : "Selecciona un código de comunidad"
+                        } />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {loadingCommunities ? (
+                          <SelectItem value="" disabled>
+                            <div className="flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <span>Cargando...</span>
+                            </div>
+                          </SelectItem>
+                        ) : communityCodes.length === 0 ? (
+                          <SelectItem value="" disabled>
+                            <div className="flex items-center gap-2 text-amber-600">
+                              <AlertCircle className="h-4 w-4" />
+                              <span>No tienes propiedades con códigos de comunidad</span>
+                            </div>
+                          </SelectItem>
+                        ) : (
+                          <>
+                            <SelectItem value="">
+                              <span className="text-stone-500">Ninguna comunidad seleccionada</span>
+                            </SelectItem>
+                            {communityCodes.map((community) => (
+                              <SelectItem key={community.id} value={community.code}>
+                                <div className="flex flex-col">
+                                  <div className="font-semibold text-blue-900">
+                                    {community.code}
+                                  </div>
+                                  <div className="text-xs text-stone-600">
+                                    {community.street} {community.street_number}, {community.city}
+                                    {community.province && `, ${community.province}`}
+                                  </div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    
+                    {communityCodes.length === 0 && !loadingCommunities && (
+                      <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                        <div className="flex items-center gap-2 text-amber-700">
+                          <AlertCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">
+                            No se encontraron códigos de comunidad
+                          </span>
+                        </div>
+                        <p className="text-xs text-amber-600 mt-1">
+                          Los códigos de comunidad se obtienen de las propiedades que has creado en "Mis Propiedades". 
+                          Asegúrate de tener propiedades con códigos de comunidad asignados.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {formData.community_name && (
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center gap-2 text-blue-700">
+                          <CheckCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">
+                            Comunidad seleccionada: {formData.community_name}
+                          </span>
+                        </div>
+                        {(() => {
+                          const selectedCommunity = communityCodes.find(c => c.code === formData.community_name);
+                          return selectedCommunity ? (
+                            <p className="text-xs text-blue-600 mt-1">
+                              {selectedCommunity.street} {selectedCommunity.street_number}, {selectedCommunity.city}
+                              {selectedCommunity.province && `, ${selectedCommunity.province}`}
+                            </p>
+                          ) : null;
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-1">
+                    {formData.community_name ? (
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                        <Building className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <span className="font-semibold text-blue-900">
+                            {formData.community_name}
+                          </span>
+                          {(() => {
+                            const selectedCommunity = communityCodes.find(c => c.code === formData.community_name);
+                            return selectedCommunity ? (
+                              <p className="text-xs text-blue-700 mt-0.5">
+                                {selectedCommunity.street} {selectedCommunity.street_number}, {selectedCommunity.city}
+                              </p>
+                            ) : null;
+                          })()}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
+                        <Building className="h-5 w-5 text-stone-400" />
+                        <span className="text-stone-500 italic">
+                          Ninguna comunidad seleccionada
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
