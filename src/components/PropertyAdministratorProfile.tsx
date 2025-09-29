@@ -584,16 +584,16 @@ export function PropertyAdministratorProfile() {
                               <strong>¿Por qué no aparecen códigos de comunidad?</strong>
                             </p>
                             <ul className="list-disc list-inside space-y-1 pl-2">
-                              <li>No tienes propiedades creadas en "Mis Propiedades"</li>
-                              <li>Las propiedades no tienen el campo "Código de Comunidad" rellenado</li>
+                              <li>No tienes propiedades creadas en &quot;Mis Propiedades&quot;</li>
+                              <li>Las propiedades no tienen el campo &quot;Código de Comunidad&quot; rellenado</li>
                               <li>Las propiedades fueron creadas antes de que se implementara esta funcionalidad</li>
                             </ul>
                             <p className="mt-2">
                               <strong>Soluciones:</strong>
                             </p>
                             <ul className="list-disc list-inside space-y-1 pl-2">
-                              <li>Ve a "Mis Propiedades" y crea o edita tus propiedades</li>
-                              <li>Asegúrate de rellenar el campo "Código de Comunidad"</li>
+                              <li>Ve a &quot;Mis Propiedades&quot; y crea o edita tus propiedades</li>
+                              <li>Asegúrate de rellenar el campo &quot;Código de Comunidad&quot;</li>
                               <li>O escribe manualmente el código aquí abajo</li>
                             </ul>
                           </div>
@@ -699,7 +699,7 @@ export function PropertyAdministratorProfile() {
                                 🎯 {communityCodes.length} código{communityCodes.length !== 1 ? 's' : ''} de comunidad disponible{communityCodes.length !== 1 ? 's' : ''}
                               </p>
                               <p className="text-blue-600 text-xs mt-1">
-                                📋 Los códigos se obtienen automáticamente de las propiedades en "Mis Propiedades". 
+                                📋 Los códigos se obtienen automáticamente de las propiedades en &quot;Mis Propiedades&quot;. 
                                 <strong> Haz clic en el selector desplegable</strong> para ver todas las opciones disponibles.
                               </p>
                             </div>
