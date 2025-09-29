@@ -10,8 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Building, Trash2, Edit, Upload, Camera, Code } from "lucide-react";
-import { Property, PropertyInsert } from "@/integrations/supabase/types";
 import { CommunityCodeService } from "@/services/CommunityCodeService";
+import { Database } from "@/integrations/supabase/database.types";
+
+// Define types from database
+type Property = Database['public']['Tables']['properties']['Row'];
+type PropertyInsert = Database['public']['Tables']['properties']['Insert'];
 
 interface ExtendedProperty extends Property {
   street?: string | null;

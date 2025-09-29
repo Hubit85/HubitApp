@@ -18,9 +18,9 @@ export interface CommunityCode {
   city: string;
   street: string;
   street_number: string;
-  created_at: string;
+  created_at: string | null;
   created_by: string;
-  updated_at: string;
+  updated_at: string | null;
 }
 
 export class CommunityCodeService {
@@ -61,7 +61,7 @@ export class CommunityCodeService {
       throw new Error(`Error buscando código existente: ${error.message}`);
     }
 
-    return existingCode;
+    return existingCode as CommunityCode | null;
   }
 
   static async createOrGetCommunityCode(data: CommunityCodeData): Promise<{ code: string; isNew: boolean }> {
@@ -111,7 +111,7 @@ export class CommunityCodeService {
       throw new Error(`Error obteniendo códigos de comunidad: ${error.message}`);
     }
 
-    return data || [];
+    return (data as CommunityCode[]) || [];
   }
 
   static async getCommunityCodeByCode(code: string): Promise<CommunityCode | null> {
@@ -125,7 +125,7 @@ export class CommunityCodeService {
       throw new Error(`Error obteniendo código de comunidad: ${error.message}`);
     }
 
-    return data;
+    return data as CommunityCode | null;
   }
 
   static async deleteCommunityCode(id: string): Promise<void> {
