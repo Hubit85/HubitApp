@@ -1789,7 +1789,7 @@ export default function Dashboard() {
                         {currentRole === "community_member" && "Conectado con tu comunidad"}
                         {currentRole === "service_provider" && "Perfil verificado y activo"}
                         {currentRole === "property_administrator" && "Sistema de administración activo"}
-                        {!["particular", "community_member", "service_provider", "property_administrator"].includes(currentRole) && "Sistema completamente configurado"}
+                        {![currentRole].includes("particular", "community_member", "service_provider", "property_administrator") && "Sistema completamente configurado"}
                       </span>
                     </div>
                   </div>
