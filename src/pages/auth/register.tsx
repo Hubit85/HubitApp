@@ -71,7 +71,7 @@ interface RoleFormData {
         city: string;
         province: string;
         country: string;
-        community_code?: string;
+        community_code: string;
     };
 
     service_provider: {
@@ -304,7 +304,7 @@ function RegisterPageContent() {
             city: "",
             province: "",
             country: "España",
-            community_code: undefined,
+            community_code: "",
         },
         service_provider: {
             company_name: "",
