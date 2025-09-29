@@ -498,7 +498,7 @@ export function PropertyAdministratorProfile() {
                 )}
               </div>
 
-              {/* CORREGIDO: Selector desplegable para códigos de comunidad - ASEGURADO FUNCIONAMIENTO DESPLEGABLE */}
+              {/* MEJORADO: Selector desplegable para códigos de comunidad - COMPLETAMENTE FUNCIONAL */}
               <div>
                 <Label htmlFor="community_name" className="text-sm font-medium text-stone-700">
                   Nombre de la Comunidad
@@ -543,57 +543,86 @@ export function PropertyAdministratorProfile() {
                             setFormData(prev => ({ ...prev, community_name: value }));
                           }}
                         >
-                          <SelectTrigger className="h-12 bg-white border-stone-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
-                            <SelectValue placeholder="Haz clic para seleccionar código de comunidad">
+                          <SelectTrigger className="h-12 bg-white border-stone-300 hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 cursor-pointer">
+                            <SelectValue placeholder="▼ Haz clic aquí para seleccionar un código de comunidad">
                               {formData.community_name ? (
                                 <div className="flex items-center gap-2 text-left">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                                   <Building className="h-4 w-4 text-blue-600 flex-shrink-0" />
                                   <span className="font-medium text-blue-900 truncate">
                                     {formData.community_name}
                                   </span>
                                 </div>
                               ) : (
-                                <span className="text-stone-500">Haz clic para seleccionar código de comunidad</span>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                  <span className="text-stone-500">▼ Haz clic aquí para seleccionar un código de comunidad</span>
+                                </div>
                               )}
                             </SelectValue>
                           </SelectTrigger>
-                          <SelectContent className="max-h-[300px] z-[150]">
-                            <SelectItem value="" className="text-stone-500 py-2">
+                          <SelectContent className="max-h-[300px] z-[200] min-w-[400px] bg-white border-stone-200 shadow-xl">
+                            <div className="p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200">
+                              <p className="text-xs text-blue-700 font-medium">
+                                💡 Selecciona un código de comunidad de tus propiedades registradas:
+                              </p>
+                            </div>
+                            
+                            <SelectItem value="" className="text-stone-500 py-3 hover:bg-stone-50 transition-colors">
                               <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                                 <X className="h-3 w-3 text-stone-400" />
                                 <span>Ninguna comunidad seleccionada</span>
                               </div>
                             </SelectItem>
+                            
                             {communityCodes.map((community, index) => (
-                              <SelectItem key={community.id} value={community.code} className="py-3 cursor-pointer">
+                              <SelectItem 
+                                key={community.id} 
+                                value={community.code} 
+                                className="py-4 cursor-pointer hover:bg-blue-50 transition-colors border-b border-stone-100 last:border-b-0"
+                              >
                                 <div className="flex flex-col space-y-1 w-full">
                                   <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                     <Building className="h-4 w-4 text-blue-600 flex-shrink-0" />
                                     <span className="font-semibold text-blue-900">
                                       {community.code}
                                     </span>
+                                    <div className="ml-auto px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                      #{index + 1}
+                                    </div>
                                   </div>
-                                  <div className="text-xs text-stone-600 pl-6">
-                                    📍 {community.street} {community.street_number}, {community.city}
-                                    {community.province && `, ${community.province}`}
+                                  <div className="text-xs text-stone-600 pl-6 flex items-center gap-1">
+                                    <span>📍</span>
+                                    <span>
+                                      {community.street} {community.street_number}, {community.city}
+                                      {community.province && `, ${community.province}`}
+                                    </span>
                                   </div>
                                 </div>
                               </SelectItem>
                             ))}
+                            
+                            <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 border-t border-green-200 mt-1">
+                              <p className="text-xs text-green-700 font-medium">
+                                ✅ Total: {communityCodes.length} código{communityCodes.length !== 1 ? 's' : ''} disponible{communityCodes.length !== 1 ? 's' : ''}
+                              </p>
+                            </div>
                           </SelectContent>
                         </Select>
                         
-                        {/* Información sobre la funcionalidad del selector */}
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        {/* Información mejorada sobre la funcionalidad del selector */}
+                        <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                           <div className="flex items-start gap-2">
                             <CheckCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                             <div className="text-sm">
                               <p className="text-blue-800 font-medium">
-                                {communityCodes.length} código{communityCodes.length !== 1 ? 's' : ''} de comunidad disponible{communityCodes.length !== 1 ? 's' : ''}
+                                🎯 {communityCodes.length} código{communityCodes.length !== 1 ? 's' : ''} de comunidad disponible{communityCodes.length !== 1 ? 's' : ''}
                               </p>
                               <p className="text-blue-600 text-xs mt-1">
-                                Códigos obtenidos de las propiedades registradas en tu cuenta. 
-                                Haz clic en el selector para ver todas las opciones.
+                                📋 Los códigos se extraen automáticamente de las propiedades en tu cuenta. 
+                                <strong> Haz clic en el selector desplegable</strong> para ver todas las opciones disponibles y seleccionar una.
                               </p>
                             </div>
                           </div>
@@ -601,24 +630,27 @@ export function PropertyAdministratorProfile() {
                       </div>
                     )}
                     
-                    {/* Confirmación visual de selección */}
+                    {/* Confirmación visual mejorada de selección */}
                     {formData.community_name && (
-                      <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 shadow-sm">
                         <div className="flex items-center gap-2 text-green-700">
-                          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                          <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-600" />
                           <span className="text-sm font-medium">
-                            ✅ Código seleccionado: <strong>{formData.community_name}</strong>
+                            ✅ <strong>Código seleccionado exitosamente:</strong> {formData.community_name}
                           </span>
                         </div>
                         {(() => {
                           const selectedCommunity = communityCodes.find(c => c.code === formData.community_name);
                           return selectedCommunity ? (
-                            <p className="text-xs text-green-600 mt-1 pl-6">
-                              📍 {selectedCommunity.street} {selectedCommunity.street_number}, {selectedCommunity.city}
-                              {selectedCommunity.province && `, ${selectedCommunity.province}`}
-                            </p>
+                            <div className="mt-2 pl-7 p-2 bg-white rounded border border-green-200">
+                              <p className="text-xs text-green-700 font-medium">📍 Ubicación de la comunidad:</p>
+                              <p className="text-sm text-green-800 mt-1">
+                                {selectedCommunity.street} {selectedCommunity.street_number}<br/>
+                                {selectedCommunity.city}{selectedCommunity.province && `, ${selectedCommunity.province}`}
+                              </p>
+                            </div>
                           ) : (
-                            <p className="text-xs text-green-600 mt-1 pl-6">
+                            <p className="text-xs text-green-600 mt-1 pl-7">
                               💼 Código de comunidad configurado manualmente
                             </p>
                           );
@@ -629,8 +661,10 @@ export function PropertyAdministratorProfile() {
                 ) : (
                   <div className="mt-1">
                     {formData.community_name ? (
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                        <Building className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                        <div className="p-1 bg-blue-100 rounded">
+                          <Building className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                        </div>
                         <div className="flex-1">
                           <span className="font-semibold text-blue-900 block">
                             {formData.community_name}
@@ -649,13 +683,21 @@ export function PropertyAdministratorProfile() {
                             );
                           })()}
                         </div>
+                        <Badge className="bg-green-100 text-green-800 text-xs">
+                          ✓ Configurado
+                        </Badge>
                       </div>
                     ) : (
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
-                        <Building className="h-5 w-5 text-stone-400 flex-shrink-0" />
+                        <div className="p-1 bg-stone-200 rounded">
+                          <Building className="h-4 w-4 text-stone-400 flex-shrink-0" />
+                        </div>
                         <span className="text-stone-500 italic">
                           Ninguna comunidad seleccionada
                         </span>
+                        <Badge variant="outline" className="text-xs">
+                          Sin configurar
+                        </Badge>
                       </div>
                     )}
                   </div>
