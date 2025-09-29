@@ -550,7 +550,7 @@ export default function PropertyManager() {
                 </Button>
               </div>
               <p className="text-xs text-gray-500">
-                El código se genera con las 3 primeras letras del país, provincia, ciudad, 6 letras de la calle y 4 dígitos del número.
+                El código se genera con las 3 primeras letras del país, provincia, ciudad, 6 letras de la calle, guión y 4 dígitos del número.
               </p>
             </div>
 

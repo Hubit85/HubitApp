@@ -43,7 +43,8 @@ export class CommunityCodeService {
     // Formatear número de calle a 4 dígitos
     const streetNumber = data.street_number.padStart(4, '0');
     
-    return `${countryCode}-${provinceCode}-${cityCode}-${streetCode}${streetNumber}`;
+    // MODIFICADO: Incluir guión entre las 6 letras de la calle y el número
+    return `${countryCode}-${provinceCode}-${cityCode}-${streetCode}-${streetNumber}`;
   }
 
   static async findExistingCode(data: CommunityCodeData): Promise<CommunityCode | null> {
