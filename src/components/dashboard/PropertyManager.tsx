@@ -355,42 +355,73 @@ export default function PropertyManager() {
               {properties.map(prop => (
                 <Card key={prop.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white">
                   {/* Photo Section */}
-                  <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group">
                     {prop.property_photo_url ? (
-                      <img 
-                        src={prop.property_photo_url} 
-                        alt={`Fotografía de ${prop.name}`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
+                      <>
+                        <img 
+                          src={prop.property_photo_url} 
+                          alt={`Fotografía de ${prop.name}`}
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100">
+                                  <div class="text-center">
+                                    <svg class="h-16 w-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                    <p class="text-slate-400 text-sm font-medium">Error cargando imagen</p>
+                                  </div>
+                                </div>
+                              `;
+                            }
+                          }}
+                        />
+                        {/* Photo Overlay for Better Contrast */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+                        
+                        {/* Enhanced Photo Label */}
+                        <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+                          <div className="bg-white/95 backdrop-blur-md rounded-lg px-3 py-2 shadow-lg">
+                            <div className="flex items-center gap-2">
+                              <Camera className="h-4 w-4 text-slate-600" />
+                              <span className="text-sm font-medium text-slate-800">Fotografía principal</span>
+                            </div>
+                          </div>
+                        </div>
+                      </>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100">
-                        <div className="text-center">
-                          <Building className="h-16 w-16 text-slate-300 mx-auto mb-3" />
-                          <p className="text-slate-400 text-sm font-medium">Sin fotografía</p>
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 group-hover:from-slate-200 group-hover:via-slate-100 group-hover:to-slate-200 transition-all duration-500">
+                        <div className="text-center transform group-hover:scale-105 transition-transform duration-500">
+                          <div className="w-20 h-20 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg transition-shadow">
+                            <Building className="h-10 w-10 text-slate-400" />
+                          </div>
+                          <p className="text-slate-400 text-sm font-medium mb-1">Sin fotografía</p>
+                          <p className="text-slate-300 text-xs">Haz clic para añadir una imagen</p>
                         </div>
                       </div>
                     )}
                     
-                    {/* Community Code Badge */}
+                    {/* Community Code Badge - Enhanced */}
                     {prop.community_code && (
-                      <div className="absolute top-3 left-3">
-                        <Badge className="font-mono text-xs bg-white/90 text-slate-700 border-0 shadow-md backdrop-blur-sm">
+                      <div className="absolute top-3 left-3 transform group-hover:scale-105 transition-transform duration-300">
+                        <Badge className="font-mono text-xs bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0 shadow-lg backdrop-blur-sm hover:shadow-xl transition-shadow">
                           <Code className="h-3 w-3 mr-1" />
                           {prop.community_code}
                         </Badge>
                       </div>
                     )}
                     
-                    {/* Action Buttons */}
-                    <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {/* Enhanced Action Buttons */}
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleOpenDialog(prop)}
-                        className="h-8 w-8 p-0 bg-white/90 backdrop-blur-sm border-0 shadow-md hover:bg-white hover:scale-110 transition-all duration-200"
+                        className="h-9 w-9 p-0 bg-white/95 backdrop-blur-md border-0 shadow-lg hover:bg-white hover:scale-110 hover:shadow-xl transition-all duration-300 rounded-full"
                       >
                         <Edit className="h-4 w-4 text-slate-600" />
                       </Button>
@@ -398,79 +429,133 @@ export default function PropertyManager() {
                         variant="destructive" 
                         size="sm" 
                         onClick={() => handleDelete(prop.id)}
-                        className="h-8 w-8 p-0 bg-red-500/90 backdrop-blur-sm border-0 shadow-md hover:bg-red-600 hover:scale-110 transition-all duration-200"
+                        className="h-9 w-9 p-0 bg-gradient-to-r from-red-500 to-red-600 backdrop-blur-md border-0 shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-110 hover:shadow-xl transition-all duration-300 rounded-full"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
+
+                    {/* Property Type Badge */}
+                    <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+                      <Badge 
+                        variant="outline" 
+                        className="bg-white/95 backdrop-blur-md text-slate-700 border-0 shadow-md text-xs font-semibold"
+                      >
+                        {prop.property_type === 'residential' ? '🏠 Residencial' :
+                         prop.property_type === 'commercial' ? '🏢 Comercial' :
+                         prop.property_type === 'industrial' ? '🏭 Industrial' :
+                         '🏘️ ' + prop.property_type}
+                      </Badge>
+                    </div>
                   </div>
                   
-                  {/* Content Section */}
-                  <CardContent className="p-5">
-                    <div className="space-y-4">
-                      {/* Title and Type */}
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-xl font-bold text-slate-800 leading-tight group-hover:text-slate-900 transition-colors">
-                            {prop.name}
-                          </h3>
-                          <Badge variant="outline" className="mt-2 text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
-                            {prop.property_type === 'residential' ? 'Residencial' :
-                             prop.property_type === 'commercial' ? 'Comercial' :
-                             prop.property_type === 'industrial' ? 'Industrial' :
-                             prop.property_type}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Address Section */}
-                      <div className="space-y-2">
-                        <div className="flex items-start gap-2">
-                          <Building className="h-4 w-4 text-slate-400 mt-1 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-700 leading-relaxed">
-                              {prop.street ? `${prop.street} ${prop.number}` : prop.address}
-                              {(prop.floor || prop.door) && (
-                                <span className="text-blue-600 font-semibold ml-1">
-                                  {prop.floor && `${prop.floor}º`}
-                                  {prop.door && ` ${prop.door}`}
-                                </span>
+                  {/* Enhanced Content Section */}
+                  <CardContent className="p-6">
+                    <div className="space-y-5">
+                      {/* Title Section with Enhanced Typography */}
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-2xl font-bold text-slate-800 leading-tight group-hover:text-slate-900 transition-colors mb-2 line-clamp-2">
+                              {prop.name}
+                            </h3>
+                            
+                            {/* Property Metadata Pills */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant="outline" className="text-xs bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-emerald-200 font-medium">
+                                ✓ {prop.property_type === 'residential' ? 'Residencial' :
+                                     prop.property_type === 'commercial' ? 'Comercial' :
+                                     prop.property_type === 'industrial' ? 'Industrial' :
+                                     prop.property_type}
+                              </Badge>
+                              
+                              {prop.units_count && prop.units_count > 1 && (
+                                <Badge variant="outline" className="text-xs bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200 font-medium">
+                                  🏠 {prop.units_count} unidades
+                                </Badge>
                               )}
-                            </p>
-                            <p className="text-sm text-slate-500">
-                              {prop.city}
-                              {prop.province && <span>, {prop.province}</span>}
-                              {prop.country && <span>, {prop.country}</span>}
-                            </p>
-                            {prop.postal_code && (
-                              <p className="text-xs text-slate-400 font-mono">
-                                CP {prop.postal_code}
-                              </p>
-                            )}
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* Description */}
+                      {/* Enhanced Address Section with Better Formatting */}
+                      <div className="space-y-3 pb-4 border-b border-slate-100">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <Building className="h-4 w-4 text-slate-500" />
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-2">
+                            {/* Main Address */}
+                            <div>
+                              <p className="text-base font-semibold text-slate-800 leading-relaxed">
+                                {prop.street ? `${prop.street} ${prop.number}` : prop.address}
+                                {(prop.floor || prop.door) && (
+                                  <span className="inline-flex items-center ml-2 px-2 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-sm font-bold rounded-full">
+                                    {prop.floor && `${prop.floor}º`}
+                                    {prop.door && ` ${prop.door}`}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            
+                            {/* Location Details */}
+                            <div className="space-y-1">
+                              <p className="text-sm font-medium text-slate-600 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
+                                {prop.city}
+                                {prop.province && <span className="text-slate-400">•</span>}
+                                {prop.province && <span>{prop.province}</span>}
+                                {prop.country && <span className="text-slate-400">•</span>}
+                                {prop.country && <span>{prop.country}</span>}
+                              </p>
+                              
+                              {prop.postal_code && (
+                                <p className="text-xs text-slate-500 font-mono bg-slate-50 inline-block px-2 py-1 rounded">
+                                  📮 CP {prop.postal_code}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Enhanced Description Section */}
                       {prop.description && (
-                        <div className="pt-2 border-t border-gray-100">
-                          <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full"></div>
+                            <h4 className="text-sm font-semibold text-slate-700">Descripción</h4>
+                          </div>
+                          <p className="text-sm text-slate-600 leading-relaxed line-clamp-3 pl-3 border-l-2 border-slate-100">
                             {prop.description}
                           </p>
                         </div>
                       )}
 
-                      {/* Details Grid */}
-                      <div className="flex items-center justify-between pt-2 text-xs">
-                        {prop.units_count && (
-                          <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-full">
-                            <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
-                            <span className="font-medium text-slate-600">{prop.units_count} unidades</span>
-                          </div>
-                        )}
+                      {/* Enhanced Footer with Stats */}
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                        <div className="flex items-center gap-3">
+                          {prop.created_at && (
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                              <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-pulse"></div>
+                              <span className="font-medium">
+                                Registrada {new Date(prop.created_at).toLocaleDateString('es-ES', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                         
-                        <div className="text-xs text-slate-400">
-                          {prop.created_at && new Date(prop.created_at).toLocaleDateString('es-ES')}
+                        {/* Property Status */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span className="text-xs font-medium text-green-700">Activa</span>
+                          </div>
                         </div>
                       </div>
                     </div>
