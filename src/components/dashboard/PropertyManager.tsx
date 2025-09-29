@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Building, Trash2, Edit, Upload, Camera, Code } from "lucide-react";
 import { CommunityCodeService } from "@/services/CommunityCodeService";
 import { Database } from "@/integrations/supabase/database.types";
-import { SupabaseStorageService } from "@/services/SupabaseStorageService";
+import { SupabaseStorageService, UploadResult } from "@/services/SupabaseStorageService";
 
 // Define types from database
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -191,42 +191,78 @@ export default function PropertyManager() {
     setError(""); // Limpiar errores previos
     
     try {
-      console.log('Iniciando subida de foto...', { fileName: file.name, size: file.size });
+      console.log('🔄 Iniciando subida de foto...', { 
+        fileName: file.name, 
+        size: file.size, 
+        type: file.type 
+      });
       
-      // Optimizar la imagen antes de subirla
-      const optimizedFile = await SupabaseStorageService.optimizeImageForWeb(file);
-      
-      // Subir archivo usando el servicio mejorado
-      const result = await SupabaseStorageService.uploadFile(
-        optimizedFile, 
-        'property-photos', 
-        user.id
-      );
-
-      if (!result.success) {
-        throw new Error(result.error || 'Error desconocido al subir la imagen');
+      // Validar que el archivo sea una imagen
+      if (!file.type.startsWith('image/')) {
+        throw new Error('El archivo debe ser una imagen (JPEG, PNG, WebP)');
       }
 
-      if (!result.publicUrl) {
+      // Validar tamaño máximo (5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new Error('La imagen es demasiado grande. Máximo 5MB permitido');
+      }
+
+      // Crear un nombre único para el archivo
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 15);
+      const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `property_${user.id}_${timestamp}_${randomId}.${fileExtension}`;
+      const filePath = `property-photos/${fileName}`;
+
+      console.log('📁 Preparando subida:', { fileName, filePath });
+
+      // Subir archivo a Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: file.type
+        });
+
+      if (uploadError) {
+        console.error('❌ Error de subida:', uploadError);
+        throw new Error(`Error subiendo imagen: ${uploadError.message}`);
+      }
+
+      console.log('✅ Archivo subido exitosamente:', uploadData);
+
+      // Obtener la URL pública de la imagen
+      const { data: urlData } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      if (!urlData?.publicUrl) {
         throw new Error('No se pudo obtener la URL pública de la imagen');
       }
 
-      console.log('Imagen subida exitosamente:', result);
-      
-      // Validar que la imagen sea accesible
-      const isValid = await SupabaseStorageService.validateImageUrl(result.publicUrl);
-      if (!isValid) {
-        console.warn('La imagen subida podría no ser accesible');
+      console.log('🔗 URL pública generada:', urlData.publicUrl);
+
+      // Verificar que la imagen sea accesible
+      try {
+        const testResponse = await fetch(urlData.publicUrl, { method: 'HEAD' });
+        if (!testResponse.ok) {
+          console.warn('⚠️ La imagen podría no estar accesible inmediatamente');
+        }
+      } catch (testError) {
+        console.warn('⚠️ No se pudo verificar la accesibilidad de la imagen:', testError);
       }
 
+      // Actualizar el estado con la nueva URL
       setCurrentProperty({
         ...currentProperty,
-        property_photo_url: result.publicUrl
+        property_photo_url: urlData.publicUrl
       });
 
-      // Mostrar notificación de éxito
+      // Mostrar notificación de éxito mejorada
       const successDiv = document.createElement('div');
-      successDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-lg shadow-xl z-50';
+      successDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-lg shadow-xl z-50 border border-green-400';
       successDiv.innerHTML = `
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -236,12 +272,13 @@ export default function PropertyManager() {
           </div>
           <div>
             <p class="font-semibold">¡Imagen subida correctamente!</p>
-            <p class="text-sm text-green-100">La fotografía se ha guardado exitosamente</p>
+            <p class="text-sm text-green-100">La fotografía se ha guardado y se mostrará en la propiedad</p>
           </div>
         </div>
       `;
       document.body.appendChild(successDiv);
       
+      // Animación de salida después de 4 segundos
       setTimeout(() => {
         if (document.body.contains(successDiv)) {
           successDiv.style.transition = 'all 0.5s ease-out';
@@ -256,12 +293,12 @@ export default function PropertyManager() {
       }, 4000);
 
     } catch (err: any) {
-      console.error('Error completo al subir imagen:', err);
+      console.error('❌ Error completo al subir imagen:', err);
       setError(`Error subiendo imagen: ${err.message}`);
       
       // Mostrar notificación de error específica para imágenes
       const errorDiv = document.createElement('div');
-      errorDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg shadow-xl z-50';
+      errorDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg shadow-xl z-50 border border-red-400';
       errorDiv.innerHTML = `
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -272,14 +309,20 @@ export default function PropertyManager() {
           <div>
             <p class="font-semibold">Error al subir imagen</p>
             <p class="text-sm text-red-100">${err.message}</p>
-            <p class="text-xs text-red-200 mt-1">Asegúrate de que el archivo sea una imagen válida (máximo 5MB)</p>
+            <p class="text-xs text-red-200 mt-1">Verifica que el archivo sea una imagen válida (máximo 5MB)</p>
           </div>
         </div>
       `;
       document.body.appendChild(errorDiv);
       setTimeout(() => {
         if (document.body.contains(errorDiv)) {
-          document.body.removeChild(errorDiv);
+          errorDiv.style.transition = 'all 0.5s ease-out';
+          errorDiv.style.opacity = '0';
+          setTimeout(() => {
+            if (document.body.contains(errorDiv)) {
+              document.body.removeChild(errorDiv);
+            }
+          }, 500);
         }
       }, 8000);
       
