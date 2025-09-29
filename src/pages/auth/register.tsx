@@ -1830,25 +1830,54 @@ function RegisterPageContent() {
                                             <div className="bg-gray-50 rounded-lg p-4">
                                                 <p className="text-sm font-medium text-gray-700 mb-2">Tu contraseña debe contener:</p>
                                                 <div className="space-y-1">
-                                                    {[
-                                                        { key: 'length', text: 'Al menos 8 caracteres' },
-                                                        { key: 'uppercase', text: 'Una letra mayúscula' },
-                                                        { key: 'lowercase', text: 'Una letra minúscula' },
-                                                        { key: 'number', text: 'Un número' }
-                                                    ].map((requirement) => (
-                                                        <div key={requirement.key} className="flex items-center gap-2">
-                                                            {passwordValidation[requirement.key] ? (
-                                                                <CheckCircle className="w-4 h-4 text-green-500" />
-                                                            ) : (
-                                                                <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
-                                                            )}
-                                                            <span className={`text-sm ${
-                                                                passwordValidation[requirement.key] ? 'text-green-700' : 'text-gray-600'
-                                                            }`}>
-                                                                {requirement.text}
-                                                            </span>
-                                                        </div>
-                                                    ))}
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordValidation.length ? (
+                                                            <CheckCircle className="w-4 h-4 text-green-500" />
+                                                        ) : (
+                                                            <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
+                                                        )}
+                                                        <span className={`text-sm ${
+                                                            passwordValidation.length ? 'text-green-700' : 'text-gray-600'
+                                                        }`}>
+                                                            Al menos 8 caracteres
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordValidation.uppercase ? (
+                                                            <CheckCircle className="w-4 h-4 text-green-500" />
+                                                        ) : (
+                                                            <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
+                                                        )}
+                                                        <span className={`text-sm ${
+                                                            passwordValidation.uppercase ? 'text-green-700' : 'text-gray-600'
+                                                        }`}>
+                                                            Una letra mayúscula
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordValidation.lowercase ? (
+                                                            <CheckCircle className="w-4 h-4 text-green-500" />
+                                                        ) : (
+                                                            <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
+                                                        )}
+                                                        <span className={`text-sm ${
+                                                            passwordValidation.lowercase ? 'text-green-700' : 'text-gray-600'
+                                                        }`}>
+                                                            Una letra minúscula
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {passwordValidation.number ? (
+                                                            <CheckCircle className="w-4 h-4 text-green-500" />
+                                                        ) : (
+                                                            <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
+                                                        )}
+                                                        <span className={`text-sm ${
+                                                            passwordValidation.number ? 'text-green-700' : 'text-gray-600'
+                                                        }`}>
+                                                            Un número
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
 
