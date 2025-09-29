@@ -609,7 +609,7 @@ export default function ProfilePage() {
                                           </span>
                                         </div>
                                         <p className="text-xs text-amber-600 mt-1">
-                                          Selecciona una propiedad en "Mis Propiedades" para mostrar tu comunidad actual
+                                          Selecciona una propiedad en &quot;Mis Propiedades&quot; para mostrar tu comunidad actual
                                         </p>
                                       </div>
                                     ) : (
@@ -621,7 +621,7 @@ export default function ProfilePage() {
                                           </span>
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1">
-                                          Ve a "Mis Propiedades" y selecciona una propiedad para mostrar tu comunidad
+                                          Ve a &quot;Mis Propiedades&quot; y selecciona una propiedad para mostrar tu comunidad
                                         </p>
                                       </div>
                                     )}
