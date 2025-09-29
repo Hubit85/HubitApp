@@ -315,374 +315,564 @@ export default function PropertyManager() {
   if (loading) return <div className="flex justify-center items-center"><Loader2 className="animate-spin mr-2" /> Cargando propiedades...</div>;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Gestor de Propiedades</CardTitle>
-          <CardDescription>Añade y administra tus propiedades con información detallada y códigos de comunidad únicos.</CardDescription>
+    <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-slate-50 to-white">
+      <CardHeader className="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-t-lg">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <CardTitle className="text-2xl font-bold flex items-center gap-3">
+              <Building className="h-7 w-7" />
+              Mis Propiedades
+            </CardTitle>
+            <CardDescription className="text-slate-200 mt-2 text-base">
+              Gestiona tu cartera inmobiliaria con información detallada y códigos de comunidad únicos.
+            </CardDescription>
+          </div>
+          <Button 
+            onClick={() => handleOpenDialog()}
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300"
+            size="lg"
+          >
+            <Plus className="mr-2 h-5 w-5" /> Añadir Propiedad
+          </Button>
         </div>
-        <Button onClick={() => handleOpenDialog()}>
-          <Plus className="mr-2 h-4 w-4" /> Añadir Propiedad
-        </Button>
       </CardHeader>
-      <CardContent>
-        {error && <Alert variant="destructive" className="mb-4"><AlertDescription>{error}</AlertDescription></Alert>}
+      <CardContent className="p-8">
+        {error && (
+          <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50">
+            <AlertDescription className="text-red-800">{error}</AlertDescription>
+          </Alert>
+        )}
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {properties.length > 0 ? (
-            properties.map(prop => (
-              <Card key={prop.id} className="p-4 border-l-4 border-l-blue-500">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{prop.name}</h3>
-                      {prop.community_code && (
-                        <Badge variant="outline" className="font-mono text-sm bg-blue-50 text-blue-700 border-blue-200">
-                          {prop.community_code}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">Dirección:</span> {prop.street ? `${prop.street} ${prop.number}` : prop.address}
-                          {(prop.floor || prop.door) && (
-                            <span className="text-blue-600 ml-2">
-                              {prop.floor && `${prop.floor}º`}
-                              {prop.door && ` ${prop.door}`}
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">Ciudad:</span> {prop.city}
-                          {prop.province && <>, {prop.province}</>}
-                          {prop.country && <>, {prop.country}</>}
-                        </p>
-                        {prop.postal_code && (
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">C.P.:</span> {prop.postal_code}
-                          </p>
-                        )}
-                        {(prop.floor || prop.door) && (
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">Ubicación:</span> 
-                            {prop.floor && ` Piso ${prop.floor}`}
-                            {prop.door && `, Puerta ${prop.door}`}
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">Tipo:</span> {
-                            prop.property_type === 'residential' ? 'Residencial' :
-                            prop.property_type === 'commercial' ? 'Comercial' :
-                            prop.property_type === 'industrial' ? 'Industrial' :
-                            prop.property_type
-                          }
-                        </p>
-                        {prop.units_count && (
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">Unidades:</span> {prop.units_count}
-                          </p>
-                        )}
-                        {prop.description && (
-                          <p className="text-sm text-gray-600">
-                            <span className="font-medium">Descripción:</span> {prop.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {prop.property_photo_url && (
-                      <div className="mt-3">
-                        <img 
-                          src={prop.property_photo_url} 
-                          alt="Foto de la propiedad" 
-                          className="w-32 h-24 object-cover rounded-lg border border-gray-200"
-                        />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {properties.map(prop => (
+                <Card key={prop.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white">
+                  {/* Photo Section */}
+                  <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                    {prop.property_photo_url ? (
+                      <img 
+                        src={prop.property_photo_url} 
+                        alt={`Fotografía de ${prop.name}`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100">
+                        <div className="text-center">
+                          <Building className="h-16 w-16 text-slate-300 mx-auto mb-3" />
+                          <p className="text-slate-400 text-sm font-medium">Sin fotografía</p>
+                        </div>
                       </div>
                     )}
+                    
+                    {/* Community Code Badge */}
+                    {prop.community_code && (
+                      <div className="absolute top-3 left-3">
+                        <Badge className="font-mono text-xs bg-white/90 text-slate-700 border-0 shadow-md backdrop-blur-sm">
+                          <Code className="h-3 w-3 mr-1" />
+                          {prop.community_code}
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {/* Action Buttons */}
+                    <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleOpenDialog(prop)}
+                        className="h-8 w-8 p-0 bg-white/90 backdrop-blur-sm border-0 shadow-md hover:bg-white hover:scale-110 transition-all duration-200"
+                      >
+                        <Edit className="h-4 w-4 text-slate-600" />
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => handleDelete(prop.id)}
+                        className="h-8 w-8 p-0 bg-red-500/90 backdrop-blur-sm border-0 shadow-md hover:bg-red-600 hover:scale-110 transition-all duration-200"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   
-                  <div className="flex gap-2 ml-4">
-                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(prop)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(prop.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))
+                  {/* Content Section */}
+                  <CardContent className="p-5">
+                    <div className="space-y-4">
+                      {/* Title and Type */}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-800 leading-tight group-hover:text-slate-900 transition-colors">
+                            {prop.name}
+                          </h3>
+                          <Badge variant="outline" className="mt-2 text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                            {prop.property_type === 'residential' ? 'Residencial' :
+                             prop.property_type === 'commercial' ? 'Comercial' :
+                             prop.property_type === 'industrial' ? 'Industrial' :
+                             prop.property_type}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Address Section */}
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2">
+                          <Building className="h-4 w-4 text-slate-400 mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-slate-700 leading-relaxed">
+                              {prop.street ? `${prop.street} ${prop.number}` : prop.address}
+                              {(prop.floor || prop.door) && (
+                                <span className="text-blue-600 font-semibold ml-1">
+                                  {prop.floor && `${prop.floor}º`}
+                                  {prop.door && ` ${prop.door}`}
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-sm text-slate-500">
+                              {prop.city}
+                              {prop.province && <span>, {prop.province}</span>}
+                              {prop.country && <span>, {prop.country}</span>}
+                            </p>
+                            {prop.postal_code && (
+                              <p className="text-xs text-slate-400 font-mono">
+                                CP {prop.postal_code}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      {prop.description && (
+                        <div className="pt-2 border-t border-gray-100">
+                          <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">
+                            {prop.description}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Details Grid */}
+                      <div className="flex items-center justify-between pt-2 text-xs">
+                        {prop.units_count && (
+                          <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-full">
+                            <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                            <span className="font-medium text-slate-600">{prop.units_count} unidades</span>
+                          </div>
+                        )}
+                        
+                        <div className="text-xs text-slate-400">
+                          {prop.created_at && new Date(prop.created_at).toLocaleDateString('es-ES')}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <Building className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No hay propiedades</h3>
-              <p className="mt-1 text-sm text-gray-500">Empieza añadiendo tu primera propiedad.</p>
+            <div className="text-center py-16 bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-2xl border border-slate-100">
+              <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Building className="h-12 w-12 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-700 mb-2">No hay propiedades registradas</h3>
+              <p className="text-slate-500 mb-6 max-w-md mx-auto">
+                Empieza añadiendo tu primera propiedad para gestionar tu cartera inmobiliaria.
+              </p>
+              <Button 
+                onClick={() => handleOpenDialog()}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Añadir Primera Propiedad
+              </Button>
             </div>
           )}
         </div>
       </CardContent>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? "Editar" : "Añadir"} Propiedad</DialogTitle>
-            <DialogDescription>
-              {isEditing ? "Modifica los detalles de tu propiedad." : "Completa los detalles para añadir una nueva propiedad."}
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-white via-slate-50 to-white">
+          <DialogHeader className="pb-4 border-b border-slate-200">
+            <DialogTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+              {isEditing ? (
+                <>
+                  <Edit className="h-6 w-6 text-blue-600" />
+                  Editar Propiedad
+                </>
+              ) : (
+                <>
+                  <Plus className="h-6 w-6 text-green-600" />
+                  Añadir Nueva Propiedad
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription className="text-slate-600 text-base">
+              {isEditing ? "Modifica los detalles de tu propiedad y mantén actualizada tu información." : "Completa todos los campos para registrar una nueva propiedad en tu cartera."}
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-6 py-4">
-            {/* Información básica */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Información Básica</h4>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">Nombre *</Label>
-                <Input 
-                  id="name" 
-                  value={currentProperty.name || ''} 
-                  onChange={(e) => setCurrentProperty({...currentProperty, name: e.target.value})} 
-                  className="col-span-3" 
-                  placeholder="Ej: Mi casa, Apartamento centro..."
-                />
+          <div className="grid gap-8 py-6">
+            {/* Fotografía Principal - Primera Sección */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+                <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Camera className="h-5 w-5" />
+                  Fotografía de la Propiedad
+                </h4>
+                <p className="text-purple-100 text-sm mt-1">Sube una imagen representativa de tu propiedad</p>
               </div>
+              
+              <div className="p-6">
+                {currentProperty.property_photo_url ? (
+                  <div className="space-y-4">
+                    <div className="relative group">
+                      <img 
+                        src={currentProperty.property_photo_url} 
+                        alt="Vista previa de la propiedad" 
+                        className="w-full h-64 object-cover rounded-lg border-2 border-slate-200 shadow-md"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 rounded-lg flex items-center justify-center">
+                        <Button 
+                          type="button"
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => setCurrentProperty({...currentProperty, property_photo_url: ""})}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Eliminar foto
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-center gap-3">
+                      <input
+                        type="file"
+                        id="property_photo"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        onClick={() => document.getElementById('property_photo')?.click()}
+                        disabled={uploadingPhoto}
+                        className="hover:bg-slate-50"
+                      >
+                        {uploadingPhoto ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Subiendo...
+                          </>
+                        ) : (
+                          <>
+                            <Camera className="mr-2 h-4 w-4" />
+                            Cambiar fotografía
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button 
+                        type="button"
+                        onClick={handleSave}
+                        disabled={generatingCode || uploadingPhoto}
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-md"
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Guardar Cambios
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                      <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Camera className="h-8 w-8 text-slate-400" />
+                      </div>
+                      <p className="text-slate-600 font-medium mb-2">No hay fotografía</p>
+                      <p className="text-slate-400 text-sm mb-4">Añade una imagen para mostrar tu propiedad</p>
+                      
+                      <input
+                        type="file"
+                        id="property_photo"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                      <div className="flex items-center justify-center gap-3">
+                        <Button 
+                          type="button"
+                          onClick={() => document.getElementById('property_photo')?.click()}
+                          disabled={uploadingPhoto}
+                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                        >
+                          {uploadingPhoto ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Subiendo...
+                            </>
+                          ) : (
+                            <>
+                              <Camera className="mr-2 h-4 w-4" />
+                              Subir fotografía
+                            </>
+                          )}
+                        </Button>
+                        
+                        <Button 
+                          type="button"
+                          onClick={handleSave}
+                          disabled={generatingCode || uploadingPhoto}
+                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+                        >
+                          <Upload className="mr-2 h-4 w-4" />
+                          Guardar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">Descripción</Label>
-                <Textarea 
-                  id="description" 
-                  value={currentProperty.description || ''} 
-                  onChange={(e) => setCurrentProperty({...currentProperty, description: e.target.value})} 
-                  className="col-span-3" 
-                  placeholder="Descripción de la propiedad..."
-                  rows={2}
-                />
+            {/* Información básica */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Información Básica
+                </h4>
+                <p className="text-blue-100 text-sm mt-1">Datos principales de identificación</p>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-semibold text-slate-700">Nombre de la Propiedad *</Label>
+                    <Input 
+                      id="name" 
+                      value={currentProperty.name || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, name: e.target.value})} 
+                      placeholder="Ej: Mi casa, Apartamento centro..."
+                      className="border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-semibold text-slate-700">Descripción</Label>
+                    <Textarea 
+                      id="description" 
+                      value={currentProperty.description || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, description: e.target.value})} 
+                      placeholder="Descripción breve de la propiedad..."
+                      rows={3}
+                      className="border-slate-300 focus:border-blue-500 focus:ring-blue-500 resize-none"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Ubicación */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Ubicación</h4>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
+                <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Dirección y Ubicación
+                </h4>
+                <p className="text-emerald-100 text-sm mt-1">Información detallada de localización</p>
+              </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="street">Calle *</Label>
-                  <Input 
-                    id="street" 
-                    value={currentProperty.street || ''} 
-                    onChange={(e) => setCurrentProperty({...currentProperty, street: e.target.value})} 
-                    placeholder="Nombre de la calle"
-                  />
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="street" className="text-sm font-semibold text-slate-700">Calle *</Label>
+                    <Input 
+                      id="street" 
+                      value={currentProperty.street || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, street: e.target.value})} 
+                      placeholder="Nombre de la calle"
+                      className="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="number" className="text-sm font-semibold text-slate-700">Número *</Label>
+                    <Input 
+                      id="number" 
+                      value={currentProperty.number || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, number: e.target.value})} 
+                      placeholder="Ej: 25, 25B"
+                      className="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="number">Número *</Label>
-                  <Input 
-                    id="number" 
-                    value={currentProperty.number || ''} 
-                    onChange={(e) => setCurrentProperty({...currentProperty, number: e.target.value})} 
-                    placeholder="Ej: 25, 25B"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="floor">Piso</Label>
-                  <Input 
-                    id="floor" 
-                    value={currentProperty.floor || ''} 
-                    onChange={(e) => setCurrentProperty({...currentProperty, floor: e.target.value})} 
-                    placeholder="Ej: 3, 3º, Bajo"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Para distinguir la propiedad individual (no necesario para el código de comunidad)
-                  </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="floor" className="text-sm font-semibold text-slate-700">Piso</Label>
+                    <Input 
+                      id="floor" 
+                      value={currentProperty.floor || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, floor: e.target.value})} 
+                      placeholder="Ej: 3, 3º, Bajo"
+                      className="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                    <p className="text-xs text-slate-500">
+                      Para distinguir la propiedad individual (no necesario para el código de comunidad)
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="door" className="text-sm font-semibold text-slate-700">Mano / Puerta</Label>
+                    <Input 
+                      id="door" 
+                      value={currentProperty.door || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, door: e.target.value})} 
+                      placeholder="Ej: A, B, Izda, Dcha"
+                      className="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                    <p className="text-xs text-slate-500">
+                      Letra o posición de la puerta (no necesario para el código de comunidad)
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="door">Mano / Puerta</Label>
-                  <Input 
-                    id="door" 
-                    value={currentProperty.door || ''} 
-                    onChange={(e) => setCurrentProperty({...currentProperty, door: e.target.value})} 
-                    placeholder="Ej: A, B, Izda, Dcha"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Letra o posición de la puerta (no necesario para el código de comunidad)
-                  </p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">Ciudad *</Label>
-                  <Input 
-                    id="city" 
-                    value={currentProperty.city || ''} 
-                    onChange={(e) => setCurrentProperty({...currentProperty, city: e.target.value})} 
-                    placeholder="Nombre de la ciudad"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city" className="text-sm font-semibold text-slate-700">Ciudad *</Label>
+                    <Input 
+                      id="city" 
+                      value={currentProperty.city || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, city: e.target.value})} 
+                      placeholder="Nombre de la ciudad"
+                      className="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="postal_code" className="text-sm font-semibold text-slate-700">Código Postal</Label>
+                    <Input 
+                      id="postal_code" 
+                      value={currentProperty.postal_code || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, postal_code: e.target.value})} 
+                      placeholder="28001"
+                      className="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="postal_code">Código Postal</Label>
-                  <Input 
-                    id="postal_code" 
-                    value={currentProperty.postal_code || ''} 
-                    onChange={(e) => setCurrentProperty({...currentProperty, postal_code: e.target.value})} 
-                    placeholder="28001"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="province">Provincia *</Label>
-                  <Input 
-                    id="province" 
-                    value={currentProperty.province || ''} 
-                    onChange={(e) => setCurrentProperty({...currentProperty, province: e.target.value})} 
-                    placeholder="Nombre de la provincia"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="country">País *</Label>
-                  <Input 
-                    id="country" 
-                    value={currentProperty.country || 'España'} 
-                    onChange={(e) => setCurrentProperty({...currentProperty, country: e.target.value})} 
-                    placeholder="País"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="province" className="text-sm font-semibold text-slate-700">Provincia *</Label>
+                    <Input 
+                      id="province" 
+                      value={currentProperty.province || ''} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, province: e.target.value})} 
+                      placeholder="Nombre de la provincia"
+                      className="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country" className="text-sm font-semibold text-slate-700">País *</Label>
+                    <Input 
+                      id="country" 
+                      value={currentProperty.country || 'España'} 
+                      onChange={(e) => setCurrentProperty({...currentProperty, country: e.target.value})} 
+                      placeholder="País"
+                      className="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Código de comunidad */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Código de Comunidad</h4>
-              
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <Input 
-                    id="community_code" 
-                    value={currentProperty.community_code || ''} 
-                    readOnly
-                    placeholder="Se generará automáticamente"
-                    className="bg-gray-50"
-                  />
-                </div>
-                <Button 
-                  type="button" 
-                  onClick={handleGenerateCommunityCode}
-                  disabled={generatingCode || !currentProperty.country || !currentProperty.province || !currentProperty.city || !currentProperty.street || !currentProperty.number}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {generatingCode ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generando...
-                    </>
-                  ) : (
-                    <>
-                      <Code className="mr-2 h-4 w-4" />
-                      Generar Código
-                    </>
-                  )}
-                </Button>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="bg-gradient-to-r from-amber-600 to-orange-600 px-6 py-4">
+                <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Code className="h-5 w-5" />
+                  Código de Comunidad
+                </h4>
+                <p className="text-amber-100 text-sm mt-1">Identificador único de la ubicación</p>
               </div>
-              <p className="text-xs text-gray-500">
-                El código se genera con las 3 primeras letras del país, provincia, ciudad, 6 letras de la calle, guión y 4 dígitos del número.
-              </p>
-            </div>
-
-            {/* Fotografía */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Fotografía de la Propiedad</h4>
               
-              <div className="space-y-3">
-                {currentProperty.property_photo_url && (
-                  <div className="flex items-center gap-4">
-                    <img 
-                      src={currentProperty.property_photo_url} 
-                      alt="Vista previa" 
-                      className="w-20 h-16 object-cover rounded-lg border border-gray-200"
+              <div className="p-6 space-y-4">
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <Input 
+                      id="community_code" 
+                      value={currentProperty.community_code || ''} 
+                      readOnly
+                      placeholder="Se generará automáticamente"
+                      className="bg-slate-50 border-slate-300 font-mono text-center text-lg"
                     />
-                    <Button 
-                      type="button"
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setCurrentProperty({...currentProperty, property_photo_url: ""})}
-                    >
-                      Eliminar foto
-                    </Button>
                   </div>
-                )}
-                
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    id="property_photo"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
                   <Button 
-                    type="button"
-                    variant="outline" 
-                    onClick={() => document.getElementById('property_photo')?.click()}
-                    disabled={uploadingPhoto}
+                    type="button" 
+                    onClick={handleGenerateCommunityCode}
+                    disabled={generatingCode || !currentProperty.country || !currentProperty.province || !currentProperty.city || !currentProperty.street || !currentProperty.number}
+                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 shadow-md"
                   >
-                    {uploadingPhoto ? (
+                    {generatingCode ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Subiendo...
+                        Generando...
                       </>
                     ) : (
                       <>
-                        <Camera className="mr-2 h-4 w-4" />
-                        {currentProperty.property_photo_url ? 'Cambiar foto' : 'Subir foto'}
+                        <Code className="mr-2 h-4 w-4" />
+                        Generar Código
                       </>
                     )}
                   </Button>
-                  <Button 
-                    type="button"
-                    onClick={handleSave}
-                    disabled={generatingCode || uploadingPhoto}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Guardar
-                  </Button>
+                </div>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm text-amber-800 leading-relaxed">
+                    <strong>Formato del código:</strong> País(3) - Provincia(3) - Ciudad(3) - Calle(6) - Número(4)
+                    <br />
+                    El código se genera automáticamente usando los primeros caracteres de cada campo.
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Detalles adicionales */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Detalles Adicionales</h4>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+                <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Información Adicional
+                </h4>
+                <p className="text-purple-100 text-sm mt-1">Detalles complementarios de la propiedad</p>
+              </div>
               
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="units_count" className="text-right">Nº Unidades</Label>
-                <Input 
-                  id="units_count" 
-                  type="number" 
-                  min="1"
-                  value={(currentProperty as any).units_count || 1} 
-                  onChange={(e) => setCurrentProperty({...currentProperty, units_count: parseInt(e.target.value, 10)})} 
-                  className="col-span-3" 
-                />
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                  <Label htmlFor="units_count" className="text-sm font-semibold text-slate-700">Número de Unidades</Label>
+                  <Input 
+                    id="units_count" 
+                    type="number" 
+                    min="1"
+                    value={(currentProperty as any).units_count || 1} 
+                    onChange={(e) => setCurrentProperty({...currentProperty, units_count: parseInt(e.target.value, 10)})} 
+                    className="border-slate-300 focus:border-purple-500 focus:ring-purple-500"
+                  />
+                  <p className="text-xs text-slate-500">Número total de viviendas o locales</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+          <DialogFooter className="pt-6 border-t border-slate-200 bg-slate-50/50">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="border-slate-300 hover:bg-slate-50">
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={generatingCode || uploadingPhoto}>
+            <Button 
+              onClick={handleSave} 
+              disabled={generatingCode || uploadingPhoto}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md"
+            >
               {isEditing ? "Guardar Cambios" : "Crear Propiedad"}
             </Button>
           </DialogFooter>
