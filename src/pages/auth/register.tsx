@@ -1279,7 +1279,7 @@ function RegisterPageContent() {
                                             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                                             placeholder="tu@email.com"
                                             className="mt-2 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                            required={true}
+                                            required
                                         />
                                     </div>
 
@@ -1314,7 +1314,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('full_name', e.target.value)}
                                                             placeholder="Tu nombre completo"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1326,7 +1326,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('phone', e.target.value)}
                                                             placeholder="+34 600 000 000"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div className="md:col-span-2">
@@ -1337,7 +1337,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('address', e.target.value)}
                                                             placeholder="Calle, número, etc."
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1348,7 +1348,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('postal_code', e.target.value)}
                                                             placeholder="28001"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1359,7 +1359,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('city', e.target.value)}
                                                             placeholder="Madrid"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1370,7 +1370,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('province', e.target.value)}
                                                             placeholder="Madrid"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1403,7 +1403,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('full_name', e.target.value)}
                                                             placeholder="Tu nombre completo"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1415,7 +1415,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('phone', e.target.value)}
                                                             placeholder="+34 600 000 000"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div className="md:col-span-2">
@@ -1426,7 +1426,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('address', e.target.value)}
                                                             placeholder="Dirección completa de la comunidad"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1437,7 +1437,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('postal_code', e.target.value)}
                                                             placeholder="28001"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1448,7 +1448,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('city', e.target.value)}
                                                             placeholder="Madrid"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1459,7 +1459,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('province', e.target.value)}
                                                             placeholder="Madrid"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1506,7 +1506,7 @@ function RegisterPageContent() {
                                                                 onChange={(e) => updateCurrentRoleData('company_name', e.target.value)}
                                                                 placeholder="Nombre de tu empresa"
                                                                 className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                                required={true}
+                                                                required
                                                             />
                                                         </div>
                                                         <div>
@@ -1518,7 +1518,7 @@ function RegisterPageContent() {
                                                                     onChange={(e) => updateCurrentRoleData('cif', e.target.value)}
                                                                     placeholder="A12345678"
                                                                     className={`bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20 ${cifValid === false ? "border-red-500" : ""}`}
-                                                                    required={true}
+                                                                    required
                                                                 />
                                                                 {cifValidating && (
                                                                     <div className="flex items-center gap-2 text-sm text-stone-600">
@@ -1545,7 +1545,7 @@ function RegisterPageContent() {
                                                                 onChange={(e) => updateCurrentRoleData('company_address', e.target.value)}
                                                                 placeholder="Dirección completa"
                                                                 className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                                required={true}
+                                                                required
                                                             />
                                                         </div>
                                                         <div>
@@ -1556,7 +1556,7 @@ function RegisterPageContent() {
                                                                 onChange={(e) => updateCurrentRoleData('company_postal_code', e.target.value)}
                                                                 placeholder="28001"
                                                                 className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                                required={true}
+                                                                required
                                                             />
                                                         </div>
                                                         <div>
@@ -1567,7 +1567,7 @@ function RegisterPageContent() {
                                                                 onChange={(e) => updateCurrentRoleData('company_city', e.target.value)}
                                                                 placeholder="Madrid"
                                                                 className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                                required={true}
+                                                                required
                                                             />
                                                         </div>
                                                         <div>
@@ -1578,7 +1578,7 @@ function RegisterPageContent() {
                                                                 onChange={(e) => updateCurrentRoleData('company_province', e.target.value)}
                                                                 placeholder="Madrid"
                                                                 className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                                required={true}
+                                                                required
                                                             />
                                                         </div>
                                                         <div>
@@ -1606,7 +1606,7 @@ function RegisterPageContent() {
                                                                 onChange={(e) => updateCurrentRoleData('business_email', e.target.value)}
                                                                 placeholder="contacto@empresa.com"
                                                                 className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                                required={true}
+                                                                required
                                                             />
                                                         </div>
                                                         <div>
@@ -1618,7 +1618,7 @@ function RegisterPageContent() {
                                                                 onChange={(e) => updateCurrentRoleData('business_phone', e.target.value)}
                                                                 placeholder="+34 600 000 000"
                                                                 className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                                required={true}
+                                                                required
                                                             />
                                                         </div>
                                                     </div>
@@ -1690,7 +1690,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('company_name', e.target.value)}
                                                             placeholder="Nombre de tu empresa de administración"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1702,7 +1702,7 @@ function RegisterPageContent() {
                                                                 onChange={(e) => updateCurrentRoleData('cif', e.target.value)}
                                                                 placeholder="A12345678"
                                                                 className={`bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20 ${cifValid === false ? "border-red-500" : ""}`}
-                                                                required={true}
+                                                                required
                                                             />
                                                             {cifValidating && (
                                                                 <div className="flex items-center gap-2 text-sm text-stone-600">
@@ -1729,7 +1729,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('company_address', e.target.value)}
                                                             placeholder="Dirección completa"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1740,7 +1740,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('company_postal_code', e.target.value)}
                                                             placeholder="28001"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1751,7 +1751,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('company_city', e.target.value)}
                                                             placeholder="Madrid"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1762,7 +1762,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('company_province', e.target.value)}
                                                             placeholder="Madrid"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1790,7 +1790,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('business_email', e.target.value)}
                                                             placeholder="admin@empresa.com"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1802,7 +1802,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('business_phone', e.target.value)}
                                                             placeholder="+34 600 000 000"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                     <div>
@@ -1813,7 +1813,7 @@ function RegisterPageContent() {
                                                             onChange={(e) => updateCurrentRoleData('professional_number', e.target.value)}
                                                             placeholder="Número de colegiado profesional"
                                                             className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
-                                                            required={true}
+                                                            required
                                                         />
                                                     </div>
                                                 </div>
@@ -1867,7 +1867,7 @@ function RegisterPageContent() {
                                                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                                                     className="pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                                                     placeholder="••••••••"
-                                                    required={true}
+                                                    required
                                                 />
                                                 <button
                                                     type="button"
@@ -1889,7 +1889,7 @@ function RegisterPageContent() {
                                                     onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                                                     className="pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                                                     placeholder="••••••••"
-                                                    required={true}
+                                                    required
                                                 />
                                                 <button
                                                     type="button"
