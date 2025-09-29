@@ -603,6 +603,15 @@ export default function PropertyManager() {
                       </>
                     )}
                   </Button>
+                  <Button 
+                    type="button"
+                    onClick={handleSave}
+                    disabled={generatingCode || uploadingPhoto}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Guardar
+                  </Button>
                 </div>
               </div>
             </div>
