@@ -195,7 +195,7 @@ export function CommunityAdministratorAssignment() {
         );
       }
 
-      query = query.order("rating_average", { ascending: false, nulls: 'last' });
+      query = query.order("rating_average", { ascending: false, nullsFirst: false });
 
       const { data: serviceProviders, error } = await query;
       
