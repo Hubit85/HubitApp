@@ -468,7 +468,7 @@ export default function Dashboard() {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-semibold text-lg text-blue-900">Información Importante</h4>
-                        <p className="text-stone-600 mb-2">Selecciona una propiedad en "Mis Propiedades" para ver las actualizaciones específicas de tu comunidad.</p>
+                        <p className="text-stone-600 mb-2">Selecciona una propiedad en &quot;Mis Propiedades&quot; para ver las actualizaciones específicas de tu comunidad.</p>
                         <div className="flex items-center gap-2 text-sm text-stone-500">
                           <Home className="h-4 w-4" />
                           <span>Todas las funcionalidades se basarán en tu propiedad seleccionada</span>
@@ -1326,7 +1326,7 @@ export default function Dashboard() {
                     <p className="text-stone-600 mb-4">
                       Evalúa únicamente los servicios relacionados con tu comunidad seleccionada.
                       <br />
-                      <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver los servicios de tu comunidad.
+                      <strong>Selecciona una propiedad en &quot;Mis Propiedades&quot;</strong> para ver los servicios de tu comunidad.
                     </p>
                     <Badge className="bg-amber-100 text-amber-800 mt-4">
                       Evaluaciones filtradas por comunidad
@@ -1394,7 +1394,7 @@ export default function Dashboard() {
                     <p className="text-stone-600 mb-4">
                       Consulta el historial de servicios específico de tu comunidad.
                       <br />
-                      <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver el historial comunitario.
+                      <strong>Selecciona una propiedad en &quot;Mis Propiedades&quot;</strong> para ver el historial comunitario.
                     </p>
                     <Badge className="bg-blue-100 text-blue-800 mt-4">
                       Historial filtrado por comunidad
@@ -1505,7 +1505,7 @@ export default function Dashboard() {
                 <p className="text-stone-600 mb-4" id="community-chat-info">
                   El chat se filtrará según la comunidad de tu propiedad seleccionada.
                   <br />
-                  <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver las conversaciones de tu comunidad.
+                  <strong>Selecciona una propiedad en &quot;Mis Propiedades&quot;</strong> para ver las conversaciones de tu comunidad.
                 </p>
                 <Badge className="bg-green-100 text-green-800 mt-4">
                   Basado en tu comunidad seleccionada
@@ -1534,7 +1534,7 @@ export default function Dashboard() {
                 <p className="text-stone-600 mb-4">
                   Las videoconferencias se organizarán específicamente para tu comunidad.
                   <br />
-                  <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver las reuniones programadas.
+                  <strong>Selecciona una propiedad en &quot;Mis Propiedades&quot;</strong> para ver las reuniones programadas.
                 </p>
                 <Badge className="bg-blue-100 text-blue-800 mt-4">
                   Filtrado por comunidad
@@ -1563,7 +1563,7 @@ export default function Dashboard() {
                 <p className="text-stone-600 mb-4">
                   Visualiza ingresos, gastos y proyecciones específicos de tu comunidad.
                   <br />
-                  <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver los datos financieros.
+                  <strong>Selecciona una propiedad en &quot;Mis Propiedades&quot;</strong> para ver los datos financieros.
                 </p>
                 <Badge className="bg-purple-100 text-purple-800 mt-4">
                   Datos específicos por comunidad
@@ -1592,7 +1592,7 @@ export default function Dashboard() {
                 <p className="text-stone-600 mb-4">
                   Contacta al administrador de fincas asignado a tu comunidad específica.
                   <br />
-                  <strong>Selecciona una propiedad en "Mis Propiedades"</strong> para ver los datos de contacto.
+                  <strong>Selecciona una propiedad en &quot;Mis Propiedades&quot;</strong> para ver los datos de contacto.
                 </p>
                 <Badge className="bg-indigo-100 text-indigo-800 mt-4">
                   Administrador de tu comunidad
@@ -1650,6 +1650,7 @@ export default function Dashboard() {
   const userTypeInfo = getUserTypeInfo(currentRole);
   const UserTypeIcon = userTypeInfo.icon;
   const navItems = [...baseNavItems, ...getRoleSpecificNavItems(currentRole)];
+  const defaultRoles = ["particular", "community_member", "service_provider", "property_administrator"];
 
   return (
     <>
@@ -1776,7 +1777,7 @@ export default function Dashboard() {
                       {currentRole === "community_member" && "¡Bienvenido a tu Comunidad! 🏘️"}
                       {currentRole === "service_provider" && "¡Tu Negocio en Marcha! 🔧"}
                       {currentRole === "property_administrator" && "Panel de Control Administrativo 🏢"}
-                      {!["particular", "community_member", "service_provider", "property_administrator"].includes(currentRole) && "¡Bienvenido de vuelta! 👋"}
+                      {!defaultRoles.includes(currentRole) && "¡Bienvenido de vuelta! 👋"}
                     </h1>
                     <p className="text-stone-600 text-lg">
                       {profile.full_name || "Usuario"} • <span className="text-stone-800 font-semibold">{userTypeInfo.label}</span>
@@ -1788,7 +1789,7 @@ export default function Dashboard() {
                         {currentRole === "community_member" && "Conectado con tu comunidad"}
                         {currentRole === "service_provider" && "Perfil verificado y activo"}
                         {currentRole === "property_administrator" && "Sistema de administración activo"}
-                        {![currentRole].includes("particular", "community_member", "service_provider", "property_administrator") && "Sistema completamente configurado"}
+                        {!defaultRoles.includes(currentRole) && "Sistema completamente configurado"}
                       </span>
                     </div>
                   </div>
@@ -1902,7 +1903,7 @@ export default function Dashboard() {
                             Gestión de Roles
                           </CardTitle>
                           <CardDescription>
-                            Administra tus diferentes roles en la plataforma
+                            &quot;Administra tus diferentes roles en la plataforma&quot;
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -1919,7 +1920,7 @@ export default function Dashboard() {
                               Administrador de Fincas
                             </CardTitle>
                             <CardDescription>
-                              Asigna la empresa que administra tu comunidad
+                              &quot;Asigna la empresa que administra tu comunidad&quot;
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
@@ -1942,7 +1943,7 @@ export default function Dashboard() {
                               Herramientas del Sistema
                             </CardTitle>
                             <CardDescription>
-                              Herramientas de configuración y diagnóstico
+                              &quot;Herramientas de configuración y diagnóstico&quot;
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
@@ -1951,7 +1952,7 @@ export default function Dashboard() {
                                 <Settings className="h-8 w-8 text-stone-600" />
                               </div>
                               <h3 className="text-lg font-semibold text-stone-900 mb-2">Sistema Configurado</h3>
-                              <p className="text-stone-600 text-sm">Todas las herramientas del sistema están funcionando correctamente.</p>
+                              <p className="text-stone-600 text-sm">&quot;Herramientas del sistema están funcionando correctamente&quot;</p>
                               <Badge className="bg-green-100 text-green-800 mt-3">✓ Operativo</Badge>
                             </div>
                           </CardContent>
@@ -1974,3 +1975,4 @@ export default function Dashboard() {
     </>
   );
 }
+
