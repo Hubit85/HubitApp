@@ -571,7 +571,7 @@ export default function ProfilePage() {
 
                                 {role.role_type === 'community_member' && (
                                   <div className="mt-2 space-y-2">
-                                    {/* Mostrar comunidad basada en propiedad seleccionada */}
+                                    {/* Mostrar comunidad SOLO basada en propiedad seleccionada */}
                                     {selectedPropertyData && selectedPropertyData.community_code ? (
                                       <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
                                         <div className="flex items-center justify-between">
@@ -609,7 +609,7 @@ export default function ProfilePage() {
                                           </span>
                                         </div>
                                         <p className="text-xs text-amber-600 mt-1">
-                                          Selecciona una propiedad en &quot;Mis Propiedades&quot; para ver tu comunidad actual.
+                                          Selecciona una propiedad en "Mis Propiedades" para ver tu comunidad actual.
                                         </p>
                                       </div>
                                     )}
@@ -669,102 +669,102 @@ export default function ProfilePage() {
           )}
         </Tabs>
 
-        {/* Community Information Section - Solo para miembros de comunidad */}
-                {activeRole && activeRole.role_type === 'community_member' && (
-                  <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Home className="h-5 w-5 text-blue-600" />
-                        Mi Comunidad
-                      </CardTitle>
-                      <CardDescription>
-                        Información de la comunidad basada en tu propiedad seleccionada
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {selectedPropertyData && selectedPropertyData.community_code ? (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                                <Building className="h-6 w-6 text-white" />
-                              </div>
-                              <div>
-                                <h3 className="font-bold text-blue-900 text-lg">
-                                  {selectedPropertyData.community_code}
-                                </h3>
-                                <p className="text-blue-700 text-sm">
-                                  Código de Comunidad
-                                </p>
-                              </div>
-                            </div>
-                            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-                              Activa
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid gap-3">
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                              <span className="text-sm text-gray-600 font-medium">Propiedad:</span>
-                              <span className="text-sm font-semibold">{selectedPropertyData.name}</span>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                              <span className="text-sm text-gray-600 font-medium">Dirección:</span>
-                              <span className="text-sm font-semibold">
-                                {selectedPropertyData.street} {selectedPropertyData.number}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                              <span className="text-sm text-gray-600 font-medium">Ubicación:</span>
-                              <span className="text-sm font-semibold">
-                                {selectedPropertyData.city}, {selectedPropertyData.province}
-                              </span>
-                            </div>
-                          </div>
+        {/* Community Information Section - Solo para miembros de comunidad - CORREGIDO */}
+        {activeRole && activeRole.role_type === 'community_member' && (
+          <Card className="bg-gradient-to-br from-white to-neutral-50 border-neutral-200/60 shadow-lg shadow-neutral-900/5">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Home className="h-5 w-5 text-blue-600" />
+                Mi Comunidad
+              </CardTitle>
+              <CardDescription>
+                Información de la comunidad basada en tu propiedad seleccionada
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {selectedPropertyData && selectedPropertyData.community_code ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                        <Building className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-blue-900 text-lg">
+                          {selectedPropertyData.community_code}
+                        </h3>
+                        <p className="text-blue-700 text-sm">
+                          Código de Comunidad
+                        </p>
+                      </div>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                      Activa
+                    </Badge>
+                  </div>
+                  
+                  <div className="grid gap-3">
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                      <span className="text-sm text-gray-600 font-medium">Propiedad:</span>
+                      <span className="text-sm font-semibold">{selectedPropertyData.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                      <span className="text-sm text-gray-600 font-medium">Dirección:</span>
+                      <span className="text-sm font-semibold">
+                        {selectedPropertyData.street} {selectedPropertyData.number}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                      <span className="text-sm text-gray-600 font-medium">Ubicación:</span>
+                      <span className="text-sm font-semibold">
+                        {selectedPropertyData.city}, {selectedPropertyData.province}
+                      </span>
+                    </div>
+                  </div>
 
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => router.push('/dashboard?tab=propiedades')}
-                              className="flex-1"
-                            >
-                              <Home className="h-4 w-4 mr-2" />
-                              Ver Propiedades
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={clearSelectedProperty}
-                              className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
-                            >
-                              Limpiar Selección
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 space-y-4">
-                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                            <Home className="h-8 w-8 text-gray-400" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900 mb-2">Sin comunidad seleccionada</h3>
-                            <p className="text-sm text-gray-600 mb-4">
-                              Para mostrar la información de tu comunidad, primero selecciona una propiedad
-                            </p>
-                            <Button
-                              onClick={() => router.push('/dashboard?tab=propiedades')}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              <Home className="h-4 w-4 mr-2" />
-                              Ir a Mis Propiedades
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push('/dashboard?tab=propiedades')}
+                      className="flex-1"
+                    >
+                      <Home className="h-4 w-4 mr-2" />
+                      Ver Propiedades
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearSelectedProperty}
+                      className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                    >
+                      Limpiar Selección
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                    <Home className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Sin comunidad seleccionada</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Para mostrar la información de tu comunidad, primero selecciona una propiedad
+                    </p>
+                    <Button
+                      onClick={() => router.push('/dashboard?tab=propiedades')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Home className="h-4 w-4 mr-2" />
+                      Ir a Mis Propiedades
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Role Switch Confirmation Dialog */}
         <Dialog open={showRoleSwitchDialog} onOpenChange={setShowRoleSwitchDialog}>
