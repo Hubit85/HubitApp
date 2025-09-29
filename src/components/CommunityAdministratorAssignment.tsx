@@ -256,7 +256,7 @@ export function CommunityAdministratorAssignment() {
       const requestOptions = {
         communityMemberRoleId: communityMemberRole.id,
         propertyAdministratorRoleId: adminRole.id,
-        requestMessage: `Solicitud de asignación para la comunidad &quot;${communityName}&quot;.` // Escapar las comillas
+        requestMessage: `Solicitud de asignación para la comunidad ${communityName}.`
       };
       
       const result = await AdministratorRequestService.sendRequestToAdministrator(requestOptions);
