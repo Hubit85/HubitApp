@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Building, Trash2, Edit, Upload, Camera, Code } from "lucide-react";
 import { CommunityCodeService } from "@/services/CommunityCodeService";
 import { Database } from "@/integrations/supabase/database.types";
-import { SupabaseStorageService, UploadResult } from "@/services/SupabaseStorageService";
 
 // Define types from database
 type Property = Database['public']['Tables']['properties']['Row'];
