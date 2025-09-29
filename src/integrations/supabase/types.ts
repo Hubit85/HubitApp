@@ -8,8 +8,115 @@ export type Database = DB;
 
 // Re-export commonly used types for convenience
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
+export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
 export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 export type Functions<T extends keyof Database['public']['Functions']> = Database['public']['Functions'][T];
 
+// Export all table types for backward compatibility and easier imports
+export type Profile = Tables<'profiles'>;
+export type ProfileInsert = TablesInsert<'profiles'>;
+export type ProfileUpdate = TablesUpdate<'profiles'>;
+
+export type Property = Tables<'properties'>;
+export type PropertyInsert = TablesInsert<'properties'>;
+export type PropertyUpdate = TablesUpdate<'properties'>;
+
+export type BudgetRequest = Tables<'budget_requests'>;
+export type BudgetRequestInsert = TablesInsert<'budget_requests'>;
+export type BudgetRequestUpdate = TablesUpdate<'budget_requests'>;
+
+export type Quote = Tables<'quotes'>;
+export type QuoteInsert = TablesInsert<'quotes'>;
+export type QuoteUpdate = TablesUpdate<'quotes'>;
+
+export type Contract = Tables<'contracts'>;
+export type ContractInsert = TablesInsert<'contracts'>;
+export type ContractUpdate = TablesUpdate<'contracts'>;
+
+export type ServiceProvider = Tables<'service_providers'>;
+export type ServiceProviderInsert = TablesInsert<'service_providers'>;
+export type ServiceProviderUpdate = TablesUpdate<'service_providers'>;
+
+export type ServiceCategory = Tables<'service_categories'>;
+export type ServiceCategoryInsert = TablesInsert<'service_categories'>;
+export type ServiceCategoryUpdate = TablesUpdate<'service_categories'>;
+
+export type UserRole = Tables<'user_roles'>;
+export type UserRoleInsert = TablesInsert<'user_roles'>;
+export type UserRoleUpdate = TablesUpdate<'user_roles'>;
+
+export type Notification = Tables<'notifications'>;
+export type NotificationInsert = TablesInsert<'notifications'>;
+export type NotificationUpdate = TablesUpdate<'notifications'>;
+
+export type Rating = Tables<'ratings'>;
+export type RatingInsert = TablesInsert<'ratings'>;
+export type RatingUpdate = TablesUpdate<'ratings'>;
+
+export type Document = Tables<'documents'>;
+export type DocumentInsert = TablesInsert<'documents'>;
+export type DocumentUpdate = TablesUpdate<'documents'>;
+
+export type Conversation = Tables<'conversations'>;
+export type ConversationInsert = TablesInsert<'conversations'>;
+export type ConversationUpdate = TablesUpdate<'conversations'>;
+
+export type Message = Tables<'messages'>;
+export type MessageInsert = TablesInsert<'messages'>;
+export type MessageUpdate = TablesUpdate<'messages'>;
+
+export type WorkSession = Tables<'work_sessions'>;
+export type WorkSessionInsert = TablesInsert<'work_sessions'>;
+export type WorkSessionUpdate = TablesUpdate<'work_sessions'>;
+
+export type PropertyAdministrator = Tables<'property_administrators'>;
+export type PropertyAdministratorInsert = TablesInsert<'property_administrators'>;
+export type PropertyAdministratorUpdate = TablesUpdate<'property_administrators'>;
+
+export type CommunityCode = Tables<'community_codes'>;
+export type CommunityCodeInsert = TablesInsert<'community_codes'>;
+export type CommunityCodeUpdate = TablesUpdate<'community_codes'>;
+
+export type Community = Tables<'communities'>;
+export type CommunityInsert = TablesInsert<'communities'>;
+export type CommunityUpdate = TablesUpdate<'communities'>;
+
+export type Incident = Tables<'incidents'>;
+export type IncidentInsert = TablesInsert<'incidents'>;
+export type IncidentUpdate = TablesUpdate<'incidents'>;
+
+export type IncidentReport = Tables<'incident_reports'>;
+export type IncidentReportInsert = TablesInsert<'incident_reports'>;
+export type IncidentReportUpdate = TablesUpdate<'incident_reports'>;
+
+export type Payment = Tables<'payments'>;
+export type PaymentInsert = TablesInsert<'payments'>;
+export type PaymentUpdate = TablesUpdate<'payments'>;
+
+export type Invoice = Tables<'invoices'>;
+export type InvoiceInsert = TablesInsert<'invoices'>;
+export type InvoiceUpdate = TablesUpdate<'invoices'>;
+
+export type EmergencyRequest = Tables<'emergency_requests'>;
+export type EmergencyRequestInsert = TablesInsert<'emergency_requests'>;
+export type EmergencyRequestUpdate = TablesUpdate<'emergency_requests'>;
+
+export type AdministratorRequest = Tables<'administrator_requests'>;
+export type AdministratorRequestInsert = TablesInsert<'administrator_requests'>;
+export type AdministratorRequestUpdate = TablesUpdate<'administrator_requests'>;
+
+export type ManagedCommunity = Tables<'managed_communities'>;
+export type ManagedCommunityInsert = TablesInsert<'managed_communities'>;
+export type ManagedCommunityUpdate = TablesUpdate<'managed_communities'>;
+
+export type CommunityMemberAdministrator = Tables<'community_member_administrators'>;
+export type CommunityMemberAdministratorInsert = TablesInsert<'community_member_administrators'>;
+export type CommunityMemberAdministratorUpdate = TablesUpdate<'community_member_administrators'>;
+
+export type QuoteRejection = Tables<'quote_rejections'>;
+export type QuoteRejectionInsert = TablesInsert<'quote_rejections'>;
+export type QuoteRejectionUpdate = TablesUpdate<'quote_rejections'>;
+
 // Project reference: djkrzbmgzfwagmripozi
-// Last updated: 2025-09-29T22:12:39.489448
+// Last updated: 2025-09-29T22:15:24.789423
