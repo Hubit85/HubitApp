@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Building, Trash2, Edit, Upload, Camera, Code, Save, RefreshCw } from "lucide-react";
+import { Loader2, Plus, Building, Trash2, Edit, Upload, Camera, Code, Save, RefreshCw, CheckCircle, X } from "lucide-react";
 import { CommunityCodeService } from "@/services/CommunityCodeService";
 import { Database } from "@/integrations/supabase/database.types";
 
@@ -62,6 +62,10 @@ export default function PropertyManager() {
   const [generatingCode, setGeneratingCode] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [savingProperty, setSavingProperty] = useState(false);
+  
+  // Estado para la propiedad seleccionada
+  const [selectedProperty, setSelectedProperty] = useState<ExtendedProperty | null>(null);
+  const [showSelectionPopup, setShowSelectionPopup] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -112,6 +116,20 @@ export default function PropertyManager() {
       });
     }
     setIsDialogOpen(true);
+  };
+
+  const handleSelectProperty = (property: ExtendedProperty) => {
+    setSelectedProperty(property);
+    setShowSelectionPopup(true);
+    
+    // Auto-ocultar el popup después de 5 segundos
+    setTimeout(() => {
+      setShowSelectionPopup(false);
+    }, 5000);
+  };
+
+  const handleCloseSelectionPopup = () => {
+    setShowSelectionPopup(false);
   };
 
   const handleGenerateCommunityCode = async () => {
@@ -528,6 +546,39 @@ export default function PropertyManager() {
         </div>
       </CardHeader>
       <CardContent className="p-8">
+        {/* Popup de Selección de Propiedad */}
+        {showSelectionPopup && selectedProperty && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] animate-in fade-in duration-500">
+            <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white px-8 py-4 rounded-2xl shadow-2xl border border-blue-400/30 backdrop-blur-sm">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg font-bold">Propiedad seleccionada</p>
+                  <p className="text-blue-100 text-sm font-medium">
+                    {selectedProperty.name} 
+                    {selectedProperty.street && selectedProperty.number && 
+                      ` • ${selectedProperty.street} ${selectedProperty.number}`
+                    }
+                  </p>
+                  <p className="text-blue-200/80 text-xs mt-1">
+                    Todas las gestiones se realizarán para esta propiedad
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCloseSelectionPopup}
+                  className="text-white hover:bg-white/20 transition-colors rounded-full p-2"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {error && (
           <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50">
             <AlertDescription className="text-red-800">{error}</AlertDescription>
@@ -540,7 +591,10 @@ export default function PropertyManager() {
               {properties.map(prop => (
                 <Card key={prop.id} className="group hover:shadow-2xl transition-all duration-700 border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white via-gray-50 to-gray-200 hover:scale-[1.03] transform-gpu backdrop-blur-sm">
                   {/* Enhanced Photo Section */}
-                  <div className="relative h-80 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 overflow-hidden group cursor-pointer" onClick={() => handleOpenDialog(prop)}>
+                  <div 
+                    className="relative h-80 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 overflow-hidden group cursor-pointer" 
+                    onClick={() => handleSelectProperty(prop)}
+                  >
                     {prop.property_photo_url ? (
                       <>
                         {/* Enhanced Professional Main Property Image Display */}
@@ -621,7 +675,7 @@ export default function PropertyManager() {
                               Añade una imagen profesional para destacar tu propiedad y generar más interés
                             </p>
                             <div className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500/15 to-purple-500/15 rounded-full inline-block border border-blue-200">
-                              <p className="text-blue-700 text-sm font-semibold">📸 Haz clic para añadir foto</p>
+                              <p className="text-blue-700 text-sm font-semibold">📸 Haz clic para seleccionar</p>
                             </div>
                           </div>
                         </div>
