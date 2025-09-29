@@ -609,7 +609,7 @@ export default function ProfilePage() {
                                           </span>
                                         </div>
                                         <p className="text-xs text-amber-600 mt-1">
-                                          Selecciona una propiedad en "Mis Propiedades" para ver tu comunidad actual.
+                                          Selecciona una propiedad en &quot;Mis Propiedades&quot; para ver tu comunidad actual.
                                         </p>
                                       </div>
                                     )}
@@ -751,6 +751,9 @@ export default function ProfilePage() {
                     <h3 className="font-semibold text-gray-900 mb-2">Sin comunidad seleccionada</h3>
                     <p className="text-sm text-gray-600 mb-4">
                       Para mostrar la información de tu comunidad, primero selecciona una propiedad
+                    </p>
+                    <p className="text-xs text-amber-600 mt-1">
+                      Selecciona una propiedad en &quot;Mis Propiedades&quot; para ver tu comunidad actual.
                     </p>
                     <Button
                       onClick={() => router.push('/dashboard?tab=propiedades')}
