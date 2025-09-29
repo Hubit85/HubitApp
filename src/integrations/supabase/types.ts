@@ -8,115 +8,113 @@ export type Database = DB;
 
 // Re-export commonly used types for convenience
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
-export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
 export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 export type Functions<T extends keyof Database['public']['Functions']> = Database['public']['Functions'][T];
 
-// Export all table types for backward compatibility and easier imports
-export type Profile = Tables<'profiles'>;
-export type ProfileInsert = TablesInsert<'profiles'>;
-export type ProfileUpdate = TablesUpdate<'profiles'>;
+// Individual table type exports
+export type AdministratorRequest = Database['public']['Tables']['administrator_requests']['Row'];
+export type AdministratorRequestInsert = Database['public']['Tables']['administrator_requests']['Insert'];
+export type AdministratorRequestUpdate = Database['public']['Tables']['administrator_requests']['Update'];
 
-export type Property = Tables<'properties'>;
-export type PropertyInsert = TablesInsert<'properties'>;
-export type PropertyUpdate = TablesUpdate<'properties'>;
+export type BudgetRequest = Database['public']['Tables']['budget_requests']['Row'];
+export type BudgetRequestInsert = Database['public']['Tables']['budget_requests']['Insert'];
+export type BudgetRequestUpdate = Database['public']['Tables']['budget_requests']['Update'];
 
-export type BudgetRequest = Tables<'budget_requests'>;
-export type BudgetRequestInsert = TablesInsert<'budget_requests'>;
-export type BudgetRequestUpdate = TablesUpdate<'budget_requests'>;
+export type Community = Database['public']['Tables']['communities']['Row'];
+export type CommunityInsert = Database['public']['Tables']['communities']['Insert'];
+export type CommunityUpdate = Database['public']['Tables']['communities']['Update'];
 
-export type Quote = Tables<'quotes'>;
-export type QuoteInsert = TablesInsert<'quotes'>;
-export type QuoteUpdate = TablesUpdate<'quotes'>;
+export type CommunityCode = Database['public']['Tables']['community_codes']['Row'];
+export type CommunityCodeInsert = Database['public']['Tables']['community_codes']['Insert'];
+export type CommunityCodeUpdate = Database['public']['Tables']['community_codes']['Update'];
 
-export type Contract = Tables<'contracts'>;
-export type ContractInsert = TablesInsert<'contracts'>;
-export type ContractUpdate = TablesUpdate<'contracts'>;
+export type CommunityMemberAdministrator = Database['public']['Tables']['community_member_administrators']['Row'];
+export type CommunityMemberAdministratorInsert = Database['public']['Tables']['community_member_administrators']['Insert'];
+export type CommunityMemberAdministratorUpdate = Database['public']['Tables']['community_member_administrators']['Update'];
 
-export type ServiceProvider = Tables<'service_providers'>;
-export type ServiceProviderInsert = TablesInsert<'service_providers'>;
-export type ServiceProviderUpdate = TablesUpdate<'service_providers'>;
+export type Contract = Database['public']['Tables']['contracts']['Row'];
+export type ContractInsert = Database['public']['Tables']['contracts']['Insert'];
+export type ContractUpdate = Database['public']['Tables']['contracts']['Update'];
 
-export type ServiceCategory = Tables<'service_categories'>;
-export type ServiceCategoryInsert = TablesInsert<'service_categories'>;
-export type ServiceCategoryUpdate = TablesUpdate<'service_categories'>;
+export type Conversation = Database['public']['Tables']['conversations']['Row'];
+export type ConversationInsert = Database['public']['Tables']['conversations']['Insert'];
+export type ConversationUpdate = Database['public']['Tables']['conversations']['Update'];
 
-export type UserRole = Tables<'user_roles'>;
-export type UserRoleInsert = TablesInsert<'user_roles'>;
-export type UserRoleUpdate = TablesUpdate<'user_roles'>;
+export type Document = Database['public']['Tables']['documents']['Row'];
+export type DocumentInsert = Database['public']['Tables']['documents']['Insert'];
+export type DocumentUpdate = Database['public']['Tables']['documents']['Update'];
 
-export type Notification = Tables<'notifications'>;
-export type NotificationInsert = TablesInsert<'notifications'>;
-export type NotificationUpdate = TablesUpdate<'notifications'>;
+export type EmergencyRequest = Database['public']['Tables']['emergency_requests']['Row'];
+export type EmergencyRequestInsert = Database['public']['Tables']['emergency_requests']['Insert'];
+export type EmergencyRequestUpdate = Database['public']['Tables']['emergency_requests']['Update'];
 
-export type Rating = Tables<'ratings'>;
-export type RatingInsert = TablesInsert<'ratings'>;
-export type RatingUpdate = TablesUpdate<'ratings'>;
+export type IncidentReport = Database['public']['Tables']['incident_reports']['Row'];
+export type IncidentReportInsert = Database['public']['Tables']['incident_reports']['Insert'];
+export type IncidentReportUpdate = Database['public']['Tables']['incident_reports']['Update'];
 
-export type Document = Tables<'documents'>;
-export type DocumentInsert = TablesInsert<'documents'>;
-export type DocumentUpdate = TablesUpdate<'documents'>;
+export type Incident = Database['public']['Tables']['incidents']['Row'];
+export type IncidentInsert = Database['public']['Tables']['incidents']['Insert'];
+export type IncidentUpdate = Database['public']['Tables']['incidents']['Update'];
 
-export type Conversation = Tables<'conversations'>;
-export type ConversationInsert = TablesInsert<'conversations'>;
-export type ConversationUpdate = TablesUpdate<'conversations'>;
+export type Invoice = Database['public']['Tables']['invoices']['Row'];
+export type InvoiceInsert = Database['public']['Tables']['invoices']['Insert'];
+export type InvoiceUpdate = Database['public']['Tables']['invoices']['Update'];
 
-export type Message = Tables<'messages'>;
-export type MessageInsert = TablesInsert<'messages'>;
-export type MessageUpdate = TablesUpdate<'messages'>;
+export type ManagedCommunity = Database['public']['Tables']['managed_communities']['Row'];
+export type ManagedCommunityInsert = Database['public']['Tables']['managed_communities']['Insert'];
+export type ManagedCommunityUpdate = Database['public']['Tables']['managed_communities']['Update'];
 
-export type WorkSession = Tables<'work_sessions'>;
-export type WorkSessionInsert = TablesInsert<'work_sessions'>;
-export type WorkSessionUpdate = TablesUpdate<'work_sessions'>;
+export type Message = Database['public']['Tables']['messages']['Row'];
+export type MessageInsert = Database['public']['Tables']['messages']['Insert'];
+export type MessageUpdate = Database['public']['Tables']['messages']['Update'];
 
-export type PropertyAdministrator = Tables<'property_administrators'>;
-export type PropertyAdministratorInsert = TablesInsert<'property_administrators'>;
-export type PropertyAdministratorUpdate = TablesUpdate<'property_administrators'>;
+export type Notification = Database['public']['Tables']['notifications']['Row'];
+export type NotificationInsert = Database['public']['Tables']['notifications']['Insert'];
+export type NotificationUpdate = Database['public']['Tables']['notifications']['Update'];
 
-export type CommunityCode = Tables<'community_codes'>;
-export type CommunityCodeInsert = TablesInsert<'community_codes'>;
-export type CommunityCodeUpdate = TablesUpdate<'community_codes'>;
+export type Payment = Database['public']['Tables']['payments']['Row'];
+export type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
+export type PaymentUpdate = Database['public']['Tables']['payments']['Update'];
 
-export type Community = Tables<'communities'>;
-export type CommunityInsert = TablesInsert<'communities'>;
-export type CommunityUpdate = TablesUpdate<'communities'>;
+export type Profile = Database['public']['Tables']['profiles']['Row'];
+export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
+export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
-export type Incident = Tables<'incidents'>;
-export type IncidentInsert = TablesInsert<'incidents'>;
-export type IncidentUpdate = TablesUpdate<'incidents'>;
+export type Property = Database['public']['Tables']['properties']['Row'];
+export type PropertyInsert = Database['public']['Tables']['properties']['Insert'];
+export type PropertyUpdate = Database['public']['Tables']['properties']['Update'];
 
-export type IncidentReport = Tables<'incident_reports'>;
-export type IncidentReportInsert = TablesInsert<'incident_reports'>;
-export type IncidentReportUpdate = TablesUpdate<'incident_reports'>;
+export type PropertyAdministrator = Database['public']['Tables']['property_administrators']['Row'];
+export type PropertyAdministratorInsert = Database['public']['Tables']['property_administrators']['Insert'];
+export type PropertyAdministratorUpdate = Database['public']['Tables']['property_administrators']['Update'];
 
-export type Payment = Tables<'payments'>;
-export type PaymentInsert = TablesInsert<'payments'>;
-export type PaymentUpdate = TablesUpdate<'payments'>;
+export type QuoteRejection = Database['public']['Tables']['quote_rejections']['Row'];
+export type QuoteRejectionInsert = Database['public']['Tables']['quote_rejections']['Insert'];
+export type QuoteRejectionUpdate = Database['public']['Tables']['quote_rejections']['Update'];
 
-export type Invoice = Tables<'invoices'>;
-export type InvoiceInsert = TablesInsert<'invoices'>;
-export type InvoiceUpdate = TablesUpdate<'invoices'>;
+export type Quote = Database['public']['Tables']['quotes']['Row'];
+export type QuoteInsert = Database['public']['Tables']['quotes']['Insert'];
+export type QuoteUpdate = Database['public']['Tables']['quotes']['Update'];
 
-export type EmergencyRequest = Tables<'emergency_requests'>;
-export type EmergencyRequestInsert = TablesInsert<'emergency_requests'>;
-export type EmergencyRequestUpdate = TablesUpdate<'emergency_requests'>;
+export type Rating = Database['public']['Tables']['ratings']['Row'];
+export type RatingInsert = Database['public']['Tables']['ratings']['Insert'];
+export type RatingUpdate = Database['public']['Tables']['ratings']['Update'];
 
-export type AdministratorRequest = Tables<'administrator_requests'>;
-export type AdministratorRequestInsert = TablesInsert<'administrator_requests'>;
-export type AdministratorRequestUpdate = TablesUpdate<'administrator_requests'>;
+export type ServiceCategory = Database['public']['Tables']['service_categories']['Row'];
+export type ServiceCategoryInsert = Database['public']['Tables']['service_categories']['Insert'];
+export type ServiceCategoryUpdate = Database['public']['Tables']['service_categories']['Update'];
 
-export type ManagedCommunity = Tables<'managed_communities'>;
-export type ManagedCommunityInsert = TablesInsert<'managed_communities'>;
-export type ManagedCommunityUpdate = TablesUpdate<'managed_communities'>;
+export type ServiceProvider = Database['public']['Tables']['service_providers']['Row'];
+export type ServiceProviderInsert = Database['public']['Tables']['service_providers']['Insert'];
+export type ServiceProviderUpdate = Database['public']['Tables']['service_providers']['Update'];
 
-export type CommunityMemberAdministrator = Tables<'community_member_administrators'>;
-export type CommunityMemberAdministratorInsert = TablesInsert<'community_member_administrators'>;
-export type CommunityMemberAdministratorUpdate = TablesUpdate<'community_member_administrators'>;
+export type UserRole = Database['public']['Tables']['user_roles']['Row'];
+export type UserRoleInsert = Database['public']['Tables']['user_roles']['Insert'];
+export type UserRoleUpdate = Database['public']['Tables']['user_roles']['Update'];
 
-export type QuoteRejection = Tables<'quote_rejections'>;
-export type QuoteRejectionInsert = TablesInsert<'quote_rejections'>;
-export type QuoteRejectionUpdate = TablesUpdate<'quote_rejections'>;
+export type WorkSession = Database['public']['Tables']['work_sessions']['Row'];
+export type WorkSessionInsert = Database['public']['Tables']['work_sessions']['Insert'];
+export type WorkSessionUpdate = Database['public']['Tables']['work_sessions']['Update'];
 
 // Project reference: djkrzbmgzfwagmripozi
-// Last updated: 2025-09-29T22:15:24.789423
+// Last updated: 2025-09-29T22:20:13.649597
