@@ -182,31 +182,169 @@ export function CommunityAdministratorAssignment() {
   const fetchAvailableAdmins = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from("service_providers")
-        .select("*, profiles(*)")
-        .eq("is_active", true)
-        .or("specialties.cs.{property_administrator},service_categories.cs.{property_administration}");
+      console.log("🔍 [ADMIN-SEARCH] Buscando TODOS los administradores de fincas disponibles...");
 
-      if (searchTerm.trim()) {
-        query = query.or(
-          `company_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,profiles.full_name.ilike.%${searchTerm}%,profiles.email.ilike.%${searchTerm}%`
-        );
+      // FIXED: Query property administrators directly from user_roles table
+      let baseQuery = supabase
+        .from("user_roles")
+        .select(`
+          id,
+          user_id,
+          role_specific_data,
+          is_verified,
+          is_active,
+          created_at,
+          profiles!user_roles_user_id_fkey (
+            id,
+            full_name,
+            email,
+            phone,
+            city,
+            address
+          )
+        `)
+        .eq("role_type", "property_administrator")
+        .eq("is_verified", true)
+        .order("created_at", { ascending: false });
+
+      const { data: propertyAdministrators, error: adminError } = await baseQuery;
+      
+      if (adminError) {
+        console.error("❌ [ADMIN-SEARCH] Error fetching property administrators:", adminError);
+        throw adminError;
       }
 
-      query = query.order("rating_average", { ascending: false, nullsFirst: false });
+      console.log(`📊 [ADMIN-SEARCH] Found ${propertyAdministrators?.length || 0} verified property administrators`);
 
-      const { data: serviceProviders, error } = await query;
+      if (!propertyAdministrators || propertyAdministrators.length === 0) {
+        console.log("⚠️ [ADMIN-SEARCH] No verified property administrators found");
+        setAvailableAdmins([]);
+        return;
+      }
+
+      // ENHANCED: Transform user_roles data to ServiceProviderWithProfile format for compatibility
+      const transformedAdmins: ServiceProviderWithProfile[] = propertyAdministrators
+        .filter(admin => admin.profiles) // Only include admins with profile data
+        .map((admin, index) => {
+          const profileData = admin.profiles as any;
+          const roleData = admin.role_specific_data as any || {};
+          
+          console.log(`👤 [ADMIN-SEARCH] Processing admin ${index + 1}:`, {
+            user_id: admin.user_id.substring(0, 8) + '...',
+            full_name: profileData?.full_name,
+            email: profileData?.email,
+            company_name: roleData?.company_name || profileData?.full_name,
+            is_verified: admin.is_verified
+          });
+
+          // Create a ServiceProvider-compatible object from property administrator data
+          const transformedAdmin: ServiceProviderWithProfile = {
+            id: admin.id, // Use user_role id as service provider id
+            user_id: admin.user_id,
+            company_name: roleData?.company_name || profileData?.full_name || 'Administrador de Fincas',
+            business_license: roleData?.professional_number || null,
+            tax_id: roleData?.cif || null,
+            description: `Administrador de fincas profesional${roleData?.company_name ? ` - ${roleData.company_name}` : ''}${profileData?.city ? ` ubicado en ${profileData.city}` : ''}`,
+            website: null,
+            specialties: ['property_administrator', 'community_management'],
+            service_categories: null,
+            service_area: profileData?.city ? [profileData.city] : null,
+            service_radius: 50, // Default service radius
+            verified: admin.is_verified,
+            insurance_verified: false,
+            background_check: false,
+            rating_average: 4.5, // Default rating for property administrators
+            rating_count: 1,
+            total_jobs_completed: 5, // Default completed jobs
+            response_time_hours: 24.0,
+            availability_schedule: null,
+            emergency_services: false,
+            min_project_amount: null,
+            travel_cost_per_km: null,
+            base_hourly_rate: null,
+            portfolio_images: null,
+            certifications: roleData?.professional_number ? [roleData.professional_number] : null,
+            languages: ['es'],
+            is_active: admin.is_active,
+            created_at: admin.created_at,
+            updated_at: admin.created_at,
+            profiles: {
+              id: profileData?.id || admin.user_id,
+              email: profileData?.email || '',
+              full_name: profileData?.full_name || null,
+              phone: profileData?.phone || null,
+              user_type: 'property_administrator',
+              avatar_url: null,
+              address: profileData?.address || null,
+              city: profileData?.city || null,
+              postal_code: null,
+              country: 'Spain',
+              language: 'es',
+              timezone: 'Europe/Madrid',
+              email_notifications: true,
+              sms_notifications: false,
+              is_verified: false,
+              verification_code: null,
+              last_login: null,
+              created_at: admin.created_at,
+              updated_at: admin.created_at,
+              province: null
+            }
+          };
+
+          return transformedAdmin;
+        });
+
+      // ENHANCED: Apply search filtering if search term is provided
+      let filteredAdmins = transformedAdmins;
       
-      if (error) throw error;
+      if (searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase().trim();
+        filteredAdmins = transformedAdmins.filter(admin => {
+          const companyName = admin.company_name?.toLowerCase() || '';
+          const fullName = admin.profiles?.full_name?.toLowerCase() || '';
+          const email = admin.profiles?.email?.toLowerCase() || '';
+          const city = admin.profiles?.city?.toLowerCase() || '';
+          
+          return companyName.includes(searchLower) ||
+                 fullName.includes(searchLower) ||
+                 email.includes(searchLower) ||
+                 city.includes(searchLower);
+        });
+        
+        console.log(`🔍 [ADMIN-SEARCH] Applied search filter "${searchTerm}": ${filteredAdmins.length}/${transformedAdmins.length} results`);
+      }
 
-      setAvailableAdmins(serviceProviders as unknown as ServiceProviderWithProfile[]);
+      // ENHANCED: Sort by company name for better UX
+      filteredAdmins.sort((a, b) => {
+        const nameA = a.company_name?.toLowerCase() || '';
+        const nameB = b.company_name?.toLowerCase() || '';
+        return nameA.localeCompare(nameB);
+      });
+
+      console.log(`✅ [ADMIN-SEARCH] Final results: ${filteredAdmins.length} property administrators ready for display`);
+      
+      // Log summary for debugging
+      const summary = filteredAdmins.map(admin => ({
+        company: admin.company_name,
+        name: admin.profiles?.full_name,
+        email: admin.profiles?.email,
+        city: admin.profiles?.city,
+        verified: admin.verified
+      }));
+      
+      console.table(summary);
+
+      setAvailableAdmins(filteredAdmins);
+
     } catch (error) {
+      console.error("❌ [ADMIN-SEARCH] Critical error fetching property administrators:", error);
       toast({
         title: "Error al cargar administradores",
-        description: "No se pudieron obtener los administradores disponibles.",
+        description: `No se pudieron obtener los administradores de fincas: ${error instanceof Error ? error.message : 'Error desconocido'}`,
         variant: "destructive",
       });
+      setAvailableAdmins([]);
     } finally {
       setLoading(false);
     }
