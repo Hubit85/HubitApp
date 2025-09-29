@@ -1378,7 +1378,6 @@ function RegisterPageContent() {
                                                         <Select 
                                                             value={formData.particular.country} 
                                                             onValueChange={(value) => updateCurrentRoleData('country', value)}
-                                                            required
                                                         >
                                                             <SelectTrigger className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20">
                                                                 <SelectValue placeholder="Selecciona país" />
@@ -1468,7 +1467,6 @@ function RegisterPageContent() {
                                                         <Select 
                                                             value={formData.community_member.country} 
                                                             onValueChange={(value) => updateCurrentRoleData('country', value)}
-                                                            required
                                                         >
                                                             <SelectTrigger className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20">
                                                                 <SelectValue placeholder="Selecciona país" />
@@ -1588,7 +1586,6 @@ function RegisterPageContent() {
                                                             <Select 
                                                                 value={formData.service_provider.company_country} 
                                                                 onValueChange={(value) => updateCurrentRoleData('company_country', value)}
-                                                                required
                                                             >
                                                                 <SelectTrigger className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20">
                                                                     <SelectValue placeholder="Selecciona país" />
@@ -1773,7 +1770,6 @@ function RegisterPageContent() {
                                                         <Select 
                                                             value={formData.property_administrator.company_country} 
                                                             onValueChange={(value) => updateCurrentRoleData('company_country', value)}
-                                                            required
                                                         >
                                                             <SelectTrigger className="mt-2 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20">
                                                                 <SelectValue placeholder="Selecciona país" />
