@@ -128,7 +128,6 @@ export default function Dashboard() {
         `;
         document.body.appendChild(successDiv);
         
-        // Remove notification after 3 seconds
         setTimeout(() => {
           if (document.body.contains(successDiv)) {
             successDiv.style.transition = 'opacity 0.5s ease-out';
@@ -1705,7 +1704,7 @@ export default function Dashboard() {
                           className={`text-white transition-all duration-200 ${
                             isCurrentRole 
                               ? "bg-emerald-600 text-white focus:bg-emerald-600 shadow-md" 
-                              : "hover:bg-gray-600 focus:bg-gray-600 hover:scale-105"
+                              : "hover:bg-gray-600 focus:bg-gray-600 hover:scale-110"
                           }`}
                         >
                           <div className="flex items-center gap-2">
