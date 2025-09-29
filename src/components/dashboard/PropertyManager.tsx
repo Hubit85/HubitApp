@@ -403,30 +403,34 @@ export default function PropertyManager() {
           {properties.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {properties.map(prop => (
-                <Card key={prop.id} className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white hover:scale-[1.02] transform-gpu">
-                  {/* Enhanced Photo Section - Now More Prominent */}
-                  <div className="relative h-72 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group cursor-pointer">
+                <Card key={prop.id} className="group hover:shadow-2xl transition-all duration-700 border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white hover:scale-[1.03] transform-gpu backdrop-blur-sm">
+                  {/* DRAMATICALLY ENHANCED Photo Section - Made Even More Prominent */}
+                  <div className="relative h-80 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 overflow-hidden group cursor-pointer">
                     {prop.property_photo_url ? (
                       <>
-                        {/* Main Property Image */}
+                        {/* Professional Main Property Image Display */}
                         <img 
                           src={prop.property_photo_url} 
-                          alt={`Fotografía de ${prop.name}`}
-                          className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1"
+                          alt={`Fotografía profesional de ${prop.name}`}
+                          className="w-full h-full object-cover transition-all duration-1200 group-hover:scale-115 group-hover:brightness-110"
+                          style={{
+                            filter: 'contrast(1.05) saturate(1.1)'
+                          }}
                           onError={(e) => {
                             const target = e.currentTarget;
                             target.style.display = 'none';
                             const parent = target.parentElement;
                             if (parent) {
                               parent.innerHTML = `
-                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100">
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200">
                                   <div class="text-center">
-                                    <div class="w-20 h-20 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                                      <svg class="h-10 w-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    <div class="w-24 h-24 bg-gradient-to-br from-slate-300 to-slate-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                      <svg class="h-12 w-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                       </svg>
                                     </div>
-                                    <p class="text-slate-400 text-sm font-medium">Error cargando imagen</p>
+                                    <p class="text-slate-500 text-lg font-bold mb-2">Imagen no disponible</p>
+                                    <p class="text-slate-400 text-sm">No se pudo cargar la fotografía</p>
                                   </div>
                                 </div>
                               `;
@@ -434,61 +438,68 @@ export default function PropertyManager() {
                           }}
                         />
                         
-                        {/* Gradient Overlays for Better Text Readability */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
+                        {/* Premium Gradient Overlays for Professional Look */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-all duration-700" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/20 opacity-50 group-hover:opacity-30 transition-all duration-700" />
                         
-                        {/* Floating Photo Badge */}
-                        <div className="absolute bottom-4 left-4 opacity-90 group-hover:opacity-100 transition-all duration-500">
-                          <div className="bg-white/95 backdrop-blur-lg rounded-full px-4 py-2 shadow-2xl border border-white/20">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <span className="text-sm font-bold text-slate-800">Fotografía disponible</span>
+                        {/* PREMIUM Photo Quality Badge - Very Prominent */}
+                        <div className="absolute bottom-6 left-6 opacity-95 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-105">
+                          <div className="bg-white/98 backdrop-blur-xl rounded-2xl px-6 py-3 shadow-2xl border border-white/30">
+                            <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></div>
+                              <div className="text-left">
+                                <p className="text-sm font-black text-slate-800 leading-none">Fotografía Profesional</p>
+                                <p className="text-xs font-semibold text-emerald-600 leading-none mt-0.5">HD • Verificada</p>
+                              </div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Professional Photo Watermark */}
-                        <div className="absolute top-4 left-4 opacity-70 group-hover:opacity-100 transition-all duration-500">
-                          <div className="bg-black/50 backdrop-blur-md rounded-lg px-3 py-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <Camera className="h-3 w-3 text-white" />
-                              <span className="text-xs font-medium text-white">HuBiT</span>
+                        {/* Premium HuBiT Watermark */}
+                        <div className="absolute top-6 left-6 opacity-80 group-hover:opacity-100 transition-all duration-500">
+                          <div className="bg-black/70 backdrop-blur-lg rounded-xl px-4 py-2 shadow-xl">
+                            <div className="flex items-center gap-2">
+                              <Camera className="h-4 w-4 text-white" />
+                              <span className="text-sm font-black text-white tracking-wide">HuBiT</span>
+                              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse ml-1"></div>
                             </div>
                           </div>
                         </div>
+
+                        {/* Professional Photo Frame Effect */}
+                        <div className="absolute inset-3 border-2 border-white/20 rounded-lg opacity-0 group-hover:opacity-60 transition-all duration-700 pointer-events-none"></div>
                       </>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 group-hover:from-slate-200 group-hover:via-slate-100 group-hover:to-slate-200 transition-all duration-500 relative overflow-hidden">
-                        {/* Subtle Pattern Background */}
-                        <div className="absolute inset-0 opacity-5" style={{
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23334155' fill-opacity='0.4'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-white to-slate-100 group-hover:from-slate-200 group-hover:via-slate-100 group-hover:to-slate-200 transition-all duration-700 relative overflow-hidden">
+                        {/* Sophisticated Pattern Background */}
+                        <div className="absolute inset-0 opacity-8" style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23475569' fill-opacity='0.6'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                         }} />
                         
-                        <div className="text-center transform group-hover:scale-110 transition-all duration-500 z-10">
-                          <div className="w-24 h-24 bg-gradient-to-br from-slate-200 to-slate-400 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl transition-shadow duration-500">
-                            <Building className="h-12 w-12 text-white drop-shadow-lg" />
+                        <div className="text-center transform group-hover:scale-110 transition-all duration-700 z-10">
+                          <div className="w-32 h-32 bg-gradient-to-br from-slate-300 via-slate-200 to-slate-400 rounded-full flex items-center justify-center mx-auto mb-8 group-hover:shadow-2xl transition-shadow duration-700 border-4 border-white shadow-lg">
+                            <Building className="h-16 w-16 text-white drop-shadow-2xl" />
                           </div>
-                          <div className="space-y-2">
-                            <p className="text-slate-500 text-lg font-bold">Sin fotografía</p>
-                            <p className="text-slate-400 text-sm max-w-48 mx-auto leading-relaxed">
-                              Añade una imagen para mostrar tu propiedad de manera profesional
+                          <div className="space-y-3">
+                            <p className="text-slate-600 text-xl font-bold">Sin fotografía</p>
+                            <p className="text-slate-500 text-sm max-w-56 mx-auto leading-relaxed">
+                              Añade una imagen profesional para destacar tu propiedad y generar más interés
                             </p>
-                            <div className="mt-4 px-4 py-2 bg-blue-500/10 rounded-full inline-block">
-                              <p className="text-blue-600 text-xs font-medium">Haz clic para editar</p>
+                            <div className="mt-6 px-6 py-3 bg-gradient-to-r from-blue-500/15 to-purple-500/15 rounded-full inline-block border border-blue-200">
+                              <p className="text-blue-700 text-sm font-semibold">📸 Haz clic para añadir foto</p>
                             </div>
                           </div>
                         </div>
                       </div>
                     )}
                     
-                    {/* Community Code Badge - More Prominent */}
+                    {/* Enhanced Community Code Badge - More Premium */}
                     {prop.community_code && (
-                      <div className="absolute top-4 right-4 transform group-hover:scale-110 transition-all duration-300 z-20">
-                        <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 rounded-lg px-3 py-2 shadow-2xl border border-white/20">
+                      <div className="absolute top-6 right-6 transform group-hover:scale-110 transition-all duration-500 z-30">
+                        <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 rounded-xl px-4 py-3 shadow-2xl border-2 border-white/30 backdrop-blur-sm">
                           <div className="flex items-center gap-2">
-                            <Code className="h-3 w-3 text-white" />
-                            <span className="font-mono text-xs font-bold text-white tracking-wide">
+                            <Code className="h-4 w-4 text-white" />
+                            <span className="font-mono text-sm font-black text-white tracking-wider drop-shadow-sm">
                               {prop.community_code}
                             </span>
                           </div>
@@ -496,31 +507,31 @@ export default function PropertyManager() {
                       </div>
                     )}
                     
-                    {/* Enhanced Action Buttons - More Professional */}
-                    <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+                    {/* Premium Action Buttons - Even More Professional */}
+                    <div className="absolute bottom-6 right-6 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-700 transform translate-y-4 group-hover:translate-y-0">
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleOpenDialog(prop)}
-                        className="h-10 w-10 p-0 bg-white/95 backdrop-blur-lg border border-white/30 shadow-2xl hover:bg-white hover:scale-125 hover:shadow-2xl transition-all duration-300 rounded-full group/btn"
+                        className="h-12 w-12 p-0 bg-white/98 backdrop-blur-xl border-2 border-white/50 shadow-2xl hover:bg-white hover:scale-125 hover:shadow-2xl transition-all duration-300 rounded-full group/btn"
                       >
-                        <Edit className="h-4 w-4 text-slate-600 group-hover/btn:text-blue-600 transition-colors" />
+                        <Edit className="h-5 w-5 text-slate-600 group-hover/btn:text-blue-600 transition-colors drop-shadow-sm" />
                       </Button>
                       <Button 
                         variant="destructive" 
                         size="sm" 
                         onClick={() => handleDelete(prop.id)}
-                        className="h-10 w-10 p-0 bg-gradient-to-r from-red-500 to-red-600 backdrop-blur-lg border border-red-300 shadow-2xl hover:from-red-600 hover:to-red-700 hover:scale-125 hover:shadow-2xl transition-all duration-300 rounded-full"
+                        className="h-12 w-12 p-0 bg-gradient-to-r from-red-500 to-red-600 backdrop-blur-xl border-2 border-red-300 shadow-2xl hover:from-red-600 hover:to-red-700 hover:scale-125 hover:shadow-2xl transition-all duration-300 rounded-full"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-5 w-5 drop-shadow-sm" />
                       </Button>
                     </div>
 
-                    {/* Property Type Badge - Enhanced Position */}
-                    <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-700 transform translate-y-2 group-hover:translate-y-0 delay-100">
+                    {/* Enhanced Property Type Badge */}
+                    <div className="absolute bottom-6 left-6 opacity-0 group-hover:opacity-100 transition-all duration-700 transform translate-y-4 group-hover:translate-y-0 delay-150 z-20">
                       <Badge 
                         variant="outline" 
-                        className="bg-white/95 backdrop-blur-lg text-slate-700 border border-white/30 shadow-xl text-xs font-bold px-3 py-1"
+                        className="bg-white/98 backdrop-blur-xl text-slate-800 border-2 border-white/50 shadow-xl text-sm font-black px-4 py-2 rounded-full"
                       >
                         {prop.property_type === 'residential' ? '🏠 Residencial' :
                          prop.property_type === 'commercial' ? '🏢 Comercial' :
