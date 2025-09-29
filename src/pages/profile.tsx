@@ -600,28 +600,16 @@ export default function ProfilePage() {
                                           </Button>
                                         </div>
                                       </div>
-                                    ) : role.role_specific_data ? (
+                                    ) : (
                                       <div className="p-2 bg-amber-50 rounded-md border border-amber-200">
                                         <div className="flex items-center gap-1 text-amber-700">
-                                          <Home className="h-3 w-3" />
-                                          <span className="text-xs font-medium">
-                                            Comunidad: {(role.role_specific_data as any)?.community_name || 'No asignada'}
-                                          </span>
-                                        </div>
-                                        <p className="text-xs text-amber-600 mt-1">
-                                          Selecciona una propiedad en &quot;Mis Propiedades&quot; para mostrar tu comunidad actual
-                                        </p>
-                                      </div>
-                                    ) : (
-                                      <div className="p-2 bg-gray-50 rounded-md border border-gray-200">
-                                        <div className="flex items-center gap-1 text-gray-600">
                                           <Home className="h-3 w-3" />
                                           <span className="text-xs font-medium">
                                             Sin comunidad asignada
                                           </span>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                          Ve a &quot;Mis Propiedades&quot; y selecciona una propiedad para mostrar tu comunidad
+                                        <p className="text-xs text-amber-600 mt-1">
+                                          Selecciona una propiedad en &quot;Mis Propiedades&quot; para ver tu comunidad actual.
                                         </p>
                                       </div>
                                     )}

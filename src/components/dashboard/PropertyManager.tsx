@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useSelectedProperty, SelectedPropertyData } from "@/hooks/useSelectedProperty";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +53,7 @@ interface ExtendedProperty {
 
 export default function PropertyManager() {
   const { user } = useSupabaseAuth();
+  const { selectedProperty, updateSelectedProperty } = useSelectedProperty();
   const [properties, setProperties] = useState<ExtendedProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -63,9 +64,8 @@ export default function PropertyManager() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [savingProperty, setSavingProperty] = useState(false);
   
-  // Estado para la propiedad seleccionada
-  const [selectedProperty, setSelectedProperty] = useState<ExtendedProperty | null>(null);
   const [showSelectionPopup, setShowSelectionPopup] = useState(false);
+  const [popupProperty, setPopupProperty] = useState<ExtendedProperty | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -119,27 +119,27 @@ export default function PropertyManager() {
   };
 
   const handleSelectProperty = (property: ExtendedProperty) => {
-    setSelectedProperty(property);
-    setShowSelectionPopup(true);
-    
-    // Guardar la propiedad seleccionada en localStorage para usarla en el perfil
     if (property.id) {
-      localStorage.setItem('selectedProperty', JSON.stringify({
+      const propertyData: SelectedPropertyData = {
         id: property.id,
-        name: property.name,
-        community_code: property.community_code,
-        address: property.address,
-        street: property.street,
-        number: property.number,
-        city: property.city,
-        province: property.province,
-        country: property.country
-      }));
+        name: property.name || 'Sin nombre',
+        community_code: property.community_code || '',
+        address: property.address || '',
+        street: property.street || '',
+        number: property.number || '',
+        city: property.city || '',
+        province: property.province || '',
+        country: property.country || ''
+      };
+      
+      updateSelectedProperty(propertyData); // Usar el hook
+      
+      setPopupProperty(propertyData);
+      setShowSelectionPopup(true);
       
       console.log('🏠 Propiedad seleccionada y guardada:', property.name, property.community_code);
     }
     
-    // Auto-ocultar el popup después de 5 segundos
     setTimeout(() => {
       setShowSelectionPopup(false);
     }, 5000);
@@ -564,7 +564,7 @@ export default function PropertyManager() {
       </CardHeader>
       <CardContent className="p-8">
         {/* Popup de Selección de Propiedad */}
-        {showSelectionPopup && selectedProperty && (
+        {showSelectionPopup && popupProperty && (
           <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] animate-in fade-in duration-500">
             <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white px-8 py-4 rounded-2xl shadow-2xl border border-blue-400/30 backdrop-blur-sm">
               <div className="flex items-center gap-4">
@@ -574,9 +574,9 @@ export default function PropertyManager() {
                 <div className="flex-1">
                   <p className="text-lg font-bold">Propiedad seleccionada</p>
                   <p className="text-blue-100 text-sm font-medium">
-                    {selectedProperty.name} 
-                    {selectedProperty.street && selectedProperty.number && 
-                      ` • ${selectedProperty.street} ${selectedProperty.number}`
+                    {popupProperty.name} 
+                    {popupProperty.street && popupProperty.number && 
+                      ` • ${popupProperty.street} ${popupProperty.number}`
                     }
                   </p>
                   <p className="text-blue-200/80 text-xs mt-1">
@@ -632,7 +632,7 @@ export default function PropertyManager() {
                                   <div class="text-center">
                                     <div class="w-24 h-24 bg-gradient-to-br from-slate-300 to-slate-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                                       <svg class="h-12 w-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4 4L19 7"></path>
                                       </svg>
                                     </div>
                                     <p class="text-slate-500 text-lg font-bold mb-2">Imagen no disponible</p>

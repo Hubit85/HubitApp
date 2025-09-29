@@ -1088,19 +1088,6 @@ export default function Dashboard() {
   };
 
   const renderRoleSpecificContent = (tabId: string, roleType: string) => {
-    // Add diagnostic tab for debugging
-    if (tabId === "diagnostico") {
-      return (
-        <>
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black mb-2">🔧 Diagnóstico de Sistema</h1>
-            <p className="text-stone-600">Información detallada sobre los datos en Supabase</p>
-          </div>
-          
-          <SupabaseDataViewer />
-        </>
-      );
-    }
     
     switch (tabId) {
       case "propiedades":
@@ -1226,11 +1213,15 @@ export default function Dashboard() {
             <>
               <div className="mb-6">
                 <h1 className="text-3xl font-bold text-black mb-2">
-                  {roleType === "property_administrator" ? "Solicitar Presupuesto" : "Solicitar Presupuesto"}
+                  {roleType === "property_administrator" ? "Solicitar Presupuesto" : 
+                   roleType === "community_member" ? "Solicitar Presupuesto" : 
+                   "Solicitar Presupuesto"}
                 </h1>
                 <p className="text-stone-600">
                   {roleType === "property_administrator" 
                     ? "Solicita presupuestos profesionales para las comunidades bajo tu administración"
+                    : roleType === "community_member"
+                    ? "Obtén presupuestos profesionales para tus proyectos"
                     : "Obtén presupuestos profesionales para tus proyectos"}
                 </p>
               </div>
@@ -1846,12 +1837,14 @@ export default function Dashboard() {
                         <CardContent className="space-y-4">
                           <div className="space-y-3">
                             <div className="flex items-center gap-3 p-3 rounded-lg bg-stone-50 border border-stone-200">
-                              <UserTypeIcon className="h-5 w-5 text-stone-500" />
-                              <div>
-                                <p className="text-sm text-stone-500 font-medium">
-                                  {currentRole === "service_provider" || currentRole === "property_administrator" ? "Empresa" : "Nombre"}
-                                </p>
-                                <p className="font-semibold text-black">{profile.full_name || "No especificado"}</p>
+                              <div className="flex items-center gap-2">
+                                <UserTypeIcon className="h-5 w-5 text-stone-500" />
+                                <div>
+                                  <p className="text-sm text-stone-500 font-medium">
+                                    {currentRole === "service_provider" || currentRole === "property_administrator" ? "Empresa" : "Nombre"}
+                                  </p>
+                                  <p className="font-semibold text-black">{profile.full_name || "No especificado"}</p>
+                                </div>
                               </div>
                             </div>
 
