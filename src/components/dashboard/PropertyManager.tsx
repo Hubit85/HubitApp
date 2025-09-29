@@ -17,14 +17,35 @@ import { Database } from "@/integrations/supabase/database.types";
 type Property = Database['public']['Tables']['properties']['Row'];
 type PropertyInsert = Database['public']['Tables']['properties']['Insert'];
 
-// Extended property interface with new fields
-interface ExtendedProperty extends Property {
+// Create a simple type that includes all the fields we need
+interface ExtendedProperty {
+  id?: string;
+  user_id?: string;
+  name?: string | null;
+  address?: string | null;
   street?: string | null;
   number?: string | null;
+  city?: string | null;
   province?: string | null;
   country?: string | null;
+  postal_code?: string | null;
+  property_type?: string | null;
+  description?: string | null;
+  units_count?: number | null;
   community_code?: string | null;
   property_photo_url?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  amenities?: string[] | null;
+  images?: string[] | null;
+  size?: number | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  garage?: boolean | null;
+  garden?: boolean | null;
+  pool?: boolean | null;
+  elevator?: boolean | null;
+  year_built?: number | null;
 }
 
 export default function PropertyManager() {
