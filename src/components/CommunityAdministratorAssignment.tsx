@@ -86,13 +86,6 @@ export function CommunityAdministratorAssignment() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if(user){
-        fetchAvailableAdmins();
-    }
-  }, [searchTerm])
-  
-
   const loadUserCommunityCodes = async () => {
     if (!user?.id) return;
 
@@ -185,7 +178,7 @@ export function CommunityAdministratorAssignment() {
       console.log("🔍 [ADMIN-SEARCH] Buscando TODOS los administradores de fincas disponibles...");
 
       // FIXED: Query property administrators directly from user_roles table
-      let baseQuery = supabase
+      const baseQuery = supabase
         .from("user_roles")
         .select(`
           id,
