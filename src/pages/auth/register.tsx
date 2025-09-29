@@ -641,7 +641,7 @@ function RegisterPageContent() {
                 // For CIF validation: if it's a valid format and not currently validating, allow progression
                 // The actual validation will happen in handleNextRole
                 const cifFormatValid = data.cif && validateCIF(data.cif);
-                const cifOk = cifValid === true || (cifFormatValid && !cifValidating);
+                const cifOk = !!cifValid || (cifFormatValid && !cifValidating);
 
                 return basicInfoComplete && servicesSelected && cifOk;
             }
@@ -658,7 +658,7 @@ function RegisterPageContent() {
                 // For CIF validation: if it's a valid format and not currently validating, allow progression
                 // The actual validation will happen in handleNextRole
                 const cifFormatValid = data.cif && validateCIF(data.cif);
-                const cifOk = cifValid === true || (cifFormatValid && !cifValidating);
+                const cifOk = !!cifValid || (cifFormatValid && !cifValidating);
 
                 return basicInfoComplete && cifOk;
             }
