@@ -6,63 +6,10 @@ import type { Database as DB } from './database.types';
 
 export type Database = DB;
 
-// Re-export commonly used types
+// Re-export commonly used types for convenience
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type Inserts<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
-export type Updates<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
-
-// Specific table types
-export type Property = Tables<'properties'>;
-export type PropertyInsert = Inserts<'properties'>;
-export type PropertyUpdate = Updates<'properties'>;
-
-export type Profile = Tables<'profiles'>;
-export type ProfileInsert = Inserts<'profiles'>;
-export type ProfileUpdate = Updates<'profiles'>;
-
-export type UserRole = Tables<'user_roles'>;
-export type UserRoleInsert = Inserts<'user_roles'>;
-export type UserRoleUpdate = Updates<'user_roles'>;
-
-export type BudgetRequest = Tables<'budget_requests'>;
-export type BudgetRequestInsert = Inserts<'budget_requests'>;
-export type BudgetRequestUpdate = Updates<'budget_requests'>;
-
-export type Quote = Tables<'quotes'>;
-export type QuoteInsert = Inserts<'quotes'>;
-export type QuoteUpdate = Updates<'quotes'>;
-
-export type Contract = Tables<'contracts'>;
-export type ContractInsert = Inserts<'contracts'>;
-export type ContractUpdate = Updates<'contracts'>;
-
-export type Notification = Tables<'notifications'>;
-export type NotificationInsert = Inserts<'notifications'>;
-export type NotificationUpdate = Updates<'notifications'>;
-
-export type ServiceProvider = Tables<'service_providers'>;
-export type ServiceProviderInsert = Inserts<'service_providers'>;
-
-export type ServiceCategory = Tables<'service_categories'>;
-export type ServiceCategoryInsert = Inserts<'service_categories'>;
-export type ServiceCategoryUpdate = Updates<'service_categories'>;
-
-export type Rating = Tables<'ratings'>;
-
-export type Document = Tables<'documents'>;
-export type DocumentInsert = Inserts<'documents'>;
-export type DocumentUpdate = Updates<'documents'>;
-
-export type Conversation = Tables<'conversations'>;
-export type ConversationInsert = Inserts<'conversations'>;
-export type ConversationUpdate = Updates<'conversations'>;
-
-export type Message = Tables<'messages'>;
-export type MessageInsert = Inserts<'messages'>;
-export type MessageUpdate = Updates<'messages'>;
-
-export type WorkSession = Tables<'work_sessions'>;
-export type WorkSessionUpdate = Updates<'work_sessions'>;
+export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
+export type Functions<T extends keyof Database['public']['Functions']> = Database['public']['Functions'][T];
 
 // Project reference: djkrzbmgzfwagmripozi
-// Last updated: 2025-09-29T17:59:31.472944
+// Last updated: 2025-09-29T19:14:48.717574

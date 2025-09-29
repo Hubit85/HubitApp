@@ -1203,6 +1203,8 @@ export type Database = {
           country: string | null
           created_at: string | null
           description: string | null
+          door: string | null
+          floor: string | null
           id: string
           images: string[] | null
           latitude: number | null
@@ -1229,6 +1231,8 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           description?: string | null
+          door?: string | null
+          floor?: string | null
           id?: string
           images?: string[] | null
           latitude?: number | null
@@ -1255,6 +1259,8 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           description?: string | null
+          door?: string | null
+          floor?: string | null
           id?: string
           images?: string[] | null
           latitude?: number | null

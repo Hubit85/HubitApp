@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Building, Trash2, Edit, Upload, Camera, Code } from "lucide-react";
 import { CommunityCodeService } from "@/services/CommunityCodeService";
 import { Database } from "@/integrations/supabase/database.types";
+import { SupabaseStorageService } from "@/services/SupabaseStorageService";
 
 // Define types from database
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -187,28 +188,101 @@ export default function PropertyManager() {
     if (!file || !user) return;
 
     setUploadingPhoto(true);
+    setError(""); // Limpiar errores previos
+    
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
-      const filePath = `property-photos/${fileName}`;
+      console.log('Iniciando subida de foto...', { fileName: file.name, size: file.size });
+      
+      // Optimizar la imagen antes de subirla
+      const optimizedFile = await SupabaseStorageService.optimizeImageForWeb(file);
+      
+      // Subir archivo usando el servicio mejorado
+      const result = await SupabaseStorageService.uploadFile(
+        optimizedFile, 
+        'property-photos', 
+        user.id
+      );
 
-      const { error: uploadError } = await supabase.storage
-        .from('uploads')
-        .upload(filePath, file);
+      if (!result.success) {
+        throw new Error(result.error || 'Error desconocido al subir la imagen');
+      }
 
-      if (uploadError) throw uploadError;
+      if (!result.publicUrl) {
+        throw new Error('No se pudo obtener la URL pública de la imagen');
+      }
 
-      const { data } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(filePath);
+      console.log('Imagen subida exitosamente:', result);
+      
+      // Validar que la imagen sea accesible
+      const isValid = await SupabaseStorageService.validateImageUrl(result.publicUrl);
+      if (!isValid) {
+        console.warn('La imagen subida podría no ser accesible');
+      }
 
       setCurrentProperty({
         ...currentProperty,
-        property_photo_url: data.publicUrl
+        property_photo_url: result.publicUrl
       });
 
+      // Mostrar notificación de éxito
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-lg shadow-xl z-50';
+      successDiv.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold">¡Imagen subida correctamente!</p>
+            <p class="text-sm text-green-100">La fotografía se ha guardado exitosamente</p>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(successDiv);
+      
+      setTimeout(() => {
+        if (document.body.contains(successDiv)) {
+          successDiv.style.transition = 'all 0.5s ease-out';
+          successDiv.style.transform = 'translateX(100%)';
+          successDiv.style.opacity = '0';
+          setTimeout(() => {
+            if (document.body.contains(successDiv)) {
+              document.body.removeChild(successDiv);
+            }
+          }, 500);
+        }
+      }, 4000);
+
     } catch (err: any) {
-      setError(`Error subiendo foto: ${err.message}`);
+      console.error('Error completo al subir imagen:', err);
+      setError(`Error subiendo imagen: ${err.message}`);
+      
+      // Mostrar notificación de error específica para imágenes
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'fixed top-4 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg shadow-xl z-50';
+      errorDiv.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold">Error al subir imagen</p>
+            <p class="text-sm text-red-100">${err.message}</p>
+            <p class="text-xs text-red-200 mt-1">Asegúrate de que el archivo sea una imagen válida (máximo 5MB)</p>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(errorDiv);
+      setTimeout(() => {
+        if (document.body.contains(errorDiv)) {
+          document.body.removeChild(errorDiv);
+        }
+      }, 8000);
+      
     } finally {
       setUploadingPhoto(false);
     }
