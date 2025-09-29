@@ -25,6 +25,8 @@ interface ExtendedProperty {
   address?: string | null;
   street?: string | null;
   number?: string | null;
+  floor?: string | null;
+  door?: string | null;
   city?: string | null;
   province?: string | null;
   country?: string | null;
@@ -95,6 +97,8 @@ export default function PropertyManager() {
         name: "",
         street: "",
         number: "",
+        floor: "",
+        door: "",
         city: "",
         province: "",
         country: "España",
@@ -343,6 +347,12 @@ export default function PropertyManager() {
                       <div className="space-y-1">
                         <p className="text-sm text-gray-600">
                           <span className="font-medium">Dirección:</span> {prop.street ? `${prop.street} ${prop.number}` : prop.address}
+                          {(prop.floor || prop.door) && (
+                            <span className="text-blue-600 ml-2">
+                              {prop.floor && `${prop.floor}º`}
+                              {prop.door && ` ${prop.door}`}
+                            </span>
+                          )}
                         </p>
                         <p className="text-sm text-gray-600">
                           <span className="font-medium">Ciudad:</span> {prop.city}
@@ -352,6 +362,13 @@ export default function PropertyManager() {
                         {prop.postal_code && (
                           <p className="text-sm text-gray-600">
                             <span className="font-medium">C.P.:</span> {prop.postal_code}
+                          </p>
+                        )}
+                        {(prop.floor || prop.door) && (
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium">Ubicación:</span> 
+                            {prop.floor && ` Piso ${prop.floor}`}
+                            {prop.door && `, Puerta ${prop.door}`}
                           </p>
                         )}
                       </div>
@@ -470,6 +487,33 @@ export default function PropertyManager() {
                     onChange={(e) => setCurrentProperty({...currentProperty, number: e.target.value})} 
                     placeholder="Ej: 25, 25B"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="floor">Piso</Label>
+                  <Input 
+                    id="floor" 
+                    value={currentProperty.floor || ''} 
+                    onChange={(e) => setCurrentProperty({...currentProperty, floor: e.target.value})} 
+                    placeholder="Ej: 3, 3º, Bajo"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Para distinguir la propiedad individual (no necesario para el código de comunidad)
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="door">Mano / Puerta</Label>
+                  <Input 
+                    id="door" 
+                    value={currentProperty.door || ''} 
+                    onChange={(e) => setCurrentProperty({...currentProperty, door: e.target.value})} 
+                    placeholder="Ej: A, B, Izda, Dcha"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Letra o posición de la puerta (no necesario para el código de comunidad)
+                  </p>
                 </div>
               </div>
 
