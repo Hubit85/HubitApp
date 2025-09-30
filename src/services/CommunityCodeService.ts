@@ -105,8 +105,8 @@ export class CommunityCodeService {
         created_by: data.created_by
       };
 
-      // PASO 1: Verificar si ya existe un código para esta combinación de ubicación (búsqueda flexible)
-      console.log('🔍 Buscando código existente para (normalizado):', {
+      // PASO 1: Verificar si ya existe un código para esta combinación EXACTA de ubicación
+      console.log('🔍 Buscando código existente para la misma ubicación:', {
         country: normalizedData.country,
         province: normalizedData.province, 
         city: normalizedData.city,
@@ -117,20 +117,21 @@ export class CommunityCodeService {
       const existingCode = await this.findExistingCode(normalizedData);
       
       if (existingCode) {
-        console.log('✅ Código existente encontrado (búsqueda flexible):', existingCode.code);
+        console.log('✅ CÓDIGO REUTILIZADO - Encontrado código existente para la misma ubicación:', existingCode.code);
+        console.log('📍 Ubicación ya registrada, permitiendo reutilización del código');
         return { code: existingCode.code, isNew: false };
       }
 
-      // PASO 2: No existe código para esta ubicación, generar nuevo código base
+      // PASO 2: No existe código para esta ubicación específica, generar nuevo código base
       const baseCode = this.generateCommunityCode(normalizedData);
-      console.log('🏗️ Código base generado:', baseCode);
+      console.log('🏗️ Código base generado para nueva ubicación:', baseCode);
 
-      // PASO 3: Verificar si el código base está disponible
+      // PASO 3: Verificar si el código base está disponible (puede estar ocupado por otra ubicación diferente)
       const isBaseCodeUnique = await this.isCodeUnique(baseCode);
       
       if (isBaseCodeUnique) {
-        // El código base está disponible, crearlo directamente con datos normalizados
-        console.log('✨ Código base disponible, creando:', baseCode);
+        // El código base está disponible, crear directamente
+        console.log('✨ Código base disponible, creando para nueva ubicación:', baseCode);
         
         const { data: newCode, error } = await supabase
           .from('community_codes')
@@ -150,28 +151,42 @@ export class CommunityCodeService {
           throw new Error(`Error creando código de comunidad: ${error.message}`);
         }
 
-        console.log('✅ Nuevo código creado exitosamente:', newCode.code);
+        console.log('✅ Nuevo código creado exitosamente para nueva ubicación:', newCode.code);
         return { code: newCode.code, isNew: true };
       }
 
-      // PASO 4: El código base ya existe para otra ubicación, generar variante única
-      console.log('⚠️ Código base ya existe para otra ubicación, generando variante única...');
+      // PASO 4: El código base ya existe PERO es para una ubicación diferente
+      console.log('⚠️ Código base ocupado por UBICACIÓN DIFERENTE, generando variante única para nueva ubicación...');
+      
+      // Verificar qué ubicación está usando el código base para logging
+      const { data: conflictingLocation, error: conflictError } = await supabase
+        .from('community_codes')
+        .select('country, province, city, street, street_number')
+        .eq('code', baseCode)
+        .single();
+
+      if (!conflictError && conflictingLocation) {
+        console.log('📍 Código base ocupado por ubicación diferente:', {
+          existing: `${conflictingLocation.street} ${conflictingLocation.street_number}, ${conflictingLocation.city}`,
+          new: `${normalizedData.street} ${normalizedData.street_number}, ${normalizedData.city}`
+        });
+      }
       
       let uniqueCode = baseCode;
       let attempt = 1;
       const maxAttempts = 100;
 
       while (attempt <= maxAttempts) {
-        // Generar código con sufijo numérico
+        // Generar código con sufijo numérico para diferencias de ubicación
         const suffix = attempt.toString().padStart(2, '0');
         uniqueCode = `${baseCode}-${suffix}`;
         
-        console.log(`🔄 Intento ${attempt}: Verificando código ${uniqueCode}`);
+        console.log(`🔄 Intento ${attempt}: Verificando disponibilidad de código ${uniqueCode}`);
         
         const isUnique = await this.isCodeUnique(uniqueCode);
         
         if (isUnique) {
-          console.log(`✨ Código único encontrado: ${uniqueCode}`);
+          console.log(`✨ Código único generado para nueva ubicación: ${uniqueCode}`);
           break;
         }
         
@@ -182,7 +197,7 @@ export class CommunityCodeService {
         throw new Error('No se pudo generar un código único después de múltiples intentos');
       }
 
-      // PASO 5: Crear el nuevo código único con datos normalizados
+      // PASO 5: Crear el nuevo código único para la nueva ubicación
       const { data: newCode, error } = await supabase
         .from('community_codes')
         .insert({
@@ -200,7 +215,7 @@ export class CommunityCodeService {
       if (error) {
         // Manejo específico para errores de duplicados
         if (error.code === '23505') { // unique_violation
-          console.warn(`⚠️ Código duplicado detectado (${uniqueCode}), generando fallback...`);
+          console.warn(`⚠️ Código duplicado detectado (${uniqueCode}), generando fallback temporal...`);
           
           // Generar código de fallback con timestamp
           const timestamp = Date.now().toString().slice(-6);
@@ -224,14 +239,14 @@ export class CommunityCodeService {
             throw new Error(`Error creando código de comunidad con fallback: ${fallbackError.message}`);
           }
 
-          console.log('✅ Código fallback creado:', fallbackNewCode.code);
+          console.log('✅ Código fallback temporal creado:', fallbackNewCode.code);
           return { code: fallbackNewCode.code, isNew: true };
         }
         
         throw new Error(`Error creando código de comunidad: ${error.message}`);
       }
 
-      console.log('✅ Nuevo código con variante creado exitosamente:', newCode.code);
+      console.log('✅ Nuevo código variante creado exitosamente para ubicación diferente:', newCode.code);
       return { code: newCode.code, isNew: true };
 
     } catch (error: any) {

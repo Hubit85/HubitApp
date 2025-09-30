@@ -8,63 +8,8 @@ export type Database = DB;
 
 // Re-export commonly used types for convenience
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
-export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
-export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
 export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 export type Functions<T extends keyof Database['public']['Functions']> = Database['public']['Functions'][T];
 
-// Convenience type aliases for commonly used tables
-export type Profile = Tables<'profiles'>;
-export type ProfileInsert = TablesInsert<'profiles'>;
-export type ProfileUpdate = TablesUpdate<'profiles'>;
-
-export type Property = Tables<'properties'>;
-export type PropertyInsert = TablesInsert<'properties'>;
-export type PropertyUpdate = TablesUpdate<'properties'>;
-
-export type BudgetRequest = Tables<'budget_requests'>;
-export type BudgetRequestInsert = TablesInsert<'budget_requests'>;
-export type BudgetRequestUpdate = TablesUpdate<'budget_requests'>;
-
-export type Quote = Tables<'quotes'>;
-export type QuoteInsert = TablesInsert<'quotes'>;
-export type QuoteUpdate = TablesUpdate<'quotes'>;
-
-export type Contract = Tables<'contracts'>;
-export type ContractInsert = TablesInsert<'contracts'>;
-export type ContractUpdate = TablesUpdate<'contracts'>;
-
-export type ServiceProvider = Tables<'service_providers'>;
-export type ServiceProviderInsert = TablesInsert<'service_providers'>;
-
-export type ServiceCategory = Tables<'service_categories'>;
-export type ServiceCategoryInsert = TablesInsert<'service_categories'>;
-export type ServiceCategoryUpdate = TablesUpdate<'service_categories'>;
-
-export type UserRole = Tables<'user_roles'>;
-export type UserRoleInsert = TablesInsert<'user_roles'>;
-export type UserRoleUpdate = TablesUpdate<'user_roles'>;
-
-export type Notification = Tables<'notifications'>;
-export type NotificationInsert = TablesInsert<'notifications'>;
-export type NotificationUpdate = TablesUpdate<'notifications'>;
-
-export type Document = Tables<'documents'>;
-export type DocumentInsert = TablesInsert<'documents'>;
-export type DocumentUpdate = TablesUpdate<'documents'>;
-
-export type Conversation = Tables<'conversations'>;
-export type ConversationInsert = TablesInsert<'conversations'>;
-export type ConversationUpdate = TablesUpdate<'conversations'>;
-
-export type Message = Tables<'messages'>;
-export type MessageInsert = TablesInsert<'messages'>;
-export type MessageUpdate = TablesUpdate<'messages'>;
-
-export type WorkSession = Tables<'work_sessions'>;
-export type WorkSessionUpdate = TablesUpdate<'work_sessions'>;
-
-export type Rating = Tables<'ratings'>;
-
 // Project reference: djkrzbmgzfwagmripozi
-// Last updated: 2025-09-30T19:57:19.527233
+// Last updated: 2025-09-30T20:22:14.003883
