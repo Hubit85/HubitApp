@@ -355,10 +355,10 @@ export class CommunityCodeService {
       }
     });
 
-    // Obtener códigos compartidos con conteo de usuarios
+    // Obtener códigos compartidos con conteo de usuarios - FIXED: Use Array.from
     const sharedCodes: { code: string; userCount: number; }[] = [];
     
-    for (const code of uniqueCodes) {
+    for (const code of Array.from(uniqueCodes)) {
       try {
         const { totalUsers } = await this.getUsersWithCommunityCode(code);
         if (totalUsers > 1) {
