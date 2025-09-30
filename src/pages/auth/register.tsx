@@ -638,9 +638,9 @@ function RegisterPageContent() {
                 // Check services selection
                 const servicesSelected = data.selected_services.length > 0;
                 
-                // CORRECCIÓN CRÍTICA: Validación CIF mejorada para service_provider
+                // CORRECCIÓN CRÍTICA: Validación CIF mejorada para service_provider - FIXED TYPE
                 const cifFormatValid = data.cif && validateCIF(data.cif);
-                const cifOk = cifValid === true || (cifFormatValid && !cifValidating);
+                const cifOk = Boolean(cifValid === true || (cifFormatValid && !cifValidating));
 
                 return basicInfoComplete && servicesSelected && cifOk;
             }
@@ -654,9 +654,9 @@ function RegisterPageContent() {
                     data.cif && data.business_email && data.business_phone &&
                     data.professional_number);
 
-                // CORRECCIÓN CRÍTICA: Validación CIF mejorada para property_administrator
+                // CORRECCIÓN CRÍTICA: Validación CIF mejorada para property_administrator - FIXED TYPE
                 const cifFormatValid = data.cif && validateCIF(data.cif);
-                const cifOk = cifValid === true || (cifFormatValid && !cifValidating);
+                const cifOk = Boolean(cifValid === true || (cifFormatValid && !cifValidating));
 
                 return basicInfoComplete && cifOk;
             }
