@@ -25,43 +25,52 @@ export interface CommunityCode {
 
 export class CommunityCodeService {
   static generateCommunityCode(data: CommunityCodeData): string {
+    // NORMALIZAR DATOS PARA GENERACIÓN CONSISTENTE
+    const country = data.country.trim().toUpperCase();
+    const province = data.province.trim().toUpperCase();
+    const city = data.city.trim().toUpperCase();
+    const street = data.street.trim().toUpperCase();
+    const streetNumberStr = data.street_number.trim();
+
     // Obtener 3 primeras letras del país
-    const countryCode = data.country.substring(0, 3).toUpperCase();
+    const countryCode = country.substring(0, 3);
     
     // Obtener 3 primeras letras de la provincia
-    const provinceCode = data.province.substring(0, 3).toUpperCase();
+    const provinceCode = province.substring(0, 3);
     
     // Obtener 3 primeras letras de la ciudad
-    const cityCode = data.city.substring(0, 3).toUpperCase();
+    const cityCode = city.substring(0, 3);
     
     // Obtener 6 primeras letras de la calle, rellenar con X si es necesario
-    let streetCode = data.street.replace(/[^a-zA-Z]/g, '').substring(0, 6).toUpperCase();
+    let streetCode = street.replace(/[^A-Z]/g, '').substring(0, 6);
     while (streetCode.length < 6) {
       streetCode += 'X';
     }
     
     // Formatear número de calle a 4 dígitos
-    const streetNumber = data.street_number.padStart(4, '0');
+    const streetNumber = streetNumberStr.padStart(4, '0');
     
     return `${countryCode}-${provinceCode}-${cityCode}-${streetCode}-${streetNumber}`;
   }
 
   static async findExistingCode(data: CommunityCodeData): Promise<CommunityCode | null> {
-    const { data: existingCode, error } = await supabase
+    // BÚSQUEDA FLEXIBLE E INSENSIBLE A MAYÚSCULAS/MINÚSCULAS
+    const { data: existingCodes, error } = await supabase
       .from('community_codes')
       .select('*')
-      .eq('country', data.country)
-      .eq('province', data.province)
-      .eq('city', data.city)
-      .eq('street', data.street)
-      .eq('street_number', data.street_number)
-      .single();
+      .ilike('country', data.country.trim())
+      .ilike('province', data.province.trim())
+      .ilike('city', data.city.trim())
+      .ilike('street', data.street.trim())
+      .eq('street_number', data.street_number.trim())
+      .limit(1);
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+    if (error) {
+      console.error(`Error buscando código existente: ${error.message}`);
       throw new Error(`Error buscando código existente: ${error.message}`);
     }
 
-    return existingCode as CommunityCode | null;
+    return existingCodes && existingCodes.length > 0 ? (existingCodes[0] as CommunityCode) : null;
   }
 
   static async isCodeUnique(code: string): Promise<boolean> {
@@ -86,43 +95,53 @@ export class CommunityCodeService {
 
   static async createOrGetCommunityCode(data: CommunityCodeData): Promise<{ code: string; isNew: boolean }> {
     try {
-      // PASO 1: Verificar si ya existe un código para esta combinación exacta de ubicación
-      console.log('🔍 Buscando código existente para:', {
-        country: data.country,
-        province: data.province, 
-        city: data.city,
-        street: data.street,
-        street_number: data.street_number
+      // PASO 0: Normalizar los datos de entrada para consistencia
+      const normalizedData: CommunityCodeData = {
+        country: data.country.trim(),
+        province: data.province.trim(),
+        city: data.city.trim(),
+        street: data.street.trim(),
+        street_number: data.street_number.trim(),
+        created_by: data.created_by
+      };
+
+      // PASO 1: Verificar si ya existe un código para esta combinación de ubicación (búsqueda flexible)
+      console.log('🔍 Buscando código existente para (normalizado):', {
+        country: normalizedData.country,
+        province: normalizedData.province, 
+        city: normalizedData.city,
+        street: normalizedData.street,
+        street_number: normalizedData.street_number
       });
 
-      const existingCode = await this.findExistingCode(data);
+      const existingCode = await this.findExistingCode(normalizedData);
       
       if (existingCode) {
-        console.log('✅ Código existente encontrado:', existingCode.code);
+        console.log('✅ Código existente encontrado (búsqueda flexible):', existingCode.code);
         return { code: existingCode.code, isNew: false };
       }
 
       // PASO 2: No existe código para esta ubicación, generar nuevo código base
-      const baseCode = this.generateCommunityCode(data);
+      const baseCode = this.generateCommunityCode(normalizedData);
       console.log('🏗️ Código base generado:', baseCode);
 
       // PASO 3: Verificar si el código base está disponible
       const isBaseCodeUnique = await this.isCodeUnique(baseCode);
       
       if (isBaseCodeUnique) {
-        // El código base está disponible, crearlo directamente
+        // El código base está disponible, crearlo directamente con datos normalizados
         console.log('✨ Código base disponible, creando:', baseCode);
         
         const { data: newCode, error } = await supabase
           .from('community_codes')
           .insert({
             code: baseCode,
-            country: data.country,
-            province: data.province,
-            city: data.city,
-            street: data.street,
-            street_number: data.street_number,
-            created_by: data.created_by
+            country: normalizedData.country.toUpperCase(),
+            province: normalizedData.province.toUpperCase(),
+            city: normalizedData.city.toUpperCase(),
+            street: normalizedData.street.toUpperCase(),
+            street_number: normalizedData.street_number,
+            created_by: normalizedData.created_by
           })
           .select()
           .single();
@@ -163,17 +182,17 @@ export class CommunityCodeService {
         throw new Error('No se pudo generar un código único después de múltiples intentos');
       }
 
-      // PASO 5: Crear el nuevo código único
+      // PASO 5: Crear el nuevo código único con datos normalizados
       const { data: newCode, error } = await supabase
         .from('community_codes')
         .insert({
           code: uniqueCode,
-          country: data.country,
-          province: data.province,
-          city: data.city,
-          street: data.street,
-          street_number: data.street_number,
-          created_by: data.created_by
+          country: normalizedData.country.toUpperCase(),
+          province: normalizedData.province.toUpperCase(),
+          city: normalizedData.city.toUpperCase(),
+          street: normalizedData.street.toUpperCase(),
+          street_number: normalizedData.street_number,
+          created_by: normalizedData.created_by
         })
         .select()
         .single();
@@ -191,12 +210,12 @@ export class CommunityCodeService {
             .from('community_codes')
             .insert({
               code: fallbackCode,
-              country: data.country,
-              province: data.province,
-              city: data.city,
-              street: data.street,
-              street_number: data.street_number,
-              created_by: data.created_by
+              country: normalizedData.country.toUpperCase(),
+              province: normalizedData.province.toUpperCase(),
+              city: normalizedData.city.toUpperCase(),
+              street: normalizedData.street.toUpperCase(),
+              street_number: normalizedData.street_number,
+              created_by: normalizedData.created_by
             })
             .select()
             .single();
