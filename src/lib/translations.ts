@@ -529,6 +529,11 @@ export const translations = {
     signOut: "Cerrar sesión",
     languageEs: "Español",
     languageEn: "Inglés",
+    help: "Ayuda",
+    whitepaper: "Whitepaper",
+    hubit: "HuBiT",
+    login: "Login",
+    register: "Register",
     
     // NEW: Property Manager Translations
     myProperties: "Mis Propiedades",
@@ -661,7 +666,6 @@ export const translations = {
 
     // Help Center Translations
     helpCenter: "Centro de Ayuda",
-    help: "Help",
     helpCenterDescription: "Encuentra respuestas y soporte para todas tus necesidades de HuBiT",
     searchHelp: "Buscar artículos de ayuda...",
     popularTopics: "Temas Populares",
