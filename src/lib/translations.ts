@@ -529,11 +529,6 @@ export const translations = {
     signOut: "Cerrar sesión",
     languageEs: "Español",
     languageEn: "Inglés",
-    help: "Ayuda",
-    whitepaper: "Whitepaper",
-    hubit: "HuBiT",
-    login: "Iniciar sesión",
-    register: "Registrarse",
     
     // NEW: Property Manager Translations
     myProperties: "Mis Propiedades",
