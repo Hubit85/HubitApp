@@ -9,6 +9,11 @@ export const translations = {
     signOut: "Sign Out",
     languageEs: "Spanish",
     languageEn: "English",
+    help: "Help",
+    whitepaper: "Whitepaper",
+    hubit: "HuBiT",
+    login: "Login",
+    register: "Register",
     
     // NEW: Property Manager Translations
     myProperties: "My Properties",
@@ -516,7 +521,6 @@ export const translations = {
     manage: "Manage",
     request: "Request",
     viewProfile: "View Profile",
-    verified: "Verified",
     jobs: "jobs",
   },
   es: {
@@ -527,6 +531,11 @@ export const translations = {
     signOut: "Cerrar sesión",
     languageEs: "Español",
     languageEn: "Inglés",
+    help: "Ayuda",
+    whitepaper: "Whitepaper",
+    hubit: "HuBiT",
+    login: "Iniciar sesión",
+    register: "Registrarse",
     
     // NEW: Property Manager Translations
     myProperties: "Mis Propiedades",
@@ -1038,7 +1047,6 @@ export const translations = {
     manage: "Gestionar",
     request: "Solicitar",
     viewProfile: "Ver Perfil",
-    verified: "Verificado",
     jobs: "trabajos",
   },
 };
