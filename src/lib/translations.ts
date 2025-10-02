@@ -554,7 +554,6 @@ export const translations = {
     saving: "Guardando...",
     imageUploadedSuccessfully: "¡Imagen subida correctamente!",
     photoSavedAndReady: "La fotografía se ha guardado y está lista para mostrarse",
-    verified: "Verificada",
     errorUploadingImage: "Error al subir imagen",
     tips: "Consejos",
     useImagesJPGPNGWebP: "Usa imágenes JPG, PNG o WebP",
@@ -660,6 +659,7 @@ export const translations = {
 
     // Help Center Translations
     helpCenter: "Centro de Ayuda",
+    help: "Help",
     helpCenterDescription: "Encuentra respuestas y soporte para todas tus necesidades de HuBiT",
     searchHelp: "Buscar artículos de ayuda...",
     popularTopics: "Temas Populares",
@@ -748,10 +748,13 @@ export const translations = {
     registerToStart: "Regístrate para empezar a usar nuestros servicios",
     createPassword: "Crea una contraseña",
     alreadyHaveAccount: "¿Ya tienes una cuenta?",
+    login: "Login",
+    register: "Register",
     
     // Home Page & General Content
     homeTitle: "HuBiT - Hub de servicios comunitarios",
     homeDescription: "Hub de servicios comunitarios con pagos en criptomonedas",
+    hubit: "HuBiT",
     professionalServices: "Hub de servicios comunitarios",
     whoWeAreTitle: "Quiénes Somos",
     whoWeAreIntro: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
@@ -977,6 +980,7 @@ export const translations = {
     moyuaSquare: "Plaza Moyúa 5, Bilbao",
 
     // Whitepaper specific translations
+    whitepaper: "Whitepaper",
     whitepaperDescription: "Descubre el enfoque innovador de HuBiT para transformar la industria de servicios inmobiliarios a través de la transparencia y tecnología blockchain",
     whitepaperIntro: "Descubre el futuro de la gestión inmobiliaria a través de la tecnología blockchain y la evaluación transparente de servicios",
     introduction: "Introducción",
