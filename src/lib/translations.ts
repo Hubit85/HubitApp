@@ -2,7 +2,6 @@ export type Language = "es" | "en";
 
 export const translations = {
   en: {
-    // Existing translations...
     // General & Navigation
     services: "Services",
     profile: "Profile",
@@ -524,7 +523,6 @@ export const translations = {
     jobs: "jobs",
   },
   es: {
-    // Existing translations...
     // General & Navigation  
     services: "Servicios",
     profile: "Perfil",
