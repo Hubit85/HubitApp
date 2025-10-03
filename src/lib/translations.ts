@@ -234,6 +234,8 @@ export const translations = {
     registerToStart: "Register to start using our services",
     createPassword: "Create a password",
     alreadyHaveAccount: "Already have an account?",
+    login: "Login",
+    register: "Register",
     
     // Home Page & General Content
     homeTitle: "HuBiT - Community Services Hub",
