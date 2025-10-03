@@ -234,6 +234,8 @@ export const translations = {
     registerToStart: "Register to start using our services",
     createPassword: "Create a password",
     alreadyHaveAccount: "Already have an account?",
+    login: "Login",
+    register: "Register",
     
     // Home Page & General Content
     homeTitle: "HuBiT - Community Services Hub",
@@ -756,15 +758,16 @@ export const translations = {
     login: "Login",
     register: "Register",
     
-    homeDescription: "Hub de servicios comunitarios con pagos en criptomonedas",
-    hubit: "HuBiT",
-    professionalServices: "Hub de servicios comunitarios",
-    whoWeAreTitle: "Quiénes Somos",
-    whoWeAreIntro: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
-    ourMission: "Nuestra Misión",
-    ourEcosystem: "Nuestro Ecosistema",
+    // Home Page & General Content
+    homeTitle: "HuBiT - Community Services Hub",
+    homeDescription: "Community services hub with cryptocurrency payments",
+    professionalServices: "Community Services Hub",
+    whoWeAreTitle: "Who We Are",
+    whoWeAreIntro: "We are a comprehensive platform that connects property administrators, service companies and neighbors to provide transparency in the needs of neighborhood communities.",
+    ourMission: "Our Mission",
+    ourEcosystem: "Our Ecosystem",
     ourEcosystemText: "Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos con total transparencia.",
-    ourFundamentalValue: "Nuestro Valor Fundamental",
+    ourFundamentalValue: "Our Fundamental Value",
     ourFundamentalValueText: "La transparencia es nuestro valor fundamental, permitiendo que todas las partes involucradas tengan acceso a la información relevante, facilitando la toma de decisiones y mejorando la calidad de vida en las comunidades de vecinos.",
     howItWorksTitle: "Cómo Funciona",
     howItWorksIntro: "Nuestra plataforma funciona como un ecosistema integrado que conecta a los tres pilares fundamentales de las comunidades de vecinos:",
