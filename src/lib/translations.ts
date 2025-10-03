@@ -532,8 +532,8 @@ export const translations = {
     help: "Ayuda",
     whitepaper: "Whitepaper",
     hubit: "HuBiT",
-    login: "Login",
-    register: "Register",
+    login: "Iniciar Sesión",
+    register: "Registrarse",
     
     // NEW: Property Manager Translations
     myProperties: "Mis Propiedades",
