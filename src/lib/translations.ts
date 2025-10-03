@@ -234,8 +234,6 @@ export const translations = {
     registerToStart: "Register to start using our services",
     createPassword: "Create a password",
     alreadyHaveAccount: "Already have an account?",
-    login: "Login",
-    register: "Register",
     
     // Home Page & General Content
     homeTitle: "HuBiT - Community Services Hub",
@@ -355,7 +353,6 @@ export const translations = {
     managePublicInfo: "Manage your company's public information",
     saveChanges: "Save Changes",
     mainInformation: "Main Information",
-    businessDetails: "Business Details",
     companyName: "Company Name",
     description: "Description",
     website: "Website",
@@ -759,15 +756,12 @@ export const translations = {
     login: "Login",
     register: "Register",
     
-    // Home Page & General Content
-    homeTitle: "HuBiT - Hub de servicios comunitarios",
     homeDescription: "Hub de servicios comunitarios con pagos en criptomonedas",
     hubit: "HuBiT",
     professionalServices: "Hub de servicios comunitarios",
     whoWeAreTitle: "Quiénes Somos",
     whoWeAreIntro: "Somos una plataforma integral que conecta a administradores de fincas, empresas de servicios y vecinos para brindar transparencia en las necesidades de las comunidades de vecinos.",
     ourMission: "Nuestra Misión",
-    ourMissionText: "Nuestra misión es facilitar la comunicación, valoración y gestión de servicios, ayudando a las empresas a expandir su negocio mientras ofrecemos total transparencia a las comunidades.",
     ourEcosystem: "Nuestro Ecosistema",
     ourEcosystemText: "Creamos un ecosistema donde todos los participantes se benefician: los administradores pueden gestionar eficientemente las necesidades de sus comunidades, las empresas de servicios pueden mostrar su profesionalidad y obtener nuevos clientes, y los vecinos pueden valorar los servicios recibidos con total transparencia.",
     ourFundamentalValue: "Nuestro Valor Fundamental",
@@ -882,7 +876,6 @@ export const translations = {
     companyName: "Nombre de la empresa",
     description: "Descripción",
     website: "Página Web",
-    phone: "Teléfono", 
     address: "Dirección",
     taxId: "CIF",
     foundedYear: "Año de fundación",
@@ -995,7 +988,6 @@ export const translations = {
     visionStatement: "Declaración de Visión",
     visionText: "Crear el ecosistema más transparente y eficiente para servicios inmobiliarios, donde la confianza y calidad están garantizadas a través de la tecnología blockchain y evaluaciones verificadas por la comunidad.",
     problemStatement: "Declaración del Problema",
-    lackOfTransparency: "Falta de Transparencia",
     transparencyProblem: "El mercado de servicios inmobiliarios carece de transparencia en la evaluación de calidad e historial de servicios, dificultando a los propietarios tomar decisiones informadas.",
     inefficientProcesses: "Procesos Ineficientes",
     efficiencyProblem: "Los procesos de gestión actuales están fragmentados y son ineficientes, llevando a retrasos, falta de comunicación y mayores costos para todas las partes involucradas.",
