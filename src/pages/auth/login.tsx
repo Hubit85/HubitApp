@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
@@ -11,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Sparkles, AlertTriangle } from "lucide-react";
+import { Header } from "@/components/layout/Header";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -91,30 +91,10 @@ export default function LoginPage() {
       </Head>
 
       <div className="min-h-screen bg-gray-50 relative overflow-hidden">
+        {/* Header - Añadido para navegación consistente */}
+        <Header />
+        
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
-          {/* Header with HuBiT Logo matching register page */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="relative w-24 h-24 transition-transform duration-200 hover:scale-105 overflow-hidden">
-                <Image
-                  src="/HuBiT logo.png"
-                  alt="HuBiT Logo"
-                  fill
-                  className="object-cover object-left"
-                  priority
-                />
-              </div>
-              <div className="flex flex-col items-start">
-                <h1 className="text-5xl md:text-6xl font-bold text-black tracking-wide">
-                  HuBiT
-                </h1>
-              </div>
-            </div>
-            <p className="text-xl text-stone-600 font-light">
-              Bienvenido de vuelta
-            </p>
-          </div>
-
           {/* Connection Status Indicator - Only show if there are connection issues */}
           {!isConnected && (
             <div className="mb-4">

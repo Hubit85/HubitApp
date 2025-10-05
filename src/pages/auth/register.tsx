@@ -42,6 +42,7 @@ import {
     UserPlus,
     AlertTriangle
 } from "lucide-react";
+import { Header } from "@/components/layout/Header";
 
 type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
 
@@ -1094,30 +1095,10 @@ function RegisterPageContent() {
             </Head>
 
             <div className="min-h-screen bg-gray-50 relative overflow-hidden">
+                {/* Header - Añadido para navegación consistente */}
+                <Header />
+                
                 <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
-                    {/* Header with HuBiT Logo exactly matching login page */}
-                    <div className="text-center mb-8">
-                        <div className="flex items-center justify-center gap-4 mb-6">
-                            <div className="relative w-24 h-24 transition-transform duration-200 hover:scale-105 overflow-hidden">
-                                <Image
-                                    src="/HuBiT logo.png"
-                                    alt="HuBiT Logo"
-                                    fill
-                                    className="object-cover object-left"
-                                    priority
-                                />
-                            </div>
-                            <div className="flex flex-col items-start">
-                                <h1 className="text-5xl md:text-6xl font-bold text-black tracking-wide">
-                                    HuBiT
-                                </h1>
-                            </div>
-                        </div>
-                        <p className="text-xl text-stone-600 font-light">
-                            Crear nueva cuenta
-                        </p>
-                    </div>
-
                     {/* Progress Indicator */}
                     <div className="mb-6 w-full max-w-2xl">
                         <div className="flex items-center justify-center mb-4">
