@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Sparkles, AlertTriangle } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Sparkles, AlertTriangle, AlertCircle, LogIn } from "lucide-react";
 import { Header } from "@/components/layout/Header";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,6 +22,7 @@ export default function LoginPage() {
 
   const { signIn, user, session, loading, isConnected } = useSupabaseAuth();
   const router = useRouter();
+  const { t } = useLanguage();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -84,171 +86,118 @@ export default function LoginPage() {
   }
 
   return (
-    <>
-      <Head>
-        <title>Iniciar Sesión - HuBiT</title>
-        <meta name="description" content="Inicia sesión en HuBiT para acceder a tu cuenta" />
-      </Head>
-
-      <div className="min-h-screen bg-gray-50 relative overflow-hidden">
-        {/* Header - Añadido para navegación consistente */}
-        <Header />
-        
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
-          {/* Connection Status Indicator - Only show if there are connection issues */}
-          {!isConnected && (
-            <div className="mb-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                <AlertTriangle className="h-4 w-4" />
-                Conectividad limitada
-              </div>
-            </div>
-          )}
-
-          {/* Login Card - matching register design exactly */}
-          <Card className="w-full max-w-2xl bg-white border-stone-200 shadow-2xl shadow-stone-900/10">
-            <CardHeader className="text-center space-y-4 pb-6">
-              <div className="mx-auto w-16 h-16 bg-stone-800 rounded-2xl flex items-center justify-center shadow-lg">
-                <Shield className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl font-bold text-black">
-                  Iniciar Sesión
-                </CardTitle>
-                <CardDescription className="text-stone-600">
-                  Accede a tu cuenta de HuBiT
-                </CardDescription>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <Header />
+      
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-md mx-auto">
+          <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="space-y-1 text-center pb-8">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {t("welcomeBack")}
+              </CardTitle>
+              <p className="text-neutral-600">
+                {t("loginToAccess")}
+              </p>
             </CardHeader>
-
-            <CardContent className="space-y-6">
-              {/* Login Error Alert */}
-              {error && (
-                <Alert className="border-red-200 bg-red-50">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-red-800">
-                    {error}
-                  </AlertDescription>
-                </Alert>
-              )}
-
+            <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-stone-700">
-                    Correo electrónico *
+                  <Label htmlFor="email" className="text-sm font-medium text-neutral-700">
+                    {t("email")}
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
                     <Input
                       id="email"
                       type="email"
+                      placeholder={t("enterEmail")}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tu@email.com"
-                      className="pl-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                       required
-                      disabled={isLoading}
+                      className="pl-10 h-12 border-neutral-300 focus:border-blue-500 focus:ring-blue-500"
+                      disabled={loading}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-stone-700">
-                    Contraseña *
+                  <Label htmlFor="password" className="text-sm font-medium text-neutral-700">
+                    {t("password")}
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
                     <Input
                       id="password"
-                      type={showPassword ? "text" : "password"}
+                      type="password"
+                      placeholder={t("enterPassword")}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="pl-10 pr-10 h-12 bg-white border-stone-200 focus:border-stone-800 focus:ring-stone-800/20"
                       required
-                      disabled={isLoading}
+                      className="pl-10 h-12 border-neutral-300 focus:border-blue-500 focus:ring-blue-500"
+                      disabled={loading}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
-                      disabled={isLoading}
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
                   </div>
                 </div>
 
+                {error && (
+                  <Alert variant="destructive" className="animate-in fade-in-50">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
                 <Button
                   type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-stone-800 hover:bg-stone-900 text-white border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none h-12"
+                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={loading}
                 >
-                  {isLoading ? (
+                  {loading ? (
                     <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Iniciando sesión...
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      {t("loading")}
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Iniciar Sesión
-                      <ArrowRight className="w-5 h-5 ml-2" />
+                      <LogIn className="mr-2 h-5 w-5" />
+                      {t("login")}
                     </>
                   )}
                 </Button>
               </form>
 
-              {/* Connection notice for offline mode */}
-              {!isConnected && (
-                <div className="text-center">
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-medium text-blue-900 mb-2">Modo de conectividad limitada</h4>
-                    <div className="text-sm text-blue-800 space-y-1">
-                      <p>• La aplicación funciona con datos locales</p>
-                      <p>• Algunas funciones pueden estar limitadas</p>
-                      <p>• La conectividad se restaurará automáticamente</p>
-                    </div>
-                  </div>
+              <div className="mt-6 text-center space-y-4">
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors"
+                  onClick={() => {
+                    toast({
+                      title: t("info"),
+                      description: t("contactSupport"),
+                    });
+                  }}
+                >
+                  {t("forgotPassword")}
+                </button>
+
+                <div className="pt-4 border-t border-neutral-200">
+                  <p className="text-sm text-neutral-600 mb-3">
+                    {t("dontHaveAccount")}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-11 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold transition-colors"
+                    onClick={() => router.push("/auth/register")}
+                  >
+                    {t("register")}
+                  </Button>
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
-
-          {/* Register Link - matching register page format */}
-          <div className="mt-8 text-center">
-            <div className="relative mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-stone-200" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-gray-50 px-2 text-stone-500">¿Nuevo en HuBiT?</span>
-              </div>
-            </div>
-            <Link 
-              href="/auth/register"
-              className="group inline-flex items-center text-stone-800 hover:text-black font-medium transition-colors"
-            >
-              Crear una cuenta
-              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          {/* Footer - exactly matching register page */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-stone-500 max-w-md">
-              Al iniciar sesión, aceptas nuestros{" "}
-              <Link href="/terms" className="text-stone-800 hover:underline">
-                Términos de Servicio
-              </Link>{" "}
-              y{" "}
-              <Link href="/privacy" className="text-stone-800 hover:underline">
-                Política de Privacidad
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
