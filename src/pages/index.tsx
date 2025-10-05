@@ -32,7 +32,7 @@ export default function HomePage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-neutral-600">Cargando...</p>
+          <p className="text-neutral-600">{t("loading")}</p>
         </div>
       </div>
     );
@@ -152,14 +152,14 @@ export default function HomePage() {
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-3 mb-6">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                  <span className="text-emerald-400 font-semibold tracking-wider uppercase text-sm">Estado del Sistema</span>
+                  <span className="text-emerald-400 font-semibold tracking-wider uppercase text-sm">{t("status")}</span>
                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-300" />
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  Integración con Supabase
+                  {t("supabaseIntegration")}
                 </h2>
                 <p className="text-neutral-300 text-lg max-w-2xl mx-auto">
-                  Monitoreo en tiempo real del estado de la base de datos y servicios backend
+                  {t("realtimeMonitoring")}
                 </p>
               </div>
               
