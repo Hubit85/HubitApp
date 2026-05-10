@@ -524,7 +524,6 @@ export const translations = {
         systemStatus: "System Status",
         supabaseIntegration: "Supabase Integration",
         realtimeMonitoring: "Real-time monitoring of database status and backend services",
-        verified: "Verified",
         // Registration page translations
         selectProfile: "Select your profile",
         whatDescribesYou: "What best describes your situation?",
