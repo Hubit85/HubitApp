@@ -56,7 +56,7 @@ export class AutomaticRoleCreationService {
 
     const shouldAutoExpandRoles = false;
     // Only create roles explicitly requested by the caller.
-    let finalAdditionalRoles = [...additionalRoles];
+    const finalAdditionalRoles = [...additionalRoles];
 
     // Calculate total roles to create (including auto-expansion)
     const totalRolesRequested = 1 + finalAdditionalRoles.length; // 1 primary + additionals (including auto-expanded)
