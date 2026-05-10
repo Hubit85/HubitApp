@@ -216,7 +216,7 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
   });
 
   const getStatusBadge = (status: string) => {
-    const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG];
+    const config = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.pending;
     const IconComponent = config.icon;
     return (
       <Badge className={`${config.color} border-0`}>

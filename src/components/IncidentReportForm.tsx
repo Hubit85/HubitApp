@@ -169,7 +169,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
               id: assignment.id,
               user_id: matchingAdmin.user_id,
               company_name: assignment.company_name,
-              contact_email: profile?.email ?? ''
+              contact_email: assignment.contact_email ?? ''
             });
           }
         }
@@ -421,6 +421,52 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     });
   };
 
+  const resolveCommunityId = async (administratorId: string): Promise<string> => {
+    const selectedProperty = formData.selectedProperty;
+    if (!selectedProperty) {
+      throw new Error("No se seleccionó una propiedad para asociar la comunidad.");
+    }
+
+    const communityName = selectedProperty.community_code || selectedProperty.name || selectedProperty.address;
+    const { data: existingCommunity, error: lookupError } = await supabase
+      .from('communities')
+      .select('id')
+      .eq('administrator_id', administratorId)
+      .eq('address', selectedProperty.address)
+      .eq('city', selectedProperty.city)
+      .maybeSingle();
+
+    if (lookupError && lookupError.code !== 'PGRST116') {
+      throw lookupError;
+    }
+
+    if (existingCommunity?.id) {
+      return existingCommunity.id;
+    }
+
+    const { data: createdCommunity, error: createError } = await supabase
+      .from('communities')
+      .insert({
+        name: communityName,
+        address: selectedProperty.address,
+        city: selectedProperty.city,
+        postal_code: selectedProperty.postal_code,
+        administrator_id: administratorId,
+        status: 'active',
+        description: selectedProperty.community_code
+          ? `Comunidad asociada al código ${selectedProperty.community_code}`
+          : `Comunidad asociada a ${selectedProperty.name || selectedProperty.address}`
+      })
+      .select('id')
+      .single();
+
+    if (createError || !createdCommunity?.id) {
+      throw createError || new Error("No se pudo crear la comunidad asociada a la incidencia.");
+    }
+
+    return createdCommunity.id;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -444,26 +490,20 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
+      const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+      if (!targetAdministrator) {
+        setError("No se encontró un administrador de fincas verificado para recibir la incidencia. Asigna un administrador en tu perfil o contacta con soporte.");
+        return;
+      }
+
+      const primaryAdministratorId = targetAdministrator.user_id;
+      const communityId = await resolveCommunityId(primaryAdministratorId);
+
       // Upload photos if any
       let photoUrls: string[] = [];
       if (formData.photos.length > 0) {
         setSuccessMessage("Subiendo fotografías...");
         photoUrls = await uploadPhotosToStorage(formData.photos);
-      }
-
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
       }
 
       // Build location details including property info
@@ -483,7 +523,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         images: photoUrls.length > 0 ? photoUrls : null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
+        community_id: communityId,
         administrator_id: primaryAdministratorId,
         admin_notes: null,
         reviewed_at: null,
@@ -524,8 +564,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         console.log('Incident created successfully:', incident.id);
 
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
-        
         if (targetAdministrator) {
           try {
             const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
