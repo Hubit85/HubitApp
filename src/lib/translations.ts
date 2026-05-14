@@ -521,7 +521,7 @@ export const translations = {
         viewProfile: "View Profile",
         jobs: "jobs",
         // Status translations for Supabase section
-        status: "System Status",
+        systemStatus: "System Status",
         supabaseIntegration: "Supabase Integration",
         realtimeMonitoring: "Real-time monitoring of database status and backend services",
         verified: "Verified",
@@ -1118,7 +1118,7 @@ export const translations = {
         viewProfile: "Ver Perfil",
         jobs: "trabajos",
         // Status translations for Supabase section  
-        status: "Estado del Sistema",
+        systemStatus: "Estado del Sistema",
         supabaseIntegration: "Integración con Supabase",
         realtimeMonitoring: "Monitoreo en tiempo real del estado de la base de datos y servicios backend",
         verified: "Verificado",
