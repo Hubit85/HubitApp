@@ -1,12 +1,16 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import supabaseServer from '@/lib/supabaseServer';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
     console.log('🧪 Iniciando prueba directa de Supabase...');
     
     // Test 1: Verificar conexión básica
+    const { default: supabaseServer } = await import('@/lib/supabaseServer');
     const { data: testData, error: testError } = await supabaseServer
       .from('profiles')
       .select('count')

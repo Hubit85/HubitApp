@@ -5,11 +5,9 @@ import { paypalService } from '@/services/PayPalService';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const headers = req.headers as Record<string, string>;
-      const body = JSON.stringify(req.body);
       const webhookId = process.env.PAYPAL_WEBHOOK_ID || '';
 
-      const isValid = await paypalService.verifyWebhookSignature(headers, body, webhookId);
+      const isValid = await paypalService.verifyWebhookSignature(req.headers, req.body, webhookId);
 
       if (!isValid) {
         return res.status(400).json({ message: 'Invalid PayPal webhook signature' });
