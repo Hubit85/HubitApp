@@ -60,6 +60,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
+  if (process.env.NODE_ENV === 'production' && process.env.ENABLE_MOCK_AUTH !== 'true') {
+    return res.status(404).json({ message: 'Not found' });
+  }
+
   try {
     const { email, password }: LoginRequest = req.body;
 
