@@ -144,7 +144,9 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         const { data: adminRole, error: adminError } = await supabase
           .from('user_roles')
           .select(`
+            id,
             user_id,
+            role_specific_data,
             profiles!user_roles_user_id_fkey(full_name, email)
           `)
           .eq('role_type', 'property_administrator')
@@ -157,19 +159,23 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
         // Find matching administrator by company details
         if (adminRole) {
-          const matchingAdmin = adminRole.find(admin => 
-            admin.profiles && 
-            typeof admin.profiles === 'object' && 
-            !Array.isArray(admin.profiles) &&
-            (admin.profiles as any).email === assignment.contact_email
-          );
+          const assignmentEmail = (assignment.contact_email || '').trim().toLowerCase();
+          const matchingAdmin = adminRole.find(admin => {
+            const profileData = admin.profiles as any;
+            const roleData = admin.role_specific_data as any || {};
+            const profileEmail = (profileData?.email || '').trim().toLowerCase();
+            const businessEmail = (roleData?.business_email || '').trim().toLowerCase();
+            return assignmentEmail && (profileEmail === assignmentEmail || businessEmail === assignmentEmail);
+          });
 
           if (matchingAdmin) {
+            const profileData = matchingAdmin.profiles as any;
+            const roleData = matchingAdmin.role_specific_data as any || {};
             setAssignedAdministrator({
-              id: assignment.id,
+              id: matchingAdmin.id,
               user_id: matchingAdmin.user_id,
               company_name: assignment.company_name,
-              contact_email: profile?.email ?? ''
+              contact_email: roleData?.business_email || profileData?.email || assignment.contact_email || ''
             });
           }
         }
@@ -421,6 +427,36 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     });
   };
 
+  const resolveIncidentCommunityId = async (targetAdministrator: PropertyAdministrator): Promise<string | null> => {
+    const communityMemberRoleIds = userRoles
+      .filter(role => role.role_type === 'community_member' && role.is_verified)
+      .map(role => role.id);
+
+    if (communityMemberRoleIds.length === 0) {
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('managed_communities')
+      .select('community_id, property_administrator_id, established_at')
+      .in('community_member_id', communityMemberRoleIds)
+      .eq('relationship_status', 'active')
+      .order('established_at', { ascending: false });
+
+    if (error) {
+      console.error('Error resolving incident community:', error);
+      throw error;
+    }
+
+    const relationshipsWithCommunity = (data || []).filter(relationship => !!relationship.community_id);
+
+    const matchingRelationship = relationshipsWithCommunity.find(
+      relationship => relationship.property_administrator_id === targetAdministrator.id
+    );
+
+    return matchingRelationship?.community_id || relationshipsWithCommunity[0]?.community_id || null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -444,6 +480,20 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
+      const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+
+      if (!targetAdministrator) {
+        setError("No hay un administrador de fincas válido para recibir la incidencia. Por favor, asigna un administrador o contacta con soporte.");
+        return;
+      }
+
+      const communityId = await resolveIncidentCommunityId(targetAdministrator);
+
+      if (!communityId) {
+        setError("No se pudo determinar la comunidad asociada a esta incidencia. Por favor, verifica tu relación con el administrador de fincas antes de enviarla.");
+        return;
+      }
+
       // Upload photos if any
       let photoUrls: string[] = [];
       if (formData.photos.length > 0) {
@@ -451,20 +501,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         photoUrls = await uploadPhotosToStorage(formData.photos);
       }
 
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
-      }
+      const primaryAdministratorId = targetAdministrator.user_id;
 
       // Build location details including property info
       const locationDetails = formData.selectedProperty 
@@ -483,7 +520,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         images: photoUrls.length > 0 ? photoUrls : null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
+        community_id: communityId,
         administrator_id: primaryAdministratorId,
         admin_notes: null,
         reviewed_at: null,
@@ -524,8 +561,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         console.log('Incident created successfully:', incident.id);
 
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
-        
         if (targetAdministrator) {
           try {
             const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
