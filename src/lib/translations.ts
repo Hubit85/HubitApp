@@ -521,11 +521,12 @@ export const translations = {
         viewProfile: "View Profile",
         jobs: "jobs",
         // Status translations for Supabase section
-        status: "System Status",
+        systemStatus: "System Status",
         supabaseIntegration: "Supabase Integration",
         realtimeMonitoring: "Real-time monitoring of database status and backend services",
-        verified: "Verified",
+        statusVerified: "Verified",
         // Registration page translations
+        registration: {
         selectProfile: "Select your profile",
         whatDescribesYou: "What best describes your situation?",
         completeInformation: "Complete your information",
@@ -598,6 +599,7 @@ export const translations = {
         yourCompanyName: "Your company name",
         yourAdminCompanyName: "Your property management company name",
         professionalLicenseNumber: "Professional license number",
+        },
     },
     es: {
         // General & Navigation  
@@ -1118,11 +1120,12 @@ export const translations = {
         viewProfile: "Ver Perfil",
         jobs: "trabajos",
         // Status translations for Supabase section  
-        status: "Estado del Sistema",
+        systemStatus: "Estado del Sistema",
         supabaseIntegration: "Integración con Supabase",
         realtimeMonitoring: "Monitoreo en tiempo real del estado de la base de datos y servicios backend",
-        verified: "Verificado",
+        statusVerified: "Verificado",
         // Registration page translations
+        registration: {
         selectProfile: "Selecciona tu perfil",
         whatDescribesYou: "¿Qué describe mejor tu situación?",
         completeInformation: "Completa tu información",
@@ -1195,5 +1198,6 @@ export const translations = {
         yourCompanyName: "Nombre de tu empresa",
         yourAdminCompanyName: "Nombre de tu empresa de administración",
         professionalLicenseNumber: "Número de colegiado profesional",
+        },
     },
 };
