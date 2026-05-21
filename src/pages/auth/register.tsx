@@ -776,7 +776,7 @@ function RegisterPageContent() {
             // Roles must come from the user's explicit form selection, never from email patterns.
 
             // ENHANCED LOGIC: Combine user-selected roles
-            let finalAdditionalRoles = [];
+            let finalAdditionalRoles: Array<{ roleType: RoleType; roleSpecificData: Record<string, any> }> = [];
             let totalExpectedRoles = 1; // Start with primary role
 
             if (orderedRoles.length > 1) {
