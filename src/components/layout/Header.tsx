@@ -3,14 +3,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LogOut, FileText, HelpCircle } from "lucide-react";
-import { authService } from "@/services/AuthService";
 import Image from "next/image";
 
 export function Header() {
   const router = useRouter();
   const { t, language } = useLanguage();
+  const { signOut } = useSupabaseAuth();
   
   // Check if user is in any dashboard/control panel
   const isDashboardPage = router.pathname.startsWith('/dashboard') || 
@@ -31,8 +32,7 @@ export function Header() {
         signOutButton.style.transform = 'scale(0.98)';
       }
 
-      // Call the logout service
-      await authService.logout();
+      await signOut();
       
       // Add a smooth transition before redirect
       setTimeout(() => {
