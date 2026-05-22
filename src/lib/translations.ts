@@ -11,7 +11,6 @@ export const translations = {
         help: "Help",
         whitepaper: "Whitepaper",
         hubit: "HuBiT",
-        login: "Login",
         register: "Register",
 
         // NEW: Property Manager Translations
@@ -40,7 +39,6 @@ export const translations = {
         saving: "Saving...",
         imageUploadedSuccessfully: "Image uploaded successfully!",
         photoSavedAndReady: "The photo has been saved and is ready to be displayed",
-        verified: "Verified",
         errorUploadingImage: "Error uploading image",
         tips: "Tips",
         useImagesJPGPNGWebP: "Use JPG, PNG or WebP images",
@@ -67,15 +65,10 @@ export const translations = {
         doorUnit: "Door / Unit",
         doorExample: "E.g.: A, B, Left, Right",
         doorHelpText: "Letter or door position (not necessary for community code)",
-        city: "City",
         cityName: "City name",
-        postalCode: "Postal Code",
-        province: "Province",
         provinceName: "Province name",
-        country: "Country",
 
         // Community Code Section
-        communityCode: "Community Code",
         uniqueLocationIdentifier: "Unique location identifier",
         willBeGeneratedAutomatically: "Will be generated automatically",
         generateCode: "Generate Code",
@@ -220,7 +213,6 @@ export const translations = {
         enterEmail: "Enter your email",
         password: "Password",
         enterPassword: "Enter your password",
-        confirmPassword: "Confirm Password",
         confirmYourPassword: "Confirm your password",
         fullName: "Full Name",
         enterFullName: "Enter your full name",
@@ -233,7 +225,6 @@ export const translations = {
         createAccount: "Create Account",
         registerToStart: "Register to start using our services",
         createPassword: "Create a password",
-        alreadyHaveAccount: "Already have an account?",
 
         // Home Page & General Content
         homeTitle: "HuBiT - Community Services Hub",
@@ -260,10 +251,7 @@ export const translations = {
         virtuousCircle: "This integration creates a virtuous circle where all participants benefit: better services for communities, more business opportunities for providers and more efficient management for administrators.",
 
         // User Roles & Dashboards
-        communityMember: "Community Member",
-        serviceProvider: "Service Provider",
         estateAdministrator: "Estate Administrator",
-        particular: "Individual",
         welcomeToDashboard: "Welcome to the Dashboard",
         selectUserType: "Select your user type",
         selectUserTypeDesc: "Choose the option that best describes your profile to access specific functionalities",
@@ -353,7 +341,6 @@ export const translations = {
         managePublicInfo: "Manage your company's public information",
         mainInformation: "Main Information",
         businessDetails: "Business Details",
-        companyName: "Company Name",
         description: "Description",
         website: "Website",
         phone: "Phone",
@@ -507,7 +494,6 @@ export const translations = {
         service: "Service",
         cost: "Cost",
         provider: "Provider",
-        status: "Status",
         actions: "Actions",
         title: "Title",
         type: "Type",
@@ -609,7 +595,6 @@ export const translations = {
         help: "Ayuda",
         whitepaper: "Whitepaper",
         hubit: "HuBiT",
-        login: "Iniciar Sesión",
         register: "Registrarse",
 
         // NEW: Property Manager Translations
@@ -664,15 +649,10 @@ export const translations = {
         doorUnit: "Mano / Puerta",
         doorExample: "Ej: A, B, Izda, Dcha",
         doorHelpText: "Letra o posición de la puerta (no necesario para el código de comunidad)",
-        city: "Ciudad",
         cityName: "Nombre de la ciudad",
-        postalCode: "Código Postal",
-        province: "Provincia",
         provinceName: "Nombre de la provincia",
-        country: "País",
 
         // Community Code Section
-        communityCode: "Código de Comunidad",
         uniqueLocationIdentifier: "Identificador único de la ubicación",
         willBeGeneratedAutomatically: "Se generará automáticamente",
         generateCode: "Generar Código",
@@ -817,7 +797,6 @@ export const translations = {
         enterEmail: "Introduce tu correo electrónico",
         password: "Contraseña",
         enterPassword: "Introduce tu contraseña",
-        confirmPassword: "Confirmar contraseña",
         confirmYourPassword: "Confirma tu contraseña",
         fullName: "Nombre completo",
         enterFullName: "Introduce tu nombre completo",
@@ -830,7 +809,6 @@ export const translations = {
         createAccount: "Crear cuenta",
         registerToStart: "Regístrate para empezar a usar nuestros servicios",
         createPassword: "Crea una contraseña",
-        alreadyHaveAccount: "¿Ya tienes una cuenta?",
 
         // Home Page & General Content
         homeTitle: "HuBiT - Hub de servicios comunitarios",
@@ -857,10 +835,7 @@ export const translations = {
         virtuousCircle: "Esta integración crea un círculo virtuoso donde todos los participantes se benefician: mejores servicios para las comunidades, más oportunidades de negocio para los proveedores y una gestión más eficiente para los administradores.",
 
         // User Roles & Dashboards
-        communityMember: "Miembro de la Comunidad",
-        serviceProvider: "Proveedor de Servicios",
         estateAdministrator: "Administrador de Fincas",
-        particular: "Particular",
         welcomeToDashboard: "Bienvenido al Panel de Control",
         selectUserType: "Selecciona tu tipo de usuario",
         selectUserTypeDesc: "Elige la opción que mejor describa tu perfil para acceder a las funcionalidades específicas",
@@ -950,7 +925,6 @@ export const translations = {
         managePublicInfo: "Gestiona la información pública de tu empresa",
         mainInformation: "Información Principal",
         businessDetails: "Detalles del Negocio",
-        companyName: "Nombre de la empresa",
         description: "Descripción",
         website: "Página Web",
         phone: "Teléfono",
@@ -1104,7 +1078,6 @@ export const translations = {
         service: "Servicio",
         cost: "Coste",
         provider: "Proveedor",
-        status: "Estado",
         actions: "Acciones",
         title: "Título",
         type: "Tipo",
