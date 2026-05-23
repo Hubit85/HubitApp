@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Sparkles, AlertTriangle, AlertCircle, LogIn } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { toast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -116,7 +117,7 @@ export default function LoginPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       className="pl-10 h-12 border-neutral-300 focus:border-blue-500 focus:ring-blue-500"
-                      disabled={loading}
+                      disabled={isLoading || loading}
                     />
                   </div>
                 </div>
@@ -135,7 +136,7 @@ export default function LoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       className="pl-10 h-12 border-neutral-300 focus:border-blue-500 focus:ring-blue-500"
-                      disabled={loading}
+                      disabled={isLoading || loading}
                     />
                   </div>
                 </div>
@@ -150,9 +151,9 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                  disabled={loading}
+                  disabled={isLoading || loading}
                 >
-                  {loading ? (
+                  {isLoading || loading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       {t("loading")}
