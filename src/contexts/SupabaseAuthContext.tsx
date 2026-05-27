@@ -1111,7 +1111,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               console.warn("⚠️ CRITICAL: No verified roles available");
               setActiveRole(null);
             }
-          }
         } else {
           console.log("✅ CRITICAL: User roles loaded successfully:", {
             total: roles.length,
