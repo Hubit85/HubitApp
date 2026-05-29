@@ -875,7 +875,7 @@ function RegisterPageContent() {
                 // ENHANCED: Post-registration validation to ensure all roles were created correctly
                 console.log('✅ Enhanced Registration successful, performing comprehensive post-registration validation...');
 
-                let registrationSummary = `¡Cuenta creada exitosamente!`;
+                const registrationSummary = `¡Cuenta creada exitosamente!`;
 
                 setSuccessMessage(registrationSummary + " Verificando configuración final...");
 

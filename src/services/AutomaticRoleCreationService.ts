@@ -55,7 +55,7 @@ export class AutomaticRoleCreationService {
     }
 
     // Only honor roles explicitly requested by the registration flow.
-    let finalAdditionalRoles = [...additionalRoles];
+    const finalAdditionalRoles = [...additionalRoles];
 
     // Calculate total roles to create.
     const totalRolesRequested = 1 + finalAdditionalRoles.length; // 1 primary + requested additionals
