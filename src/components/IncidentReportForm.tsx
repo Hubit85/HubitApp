@@ -61,9 +61,11 @@ interface IncidentReportFormProps {
 
 interface PropertyAdministrator {
   id: string;
+  role_id?: string;
   user_id: string;
   company_name: string;
   contact_email: string;
+  community_id?: string | null;
 }
 
 export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormProps) {
@@ -126,6 +128,57 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     if (!user?.id) return;
 
     try {
+      const communityMemberRole = userRoles.find(role =>
+        role.role_type === 'community_member' && role.is_verified
+      );
+
+      if (communityMemberRole?.id) {
+        const { data: managedCommunity, error: managedError } = await supabase
+          .from('managed_communities')
+          .select('property_administrator_id, community_id')
+          .eq('community_member_id', communityMemberRole.id)
+          .eq('relationship_status', 'active')
+          .order('established_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (managedError && managedError.code !== 'PGRST116') {
+          console.warn('Error loading active managed community:', managedError);
+        }
+
+        if (managedCommunity?.property_administrator_id) {
+          const { data: adminRole, error: adminRoleError } = await supabase
+            .from('user_roles')
+            .select(`
+              id,
+              user_id,
+              role_specific_data,
+              profiles!user_roles_user_id_fkey(full_name, email)
+            `)
+            .eq('id', managedCommunity.property_administrator_id)
+            .eq('role_type', 'property_administrator')
+            .eq('is_verified', true)
+            .single();
+
+          if (adminRoleError) {
+            console.warn('Error loading managed administrator role:', adminRoleError);
+          } else if (adminRole) {
+            const adminProfile = adminRole.profiles as any;
+            const roleData = adminRole.role_specific_data as any || {};
+
+            setAssignedAdministrator({
+              id: adminRole.id,
+              role_id: adminRole.id,
+              user_id: adminRole.user_id,
+              company_name: roleData?.company_name || adminProfile?.full_name || 'Administrador de Fincas',
+              contact_email: roleData?.business_email || adminProfile?.email || '',
+              community_id: managedCommunity.community_id
+            });
+            return;
+          }
+        }
+      }
+
       // Look for approved administrator assignment
       const { data: assignment, error } = await supabase
         .from('community_member_administrators')
@@ -167,9 +220,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
           if (matchingAdmin) {
             setAssignedAdministrator({
               id: assignment.id,
+              role_id: undefined,
               user_id: matchingAdmin.user_id,
               company_name: assignment.company_name,
-              contact_email: profile?.email ?? ''
+              contact_email: assignment.contact_email ?? '',
+              community_id: null
             });
           }
         }
@@ -421,6 +476,54 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     });
   };
 
+  const resolveIncidentCommunityId = async (administrator: PropertyAdministrator): Promise<string | null> => {
+    if (administrator.community_id) {
+      return administrator.community_id;
+    }
+
+    const property = formData.selectedProperty;
+    if (!property) {
+      return null;
+    }
+
+    const { data: existingCommunity, error: existingError } = await supabase
+      .from('communities')
+      .select('id')
+      .eq('administrator_id', administrator.user_id)
+      .eq('address', property.address)
+      .eq('city', property.city)
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle();
+
+    if (existingError && existingError.code !== 'PGRST116') {
+      throw existingError;
+    }
+
+    if (existingCommunity?.id) {
+      return existingCommunity.id;
+    }
+
+    const { data: createdCommunity, error: createError } = await supabase
+      .from('communities')
+      .insert({
+        name: property.name || property.address,
+        address: property.address,
+        city: property.city,
+        postal_code: property.postal_code,
+        administrator_id: administrator.user_id,
+        status: 'active'
+      })
+      .select('id')
+      .single();
+
+    if (createError) {
+      throw createError;
+    }
+
+    return createdCommunity?.id ?? null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -444,26 +547,26 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
+      const targetAdministrator = assignedAdministrator;
+
+      if (!targetAdministrator) {
+        setError("No tienes un administrador de fincas asignado para gestionar incidencias. Solicita la asignación de un administrador antes de reportar una incidencia.");
+        return;
+      }
+
+      setSuccessMessage("Preparando incidencia...");
+      const communityId = await resolveIncidentCommunityId(targetAdministrator);
+
+      if (!communityId) {
+        setError("No se pudo resolver una comunidad válida para esta incidencia. Contacta con tu administrador de fincas.");
+        return;
+      }
+
       // Upload photos if any
       let photoUrls: string[] = [];
       if (formData.photos.length > 0) {
         setSuccessMessage("Subiendo fotografías...");
         photoUrls = await uploadPhotosToStorage(formData.photos);
-      }
-
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
       }
 
       // Build location details including property info
@@ -483,8 +586,8 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         images: photoUrls.length > 0 ? photoUrls : null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
-        administrator_id: primaryAdministratorId,
+        community_id: communityId,
+        administrator_id: targetAdministrator.user_id,
         admin_notes: null,
         reviewed_at: null,
         reviewed_by: null
@@ -494,6 +597,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         title: incidentData.title,
         reporter_id: incidentData.reporter_id,
         administrator_id: incidentData.administrator_id,
+        community_id: incidentData.community_id,
         category: incidentData.category,
         urgency: incidentData.urgency,
         work_location: incidentData.work_location
@@ -524,8 +628,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         console.log('Incident created successfully:', incident.id);
 
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
-        
         if (targetAdministrator) {
           try {
             const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
@@ -601,7 +703,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         } else if (err.message.includes('23503')) {
           errorMessage = "Error de configuración de la base de datos. Contacta con soporte.";
         } else if (err.message.includes('RLS') || err.message.includes('policy')) {
-          errorMessage = "Error de permisos del sistema. La incidencia fue reportada pero las fotos no se pudieron guardar.";
+          errorMessage = "Error de permisos del sistema. No se pudo reportar la incidencia.";
         } else if (err.message.includes('community_id')) {
           errorMessage = "Error de comunidad no válida. Contacta con tu administrador de fincas.";
         } else {
