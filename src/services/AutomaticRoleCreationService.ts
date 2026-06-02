@@ -55,7 +55,7 @@ export class AutomaticRoleCreationService {
     }
 
     // Only create roles explicitly selected by the registrant.
-    let finalAdditionalRoles = [...additionalRoles];
+    const finalAdditionalRoles = [...additionalRoles];
 
     // Calculate total roles to create
     const totalRolesRequested = 1 + finalAdditionalRoles.length; // 1 primary + additionals
