@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { stripeService } from '@/services/StripeService';
 import { paypalService } from '@/services/PayPalService';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomUUID();
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {
@@ -12,6 +12,10 @@ interface AuthenticatedRequest extends NextApiRequest {
     email: string;
     role: string;
   };
+}
+
+function canManageResource(req: AuthenticatedRequest, ownerUserId?: string | null) {
+  return req.user?.role === 'administrator' || (!!ownerUserId && ownerUserId === req.user?.userId);
 }
 
 function authenticateToken(req: AuthenticatedRequest, res: NextApiResponse, next: () => void) {
@@ -42,8 +46,15 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
         let refund;
 
         if (provider === 'stripe') {
+          const paymentIntent = await stripeService.retrievePaymentIntent(id as string);
+          if (!canManageResource(req, paymentIntent.metadata?.userId)) {
+            return res.status(403).json({ message: 'You are not allowed to refund this payment' });
+          }
           refund = await stripeService.createRefund(id as string, amount, reason);
         } else if (provider === 'paypal') {
+          if (req.user?.role !== 'administrator') {
+            return res.status(403).json({ message: 'PayPal refunds require administrator verification' });
+          }
           refund = await paypalService.createRefund(id as string, amount, 'EUR');
         } else {
           return res.status(400).json({ message: 'Invalid payment provider' });

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { stripeService } from '@/services/StripeService';
 import { paypalService } from '@/services/PayPalService';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomUUID();
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {
@@ -12,6 +12,10 @@ interface AuthenticatedRequest extends NextApiRequest {
     email: string;
     role: string;
   };
+}
+
+function canManageResource(req: AuthenticatedRequest, ownerUserId?: string | null) {
+  return req.user?.role === 'administrator' || (!!ownerUserId && ownerUserId === req.user?.userId);
 }
 
 function authenticateToken(req: AuthenticatedRequest, res: NextApiResponse, next: () => void) {
@@ -40,9 +44,18 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
         const userId = req.user?.userId;
 
         if (provider === 'stripe') {
+          const subscription = await stripeService.retrieveSubscription(id as string);
+          if (!canManageResource(req, subscription.metadata?.userId)) {
+            return res.status(403).json({ message: 'You are not allowed to cancel this subscription' });
+          }
           await stripeService.cancelSubscription(id as string, immediately);
         } else if (provider === 'paypal') {
+          if (req.user?.role !== 'administrator') {
+            return res.status(403).json({ message: 'PayPal subscription cancellation requires administrator verification' });
+          }
           await paypalService.cancelSubscription(id as string, 'User requested cancellation');
+        } else {
+          return res.status(400).json({ message: 'Invalid subscription provider' });
         }
 
         const cancelledSubscription = {

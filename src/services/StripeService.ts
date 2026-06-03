@@ -198,6 +198,15 @@ class StripeService {
     }
   }
 
+  async retrievePaymentMethod(paymentMethodId: string): Promise<Stripe.PaymentMethod> {
+    try {
+      return await stripe.paymentMethods.retrieve(paymentMethodId);
+    } catch (error) {
+      console.error('Error retrieving Stripe payment method:', error);
+      throw new Error('Failed to retrieve payment method');
+    }
+  }
+
   async listPaymentMethods(customerId: string, type: string = 'card'): Promise<StripePaymentMethod[]> {
     try {
       const paymentMethods = await stripe.paymentMethods.list({
@@ -279,6 +288,15 @@ class StripeService {
     } catch (error) {
       console.error('Error canceling Stripe subscription:', error);
       throw new Error('Failed to cancel subscription');
+    }
+  }
+
+  async retrieveSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
+    try {
+      return await stripe.subscriptions.retrieve(subscriptionId);
+    } catch (error) {
+      console.error('Error retrieving Stripe subscription:', error);
+      throw new Error('Failed to retrieve subscription');
     }
   }
 

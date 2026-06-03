@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { stripeService } from '@/services/StripeService';
 import { v4 as uuidv4 } from 'uuid';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomUUID();
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {

@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import { stripeService } from '@/services/StripeService';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomUUID();
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {
@@ -65,6 +65,10 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
       }
     } else if (req.method === 'DELETE') {
       try {
+        if (req.user?.role !== 'administrator') {
+          return res.status(403).json({ message: 'Payment method deletion requires administrator verification' });
+        }
+
         await stripeService.detachPaymentMethod(id as string);
 
         res.status(200).json({
