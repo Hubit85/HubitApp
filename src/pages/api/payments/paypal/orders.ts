@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import { paypalService } from '@/services/PayPalService';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomUUID();
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {
