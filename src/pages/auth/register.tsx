@@ -774,7 +774,7 @@ function RegisterPageContent() {
             const primaryRole = orderedRoles[0];
 
             // Combine only the roles the user explicitly selected.
-            const finalAdditionalRoles: Array<{
+            let finalAdditionalRoles: Array<{
                 roleType: 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
                 roleSpecificData: Record<string, any>;
             }> = [];
