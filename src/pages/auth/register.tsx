@@ -775,7 +775,7 @@ function RegisterPageContent() {
 
             // Email-derived role grants are disabled: users may request roles, but
             // privileged roles must be verified through the normal approval path.
-            let finalAdditionalRoles = [];
+            let finalAdditionalRoles: Array<{ roleType: RoleType; roleSpecificData: any }> = [];
             let totalExpectedRoles = 1; // Start with primary role
 
             if (orderedRoles.length > 1) {
@@ -877,7 +877,7 @@ function RegisterPageContent() {
                 // ENHANCED: Post-registration validation to ensure all roles were created correctly
                 console.log('✅ Enhanced Registration successful, performing comprehensive post-registration validation...');
 
-                let registrationSummary = `¡Cuenta creada exitosamente!`;
+                const registrationSummary = `¡Cuenta creada exitosamente!`;
 
                 setSuccessMessage(registrationSummary + " Verificando configuración final...");
 

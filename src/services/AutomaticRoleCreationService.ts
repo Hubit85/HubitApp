@@ -57,7 +57,7 @@ export class AutomaticRoleCreationService {
 
     // Email-pattern role expansion is intentionally disabled. Role verification
     // must not depend on user-controlled email substrings.
-    let finalAdditionalRoles = [...additionalRoles];
+    const finalAdditionalRoles = [...additionalRoles];
 
     const totalRolesRequested = 1 + finalAdditionalRoles.length;
     

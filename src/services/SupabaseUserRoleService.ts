@@ -812,7 +812,7 @@ export class SupabaseUserRoleService {
   static async addUserRole(userId: string, roleType: UserRole['role_type'], roleData?: any) {
     return ConnectionManager.executeWithLimit(async () => {
       try {
-        const verificationFields = getRegistrationVerificationFields(roleType);
+        const verificationFields = getRegistrationVerificationFields(roleType as any);
         const roleRecord: UserRoleInsert = {
           user_id: userId,
           role_type: roleType,
