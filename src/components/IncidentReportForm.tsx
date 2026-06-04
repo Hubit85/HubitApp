@@ -66,6 +66,12 @@ interface PropertyAdministrator {
   contact_email: string;
 }
 
+interface IncidentRouting {
+  communityId: string;
+  administratorUserId: string;
+  targetAdministrator: PropertyAdministrator;
+}
+
 export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormProps) {
   const { user, profile, userRoles } = useSupabaseAuth();
   const [formData, setFormData] = useState<IncidentFormData>({
@@ -345,6 +351,105 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     }));
   };
 
+  const resolveIncidentRouting = async (): Promise<IncidentRouting> => {
+    const communityMemberRole = userRoles.find(role =>
+      role.role_type === 'community_member' && role.is_verified
+    );
+
+    if (communityMemberRole?.id) {
+      const { data: managedCommunities, error: managedError } = await supabase
+        .from('managed_communities')
+        .select('community_id, property_administrator_id')
+        .eq('community_member_id', communityMemberRole.id)
+        .eq('relationship_status', 'active')
+        .not('community_id', 'is', null)
+        .limit(1);
+
+      if (managedError) {
+        console.warn('Error loading managed community relationship:', managedError);
+      }
+
+      const managedCommunity = managedCommunities?.[0];
+      if (managedCommunity?.community_id && managedCommunity.property_administrator_id) {
+        const { data: administratorRole, error: administratorRoleError } = await supabase
+          .from('user_roles')
+          .select(`
+            id,
+            user_id,
+            role_specific_data,
+            profiles!user_roles_user_id_fkey(full_name, email)
+          `)
+          .eq('id', managedCommunity.property_administrator_id)
+          .eq('role_type', 'property_administrator')
+          .eq('is_verified', true)
+          .maybeSingle();
+
+        if (administratorRoleError) {
+          console.warn('Error loading managed administrator role:', administratorRoleError);
+        }
+
+        if (administratorRole?.user_id) {
+          const roleData = administratorRole.role_specific_data as any || {};
+          const profileData = administratorRole.profiles as any;
+          const existingAdmin = propertyAdministrators.find(admin => admin.user_id === administratorRole.user_id);
+
+          return {
+            communityId: managedCommunity.community_id,
+            administratorUserId: administratorRole.user_id,
+            targetAdministrator: existingAdmin || {
+              id: administratorRole.id,
+              user_id: administratorRole.user_id,
+              company_name: roleData.company_name || profileData?.full_name || 'Administrador de Fincas',
+              contact_email: roleData.business_email || profileData?.email || ''
+            }
+          };
+        }
+      }
+    }
+
+    const targetAdministrator = assignedAdministrator || propertyAdministrators[0];
+    if (!targetAdministrator) {
+      throw new Error('NO_ADMINISTRATOR_AVAILABLE');
+    }
+
+    const { data: communities, error: communitiesError } = await supabase
+      .from('communities')
+      .select('id, name, address, city')
+      .eq('administrator_id', targetAdministrator.user_id)
+      .eq('status', 'active');
+
+    if (communitiesError) {
+      console.error('Error loading administrator communities:', communitiesError);
+      throw communitiesError;
+    }
+
+    const normalize = (value?: string | null) => value?.trim().toLowerCase() || '';
+    const propertyAddress = normalize(formData.selectedProperty?.address);
+    const propertyCity = normalize(formData.selectedProperty?.city);
+    const propertyName = normalize(formData.selectedProperty?.name);
+
+    const matchingCommunity = communities?.find(community => {
+      const communityAddress = normalize(community.address);
+      const communityCity = normalize(community.city);
+      const communityName = normalize(community.name);
+
+      return (
+        (!!propertyAddress && communityAddress === propertyAddress && (!propertyCity || communityCity === propertyCity)) ||
+        (!!propertyName && communityName === propertyName)
+      );
+    }) || (communities?.length === 1 ? communities[0] : null);
+
+    if (!matchingCommunity) {
+      throw new Error('NO_VALID_COMMUNITY');
+    }
+
+    return {
+      communityId: matchingCommunity.id,
+      administratorUserId: targetAdministrator.user_id,
+      targetAdministrator
+    };
+  };
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -444,26 +549,13 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
-      // Upload photos if any
+      const routing = await resolveIncidentRouting();
+
+      // Upload photos only after validating that the incident can be routed.
       let photoUrls: string[] = [];
       if (formData.photos.length > 0) {
         setSuccessMessage("Subiendo fotografías...");
         photoUrls = await uploadPhotosToStorage(formData.photos);
-      }
-
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
       }
 
       // Build location details including property info
@@ -483,8 +575,8 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         images: photoUrls.length > 0 ? photoUrls : null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
-        administrator_id: primaryAdministratorId,
+        community_id: routing.communityId,
+        administrator_id: routing.administratorUserId,
         admin_notes: null,
         reviewed_at: null,
         reviewed_by: null
@@ -494,6 +586,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         title: incidentData.title,
         reporter_id: incidentData.reporter_id,
         administrator_id: incidentData.administrator_id,
+        community_id: incidentData.community_id,
         category: incidentData.category,
         urgency: incidentData.urgency,
         work_location: incidentData.work_location
@@ -524,7 +617,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         console.log('Incident created successfully:', incident.id);
 
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+        const targetAdministrator = routing.targetAdministrator;
         
         if (targetAdministrator) {
           try {
@@ -594,7 +687,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       let errorMessage = "Error al reportar la incidencia. Por favor, inténtalo de nuevo.";
       
       if (err instanceof Error) {
-        if (err.message.includes('administrator_id')) {
+        if (err.message.includes('NO_ADMINISTRATOR_AVAILABLE')) {
+          errorMessage = "No se encontró un administrador de fincas verificado para gestionar la incidencia.";
+        } else if (err.message.includes('NO_VALID_COMMUNITY')) {
+          errorMessage = "No se encontró una comunidad activa válida para esta propiedad. Contacta con tu administrador de fincas.";
+        } else if (err.message.includes('administrator_id')) {
           errorMessage = "Error de configuración del sistema. No se encontró un administrador válido.";
         } else if (err.message.includes('uuid')) {
           errorMessage = "Error de datos inválidos. Por favor, contacta con soporte técnico.";

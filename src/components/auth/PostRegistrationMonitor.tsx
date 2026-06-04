@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { getRegistrationVerificationFields } from '@/lib/roleVerification';
 
 interface PostRegistrationMonitorProps {
   onRolesVerified: (rolesCount: number) => void;
@@ -95,11 +96,13 @@ export function PostRegistrationMonitor({
           if (profile && profile.user_type) {
             console.log('🆘 MONITOR: Creating emergency role:', profile.user_type);
 
+            const roleType = profile.user_type as any;
+            const verificationFields = getRegistrationVerificationFields(roleType);
             const emergencyRoleData = {
               user_id: user.id,
-              role_type: profile.user_type as any,
-              is_verified: true,
-              is_active: true,
+              role_type: roleType,
+              ...verificationFields,
+              is_active: verificationFields.is_verified,
               role_specific_data: {
                 full_name: profile.full_name || 'Usuario',
                 phone: '',
@@ -108,9 +111,6 @@ export function PostRegistrationMonitor({
                 postal_code: '',
                 country: 'España'
               },
-              verification_confirmed_at: new Date().toISOString(),
-              verification_token: null,
-              verification_expires_at: null,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             };

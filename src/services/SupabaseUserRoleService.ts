@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole, UserRoleInsert, UserRoleUpdate } from "@/integrations/supabase/types";
+import { getRegistrationVerificationFields } from "@/lib/roleVerification";
 
 // Connection pool to prevent too many simultaneous requests
 class ConnectionManager {
@@ -811,15 +812,13 @@ export class SupabaseUserRoleService {
   static async addUserRole(userId: string, roleType: UserRole['role_type'], roleData?: any) {
     return ConnectionManager.executeWithLimit(async () => {
       try {
+        const verificationFields = getRegistrationVerificationFields(roleType as any);
         const roleRecord: UserRoleInsert = {
           user_id: userId,
           role_type: roleType,
-          is_verified: true, // IMMEDIATELY VERIFIED - NO EMAIL VERIFICATION NEEDED
+          ...verificationFields,
           is_active: false,
           role_specific_data: roleData || {},
-          verification_confirmed_at: new Date().toISOString(), // IMMEDIATELY CONFIRMED
-          verification_token: null, // NO TOKEN NEEDED
-          verification_expires_at: null, // NO EXPIRATION NEEDED
         };
 
         // Use timeout approach instead of abortSignal
