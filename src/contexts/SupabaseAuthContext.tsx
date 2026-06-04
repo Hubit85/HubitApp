@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Profile, ProfileInsert, UserRoleInsert } from "@/integrations/supabase/types";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
 import { PropertyAutoService, UserPropertyData } from "@/services/PropertyAutoService";
+import { getRegistrationVerificationFields } from "@/lib/roleVerification";
 
 interface AuthContextType {
   user: User | null;
@@ -446,16 +447,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   console.log(`🔄 Role creation attempt ${roleCreationAttempts}/${maxRoleAttempts} for ${roleRequest.roleType}`);
                   
                   try {
-                    // Create the role record - IMMEDIATELY VERIFIED AND ACTIVE
+                    const verificationFields = getRegistrationVerificationFields(roleRequest.roleType as ValidRoleType);
                     const roleInsertData: UserRoleInsert = {
                       user_id: data.user.id,
                       role_type: roleRequest.roleType as ValidRoleType,
-                      is_verified: true, // IMMEDIATELY VERIFIED
-                      is_active: isFirstRole, // First role is active by default
+                      ...verificationFields,
+                      is_active: isFirstRole && verificationFields.is_verified,
                       role_specific_data: processedRoleData,
-                      verification_confirmed_at: new Date().toISOString(), // IMMEDIATELY CONFIRMED
-                      verification_token: null, // NO TOKEN NEEDED
-                      verification_expires_at: null, // NO EXPIRATION NEEDED
                       created_at: new Date().toISOString(),
                       updated_at: new Date().toISOString()
                     };
@@ -981,11 +979,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             if (ageMinutes < 60) {
               console.log('🔧 CRITICAL: Creating emergency role for very recent broken registration...');
               
+              const roleType = profileCheck.user_type as any || 'particular';
+              const verificationFields = getRegistrationVerificationFields(roleType);
               const emergencyRoleData: UserRoleInsert = {
                 user_id: userObject.id,
-                role_type: profileCheck.user_type as any || 'particular',
-                is_verified: true,
-                is_active: true,
+                role_type: roleType,
+                ...verificationFields,
+                is_active: verificationFields.is_verified,
                 role_specific_data: {
                   full_name: userObject.user_metadata?.full_name || 'Usuario',
                   phone: userObject.user_metadata?.phone || '',
@@ -993,10 +993,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   city: '',
                   postal_code: '',
                   country: 'España'
-                },
-                verification_confirmed_at: new Date().toISOString(),
-                verification_token: null,
-                verification_expires_at: null
+                }
               };
 
               const { data: emergencyRole, error: emergencyError } = await supabase
@@ -1048,194 +1045,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             .single();
           
           if (profileCheck && profileCheck.email) {
-            const profileAge = new Date(profileCheck.created_at || new Date().toISOString());
-            const now = new Date();
-            const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
-            
-            // SPECIFIC CHECK: Users who should have multiple roles but only show one - MEJORADO PARA TODOS LOS USUARIOS
-            const shouldHaveMultipleRoles = (
-              profileCheck.email.includes('alain') ||
-              profileCheck.email.includes('espinosa') ||
-              profileCheck.email === 'alainespinosaroman@gmail.com' || // Detección específica
-              profileCheck.email.includes('ddayanacastro') ||
-              profileCheck.email.includes('castro') ||
-              profileCheck.email.includes('pipaon') ||
-              profileCheck.email.includes('borja') ||
-              (ageMinutes < 240 && profileCheck.email.match(/\w+\.\w+@\w+\.\w+/)) // Complex email patterns from recent registrations
-            );
-            
-            if (shouldHaveMultipleRoles) {
-              console.log('🎯 CRITICAL: User should have multiple roles but only has one - investigating...');
-              console.log('🎯 ESPECÍFICO: Detectado usuario con un solo rol:', profileCheck.email);
-              
-              // INVESTIGATION: Check if user registered with multiple role intent
-              console.log(`📊 CRITICAL: User ${profileCheck.email} analysis:`, {
-                currentRoles: roles.length,
-                roleTypes: roles.map(r => r.role_type),
-                profileAge: ageMinutes.toFixed(1) + ' minutes',
-                shouldHaveMultiple: shouldHaveMultipleRoles
-              });
-              
-              // RECOVERY ACTION: Offer to add missing typical roles
-              try {
-                console.log('🔄 CRITICAL: Adding missing roles for multi-role user...');
-                
-                const { AutomaticRoleCreationService } = await import('@/services/AutomaticRoleCreationService');
-                
-                const existingRoleType = roles[0].role_type;
-                const missingRoles: Array<{roleType: any, roleSpecificData: any}> = [];
-                
-                // DINÁMICO: Determinar qué roles faltan basándose en el email
-                let userName = profileCheck.email?.split('@')[0] || 'Usuario';
-                let expectedAdditionalRoles: string[] = [];
-                
-                if (profileCheck.email?.includes('alain') || profileCheck.email?.includes('espinosa')) {
-                  userName = 'alain espinosa';
-                  expectedAdditionalRoles = ['community_member', 'service_provider'];
-                } else if (profileCheck.email?.includes('ddayanacastro') || profileCheck.email?.includes('castro')) {
-                  userName = 'Dayana Castro';
-                  expectedAdditionalRoles = ['community_member', 'service_provider', 'property_administrator'];
-                } else if (profileCheck.email?.includes('borja') || profileCheck.email?.includes('pipaon')) {
-                  userName = 'Borja Pipaón';
-                  expectedAdditionalRoles = ['community_member', 'service_provider'];
-                } else {
-                  userName = profileCheck.email?.split('@')[0] || 'Usuario';
-                  expectedAdditionalRoles = ['community_member'];
-                }
-                
-                // Filtrar roles que ya existen
-                const currentRoleTypes = roles.map(r => r.role_type);
-                const actuallyMissingRoles = expectedAdditionalRoles.filter(role => !currentRoleTypes.includes(role));
-                
-                console.log('🔍 ANÁLISIS DE ROLES:', {
-                  usuario: userName,
-                  rolesActuales: currentRoleTypes,
-                  rolesEsperados: expectedAdditionalRoles,
-                  rolesFaltantes: actuallyMissingRoles
-                });
-                
-                // Construir roles faltantes
-                for (const missingRole of actuallyMissingRoles) {
-                  if (missingRole === 'community_member') {
-                    missingRoles.push({
-                      roleType: 'community_member',
-                      roleSpecificData: {
-                        full_name: userName,
-                        phone: '',
-                        address: '',
-                        city: '',
-                        postal_code: '',
-                        country: 'España',
-                        community_code: 'COM-' + profileCheck.email?.split('@')[0].toUpperCase() + '-' + Date.now().toString().slice(-6)
-                      }
-                    });
-                  }
-                  
-                  if (missingRole === 'service_provider') {
-                    missingRoles.push({
-                      roleType: 'service_provider',
-                      roleSpecificData: {
-                        company_name: userName,
-                        company_address: '',
-                        company_postal_code: '',
-                        company_city: '',
-                        company_country: 'España',
-                        cif: '',
-                        business_email: profileCheck.email,
-                        business_phone: '',
-                        selected_services: [],
-                        service_costs: {}
-                      }
-                    });
-                  }
-                  
-                  if (missingRole === 'property_administrator') {
-                    missingRoles.push({
-                      roleType: 'property_administrator',
-                      roleSpecificData: {
-                        company_name: userName + ' Gestión',
-                        company_address: '',
-                        company_postal_code: '',
-                        company_city: '',
-                        company_country: 'España',
-                        cif: '',
-                        business_email: profileCheck.email,
-                        business_phone: '',
-                        professional_number: ''
-                      }
-                    });
-                  }
-                }
-                
-                if (missingRoles.length > 0) {
-                  console.log(`🔄 CRITICAL: Adding ${missingRoles.length} missing roles for ${profileCheck.email}...`);
-                  
-                  const enhancementOptions = {
-                    userId: userObject.id,
-                    email: profileCheck.email,
-                    primaryRole: existingRoleType as any,
-                    additionalRoles: missingRoles,
-                    userData: {
-                      full_name: userName,
-                      user_type: existingRoleType,
-                      phone: '',
-                      address: '',
-                      city: '',
-                      postal_code: '',
-                      country: 'España',
-                      email: profileCheck.email
-                    }
-                  };
-                  
-                  const enhancementResult = await AutomaticRoleCreationService.createAllRolesAutomatically(enhancementOptions);
-                  
-                  if (enhancementResult.success && enhancementResult.rolesCreated > 0) {
-                    console.log(`✅ CRITICAL: Successfully added ${enhancementResult.rolesCreated} missing roles for ${profileCheck.email}!`);
-                    
-                    // Reload all roles
-                    const { data: updatedRoles } = await supabase
-                      .from('user_roles')
-                      .select('*')
-                      .eq('user_id', userObject.id);
-                    
-                    if (updatedRoles && updatedRoles.length > 1) {
-                      console.log(`🎉 CRITICAL: Role enhancement complete - ${updatedRoles.length} total roles for ${profileCheck.email}`);
-                      setUserRoles(updatedRoles as UserRole[]);
-                      
-                      // Keep the current active role or set first verified role
-                      const activeRole = updatedRoles.find(r => r.is_active) || updatedRoles.find(r => r.is_verified) || updatedRoles[0];
-                      setActiveRole(activeRole as UserRole);
-                      
-                      // Create enhancement notification
-                      try {
-                        await supabase
-                          .from('notifications')
-                          .insert({
-                            user_id: userObject.id,
-                            title: 'Roles completados automáticamente ✨',
-                            message: `Se han añadido ${enhancementResult.rolesCreated} roles adicionales a tu cuenta (${updatedRoles.map(r => r.role_type).join(', ')}). Ahora tienes acceso completo a ${updatedRoles.length} roles en la plataforma.`,
-                            type: 'success' as const,
-                            category: 'system' as const,
-                            read: false
-                          });
-                      } catch (notificationError) {
-                        console.warn('Could not create enhancement notification:', notificationError);
-                      }
-                      
-                      // Update roles variable for the rest of the function
-                      roles = updatedRoles as UserRole[];
-                    }
-                  } else {
-                    console.warn('❌ CRITICAL: Role enhancement failed for user:', enhancementResult.message);
-                  }
-                }
-                
-              } catch (enhancementError) {
-                console.error('❌ CRITICAL: Role enhancement system error:', enhancementError);
-              }
-            }
-            
-            // Continue with normal single-role processing if no enhancement occurred
+            console.log("✅ CRITICAL: User has a single configured role; skipping email-derived role recovery:", {
+              email: profileCheck.email,
+              roleTypes: roles.map(r => r.role_type)
+            });
+
             console.log("✅ CRITICAL: User roles loaded successfully:", {
               total: roles.length,
               types: roles.map(r => r.role_type),

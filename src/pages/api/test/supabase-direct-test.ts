@@ -1,8 +1,13 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import supabaseServer from '@/lib/supabaseServer';
+import { requireDiagnosticsAccess } from '@/lib/apiGuards';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (!requireDiagnosticsAccess(req, res)) {
+    return;
+  }
+
   try {
     console.log('🧪 Iniciando prueba directa de Supabase...');
     

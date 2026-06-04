@@ -1,7 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from "@supabase/supabase-js";
+import { requireDiagnosticsAccess } from '@/lib/apiGuards';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (!requireDiagnosticsAccess(req, res)) {
+    return;
+  }
+
   const results: any = {
     timestamp: new Date().toISOString(),
     environment: {},

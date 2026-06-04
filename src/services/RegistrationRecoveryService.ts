@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { UserRoleInsert } from "@/integrations/supabase/types";
+import { getRegistrationVerificationFields } from "@/lib/roleVerification";
 
 export interface RegistrationRecoveryOptions {
   userId: string;
@@ -172,15 +173,13 @@ export class RegistrationRecoveryService {
     roleData: any
   ): Promise<boolean> {
     try {
+      const verificationFields = getRegistrationVerificationFields(roleType);
       const roleInsertData: UserRoleInsert = {
         user_id: userId,
         role_type: roleType,
-        is_verified: true,
+        ...verificationFields,
         is_active: false, // Will be set active by ensureActiveRole if needed
         role_specific_data: roleData,
-        verification_confirmed_at: new Date().toISOString(),
-        verification_token: null,
-        verification_expires_at: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
