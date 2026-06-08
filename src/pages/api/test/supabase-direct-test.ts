@@ -3,6 +3,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import supabaseServer from '@/lib/supabaseServer';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
   try {
     console.log('🧪 Iniciando prueba directa de Supabase...');
     
