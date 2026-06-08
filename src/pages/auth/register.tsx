@@ -46,6 +46,11 @@ import { Header } from "@/components/layout/Header";
 
 type RoleType = 'particular' | 'community_member' | 'service_provider' | 'property_administrator';
 
+type AdditionalRoleSelection = {
+    roleType: RoleType;
+    roleSpecificData: Record<string, any>;
+};
+
 interface RoleFormData {
     // Campos comunes
     email: string;
@@ -773,7 +778,7 @@ function RegisterPageContent() {
             const orderedRoles = getOrderedRoles(formData.roles);
             const primaryRole = orderedRoles[0];
 
-            let finalAdditionalRoles = [];
+            let finalAdditionalRoles: AdditionalRoleSelection[] = [];
             let totalExpectedRoles = 1; // Start with primary role
 
             if (orderedRoles.length > 1) {
