@@ -1,9 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from "@supabase/supabase-js";
+import { blockProductionDiagnostics } from '@/lib/apiSecurity';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (blockProductionDiagnostics(res)) {
+    return;
   }
 
   try {
@@ -62,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       connectionTest,
       debug: {
         url_length: process.env.NEXT_PUBLIC_SUPABASE_URL?.length || 0,
-        service_key_prefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) || 'No disponible'
+        service_key_configured: !!process.env.SUPABASE_SERVICE_ROLE_KEY
       }
     });
 

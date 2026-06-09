@@ -1,7 +1,12 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
+import { blockProductionDiagnostics } from '@/lib/apiSecurity';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (blockProductionDiagnostics(res)) {
+    return;
+  }
+
   return res.status(200).json({
     timestamp: new Date().toISOString(),
     nodeEnv: process.env.NODE_ENV,
