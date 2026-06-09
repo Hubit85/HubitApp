@@ -13,8 +13,7 @@ import {
   X, Camera, Loader2, Shield, 
   CheckCircle, MapPin, Clock, AlertCircle, Home, FileImage
 } from "lucide-react";
-import PropertySelector from "@/components/PropertySelector";
-import type { Property } from "@/integrations/supabase/types";
+import PropertySelector, { type PropertyWithUnits } from "@/components/PropertySelector";
 
 // Service categories matching those in register.tsx
 const SERVICE_CATEGORIES = [
@@ -50,8 +49,8 @@ interface IncidentFormData {
   location: string;
   urgency: 'low' | 'normal' | 'high' | 'emergency';
   photos: File[];
-  selectedProperty?: Property;
-  selectedUnit?: any;
+  selectedProperty?: PropertyWithUnits;
+  selectedUnit?: { id: string; unit_number: string } | null;
 }
 
 interface IncidentReportFormProps {
@@ -298,11 +297,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setError("");
   };
 
-  const handlePropertySelection = (property: any, unit?: any) => {
+  const handlePropertySelection = (property: PropertyWithUnits, unit?: { id: string; unit_number: string } | null) => {
     setFormData(prev => ({
       ...prev,
       selectedProperty: property,
-      selectedUnit: unit
+      selectedUnit: unit ?? null
     }));
     setShowPropertySelector(false);
     setError("");
@@ -376,7 +375,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         // Use a simpler path structure to avoid RLS issues
         const filePath = `public/${fileName}`;
 
-        // Try uploading to a public bucket or create base64 encoded version as fallback
         try {
           const { error } = await supabase.storage
             .from('incident-photos')
@@ -396,11 +394,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
           uploadedUrls.push(publicUrl);
         } catch (storageError) {
-          console.warn('Storage upload failed, using base64 fallback:', storageError);
-          
-          // Fallback: convert to base64 and store as data URL
-          const base64 = await convertToBase64(photo);
-          uploadedUrls.push(base64);
+          console.error('Storage upload failed:', storageError);
         }
 
       } catch (uploadError) {
@@ -412,13 +406,71 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     return uploadedUrls;
   };
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
+  const resolveIncidentCommunityId = async (
+    selectedProperty: PropertyWithUnits,
+    administratorId: string
+  ): Promise<string> => {
+    const communityRoleIds = userRoles
+      .filter(role => role.role_type === 'community_member' && role.is_verified)
+      .map(role => role.id);
+
+    if (communityRoleIds.length > 0) {
+      const { data: managedCommunity, error: managedCommunityError } = await supabase
+        .from('managed_communities')
+        .select('community_id')
+        .in('community_member_id', communityRoleIds)
+        .eq('relationship_status', 'active')
+        .not('community_id', 'is', null)
+        .limit(1)
+        .maybeSingle();
+
+      if (managedCommunityError && managedCommunityError.code !== 'PGRST116') {
+        throw managedCommunityError;
+      }
+
+      if (managedCommunity?.community_id) {
+        return managedCommunity.community_id;
+      }
+    }
+
+    const { data: existingCommunity, error: existingCommunityError } = await supabase
+      .from('communities')
+      .select('id')
+      .eq('administrator_id', administratorId)
+      .eq('address', selectedProperty.address)
+      .eq('city', selectedProperty.city)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingCommunityError && existingCommunityError.code !== 'PGRST116') {
+      throw existingCommunityError;
+    }
+
+    if (existingCommunity?.id) {
+      return existingCommunity.id;
+    }
+
+    const { data: newCommunity, error: createCommunityError } = await supabase
+      .from('communities')
+      .insert({
+        name: selectedProperty.name,
+        address: selectedProperty.address,
+        city: selectedProperty.city,
+        postal_code: selectedProperty.postal_code,
+        administrator_id: administratorId,
+        status: 'active',
+        description: selectedProperty.community_code
+          ? `Comunidad creada desde incidencia para el código ${selectedProperty.community_code}`
+          : 'Comunidad creada desde incidencia'
+      })
+      .select('id')
+      .single();
+
+    if (createCommunityError) {
+      throw createCommunityError;
+    }
+
+    return newCommunity.id;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -444,27 +496,13 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
-      // Upload photos if any
-      let photoUrls: string[] = [];
-      if (formData.photos.length > 0) {
-        setSuccessMessage("Subiendo fotografías...");
-        photoUrls = await uploadPhotosToStorage(formData.photos);
+      if (!assignedAdministrator) {
+        setError("No hay un administrador de fincas verificado asignado a tu comunidad. Solicita la asignación antes de reportar incidencias.");
+        return;
       }
 
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
-      }
+      const primaryAdministratorId = assignedAdministrator.user_id;
+      const communityId = await resolveIncidentCommunityId(formData.selectedProperty, primaryAdministratorId);
 
       // Build location details including property info
       const locationDetails = formData.selectedProperty 
@@ -479,11 +517,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         urgency: formData.urgency,
         status: 'pending' as const,
         work_location: locationDetails,
-        special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unitNumber}` : null,
-        images: photoUrls.length > 0 ? photoUrls : null,
+        special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unit_number}` : null,
+        images: null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
+        community_id: communityId,
         administrator_id: primaryAdministratorId,
         admin_notes: null,
         reviewed_at: null,
@@ -523,8 +561,24 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       if (incident) {
         console.log('Incident created successfully:', incident.id);
 
+        if (formData.photos.length > 0) {
+          setSuccessMessage("Incidencia creada. Subiendo fotografías...");
+          const photoUrls = await uploadPhotosToStorage(formData.photos);
+
+          if (photoUrls.length > 0) {
+            const { error: imageUpdateError } = await supabase
+              .from('incidents')
+              .update({ images: photoUrls })
+              .eq('id', incident.id);
+
+            if (imageUpdateError) {
+              throw imageUpdateError;
+            }
+          }
+        }
+
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+        const targetAdministrator = assignedAdministrator;
         
         if (targetAdministrator) {
           try {
@@ -706,7 +760,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
                       </p>
                       {formData.selectedUnit && (
                         <p className="text-xs text-blue-600">
-                          Unidad: {formData.selectedUnit.unitNumber}
+                          Unidad: {formData.selectedUnit.unit_number}
                         </p>
                       )}
                     </div>

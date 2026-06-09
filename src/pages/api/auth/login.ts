@@ -1,9 +1,8 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { blockProductionDiagnostics } from '@/lib/apiSecurity';
+import { signJwtToken } from '@/lib/jwtAuth';
 
 interface LoginRequest {
   email: string;
@@ -60,6 +59,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
+  if (blockProductionDiagnostics(res)) {
+    return;
+  }
+
   try {
     const { email, password }: LoginRequest = req.body;
 
@@ -81,13 +84,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign(
+    const token = signJwtToken(
       { 
         userId: user.id, 
         email: user.email, 
         role: user.role 
       },
-      JWT_SECRET,
       { expiresIn: '24h' }
     );
 

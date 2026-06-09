@@ -1,7 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from "@supabase/supabase-js";
+import { blockProductionDiagnostics } from '@/lib/apiSecurity';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (blockProductionDiagnostics(res)) {
+    return;
+  }
+
   const results: any = {
     timestamp: new Date().toISOString(),
     environment: {},

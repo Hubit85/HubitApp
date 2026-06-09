@@ -32,7 +32,7 @@ function loadEnvFile() {
             loadedCount++;
             
             if (key.includes('SUPABASE')) {
-              console.log(`🔧 Set ${key}: ${value.substring(0, 20)}...${oldValue ? ' (updated)' : ' (new)'}`);
+              console.log(`🔧 Set ${key}: present${oldValue ? ' (updated)' : ' (new)'}`);
             }
           }
         }
@@ -54,8 +54,8 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 console.log("🔍 Final environment check:");
-console.log("- SUPABASE_URL:", SUPABASE_URL ? `✅ ${SUPABASE_URL.substring(0, 30)}...` : "❌ MISSING");
-console.log("- SERVICE_KEY:", SUPABASE_SERVICE_KEY ? `✅ ${SUPABASE_SERVICE_KEY.substring(0, 20)}...` : "❌ MISSING");
+console.log("- SUPABASE_URL:", SUPABASE_URL ? "✅ Present" : "❌ MISSING");
+console.log("- SERVICE_KEY:", SUPABASE_SERVICE_KEY ? "✅ Present" : "❌ MISSING");
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   console.error("❌ Missing Supabase server environment variables.");
