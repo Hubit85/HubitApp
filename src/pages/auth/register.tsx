@@ -775,7 +775,10 @@ function RegisterPageContent() {
 
             // Only create roles that the user explicitly selected during registration.
             // ENHANCED LOGIC: Combine user-selected roles
-            let finalAdditionalRoles = [];
+            let finalAdditionalRoles: Array<{
+                roleType: RoleType;
+                roleSpecificData: Record<string, any>;
+            }> = [];
             let totalExpectedRoles = 1; // Start with primary role
 
             if (orderedRoles.length > 1) {
@@ -877,7 +880,7 @@ function RegisterPageContent() {
                 // ENHANCED: Post-registration validation to ensure all roles were created correctly
                 console.log('✅ Enhanced Registration successful, performing comprehensive post-registration validation...');
 
-                let registrationSummary = `¡Cuenta creada exitosamente!`;
+                const registrationSummary = `¡Cuenta creada exitosamente!`;
 
                 setSuccessMessage(registrationSummary + " Verificando configuración final...");
 
