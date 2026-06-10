@@ -66,6 +66,13 @@ interface PropertyAdministrator {
   contact_email: string;
 }
 
+interface IncidentRoutingContext {
+  communityId: string;
+  administratorId: string;
+  administratorName: string;
+  administratorEmail: string;
+}
+
 export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormProps) {
   const { user, profile, userRoles } = useSupabaseAuth();
   const [formData, setFormData] = useState<IncidentFormData>({
@@ -289,6 +296,120 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     }
   };
 
+  const resolveOrCreateIncidentCommunity = async (administratorId: string): Promise<string> => {
+    const property = formData.selectedProperty;
+
+    if (!property) {
+      throw new Error("Debes seleccionar una propiedad para asociar la incidencia a una comunidad.");
+    }
+
+    const { data: existingCommunity, error: existingError } = await supabase
+      .from('communities')
+      .select('id')
+      .eq('administrator_id', administratorId)
+      .eq('address', property.address)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingError && existingError.code !== 'PGRST116') {
+      throw new Error(`No se pudo resolver la comunidad de la propiedad: ${existingError.message}`);
+    }
+
+    if (existingCommunity?.id) {
+      return existingCommunity.id;
+    }
+
+    const { data: createdCommunity, error: createError } = await supabase
+      .from('communities')
+      .insert({
+        administrator_id: administratorId,
+        name: property.name || property.address,
+        address: property.address,
+        city: property.city,
+        postal_code: property.postal_code || null,
+        status: 'active',
+        description: `Comunidad creada para gestionar incidencias de ${property.name || property.address}`
+      })
+      .select('id')
+      .single();
+
+    if (createError || !createdCommunity?.id) {
+      throw new Error(`No se pudo crear una comunidad válida para la incidencia: ${createError?.message || 'sin respuesta'}`);
+    }
+
+    return createdCommunity.id;
+  };
+
+  const resolveIncidentRouting = async (): Promise<IncidentRoutingContext> => {
+    if (!user?.id) {
+      throw new Error("No hay usuario autenticado para reportar la incidencia.");
+    }
+
+    const communityMemberRole = userRoles.find(role =>
+      role.role_type === 'community_member' && role.is_verified
+    );
+
+    let administratorId = assignedAdministrator?.user_id || null;
+    let administratorName = assignedAdministrator?.company_name || '';
+    let administratorEmail = assignedAdministrator?.contact_email || '';
+    let communityId: string | null = null;
+
+    if (communityMemberRole?.id) {
+      const { data: managedCommunity, error: managedError } = await supabase
+        .from('managed_communities')
+        .select('community_id, property_administrator_id')
+        .eq('community_member_id', communityMemberRole.id)
+        .eq('relationship_status', 'active')
+        .order('established_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (managedError && managedError.code !== 'PGRST116') {
+        throw new Error(`No se pudo verificar la relación con el administrador: ${managedError.message}`);
+      }
+
+      if (managedCommunity?.property_administrator_id) {
+        const { data: adminRole, error: adminRoleError } = await supabase
+          .from('user_roles')
+          .select(`
+            user_id,
+            role_specific_data,
+            profiles!user_roles_user_id_fkey(full_name, email)
+          `)
+          .eq('id', managedCommunity.property_administrator_id)
+          .eq('role_type', 'property_administrator')
+          .eq('is_verified', true)
+          .single();
+
+        if (adminRoleError || !adminRole) {
+          throw new Error(`El administrador asignado no está disponible o no está verificado: ${adminRoleError?.message || 'sin datos'}`);
+        }
+
+        const profileData = adminRole.profiles as any;
+        const roleData = adminRole.role_specific_data as any;
+        administratorId = adminRole.user_id;
+        administratorName = roleData?.company_name || profileData?.full_name || administratorName || 'Administrador de Fincas';
+        administratorEmail = roleData?.business_email || profileData?.email || administratorEmail || '';
+        communityId = managedCommunity.community_id;
+      }
+    }
+
+    if (!administratorId) {
+      throw new Error("No tienes un administrador de fincas asignado. Asigna uno antes de reportar incidencias.");
+    }
+
+    if (!communityId) {
+      communityId = await resolveOrCreateIncidentCommunity(administratorId);
+    }
+
+    return {
+      communityId,
+      administratorId,
+      administratorName: administratorName || 'Administrador de Fincas',
+      administratorEmail
+    };
+  };
+
   const handleInputChange = (field: keyof IncidentFormData, value: string) => {
     if (field === 'urgency') {
       setFormData(prev => ({ ...prev, [field]: value as 'low' | 'normal' | 'high' | 'emergency' }));
@@ -376,33 +497,22 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         // Use a simpler path structure to avoid RLS issues
         const filePath = `public/${fileName}`;
 
-        // Try uploading to a public bucket or create base64 encoded version as fallback
-        try {
-          const { error } = await supabase.storage
-            .from('incident-photos')
-            .upload(filePath, photo, {
-              cacheControl: '3600',
-              upsert: false
-            });
+        const { error } = await supabase.storage
+          .from('incident-photos')
+          .upload(filePath, photo, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-          if (error) {
-            throw error;
-          }
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('incident-photos')
-            .getPublicUrl(filePath);
-
-          uploadedUrls.push(publicUrl);
-        } catch (storageError) {
-          console.warn('Storage upload failed, using base64 fallback:', storageError);
-          
-          // Fallback: convert to base64 and store as data URL
-          const base64 = await convertToBase64(photo);
-          uploadedUrls.push(base64);
+        if (error) {
+          throw error;
         }
 
+        const { data: { publicUrl } } = supabase.storage
+          .from('incident-photos')
+          .getPublicUrl(filePath);
+
+        uploadedUrls.push(publicUrl);
       } catch (uploadError) {
         console.error('Failed to process photo:', uploadError);
         // Continue with other photos even if one fails
@@ -410,15 +520,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     }
 
     return uploadedUrls;
-  };
-
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -444,27 +545,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
-      // Upload photos if any
-      let photoUrls: string[] = [];
-      if (formData.photos.length > 0) {
-        setSuccessMessage("Subiendo fotografías...");
-        photoUrls = await uploadPhotosToStorage(formData.photos);
-      }
-
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
-      }
+      const routingContext = await resolveIncidentRouting();
 
       // Build location details including property info
       const locationDetails = formData.selectedProperty 
@@ -480,11 +561,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         status: 'pending' as const,
         work_location: locationDetails,
         special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unitNumber}` : null,
-        images: photoUrls.length > 0 ? photoUrls : null,
+        images: null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
-        administrator_id: primaryAdministratorId,
+        community_id: routingContext.communityId,
+        administrator_id: routingContext.administratorId,
         admin_notes: null,
         reviewed_at: null,
         reviewed_by: null
@@ -523,8 +604,31 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       if (incident) {
         console.log('Incident created successfully:', incident.id);
 
+        let photoWarning = false;
+        if (formData.photos.length > 0) {
+          setSuccessMessage("Incidencia creada. Subiendo fotografías...");
+          const photoUrls = await uploadPhotosToStorage(formData.photos);
+          photoWarning = photoUrls.length < formData.photos.length;
+
+          if (photoUrls.length > 0) {
+            const { error: updateImagesError } = await supabase
+              .from('incidents')
+              .update({ images: photoUrls, updated_at: new Date().toISOString() })
+              .eq('id', incident.id);
+
+            if (updateImagesError) {
+              photoWarning = true;
+              console.warn('Incident was created but images could not be linked:', updateImagesError);
+            }
+          }
+        }
+
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+        const targetAdministrator = {
+          user_id: routingContext.administratorId,
+          company_name: routingContext.administratorName,
+          contact_email: routingContext.administratorEmail
+        };
         
         if (targetAdministrator) {
           try {
@@ -560,9 +664,9 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
         // Success message
         setSuccessMessage(
-          targetAdministrator
-            ? `¡Incidencia reportada exitosamente! ${targetAdministrator.company_name} ha sido notificado y revisará tu solicitud.`
-            : "¡Incidencia reportada exitosamente! Se ha creado el reporte y será asignado a un administrador cuando esté disponible."
+          photoWarning
+            ? `¡Incidencia reportada exitosamente! ${targetAdministrator.company_name} ha sido notificado. Algunas fotografías no pudieron guardarse.`
+            : `¡Incidencia reportada exitosamente! ${targetAdministrator.company_name} ha sido notificado y revisará tu solicitud.`
         );
         
         // Reset form

@@ -2,8 +2,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { blockProductionDiagnosticRoute } from '@/lib/apiSecurity';
+import { getLegacyJwtSecret } from '@/lib/jwtAuth';
 
 interface LoginRequest {
   email: string;
@@ -56,6 +56,10 @@ const mockUsers: User[] = [
 ];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (blockProductionDiagnosticRoute(res)) {
+    return;
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -81,13 +85,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    const jwtSecret = getLegacyJwtSecret();
+    if (!jwtSecret) {
+      return res.status(503).json({ message: 'Authentication is not configured' });
+    }
+
     const token = jwt.sign(
       { 
         userId: user.id, 
         email: user.email, 
         role: user.role 
       },
-      JWT_SECRET,
+      jwtSecret,
       { expiresIn: '24h' }
     );
 

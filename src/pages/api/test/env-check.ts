@@ -1,6 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { blockProductionDiagnosticRoute } from '@/lib/apiSecurity';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (blockProductionDiagnosticRoute(res)) {
+    return;
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -36,8 +41,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         hasAnonKey: !!envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         hasResendKey: !!envVars.RESEND_API_KEY,
         resendKeyValid: envVars.RESEND_API_KEY?.startsWith('re_'),
-        supabaseUrlPreview: envVars.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 50) + '...',
-        serviceKeyPreview: envVars.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) + '...',
         nodeEnv: envVars.NODE_ENV
       }
     });
