@@ -1,9 +1,18 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import supabaseServer from '@/lib/supabaseServer';
+import { blockProductionDiagnosticRoute } from '@/lib/apiSecurity';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (blockProductionDiagnosticRoute(res)) {
+    return;
+  }
+
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
+    const { default: supabaseServer } = await import('@/lib/supabaseServer');
     console.log('🧪 Iniciando prueba directa de Supabase...');
     
     // Test 1: Verificar conexión básica
@@ -27,26 +36,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Test 2: Probar inserción de datos de prueba
-    const testUser = {
-      id: '00000000-0000-0000-0000-000000000001',
-      email: 'test@example.com',
-      full_name: 'Test User',
-      user_type: 'particular' as const
-    };
-
-    const { data: insertTest, error: insertError } = await supabaseServer
-      .from('profiles')
-      .upsert(testUser)
-      .select()
-      .maybeSingle();
-
     return res.status(200).json({
       success: true,
       message: 'Conexión Supabase funcionando correctamente',
       tests: {
-        basicConnection: { success: true, data: testData },
-        insertTest: { success: !insertError, data: insertTest, error: insertError?.message }
+        basicConnection: { success: true, data: testData }
       },
       timestamp: new Date().toISOString()
     });

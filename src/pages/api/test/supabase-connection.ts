@@ -1,12 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import supabaseServer from '@/lib/supabaseServer';
+import { blockProductionDiagnosticRoute } from '@/lib/apiSecurity';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (blockProductionDiagnosticRoute(res)) {
+    return;
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
+    const { default: supabaseServer } = await import('@/lib/supabaseServer');
     console.log('🔧 TEST: Starting Supabase connection test...');
     
     // Test 1: Variables de entorno

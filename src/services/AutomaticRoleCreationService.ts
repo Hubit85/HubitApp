@@ -54,146 +54,13 @@ export class AutomaticRoleCreationService {
       console.warn("Email check failed, continuing with registration:", emailCheckError);
     }
 
-    // ENHANCED: Automatic detection of multi-role users during registration
-    console.log('🎯 AUTO-DETECTION: Analyzing email pattern for automatic multi-role assignment...');
-    
-    const emailLower = email.toLowerCase();
-    let shouldAutoExpandRoles = false;
-    let autoExpandedRoles: any[] = [];
-    
-    // SPECIFIC USER PATTERNS: Auto-detect users who should get multiple roles automatically
-    if (emailLower.includes('alain') || emailLower.includes('espinosa') || emailLower === 'alainespinosaroman@gmail.com') {
-      console.log('🎯 AUTO-DETECTION: Detected alainespinosaroman pattern - auto-expanding to multiple roles');
-      shouldAutoExpandRoles = true;
-      autoExpandedRoles = [
-        {
-          roleType: 'community_member',
-          roleSpecificData: {
-            full_name: 'alain espinosa',
-            phone: '',
-            address: '',
-            city: '',
-            postal_code: '',
-            country: 'España',
-            community_code: 'COM-ALAIN-ESPINOSA-001'
-          }
-        },
-        {
-          roleType: 'service_provider',
-          roleSpecificData: {
-            company_name: 'alain espinosa',
-            company_address: '',
-            company_postal_code: '',
-            company_city: '',
-            company_country: 'España',
-            cif: '',
-            business_email: email,
-            business_phone: '',
-            selected_services: [],
-            service_costs: {}
-          }
-        }
-      ];
-    } else if (emailLower.includes('ddayanacastro') || emailLower.includes('castro')) {
-      console.log('🎯 AUTO-DETECTION: Detected ddayanacastro pattern - auto-expanding to all roles');
-      shouldAutoExpandRoles = true;
-      autoExpandedRoles = [
-        {
-          roleType: 'community_member',
-          roleSpecificData: {
-            full_name: 'Dayana Castro',
-            phone: '',
-            address: '',
-            city: '',
-            postal_code: '',
-            country: 'España',
-            community_code: 'COM-DAYANA-CASTRO-001'
-          }
-        },
-        {
-          roleType: 'service_provider',
-          roleSpecificData: {
-            company_name: 'Dayana Castro',
-            company_address: '',
-            company_postal_code: '',
-            company_city: '',
-            company_country: 'España',
-            cif: '',
-            business_email: email,
-            business_phone: '',
-            selected_services: [],
-            service_costs: {}
-          }
-        },
-        {
-          roleType: 'property_administrator',
-          roleSpecificData: {
-            company_name: 'Dayana Castro Gestión',
-            company_address: '',
-            company_postal_code: '',
-            company_city: '',
-            company_country: 'España',
-            cif: '',
-            business_email: email,
-            business_phone: '',
-            professional_number: ''
-          }
-        }
-      ];
-    } else if (emailLower.includes('borja') || emailLower.includes('pipaon')) {
-      console.log('🎯 AUTO-DETECTION: Detected borjapipaon pattern - auto-expanding to multiple roles');
-      shouldAutoExpandRoles = true;
-      autoExpandedRoles = [
-        {
-          roleType: 'community_member',
-          roleSpecificData: {
-            full_name: 'Borja Pipaón',
-            phone: '',
-            address: '',
-            city: '',
-            postal_code: '',
-            country: 'España',
-            community_code: 'COM-BORJA-PIPAON-001'
-          }
-        },
-        {
-          roleType: 'service_provider',
-          roleSpecificData: {
-            company_name: 'Borja Pipaón',
-            company_address: '',
-            company_postal_code: '',
-            company_city: '',
-            company_country: 'España',
-            cif: '',
-            business_email: email,
-            business_phone: '',
-            selected_services: [],
-            service_costs: {}
-          }
-        }
-      ];
-    }
-
-    // MERGE USER-SELECTED ROLES WITH AUTO-DETECTED ROLES
-    let finalAdditionalRoles = [...additionalRoles];
-    
-    if (shouldAutoExpandRoles && autoExpandedRoles.length > 0) {
-      console.log(`🤖 AUTO-EXPANSION: Adding ${autoExpandedRoles.length} auto-detected roles to user selection`);
-      
-      // Avoid duplicates by checking if role types already exist
-      const existingRoleTypes = additionalRoles.map(r => r.roleType);
-      const newAutoRoles = autoExpandedRoles.filter(autoRole => 
-        !existingRoleTypes.includes(autoRole.roleType) && autoRole.roleType !== primaryRole
-      );
-      
-      finalAdditionalRoles = [...additionalRoles, ...newAutoRoles];
-      console.log(`🎯 AUTO-EXPANSION: Final role count - Primary: 1, Additional: ${finalAdditionalRoles.length} (${newAutoRoles.length} auto-added)`);
-    }
+    // Only user-selected additional roles should be created. Email substrings must never grant roles.
+    const finalAdditionalRoles = [...additionalRoles];
 
     // Calculate total roles to create (including auto-expansion)
-    const totalRolesRequested = 1 + finalAdditionalRoles.length; // 1 primary + additionals (including auto-expanded)
+    const totalRolesRequested = 1 + finalAdditionalRoles.length; // 1 primary + additionals
     
-    console.log(`🎯 ENHANCED AUTO-ROLE: Target - ${totalRolesRequested} roles (1 primary + ${finalAdditionalRoles.length} additional${shouldAutoExpandRoles ? ', auto-detected' : ''})`);
+    console.log(`🎯 ENHANCED AUTO-ROLE: Target - ${totalRolesRequested} roles (1 primary + ${finalAdditionalRoles.length} additional)`);
     console.log(`🎯 ENHANCED AUTO-ROLE: User details - ${userId.substring(0, 8)}..., email: ${email}`);
 
     try {
@@ -260,7 +127,7 @@ export class AutomaticRoleCreationService {
             
             return {
               success: true,
-              message: `All ${existingCount} roles already exist${shouldAutoExpandRoles ? ' (auto-detected pattern)' : ''}`,
+              message: `All ${existingCount} roles already exist`,
               rolesCreated: 0,
               totalRolesRequested,
               createdRoles: existingRoles || [],
@@ -332,12 +199,10 @@ export class AutomaticRoleCreationService {
         }
       }
 
-      // PHASE 2: Enhanced Additional Roles Creation (including auto-detected roles)
+      // PHASE 2: Enhanced Additional Roles Creation
       for (let i = 0; i < finalAdditionalRoles.length; i++) {
         const additionalRole = finalAdditionalRoles[i];
-        const isAutoDetected = shouldAutoExpandRoles && i >= additionalRoles.length;
-        
-        console.log(`🔄 ENHANCED AUTO-ROLE: Creating additional role ${i + 1}/${finalAdditionalRoles.length}: ${additionalRole.roleType}${isAutoDetected ? ' (auto-detected)' : ''}`);
+        console.log(`🔄 ENHANCED AUTO-ROLE: Creating additional role ${i + 1}/${finalAdditionalRoles.length}: ${additionalRole.roleType}`);
         
         const additionalRoleResult = await this.createSingleRoleEnhanced({
           userId,
@@ -351,7 +216,7 @@ export class AutomaticRoleCreationService {
         if (additionalRoleResult.success && additionalRoleResult.role) {
           createdRoles.push(additionalRoleResult.role);
           rolesCreated++;
-          console.log(`✅ ENHANCED AUTO-ROLE: Additional role ${additionalRole.roleType} created successfully${isAutoDetected ? ' (auto-detected)' : ''}`);
+          console.log(`✅ ENHANCED AUTO-ROLE: Additional role ${additionalRole.roleType} created successfully`);
           
           // AUTOMATIC SYNC: If additional role is property_administrator, sync immediately
           if (additionalRole.roleType === 'property_administrator') {
@@ -371,7 +236,7 @@ export class AutomaticRoleCreationService {
         } else {
           const errorMsg = `Failed to create additional role ${additionalRole.roleType}: ${additionalRoleResult.error}`;
           errors.push(errorMsg);
-          console.error(`❌ ENHANCED AUTO-ROLE: ${errorMsg}${isAutoDetected ? ' (auto-detected)' : ''}`);
+          console.error(`❌ ENHANCED AUTO-ROLE: ${errorMsg}`);
           
           // ENHANCED: Attempt recovery for additional roles too
           console.log(`🆘 ENHANCED AUTO-ROLE: Attempting recovery for additional role: ${additionalRole.roleType}...`);
@@ -380,7 +245,7 @@ export class AutomaticRoleCreationService {
           if (recoveryResult.success && recoveryResult.roleCreated) {
             createdRoles.push(recoveryResult.roleCreated);
             rolesCreated++;
-            console.log(`✅ ENHANCED AUTO-ROLE: Recovery successful for ${additionalRole.roleType}${isAutoDetected ? ' (auto-detected)' : ''}`);
+            console.log(`✅ ENHANCED AUTO-ROLE: Recovery successful for ${additionalRole.roleType}`);
             
             // RECOVERY SYNC: If recovery created property_administrator, sync
             if (additionalRole.roleType === 'property_administrator') {
@@ -392,13 +257,13 @@ export class AutomaticRoleCreationService {
               }
             }
           } else {
-            console.error(`❌ ENHANCED AUTO-ROLE: Recovery also failed for ${additionalRole.roleType}${isAutoDetected ? ' (auto-detected)' : ''}`);
+            console.error(`❌ ENHANCED AUTO-ROLE: Recovery also failed for ${additionalRole.roleType}`);
           }
         }
       }
 
       // PHASE 3: Enhanced Validation and Active Role Management
-      console.log(`📊 ENHANCED AUTO-ROLE: Final result - ${rolesCreated}/${totalRolesRequested} roles created${shouldAutoExpandRoles ? ' (auto-detection active)' : ''}`);
+      console.log(`📊 ENHANCED AUTO-ROLE: Final result - ${rolesCreated}/${totalRolesRequested} roles created`);
 
       // ENHANCED: Ensure at least one role is active with better logic
       if (rolesCreated > 0) {
@@ -442,13 +307,6 @@ export class AutomaticRoleCreationService {
           ? `Tu cuenta se ha configurado perfectamente con ${rolesCreated} rol${rolesCreated === 1 ? '' : 'es'} activo${rolesCreated === 1 ? '' : 's'}. ¡Bienvenido a HuBiT!`
           : `Se crearon ${rolesCreated} de ${totalRolesRequested} roles solicitados. Los roles restantes pueden agregarse desde tu perfil en cualquier momento.`;
         
-        // Add auto-detection info to notification
-        if (shouldAutoExpandRoles) {
-          const autoDetectedCount = finalAdditionalRoles.length - additionalRoles.length;
-          notificationMessage += autoDetectedCount > 0 
-            ? ` Se detectó automáticamente tu perfil y se añadieron ${autoDetectedCount} roles adicionales.`
-            : ` Se detectó tu perfil para configuración automática.`;
-        }
         
         // Add sync info to notification if applicable
         if (syncResults && hasPropertyAdminRole) {
@@ -481,7 +339,7 @@ export class AutomaticRoleCreationService {
       const result = {
         success,
         message: success 
-          ? `Creación automática exitosa: ${rolesCreated}/${totalRolesRequested} roles configurados (${actualFinalCount} total en BD)${shouldAutoExpandRoles ? '. Auto-detección activada' : ''}${syncResults ? '. Sincronización: ' + syncResults.message : ''}`
+          ? `Creación automática exitosa: ${rolesCreated}/${totalRolesRequested} roles configurados (${actualFinalCount} total en BD)${syncResults ? '. Sincronización: ' + syncResults.message : ''}`
           : `Error en creación automática: solo ${rolesCreated}/${totalRolesRequested} roles creados`,
         rolesCreated,
         totalRolesRequested,
@@ -516,7 +374,7 @@ export class AutomaticRoleCreationService {
             
             return {
               success: true,
-              message: 'Recuperación de emergencia exitosa' + (shouldAutoExpandRoles ? ' (auto-detección activada)' : ''),
+              message: 'Recuperación de emergencia exitosa',
               rolesCreated: 1,
               totalRolesRequested,
               createdRoles: [lastDitchResult.roleCreated],

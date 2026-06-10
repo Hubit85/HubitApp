@@ -1,12 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import supabaseServer from '@/lib/supabaseServer';
+import { blockProductionDiagnosticRoute } from '@/lib/apiSecurity';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (blockProductionDiagnosticRoute(res)) {
+    return;
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
+    const { default: supabaseServer } = await import('@/lib/supabaseServer');
     console.log('🔧 Testing server environment variables...');
     
     // Verificar variables de entorno
@@ -16,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Environment check:');
     console.log('- SUPABASE_URL:', supabaseUrl ? '✅ Present' : '❌ Missing');
-    console.log('- SERVICE_KEY:', supabaseServiceKey ? `✅ Present (${supabaseServiceKey.substring(0, 20)}...)` : '❌ Missing');
+    console.log('- SERVICE_KEY:', supabaseServiceKey ? '✅ Present' : '❌ Missing');
     console.log('- RESEND_KEY:', resendKey ? '✅ Present' : '❌ Missing');
 
     // Probar conexión a Supabase
@@ -51,9 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       environment: {
         supabaseUrl: !!supabaseUrl,
         serviceKey: !!supabaseServiceKey,
-        resendKey: !!resendKey,
-        supabaseUrlValue: supabaseUrl?.substring(0, 30) + '...',
-        serviceKeyPrefix: supabaseServiceKey?.substring(0, 20) + '...'
+        resendKey: !!resendKey
       },
       supabaseTest: {
         success: true,
