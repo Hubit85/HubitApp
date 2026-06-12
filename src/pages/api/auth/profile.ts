@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {
@@ -18,6 +18,10 @@ function authenticateToken(req: AuthenticatedRequest, res: NextApiResponse, next
 
   if (!token) {
     return res.status(401).json({ message: 'Access token required' });
+  }
+
+  if (!JWT_SECRET) {
+    return res.status(503).json({ message: 'Authentication service unavailable' });
   }
 
   jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
@@ -107,6 +111,17 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
       try {
         const userId = req.user?.userId;
         const updates = req.body;
+        const allowedUpdates = {
+          name: updates.name,
+          phone: updates.phone,
+          address: updates.address,
+          avatar: updates.avatar,
+        };
+        Object.keys(allowedUpdates).forEach((key) => {
+          if (allowedUpdates[key as keyof typeof allowedUpdates] === undefined) {
+            delete allowedUpdates[key as keyof typeof allowedUpdates];
+          }
+        });
 
         if (!mockUserProfiles[userId!]) {
           return res.status(404).json({ message: 'User profile not found' });
@@ -114,7 +129,7 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
 
         mockUserProfiles[userId!] = {
           ...mockUserProfiles[userId!],
-          ...updates,
+          ...allowedUpdates,
           updatedAt: new Date(),
         };
 

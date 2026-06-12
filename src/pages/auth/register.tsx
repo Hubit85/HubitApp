@@ -773,182 +773,29 @@ function RegisterPageContent() {
             const orderedRoles = getOrderedRoles(formData.roles);
             const primaryRole = orderedRoles[0];
 
-            // ENHANCED AUTOMATIC MULTI-ROLE DETECTION: Detect users who should automatically get multiple roles
-            console.log('🎯 ENHANCED AUTO-DETECTION: Analyzing user for automatic multi-role assignment...');
+            const finalAdditionalRoles = orderedRoles.slice(1).map(roleType => {
+                let roleSpecificData: any = {};
 
-            const email = formData.email.toLowerCase();
-            let shouldAutoAssignMultipleRoles = false;
-            let autoRoleConfiguration: any[] = [];
-            let autoDetectionReason = '';
-
-            // COMPREHENSIVE USER PATTERNS: Detect specific users who should get multiple roles automatically
-            if (email.includes('alain') || email.includes('espinosa') || email === 'alainespinosaroman@gmail.com') {
-                console.log('🎯 ENHANCED AUTO-DETECTION: Detected alainespinosaroman pattern - auto-assigning multiple roles');
-                shouldAutoAssignMultipleRoles = true;
-                autoDetectionReason = 'alain espinosa profile detected';
-                autoRoleConfiguration = [
-                    {
-                        roleType: 'community_member',
-                        roleSpecificData: {
-                            full_name: 'alain espinosa',
-                            phone: '',
-                            address: '',
-                            city: '',
-                            postal_code: '',
-                            country: 'España',
-                            community_code: 'COM-ALAIN-ESPINOSA-001'
-                        }
-                    },
-                    {
-                        roleType: 'service_provider',
-                        roleSpecificData: {
-                            company_name: 'alain espinosa',
-                            company_address: '',
-                            company_postal_code: '',
-                            company_city: '',
-                            company_country: 'España',
-                            cif: '',
-                            business_email: email,
-                            business_phone: '',
-                            selected_services: [],
-                            service_costs: {}
-                        }
-                    }
-                ];
-            } else if (email.includes('ddayanacastro') || email.includes('castro')) {
-                console.log('🎯 ENHANCED AUTO-DETECTION: Detected ddayanacastro pattern - auto-assigning all roles');
-                shouldAutoAssignMultipleRoles = true;
-                autoDetectionReason = 'Dayana Castro profile detected';
-                autoRoleConfiguration = [
-                    {
-                        roleType: 'community_member',
-                        roleSpecificData: {
-                            full_name: 'Dayana Castro',
-                            phone: '',
-                            address: '',
-                            city: '',
-                            postal_code: '',
-                            country: 'España',
-                            community_code: 'COM-DAYANA-CASTRO-001'
-                        }
-                    },
-                    {
-                        roleType: 'service_provider',
-                        roleSpecificData: {
-                            company_name: 'Dayana Castro',
-                            company_address: '',
-                            company_postal_code: '',
-                            company_city: '',
-                            company_country: 'España',
-                            cif: '',
-                            business_email: email,
-                            business_phone: '',
-                            selected_services: [],
-                            service_costs: {}
-                        }
-                    },
-                    {
-                        roleType: 'property_administrator',
-                        roleSpecificData: {
-                            company_name: 'Dayana Castro Gestión',
-                            company_address: '',
-                            company_postal_code: '',
-                            company_city: '',
-                            company_country: 'España',
-                            cif: '',
-                            business_email: email,
-                            business_phone: '',
-                            professional_number: ''
-                        }
-                    }
-                ];
-            } else if (email.includes('borja') || email.includes('pipaon')) {
-                console.log('🎯 ENHANCED AUTO-DETECTION: Detected borjapipaon pattern - auto-assigning multiple roles');
-                shouldAutoAssignMultipleRoles = true;
-                autoDetectionReason = 'Borja Pipaón profile detected';
-                autoRoleConfiguration = [
-                    {
-                        roleType: 'community_member',
-                        roleSpecificData: {
-                            full_name: 'Borja Pipaón',
-                            phone: '',
-                            address: '',
-                            city: '',
-                            postal_code: '',
-                            country: 'España',
-                            community_code: 'COM-BORJA-PIPAON-001'
-                        }
-                    },
-                    {
-                        roleType: 'service_provider',
-                        roleSpecificData: {
-                            company_name: 'Borja Pipaón',
-                            company_address: '',
-                            company_postal_code: '',
-                            company_city: '',
-                            company_country: 'España',
-                            cif: '',
-                            business_email: email,
-                            business_phone: '',
-                            selected_services: [],
-                            service_costs: {}
-                        }
-                    }
-                ];
-            }
-
-            // ENHANCED LOGIC: Combine user-selected roles with auto-detected roles
-            let finalAdditionalRoles = [];
-            let totalExpectedRoles = 1; // Start with primary role
-
-            if (orderedRoles.length > 1) {
-                // User manually selected multiple roles - use their selection
-                console.log(`👤 USER SELECTION: User manually selected ${orderedRoles.length} roles`);
-                finalAdditionalRoles = orderedRoles.slice(1).map(roleType => {
-                    let roleSpecificData: any = {};
-
-                    if (roleType === 'particular') {
-                        roleSpecificData = formData.particular;
-                    } else if (roleType === 'community_member') {
-                        roleSpecificData = {
-                            ...formData.community_member,
-                            community_code: formData.community_member.community_code ||
-                                generateCommunityCode(formData.community_member.address)
-                        };
-                    } else if (roleType === 'service_provider') {
-                        roleSpecificData = formData.service_provider;
-                    } else if (roleType === 'property_administrator') {
-                        roleSpecificData = formData.property_administrator;
-                    }
-
-                    return {
-                        roleType,
-                        roleSpecificData
+                if (roleType === 'particular') {
+                    roleSpecificData = formData.particular;
+                } else if (roleType === 'community_member') {
+                    roleSpecificData = {
+                        ...formData.community_member,
+                        community_code: formData.community_member.community_code ||
+                            generateCommunityCode(formData.community_member.address)
                     };
-                });
-                totalExpectedRoles = orderedRoles.length;
-
-                // If user manually selected roles AND auto-detection kicked in, merge them
-                if (shouldAutoAssignMultipleRoles) {
-                    console.log(`🤖 ENHANCED: Merging user selection with auto-detected roles`);
-                    const existingRoleTypes = finalAdditionalRoles.map(r => r.roleType);
-                    const newAutoRoles = autoRoleConfiguration.filter(autoRole =>
-                        !existingRoleTypes.includes(autoRole.roleType) && autoRole.roleType !== primaryRole
-                    );
-
-                    if (newAutoRoles.length > 0) {
-                        finalAdditionalRoles = [...finalAdditionalRoles, ...newAutoRoles];
-                        totalExpectedRoles += newAutoRoles.length;
-                        console.log(`🔗 ENHANCED: Added ${newAutoRoles.length} auto-detected roles to user selection`);
-                    }
+                } else if (roleType === 'service_provider') {
+                    roleSpecificData = formData.service_provider;
+                } else if (roleType === 'property_administrator') {
+                    roleSpecificData = formData.property_administrator;
                 }
 
-            } else if (shouldAutoAssignMultipleRoles) {
-                // Auto-assign based on email pattern (user only selected one role, but we detected they should have more)
-                console.log(`🤖 ENHANCED AUTO-ASSIGNMENT: Auto-assigning ${autoRoleConfiguration.length} additional roles (${autoDetectionReason})`);
-                finalAdditionalRoles = autoRoleConfiguration;
-                totalExpectedRoles = 1 + autoRoleConfiguration.length;
-            }
+                return {
+                    roleType,
+                    roleSpecificData
+                };
+            });
+            const totalExpectedRoles = orderedRoles.length;
 
             // Preparar datos del usuario principal
             let userData: any = {};
@@ -1002,23 +849,11 @@ function RegisterPageContent() {
                 };
             }
 
-            // ENHANCED: Override user data for auto-detected users to ensure consistency
-            if (shouldAutoAssignMultipleRoles) {
-                if (email.includes('alain') || email.includes('espinosa')) {
-                    userData.full_name = 'alain espinosa';
-                } else if (email.includes('ddayanacastro') || email.includes('castro')) {
-                    userData.full_name = 'Dayana Castro';
-                } else if (email.includes('borja') || email.includes('pipaon')) {
-                    userData.full_name = 'Borja Pipaón';
-                }
-            }
-
             // CRITICAL: Add additional roles to userData for the signUp process
             userData.additionalRoles = finalAdditionalRoles;
 
             console.log(`🚀 ENHANCED REGISTRATION: Starting with ${totalExpectedRoles} total expected roles:`, [primaryRole, ...finalAdditionalRoles.map(r => r.roleType)]);
-            console.log(`📋 DETAILED BREAKDOWN: PRIMARY[${primaryRole}] + ADDITIONAL[${finalAdditionalRoles.length}]${shouldAutoAssignMultipleRoles ? ' (AUTO-DETECTED)' : ''}`);
-            console.log(`🎯 AUTO-DETECTION STATUS: ${shouldAutoAssignMultipleRoles ? `ACTIVE (${autoDetectionReason})` : 'INACTIVE'}`);
+            console.log(`📋 DETAILED BREAKDOWN: PRIMARY[${primaryRole}] + ADDITIONAL[${finalAdditionalRoles.length}]`);
 
             // ENHANCED REGISTRATION CALL: Pass all role information to signUp
             const result = await signUp(formData.email, formData.password, userData);
@@ -1032,12 +867,7 @@ function RegisterPageContent() {
                 // ENHANCED: Post-registration validation to ensure all roles were created correctly
                 console.log('✅ Enhanced Registration successful, performing comprehensive post-registration validation...');
 
-                let registrationSummary = `¡Cuenta creada exitosamente!`;
-                if (shouldAutoAssignMultipleRoles) {
-                    registrationSummary += ` Se detectó tu perfil automáticamente (${autoDetectionReason.split(' ')[0]}) y se configuraron roles adicionales.`;
-                }
-
-                setSuccessMessage(registrationSummary + " Verificando configuración final...");
+                setSuccessMessage("¡Cuenta creada exitosamente! Verificando configuración final...");
 
                 // ENHANCED BULLETPROOF VERIFICATION: Verify all expected roles were actually created
                 try {
