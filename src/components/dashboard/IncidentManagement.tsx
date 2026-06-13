@@ -180,7 +180,8 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
           reviewed_at: new Date().toISOString(),
           reviewed_by: user?.id
         })
-        .eq('id', selectedIncident.id);
+        .eq('id', selectedIncident.id)
+        .eq('administrator_id', user?.id);
 
       if (updateError) {
         throw updateError;

@@ -897,6 +897,13 @@ function RegisterPageContent() {
                 ];
             }
 
+            if (shouldAutoAssignMultipleRoles) {
+                console.warn('AUTO-DETECTION disabled: role grants must come from explicit user selection or an approved server-side flow.');
+                shouldAutoAssignMultipleRoles = false;
+                autoRoleConfiguration = [];
+                autoDetectionReason = '';
+            }
+
             // ENHANCED LOGIC: Combine user-selected roles with auto-detected roles
             let finalAdditionalRoles = [];
             let totalExpectedRoles = 1; // Start with primary role
