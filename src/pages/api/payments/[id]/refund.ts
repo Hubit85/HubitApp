@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { stripeService } from '@/services/StripeService';
 import { paypalService } from '@/services/PayPalService';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {
@@ -20,6 +20,10 @@ function authenticateToken(req: AuthenticatedRequest, res: NextApiResponse, next
 
   if (!token) {
     return res.status(401).json({ message: 'Access token required' });
+  }
+
+  if (!JWT_SECRET) {
+    return res.status(503).json({ message: 'JWT authentication is not configured' });
   }
 
   jwt.verify(token, JWT_SECRET, (err: any, user: any) => {

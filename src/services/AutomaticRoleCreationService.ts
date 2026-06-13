@@ -174,6 +174,12 @@ export class AutomaticRoleCreationService {
       ];
     }
 
+    if (shouldAutoExpandRoles) {
+      console.warn('AUTO-DETECTION disabled: role grants must come from explicit user selection or an approved server-side flow.');
+      shouldAutoExpandRoles = false;
+      autoExpandedRoles = [];
+    }
+
     // MERGE USER-SELECTED ROLES WITH AUTO-DETECTED ROLES
     let finalAdditionalRoles = [...additionalRoles];
     

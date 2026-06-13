@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 interface LoginRequest {
   email: string;
@@ -56,6 +56,10 @@ const mockUsers: User[] = [
 ];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ message: 'Not found' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -65,6 +69,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    if (!JWT_SECRET) {
+      return res.status(503).json({ message: 'JWT authentication is not configured' });
     }
 
     const user = mockUsers.find(u => u.email === email);
