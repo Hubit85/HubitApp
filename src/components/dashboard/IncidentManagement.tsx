@@ -166,7 +166,7 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
   };
 
   const updateIncidentStatus = async (status: 'approved' | 'rejected' | 'under_review') => {
-    if (!selectedIncident) return;
+    if (!selectedIncident || !user?.id) return;
 
     try {
       setProcessing(true);
@@ -178,10 +178,10 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
           status,
           admin_notes: adminNotes,
           reviewed_at: new Date().toISOString(),
-          reviewed_by: user?.id
+          reviewed_by: user.id
         })
         .eq('id', selectedIncident.id)
-        .eq('administrator_id', user?.id);
+        .eq('administrator_id', user.id);
 
       if (updateError) {
         throw updateError;
