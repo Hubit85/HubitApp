@@ -26,8 +26,8 @@ export function verifyJwtToken(token: string, callback: VerifyCallback): void {
 
   try {
     secret = resolveJwtSecret();
-  } catch (error) {
-    callback(error instanceof Error ? error : new JwtConfigurationError(), undefined);
+  } catch {
+    callback(new JwtConfigurationError(), undefined);
     return;
   }
 
