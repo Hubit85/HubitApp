@@ -1,8 +1,8 @@
-import jwt, { SignOptions, VerifyCallback } from 'jsonwebtoken';
+import jwt, { JsonWebTokenError, SignOptions, VerifyCallback } from 'jsonwebtoken';
 
 const DEVELOPMENT_JWT_SECRET = 'development-only-jwt-secret';
 
-class JwtConfigurationError extends Error {
+class JwtConfigurationError extends JsonWebTokenError {
   constructor() {
     super('JWT_SECRET must be configured in production');
     this.name = 'JwtConfigurationError';
