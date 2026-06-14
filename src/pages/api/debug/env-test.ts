@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Environment check:');
     console.log('- SUPABASE_URL:', supabaseUrl ? '✅ Present' : '❌ Missing');
-    console.log('- SERVICE_KEY:', supabaseServiceKey ? `✅ Present (${supabaseServiceKey.substring(0, 20)}...)` : '❌ Missing');
+    console.log('- SERVICE_KEY:', supabaseServiceKey ? '✅ Present' : '❌ Missing');
     console.log('- RESEND_KEY:', resendKey ? '✅ Present' : '❌ Missing');
 
     // Probar conexión a Supabase
@@ -51,9 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       environment: {
         supabaseUrl: !!supabaseUrl,
         serviceKey: !!supabaseServiceKey,
-        resendKey: !!resendKey,
-        supabaseUrlValue: supabaseUrl?.substring(0, 30) + '...',
-        serviceKeyPrefix: supabaseServiceKey?.substring(0, 20) + '...'
+        resendKey: !!resendKey
       },
       supabaseTest: {
         success: true,

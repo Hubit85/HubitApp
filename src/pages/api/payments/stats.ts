@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import jwt from 'jsonwebtoken';
+import { verifyJwtToken } from '@/lib/jwtAuth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {
@@ -19,7 +18,7 @@ function authenticateToken(req: AuthenticatedRequest, res: NextApiResponse, next
     return res.status(401).json({ message: 'Access token required' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+  verifyJwtToken(token, (err: any, user: any) => {
     if (err) {
       return res.status(403).json({ message: 'Invalid or expired token' });
     }
