@@ -28,6 +28,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AUTO_ROLE_RECOVERY_ENABLED = false;
 
 export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -1037,7 +1038,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.error('❌ CRITICAL: Cannot analyze profile - no profile data');
             setActiveRole(null);
           }
-        } else if (roles.length === 1) {
+        } else if (roles.length === 1 && AUTO_ROLE_RECOVERY_ENABLED) {
           // ENHANCED: Check if this user should have more roles than they currently have
           console.log('🔍 CRITICAL: Single role detected - checking if user should have multiple roles...');
           

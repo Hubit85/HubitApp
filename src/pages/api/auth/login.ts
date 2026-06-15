@@ -1,9 +1,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { signAuthToken } from '@/lib/jwtAuth';
 
 interface LoginRequest {
   email: string;
@@ -81,13 +79,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign(
+    const token = signAuthToken(
       { 
         userId: user.id, 
         email: user.email, 
         role: user.role 
       },
-      JWT_SECRET,
       { expiresIn: '24h' }
     );
 
