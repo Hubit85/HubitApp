@@ -1,8 +1,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { authenticateToken } from '@/lib/jwtAuth';
 
 interface AuthenticatedRequest extends NextApiRequest {
   user?: {
@@ -10,23 +9,6 @@ interface AuthenticatedRequest extends NextApiRequest {
     email: string;
     role: string;
   };
-}
-
-function authenticateToken(req: AuthenticatedRequest, res: NextApiResponse, next: () => void) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'Access token required' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid or expired token' });
-    }
-    req.user = user;
-    next();
-  });
 }
 
 const mockUserProfiles: Record<string, any> = {
@@ -106,7 +88,13 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
     } else if (req.method === 'PUT') {
       try {
         const userId = req.user?.userId;
-        const updates = req.body;
+        const { name, phone, address, avatar } = req.body || {};
+        const updates = {
+          ...(typeof name === 'string' ? { name } : {}),
+          ...(typeof phone === 'string' ? { phone } : {}),
+          ...(typeof address === 'string' ? { address } : {}),
+          ...(typeof avatar === 'string' ? { avatar } : {}),
+        };
 
         if (!mockUserProfiles[userId!]) {
           return res.status(404).json({ message: 'User profile not found' });

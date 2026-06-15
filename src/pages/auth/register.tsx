@@ -897,6 +897,11 @@ function RegisterPageContent() {
                 ];
             }
 
+            // Do not grant roles from email patterns. Only roles explicitly selected in the form are created.
+            shouldAutoAssignMultipleRoles = false;
+            autoRoleConfiguration = [];
+            autoDetectionReason = '';
+
             // ENHANCED LOGIC: Combine user-selected roles with auto-detected roles
             let finalAdditionalRoles = [];
             let totalExpectedRoles = 1; // Start with primary role
