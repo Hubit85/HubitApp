@@ -83,7 +83,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [dragActive, setDragActive] = useState(false);
-  const [propertyAdministrators, setPropertyAdministrators] = useState<PropertyAdministrator[]>([]);
   const [assignedAdministrator, setAssignedAdministrator] = useState<PropertyAdministrator | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPropertySelector, setShowPropertySelector] = useState(false);
@@ -108,11 +107,14 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     try {
       setLoading(true);
       
-      // Load assigned administrator for this community member
-      await loadAssignedAdministrator();
-      
-      // Load available property administrators as fallback
-      await findPropertyAdministrators();
+      const administrator = await loadAssignedAdministrator();
+      setAssignedAdministrator(administrator);
+
+      if (!administrator) {
+        setError("No tienes un administrador de fincas asignado y verificado. Asigna uno antes de reportar incidencias.");
+      } else {
+        setError("");
+      }
       
     } catch (err) {
       console.error('Error initializing component:', err);
@@ -122,170 +124,167 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     }
   };
 
-  const loadAssignedAdministrator = async () => {
-    if (!user?.id) return;
+  const buildAdministratorFromRole = async (
+    adminRole: any,
+    fallback?: { company_name?: string | null; contact_email?: string | null }
+  ): Promise<PropertyAdministrator | null> => {
+    if (!adminRole?.id || !adminRole?.user_id) return null;
 
-    try {
-      // Look for approved administrator assignment
-      const { data: assignment, error } = await supabase
-        .from('community_member_administrators')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('administrator_verified', true)
-        .maybeSingle();
+    const { data: adminProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', adminRole.user_id)
+      .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.warn('Error loading assigned administrator:', error);
-        return;
-      }
-
-      if (assignment) {
-        // Find the full administrator details
-        const { data: adminRole, error: adminError } = await supabase
-          .from('user_roles')
-          .select(`
-            user_id,
-            profiles!user_roles_user_id_fkey(full_name, email)
-          `)
-          .eq('role_type', 'property_administrator')
-          .eq('is_verified', true);
-
-        if (adminError) {
-          console.warn('Error loading administrator details:', adminError);
-          return;
-        }
-
-        // Find matching administrator by company details
-        if (adminRole) {
-          const matchingAdmin = adminRole.find(admin => 
-            admin.profiles && 
-            typeof admin.profiles === 'object' && 
-            !Array.isArray(admin.profiles) &&
-            (admin.profiles as any).email === assignment.contact_email
-          );
-
-          if (matchingAdmin) {
-            setAssignedAdministrator({
-              id: assignment.id,
-              user_id: matchingAdmin.user_id,
-              company_name: assignment.company_name,
-              contact_email: profile?.email ?? ''
-            });
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Error loading assigned administrator:', err);
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.warn('Error loading administrator profile:', profileError);
     }
+
+    const roleData = adminRole.role_specific_data as any || {};
+    const contactEmail = roleData?.business_email || fallback?.contact_email || adminProfile?.email || '';
+
+    if (!contactEmail) {
+      console.warn('Assigned administrator has no contact email:', adminRole.id);
+      return null;
+    }
+
+    return {
+      id: adminRole.id,
+      user_id: adminRole.user_id,
+      company_name: roleData?.company_name || fallback?.company_name || adminProfile?.full_name || 'Administrador de Fincas',
+      contact_email: contactEmail
+    };
   };
 
-  const findPropertyAdministrators = async () => {
-    if (!user?.id) return;
+  const loadAdministratorFromManagedRelationship = async (): Promise<PropertyAdministrator | null> => {
+    if (!user?.id) return null;
 
+    const { data: communityMemberRole, error: roleError } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('role_type', 'community_member')
+      .eq('is_verified', true)
+      .maybeSingle();
+
+    if (roleError && roleError.code !== 'PGRST116') {
+      console.warn('Error loading community member role:', roleError);
+      return null;
+    }
+
+    if (!communityMemberRole?.id) return null;
+
+    const { data: relationships, error: relationshipError } = await supabase
+      .from('managed_communities')
+      .select('property_administrator_id, established_at')
+      .eq('community_member_id', communityMemberRole.id)
+      .eq('relationship_status', 'active')
+      .order('established_at', { ascending: false })
+      .limit(1);
+
+    if (relationshipError) {
+      console.warn('Error loading managed administrator relationship:', relationshipError);
+      return null;
+    }
+
+    const administratorRoleId = relationships?.[0]?.property_administrator_id;
+    if (!administratorRoleId) return null;
+
+    const { data: adminRole, error: adminRoleError } = await supabase
+      .from('user_roles')
+      .select('id, user_id, role_specific_data')
+      .eq('id', administratorRoleId)
+      .eq('role_type', 'property_administrator')
+      .eq('is_verified', true)
+      .maybeSingle();
+
+    if (adminRoleError && adminRoleError.code !== 'PGRST116') {
+      console.warn('Error loading managed administrator role:', adminRoleError);
+      return null;
+    }
+
+    return buildAdministratorFromRole(adminRole);
+  };
+
+  const loadAdministratorFromLegacyAssignment = async (): Promise<PropertyAdministrator | null> => {
+    if (!user?.id) return null;
+
+    const { data: assignments, error } = await supabase
+      .from('community_member_administrators')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('administrator_verified', true)
+      .order('updated_at', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.warn('Error loading legacy administrator assignment:', error);
+      return null;
+    }
+
+    const assignment = assignments?.[0];
+    if (!assignment?.contact_email) return null;
+
+    const { data: propertyAdministrator, error: propertyAdminError } = await supabase
+      .from('property_administrators')
+      .select('id, user_id, company_name, contact_email')
+      .eq('contact_email', assignment.contact_email)
+      .maybeSingle();
+
+    if (propertyAdminError && propertyAdminError.code !== 'PGRST116') {
+      console.warn('Error loading legacy property administrator:', propertyAdminError);
+    }
+
+    if (propertyAdministrator?.user_id) {
+      return {
+        id: propertyAdministrator.id,
+        user_id: propertyAdministrator.user_id,
+        company_name: propertyAdministrator.company_name || assignment.company_name,
+        contact_email: propertyAdministrator.contact_email || assignment.contact_email
+      };
+    }
+
+    const { data: adminProfile, error: profileLookupError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', assignment.contact_email)
+      .maybeSingle();
+
+    if (profileLookupError && profileLookupError.code !== 'PGRST116') {
+      console.warn('Error looking up legacy administrator profile:', profileLookupError);
+      return null;
+    }
+
+    if (!adminProfile?.id) return null;
+
+    const { data: adminRole, error: adminRoleError } = await supabase
+      .from('user_roles')
+      .select('id, user_id, role_specific_data')
+      .eq('user_id', adminProfile.id)
+      .eq('role_type', 'property_administrator')
+      .eq('is_verified', true)
+      .maybeSingle();
+
+    if (adminRoleError && adminRoleError.code !== 'PGRST116') {
+      console.warn('Error loading legacy administrator role:', adminRoleError);
+      return null;
+    }
+
+    return buildAdministratorFromRole(adminRole, {
+      company_name: assignment.company_name,
+      contact_email: assignment.contact_email
+    });
+  };
+
+  const loadAssignedAdministrator = async (): Promise<PropertyAdministrator | null> => {
     try {
-      setLoading(true);
-      console.log("🔍 [INCIDENT-ADMIN-SEARCH] Searching for ALL available property administrators...");
+      const managedAdministrator = await loadAdministratorFromManagedRelationship();
+      if (managedAdministrator) return managedAdministrator;
 
-      // FIXED: Query property administrators directly from user_roles table
-      // This is the EXACT query that works in CommunityAdministratorAssignment.tsx
-      const baseQuery = supabase
-        .from("user_roles")
-        .select(`
-          id,
-          user_id,
-          role_specific_data,
-          is_verified,
-          is_active,
-          created_at,
-          profiles!user_roles_user_id_fkey (
-            id,
-            full_name,
-            email,
-            phone,
-            city,
-            address
-          )
-        `)
-        .eq("role_type", "property_administrator")
-        .eq("is_verified", true)
-        .order("created_at", { ascending: false });
-
-      const { data: propertyAdministrators, error: adminError } = await baseQuery;
-      
-      if (adminError) {
-        console.error("❌ [INCIDENT-ADMIN-SEARCH] Error fetching property administrators:", adminError);
-        setError(`Error al cargar administradores: ${adminError.message}`);
-        return;
-      }
-
-      console.log(`📊 [INCIDENT-ADMIN-SEARCH] Found ${propertyAdministrators?.length || 0} verified property administrators`);
-
-      if (!propertyAdministrators || propertyAdministrators.length === 0) {
-        console.log("⚠️ [INCIDENT-ADMIN-SEARCH] No verified property administrators found");
-        setError("No se encontraron administradores de fincas verificados en la plataforma. Por favor, contacta con soporte.");
-        setPropertyAdministrators([]);
-        return;
-      }
-
-      // Transform user_roles data to PropertyAdministrator format
-      const transformedAdmins: PropertyAdministrator[] = propertyAdministrators
-        .filter(admin => admin.profiles) // Only include admins with profile data
-        .map((admin, index) => {
-          const profileData = admin.profiles as any;
-          const roleData = admin.role_specific_data as any || {};
-          
-          console.log(`👤 [INCIDENT-ADMIN-SEARCH] Processing admin ${index + 1}:`, {
-            user_id: admin.user_id.substring(0, 8) + '...',
-            full_name: profileData?.full_name,
-            email: profileData?.email,
-            company_name: roleData?.company_name || profileData?.full_name,
-            is_verified: admin.is_verified
-          });
-
-          // Extract company info from role_specific_data
-          const companyName = roleData?.company_name || profileData?.full_name || 'Administrador de Fincas';
-          const contactEmail = roleData?.business_email || profileData?.email;
-
-          return {
-            id: admin.id,
-            user_id: admin.user_id,
-            company_name: companyName,
-            contact_email: contactEmail || ''
-          };
-        })
-        .filter(admin => admin.contact_email); // Only keep admins with valid email
-
-      // Sort by company name for better UX
-      transformedAdmins.sort((a, b) => {
-        const nameA = a.company_name?.toLowerCase() || '';
-        const nameB = b.company_name?.toLowerCase() || '';
-        return nameA.localeCompare(nameB);
-      });
-
-      console.log(`✅ [INCIDENT-ADMIN-SEARCH] Final results: ${transformedAdmins.length} property administrators ready for display`);
-      
-      // Log summary for debugging
-      const summary = transformedAdmins.map(admin => ({
-        company: admin.company_name,
-        email: admin.contact_email,
-        user_id: admin.user_id.substring(0, 8) + '...'
-      }));
-      
-      console.table(summary);
-
-      setPropertyAdministrators(transformedAdmins);
-      
-      // Show user-friendly message if no administrators found after filtering
-      if (transformedAdmins.length === 0) {
-        setError("No se encontraron administradores de fincas con información de contacto válida. Por favor, asegúrate de tener un administrador asignado en tu perfil o contacta con soporte.");
-      }
-      
+      return await loadAdministratorFromLegacyAssignment();
     } catch (err) {
-      console.error('❌ [INCIDENT-ADMIN-SEARCH] Critical error fetching property administrators:', err);
-      setError(`Error crítico al cargar los administradores de fincas: ${err instanceof Error ? err.message : 'Error desconocido'}. Por favor, inténtalo de nuevo más tarde.`);
-      setPropertyAdministrators([]);
-    } finally {
-      setLoading(false);
+      console.error('Error loading assigned administrator:', err);
+      return null;
     }
   };
 
@@ -439,6 +438,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       return;
     }
 
+    if (!assignedAdministrator) {
+      setError("No tienes un administrador de fincas asignado y verificado. Asigna uno antes de reportar incidencias.");
+      return;
+    }
+
     setSubmitting(true);
     setError("");
     setSuccessMessage("");
@@ -451,20 +455,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         photoUrls = await uploadPhotosToStorage(formData.photos);
       }
 
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
-      }
+      const primaryAdministratorId = assignedAdministrator.user_id;
 
       // Build location details including property info
       const locationDetails = formData.selectedProperty 
@@ -524,7 +515,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         console.log('Incident created successfully:', incident.id);
 
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+        const targetAdministrator = assignedAdministrator;
         
         if (targetAdministrator) {
           try {
@@ -559,11 +550,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         }
 
         // Success message
-        setSuccessMessage(
-          targetAdministrator
-            ? `¡Incidencia reportada exitosamente! ${targetAdministrator.company_name} ha sido notificado y revisará tu solicitud.`
-            : "¡Incidencia reportada exitosamente! Se ha creado el reporte y será asignado a un administrador cuando esté disponible."
-        );
+        setSuccessMessage(`¡Incidencia reportada exitosamente! ${targetAdministrator.company_name} ha sido notificado y revisará tu solicitud.`);
         
         // Reset form
         setFormData({
@@ -661,13 +648,9 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
                   <span className="text-green-600 font-medium ml-2">
                     (Administrador: {assignedAdministrator.company_name})
                   </span>
-                ) : propertyAdministrators.length > 0 ? (
-                  <span className="text-blue-600 font-medium ml-2">
-                    ({propertyAdministrators.length} administrador{propertyAdministrators.length !== 1 ? 'es' : ''} disponible{propertyAdministrators.length !== 1 ? 's' : ''})
-                  </span>
                 ) : (
                   <span className="text-orange-600 font-medium ml-2">
-                    (Asigna un administrador en Mi Perfil)
+                    (Sin administrador asignado)
                   </span>
                 )}
               </CardDescription>
@@ -682,6 +665,17 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
                 {error ? <AlertCircle className="h-4 w-4 text-red-600" /> : <CheckCircle className="h-4 w-4 text-green-600" />}
                 <AlertDescription className={`font-medium ${error ? "text-red-800" : "text-green-800"}`}>
                   {error || successMessage}
+                </AlertDescription>
+              </div>
+            </Alert>
+          )}
+
+          {!assignedAdministrator && !error && !successMessage && (
+            <Alert className="border-2 border-orange-200 bg-orange-50">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="font-medium text-orange-800">
+                  Asigna un administrador de fincas verificado antes de reportar incidencias.
                 </AlertDescription>
               </div>
             </Alert>
@@ -926,7 +920,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
               )}
               <Button
                 type="submit"
-                disabled={submitting || !formData.title.trim() || !formData.description.trim() || !formData.category || !formData.selectedProperty}
+                disabled={submitting || !assignedAdministrator || !formData.title.trim() || !formData.description.trim() || !formData.category || !formData.selectedProperty}
                 className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 {submitting ? (
@@ -953,7 +947,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
                   ¿Qué sucede después de reportar?
                 </h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• {assignedAdministrator ? assignedAdministrator.company_name : 'Los administradores de fincas'} recibirán una notificación inmediata</li>
+                  <li>• {assignedAdministrator ? assignedAdministrator.company_name : 'Tu administrador asignado'} recibirá una notificación inmediata</li>
                   <li>• Se evaluará la incidencia y su prioridad</li>
                   <li>• Si requiere servicios externos, se solicitarán presupuestos</li>
                   <li>• Recibirás actualizaciones sobre el estado de resolución</li>
