@@ -152,7 +152,7 @@ export default function HomePage() {
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-3 mb-6">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                  <span className="text-emerald-400 font-semibold tracking-wider uppercase text-sm">{t("status")}</span>
+                  <span className="text-emerald-400 font-semibold tracking-wider uppercase text-sm">{t("systemStatus")}</span>
                   <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-300" />
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
