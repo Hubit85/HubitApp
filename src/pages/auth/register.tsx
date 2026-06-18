@@ -774,7 +774,7 @@ function RegisterPageContent() {
             const primaryRole = orderedRoles[0];
 
             // Create only the roles explicitly selected by the user during registration.
-            let finalAdditionalRoles = [];
+            let finalAdditionalRoles: Array<{ roleType: RoleType; roleSpecificData: Record<string, any> }> = [];
             let totalExpectedRoles = 1; // Start with primary role
 
             if (orderedRoles.length > 1) {
