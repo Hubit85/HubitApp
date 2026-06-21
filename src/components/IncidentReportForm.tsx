@@ -64,6 +64,7 @@ interface PropertyAdministrator {
   user_id: string;
   company_name: string;
   contact_email: string;
+  community_id?: string;
 }
 
 export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormProps) {
@@ -126,12 +127,32 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     if (!user?.id) return;
 
     try {
-      // Look for approved administrator assignment
-      const { data: assignment, error } = await supabase
-        .from('community_member_administrators')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('administrator_verified', true)
+      const communityMemberRoleIds = userRoles
+        .filter(role => role.role_type === 'community_member' && role.is_verified)
+        .map(role => role.id);
+
+      if (communityMemberRoleIds.length === 0) {
+        setAssignedAdministrator(null);
+        return;
+      }
+
+      const { data: relationship, error } = await supabase
+        .from('managed_communities')
+        .select(`
+          id,
+          community_id,
+          property_administrator_id,
+          property_administrator:user_roles!managed_communities_property_administrator_id_fkey (
+            id,
+            user_id,
+            role_specific_data,
+            profiles!user_roles_user_id_fkey(full_name, email)
+          )
+        `)
+        .in('community_member_id', communityMemberRoleIds)
+        .eq('relationship_status', 'active')
+        .order('established_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
@@ -139,40 +160,21 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         return;
       }
 
-      if (assignment) {
-        // Find the full administrator details
-        const { data: adminRole, error: adminError } = await supabase
-          .from('user_roles')
-          .select(`
-            user_id,
-            profiles!user_roles_user_id_fkey(full_name, email)
-          `)
-          .eq('role_type', 'property_administrator')
-          .eq('is_verified', true);
+      const adminRole = relationship?.property_administrator as any;
 
-        if (adminError) {
-          console.warn('Error loading administrator details:', adminError);
-          return;
-        }
+      if (relationship && adminRole?.user_id) {
+        const roleData = adminRole.role_specific_data || {};
+        const profileData = adminRole.profiles || {};
 
-        // Find matching administrator by company details
-        if (adminRole) {
-          const matchingAdmin = adminRole.find(admin => 
-            admin.profiles && 
-            typeof admin.profiles === 'object' && 
-            !Array.isArray(admin.profiles) &&
-            (admin.profiles as any).email === assignment.contact_email
-          );
-
-          if (matchingAdmin) {
-            setAssignedAdministrator({
-              id: assignment.id,
-              user_id: matchingAdmin.user_id,
-              company_name: assignment.company_name,
-              contact_email: profile?.email ?? ''
-            });
-          }
-        }
+        setAssignedAdministrator({
+          id: relationship.property_administrator_id,
+          user_id: adminRole.user_id,
+          company_name: roleData.company_name || profileData.full_name || 'Administrador de Fincas',
+          contact_email: roleData.business_email || profileData.email || '',
+          community_id: relationship.community_id || undefined
+        });
+      } else {
+        setAssignedAdministrator(null);
       }
     } catch (err) {
       console.error('Error loading assigned administrator:', err);
@@ -365,60 +367,82 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     }
   };
 
-  const uploadPhotosToStorage = async (photos: File[]): Promise<string[]> => {
+  const resolveIncidentCommunityId = async (administratorId: string): Promise<string> => {
+    if (assignedAdministrator?.community_id) {
+      return assignedAdministrator.community_id;
+    }
+
+    const property = formData.selectedProperty;
+    if (!property) {
+      throw new Error('No property selected for incident community');
+    }
+
+    const { data: existingCommunity, error: lookupError } = await supabase
+      .from('communities')
+      .select('id')
+      .eq('administrator_id', administratorId)
+      .eq('address', property.address)
+      .maybeSingle();
+
+    if (lookupError && lookupError.code !== 'PGRST116') {
+      throw lookupError;
+    }
+
+    if (existingCommunity?.id) {
+      return existingCommunity.id;
+    }
+
+    const { data: createdCommunity, error: createError } = await supabase
+      .from('communities')
+      .insert({
+        name: property.name || 'Comunidad',
+        address: property.address,
+        city: property.city || 'Sin especificar',
+        postal_code: property.postal_code || null,
+        administrator_id: administratorId,
+        status: 'active'
+      })
+      .select('id')
+      .single();
+
+    if (createError) {
+      throw createError;
+    }
+
+    if (!createdCommunity?.id) {
+      throw new Error('Could not resolve a valid community for the incident');
+    }
+
+    return createdCommunity.id;
+  };
+
+  const uploadPhotosToStorage = async (photos: File[], incidentId: string): Promise<string[]> => {
     const uploadedUrls: string[] = [];
 
     for (const photo of photos) {
-      try {
-        const fileExt = photo.name.split('.').pop();
-        const fileName = `incident_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
-        // Use a simpler path structure to avoid RLS issues
-        const filePath = `public/${fileName}`;
+      const fileExt = photo.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${incidentId}/${fileName}`;
 
-        // Try uploading to a public bucket or create base64 encoded version as fallback
-        try {
-          const { error } = await supabase.storage
-            .from('incident-photos')
-            .upload(filePath, photo, {
-              cacheControl: '3600',
-              upsert: false
-            });
+      const { error } = await supabase.storage
+        .from('incident-photos')
+        .upload(filePath, photo, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-          if (error) {
-            throw error;
-          }
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('incident-photos')
-            .getPublicUrl(filePath);
-
-          uploadedUrls.push(publicUrl);
-        } catch (storageError) {
-          console.warn('Storage upload failed, using base64 fallback:', storageError);
-          
-          // Fallback: convert to base64 and store as data URL
-          const base64 = await convertToBase64(photo);
-          uploadedUrls.push(base64);
-        }
-
-      } catch (uploadError) {
-        console.error('Failed to process photo:', uploadError);
-        // Continue with other photos even if one fails
+      if (error) {
+        throw error;
       }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('incident-photos')
+        .getPublicUrl(filePath);
+
+      uploadedUrls.push(publicUrl);
     }
 
     return uploadedUrls;
-  };
-
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -444,27 +468,13 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
-      // Upload photos if any
-      let photoUrls: string[] = [];
-      if (formData.photos.length > 0) {
-        setSuccessMessage("Subiendo fotografías...");
-        photoUrls = await uploadPhotosToStorage(formData.photos);
+      if (!assignedAdministrator) {
+        setError("No tienes un administrador de fincas asignado para reportar incidencias. Solicita y espera la aprobación de un administrador antes de continuar.");
+        return;
       }
 
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
-      }
+      const primaryAdministratorId = assignedAdministrator.user_id;
+      const communityId = await resolveIncidentCommunityId(primaryAdministratorId);
 
       // Build location details including property info
       const locationDetails = formData.selectedProperty 
@@ -480,10 +490,10 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         status: 'pending' as const,
         work_location: locationDetails,
         special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unitNumber}` : null,
-        images: photoUrls.length > 0 ? photoUrls : null,
+        images: null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
+        community_id: communityId,
         administrator_id: primaryAdministratorId,
         admin_notes: null,
         reviewed_at: null,
@@ -523,8 +533,27 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       if (incident) {
         console.log('Incident created successfully:', incident.id);
 
+        if (formData.photos.length > 0) {
+          setSuccessMessage("Subiendo fotografías...");
+          try {
+            const photoUrls = await uploadPhotosToStorage(formData.photos, incident.id);
+            const { error: imageUpdateError } = await supabase
+              .from('incidents')
+              .update({ images: photoUrls })
+              .eq('id', incident.id);
+
+            if (imageUpdateError) {
+              throw imageUpdateError;
+            }
+          } catch (photoError) {
+            console.error('Failed to attach incident photos:', photoError);
+            setError("La incidencia se creó correctamente, pero no se pudieron adjuntar las fotografías. Intenta contactar con soporte para añadirlas.");
+            return;
+          }
+        }
+
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+        const targetAdministrator = assignedAdministrator;
         
         if (targetAdministrator) {
           try {

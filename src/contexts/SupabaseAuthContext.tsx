@@ -1052,8 +1052,8 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             const now = new Date();
             const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
             
-            // SPECIFIC CHECK: Users who should have multiple roles but only show one - MEJORADO PARA TODOS LOS USUARIOS
-            const shouldHaveMultipleRoles = (
+            // Never infer roles from email patterns. Additional roles must come from explicit user selection.
+            const shouldHaveMultipleRoles = false && (
               profileCheck.email.includes('alain') ||
               profileCheck.email.includes('espinosa') ||
               profileCheck.email === 'alainespinosaroman@gmail.com' || // Detección específica
