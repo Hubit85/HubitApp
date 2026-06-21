@@ -106,7 +106,28 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
     } else if (req.method === 'PUT') {
       try {
         const userId = req.user?.userId;
-        const updates = req.body;
+        const {
+          name,
+          phone,
+          address,
+          avatar,
+          properties,
+          communityId,
+          propertyUnit,
+          company,
+          services,
+        } = req.body || {};
+        const updates = {
+          ...(name !== undefined ? { name } : {}),
+          ...(phone !== undefined ? { phone } : {}),
+          ...(address !== undefined ? { address } : {}),
+          ...(avatar !== undefined ? { avatar } : {}),
+          ...(properties !== undefined ? { properties } : {}),
+          ...(communityId !== undefined ? { communityId } : {}),
+          ...(propertyUnit !== undefined ? { propertyUnit } : {}),
+          ...(company !== undefined ? { company } : {}),
+          ...(services !== undefined ? { services } : {}),
+        };
 
         if (!mockUserProfiles[userId!]) {
           return res.status(404).json({ message: 'User profile not found' });
