@@ -1,9 +1,36 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
+import { timingSafeEqual } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+
+function isValidWebhookSecret(receivedSecret: string | string[] | undefined): boolean {
+  const expectedSecret = process.env.PAYMENTS_WEBHOOK_SECRET;
+
+  if (process.env.NODE_ENV === 'production' && !expectedSecret) {
+    return false;
+  }
+
+  if (!expectedSecret) {
+    return true;
+  }
+
+  if (typeof receivedSecret !== 'string') {
+    return false;
+  }
+
+  const received = Buffer.from(receivedSecret);
+  const expected = Buffer.from(expectedSecret);
+
+  return received.length === expected.length && timingSafeEqual(received, expected);
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
+    if (!isValidWebhookSecret(req.headers['x-hubit-webhook-secret'])) {
+      const status = process.env.PAYMENTS_WEBHOOK_SECRET ? 401 : 503;
+      return res.status(status).json({ message: 'Webhook verification failed' });
+    }
+
     try {
       const { type, data } = req.body;
 
