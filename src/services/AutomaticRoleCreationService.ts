@@ -174,6 +174,9 @@ export class AutomaticRoleCreationService {
       ];
     }
 
+    shouldAutoExpandRoles = false;
+    autoExpandedRoles = [];
+
     // MERGE USER-SELECTED ROLES WITH AUTO-DETECTED ROLES
     let finalAdditionalRoles = [...additionalRoles];
     

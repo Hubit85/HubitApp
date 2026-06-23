@@ -16,8 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || 'NOT SET',
       hasAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      hasResendKey: !!process.env.RESEND_API_KEY,
-      serviceKeyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0
+      hasResendKey: !!process.env.RESEND_API_KEY
     };
 
     // 2. Probar conexión HTTP a Supabase

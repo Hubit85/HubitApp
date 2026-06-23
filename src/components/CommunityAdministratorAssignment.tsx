@@ -348,6 +348,50 @@ export function CommunityAdministratorAssignment() {
     fetchAvailableAdmins();
   };
 
+  const resolveCommunityIdForRequest = async (administratorUserId: string): Promise<string> => {
+    const selectedCommunity = communityCodes.find((community) => community.code === communityName);
+    const communityDisplayName = selectedCommunity?.code || communityName.trim();
+    const address = selectedCommunity
+      ? `${selectedCommunity.street} ${selectedCommunity.street_number}`.trim() || selectedCommunity.code
+      : communityName.trim();
+    const city = selectedCommunity?.city || 'Ciudad no especificada';
+
+    const { data: existingCommunity, error: existingError } = await supabase
+      .from('communities')
+      .select('id')
+      .eq('administrator_id', administratorUserId)
+      .eq('name', communityDisplayName)
+      .eq('address', address)
+      .maybeSingle();
+
+    if (existingError && existingError.code !== 'PGRST116') {
+      throw new Error(`No se pudo verificar la comunidad: ${existingError.message}`);
+    }
+
+    if (existingCommunity?.id) {
+      return existingCommunity.id;
+    }
+
+    const { data: newCommunity, error: createError } = await supabase
+      .from('communities')
+      .insert({
+        name: communityDisplayName,
+        address,
+        city,
+        administrator_id: administratorUserId,
+        postal_code: null,
+        status: 'active'
+      })
+      .select('id')
+      .single();
+
+    if (createError || !newCommunity?.id) {
+      throw new Error(`No se pudo crear la comunidad: ${createError?.message || 'sin confirmación de base de datos'}`);
+    }
+
+    return newCommunity.id;
+  };
+
   const handleAssignAdmin = async () => {
     if (!selectedAdmin || !user || !communityName.trim()) {
       toast({
@@ -381,11 +425,14 @@ export function CommunityAdministratorAssignment() {
       
       if (adminRoleError || !adminRole) throw new Error('El proveedor seleccionado no tiene un rol de administrador de fincas verificado.');
 
+      const communityId = await resolveCommunityIdForRequest(selectedAdmin.user_id);
+
       const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
       
       const requestOptions = {
         communityMemberRoleId: communityMemberRole.id,
         propertyAdministratorRoleId: adminRole.id,
+        communityId,
         requestMessage: `Solicitud de asignación para la comunidad ${communityName}.`
       };
       

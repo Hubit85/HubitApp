@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       connectionTest,
       debug: {
         url_length: process.env.NEXT_PUBLIC_SUPABASE_URL?.length || 0,
-        service_key_prefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) || 'No disponible'
+        service_key_configured: !!process.env.SUPABASE_SERVICE_ROLE_KEY
       }
     });
 

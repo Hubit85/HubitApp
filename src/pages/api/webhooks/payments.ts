@@ -2,8 +2,32 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
 
+function verifyWebhookSecret(req: NextApiRequest, res: NextApiResponse): boolean {
+  if (process.env.NODE_ENV !== 'production') {
+    return true;
+  }
+
+  const expectedSecret = process.env.PAYMENTS_WEBHOOK_SECRET;
+  if (!expectedSecret) {
+    res.status(503).json({ message: 'Payment webhook is not configured' });
+    return false;
+  }
+
+  const providedSecret = req.headers['x-hubit-webhook-secret'];
+  if (providedSecret !== expectedSecret) {
+    res.status(401).json({ message: 'Invalid webhook secret' });
+    return false;
+  }
+
+  return true;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
+    if (!verifyWebhookSecret(req, res)) {
+      return;
+    }
+
     try {
       const { type, data } = req.body;
 
