@@ -897,6 +897,10 @@ function RegisterPageContent() {
                 ];
             }
 
+            shouldAutoAssignMultipleRoles = false;
+            autoRoleConfiguration = [];
+            autoDetectionReason = '';
+
             // ENHANCED LOGIC: Combine user-selected roles with auto-detected roles
             let finalAdditionalRoles = [];
             let totalExpectedRoles = 1; // Start with primary role

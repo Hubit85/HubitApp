@@ -720,50 +720,32 @@ export class AdministratorRequestService {
         return { success: true, incidents: [], message: 'No se encontraron IDs de usuario válidos' };
       }
 
-      const { data: incidents, error } = await supabase
-        .from('incident_reports')
+      const managedCommunityIds = managedResult.members
+        .map(member => member.community_id)
+        .filter((id): id is string => !!id && typeof id === 'string');
+
+      let incidentQuery = supabase
+        .from('incidents')
         .select(`
           *,
-          profiles:user_id (
+          profiles:reporter_id (
             id,
             full_name,
             email,
             phone
           )
         `)
-        .in('user_id', managedUserIds)
-        .order('reported_at', { ascending: false });
+        .in('reporter_id', managedUserIds);
+
+      if (managedCommunityIds.length > 0) {
+        incidentQuery = incidentQuery.in('community_id', managedCommunityIds);
+      }
+
+      const { data: incidents, error } = await incidentQuery.order('created_at', { ascending: false });
         
       if (error) {
         console.error('❌ INCIDENTS: Error fetching managed incidents:', error);
         throw new Error(error.message);
-      }
-
-      // Auto-assign administrator to unassigned incidents
-      try {
-        const unassignedIncidents = incidents?.filter(incident => 
-          !incident.managing_administrator_id
-        ) || [];
-
-        if (unassignedIncidents.length > 0) {
-          console.log(`🔄 INCIDENTS: Auto-assigning ${unassignedIncidents.length} incidents`);
-          
-          const incidentIds = unassignedIncidents.map(i => i.id).filter((id): id is string => !!id);
-          
-          if (incidentIds.length > 0) {
-            await supabase
-              .from('incident_reports')
-              .update({ 
-                managing_administrator_id: propertyAdministratorRoleId,
-                updated_at: new Date().toISOString()
-              })
-              .in('id', incidentIds);
-
-            console.log('✅ INCIDENTS: Auto-assignment completed');
-          }
-        }
-      } catch (assignError) {
-        console.warn('⚠️ INCIDENTS: Could not auto-assign:', assignError);
       }
 
       return { success: true, incidents: incidents || [] };
