@@ -106,7 +106,10 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
     } else if (req.method === 'PUT') {
       try {
         const userId = req.user?.userId;
-        const updates = req.body;
+        const { name, phone, address, avatar } = req.body;
+        const updates = Object.fromEntries(
+          Object.entries({ name, phone, address, avatar }).filter(([, value]) => value !== undefined)
+        );
 
         if (!mockUserProfiles[userId!]) {
           return res.status(404).json({ message: 'User profile not found' });

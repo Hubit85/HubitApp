@@ -5,6 +5,16 @@ import { v4 as uuidv4 } from 'uuid';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
+      const webhookSecret = process.env.PAYMENTS_WEBHOOK_SECRET;
+
+      if (process.env.NODE_ENV === 'production' && !webhookSecret) {
+        return res.status(503).json({ message: 'Payment webhook is not configured' });
+      }
+
+      if (webhookSecret && req.headers['x-hubit-webhook-secret'] !== webhookSecret) {
+        return res.status(401).json({ message: 'Invalid webhook signature' });
+      }
+
       const { type, data } = req.body;
 
       console.log('Payment webhook received:', { type, data });

@@ -1052,17 +1052,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             const now = new Date();
             const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
             
-            // SPECIFIC CHECK: Users who should have multiple roles but only show one - MEJORADO PARA TODOS LOS USUARIOS
-            const shouldHaveMultipleRoles = (
-              profileCheck.email.includes('alain') ||
-              profileCheck.email.includes('espinosa') ||
-              profileCheck.email === 'alainespinosaroman@gmail.com' || // Detección específica
-              profileCheck.email.includes('ddayanacastro') ||
-              profileCheck.email.includes('castro') ||
-              profileCheck.email.includes('pipaon') ||
-              profileCheck.email.includes('borja') ||
-              (ageMinutes < 240 && profileCheck.email.match(/\w+\.\w+@\w+\.\w+/)) // Complex email patterns from recent registrations
-            );
+            // Never infer additional verified roles from email patterns during login unless a
+            // temporary recovery flag is explicitly enabled outside production.
+            const shouldHaveMultipleRoles =
+              process.env.NODE_ENV !== 'production' &&
+              process.env.NEXT_PUBLIC_ENABLE_EMAIL_ROLE_DETECTION === 'true';
             
             if (shouldHaveMultipleRoles) {
               console.log('🎯 CRITICAL: User should have multiple roles but only has one - investigating...');

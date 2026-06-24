@@ -60,9 +60,12 @@ export class AutomaticRoleCreationService {
     const emailLower = email.toLowerCase();
     let shouldAutoExpandRoles = false;
     let autoExpandedRoles: any[] = [];
+    const allowEmailBasedRoleDetection =
+      process.env.NODE_ENV !== 'production' &&
+      process.env.NEXT_PUBLIC_ENABLE_EMAIL_ROLE_DETECTION === 'true';
     
-    // SPECIFIC USER PATTERNS: Auto-detect users who should get multiple roles automatically
-    if (emailLower.includes('alain') || emailLower.includes('espinosa') || emailLower === 'alainespinosaroman@gmail.com') {
+    // Do not infer privileged roles from email patterns; only explicit selections are honored.
+    if (allowEmailBasedRoleDetection && (emailLower.includes('alain') || emailLower.includes('espinosa') || emailLower === 'alainespinosaroman@gmail.com')) {
       console.log('🎯 AUTO-DETECTION: Detected alainespinosaroman pattern - auto-expanding to multiple roles');
       shouldAutoExpandRoles = true;
       autoExpandedRoles = [
@@ -94,7 +97,7 @@ export class AutomaticRoleCreationService {
           }
         }
       ];
-    } else if (emailLower.includes('ddayanacastro') || emailLower.includes('castro')) {
+    } else if (allowEmailBasedRoleDetection && (emailLower.includes('ddayanacastro') || emailLower.includes('castro'))) {
       console.log('🎯 AUTO-DETECTION: Detected ddayanacastro pattern - auto-expanding to all roles');
       shouldAutoExpandRoles = true;
       autoExpandedRoles = [
@@ -140,7 +143,7 @@ export class AutomaticRoleCreationService {
           }
         }
       ];
-    } else if (emailLower.includes('borja') || emailLower.includes('pipaon')) {
+    } else if (allowEmailBasedRoleDetection && (emailLower.includes('borja') || emailLower.includes('pipaon'))) {
       console.log('🎯 AUTO-DETECTION: Detected borjapipaon pattern - auto-expanding to multiple roles');
       shouldAutoExpandRoles = true;
       autoExpandedRoles = [
