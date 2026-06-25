@@ -396,11 +396,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
           uploadedUrls.push(publicUrl);
         } catch (storageError) {
-          console.warn('Storage upload failed, using base64 fallback:', storageError);
-          
-          // Fallback: convert to base64 and store as data URL
-          const base64 = await convertToBase64(photo);
-          uploadedUrls.push(base64);
+          console.warn('Storage upload failed; skipping photo:', storageError);
         }
 
       } catch (uploadError) {
@@ -412,13 +408,80 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     return uploadedUrls;
   };
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
+  const resolveIncidentAssignment = async (): Promise<{
+    communityId: string;
+    administrator: PropertyAdministrator;
+  } | null> => {
+    const communityMemberRole = userRoles.find(role =>
+      role.role_type === 'community_member' && role.is_verified
+    );
+
+    if (!communityMemberRole) {
+      setError("No se encontró un rol de miembro de comunidad verificado.");
+      return null;
+    }
+
+    const { data: assignment, error: assignmentError } = await supabase
+      .from('managed_communities')
+      .select('community_id, property_administrator_id')
+      .eq('community_member_id', communityMemberRole.id)
+      .eq('relationship_status', 'active')
+      .not('community_id', 'is', null)
+      .limit(1)
+      .maybeSingle();
+
+    if (assignmentError) {
+      console.error('Error resolving managed community assignment:', assignmentError);
+      setError("No se pudo comprobar la asignación con tu administrador de fincas.");
+      return null;
+    }
+
+    if (!assignment?.community_id || !assignment.property_administrator_id) {
+      setError("No tienes una comunidad activa asignada a un administrador de fincas.");
+      return null;
+    }
+
+    const { data: adminRole, error: adminRoleError } = await supabase
+      .from('user_roles')
+      .select(`
+        id,
+        user_id,
+        role_specific_data,
+        profiles!user_roles_user_id_fkey (
+          full_name,
+          email
+        )
+      `)
+      .eq('id', assignment.property_administrator_id)
+      .eq('role_type', 'property_administrator')
+      .eq('is_verified', true)
+      .maybeSingle();
+
+    if (adminRoleError) {
+      console.error('Error loading assigned administrator role:', adminRoleError);
+      setError("No se pudo cargar el administrador de fincas asignado.");
+      return null;
+    }
+
+    if (!adminRole?.user_id) {
+      setError("La comunidad asignada no tiene un administrador de fincas verificado.");
+      return null;
+    }
+
+    const adminProfile = Array.isArray(adminRole.profiles)
+      ? adminRole.profiles[0]
+      : adminRole.profiles;
+    const roleData = (adminRole.role_specific_data as any) || {};
+
+    return {
+      communityId: assignment.community_id,
+      administrator: {
+        id: adminRole.id,
+        user_id: adminRole.user_id,
+        company_name: roleData.company_name || adminProfile?.full_name || 'Administrador de Fincas',
+        contact_email: roleData.business_email || adminProfile?.email || ''
+      }
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -444,34 +507,19 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
-      // Upload photos if any
-      let photoUrls: string[] = [];
-      if (formData.photos.length > 0) {
-        setSuccessMessage("Subiendo fotografías...");
-        photoUrls = await uploadPhotosToStorage(formData.photos);
+      const assignment = await resolveIncidentAssignment();
+      if (!assignment) {
+        return;
       }
 
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
-      }
+      const targetAdministrator = assignment.administrator;
 
       // Build location details including property info
       const locationDetails = formData.selectedProperty 
         ? `${formData.selectedProperty.name || formData.selectedProperty.address} - ${formData.location.trim() || 'Ubicación específica no especificada'}`
         : formData.location.trim() || 'Áreas comunes de la comunidad';
 
-      // Create incident record with proper UUID
+      // Create the incident first. Photos are uploaded only after the required assignment is valid.
       const incidentData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -480,11 +528,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         status: 'pending' as const,
         work_location: locationDetails,
         special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unitNumber}` : null,
-        images: photoUrls.length > 0 ? photoUrls : null,
+        images: null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
-        administrator_id: primaryAdministratorId,
+        community_id: assignment.communityId,
+        administrator_id: targetAdministrator.user_id,
         admin_notes: null,
         reviewed_at: null,
         reviewed_by: null
@@ -494,6 +542,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         title: incidentData.title,
         reporter_id: incidentData.reporter_id,
         administrator_id: incidentData.administrator_id,
+        community_id: incidentData.community_id,
         category: incidentData.category,
         urgency: incidentData.urgency,
         work_location: incidentData.work_location
@@ -523,9 +572,24 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       if (incident) {
         console.log('Incident created successfully:', incident.id);
 
+        let photoUrls: string[] = [];
+        if (formData.photos.length > 0) {
+          setSuccessMessage("Subiendo fotografías...");
+          photoUrls = await uploadPhotosToStorage(formData.photos);
+
+          if (photoUrls.length > 0) {
+            const { error: imageUpdateError } = await supabase
+              .from('incidents')
+              .update({ images: photoUrls, updated_at: new Date().toISOString() })
+              .eq('id', incident.id);
+
+            if (imageUpdateError) {
+              console.warn('Failed to attach uploaded photos to incident:', imageUpdateError);
+            }
+          }
+        }
+
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
-        
         if (targetAdministrator) {
           try {
             const urgencyLevel = URGENCY_LEVELS.find(u => u.value === formData.urgency);
