@@ -35,6 +35,10 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
   authenticateToken(req, res, async () => {
     if (req.method === 'POST') {
       try {
+        if (req.user?.role !== 'administrator') {
+          return res.status(403).json({ message: 'Administrator role required' });
+        }
+
         const { id } = req.query;
         const { immediately, provider } = req.body;
         const userId = req.user?.userId;

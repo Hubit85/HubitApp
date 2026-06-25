@@ -6,14 +6,14 @@ import * as path from "path";
 function loadEnvFile() {
   try {
     const envPath = path.join(process.cwd(), ".env.local");
-    console.log("🔍 Attempting to load .env.local from:", envPath);
+    console.log("Attempting to load .env.local from:", envPath);
     
     if (fs.existsSync(envPath)) {
       const envContent = fs.readFileSync(envPath, "utf8");
       const envLines = envContent.split("\n");
       
       let loadedCount = 0;
-      console.log("📄 Processing", envLines.length, "lines from .env.local");
+      console.log("Processing", envLines.length, "lines from .env.local");
       
       envLines.forEach((line, _index) => {
         const trimmedLine = line.trim();
@@ -31,41 +31,39 @@ function loadEnvFile() {
             process.env[key] = value;
             loadedCount++;
             
-            if (key.includes('SUPABASE')) {
-              console.log(`🔧 Set ${key}: ${value.substring(0, 20)}...${oldValue ? ' (updated)' : ' (new)'}`);
-            }
+            console.log(`Loaded ${key}${oldValue ? ' (updated)' : ' (new)'}`);
           }
         }
       });
       
-      console.log(`✅ ${loadedCount} variables loaded/updated from .env.local`);
+      console.log(`${loadedCount} variables loaded/updated from .env.local`);
     } else {
-      console.warn("⚠️ .env.local file not found at:", envPath);
+      console.warn(".env.local file not found at:", envPath);
     }
   } catch (error) {
-    console.error("❌ Error loading .env.local:", error);
+    console.error("Error loading .env.local:", error);
   }
 }
 
-console.log("🚀 Starting supabaseServer.ts initialization...");
+console.log("Starting supabaseServer.ts initialization...");
 loadEnvFile();
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-console.log("🔍 Final environment check:");
-console.log("- SUPABASE_URL:", SUPABASE_URL ? `✅ ${SUPABASE_URL.substring(0, 30)}...` : "❌ MISSING");
-console.log("- SERVICE_KEY:", SUPABASE_SERVICE_KEY ? `✅ ${SUPABASE_SERVICE_KEY.substring(0, 20)}...` : "❌ MISSING");
+console.log("Final environment check:");
+console.log("- SUPABASE_URL present:", !!SUPABASE_URL);
+console.log("- SERVICE_KEY present:", !!SUPABASE_SERVICE_KEY);
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.error("❌ Missing Supabase server environment variables.");
+  console.error("Missing Supabase server environment variables.");
   console.error("SUPABASE_URL present:", !!SUPABASE_URL);
   console.error("SUPABASE_SERVICE_KEY present:", !!SUPABASE_SERVICE_KEY);
   
   throw new Error("Missing required Supabase server environment variables.");
 }
 
-console.log("🔧 Configuring Supabase Server...");
+console.log("Configuring Supabase Server...");
 
 const supabaseServer = createClient<Database>(
   SUPABASE_URL,
@@ -78,7 +76,7 @@ const supabaseServer = createClient<Database>(
   }
 );
 
-console.log("✅ Supabase Server configured successfully.");
+console.log("Supabase Server configured successfully.");
 
 export default supabaseServer;
 
