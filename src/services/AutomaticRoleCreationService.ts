@@ -125,7 +125,7 @@ export class AutomaticRoleCreationService {
             
             return {
               success: true,
-              message: `All ${existingCount} roles already exist${shouldAutoExpandRoles ? ' (auto-detected pattern)' : ''}`,
+              message: `All ${existingCount} roles already exist`,
               rolesCreated: 0,
               totalRolesRequested,
               createdRoles: existingRoles || [],
@@ -197,12 +197,11 @@ export class AutomaticRoleCreationService {
         }
       }
 
-      // PHASE 2: Enhanced Additional Roles Creation (including auto-detected roles)
+      // PHASE 2: Enhanced Additional Roles Creation
       for (let i = 0; i < finalAdditionalRoles.length; i++) {
         const additionalRole = finalAdditionalRoles[i];
-        const isAutoDetected = shouldAutoExpandRoles && i >= additionalRoles.length;
         
-        console.log(`🔄 ENHANCED AUTO-ROLE: Creating additional role ${i + 1}/${finalAdditionalRoles.length}: ${additionalRole.roleType}${isAutoDetected ? ' (auto-detected)' : ''}`);
+        console.log(`🔄 ENHANCED AUTO-ROLE: Creating additional role ${i + 1}/${finalAdditionalRoles.length}: ${additionalRole.roleType}`);
         
         const additionalRoleResult = await this.createSingleRoleEnhanced({
           userId,
@@ -216,7 +215,7 @@ export class AutomaticRoleCreationService {
         if (additionalRoleResult.success && additionalRoleResult.role) {
           createdRoles.push(additionalRoleResult.role);
           rolesCreated++;
-          console.log(`✅ ENHANCED AUTO-ROLE: Additional role ${additionalRole.roleType} created successfully${isAutoDetected ? ' (auto-detected)' : ''}`);
+          console.log(`✅ ENHANCED AUTO-ROLE: Additional role ${additionalRole.roleType} created successfully`);
           
           // AUTOMATIC SYNC: If additional role is property_administrator, sync immediately
           if (additionalRole.roleType === 'property_administrator') {
@@ -236,7 +235,7 @@ export class AutomaticRoleCreationService {
         } else {
           const errorMsg = `Failed to create additional role ${additionalRole.roleType}: ${additionalRoleResult.error}`;
           errors.push(errorMsg);
-          console.error(`❌ ENHANCED AUTO-ROLE: ${errorMsg}${isAutoDetected ? ' (auto-detected)' : ''}`);
+          console.error(`❌ ENHANCED AUTO-ROLE: ${errorMsg}`);
           
           // ENHANCED: Attempt recovery for additional roles too
           console.log(`🆘 ENHANCED AUTO-ROLE: Attempting recovery for additional role: ${additionalRole.roleType}...`);
@@ -245,7 +244,7 @@ export class AutomaticRoleCreationService {
           if (recoveryResult.success && recoveryResult.roleCreated) {
             createdRoles.push(recoveryResult.roleCreated);
             rolesCreated++;
-            console.log(`✅ ENHANCED AUTO-ROLE: Recovery successful for ${additionalRole.roleType}${isAutoDetected ? ' (auto-detected)' : ''}`);
+            console.log(`✅ ENHANCED AUTO-ROLE: Recovery successful for ${additionalRole.roleType}`);
             
             // RECOVERY SYNC: If recovery created property_administrator, sync
             if (additionalRole.roleType === 'property_administrator') {
@@ -257,13 +256,13 @@ export class AutomaticRoleCreationService {
               }
             }
           } else {
-            console.error(`❌ ENHANCED AUTO-ROLE: Recovery also failed for ${additionalRole.roleType}${isAutoDetected ? ' (auto-detected)' : ''}`);
+            console.error(`❌ ENHANCED AUTO-ROLE: Recovery also failed for ${additionalRole.roleType}`);
           }
         }
       }
 
       // PHASE 3: Enhanced Validation and Active Role Management
-      console.log(`📊 ENHANCED AUTO-ROLE: Final result - ${rolesCreated}/${totalRolesRequested} roles created${shouldAutoExpandRoles ? ' (auto-detection active)' : ''}`);
+      console.log(`📊 ENHANCED AUTO-ROLE: Final result - ${rolesCreated}/${totalRolesRequested} roles created`);
 
       // ENHANCED: Ensure at least one role is active with better logic
       if (rolesCreated > 0) {
@@ -297,7 +296,7 @@ export class AutomaticRoleCreationService {
       const actualFinalCount = finalVerification?.length || 0;
       console.log(`🔍 ENHANCED AUTO-ROLE: Final verification - ${actualFinalCount} total roles in database`);
 
-      // ENHANCED: Create comprehensive notifications with auto-detection info
+      // ENHANCED: Create comprehensive notifications
       if (rolesCreated > 0) {
         const notificationTitle = rolesCreated === totalRolesRequested 
           ? '¡Registro completado exitosamente! 🎉' 
@@ -306,14 +305,6 @@ export class AutomaticRoleCreationService {
         let notificationMessage = rolesCreated === totalRolesRequested
           ? `Tu cuenta se ha configurado perfectamente con ${rolesCreated} rol${rolesCreated === 1 ? '' : 'es'} activo${rolesCreated === 1 ? '' : 's'}. ¡Bienvenido a HuBiT!`
           : `Se crearon ${rolesCreated} de ${totalRolesRequested} roles solicitados. Los roles restantes pueden agregarse desde tu perfil en cualquier momento.`;
-        
-        // Add auto-detection info to notification
-        if (shouldAutoExpandRoles) {
-          const autoDetectedCount = finalAdditionalRoles.length - additionalRoles.length;
-          notificationMessage += autoDetectedCount > 0 
-            ? ` Se detectó automáticamente tu perfil y se añadieron ${autoDetectedCount} roles adicionales.`
-            : ` Se detectó tu perfil para configuración automática.`;
-        }
         
         // Add sync info to notification if applicable
         if (syncResults && hasPropertyAdminRole) {
@@ -342,11 +333,11 @@ export class AutomaticRoleCreationService {
       // ENHANCED: Success criteria - we need at least the primary role
       const success = rolesCreated >= 1 && actualFinalCount >= 1;
 
-      // ENHANCED: Comprehensive result object with sync results and auto-detection info
+      // ENHANCED: Comprehensive result object with sync results
       const result = {
         success,
         message: success 
-          ? `Creación automática exitosa: ${rolesCreated}/${totalRolesRequested} roles configurados (${actualFinalCount} total en BD)${shouldAutoExpandRoles ? '. Auto-detección activada' : ''}${syncResults ? '. Sincronización: ' + syncResults.message : ''}`
+          ? `Creación automática exitosa: ${rolesCreated}/${totalRolesRequested} roles configurados (${actualFinalCount} total en BD)${syncResults ? '. Sincronización: ' + syncResults.message : ''}`
           : `Error en creación automática: solo ${rolesCreated}/${totalRolesRequested} roles creados`,
         rolesCreated,
         totalRolesRequested,
@@ -381,7 +372,7 @@ export class AutomaticRoleCreationService {
             
             return {
               success: true,
-              message: 'Recuperación de emergencia exitosa' + (shouldAutoExpandRoles ? ' (auto-detección activada)' : ''),
+              message: 'Recuperación de emergencia exitosa',
               rolesCreated: 1,
               totalRolesRequested,
               createdRoles: [lastDitchResult.roleCreated],

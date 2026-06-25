@@ -962,162 +962,15 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
         // CRITICAL: Set all roles immediately
         setUserRoles(roles);
 
-        if (roles.length === 0) {
-          console.log('🚨 CRITICAL: ZERO ROLES DETECTED - This should not happen with proper registration');
-          
-          // SIMPLIFIED: Basic emergency role creation only for truly broken accounts
-          const { data: profileCheck } = await supabase
-            .from('profiles')
-            .select('created_at, email, user_type')
-            .eq('id', userObject.id)
-            .single();
-          
-          if (profileCheck) {
-            const profileAge = new Date(profileCheck.created_at || new Date().toISOString());
-            const now = new Date();
-            const ageMinutes = (now.getTime() - profileAge.getTime()) / (1000 * 60);
-            
-            // Only create emergency role for very recent registrations (likely broken)
-            if (ageMinutes < 60) {
-              console.log('🔧 CRITICAL: Creating emergency role for very recent broken registration...');
-              
-              const emergencyRoleData: UserRoleInsert = {
-                user_id: userObject.id,
-                role_type: profileCheck.user_type as any || 'particular',
-                is_verified: true,
-                is_active: true,
-                role_specific_data: {
-                  full_name: userObject.user_metadata?.full_name || 'Usuario',
-                  phone: userObject.user_metadata?.phone || '',
-                  address: '',
-                  city: '',
-                  postal_code: '',
-                  country: 'España'
-                },
-                verification_confirmed_at: new Date().toISOString(),
-                verification_token: null,
-                verification_expires_at: null
-              };
-
-              const { data: emergencyRole, error: emergencyError } = await supabase
-                .from('user_roles')
-                .insert(emergencyRoleData)
-                .select()
-                .single();
-
-              if (!emergencyError && emergencyRole) {
-                console.log('✅ CRITICAL: Emergency role created successfully');
-                setUserRoles([emergencyRole as UserRole]);
-                setActiveRole(emergencyRole as UserRole);
-              } else {
-                console.error('❌ CRITICAL: Emergency role creation failed:', emergencyError);
-                setActiveRole(null);
-              }
-            } else {
-              console.error('❌ CRITICAL: Old profile with zero roles - likely registration never completed properly');
-              setActiveRole(null);
-              
-              // Create notification for user to contact support
-              try {
-                await supabase
-                  .from('notifications')
-                  .insert({
-                    user_id: userObject.id,
-                    title: 'Problema con la configuración de la cuenta ⚠️',
-                    message: 'Tu cuenta no tiene roles configurados. Por favor, contacta con soporte técnico para resolver este problema.',
-                    type: 'warning' as const,
-                    category: 'system' as const,
-                    read: false
-                  });
-              } catch (notificationError) {
-                console.warn('Could not create support notification:', notificationError);
-              }
-            }
-          } else {
-            console.error('❌ CRITICAL: Cannot analyze profile - no profile data');
-            setActiveRole(null);
-          }
-        } else if (roles.length === 1) {
+        const establishActiveRole = async (loadedRoles: UserRole[]) => {
           console.log("✅ CRITICAL: User roles loaded successfully:", {
-              total: roles.length,
-              types: roles.map(r => r.role_type),
-              verified: roles.filter(r => r.is_verified).length,
-              active: roles.filter(r => r.is_active).length
-            });
-
-            // CRITICAL: Establish active role with enhanced logic
-            const verifiedRoles = roles.filter(r => r.is_verified);
-            
-            if (verifiedRoles.length > 0) {
-              console.log(`📊 CRITICAL: Processing ${verifiedRoles.length} verified roles:`, 
-                verifiedRoles.map(r => `${r.role_type}(active:${r.is_active})`));
-              
-              // Check if there's already an active verified role
-              const currentActiveRole = verifiedRoles.find(r => r.is_active);
-              
-              if (currentActiveRole) {
-                console.log("🎯 CRITICAL: Found existing active role:", currentActiveRole.role_type);
-                setActiveRole(currentActiveRole);
-              } else {
-                console.log("🚨 CRITICAL: No active role found - Activating first verified role");
-                
-                // Activate the first verified role
-                const roleToActivate = verifiedRoles[0];
-                
-                try {
-                  console.log(`🔄 CRITICAL: Activating role: ${roleToActivate.role_type}`);
-                  
-                  // ENHANCED: More robust activation process
-                  // Step 1: Deactivate all roles first
-                  await supabase
-                    .from('user_roles')
-                    .update({ is_active: false, updated_at: new Date().toISOString() })
-                    .eq('user_id', userObject.id);
-
-                  // Step 2: Activate the selected role
-                  const { error: activateError } = await supabase
-                    .from('user_roles')
-                    .update({ is_active: true, updated_at: new Date().toISOString() })
-                    .eq('id', roleToActivate.id);
-
-                  if (!activateError) {
-                    const activatedRole = { ...roleToActivate, is_active: true };
-                    setActiveRole(activatedRole);
-                    
-                    // Update local roles state to reflect the change
-                    const updatedRoles = roles.map(r => ({
-                      ...r,
-                      is_active: r.id === roleToActivate.id
-                    }));
-                    setUserRoles(updatedRoles);
-                    
-                    console.log("✅ CRITICAL: Role activated successfully:", roleToActivate.role_type);
-                  } else {
-                    console.error("❌ CRITICAL: Role activation failed:", activateError);
-                    // Set locally anyway - better than having no active role
-                    setActiveRole(roleToActivate);
-                  }
-                } catch (activationError) {
-                  console.error("❌ CRITICAL: Role activation exception:", activationError);
-                  // Set locally anyway - better than having no active role
-                  setActiveRole(roleToActivate);
-                }
-              }
-            } else {
-              console.warn("⚠️ CRITICAL: No verified roles available");
-              setActiveRole(null);
-            }
-          }
-        } else {
-          console.log("✅ CRITICAL: User roles loaded successfully:", {
-            total: roles.length,
-            types: roles.map(r => r.role_type),
-            verified: roles.filter(r => r.is_verified).length,
-            active: roles.filter(r => r.is_active).length
+            total: loadedRoles.length,
+            types: loadedRoles.map(r => r.role_type),
+            verified: loadedRoles.filter(r => r.is_verified).length,
+            active: loadedRoles.filter(r => r.is_active).length
           });
 
-          // CRITICAL: Establish active role with enhanced logic
-          const verifiedRoles = roles.filter(r => r.is_verified);
+          const verifiedRoles = loadedRoles.filter(r => r.is_verified);
           
           if (verifiedRoles.length > 0) {
             console.log(`📊 CRITICAL: Processing ${verifiedRoles.length} verified roles:`, 
@@ -1156,7 +1009,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                   setActiveRole(activatedRole);
                   
                   // Update local roles state to reflect the change
-                  const updatedRoles = roles.map(r => ({
+                  const updatedRoles = loadedRoles.map(r => ({
                     ...r,
                     is_active: r.id === roleToActivate.id
                   }));
@@ -1178,6 +1031,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
             console.warn("⚠️ CRITICAL: No verified roles available");
             setActiveRole(null);
           }
+        };
+
+        if (roles.length === 0) {
+          console.log('🚨 CRITICAL: ZERO ROLES DETECTED - user must contact support');
+          setActiveRole(null);
+        } else {
+          await establishActiveRole(roles);
         }
 
       } catch (criticalRoleError) {
