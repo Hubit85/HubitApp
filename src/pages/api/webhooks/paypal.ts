@@ -9,6 +9,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const body = JSON.stringify(req.body);
       const webhookId = process.env.PAYPAL_WEBHOOK_ID || '';
 
+      if (!webhookId && process.env.NODE_ENV === 'production') {
+        return res.status(503).json({ message: 'PayPal webhook is not configured' });
+      }
+
       const isValid = await paypalService.verifyWebhookSignature(headers, body, webhookId);
 
       if (!isValid) {

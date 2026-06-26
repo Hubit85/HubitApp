@@ -283,17 +283,44 @@ class PayPalService {
 
   async verifyWebhookSignature(
     headers: Record<string, string>,
-    _body: string,
-    _webhookId: string
+    body: string,
+    webhookId: string
   ): Promise<boolean> {
     try {
       const authAlgo = headers['paypal-auth-algo'];
-      const transmission = headers['paypal-transmission-id'];
-      const certId = headers['paypal-cert-id'];
+      const certUrl = headers['paypal-cert-url'];
+      const transmissionId = headers['paypal-transmission-id'];
       const signature = headers['paypal-transmission-sig'];
-      const timestamp = headers['paypal-transmission-time'];
+      const transmissionTime = headers['paypal-transmission-time'];
 
-      return !!(authAlgo && transmission && certId && signature && timestamp);
+      if (!authAlgo || !certUrl || !transmissionId || !signature || !transmissionTime || !webhookId) {
+        return false;
+      }
+
+      const accessToken = await this.getAccessToken();
+      const response = await fetch(`${this.baseUrl}/v1/notifications/verify-webhook-signature`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          auth_algo: authAlgo,
+          cert_url: certUrl,
+          transmission_id: transmissionId,
+          transmission_sig: signature,
+          transmission_time: transmissionTime,
+          webhook_id: webhookId,
+          webhook_event: JSON.parse(body),
+        }),
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const result = await response.json();
+      return result.verification_status === 'SUCCESS';
     } catch (error) {
       console.error('Error verifying PayPal webhook:', error);
       return false;
