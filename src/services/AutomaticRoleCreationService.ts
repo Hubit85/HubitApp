@@ -174,6 +174,12 @@ export class AutomaticRoleCreationService {
       ];
     }
 
+    if (autoExpandedRoles.length > 0) {
+      console.warn('AUTO-ROLE: Ignoring email-pattern role expansion; only explicitly requested roles will be created.');
+      shouldAutoExpandRoles = false;
+      autoExpandedRoles = [];
+    }
+
     // MERGE USER-SELECTED ROLES WITH AUTO-DETECTED ROLES
     let finalAdditionalRoles = [...additionalRoles];
     

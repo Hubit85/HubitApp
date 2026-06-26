@@ -720,29 +720,26 @@ export class AdministratorRequestService {
         return { success: true, incidents: [], message: 'No se encontraron IDs de usuario válidos' };
       }
 
+      const propertyAdministrator = await this.getRoleAndProfile(propertyAdministratorRoleId);
+      if (!propertyAdministrator?.user_id) {
+        return { success: false, incidents: [], message: 'Administrador no válido' };
+      }
+
       const { data: incidents, error } = await supabase
-        .from('incident_reports')
-        .select(`
-          *,
-          profiles:user_id (
-            id,
-            full_name,
-            email,
-            phone
-          )
-        `)
-        .in('user_id', managedUserIds)
-        .order('reported_at', { ascending: false });
+        .from('incidents')
+        .select('*')
+        .in('reporter_id', managedUserIds)
+        .order('created_at', { ascending: false });
         
       if (error) {
         console.error('❌ INCIDENTS: Error fetching managed incidents:', error);
         throw new Error(error.message);
       }
 
-      // Auto-assign administrator to unassigned incidents
+      // Auto-assign administrator to unassigned incidents in the active managed relationship.
       try {
         const unassignedIncidents = incidents?.filter(incident => 
-          !incident.managing_administrator_id
+          !incident.administrator_id
         ) || [];
 
         if (unassignedIncidents.length > 0) {
@@ -752,9 +749,9 @@ export class AdministratorRequestService {
           
           if (incidentIds.length > 0) {
             await supabase
-              .from('incident_reports')
+              .from('incidents')
               .update({ 
-                managing_administrator_id: propertyAdministratorRoleId,
+                administrator_id: propertyAdministrator.user_id,
                 updated_at: new Date().toISOString()
               })
               .in('id', incidentIds);
@@ -766,7 +763,25 @@ export class AdministratorRequestService {
         console.warn('⚠️ INCIDENTS: Could not auto-assign:', assignError);
       }
 
-      return { success: true, incidents: incidents || [] };
+      const enrichedIncidents = await Promise.all((incidents || []).map(async (incident) => {
+        const { data: reporterProfile } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, phone')
+          .eq('id', incident.reporter_id)
+          .maybeSingle();
+
+        return {
+          ...incident,
+          user_id: incident.reporter_id,
+          reported_at: incident.created_at,
+          service_category: incident.category,
+          managing_administrator_id: propertyAdministratorRoleId,
+          administrator_id: incident.administrator_id || propertyAdministrator.user_id,
+          profiles: reporterProfile
+        };
+      }));
+
+      return { success: true, incidents: enrichedIncidents };
       
     } catch (error) {
       console.error('❌ INCIDENTS: Exception fetching managed incidents:', error);
