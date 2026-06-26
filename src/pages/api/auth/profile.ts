@@ -107,6 +107,12 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
       try {
         const userId = req.user?.userId;
         const updates = req.body;
+        const allowedUpdates = {
+          name: updates.name,
+          phone: updates.phone,
+          address: updates.address,
+          avatar: updates.avatar,
+        };
 
         if (!mockUserProfiles[userId!]) {
           return res.status(404).json({ message: 'User profile not found' });
@@ -114,7 +120,9 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
 
         mockUserProfiles[userId!] = {
           ...mockUserProfiles[userId!],
-          ...updates,
+          ...Object.fromEntries(
+            Object.entries(allowedUpdates).filter(([, value]) => value !== undefined)
+          ),
           updatedAt: new Date(),
         };
 

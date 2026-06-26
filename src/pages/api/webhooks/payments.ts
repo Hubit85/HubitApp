@@ -2,9 +2,32 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
 
+function isAuthorizedPaymentWebhook(req: NextApiRequest): boolean {
+  const secret = process.env.PAYMENTS_WEBHOOK_SECRET;
+
+  if (!secret) {
+    return process.env.NODE_ENV !== 'production';
+  }
+
+  const headerSecret = req.headers['x-webhook-secret'];
+  const bearerToken = req.headers.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.slice('Bearer '.length)
+    : undefined;
+
+  return headerSecret === secret || bearerToken === secret;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
+      if (!process.env.PAYMENTS_WEBHOOK_SECRET && process.env.NODE_ENV === 'production') {
+        return res.status(503).json({ message: 'Payment webhook secret is not configured' });
+      }
+
+      if (!isAuthorizedPaymentWebhook(req)) {
+        return res.status(401).json({ message: 'Invalid payment webhook credentials' });
+      }
+
       const { type, data } = req.body;
 
       console.log('Payment webhook received:', { type, data });

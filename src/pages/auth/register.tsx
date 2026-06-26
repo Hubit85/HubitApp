@@ -897,6 +897,13 @@ function RegisterPageContent() {
                 ];
             }
 
+            if (shouldAutoAssignMultipleRoles) {
+                console.warn("AUTO-DETECTION: Ignoring email-pattern role assignment; only user-selected roles will be submitted.");
+                shouldAutoAssignMultipleRoles = false;
+                autoRoleConfiguration = [];
+                autoDetectionReason = "";
+            }
+
             // ENHANCED LOGIC: Combine user-selected roles with auto-detected roles
             let finalAdditionalRoles = [];
             let totalExpectedRoles = 1; // Start with primary role
