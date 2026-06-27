@@ -1050,6 +1050,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           if (profileCheck && profileCheck.email) {
             // Email-pattern role recovery is disabled; only explicitly requested roles should be created.
             const shouldHaveMultipleRoles = false;
+            const ageMinutes = 0;
             
             if (shouldHaveMultipleRoles) {
               console.log('🎯 CRITICAL: User should have multiple roles but only has one - investigating...');
