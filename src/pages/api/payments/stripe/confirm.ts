@@ -45,6 +45,13 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
           paymentMethodId
         );
 
+        if (confirmedPayment.status !== 'succeeded') {
+          return res.status(402).json({
+            message: 'Stripe payment has not succeeded',
+            payment: confirmedPayment,
+          });
+        }
+
         res.status(200).json({
           message: 'Stripe payment confirmed successfully',
           payment: confirmedPayment,

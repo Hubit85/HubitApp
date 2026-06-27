@@ -1,7 +1,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import { stripeService } from '@/services/StripeService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -31,27 +31,40 @@ function authenticateToken(req: AuthenticatedRequest, res: NextApiResponse, next
 }
 
 export default async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
-  authenticateToken(req, res, () => {
+  authenticateToken(req, res, async () => {
     if (req.method === 'POST') {
       try {
-        const { paymentIntentId } = req.body;
+        const { paymentIntentId, provider } = req.body;
         const userId = req.user?.userId;
 
         if (!paymentIntentId) {
           return res.status(400).json({ message: 'Payment intent ID is required' });
         }
 
+        if (provider && provider !== 'stripe') {
+          return res.status(400).json({ message: 'Invalid payment provider' });
+        }
+
+        const paymentIntent = await stripeService.retrievePaymentIntent(paymentIntentId);
+
+        if (paymentIntent.status !== 'succeeded') {
+          return res.status(402).json({
+            message: 'Payment has not succeeded',
+            payment: paymentIntent,
+          });
+        }
+
         const confirmedPayment = {
-          id: uuidv4(),
+          id: paymentIntent.id,
           userId,
           paymentIntentId,
-          amount: 250.00,
-          currency: 'EUR',
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency.toUpperCase(),
           status: 'completed',
           type: 'service_payment',
           description: 'Pago confirmado exitosamente',
-          processingFee: 7.50,
-          netAmount: 242.50,
+          processingFee: 0,
+          netAmount: paymentIntent.amount,
           paidAt: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),

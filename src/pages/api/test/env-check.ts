@@ -36,8 +36,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         hasAnonKey: !!envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         hasResendKey: !!envVars.RESEND_API_KEY,
         resendKeyValid: envVars.RESEND_API_KEY?.startsWith('re_'),
-        supabaseUrlPreview: envVars.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 50) + '...',
-        serviceKeyPreview: envVars.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) + '...',
+        supabaseUrlPresent: !!envVars.NEXT_PUBLIC_SUPABASE_URL,
+        serviceKeyPresent: !!envVars.SUPABASE_SERVICE_ROLE_KEY,
         nodeEnv: envVars.NODE_ENV
       }
     });
