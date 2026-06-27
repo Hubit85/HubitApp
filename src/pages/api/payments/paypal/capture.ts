@@ -42,6 +42,13 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
 
         const capture = await paypalService.captureOrder(orderId);
 
+        if (capture.status !== 'COMPLETED') {
+          return res.status(402).json({
+            message: 'PayPal order capture has not completed',
+            capture,
+          });
+        }
+
         res.status(200).json({
           message: 'PayPal order captured successfully',
           capture,

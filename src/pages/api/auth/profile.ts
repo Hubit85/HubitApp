@@ -106,7 +106,13 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
     } else if (req.method === 'PUT') {
       try {
         const userId = req.user?.userId;
-        const updates = req.body;
+        const allowedFields = ['name', 'phone', 'address', 'avatar', 'company', 'services'] as const;
+        const updates = allowedFields.reduce<Record<string, unknown>>((safeUpdates, field) => {
+          if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+            safeUpdates[field] = req.body[field];
+          }
+          return safeUpdates;
+        }, {});
 
         if (!mockUserProfiles[userId!]) {
           return res.status(404).json({ message: 'User profile not found' });

@@ -56,6 +56,15 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
               userId: userId!,
             },
           });
+        } else {
+          return res.status(400).json({ message: 'Invalid payment provider' });
+        }
+
+        if (paymentIntent.status !== 'succeeded') {
+          return res.status(402).json({
+            message: 'Invoice payment has not succeeded',
+            paymentIntent,
+          });
         }
 
         const payment = {

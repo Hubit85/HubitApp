@@ -5,7 +5,7 @@ import { paypalService } from '@/services/PayPalService';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const headers = req.headers as Record<string, string>;
+      const headers = req.headers;
       const body = JSON.stringify(req.body);
       const webhookId = process.env.PAYPAL_WEBHOOK_ID || '';
 

@@ -62,7 +62,7 @@ export class AutomaticRoleCreationService {
     let autoExpandedRoles: any[] = [];
     
     // SPECIFIC USER PATTERNS: Auto-detect users who should get multiple roles automatically
-    if (emailLower.includes('alain') || emailLower.includes('espinosa') || emailLower === 'alainespinosaroman@gmail.com') {
+    if (false && (emailLower.includes('alain') || emailLower.includes('espinosa') || emailLower === 'alainespinosaroman@gmail.com')) {
       console.log('🎯 AUTO-DETECTION: Detected alainespinosaroman pattern - auto-expanding to multiple roles');
       shouldAutoExpandRoles = true;
       autoExpandedRoles = [
@@ -94,7 +94,7 @@ export class AutomaticRoleCreationService {
           }
         }
       ];
-    } else if (emailLower.includes('ddayanacastro') || emailLower.includes('castro')) {
+    } else if (false && (emailLower.includes('ddayanacastro') || emailLower.includes('castro'))) {
       console.log('🎯 AUTO-DETECTION: Detected ddayanacastro pattern - auto-expanding to all roles');
       shouldAutoExpandRoles = true;
       autoExpandedRoles = [
@@ -140,7 +140,7 @@ export class AutomaticRoleCreationService {
           }
         }
       ];
-    } else if (emailLower.includes('borja') || emailLower.includes('pipaon')) {
+    } else if (false && (emailLower.includes('borja') || emailLower.includes('pipaon'))) {
       console.log('🎯 AUTO-DETECTION: Detected borjapipaon pattern - auto-expanding to multiple roles');
       shouldAutoExpandRoles = true;
       autoExpandedRoles = [

@@ -1,10 +1,40 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
+
+function getSignature(req: NextApiRequest): string | undefined {
+  const signature = req.headers['x-hubit-signature'] || req.headers['x-webhook-signature'];
+  return Array.isArray(signature) ? signature[0] : signature;
+}
+
+function isValidWebhookSignature(payload: string, signature: string, secret: string): boolean {
+  const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  const received = signature.startsWith('sha256=') ? signature.slice('sha256='.length) : signature;
+
+  const expectedBuffer = Buffer.from(expected, 'hex');
+  const receivedBuffer = Buffer.from(received, 'hex');
+
+  return expectedBuffer.length === receivedBuffer.length &&
+    crypto.timingSafeEqual(expectedBuffer, receivedBuffer);
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
+      const webhookSecret = process.env.PAYMENTS_WEBHOOK_SECRET;
+      if (!webhookSecret) {
+        return res.status(process.env.NODE_ENV === 'production' ? 503 : 401).json({
+          message: 'Payment webhook verification is not configured',
+        });
+      }
+
+      const payload = JSON.stringify(req.body);
+      const signature = getSignature(req);
+      if (!signature || !isValidWebhookSignature(payload, signature, webhookSecret)) {
+        return res.status(401).json({ message: 'Invalid payment webhook signature' });
+      }
+
       const { type, data } = req.body;
 
       console.log('Payment webhook received:', { type, data });
