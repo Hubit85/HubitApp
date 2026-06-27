@@ -39,6 +39,10 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
         const { amount, reason, provider } = req.body;
         const userId = req.user?.userId;
 
+        if (req.user?.role !== 'administrator') {
+          return res.status(403).json({ message: 'Administrator role required' });
+        }
+
         let refund;
 
         if (provider === 'stripe') {
