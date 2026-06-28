@@ -39,10 +39,16 @@ export default async function handler(req: AuthenticatedRequest, res: NextApiRes
         const { immediately, provider } = req.body;
         const userId = req.user?.userId;
 
+        if (req.user?.role !== 'administrator') {
+          return res.status(403).json({ message: 'Administrator role required' });
+        }
+
         if (provider === 'stripe') {
           await stripeService.cancelSubscription(id as string, immediately);
         } else if (provider === 'paypal') {
           await paypalService.cancelSubscription(id as string, 'User requested cancellation');
+        } else {
+          return res.status(400).json({ message: 'Invalid subscription provider' });
         }
 
         const cancelledSubscription = {

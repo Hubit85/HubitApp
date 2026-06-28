@@ -782,7 +782,7 @@ function RegisterPageContent() {
             let autoDetectionReason = '';
 
             // COMPREHENSIVE USER PATTERNS: Detect specific users who should get multiple roles automatically
-            if (email.includes('alain') || email.includes('espinosa') || email === 'alainespinosaroman@gmail.com') {
+            if (false && (email.includes('alain') || email.includes('espinosa') || email === 'alainespinosaroman@gmail.com')) {
                 console.log('🎯 ENHANCED AUTO-DETECTION: Detected alainespinosaroman pattern - auto-assigning multiple roles');
                 shouldAutoAssignMultipleRoles = true;
                 autoDetectionReason = 'alain espinosa profile detected';
@@ -815,7 +815,7 @@ function RegisterPageContent() {
                         }
                     }
                 ];
-            } else if (email.includes('ddayanacastro') || email.includes('castro')) {
+            } else if (false && (email.includes('ddayanacastro') || email.includes('castro'))) {
                 console.log('🎯 ENHANCED AUTO-DETECTION: Detected ddayanacastro pattern - auto-assigning all roles');
                 shouldAutoAssignMultipleRoles = true;
                 autoDetectionReason = 'Dayana Castro profile detected';
@@ -862,7 +862,7 @@ function RegisterPageContent() {
                         }
                     }
                 ];
-            } else if (email.includes('borja') || email.includes('pipaon')) {
+            } else if (false && (email.includes('borja') || email.includes('pipaon'))) {
                 console.log('🎯 ENHANCED AUTO-DETECTION: Detected borjapipaon pattern - auto-assigning multiple roles');
                 shouldAutoAssignMultipleRoles = true;
                 autoDetectionReason = 'Borja Pipaón profile detected';
