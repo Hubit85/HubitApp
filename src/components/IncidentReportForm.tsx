@@ -421,6 +421,48 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     });
   };
 
+  const normalizeText = (value?: string | null) => value?.trim().toLowerCase() || "";
+
+  const resolveIncidentCommunityId = async (administratorId: string, property: Property): Promise<string | null> => {
+    const { data: communities, error } = await supabase
+      .from('communities')
+      .select('id, name, address, city')
+      .eq('administrator_id', administratorId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!communities || communities.length === 0) {
+      return null;
+    }
+
+    const propertyAddress = normalizeText(property.address);
+    const propertyCity = normalizeText(property.city);
+    const propertyName = normalizeText(property.name);
+
+    const addressMatch = communities.find(community =>
+      normalizeText(community.address) === propertyAddress &&
+      normalizeText(community.city) === propertyCity
+    );
+
+    if (addressMatch) {
+      return addressMatch.id;
+    }
+
+    const nameMatch = communities.find(community =>
+      normalizeText(community.name) === propertyName
+    );
+
+    if (nameMatch) {
+      return nameMatch.id;
+    }
+
+    return communities.length === 1 ? communities[0].id : null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -444,13 +486,6 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
-      // Upload photos if any
-      let photoUrls: string[] = [];
-      if (formData.photos.length > 0) {
-        setSuccessMessage("Subiendo fotografías...");
-        photoUrls = await uploadPhotosToStorage(formData.photos);
-      }
-
       // Determine administrator ID
       let primaryAdministratorId: string;
       
@@ -464,6 +499,27 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         // FALLBACK: Use the reporter's ID as temporary administrator
         primaryAdministratorId = user.id;
         console.warn('No property administrators found, using reporter as temporary administrator');
+      }
+
+      let communityId: string | null = null;
+      try {
+        communityId = await resolveIncidentCommunityId(primaryAdministratorId, formData.selectedProperty);
+      } catch (communityError) {
+        console.error('Error resolving incident community:', communityError);
+        setError("Error al verificar la comunidad asociada a la incidencia. Por favor, inténtalo de nuevo.");
+        return;
+      }
+
+      if (!communityId) {
+        setError("No se encontró una comunidad activa asociada a esta propiedad y administrador. Contacta con tu administrador de fincas antes de reportar la incidencia.");
+        return;
+      }
+
+      // Upload photos only after validating the incident can reference a real community.
+      let photoUrls: string[] = [];
+      if (formData.photos.length > 0) {
+        setSuccessMessage("Subiendo fotografías...");
+        photoUrls = await uploadPhotosToStorage(formData.photos);
       }
 
       // Build location details including property info
@@ -483,7 +539,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         images: photoUrls.length > 0 ? photoUrls : null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
+        community_id: communityId,
         administrator_id: primaryAdministratorId,
         admin_notes: null,
         reviewed_at: null,
