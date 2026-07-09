@@ -773,129 +773,10 @@ function RegisterPageContent() {
             const orderedRoles = getOrderedRoles(formData.roles);
             const primaryRole = orderedRoles[0];
 
-            // ENHANCED AUTOMATIC MULTI-ROLE DETECTION: Detect users who should automatically get multiple roles
-            console.log('🎯 ENHANCED AUTO-DETECTION: Analyzing user for automatic multi-role assignment...');
-
-            const email = formData.email.toLowerCase();
-            let shouldAutoAssignMultipleRoles = false;
-            let autoRoleConfiguration: any[] = [];
-            let autoDetectionReason = '';
-
-            // COMPREHENSIVE USER PATTERNS: Detect specific users who should get multiple roles automatically
-            if (email.includes('alain') || email.includes('espinosa') || email === 'alainespinosaroman@gmail.com') {
-                console.log('🎯 ENHANCED AUTO-DETECTION: Detected alainespinosaroman pattern - auto-assigning multiple roles');
-                shouldAutoAssignMultipleRoles = true;
-                autoDetectionReason = 'alain espinosa profile detected';
-                autoRoleConfiguration = [
-                    {
-                        roleType: 'community_member',
-                        roleSpecificData: {
-                            full_name: 'alain espinosa',
-                            phone: '',
-                            address: '',
-                            city: '',
-                            postal_code: '',
-                            country: 'España',
-                            community_code: 'COM-ALAIN-ESPINOSA-001'
-                        }
-                    },
-                    {
-                        roleType: 'service_provider',
-                        roleSpecificData: {
-                            company_name: 'alain espinosa',
-                            company_address: '',
-                            company_postal_code: '',
-                            company_city: '',
-                            company_country: 'España',
-                            cif: '',
-                            business_email: email,
-                            business_phone: '',
-                            selected_services: [],
-                            service_costs: {}
-                        }
-                    }
-                ];
-            } else if (email.includes('ddayanacastro') || email.includes('castro')) {
-                console.log('🎯 ENHANCED AUTO-DETECTION: Detected ddayanacastro pattern - auto-assigning all roles');
-                shouldAutoAssignMultipleRoles = true;
-                autoDetectionReason = 'Dayana Castro profile detected';
-                autoRoleConfiguration = [
-                    {
-                        roleType: 'community_member',
-                        roleSpecificData: {
-                            full_name: 'Dayana Castro',
-                            phone: '',
-                            address: '',
-                            city: '',
-                            postal_code: '',
-                            country: 'España',
-                            community_code: 'COM-DAYANA-CASTRO-001'
-                        }
-                    },
-                    {
-                        roleType: 'service_provider',
-                        roleSpecificData: {
-                            company_name: 'Dayana Castro',
-                            company_address: '',
-                            company_postal_code: '',
-                            company_city: '',
-                            company_country: 'España',
-                            cif: '',
-                            business_email: email,
-                            business_phone: '',
-                            selected_services: [],
-                            service_costs: {}
-                        }
-                    },
-                    {
-                        roleType: 'property_administrator',
-                        roleSpecificData: {
-                            company_name: 'Dayana Castro Gestión',
-                            company_address: '',
-                            company_postal_code: '',
-                            company_city: '',
-                            company_country: 'España',
-                            cif: '',
-                            business_email: email,
-                            business_phone: '',
-                            professional_number: ''
-                        }
-                    }
-                ];
-            } else if (email.includes('borja') || email.includes('pipaon')) {
-                console.log('🎯 ENHANCED AUTO-DETECTION: Detected borjapipaon pattern - auto-assigning multiple roles');
-                shouldAutoAssignMultipleRoles = true;
-                autoDetectionReason = 'Borja Pipaón profile detected';
-                autoRoleConfiguration = [
-                    {
-                        roleType: 'community_member',
-                        roleSpecificData: {
-                            full_name: 'Borja Pipaón',
-                            phone: '',
-                            address: '',
-                            city: '',
-                            postal_code: '',
-                            country: 'España',
-                            community_code: 'COM-BORJA-PIPAON-001'
-                        }
-                    },
-                    {
-                        roleType: 'service_provider',
-                        roleSpecificData: {
-                            company_name: 'Borja Pipaón',
-                            company_address: '',
-                            company_postal_code: '',
-                            company_city: '',
-                            company_country: 'España',
-                            cif: '',
-                            business_email: email,
-                            business_phone: '',
-                            selected_services: [],
-                            service_costs: {}
-                        }
-                    }
-                ];
-            }
+            // Roles must come only from explicit user selection; never infer permissions from email text.
+            const shouldAutoAssignMultipleRoles = false;
+            const autoRoleConfiguration: any[] = [];
+            const autoDetectionReason = '';
 
             // ENHANCED LOGIC: Combine user-selected roles with auto-detected roles
             let finalAdditionalRoles = [];
@@ -1000,17 +881,6 @@ function RegisterPageContent() {
                     province: formData.property_administrator.company_province,
                     country: formData.property_administrator.company_country,
                 };
-            }
-
-            // ENHANCED: Override user data for auto-detected users to ensure consistency
-            if (shouldAutoAssignMultipleRoles) {
-                if (email.includes('alain') || email.includes('espinosa')) {
-                    userData.full_name = 'alain espinosa';
-                } else if (email.includes('ddayanacastro') || email.includes('castro')) {
-                    userData.full_name = 'Dayana Castro';
-                } else if (email.includes('borja') || email.includes('pipaon')) {
-                    userData.full_name = 'Borja Pipaón';
-                }
             }
 
             // CRITICAL: Add additional roles to userData for the signUp process
