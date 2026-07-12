@@ -66,6 +66,11 @@ interface PropertyAdministrator {
   contact_email: string;
 }
 
+interface IncidentRouting {
+  communityId: string;
+  administrator: PropertyAdministrator;
+}
+
 export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormProps) {
   const { user, profile, userRoles } = useSupabaseAuth();
   const [formData, setFormData] = useState<IncidentFormData>({
@@ -208,6 +213,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         `)
         .eq("role_type", "property_administrator")
         .eq("is_verified", true)
+        .eq("is_active", true)
         .order("created_at", { ascending: false });
 
       const { data: propertyAdministrators, error: adminError } = await baseQuery;
@@ -338,6 +344,66 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     }
   };
 
+  const resolveIncidentRouting = async (): Promise<IncidentRouting | null> => {
+    const communityMemberRole = userRoles.find(role =>
+      role.role_type === 'community_member' && role.is_verified
+    );
+
+    if (!communityMemberRole) {
+      return null;
+    }
+
+    const { data: managedCommunity, error: managedError } = await supabase
+      .from('managed_communities')
+      .select('community_id, property_administrator_id')
+      .eq('community_member_id', communityMemberRole.id)
+      .eq('relationship_status', 'active')
+      .not('community_id', 'is', null)
+      .maybeSingle();
+
+    if (managedError && managedError.code !== 'PGRST116') {
+      throw managedError;
+    }
+
+    if (!managedCommunity?.community_id || !managedCommunity.property_administrator_id) {
+      return null;
+    }
+
+    const { data: administratorRole, error: administratorError } = await supabase
+      .from('user_roles')
+      .select(`
+        id,
+        user_id,
+        role_specific_data,
+        profiles!user_roles_user_id_fkey(full_name, email)
+      `)
+      .eq('id', managedCommunity.property_administrator_id)
+      .eq('role_type', 'property_administrator')
+      .eq('is_verified', true)
+      .maybeSingle();
+
+    if (administratorError && administratorError.code !== 'PGRST116') {
+      throw administratorError;
+    }
+
+    if (!administratorRole?.user_id) {
+      return null;
+    }
+
+    const roleData = (administratorRole.role_specific_data as Record<string, any> | null) || {};
+    const profileData = administratorRole.profiles as any;
+
+    return {
+      communityId: managedCommunity.community_id,
+      administrator: {
+        id: administratorRole.id,
+        user_id: administratorRole.user_id,
+        company_name: roleData.company_name || profileData?.full_name || 'Administrador de Fincas',
+        contact_email: roleData.business_email || profileData?.email || ''
+      }
+    };
+  };
+
   const removePhoto = (index: number) => {
     setFormData(prev => ({
       ...prev,
@@ -444,26 +510,18 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
+      const routing = await resolveIncidentRouting();
+
+      if (!routing) {
+        setError("No se encontró una comunidad activa con administrador asignado. Contacta con tu administrador de fincas antes de reportar una incidencia.");
+        return;
+      }
+
       // Upload photos if any
       let photoUrls: string[] = [];
       if (formData.photos.length > 0) {
         setSuccessMessage("Subiendo fotografías...");
         photoUrls = await uploadPhotosToStorage(formData.photos);
-      }
-
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
       }
 
       // Build location details including property info
@@ -479,12 +537,12 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         urgency: formData.urgency,
         status: 'pending' as const,
         work_location: locationDetails,
-        special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unitNumber}` : null,
+        special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unit_number || formData.selectedUnit.unitNumber}` : null,
         images: photoUrls.length > 0 ? photoUrls : null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
-        administrator_id: primaryAdministratorId,
+        community_id: routing.communityId,
+        administrator_id: routing.administrator.user_id,
         admin_notes: null,
         reviewed_at: null,
         reviewed_by: null
@@ -494,6 +552,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         title: incidentData.title,
         reporter_id: incidentData.reporter_id,
         administrator_id: incidentData.administrator_id,
+        community_id: incidentData.community_id,
         category: incidentData.category,
         urgency: incidentData.urgency,
         work_location: incidentData.work_location
@@ -524,7 +583,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         console.log('Incident created successfully:', incident.id);
 
         // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+        const targetAdministrator = routing.administrator;
         
         if (targetAdministrator) {
           try {
