@@ -773,13 +773,8 @@ function RegisterPageContent() {
             const orderedRoles = getOrderedRoles(formData.roles);
             const primaryRole = orderedRoles[0];
 
-            const email = formData.email.toLowerCase();
-            let shouldAutoAssignMultipleRoles = false;
-            let autoRoleConfiguration: any[] = [];
-            let autoDetectionReason = '';
-
-            // ENHANCED LOGIC: Combine user-selected roles with auto-detected roles
-            let finalAdditionalRoles = [];
+            // Only explicitly selected roles are submitted for creation.
+            let finalAdditionalRoles: any[] = [];
             let totalExpectedRoles = 1; // Start with primary role
 
             if (orderedRoles.length > 1) {
@@ -808,27 +803,6 @@ function RegisterPageContent() {
                     };
                 });
                 totalExpectedRoles = orderedRoles.length;
-
-                // If user manually selected roles AND auto-detection kicked in, merge them
-                if (shouldAutoAssignMultipleRoles) {
-                    console.log(`🤖 ENHANCED: Merging user selection with auto-detected roles`);
-                    const existingRoleTypes = finalAdditionalRoles.map(r => r.roleType);
-                    const newAutoRoles = autoRoleConfiguration.filter(autoRole =>
-                        !existingRoleTypes.includes(autoRole.roleType) && autoRole.roleType !== primaryRole
-                    );
-
-                    if (newAutoRoles.length > 0) {
-                        finalAdditionalRoles = [...finalAdditionalRoles, ...newAutoRoles];
-                        totalExpectedRoles += newAutoRoles.length;
-                        console.log(`🔗 ENHANCED: Added ${newAutoRoles.length} auto-detected roles to user selection`);
-                    }
-                }
-
-            } else if (shouldAutoAssignMultipleRoles) {
-                // Auto-assign based on email pattern (user only selected one role, but we detected they should have more)
-                console.log(`🤖 ENHANCED AUTO-ASSIGNMENT: Auto-assigning ${autoRoleConfiguration.length} additional roles (${autoDetectionReason})`);
-                finalAdditionalRoles = autoRoleConfiguration;
-                totalExpectedRoles = 1 + autoRoleConfiguration.length;
             }
 
             // Preparar datos del usuario principal
@@ -887,8 +861,7 @@ function RegisterPageContent() {
             userData.additionalRoles = finalAdditionalRoles;
 
             console.log(`🚀 ENHANCED REGISTRATION: Starting with ${totalExpectedRoles} total expected roles:`, [primaryRole, ...finalAdditionalRoles.map(r => r.roleType)]);
-            console.log(`📋 DETAILED BREAKDOWN: PRIMARY[${primaryRole}] + ADDITIONAL[${finalAdditionalRoles.length}]${shouldAutoAssignMultipleRoles ? ' (AUTO-DETECTED)' : ''}`);
-            console.log(`🎯 AUTO-DETECTION STATUS: ${shouldAutoAssignMultipleRoles ? `ACTIVE (${autoDetectionReason})` : 'INACTIVE'}`);
+            console.log(`📋 DETAILED BREAKDOWN: PRIMARY[${primaryRole}] + ADDITIONAL[${finalAdditionalRoles.length}]`);
 
             // ENHANCED REGISTRATION CALL: Pass all role information to signUp
             const result = await signUp(formData.email, formData.password, userData);
@@ -903,9 +876,6 @@ function RegisterPageContent() {
                 console.log('✅ Enhanced Registration successful, performing comprehensive post-registration validation...');
 
                 let registrationSummary = `¡Cuenta creada exitosamente!`;
-                if (shouldAutoAssignMultipleRoles) {
-                    registrationSummary += ` Se detectó tu perfil automáticamente (${autoDetectionReason.split(' ')[0]}) y se configuraron roles adicionales.`;
-                }
 
                 setSuccessMessage(registrationSummary + " Verificando configuración final...");
 

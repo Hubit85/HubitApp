@@ -55,24 +55,8 @@ export class AutomaticRoleCreationService {
     }
 
     // Only roles explicitly selected during registration should be created.
-    let shouldAutoExpandRoles = false;
-    let autoExpandedRoles: any[] = [];
-
-    // MERGE USER-SELECTED ROLES WITH AUTO-DETECTED ROLES
-    let finalAdditionalRoles = [...additionalRoles];
-    
-    if (shouldAutoExpandRoles && autoExpandedRoles.length > 0) {
-      console.log(`🤖 AUTO-EXPANSION: Adding ${autoExpandedRoles.length} auto-detected roles to user selection`);
-      
-      // Avoid duplicates by checking if role types already exist
-      const existingRoleTypes = additionalRoles.map(r => r.roleType);
-      const newAutoRoles = autoExpandedRoles.filter(autoRole => 
-        !existingRoleTypes.includes(autoRole.roleType) && autoRole.roleType !== primaryRole
-      );
-      
-      finalAdditionalRoles = [...additionalRoles, ...newAutoRoles];
-      console.log(`🎯 AUTO-EXPANSION: Final role count - Primary: 1, Additional: ${finalAdditionalRoles.length} (${newAutoRoles.length} auto-added)`);
-    }
+    const shouldAutoExpandRoles = false;
+    const finalAdditionalRoles = [...additionalRoles];
 
     // Calculate total roles to create (including auto-expansion)
     const totalRolesRequested = 1 + finalAdditionalRoles.length; // 1 primary + additionals (including auto-expanded)
