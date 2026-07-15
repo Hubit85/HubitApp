@@ -13,8 +13,7 @@ import {
   X, Camera, Loader2, Shield, 
   CheckCircle, MapPin, Clock, AlertCircle, Home, FileImage
 } from "lucide-react";
-import PropertySelector from "@/components/PropertySelector";
-import type { Property } from "@/integrations/supabase/types";
+import PropertySelector, { type PropertyWithUnits } from "@/components/PropertySelector";
 
 // Service categories matching those in register.tsx
 const SERVICE_CATEGORIES = [
@@ -50,8 +49,8 @@ interface IncidentFormData {
   location: string;
   urgency: 'low' | 'normal' | 'high' | 'emergency';
   photos: File[];
-  selectedProperty?: Property;
-  selectedUnit?: any;
+  selectedProperty?: PropertyWithUnits;
+  selectedUnit?: { id: string; unit_number: string } | null;
 }
 
 interface IncidentReportFormProps {
@@ -298,11 +297,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setError("");
   };
 
-  const handlePropertySelection = (property: any, unit?: any) => {
+  const handlePropertySelection = (property: PropertyWithUnits, unit?: { id: string; unit_number: string } | null) => {
     setFormData(prev => ({
       ...prev,
       selectedProperty: property,
-      selectedUnit: unit
+      selectedUnit: unit ?? null
     }));
     setShowPropertySelector(false);
     setError("");
@@ -421,6 +420,64 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     });
   };
 
+  const resolveManagedCommunityForReporter = async (): Promise<{
+    communityId: string;
+    administratorUserId: string;
+  } | null> => {
+    const communityMemberRole = userRoles.find(role =>
+      role.role_type === 'community_member' && role.is_verified
+    );
+
+    if (!communityMemberRole?.id) {
+      return null;
+    }
+
+    const { data: relationship, error: relationshipError } = await supabase
+      .from('managed_communities')
+      .select('community_id, property_administrator_id')
+      .eq('community_member_id', communityMemberRole.id)
+      .eq('relationship_status', 'active')
+      .not('community_id', 'is', null)
+      .limit(1)
+      .maybeSingle();
+
+    if (relationshipError) {
+      console.error('Error resolving managed community:', relationshipError);
+      throw relationshipError;
+    }
+
+    const activeRelationship = relationship as {
+      community_id: string | null;
+      property_administrator_id: string | null;
+    } | null;
+
+    if (!activeRelationship?.community_id || !activeRelationship.property_administrator_id) {
+      return null;
+    }
+
+    const { data: administratorRole, error: administratorError } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('id', activeRelationship.property_administrator_id)
+      .eq('role_type', 'property_administrator')
+      .eq('is_verified', true)
+      .maybeSingle();
+
+    if (administratorError) {
+      console.error('Error resolving managed administrator:', administratorError);
+      throw administratorError;
+    }
+
+    if (!administratorRole?.user_id) {
+      return null;
+    }
+
+    return {
+      communityId: activeRelationship.community_id,
+      administratorUserId: administratorRole.user_id
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -444,6 +501,12 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
     setSuccessMessage("");
 
     try {
+      const managedCommunity = await resolveManagedCommunityForReporter();
+      if (!managedCommunity) {
+        setError("No se encontró una comunidad gestionada activa para tu usuario. Contacta con tu administrador de fincas antes de reportar incidencias.");
+        return;
+      }
+
       // Upload photos if any
       let photoUrls: string[] = [];
       if (formData.photos.length > 0) {
@@ -451,20 +514,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         photoUrls = await uploadPhotosToStorage(formData.photos);
       }
 
-      // Determine administrator ID
-      let primaryAdministratorId: string;
-      
-      if (assignedAdministrator) {
-        // Use assigned administrator
-        primaryAdministratorId = assignedAdministrator.user_id;
-      } else if (propertyAdministrators.length > 0) {
-        // Use first available property administrator
-        primaryAdministratorId = propertyAdministrators[0].user_id;
-      } else {
-        // FALLBACK: Use the reporter's ID as temporary administrator
-        primaryAdministratorId = user.id;
-        console.warn('No property administrators found, using reporter as temporary administrator');
-      }
+      const primaryAdministratorId = managedCommunity.administratorUserId;
 
       // Build location details including property info
       const locationDetails = formData.selectedProperty 
@@ -479,11 +529,11 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
         urgency: formData.urgency,
         status: 'pending' as const,
         work_location: locationDetails,
-        special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unitNumber}` : null,
+        special_requirements: formData.selectedUnit ? `Unidad: ${formData.selectedUnit.unit_number}` : null,
         images: photoUrls.length > 0 ? photoUrls : null,
         documents: null,
         reporter_id: user.id,
-        community_id: 'general_community',
+        community_id: managedCommunity.communityId,
         administrator_id: primaryAdministratorId,
         admin_notes: null,
         reviewed_at: null,
@@ -523,8 +573,10 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       if (incident) {
         console.log('Incident created successfully:', incident.id);
 
-        // Send notifications to the assigned administrator
-        const targetAdministrator = assignedAdministrator || (propertyAdministrators.length > 0 ? propertyAdministrators[0] : null);
+        // Send notifications to the administrator that actually manages this community.
+        const targetAdministrator =
+          propertyAdministrators.find(admin => admin.user_id === primaryAdministratorId) ||
+          (assignedAdministrator?.user_id === primaryAdministratorId ? assignedAdministrator : null);
         
         if (targetAdministrator) {
           try {
@@ -706,7 +758,7 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
                       </p>
                       {formData.selectedUnit && (
                         <p className="text-xs text-blue-600">
-                          Unidad: {formData.selectedUnit.unitNumber}
+                          Unidad: {formData.selectedUnit.unit_number}
                         </p>
                       )}
                     </div>
