@@ -651,6 +651,20 @@ export class AdministratorRequestService {
     notes?: string;
   }): Promise<{ success: boolean; message: string; relationshipId?: string; }> {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const currentUserId = authData.user?.id;
+      if (!currentUserId || currentUserId !== options.establishedBy) {
+        console.error('❌ MANAGEMENT: establishedBy does not match authenticated user');
+        return { success: false, message: 'No autorizado para crear esta relación' };
+      }
+
+      // Only the assigned property administrator may establish the relationship.
+      const adminRole = await this.getRoleAndProfile(options.propertyAdministratorRoleId);
+      if (!adminRole?.user_id || adminRole.user_id !== currentUserId) {
+        console.error('❌ MANAGEMENT: Authenticated user is not the assigned property administrator');
+        return { success: false, message: 'No autorizado para crear esta relación' };
+      }
+
       // Check if relationship already exists
       const { data: existing } = await supabase
         .from('managed_communities')
@@ -823,7 +837,9 @@ export class AdministratorRequestService {
         this.getRoleAndProfile(originalRequest.community_member_id),
         this.getRoleAndProfile(originalRequest.property_administrator_id),
       ]);
-      const allowedUserIds = [memberRole?.user_id, adminRole?.user_id].filter(Boolean);
+      const allowedUserIds = [memberRole?.user_id, adminRole?.user_id].filter(
+        (id): id is string => typeof id === 'string' && id.length > 0
+      );
       if (!allowedUserIds.includes(currentUserId)) {
         console.error('❌ ADMIN REQUEST: User not authorized to cancel request');
         return { success: false, message: 'No autorizado para cancelar esta solicitud' };
@@ -878,7 +894,9 @@ export class AdministratorRequestService {
         this.getRoleAndProfile(relationship.community_member_id),
         this.getRoleAndProfile(relationship.property_administrator_id),
       ]);
-      const allowedUserIds = [memberRole?.user_id, adminRole?.user_id].filter(Boolean);
+      const allowedUserIds = [memberRole?.user_id, adminRole?.user_id].filter(
+        (id): id is string => typeof id === 'string' && id.length > 0
+      );
       if (!allowedUserIds.includes(currentUserId)) {
         console.error('❌ MANAGEMENT: User not authorized to end relationship');
         return { success: false, message: 'No autorizado para terminar esta relación' };
