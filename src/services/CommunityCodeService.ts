@@ -132,27 +132,19 @@ export class CommunityCodeService {
       if (isBaseCodeUnique) {
         // El código base está disponible, crear directamente
         console.log('✨ Código base disponible, creando para nueva ubicación:', baseCode);
-        
-        const { data: newCode, error } = await supabase
-          .from('community_codes')
-          .insert({
-            code: baseCode,
-            country: normalizedData.country.toUpperCase(),
-            province: normalizedData.province.toUpperCase(),
-            city: normalizedData.city.toUpperCase(),
-            street: normalizedData.street.toUpperCase(),
-            street_number: normalizedData.street_number,
-            created_by: normalizedData.created_by
-          })
-          .select()
-          .single();
 
-        if (error) {
-          throw new Error(`Error creando código de comunidad: ${error.message}`);
+        const baseInsert = await this.insertCommunityCodeRow(baseCode, normalizedData);
+        if (baseInsert.kind === 'created') {
+          console.log('✅ Nuevo código creado exitosamente para nueva ubicación:', baseInsert.code);
+          return { code: baseInsert.code, isNew: true };
         }
-
-        console.log('✅ Nuevo código creado exitosamente para nueva ubicación:', newCode.code);
-        return { code: newCode.code, isNew: true };
+        if (baseInsert.kind === 'reused') {
+          // Concurrent creator won the race for this same location.
+          console.log('✅ Código reutilizado tras carrera concurrente:', baseInsert.code);
+          return { code: baseInsert.code, isNew: false };
+        }
+        // kind === 'code_taken': another location claimed the base code between check and insert.
+        console.log('⚠️ Código base ocupado durante el insert; generando variante...');
       }
 
       // PASO 4: El código base ya existe PERO es para una ubicación diferente
@@ -172,87 +164,89 @@ export class CommunityCodeService {
         });
       }
       
-      let uniqueCode = baseCode;
       let attempt = 1;
       const maxAttempts = 100;
 
       while (attempt <= maxAttempts) {
         // Generar código con sufijo numérico para diferencias de ubicación
         const suffix = attempt.toString().padStart(2, '0');
-        uniqueCode = `${baseCode}-${suffix}`;
+        const uniqueCode = `${baseCode}-${suffix}`;
         
         console.log(`🔄 Intento ${attempt}: Verificando disponibilidad de código ${uniqueCode}`);
         
         const isUnique = await this.isCodeUnique(uniqueCode);
         
-        if (isUnique) {
-          console.log(`✨ Código único generado para nueva ubicación: ${uniqueCode}`);
-          break;
+        if (!isUnique) {
+          attempt++;
+          continue;
         }
-        
+
+        console.log(`✨ Código único generado para nueva ubicación: ${uniqueCode}`);
+
+        const variantInsert = await this.insertCommunityCodeRow(uniqueCode, normalizedData);
+        if (variantInsert.kind === 'created') {
+          console.log('✅ Nuevo código variante creado exitosamente para ubicación diferente:', variantInsert.code);
+          return { code: variantInsert.code, isNew: true };
+        }
+        if (variantInsert.kind === 'reused') {
+          // CRITICAL: a concurrent request already created a code for THIS location.
+          // Never invent a timestamp fork — that would split one physical community.
+          console.log('✅ Código reutilizado tras carrera concurrente (variante):', variantInsert.code);
+          return { code: variantInsert.code, isNew: false };
+        }
+
+        // kind === 'code_taken': another location took this suffix; try the next one.
         attempt++;
       }
 
-      if (attempt > maxAttempts) {
-        throw new Error('No se pudo generar un código único después de múltiples intentos');
-      }
-
-      // PASO 5: Crear el nuevo código único para la nueva ubicación
-      const { data: newCode, error } = await supabase
-        .from('community_codes')
-        .insert({
-          code: uniqueCode,
-          country: normalizedData.country.toUpperCase(),
-          province: normalizedData.province.toUpperCase(),
-          city: normalizedData.city.toUpperCase(),
-          street: normalizedData.street.toUpperCase(),
-          street_number: normalizedData.street_number,
-          created_by: normalizedData.created_by
-        })
-        .select()
-        .single();
-
-      if (error) {
-        // Manejo específico para errores de duplicados
-        if (error.code === '23505') { // unique_violation
-          console.warn(`⚠️ Código duplicado detectado (${uniqueCode}), generando fallback temporal...`);
-          
-          // Generar código de fallback con timestamp
-          const timestamp = Date.now().toString().slice(-6);
-          const fallbackCode = `${baseCode}-T${timestamp}`;
-          
-          const { data: fallbackNewCode, error: fallbackError } = await supabase
-            .from('community_codes')
-            .insert({
-              code: fallbackCode,
-              country: normalizedData.country.toUpperCase(),
-              province: normalizedData.province.toUpperCase(),
-              city: normalizedData.city.toUpperCase(),
-              street: normalizedData.street.toUpperCase(),
-              street_number: normalizedData.street_number,
-              created_by: normalizedData.created_by
-            })
-            .select()
-            .single();
-
-          if (fallbackError) {
-            throw new Error(`Error creando código de comunidad con fallback: ${fallbackError.message}`);
-          }
-
-          console.log('✅ Código fallback temporal creado:', fallbackNewCode.code);
-          return { code: fallbackNewCode.code, isNew: true };
-        }
-        
-        throw new Error(`Error creando código de comunidad: ${error.message}`);
-      }
-
-      console.log('✅ Nuevo código variante creado exitosamente para ubicación diferente:', newCode.code);
-      return { code: newCode.code, isNew: true };
+      throw new Error('No se pudo generar un código único después de múltiples intentos');
 
     } catch (error: any) {
       console.error('❌ Error en CommunityCodeService:', error);
       throw new Error(`Error en el servicio de códigos de comunidad: ${error.message}`);
     }
+  }
+
+  /**
+   * Insert a community_codes row. On unique_violation (23505), re-read by location
+   * so concurrent creators for the same address converge on one code instead of
+   * creating a timestamped fork that permanently splits the community.
+   */
+  private static async insertCommunityCodeRow(
+    code: string,
+    normalizedData: CommunityCodeData
+  ): Promise<
+    | { kind: 'created'; code: string }
+    | { kind: 'reused'; code: string }
+    | { kind: 'code_taken' }
+  > {
+    const { data: newCode, error } = await supabase
+      .from('community_codes')
+      .insert({
+        code,
+        country: normalizedData.country.toUpperCase(),
+        province: normalizedData.province.toUpperCase(),
+        city: normalizedData.city.toUpperCase(),
+        street: normalizedData.street.toUpperCase(),
+        street_number: normalizedData.street_number,
+        created_by: normalizedData.created_by
+      })
+      .select()
+      .single();
+
+    if (!error && newCode) {
+      return { kind: 'created', code: newCode.code };
+    }
+
+    if (error?.code === '23505') {
+      const existingForLocation = await this.findExistingCode(normalizedData);
+      if (existingForLocation) {
+        return { kind: 'reused', code: existingForLocation.code };
+      }
+      return { kind: 'code_taken' };
+    }
+
+    throw new Error(`Error creando código de comunidad: ${error?.message || 'desconocido'}`);
   }
 
   static async getAllCommunityCodes(): Promise<CommunityCode[]> {
