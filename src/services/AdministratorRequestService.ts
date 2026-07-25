@@ -330,6 +330,18 @@ export class AdministratorRequestService {
         hasMessage: !!options.requestMessage
       });
 
+      const { data: authData } = await supabase.auth.getUser();
+      const currentUserId = authData.user?.id;
+      if (!currentUserId) {
+        return { success: false, message: 'Usuario no autenticado' };
+      }
+
+      const memberRole = await this.getRoleAndProfile(options.communityMemberRoleId);
+      if (!memberRole?.user_id || memberRole.user_id !== currentUserId) {
+        console.error('❌ ADMIN REQUEST: communityMemberRoleId does not belong to authenticated user');
+        return { success: false, message: 'No autorizado para enviar esta solicitud' };
+      }
+
       // Check if request already exists
       const { data: existingRequest } = await supabase
         .from('administrator_requests')
@@ -539,6 +551,19 @@ export class AdministratorRequestService {
         return { success: false, message: 'No se pudo encontrar la solicitud' };
       }
 
+      // Only the assigned property administrator may accept/reject the request.
+      const adminRole = await this.getRoleAndProfile(originalRequest.property_administrator_id);
+      if (!adminRole?.user_id || adminRole.user_id !== options.respondedBy) {
+        console.error('❌ ADMIN REQUEST: Responder is not the assigned property administrator');
+        return { success: false, message: 'No autorizado para responder esta solicitud' };
+      }
+
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData.user?.id || authData.user.id !== options.respondedBy) {
+        console.error('❌ ADMIN REQUEST: respondedBy does not match authenticated user');
+        return { success: false, message: 'No autorizado para responder esta solicitud' };
+      }
+
       // Update the request status
       const { error: updateError } = await supabase
         .from('administrator_requests')
@@ -575,7 +600,6 @@ export class AdministratorRequestService {
       console.log('📧 NOTIFICATION: Sending response notification to member...');
       
       const memberRole = await this.getRoleAndProfile(originalRequest.community_member_id);
-      const adminRole = await this.getRoleAndProfile(originalRequest.property_administrator_id);
 
       if (memberRole?.user_id) {
         const adminName = adminRole?.profiles?.full_name || 'El administrador';
@@ -627,6 +651,20 @@ export class AdministratorRequestService {
     notes?: string;
   }): Promise<{ success: boolean; message: string; relationshipId?: string; }> {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const currentUserId = authData.user?.id;
+      if (!currentUserId || currentUserId !== options.establishedBy) {
+        console.error('❌ MANAGEMENT: establishedBy does not match authenticated user');
+        return { success: false, message: 'No autorizado para crear esta relación' };
+      }
+
+      // Only the assigned property administrator may establish the relationship.
+      const adminRole = await this.getRoleAndProfile(options.propertyAdministratorRoleId);
+      if (!adminRole?.user_id || adminRole.user_id !== currentUserId) {
+        console.error('❌ MANAGEMENT: Authenticated user is not the assigned property administrator');
+        return { success: false, message: 'No autorizado para crear esta relación' };
+      }
+
       // Check if relationship already exists
       const { data: existing } = await supabase
         .from('managed_communities')
@@ -776,6 +814,37 @@ export class AdministratorRequestService {
 
   static async cancelRequest(requestId: string): Promise<{ success: boolean; message: string; }> {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const currentUserId = authData.user?.id;
+      if (!currentUserId) {
+        return { success: false, message: 'Usuario no autenticado' };
+      }
+
+      const { data: originalRequest, error: fetchError } = await supabase
+        .from('administrator_requests')
+        .select('*')
+        .eq('id', requestId)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (fetchError || !originalRequest) {
+        console.error('❌ ADMIN REQUEST: Could not fetch request to cancel:', fetchError);
+        return { success: false, message: 'No se pudo encontrar la solicitud pendiente' };
+      }
+
+      // Only the requesting community member (or the assigned admin) may cancel.
+      const [memberRole, adminRole] = await Promise.all([
+        this.getRoleAndProfile(originalRequest.community_member_id),
+        this.getRoleAndProfile(originalRequest.property_administrator_id),
+      ]);
+      const allowedUserIds = [memberRole?.user_id, adminRole?.user_id].filter(
+        (id): id is string => typeof id === 'string' && id.length > 0
+      );
+      if (!allowedUserIds.includes(currentUserId)) {
+        console.error('❌ ADMIN REQUEST: User not authorized to cancel request');
+        return { success: false, message: 'No autorizado para cancelar esta solicitud' };
+      }
+
       const { error } = await supabase
         .from('administrator_requests')
         .update({ 
@@ -804,6 +873,35 @@ export class AdministratorRequestService {
 
   static async endManagementRelationship(relationshipId: string, reason?: string): Promise<{ success: boolean; message: string; }> {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const currentUserId = authData.user?.id;
+      if (!currentUserId) {
+        return { success: false, message: 'Usuario no autenticado' };
+      }
+
+      const { data: relationship, error: fetchError } = await supabase
+        .from('managed_communities')
+        .select('*')
+        .eq('id', relationshipId)
+        .maybeSingle();
+
+      if (fetchError || !relationship) {
+        console.error('❌ MANAGEMENT: Could not fetch relationship:', fetchError);
+        return { success: false, message: 'No se pudo encontrar la relación de gestión' };
+      }
+
+      const [memberRole, adminRole] = await Promise.all([
+        this.getRoleAndProfile(relationship.community_member_id),
+        this.getRoleAndProfile(relationship.property_administrator_id),
+      ]);
+      const allowedUserIds = [memberRole?.user_id, adminRole?.user_id].filter(
+        (id): id is string => typeof id === 'string' && id.length > 0
+      );
+      if (!allowedUserIds.includes(currentUserId)) {
+        console.error('❌ MANAGEMENT: User not authorized to end relationship');
+        return { success: false, message: 'No autorizado para terminar esta relación' };
+      }
+
       const { error } = await supabase
         .from('managed_communities')
         .update({ 

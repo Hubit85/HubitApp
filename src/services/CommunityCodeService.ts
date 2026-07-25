@@ -54,14 +54,16 @@ export class CommunityCodeService {
   }
 
   static async findExistingCode(data: CommunityCodeData): Promise<CommunityCode | null> {
-    // BÚSQUEDA FLEXIBLE E INSENSIBLE A MAYÚSCULAS/MINÚSCULAS
+    // Exact match on normalized uppercase fields.
+    // Do NOT use ilike here: PostgREST treats `%`/`_` as SQL wildcards, which would let a
+    // caller reuse an arbitrary existing community code (wrong community assignment).
     const { data: existingCodes, error } = await supabase
       .from('community_codes')
       .select('*')
-      .ilike('country', data.country.trim())
-      .ilike('province', data.province.trim())
-      .ilike('city', data.city.trim())
-      .ilike('street', data.street.trim())
+      .eq('country', data.country.trim().toUpperCase())
+      .eq('province', data.province.trim().toUpperCase())
+      .eq('city', data.city.trim().toUpperCase())
+      .eq('street', data.street.trim().toUpperCase())
       .eq('street_number', data.street_number.trim())
       .limit(1);
 
