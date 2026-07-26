@@ -262,29 +262,36 @@ export class AdministratorRequestService {
   }> {
     try {
       console.log('🔍 SEARCH: Loading administrators...');
-      
-      const { data: propertyAdmins, error: propertyError } = await supabase
-        .from('property_administrators')
-        .select('*');
 
-      if (propertyError) {
-        throw new Error(propertyError.message);
+      // CRITICAL: role_id must be user_roles.id — administrator_requests,
+      // managed_communities, and NotificationCenter all key off user_roles, not
+      // property_administrators.id (those are different UUIDs).
+      const { data: adminRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('id, user_id, role_specific_data')
+        .eq('role_type', 'property_administrator')
+        .eq('is_verified', true);
+
+      if (rolesError) {
+        throw new Error(rolesError.message);
       }
 
       const enrichedAdmins = await Promise.all(
-        (propertyAdmins || []).map(async (admin) => {
+        (adminRoles || []).map(async (role) => {
           const { data: profile } = await supabase
             .from('profiles')
             .select('full_name, email, phone')
-            .eq('id', admin.user_id)
+            .eq('id', role.user_id)
             .single();
 
+          const roleData = (role.role_specific_data || {}) as Record<string, any>;
+
           return {
-            role_id: admin.id,
-            user_id: admin.user_id,
-            company_name: admin.company_name || 'Empresa no especificada',
-            business_email: admin.contact_email || profile?.email || '',
-            business_phone: admin.contact_phone || profile?.phone || '',
+            role_id: role.id,
+            user_id: role.user_id,
+            company_name: roleData.company_name || profile?.full_name || 'Empresa no especificada',
+            business_email: roleData.business_email || profile?.email || '',
+            business_phone: roleData.business_phone || profile?.phone || '',
             user_name: profile?.full_name || 'Usuario',
             user_email: profile?.email || ''
           };
@@ -309,6 +316,95 @@ export class AdministratorRequestService {
     } catch (error) {
       console.error('❌ SEARCH: Exception searching administrators:', error);
       return { success: false, administrators: [], message: 'Error inesperado al buscar administradores' };
+    }
+  }
+
+  /**
+   * Resolve a real communities.id for an assignment. The UI works with
+   * community_code strings, but managed_communities.community_id / incidents
+   * FKs require communities.id. Find-or-create by community code name.
+   */
+  static async ensureCommunityIdForCode(options: {
+    communityCode: string;
+    administratorUserId: string;
+    city?: string;
+    address?: string;
+  }): Promise<{ success: boolean; communityId?: string; message?: string }> {
+    const code = options.communityCode.trim();
+    if (!code) {
+      return { success: false, message: 'Código de comunidad requerido' };
+    }
+
+    try {
+      const { data: existing, error: existingError } = await supabase
+        .from('communities')
+        .select('id')
+        .eq('name', code)
+        .maybeSingle();
+
+      if (existingError) {
+        throw new Error(existingError.message);
+      }
+
+      if (existing?.id) {
+        return { success: true, communityId: existing.id };
+      }
+
+      let city = options.city?.trim() || '';
+      let address = options.address?.trim() || code;
+
+      const { data: codeRow } = await supabase
+        .from('community_codes')
+        .select('street, street_number, city, province, country')
+        .eq('code', code)
+        .maybeSingle();
+
+      if (codeRow) {
+        city = city || codeRow.city || 'Sin ciudad';
+        address = options.address?.trim() ||
+          `${codeRow.street || ''} ${codeRow.street_number || ''}`.trim() ||
+          code;
+      }
+
+      if (!city) {
+        city = 'Sin ciudad';
+      }
+
+      const { data: created, error: createError } = await supabase
+        .from('communities')
+        .insert({
+          name: code,
+          address,
+          city,
+          administrator_id: options.administratorUserId,
+          status: 'active',
+          description: `Comunidad vinculada al código ${code}`
+        })
+        .select('id')
+        .single();
+
+      if (createError) {
+        // Concurrent create: another request may have inserted the same name
+        const { data: raced } = await supabase
+          .from('communities')
+          .select('id')
+          .eq('name', code)
+          .maybeSingle();
+
+        if (raced?.id) {
+          return { success: true, communityId: raced.id };
+        }
+
+        throw new Error(createError.message);
+      }
+
+      return { success: true, communityId: created.id };
+    } catch (error) {
+      console.error('❌ COMMUNITY: ensureCommunityIdForCode failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Error resolviendo comunidad'
+      };
     }
   }
 
