@@ -61,8 +61,14 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
 
   const loadReceivedRequests = useCallback(async () => {
     if (!activeRole) return;
-    
-    const result = await AdministratorRequestService.getReceivedRequests(activeRole.id);
+
+    // sendRequestToAdministrator always sets assignment_type, so the admin inbox
+    // must load assignment requests (not the default management filter which
+    // only returns rows where assignment_type IS NULL).
+    const result = await AdministratorRequestService.getReceivedRequests(
+      activeRole.id,
+      'assignment'
+    );
     if (result.success) {
       setReceivedRequests(result.requests);
     }

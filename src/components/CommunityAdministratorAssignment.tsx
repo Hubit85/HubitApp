@@ -382,10 +382,28 @@ export function CommunityAdministratorAssignment() {
       if (adminRoleError || !adminRole) throw new Error('El proveedor seleccionado no tiene un rol de administrador de fincas verificado.');
 
       const { AdministratorRequestService } = await import('@/services/AdministratorRequestService');
+
+      // Resolve communities.id from the selected community_code. Without this,
+      // managed_communities.community_id stays null and incident reporting cannot
+      // attach a valid FK after the request is accepted.
+      const selectedCommunity = communityCodes.find((c) => c.code === communityName.trim());
+      const communityResult = await AdministratorRequestService.ensureCommunityIdForCode({
+        communityCode: communityName.trim(),
+        administratorUserId: selectedAdmin.user_id,
+        city: selectedCommunity?.city,
+        address: selectedCommunity
+          ? `${selectedCommunity.street} ${selectedCommunity.street_number}`.trim()
+          : undefined
+      });
+
+      if (!communityResult.success || !communityResult.communityId) {
+        throw new Error(communityResult.message || 'No se pudo resolver la comunidad para la asignación.');
+      }
       
       const requestOptions = {
         communityMemberRoleId: communityMemberRole.id,
         propertyAdministratorRoleId: adminRole.id,
+        communityId: communityResult.communityId,
         requestMessage: `Solicitud de asignación para la comunidad ${communityName}.`
       };
       
