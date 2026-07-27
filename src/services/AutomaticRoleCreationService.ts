@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { UserRoleInsert } from "@/integrations/supabase/types";
 import { PropertyAdministratorSyncService } from "./PropertyAdministratorSyncService";
+import { ServiceProviderSyncService } from "./ServiceProviderSyncService";
 
 export interface AutoRoleCreationOptions {
   userId: string;
@@ -257,6 +258,16 @@ export class AutomaticRoleCreationService {
               console.log('🔄 ENHANCED AUTO-ROLE: Property administrator role exists, verifying sync...');
               syncResults = await PropertyAdministratorSyncService.syncSingleAdministrator(userId);
             }
+
+            // SERVICE PROVIDER DOMAIN ROW: marketplace UI requires service_providers
+            const hasServiceProvider = existingRoleTypes.includes('service_provider');
+            if (hasServiceProvider) {
+              console.log('🔄 ENHANCED AUTO-ROLE: Service provider role exists, ensuring domain row...');
+              const providerSync = await ServiceProviderSyncService.ensureServiceProviderProfile(userId);
+              if (!providerSync.success) {
+                errors.push(`Provider sync: ${providerSync.message}`);
+              }
+            }
             
             return {
               success: true,
@@ -303,6 +314,19 @@ export class AutomaticRoleCreationService {
             errors.push(`Sync error: ${syncError instanceof Error ? syncError.message : String(syncError)}`);
           }
         }
+
+        if (primaryRole === 'service_provider') {
+          console.log('🔄 ENHANCED AUTO-ROLE: Ensuring service_providers domain row...');
+          try {
+            const providerSync = await ServiceProviderSyncService.ensureServiceProviderProfile(userId);
+            if (!providerSync.success) {
+              errors.push(`Provider sync: ${providerSync.message}`);
+            }
+          } catch (syncError) {
+            console.error('❌ ENHANCED AUTO-ROLE: Service provider sync error:', syncError);
+            errors.push(`Provider sync error: ${syncError instanceof Error ? syncError.message : String(syncError)}`);
+          }
+        }
         
       } else {
         const errorMsg = `Failed to create primary role ${primaryRole}: ${primaryRoleResult.error}`;
@@ -325,6 +349,15 @@ export class AutomaticRoleCreationService {
               console.log('✅ ENHANCED AUTO-ROLE: Emergency recovery sync completed');
             } catch (syncError) {
               console.error('❌ ENHANCED AUTO-ROLE: Emergency recovery sync failed:', syncError);
+            }
+          }
+
+          if (primaryRole === 'service_provider') {
+            try {
+              await ServiceProviderSyncService.ensureServiceProviderProfile(userId);
+              console.log('✅ ENHANCED AUTO-ROLE: Emergency provider sync completed');
+            } catch (syncError) {
+              console.error('❌ ENHANCED AUTO-ROLE: Emergency provider sync failed:', syncError);
             }
           }
         } else {
@@ -367,6 +400,18 @@ export class AutomaticRoleCreationService {
               console.error('❌ ENHANCED AUTO-ROLE: Additional property administrator sync error:', syncError);
             }
           }
+
+          if (additionalRole.roleType === 'service_provider') {
+            console.log('🔄 ENHANCED AUTO-ROLE: Ensuring additional service_providers domain row...');
+            try {
+              const providerSync = await ServiceProviderSyncService.ensureServiceProviderProfile(userId);
+              if (!providerSync.success) {
+                errors.push(`Provider sync: ${providerSync.message}`);
+              }
+            } catch (syncError) {
+              console.error('❌ ENHANCED AUTO-ROLE: Additional service provider sync error:', syncError);
+            }
+          }
           
         } else {
           const errorMsg = `Failed to create additional role ${additionalRole.roleType}: ${additionalRoleResult.error}`;
@@ -389,6 +434,15 @@ export class AutomaticRoleCreationService {
                 console.log('✅ ENHANCED AUTO-ROLE: Recovery sync completed');
               } catch (syncError) {
                 console.error('❌ ENHANCED AUTO-ROLE: Recovery sync failed:', syncError);
+              }
+            }
+
+            if (additionalRole.roleType === 'service_provider') {
+              try {
+                await ServiceProviderSyncService.ensureServiceProviderProfile(userId);
+                console.log('✅ ENHANCED AUTO-ROLE: Recovery provider sync completed');
+              } catch (syncError) {
+                console.error('❌ ENHANCED AUTO-ROLE: Recovery provider sync failed:', syncError);
               }
             }
           } else {
@@ -419,6 +473,20 @@ export class AutomaticRoleCreationService {
         } catch (finalSyncError) {
           console.error('❌ ENHANCED AUTO-ROLE: Final sync verification failed:', finalSyncError);
           errors.push(`Final sync error: ${finalSyncError instanceof Error ? finalSyncError.message : String(finalSyncError)}`);
+        }
+      }
+
+      const hasServiceProviderRole = createdRoles.some(role => role.role_type === 'service_provider');
+      if (hasServiceProviderRole) {
+        console.log('🔄 ENHANCED AUTO-ROLE: Running final service provider domain sync...');
+        try {
+          const providerSync = await ServiceProviderSyncService.ensureServiceProviderProfile(userId);
+          if (!providerSync.success) {
+            errors.push(`Final provider sync: ${providerSync.message}`);
+          }
+        } catch (finalProviderSyncError) {
+          console.error('❌ ENHANCED AUTO-ROLE: Final provider sync failed:', finalProviderSyncError);
+          errors.push(`Final provider sync error: ${finalProviderSyncError instanceof Error ? finalProviderSyncError.message : String(finalProviderSyncError)}`);
         }
       }
 
