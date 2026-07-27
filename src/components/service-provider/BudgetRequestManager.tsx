@@ -18,6 +18,7 @@ import {
   Loader2, RefreshCw, FileText, Building
 } from "lucide-react";
 import { BudgetRequest, Quote } from "@/integrations/supabase/types";
+import { ServiceProviderSyncService } from "@/services/ServiceProviderSyncService";
 
 interface ExtendedBudgetRequest extends BudgetRequest {
   user_name?: string;
@@ -98,16 +99,32 @@ export function BudgetRequestManager() {
 
       console.log("🔍 Loading service provider data for user:", user.id.substring(0, 8) + '...');
 
-      // Get service provider record
-      const { data: providerData, error: providerError } = await supabase
+      // Get service provider record (create domain row if registration only wrote user_roles)
+      let { data: providerData, error: providerError } = await supabase
         .from('service_providers')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (providerError) {
+      if (providerError && providerError.code !== 'PGRST116') {
         console.error("❌ Error loading service provider:", providerError);
         throw new Error(`Error cargando perfil de proveedor: ${providerError.message}`);
+      }
+
+      if (!providerData?.id) {
+        const sync = await ServiceProviderSyncService.ensureServiceProviderProfile(user.id);
+        if (!sync.success || !sync.providerId) {
+          throw new Error(`Error cargando perfil de proveedor: ${sync.message}`);
+        }
+        const { data: createdProvider, error: reloadError } = await supabase
+          .from('service_providers')
+          .select('*')
+          .eq('id', sync.providerId)
+          .single();
+        if (reloadError || !createdProvider) {
+          throw new Error(`Error cargando perfil de proveedor: ${reloadError?.message || 'missing after sync'}`);
+        }
+        providerData = createdProvider;
       }
 
       console.log("✅ Service provider loaded:", {

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
+import { ServiceProviderSyncService } from "@/services/ServiceProviderSyncService";
 
 type Contract = Database["public"]["Tables"]["contracts"]["Row"];
 type Quote = Database["public"]["Tables"]["quotes"]["Row"];
@@ -68,7 +69,7 @@ interface ContractFormData {
 }
 
 export function ContractManager() {
-  const { user } = useSupabaseAuth();
+  const { user, activeRole } = useSupabaseAuth();
   const { toast } = useToast();
   const [contracts, setContracts] = useState<ExtendedContract[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,7 @@ export function ContractManager() {
   const [currentTab, setCurrentTab] = useState("my-contracts");
   const [availableQuotes, setAvailableQuotes] = useState<ExtendedQuote[]>([]);
   const [selectedQuote, setSelectedQuote] = useState<ExtendedQuote | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(activeRole?.role_type || null);
 
   const [contractForm, setContractForm] = useState<ContractFormData>({
     title: "",
@@ -99,14 +100,31 @@ export function ContractManager() {
   };
 
   useEffect(() => {
-    if (user) {
-      loadUserRole();
-      loadContractsData();
-    }
-  }, [user]);
+    if (!user) return;
 
-  const loadUserRole = async () => {
-    if (!user?.id) return;
+    let cancelled = false;
+
+    const bootstrap = async () => {
+      const resolvedRole = await loadUserRole();
+      if (cancelled) return;
+      await loadContractsData(resolvedRole);
+    };
+
+    bootstrap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, activeRole?.role_type]);
+
+  const loadUserRole = async (): Promise<string | null> => {
+    if (!user?.id) return null;
+
+    // Prefer the session active role over profiles.user_type (multi-role users)
+    if (activeRole?.role_type) {
+      setUserRole(activeRole.role_type);
+      return activeRole.role_type;
+    }
 
     try {
       const { data: profile, error } = await supabase
@@ -117,17 +135,22 @@ export function ContractManager() {
 
       if (error) {
         console.error("Error loading user profile:", error);
-        return;
+        return null;
       }
 
-      setUserRole(profile?.user_type || 'particular');
+      const role = profile?.user_type || 'particular';
+      setUserRole(role);
+      return role;
     } catch (err) {
       console.error("Error loading user role:", err);
+      return null;
     }
   };
 
-  const loadContractsData = async () => {
+  const loadContractsData = async (roleOverride?: string | null) => {
     if (!user?.id) return;
+
+    const effectiveRole = roleOverride ?? userRole;
 
     try {
       setLoading(true);
@@ -135,7 +158,7 @@ export function ContractManager() {
 
       console.log("🔍 Loading contracts data for user:", user.id.substring(0, 8) + '...');
 
-      if (userRole === 'service_provider') {
+      if (effectiveRole === 'service_provider') {
         await Promise.all([
           loadProviderContracts(),
           loadAvailableQuotes()
@@ -198,19 +221,36 @@ export function ContractManager() {
     }
   };
 
+  const getOrEnsureProviderId = async (): Promise<string | null> => {
+    if (!user?.id) return null;
+
+    const { data: providerData, error: providerError } = await supabase
+      .from('service_providers')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (providerError && providerError.code !== 'PGRST116') {
+      console.error("❌ Error loading provider data:", providerError);
+      return null;
+    }
+
+    if (providerData?.id) {
+      return providerData.id;
+    }
+
+    const sync = await ServiceProviderSyncService.ensureServiceProviderProfile(user.id);
+    return sync.providerId || null;
+  };
+
   const loadProviderContracts = async () => {
     if (!user?.id) return;
 
     try {
-      const { data: providerData, error: providerError } = await supabase
-        .from('service_providers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      const providerId = await getOrEnsureProviderId();
 
-      if (providerError || !providerData?.id) {
-        console.error("❌ Error loading provider data:", providerError);
-        throw new Error(`Error cargando datos del proveedor: ${providerError?.message || 'ID no encontrado'}`);
+      if (!providerId) {
+        throw new Error('Error cargando datos del proveedor: ID no encontrado');
       }
 
       const { data, error } = await supabase
@@ -230,7 +270,7 @@ export function ContractManager() {
             )
           )
         `)
-        .eq('service_provider_id', providerData.id)
+        .eq('service_provider_id', providerId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -259,13 +299,9 @@ export function ContractManager() {
     if (!user?.id) return;
 
     try {
-      const { data: providerData, error: providerError } = await supabase
-        .from('service_providers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      const providerId = await getOrEnsureProviderId();
 
-      if (providerError || !providerData?.id) {
+      if (!providerId) {
         console.warn("⚠️ Provider not found, skipping quotes");
         return;
       }
@@ -286,7 +322,7 @@ export function ContractManager() {
             )
           )
         `)
-        .eq('service_provider_id', providerData.id)
+        .eq('service_provider_id', providerId)
         .eq('status', 'accepted')
         .order('created_at', { ascending: false });
 
@@ -325,17 +361,9 @@ export function ContractManager() {
 
       console.log("📄 Creating contract for quote:", selectedQuote.id);
 
-      const { data: providerData, error: providerError } = await supabase
-        .from('service_providers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      const providerId = await getOrEnsureProviderId();
 
-      if (providerError) {
-        throw new Error("Error al obtener datos del proveedor");
-      }
-
-      if (!providerData?.id) {
+      if (!providerId) {
         throw new Error("No se pudo obtener el ID del proveedor de servicios");
       }
 
@@ -349,7 +377,7 @@ export function ContractManager() {
       const contractData = {
         quote_id: selectedQuote.id,
         user_id: requestUserId,
-        service_provider_id: providerData.id,
+        service_provider_id: providerId,
         contract_number: contractNumber,
         work_description: contractForm.work_scope || selectedQuote.description || 'Descripción del trabajo',
         total_amount: selectedQuote.amount,
@@ -373,7 +401,7 @@ export function ContractManager() {
       console.log("✅ Contract created successfully:", newContract.id);
 
       // Send notification to the contract owner with proper null checks and fallback
-      if (requestUserId && user?.id && providerData?.id && newContract) {
+      if (requestUserId && user?.id && providerId && newContract) {
         try {
           const serviceTitle = selectedQuote.title || 'Servicio';
           
@@ -530,7 +558,7 @@ export function ContractManager() {
             </div>
             
             <Button 
-              onClick={loadContractsData}
+              onClick={() => loadContractsData()}
               disabled={loading}
               variant="outline"
               size="sm"

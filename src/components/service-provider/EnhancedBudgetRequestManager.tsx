@@ -20,6 +20,7 @@ import {
   Briefcase, ArrowRight, RefreshCw
 } from "lucide-react";
 import { Database } from "@/integrations/supabase/types";
+import { ServiceProviderSyncService } from "@/services/ServiceProviderSyncService";
 
 type BudgetRequest = Database["public"]["Tables"]["budget_requests"]["Row"];
 type Quote = Database["public"]["Tables"]["quotes"]["Row"];
@@ -101,15 +102,31 @@ export function EnhancedBudgetRequestManager() {
       setLoading(true);
       setError("");
 
-      // Load service provider profile
-      const { data: providerData, error: providerError } = await supabase
+      // Load service provider profile (backfill domain row if missing)
+      let { data: providerData, error: providerError } = await supabase
         .from('service_providers')
         .select('*')
         .eq('user_id', user!.id)
-        .single();
+        .maybeSingle();
 
-      if (providerError) {
+      if (providerError && providerError.code !== 'PGRST116') {
         throw new Error("Error loading service provider profile");
+      }
+
+      if (!providerData?.id) {
+        const sync = await ServiceProviderSyncService.ensureServiceProviderProfile(user!.id);
+        if (!sync.success || !sync.providerId) {
+          throw new Error("Error loading service provider profile");
+        }
+        const { data: createdProvider, error: reloadError } = await supabase
+          .from('service_providers')
+          .select('*')
+          .eq('id', sync.providerId)
+          .single();
+        if (reloadError || !createdProvider) {
+          throw new Error("Error loading service provider profile");
+        }
+        providerData = createdProvider;
       }
 
       setServiceProvider(providerData);
