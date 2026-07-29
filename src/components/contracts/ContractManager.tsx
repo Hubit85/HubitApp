@@ -270,6 +270,24 @@ export function ContractManager() {
         return;
       }
 
+      // Query contracted quote IDs from DB — do not rely on React `contracts` state.
+      // loadProviderContracts runs in parallel via Promise.all, so `contracts` is often still [] here.
+      const { data: existingContracts, error: existingContractsError } = await supabase
+        .from('contracts')
+        .select('quote_id')
+        .eq('service_provider_id', providerData.id);
+
+      if (existingContractsError) {
+        console.error("❌ Error loading existing contracts for quote filter:", existingContractsError);
+        return;
+      }
+
+      const contractedQuoteIds = new Set(
+        (existingContracts || [])
+          .map((contract) => contract.quote_id)
+          .filter((quoteId): quoteId is string => Boolean(quoteId))
+      );
+
       const { data, error } = await supabase
         .from('quotes')
         .select(`
@@ -296,10 +314,7 @@ export function ContractManager() {
       }
 
       const transformedQuotes: ExtendedQuote[] = (data || [])
-        .filter((quote: any) => {
-          // Filter out quotes that already have contracts
-          return !contracts.some(contract => contract.quote_id === quote.id);
-        })
+        .filter((quote: any) => !contractedQuoteIds.has(quote.id))
         .map((quote: any) => ({
           ...quote,
           user_id: quote.budget_requests?.user_id || quote.user_id,
@@ -337,6 +352,24 @@ export function ContractManager() {
 
       if (!providerData?.id) {
         throw new Error("No se pudo obtener el ID del proveedor de servicios");
+      }
+
+      // contracts.quote_id has no UNIQUE constraint — guard against duplicate obligations.
+      const { data: existingContract, error: existingContractError } = await supabase
+        .from('contracts')
+        .select('id, contract_number')
+        .eq('quote_id', selectedQuote.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (existingContractError) {
+        throw existingContractError;
+      }
+
+      if (existingContract?.id) {
+        throw new Error(
+          `Ya existe un contrato para esta cotización (${existingContract.contract_number || existingContract.id}).`
+        );
       }
 
       const contractNumber = `CON-${Date.now()}-${Math.floor(Math.random() * 1000)}`;

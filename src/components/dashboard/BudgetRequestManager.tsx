@@ -133,6 +133,11 @@ export default function BudgetRequestManager() {
   };
 
   const handleDelete = async (requestId: string) => {
+    if (!user?.id) {
+      setError("Error: Debes iniciar sesión para eliminar solicitudes");
+      return;
+    }
+
     if (!requestId) {
       console.error("Cannot delete request: ID is missing or invalid");
       setError("Error: No se puede eliminar la solicitud porque falta el ID");
@@ -142,8 +147,39 @@ export default function BudgetRequestManager() {
     if (!confirm("¿Estás seguro de que quieres eliminar esta solicitud?")) return;
     
     try {
-      const { error } = await supabase.from("budget_requests").delete().eq("id", requestId);
-      if (error) throw error;
+      // Hard-deleting a budget_request cascades to quotes and contracts (ON DELETE CASCADE).
+      // Only allow physical delete for empty drafts; otherwise soft-cancel to preserve commercial records.
+      const { data: relatedQuotes, error: quotesError } = await supabase
+        .from("quotes")
+        .select("id")
+        .eq("budget_request_id", requestId)
+        .limit(1);
+
+      if (quotesError) throw quotesError;
+
+      const request = requests.find((r) => r.id === requestId);
+      const status = request?.status || "pending";
+      const hasRelatedQuotes = (relatedQuotes?.length || 0) > 0;
+      const isActiveMarketplaceRequest = !["pending", "draft"].includes(status);
+
+      if (hasRelatedQuotes || isActiveMarketplaceRequest) {
+        const { error } = await supabase
+          .from("budget_requests")
+          .update({ status: "cancelled", updated_at: new Date().toISOString() })
+          .eq("id", requestId)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("budget_requests")
+          .delete()
+          .eq("id", requestId)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+      }
+
       await fetchData();
     } catch (err: any) {
       setError(err.message);

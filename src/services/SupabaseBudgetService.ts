@@ -228,7 +228,40 @@ export class SupabaseBudgetService {
   }
 
   static async deleteBudgetRequest(id: string): Promise<void> {
-    // Antes de eliminar, notificar cambio de estado
+    // quotes.budget_request_id and contracts.quote_id use ON DELETE CASCADE.
+    // Refuse hard-delete when marketplace records exist; cancel instead.
+    const { data: relatedQuotes, error: quotesError } = await supabase
+      .from("quotes")
+      .select("id")
+      .eq("budget_request_id", id)
+      .limit(1);
+
+    if (quotesError) {
+      throw new Error(quotesError.message);
+    }
+
+    if ((relatedQuotes?.length || 0) > 0) {
+      await this.cancelBudgetRequest(id, "Blocked hard-delete: related quotes exist");
+      console.log("⚠️ Budget request cancelled instead of deleted (quotes present):", id);
+      return;
+    }
+
+    const { data: request, error: requestError } = await supabase
+      .from("budget_requests")
+      .select("status")
+      .eq("id", id)
+      .single();
+
+    if (requestError) {
+      throw new Error(requestError.message);
+    }
+
+    if (request?.status && !["pending", "draft"].includes(request.status)) {
+      await this.cancelBudgetRequest(id, "Blocked hard-delete: active marketplace status");
+      console.log("⚠️ Budget request cancelled instead of deleted (active status):", id);
+      return;
+    }
+
     await SupabaseBudgetNotificationService.updateBudgetRequestStatusNotifications(id, 'cancelled');
 
     const { error } = await supabase
