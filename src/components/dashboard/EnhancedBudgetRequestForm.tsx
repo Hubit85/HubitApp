@@ -205,23 +205,65 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
 
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase
+
+      // Legacy ownership column on communities
+      const ownedQuery = supabase
         .from('communities')
         .select('*')
         .eq('administrator_id', user.id)
         .eq('status', 'active')
         .order('name');
 
-      if (error) {
-        console.error("Error loading communities:", error);
-        throw error;
+      // Canonical marketplace/admin relationship after assignment acceptance
+      const managedQuery = activeRole?.id
+        ? supabase
+            .from('managed_communities')
+            .select(`
+              community_id,
+              communities:community_id (
+                id, name, address, city, postal_code, status, administrator_id, description, created_at, updated_at
+              )
+            `)
+            .eq('property_administrator_id', activeRole.id)
+            .eq('relationship_status', 'active')
+        : Promise.resolve({ data: null, error: null });
+
+      const [ownedRes, managedRes] = await Promise.all([ownedQuery, managedQuery]);
+
+      if (ownedRes.error) {
+        console.error("Error loading owned communities:", ownedRes.error);
+        throw ownedRes.error;
       }
 
-      setCommunities(data || []);
-      
-      if (data && data.length > 0 && !selectedCommunityId) {
-        setSelectedCommunityId(data[0].id);
+      const byId = new Map<string, Community>();
+      for (const community of ownedRes.data || []) {
+        byId.set(community.id, community as Community);
+      }
+
+      if (!managedRes.error && managedRes.data) {
+        for (const row of managedRes.data as Array<{
+          communities: (Community & { status?: string | null }) | (Community & { status?: string | null })[] | null
+        }>) {
+          const linked = Array.isArray(row.communities) ? row.communities[0] : row.communities;
+          if (linked?.id && (linked.status ?? 'active') === 'active') {
+            byId.set(linked.id, {
+              id: linked.id,
+              name: linked.name,
+              address: linked.address,
+              city: linked.city,
+              postal_code: linked.postal_code ?? null
+            });
+          }
+        }
+      } else if (managedRes.error) {
+        console.warn("Managed communities lookup failed, using owned communities only:", managedRes.error);
+      }
+
+      const merged = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+      setCommunities(merged);
+
+      if (merged.length > 0 && !selectedCommunityId) {
+        setSelectedCommunityId(merged[0].id);
       }
 
     } catch (err) {
@@ -369,6 +411,15 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       return;
     }
 
+    if (
+      activeRole?.role_type === 'property_administrator' &&
+      communities.length > 0 &&
+      !selectedCommunityId
+    ) {
+      setError("Selecciona la comunidad para la que solicitas el presupuesto");
+      return;
+    }
+
     if (autoPublish) {
       setShowConfirmDialog(true);
       return;
@@ -377,10 +428,47 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
     await createBudgetRequest(false);
   };
 
+  const resolveWorkLocationForSubmit = (): string | null => {
+    const typedLocation = (formData.work_location || "").trim();
+
+    // budget_requests has no community_id column; persist the selected community
+    // into work_location so marketplace quotes/contracts keep a real place anchor.
+    if (activeRole?.role_type === 'property_administrator' && selectedCommunityId) {
+      const community = communities.find((c) => c.id === selectedCommunityId);
+      if (community) {
+        const communityLocation = [
+          community.name,
+          community.address,
+          community.city,
+          community.postal_code
+        ].filter(Boolean).join(", ");
+
+        if (typedLocation && !typedLocation.includes(community.name)) {
+          return `${communityLocation} — ${typedLocation}`;
+        }
+        return typedLocation || communityLocation || null;
+      }
+    }
+
+    return typedLocation || null;
+  };
+
   const createBudgetRequest = async (shouldAutoPublish: boolean) => {
     try {
       setSubmitting(true);
       setError("");
+
+      if (
+        activeRole?.role_type === 'property_administrator' &&
+        communities.length > 0 &&
+        !selectedCommunityId
+      ) {
+        setError("Selecciona la comunidad para la que solicitas el presupuesto");
+        setSubmitting(false);
+        return;
+      }
+
+      const resolvedWorkLocation = resolveWorkLocationForSubmit();
 
       const requestData: BudgetRequestInsert = {
         ...formData,
@@ -389,7 +477,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         budget_range_max: formData.budget_range_max || null,
         preferred_date: formData.preferred_date || null,
         deadline_date: formData.deadline_date || null,
-        work_location: formData.work_location || null,
+        work_location: resolvedWorkLocation,
         special_requirements: formData.special_requirements || null
       };
 
@@ -419,6 +507,7 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         images: [],
         documents: []
       });
+      // Keep selectedCommunityId so the next request defaults to the same community.
 
       setShowConfirmDialog(false);
       setProviderPreview(null);
