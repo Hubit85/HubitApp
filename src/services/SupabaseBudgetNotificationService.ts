@@ -12,12 +12,15 @@ export interface NotificationToProvider {
 export class SupabaseBudgetNotificationService {
   /**
    * Extract a city-like token from free-text work_location.
-   * Admin budget create (#60) persists: "name, address, city, postal_code".
+   * Admin budget create persists: "name, address, city, postal_code"
+   * and may append " — <detail>" when an incident prefill adds notes.
    */
   private static extractCityFromWorkLocation(workLocation: string | null | undefined): string | null {
     if (!workLocation?.trim()) return null;
 
-    const parts = workLocation.split(',').map((part) => part.trim()).filter(Boolean);
+    // Drop incidental detail after an em/en dash so postal/city tokens stay parseable.
+    const primary = workLocation.split(/\s+[—–-]\s+/)[0]?.trim() || workLocation.trim();
+    const parts = primary.split(',').map((part) => part.trim()).filter(Boolean);
     if (parts.length === 0) return null;
 
     const last = parts[parts.length - 1];
