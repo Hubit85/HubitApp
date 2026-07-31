@@ -11,6 +11,54 @@ export interface NotificationToProvider {
 
 export class SupabaseBudgetNotificationService {
   /**
+   * Extract a city-like token from free-text work_location.
+   * Admin budget create (#60) persists: "name, address, city, postal_code".
+   */
+  private static extractCityFromWorkLocation(workLocation: string | null | undefined): string | null {
+    if (!workLocation?.trim()) return null;
+
+    const parts = workLocation.split(',').map((part) => part.trim()).filter(Boolean);
+    if (parts.length === 0) return null;
+
+    const last = parts[parts.length - 1];
+    // Spanish postal codes are typically 5 digits; treat last segment as CP when it matches.
+    if (/^\d{4,5}(-\d+)?$/.test(last) && parts.length >= 2) {
+      return parts[parts.length - 2];
+    }
+
+    // Free-text locations often end with the city.
+    if (parts.length >= 2) {
+      return parts[parts.length - 1];
+    }
+
+    return parts[0];
+  }
+
+  private static providerServesLocation(
+    provider: ServiceProvider,
+    city: string,
+    workLocation?: string | null
+  ): boolean {
+    if (!provider.service_area || provider.service_area.length === 0) {
+      return true;
+    }
+
+    const cityLower = city.toLowerCase();
+    const workLocationLower = (workLocation || '').toLowerCase();
+
+    return provider.service_area.some((area: string) => {
+      const areaLower = area.toLowerCase();
+      return (
+        areaLower.includes(cityLower) ||
+        cityLower.includes(areaLower) ||
+        // Also match against full work_location (community name/address/city blob from #60)
+        (!!workLocationLower &&
+          (workLocationLower.includes(areaLower) || areaLower.includes(workLocationLower)))
+      );
+    });
+  }
+
+  /**
    * Notifica automáticamente a proveedores relevantes cuando se publica una solicitud de presupuesto
    */
   static async notifyProvidersOfNewBudgetRequest(budgetRequest: BudgetRequest): Promise<{
@@ -100,8 +148,8 @@ export class SupabaseBudgetNotificationService {
     try {
       console.log("🔍 Finding eligible providers for category:", budgetRequest.category);
 
-      // Obtener ubicación de la propiedad si está disponible
-      let propertyLocation = null;
+      // Resolve location: property.city first, then work_location (admin community path has no property_id)
+      let locationCity: string | null = null;
       if (budgetRequest.property_id) {
         const { data: property, error: propertyError } = await supabase
           .from('properties')
@@ -109,9 +157,20 @@ export class SupabaseBudgetNotificationService {
           .eq('id', budgetRequest.property_id)
           .single();
 
-        if (!propertyError && property) {
-          propertyLocation = property;
+        if (!propertyError && property?.city) {
+          locationCity = property.city;
           console.log("📍 Property location found:", property.city);
+        }
+      }
+
+      if (!locationCity) {
+        locationCity = this.extractCityFromWorkLocation(budgetRequest.work_location);
+        if (locationCity) {
+          console.log("📍 City resolved from work_location:", locationCity);
+        } else if (budgetRequest.work_location) {
+          console.log("📍 Using full work_location for service_area matching (no city token)");
+        } else {
+          console.log("⚠️ No property_id city or work_location; skipping location filter");
         }
       }
 
@@ -160,21 +219,21 @@ export class SupabaseBudgetNotificationService {
       // Filtrar por ubicación y radio de servicio (si está disponible)
       let locationFilteredProviders = categoryFilteredProviders;
       
-      if (propertyLocation && propertyLocation.city) {
+      if (locationCity || budgetRequest.work_location) {
+        const cityForFilter = locationCity || budgetRequest.work_location || '';
         locationFilteredProviders = categoryFilteredProviders.filter(provider => {
-          // Si no tiene áreas de servicio definidas, asumimos que acepta todas
           if (!provider.service_area || provider.service_area.length === 0) {
             console.log(`✅ Provider ${provider.company_name} serves all areas`);
             return true;
           }
 
-          // Verificar si la ciudad está en su área de servicio
-          const servesLocation = provider.service_area.some((area: string) =>
-            area.toLowerCase().includes(propertyLocation.city.toLowerCase()) ||
-            propertyLocation.city.toLowerCase().includes(area.toLowerCase())
+          const servesLocation = this.providerServesLocation(
+            provider,
+            cityForFilter,
+            budgetRequest.work_location
           );
 
-          console.log(`${servesLocation ? '✅' : '❌'} Provider ${provider.company_name} serves ${propertyLocation.city}:`, servesLocation);
+          console.log(`${servesLocation ? '✅' : '❌'} Provider ${provider.company_name} serves ${cityForFilter}:`, servesLocation);
 
           return servesLocation;
         });
@@ -269,6 +328,10 @@ export class SupabaseBudgetNotificationService {
       const title = `${urgencyLabel}: Nueva solicitud de presupuesto`;
       
       let message = `${clientName} solicita un presupuesto para "${budgetRequest.title}" en la categoría ${budgetRequest.category}.`;
+
+      if (budgetRequest.work_location) {
+        message += ` Ubicación: ${budgetRequest.work_location}.`;
+      }
       
       if (budgetRequest.budget_range_min && budgetRequest.budget_range_max) {
         message += ` Presupuesto estimado: €${budgetRequest.budget_range_min} - €${budgetRequest.budget_range_max}.`;
