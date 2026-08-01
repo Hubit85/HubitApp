@@ -539,7 +539,30 @@ export class AdministratorRequestService {
         return { success: false, message: 'No se pudo encontrar la solicitud' };
       }
 
-      // Update the request status
+      // Establish the management relationship BEFORE marking the request accepted.
+      // Previously status was set to accepted first and createManagementRelationship's
+      // { success: false } was ignored, leaving accepted-but-unmanaged requests with no retry UI.
+      if (options.response === 'accepted') {
+        console.log('🔗 MANAGEMENT: Creating relationship...');
+        
+        const relationshipResult = await this.createManagementRelationship({
+          propertyAdministratorRoleId: originalRequest.property_administrator_id,
+          communityMemberRoleId: originalRequest.community_member_id,
+          communityId: originalRequest.community_id ?? undefined,
+          establishedBy: options.respondedBy,
+          notes: `Relación establecida tras aceptar solicitud del ${new Date().toLocaleDateString()}`
+        });
+
+        if (!relationshipResult.success) {
+          console.error('❌ MANAGEMENT: Relationship creation failed; request left pending for retry');
+          return {
+            success: false,
+            message: `No se pudo establecer la relación de gestión: ${relationshipResult.message}. La solicitud permanece pendiente para reintentar.`
+          };
+        }
+      }
+
+      // Update the request status only after relationship success (when accepting)
       const { error: updateError } = await supabase
         .from('administrator_requests')
         .update({
@@ -557,19 +580,6 @@ export class AdministratorRequestService {
       }
 
       console.log('✅ ADMIN REQUEST: Request updated successfully');
-
-      // If accepted, create management relationship
-      if (options.response === 'accepted') {
-        console.log('🔗 MANAGEMENT: Creating relationship...');
-        
-        await this.createManagementRelationship({
-          propertyAdministratorRoleId: originalRequest.property_administrator_id,
-          communityMemberRoleId: originalRequest.community_member_id,
-          communityId: originalRequest.community_id ?? undefined,
-          establishedBy: options.respondedBy,
-          notes: `Relación establecida tras aceptar solicitud del ${new Date().toLocaleDateString()}`
-        });
-      }
       
       // Send notification to community member
       console.log('📧 NOTIFICATION: Sending response notification to member...');

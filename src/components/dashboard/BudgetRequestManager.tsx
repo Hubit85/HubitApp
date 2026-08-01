@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, FileText, Trash2, Edit } from "lucide-react";
+import { Loader2, Plus, FileText, Trash2, Edit, Send } from "lucide-react";
 import { BudgetRequest, Property, BudgetRequestInsert, BudgetRequestUpdate } from "@/integrations/supabase/types";
+import { SupabaseBudgetService } from "@/services/SupabaseBudgetService";
 
 type BudgetRequestWithProperty = BudgetRequest & {
   properties: Pick<Property, 'name' | 'address'> | null;
@@ -22,6 +23,12 @@ const CATEGORIES = [
   "maintenance", "security", "hvac", "carpentry", "emergency", "other"
 ] as const;
 
+/** Resolve a nullable UUID FK: empty strings are invalid for Postgres uuid columns. */
+export function resolveOptionalUuid(value: string | null | undefined): string | null {
+  if (!value || value.trim() === "") return null;
+  return value;
+}
+
 export default function BudgetRequestManager() {
   const { user } = useSupabaseAuth();
   const [requests, setRequests] = useState<BudgetRequestWithProperty[]>([]);
@@ -31,6 +38,7 @@ export default function BudgetRequestManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentRequest, setCurrentRequest] = useState<Partial<BudgetRequest>>({});
   const [isEditing, setIsEditing] = useState(false);
+  const [publishingId, setPublishingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -89,46 +97,76 @@ export default function BudgetRequestManager() {
   const handleSave = async () => {
     if (!user) return;
     try {
-      const requestData = {
-        ...currentRequest,
-        user_id: user.id,
-        property_id: currentRequest.property_id || properties[0]?.id || '',
-        title: currentRequest.title || '',
-        description: currentRequest.description || '',
-        category: currentRequest.category as typeof CATEGORIES[number] || 'maintenance',
-      };
-      
-      let res;
-      if (isEditing && currentRequest.id) {
-        const updateData: BudgetRequestUpdate = { 
-          title: requestData.title,
-          description: requestData.description,
-          category: requestData.category,
-          property_id: requestData.property_id,
-          budget_range_min: requestData.budget_range_min,
-          budget_range_max: requestData.budget_range_max
-        };
-        res = await supabase.from("budget_requests").update(updateData).eq("id", currentRequest.id);
-      } else {
-        const insertData: BudgetRequestInsert = { 
-          user_id: user.id,
-          property_id: requestData.property_id,
-          title: requestData.title,
-          description: requestData.description,
-          category: requestData.category,
-          status: 'pending',
-          budget_range_min: requestData.budget_range_min,
-          budget_range_max: requestData.budget_range_max
-        };
-        res = await supabase.from("budget_requests").insert(insertData);
+      setError("");
+      const title = (currentRequest.title || "").trim();
+      const description = (currentRequest.description || "").trim();
+      if (!title || !description) {
+        setError("El título y la descripción son obligatorios");
+        return;
       }
 
-      if (res.error) throw res.error;
+      const propertyId = resolveOptionalUuid(
+        currentRequest.property_id || properties[0]?.id || null
+      );
+      const category =
+        (currentRequest.category as (typeof CATEGORIES)[number]) || "maintenance";
+
+      if (isEditing && currentRequest.id) {
+        const updateData: BudgetRequestUpdate = {
+          title,
+          description,
+          category,
+          property_id: propertyId,
+          budget_range_min: currentRequest.budget_range_min,
+          budget_range_max: currentRequest.budget_range_max,
+        };
+        const { error: updateError } = await supabase
+          .from("budget_requests")
+          .update(updateData)
+          .eq("id", currentRequest.id)
+          .eq("user_id", user.id);
+        if (updateError) throw updateError;
+      } else {
+        // Particulars/community members use this manager; providers only list
+        // status='published'. Creating as pending made requests permanently invisible.
+        const insertData: BudgetRequestInsert = {
+          user_id: user.id,
+          property_id: propertyId,
+          title,
+          description,
+          category,
+          budget_range_min: currentRequest.budget_range_min,
+          budget_range_max: currentRequest.budget_range_max,
+        };
+        await SupabaseBudgetService.createAndPublishBudgetRequest(insertData, true);
+      }
 
       setIsDialogOpen(false);
       await fetchData();
     } catch (err: any) {
       setError(err.message);
+    }
+  };
+
+  const handlePublish = async (requestId: string) => {
+    if (!user) {
+      setError("Error: Debes iniciar sesión para publicar solicitudes");
+      return;
+    }
+    if (!requestId) {
+      setError("Error: No se puede publicar la solicitud porque falta el ID");
+      return;
+    }
+
+    try {
+      setPublishingId(requestId);
+      setError("");
+      await SupabaseBudgetService.publishBudgetRequest(requestId);
+      await fetchData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setPublishingId(null);
     }
   };
 
@@ -194,6 +232,21 @@ export default function BudgetRequestManager() {
                     <Badge variant={getStatusBadgeVariant(req.status)} className="mt-2">{req.status}</Badge>
                   </div>
                   <div className="flex gap-2">
+                    {(req.status === "pending" || req.status === "draft" || !req.status) && req.id && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handlePublish(req.id!)}
+                        disabled={publishingId === req.id}
+                        title="Publicar para que los proveedores puedan cotizar"
+                      >
+                        {publishingId === req.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                     <Button variant="outline" size="sm" onClick={() => handleOpenDialog(req)}>
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -265,7 +318,9 @@ export default function BudgetRequestManager() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>{isEditing ? "Guardar Cambios" : "Crear Solicitud"}</Button>
+            <Button onClick={handleSave}>
+              {isEditing ? "Guardar Cambios" : "Crear y Publicar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
