@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { BudgetRequestInsert, Property, BudgetRequest } from "@/integrations/supabase/types";
 import { SupabaseBudgetService } from "@/services/SupabaseBudgetService";
+import { SupabaseIncidentService } from "@/services/SupabaseIncidentService";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceCategoryOption {
@@ -382,6 +383,33 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
       setSubmitting(true);
       setError("");
 
+      const incidentId = formData.incident_id;
+      let incidentClaimed = false;
+
+      // Claim approved→processed before creating the budget request so concurrent
+      // or repeated "Tramitar" cannot publish unbounded duplicate requests.
+      if (incidentId) {
+        const sourceIncident = await SupabaseIncidentService.getIncidentById(incidentId);
+        if (!sourceIncident) {
+          throw new Error("No se encontró la incidencia a tramitar");
+        }
+        if (sourceIncident.status === "processed") {
+          throw new Error("Esta incidencia ya fue tramitada");
+        }
+        if (sourceIncident.status !== "approved") {
+          throw new Error("Solo se pueden tramitar incidencias aprobadas");
+        }
+
+        await SupabaseIncidentService.processIncidentToBudgetRequest(
+          {
+            id: incidentId,
+            admin_notes: prefilledIncident?.admin_notes || sourceIncident.admin_notes || null,
+          } as Parameters<typeof SupabaseIncidentService.processIncidentToBudgetRequest>[0],
+          user!.id
+        );
+        incidentClaimed = true;
+      }
+
       const requestData: BudgetRequestInsert = {
         ...formData,
         user_id: user!.id,
@@ -390,12 +418,36 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         preferred_date: formData.preferred_date || null,
         deadline_date: formData.deadline_date || null,
         work_location: formData.work_location || null,
-        special_requirements: formData.special_requirements || null
+        special_requirements: formData.special_requirements || null,
+        incident_id: incidentId || null,
       };
 
       console.log("🚀 Creating budget request with auto-publish:", shouldAutoPublish);
 
-      const result = await SupabaseBudgetService.createAndPublishBudgetRequest(requestData, shouldAutoPublish);
+      let result;
+      try {
+        result = await SupabaseBudgetService.createAndPublishBudgetRequest(
+          requestData,
+          shouldAutoPublish
+        );
+      } catch (createError) {
+        if (incidentClaimed && incidentId) {
+          try {
+            await SupabaseIncidentService.updateIncidentStatus(
+              incidentId,
+              "approved",
+              prefilledIncident?.admin_notes || undefined,
+              user!.id
+            );
+          } catch (revertError) {
+            console.error(
+              "Failed to revert incident after budget create error:",
+              revertError
+            );
+          }
+        }
+        throw createError;
+      }
 
       if (shouldAutoPublish && result.notificationResults) {
         setSuccessMessage(`¡Solicitud creada y publicada exitosamente! Se ha notificado a ${result.notificationResults.notificationsSent} proveedores.`);
@@ -417,7 +469,8 @@ export function EnhancedBudgetRequestForm({ onSuccess, prefilledIncident }: {
         work_location: "",
         special_requirements: "",
         images: [],
-        documents: []
+        documents: [],
+        incident_id: null,
       });
 
       setShowConfirmDialog(false);

@@ -383,7 +383,42 @@ export class SupabaseIncidentService {
 
   static async processIncidentToBudgetRequest(incident: Incident, userId?: string): Promise<void> {
     try {
-      await this.updateIncidentStatus(incident.id, "processed", incident.admin_notes || undefined, userId);
+      // Only transition approved → processed so re-tramitation and races cannot
+      // leave the incident actionable after a budget request was created.
+      const updateData: Record<string, unknown> = {
+        status: "processed",
+        updated_at: new Date().toISOString(),
+      };
+
+      if (incident.admin_notes) {
+        updateData.admin_notes = incident.admin_notes;
+      }
+
+      if (userId) {
+        updateData.reviewed_by = userId;
+        updateData.reviewed_at = new Date().toISOString();
+      }
+
+      const { data, error } = await supabase
+        .from("incidents")
+        .update(updateData)
+        .eq("id", incident.id)
+        .eq("status", "approved")
+        .select("id")
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error processing incident to budget request:", error);
+        throw new Error(
+          `Error al marcar la incidencia como tramitada: ${error.message}`
+        );
+      }
+
+      if (!data) {
+        throw new Error(
+          "La incidencia ya no está aprobada o ya fue tramitada"
+        );
+      }
     } catch (error) {
       console.error("Service error processing incident to budget request:", error);
       throw error;

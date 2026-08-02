@@ -539,8 +539,22 @@ export class AdministratorRequestService {
         return { success: false, message: 'No se pudo encontrar la solicitud' };
       }
 
-      // Update the request status
-      const { error: updateError } = await supabase
+      // Reject stale responses: only pending requests can be accepted/rejected.
+      // Without this, a second tab can flip rejected→accepted (or accepted→rejected)
+      // and incorrectly create/skip managed_communities.
+      if (originalRequest.status !== 'pending') {
+        console.warn(
+          '⚠️ ADMIN REQUEST: Refusing to respond to non-pending request:',
+          originalRequest.status
+        );
+        return {
+          success: false,
+          message: `La solicitud ya está ${originalRequest.status} y no puede modificarse`,
+        };
+      }
+
+      // Update the request status with an optimistic pending guard for races
+      const { data: updatedRequest, error: updateError } = await supabase
         .from('administrator_requests')
         .update({
           status: options.response,
@@ -549,11 +563,22 @@ export class AdministratorRequestService {
           responded_by: options.respondedBy,
           updated_at: new Date().toISOString()
         })
-        .eq('id', options.requestId);
+        .eq('id', options.requestId)
+        .eq('status', 'pending')
+        .select('id')
+        .maybeSingle();
 
       if (updateError) {
         console.error('❌ ADMIN REQUEST: Error updating request:', updateError);
         throw new Error(updateError.message);
+      }
+
+      if (!updatedRequest) {
+        console.warn('⚠️ ADMIN REQUEST: Concurrent response won the race');
+        return {
+          success: false,
+          message: 'La solicitud ya fue respondida. Recarga para ver el estado actual.',
+        };
       }
 
       console.log('✅ ADMIN REQUEST: Request updated successfully');
