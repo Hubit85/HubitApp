@@ -744,7 +744,7 @@ export class AdministratorRequestService {
         throw new Error(assignedError.message);
       }
 
-      let incidents = assignedIncidents || [];
+      const incidents = [...(assignedIncidents || [])];
 
       // Also surface unassigned incidents from actively managed members/communities.
       if (managedUserIds.length > 0 || managedCommunityIds.length > 0) {
