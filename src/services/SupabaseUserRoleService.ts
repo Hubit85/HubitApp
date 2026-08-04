@@ -435,65 +435,120 @@ export class SupabaseUserRoleService {
       try {
         console.log('🔄 Activating role:', { userId, roleType });
 
-        // Use timeout approach instead of abortSignal
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Operation timeout')), 10000);
-        });
-
-        try {
-          // First, deactivate all roles
-          const deactivatePromise = supabase
-            .from('user_roles')
-            .update({ 
-              is_active: false, 
-              updated_at: new Date().toISOString() 
-            })
-            .eq('user_id', userId);
-
-          const deactivateResult = await Promise.race([deactivatePromise, timeoutPromise]) as any;
-          const { error: deactivateError } = deactivateResult;
-
-          if (deactivateError) {
-            throw new Error(`Error deactivating roles: ${deactivateError.message}`);
+        const withTimeout = async <T,>(operation: PromiseLike<T>, label: string): Promise<T> => {
+          let timeoutId: ReturnType<typeof setTimeout> | undefined;
+          try {
+            return await Promise.race([
+              Promise.resolve(operation),
+              new Promise<T>((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error(`Operation timeout: ${label}`)), 10000);
+              })
+            ]);
+          } finally {
+            if (timeoutId) clearTimeout(timeoutId);
           }
+        };
 
-          // Then activate the selected role
-          const activatePromise = supabase
+        const { data: currentRoles, error: currentRolesError } = await withTimeout(
+          supabase
+            .from('user_roles')
+            .select('id, role_type, is_active, is_verified')
+            .eq('user_id', userId),
+          'load roles'
+        ) as any;
+
+        if (currentRolesError) {
+          throw new Error(`Error loading roles: ${currentRolesError.message}`);
+        }
+
+        const targetRole = (currentRoles || []).find(
+          (role: UserRole) => role.role_type === roleType && role.is_verified
+        );
+
+        if (!targetRole) {
+          return {
+            success: false,
+            message: "El rol seleccionado no existe o no está verificado"
+          };
+        }
+
+        if (targetRole.is_active) {
+          // Still clear any stale extra active flags.
+          await withTimeout(
+            supabase
+              .from('user_roles')
+              .update({
+                is_active: false,
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', userId)
+              .neq('id', targetRole.id),
+            'clear stale active roles'
+          );
+          return {
+            success: true,
+            message: `Rol ${this.getRoleDisplayName(roleType)} ya está activo`
+          };
+        }
+
+        // Activate target FIRST so a later failure cannot leave the user with zero active roles.
+        const { data: activatedRoles, error: activateError } = await withTimeout(
+          supabase
             .from('user_roles')
             .update({ 
               is_active: true, 
               updated_at: new Date().toISOString() 
             })
+            .eq('id', targetRole.id)
             .eq('user_id', userId)
-            .eq('role_type', roleType)
-            .eq('is_verified', true);
+            .eq('is_verified', true)
+            .select('id'),
+          'activate role'
+        ) as any;
 
-          const activateResult = await Promise.race([activatePromise, timeoutPromise]) as any;
-          const { error: activateError } = activateResult;
-
-          if (activateError) {
-            throw new Error(`Error activating role: ${activateError.message}`);
-          }
-
-          console.log('✅ Role activated successfully');
-
-          return {
-            success: true,
-            message: `Rol ${this.getRoleDisplayName(roleType)} activado correctamente`
-          };
-
-        } catch (dbError) {
-          throw dbError;
+        if (activateError) {
+          throw new Error(`Error activating role: ${activateError.message}`);
         }
+
+        if (!activatedRoles || activatedRoles.length === 0) {
+          return {
+            success: false,
+            message: "El rol seleccionado no existe o no está verificado"
+          };
+        }
+
+        // Then deactivate every other role for this user.
+        const { error: deactivateError } = await withTimeout(
+          supabase
+            .from('user_roles')
+            .update({ 
+              is_active: false, 
+              updated_at: new Date().toISOString() 
+            })
+            .eq('user_id', userId)
+            .neq('id', targetRole.id),
+          'deactivate other roles'
+        ) as any;
+
+        if (deactivateError) {
+          throw new Error(`Error deactivating roles: ${deactivateError.message}`);
+        }
+
+        console.log('✅ Role activated successfully');
+
+        return {
+          success: true,
+          message: `Rol ${this.getRoleDisplayName(roleType)} activado correctamente`
+        };
 
       } catch (error) {
         console.error("❌ Error activating role:", error);
         
         let message = "Error al activar el rol";
-        if (error instanceof Error && error.message === 'Operation timeout') {
+        if (error instanceof Error && error.message.startsWith('Operation timeout')) {
           message = "Error: La operación tardó demasiado tiempo";
-        } else if (error instanceof Error && error.message.includes('no rows')) {
-          message = "El rol seleccionado no existe o no está verificado";
+        } else if (error instanceof Error && error.message.includes('no está verificado')) {
+          message = error.message;
         }
         
         return {

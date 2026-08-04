@@ -707,66 +707,135 @@ export class AdministratorRequestService {
 
   static async getManagedIncidents(propertyAdministratorRoleId: string): Promise<{ success: boolean; incidents: any[]; message?: string; }> {
     try {
-      const managedResult = await this.getManagedMembers(propertyAdministratorRoleId);
-      if (!managedResult.success || managedResult.members.length === 0) {
-        return { success: true, incidents: [], message: 'No hay miembros gestionados' };
+      // IncidentReportForm / IncidentManagement persist into `incidents` (not legacy `incident_reports`).
+      const { data: administratorRole, error: administratorRoleError } = await supabase
+        .from('user_roles')
+        .select('id, user_id')
+        .eq('id', propertyAdministratorRoleId)
+        .eq('role_type', 'property_administrator')
+        .maybeSingle();
+
+      if (administratorRoleError) {
+        console.error('❌ INCIDENTS: Error resolving administrator role:', administratorRoleError);
+        throw new Error(administratorRoleError.message);
       }
-      
-      const managedUserIds = managedResult.members
+
+      if (!administratorRole?.user_id) {
+        return { success: true, incidents: [], message: 'Administrador no encontrado' };
+      }
+
+      const managedResult = await this.getManagedMembers(propertyAdministratorRoleId);
+      const managedUserIds = (managedResult.members || [])
         .map(member => member.community_member?.user_id)
         .filter((id): id is string => !!id && typeof id === 'string');
-        
-      if (managedUserIds.length === 0) {
-        return { success: true, incidents: [], message: 'No se encontraron IDs de usuario válidos' };
+      const managedCommunityIds = (managedResult.members || [])
+        .map(member => member.community_id)
+        .filter((id): id is string => !!id && typeof id === 'string');
+
+      // Primary path matches IncidentManagement: incidents.administrator_id stores auth user id.
+      const { data: assignedIncidents, error: assignedError } = await supabase
+        .from('incidents')
+        .select('*')
+        .eq('administrator_id', administratorRole.user_id)
+        .order('created_at', { ascending: false });
+
+      if (assignedError) {
+        console.error('❌ INCIDENTS: Error fetching managed incidents:', assignedError);
+        throw new Error(assignedError.message);
       }
 
-      const { data: incidents, error } = await supabase
-        .from('incident_reports')
-        .select(`
-          *,
-          profiles:user_id (
-            id,
-            full_name,
-            email,
-            phone
-          )
-        `)
-        .in('user_id', managedUserIds)
-        .order('reported_at', { ascending: false });
-        
-      if (error) {
-        console.error('❌ INCIDENTS: Error fetching managed incidents:', error);
-        throw new Error(error.message);
-      }
+      const incidents = [...(assignedIncidents || [])];
 
-      // Auto-assign administrator to unassigned incidents
-      try {
-        const unassignedIncidents = incidents?.filter(incident => 
-          !incident.managing_administrator_id
-        ) || [];
+      // Also surface unassigned incidents from actively managed members/communities.
+      if (managedUserIds.length > 0 || managedCommunityIds.length > 0) {
+        let unassignedQuery = supabase
+          .from('incidents')
+          .select('*')
+          .is('administrator_id', null)
+          .order('created_at', { ascending: false });
 
-        if (unassignedIncidents.length > 0) {
-          console.log(`🔄 INCIDENTS: Auto-assigning ${unassignedIncidents.length} incidents`);
-          
-          const incidentIds = unassignedIncidents.map(i => i.id).filter((id): id is string => !!id);
-          
-          if (incidentIds.length > 0) {
-            await supabase
-              .from('incident_reports')
-              .update({ 
-                managing_administrator_id: propertyAdministratorRoleId,
+        if (managedUserIds.length > 0 && managedCommunityIds.length > 0) {
+          unassignedQuery = unassignedQuery.or(
+            `reporter_id.in.(${managedUserIds.join(',')}),community_id.in.(${managedCommunityIds.join(',')})`
+          );
+        } else if (managedUserIds.length > 0) {
+          unassignedQuery = unassignedQuery.in('reporter_id', managedUserIds);
+        } else {
+          unassignedQuery = unassignedQuery.in('community_id', managedCommunityIds);
+        }
+
+        const { data: unassignedIncidents, error: unassignedError } = await unassignedQuery;
+
+        if (unassignedError) {
+          console.warn('⚠️ INCIDENTS: Could not load unassigned managed incidents:', unassignedError);
+        } else if (unassignedIncidents && unassignedIncidents.length > 0) {
+          const unassignedIds = unassignedIncidents
+            .map((incident) => incident.id)
+            .filter((id): id is string => !!id);
+
+          if (unassignedIds.length > 0) {
+            const { error: assignError } = await supabase
+              .from('incidents')
+              .update({
+                administrator_id: administratorRole.user_id,
                 updated_at: new Date().toISOString()
               })
-              .in('id', incidentIds);
+              .in('id', unassignedIds)
+              .is('administrator_id', null);
 
-            console.log('✅ INCIDENTS: Auto-assignment completed');
+            if (assignError) {
+              console.warn('⚠️ INCIDENTS: Could not auto-assign incidents:', assignError);
+            } else {
+              console.log(`✅ INCIDENTS: Auto-assigned ${unassignedIds.length} incidents`);
+            }
+          }
+
+          const knownIds = new Set(incidents.map((incident) => incident.id));
+          for (const incident of unassignedIncidents) {
+            if (!knownIds.has(incident.id)) {
+              incidents.push({
+                ...incident,
+                administrator_id: administratorRole.user_id
+              });
+            }
           }
         }
-      } catch (assignError) {
-        console.warn('⚠️ INCIDENTS: Could not auto-assign:', assignError);
       }
 
-      return { success: true, incidents: incidents || [] };
+      const enrichedIncidents = await Promise.all(
+        incidents.map(async (incident) => {
+          let profiles: { id: string; full_name: string | null; email: string; phone?: string | null } | null = null;
+
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, full_name, email, phone')
+              .eq('id', incident.reporter_id)
+              .maybeSingle();
+            profiles = profile;
+          } catch (profileError) {
+            console.warn(`⚠️ INCIDENTS: Could not load reporter profile for ${incident.reporter_id}:`, profileError);
+          }
+
+          // Normalize legacy NotificationCenter / AdministratorRequestManager field names.
+          return {
+            ...incident,
+            profiles,
+            service_category: incident.category,
+            reported_at: incident.created_at,
+            user_id: incident.reporter_id,
+            managing_administrator_id: incident.administrator_id
+          };
+        })
+      );
+
+      enrichedIncidents.sort((a, b) => {
+        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return bTime - aTime;
+      });
+
+      return { success: true, incidents: enrichedIncidents };
       
     } catch (error) {
       console.error('❌ INCIDENTS: Exception fetching managed incidents:', error);
