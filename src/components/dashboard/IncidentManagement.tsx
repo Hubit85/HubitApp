@@ -64,6 +64,10 @@ const STATUS_CONFIG = {
   "processed": { label: "Procesada", color: "bg-neutral-100 text-neutral-800", icon: CheckCircle }
 };
 
+/** Incidents that still need an approve/reject decision (not a terminal state). */
+const isReviewableStatus = (status: Incident['status']) =>
+  status === 'pending' || status === 'under_review';
+
 export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: (incident: Incident) => void }) {
   const { user, activeRole } = useSupabaseAuth();
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -172,7 +176,8 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
       setProcessing(true);
       setError("");
 
-      const { error: updateError } = await supabase
+      // Only pending/under_review can transition; prevents clobbering approved/processed/rejected.
+      const { data: updatedRows, error: updateError } = await supabase
         .from('incidents')
         .update({
           status,
@@ -180,10 +185,16 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
           reviewed_at: new Date().toISOString(),
           reviewed_by: user?.id
         })
-        .eq('id', selectedIncident.id);
+        .eq('id', selectedIncident.id)
+        .in('status', ['pending', 'under_review'])
+        .select('id');
 
       if (updateError) {
         throw updateError;
+      }
+
+      if (!updatedRows || updatedRows.length === 0) {
+        throw new Error('Incident is no longer reviewable');
       }
 
       // Update local state
@@ -399,7 +410,7 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
                             Ver Detalles
                           </Button>
                           
-                          {incident.status === 'pending' && (
+                          {isReviewableStatus(incident.status) && (
                             <Button
                               size="sm"
                               onClick={() => handleProcessIncident(incident)}
@@ -525,7 +536,7 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
             <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
               Cerrar
             </Button>
-            {selectedIncident && selectedIncident.status === 'pending' && (
+            {selectedIncident && isReviewableStatus(selectedIncident.status) && (
               <Button 
                 onClick={() => {
                   setShowDetailDialog(false);
@@ -587,14 +598,16 @@ export function IncidentManagement({ onProcessIncident }: { onProcessIncident?: 
             >
               Cancelar
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => updateIncidentStatus('under_review')}
-              disabled={processing}
-            >
-              {processing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Clock className="h-4 w-4 mr-1" />}
-              Marcar en Revisión
-            </Button>
+            {selectedIncident?.status !== 'under_review' && (
+              <Button 
+                variant="outline"
+                onClick={() => updateIncidentStatus('under_review')}
+                disabled={processing}
+              >
+                {processing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Clock className="h-4 w-4 mr-1" />}
+                Marcar en Revisión
+              </Button>
+            )}
             <Button 
               variant="destructive"
               onClick={() => updateIncidentStatus('rejected')}
