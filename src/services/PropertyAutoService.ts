@@ -10,6 +10,7 @@ export interface UserPropertyData {
   community_name?: string;
   portal_number?: string;
   apartment_number?: string;
+  community_code?: string;
   user_type: string;
 }
 
@@ -54,6 +55,8 @@ export class PropertyAutoService {
         city: userData.city,
         postal_code: userData.postal_code || "",
         property_type: propertyType, // Campo correcto del schema
+        // Persist registration/join code so admin assignment & community linking work
+        community_code: userData.community_code?.trim() || null,
         
         // Para información de comunidad, usar la descripción en su lugar
         ...(userData.user_type === "community_member" && userData.community_name && {
@@ -213,6 +216,7 @@ export class PropertyAutoService {
               community_name: roleData.community_name || '',
               portal_number: roleData.portal_number || '',
               apartment_number: roleData.apartment_number || '',
+              community_code: roleData.community_code || '',
               user_type: role.role_type
             };
 

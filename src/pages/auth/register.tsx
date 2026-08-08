@@ -747,13 +747,6 @@ function RegisterPageContent() {
         }
     };
 
-    // Helper function to generate community code based on address
-    function generateCommunityCode(address: string): string {
-        const hash = address.toLowerCase().replace(/\s+/g, '').slice(0, 10);
-        const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        return `COM-${hash}-${randomNum}`.toUpperCase();
-    }
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -912,8 +905,8 @@ function RegisterPageContent() {
                     } else if (roleType === 'community_member') {
                         roleSpecificData = {
                             ...formData.community_member,
-                            community_code: formData.community_member.community_code ||
-                                generateCommunityCode(formData.community_member.address)
+                            // Optional join code only — do not invent a random orphan code
+                            community_code: formData.community_member.community_code || ''
                         };
                     } else if (roleType === 'service_provider') {
                         roleSpecificData = formData.service_provider;
@@ -965,8 +958,6 @@ function RegisterPageContent() {
                     country: formData.particular.country,
                 };
             } else if (primaryRole === 'community_member') {
-                const communityCode = formData.community_member.community_code ||
-                    generateCommunityCode(formData.community_member.address);
                 userData = {
                     full_name: formData.community_member.full_name,
                     user_type: primaryRole,
@@ -976,7 +967,8 @@ function RegisterPageContent() {
                     city: formData.community_member.city,
                     province: formData.community_member.province,
                     country: formData.community_member.country,
-                    community_code: communityCode,
+                    // Preserve entered join/link code; empty means create/join later via PropertyManager
+                    community_code: formData.community_member.community_code || '',
                 };
             } else if (primaryRole === 'service_provider') {
                 userData = {
