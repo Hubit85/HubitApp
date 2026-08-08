@@ -540,7 +540,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                       community_name: processedRoleData.community_name || '',
                       portal_number: processedRoleData.portal_number || '',
                       apartment_number: processedRoleData.apartment_number || '',
-                      community_code: processedRoleData.community_code || userData.community_code || '',
+                      community_code: processedRoleData.community_code || (userData as any).community_code || '',
                       user_type: roleRequest.roleType
                     };
 
