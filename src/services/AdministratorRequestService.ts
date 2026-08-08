@@ -312,6 +312,150 @@ export class AdministratorRequestService {
     }
   }
 
+  /**
+   * Resolve a real communities.id for an assignment. UI/callers often only have
+   * community_code strings, but managed_communities.community_id and incidents
+   * FKs require communities.id. Find-or-create by community code name.
+   */
+  static async ensureCommunityIdForCode(options: {
+    communityCode: string;
+    administratorUserId: string;
+    city?: string;
+    address?: string;
+  }): Promise<{ success: boolean; communityId?: string; message?: string }> {
+    const code = options.communityCode.trim();
+    if (!code) {
+      return { success: false, message: 'Código de comunidad requerido' };
+    }
+
+    try {
+      const { data: existing, error: existingError } = await supabase
+        .from('communities')
+        .select('id')
+        .eq('name', code)
+        .maybeSingle();
+
+      if (existingError) {
+        throw new Error(existingError.message);
+      }
+
+      if (existing?.id) {
+        return { success: true, communityId: existing.id };
+      }
+
+      let city = options.city?.trim() || '';
+      let address = options.address?.trim() || code;
+
+      const { data: codeRow } = await supabase
+        .from('community_codes')
+        .select('street, street_number, city, province, country')
+        .eq('code', code)
+        .maybeSingle();
+
+      if (codeRow) {
+        city = city || codeRow.city || 'Sin ciudad';
+        address = options.address?.trim() ||
+          `${codeRow.street || ''} ${codeRow.street_number || ''}`.trim() ||
+          code;
+      }
+
+      if (!city) {
+        city = 'Sin ciudad';
+      }
+
+      const { data: created, error: createError } = await supabase
+        .from('communities')
+        .insert({
+          name: code,
+          address,
+          city,
+          administrator_id: options.administratorUserId,
+          status: 'active',
+          description: `Comunidad vinculada al código ${code}`
+        })
+        .select('id')
+        .single();
+
+      if (createError) {
+        // Concurrent create: another request may have inserted the same name
+        const { data: raced } = await supabase
+          .from('communities')
+          .select('id')
+          .eq('name', code)
+          .maybeSingle();
+
+        if (raced?.id) {
+          return { success: true, communityId: raced.id };
+        }
+
+        throw new Error(createError.message);
+      }
+
+      return { success: true, communityId: created.id };
+    } catch (error) {
+      console.error('❌ COMMUNITY: ensureCommunityIdForCode failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Error resolviendo comunidad'
+      };
+    }
+  }
+
+  /**
+   * When callers omit communityId (e.g. Profile → AdministratorRequestManager),
+   * resolve it from the member's most recent property that has a community_code.
+   * Leaving community_id null makes accepted managed_communities unusable for
+   * incident reporting (FK / non-null community resolution).
+   */
+  static async resolveCommunityIdForMember(options: {
+    communityMemberRoleId: string;
+    propertyAdministratorRoleId: string;
+  }): Promise<{ success: boolean; communityId?: string; message?: string }> {
+    const memberRole = await this.getRoleAndProfile(options.communityMemberRoleId);
+    if (!memberRole?.user_id) {
+      return { success: false, message: 'No se encontró el rol del miembro de comunidad' };
+    }
+
+    const adminRole = await this.getRoleAndProfile(options.propertyAdministratorRoleId);
+    if (!adminRole?.user_id) {
+      return { success: false, message: 'No se encontró el rol del administrador de fincas' };
+    }
+
+    const { data: property, error: propertyError } = await supabase
+      .from('properties')
+      .select('community_code, street, number, address, city')
+      .eq('user_id', memberRole.user_id)
+      .not('community_code', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (propertyError) {
+      return { success: false, message: propertyError.message };
+    }
+
+    const communityCode = property?.community_code?.trim();
+    if (!property || !communityCode) {
+      return {
+        success: false,
+        message:
+          'No tienes una propiedad con código de comunidad. Añade o genera un código en Propiedades antes de solicitar administrador.'
+      };
+    }
+
+    const address =
+      property.street || property.number
+        ? `${property.street || ''} ${property.number || ''}`.trim()
+        : property.address || undefined;
+
+    return this.ensureCommunityIdForCode({
+      communityCode,
+      administratorUserId: adminRole.user_id,
+      city: property.city || undefined,
+      address
+    });
+  }
+
   static async sendRequestToAdministrator(options: {
     communityMemberRoleId: string;
     propertyAdministratorRoleId: string;
@@ -344,11 +488,31 @@ export class AdministratorRequestService {
         return { success: false, message: 'Ya tienes una solicitud pendiente con este administrador.' };
       }
 
+      // Refuse null community_id: Profile ARM never passed it, and accepted
+      // managed_communities then cannot back incident / community FK resolution.
+      let communityId = options.communityId || null;
+      if (!communityId) {
+        const resolved = await this.resolveCommunityIdForMember({
+          communityMemberRoleId: options.communityMemberRoleId,
+          propertyAdministratorRoleId: options.propertyAdministratorRoleId
+        });
+        if (!resolved.success || !resolved.communityId) {
+          return {
+            success: false,
+            message:
+              resolved.message ||
+              'No se pudo resolver la comunidad para la solicitud de administrador.'
+          };
+        }
+        communityId = resolved.communityId;
+        console.log('✅ ADMIN REQUEST: Resolved community_id from member property:', communityId);
+      }
+
       // CRITICAL: Create the request with assignment_type for administrator assignment requests
       const requestData = {
         community_member_id: options.communityMemberRoleId,
         property_administrator_id: options.propertyAdministratorRoleId,
-        community_id: options.communityId || null,
+        community_id: communityId,
         assignment_type: 'full_management' as const, // CRITICAL: This determines where it appears
         status: 'pending' as const,
         request_message: options.requestMessage || null,
