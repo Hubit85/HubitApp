@@ -31,18 +31,19 @@ export class PropertyAutoService {
         };
       }
 
-      // Determinar el tipo de propiedad basado en el rol del usuario
-      let propertyType = "apartment"; // por defecto
+      // Schema CHECK: properties.property_type IN ('residential', 'commercial', 'mixed')
+      // Using "apartment" silently fails the insert (CHECK violation) while registration
+      // still succeeds — users get roles but no property / community_code link.
+      let propertyType: "residential" | "commercial" | "mixed" = "residential";
       let propertyName = "";
       
       if (userData.user_type === "community_member") {
-        propertyType = "apartment";
+        propertyType = "residential";
         propertyName = userData.community_name 
           ? `${userData.community_name} - ${userData.apartment_number || 'Vivienda'}`
           : `Apartamento en ${userData.city}`;
       } else if (userData.user_type === "particular") {
-        // Para particulares, asumimos apartamento por defecto pero podría ser casa
-        propertyType = "apartment";
+        propertyType = "residential";
         propertyName = `Propiedad en ${userData.city}`;
       }
 
