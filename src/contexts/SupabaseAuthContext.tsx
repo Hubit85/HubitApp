@@ -56,11 +56,34 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Helper function to generate community code
+  // Helper function to generate community code (only when none was provided)
   const generateCommunityCode = (address: string): string => {
     const hash = address.toLowerCase().replace(/\s+/g, '').slice(0, 10);
     const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
     return `COM-${hash}-${randomNum}`.toUpperCase();
+  };
+
+  // Activate target role first, then deactivate others — never wipe active roles on partial failure.
+  const establishActiveRoleInDb = async (userId: string, roleId: string) => {
+    const { error: activateError } = await supabase
+      .from('user_roles')
+      .update({ is_active: true, updated_at: new Date().toISOString() })
+      .eq('id', roleId)
+      .eq('is_verified', true);
+
+    if (activateError) {
+      throw activateError;
+    }
+
+    const { error: deactivateError } = await supabase
+      .from('user_roles')
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq('user_id', userId)
+      .neq('id', roleId);
+
+    if (deactivateError) {
+      throw deactivateError;
+    }
   };
 
   // Helper function to extract role-specific data from user data
@@ -422,9 +445,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
                 console.log(`🔄 FALLBACK: Creating role ${i + 1}/${orderedRoles.length}: ${roleRequest.roleType} (${roleRequest.isPrimary ? 'PRIMARY' : 'ADDITIONAL'})`);
 
-                // Generate community code if needed
+                // Preserve an explicitly entered community code; only generate when missing.
                 const processedRoleData = { ...roleRequest.roleSpecificData };
-                if (roleRequest.roleType === 'community_member' && processedRoleData.address) {
+                if (
+                  roleRequest.roleType === 'community_member' &&
+                  processedRoleData.address &&
+                  !processedRoleData.community_code
+                ) {
                   processedRoleData.community_code = generateCommunityCode(processedRoleData.address);
                 }
 
@@ -513,6 +540,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                       community_name: processedRoleData.community_name || '',
                       portal_number: processedRoleData.portal_number || '',
                       apartment_number: processedRoleData.apartment_number || '',
+                      community_code: processedRoleData.community_code || (userData as any).community_code || '',
                       user_type: roleRequest.roleType
                     };
 
@@ -1264,37 +1292,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
                 
                 try {
                   console.log(`🔄 CRITICAL: Activating role: ${roleToActivate.role_type}`);
-                  
-                  // ENHANCED: More robust activation process
-                  // Step 1: Deactivate all roles first
-                  await supabase
-                    .from('user_roles')
-                    .update({ is_active: false, updated_at: new Date().toISOString() })
-                    .eq('user_id', userObject.id);
+                  await establishActiveRoleInDb(userObject.id, roleToActivate.id);
 
-                  // Step 2: Activate the selected role
-                  const { error: activateError } = await supabase
-                    .from('user_roles')
-                    .update({ is_active: true, updated_at: new Date().toISOString() })
-                    .eq('id', roleToActivate.id);
+                  const activatedRole = { ...roleToActivate, is_active: true };
+                  setActiveRole(activatedRole);
 
-                  if (!activateError) {
-                    const activatedRole = { ...roleToActivate, is_active: true };
-                    setActiveRole(activatedRole);
-                    
-                    // Update local roles state to reflect the change
-                    const updatedRoles = roles.map(r => ({
-                      ...r,
-                      is_active: r.id === roleToActivate.id
-                    }));
-                    setUserRoles(updatedRoles);
-                    
-                    console.log("✅ CRITICAL: Role activated successfully:", roleToActivate.role_type);
-                  } else {
-                    console.error("❌ CRITICAL: Role activation failed:", activateError);
-                    // Set locally anyway - better than having no active role
-                    setActiveRole(roleToActivate);
-                  }
+                  const updatedRoles = roles.map(r => ({
+                    ...r,
+                    is_active: r.id === roleToActivate.id
+                  }));
+                  setUserRoles(updatedRoles);
+
+                  console.log("✅ CRITICAL: Role activated successfully:", roleToActivate.role_type);
                 } catch (activationError) {
                   console.error("❌ CRITICAL: Role activation exception:", activationError);
                   // Set locally anyway - better than having no active role
@@ -1335,37 +1344,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
               
               try {
                 console.log(`🔄 CRITICAL: Activating role: ${roleToActivate.role_type}`);
-                
-                // ENHANCED: More robust activation process
-                // Step 1: Deactivate all roles first
-                await supabase
-                  .from('user_roles')
-                  .update({ is_active: false, updated_at: new Date().toISOString() })
-                  .eq('user_id', userObject.id);
+                await establishActiveRoleInDb(userObject.id, roleToActivate.id);
 
-                // Step 2: Activate the selected role
-                const { error: activateError } = await supabase
-                  .from('user_roles')
-                  .update({ is_active: true, updated_at: new Date().toISOString() })
-                  .eq('id', roleToActivate.id);
+                const activatedRole = { ...roleToActivate, is_active: true };
+                setActiveRole(activatedRole);
 
-                if (!activateError) {
-                  const activatedRole = { ...roleToActivate, is_active: true };
-                  setActiveRole(activatedRole);
-                  
-                  // Update local roles state to reflect the change
-                  const updatedRoles = roles.map(r => ({
-                    ...r,
-                    is_active: r.id === roleToActivate.id
-                  }));
-                  setUserRoles(updatedRoles);
-                  
-                  console.log("✅ CRITICAL: Role activated successfully:", roleToActivate.role_type);
-                } else {
-                  console.error("❌ CRITICAL: Role activation failed:", activateError);
-                  // Set locally anyway - better than having no active role
-                  setActiveRole(roleToActivate);
-                }
+                const updatedRoles = roles.map(r => ({
+                  ...r,
+                  is_active: r.id === roleToActivate.id
+                }));
+                setUserRoles(updatedRoles);
+
+                console.log("✅ CRITICAL: Role activated successfully:", roleToActivate.role_type);
               } catch (activationError) {
                 console.error("❌ CRITICAL: Role activation exception:", activationError);
                 // Set locally anyway - better than having no active role
@@ -1498,34 +1488,18 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           const roleToActivate = verifiedRoles[0];
           
           try {
-            // Deactivate all first
-            await supabase
-              .from('user_roles')
-              .update({ is_active: false, updated_at: new Date().toISOString() })
-              .eq('user_id', user.id);
+            await establishActiveRoleInDb(user.id, roleToActivate.id);
 
-            // Activate the selected role
-            const { error: activateError } = await supabase
-              .from('user_roles')
-              .update({ is_active: true, updated_at: new Date().toISOString() })
-              .eq('id', roleToActivate.id);
+            const activatedRole = { ...roleToActivate, is_active: true };
+            setActiveRole(activatedRole);
 
-            if (!activateError) {
-              const activatedRole = { ...roleToActivate, is_active: true };
-              setActiveRole(activatedRole);
-              
-              // Update local state with activated role
-              const updatedRolesWithActive = updatedRoles.map(r => ({
-                ...r,
-                is_active: r.id === roleToActivate.id
-              }));
-              setUserRoles(updatedRolesWithActive);
-              
-              console.log("✅ CRITICAL: Active role established during refresh:", roleToActivate.role_type);
-            } else {
-              console.error("❌ CRITICAL: Role activation failed during refresh:", activateError);
-              setActiveRole(roleToActivate); // Set locally anyway
-            }
+            const updatedRolesWithActive = updatedRoles.map(r => ({
+              ...r,
+              is_active: r.id === roleToActivate.id
+            }));
+            setUserRoles(updatedRolesWithActive);
+
+            console.log("✅ CRITICAL: Active role established during refresh:", roleToActivate.role_type);
           } catch (activationError) {
             console.error("❌ CRITICAL: Role activation exception during refresh:", activationError);
             setActiveRole(roleToActivate); // Set locally anyway

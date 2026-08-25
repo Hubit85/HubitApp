@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { UserRoleInsert } from "@/integrations/supabase/types";
 import { PropertyAdministratorSyncService } from "./PropertyAdministratorSyncService";
+import { PropertyAutoService } from "./PropertyAutoService";
 
 export interface AutoRoleCreationOptions {
   userId: string;
@@ -654,6 +655,32 @@ export class AutomaticRoleCreationService {
         console.warn(`⚠️ ENHANCED SINGLE ROLE: Verification error for ${roleType}:`, _verificationError);
       }
 
+      // Persist community_code onto a default property so admin assignment can discover it
+      if (roleType === 'particular' || roleType === 'community_member') {
+        try {
+          const roleDataRecord = (roleData || {}) as Record<string, any>;
+          const propertyResult = await PropertyAutoService.createDefaultProperty(userId, {
+            full_name: roleDataRecord.full_name || 'Usuario',
+            address: roleDataRecord.address || '',
+            city: roleDataRecord.city || '',
+            postal_code: roleDataRecord.postal_code || '',
+            country: roleDataRecord.country || 'España',
+            community_name: roleDataRecord.community_name || '',
+            portal_number: roleDataRecord.portal_number || '',
+            apartment_number: roleDataRecord.apartment_number || '',
+            community_code: roleDataRecord.community_code || '',
+            user_type: roleType
+          });
+          if (propertyResult.success) {
+            console.log(`✅ ENHANCED SINGLE ROLE: Default property created for ${roleType}`);
+          } else {
+            console.warn(`⚠️ ENHANCED SINGLE ROLE: Property creation skipped for ${roleType}:`, propertyResult.message);
+          }
+        } catch (propertyError) {
+          console.warn(`⚠️ ENHANCED SINGLE ROLE: Non-critical property creation error for ${roleType}:`, propertyError);
+        }
+      }
+
       return {
         success: true,
         role: newRole
@@ -1016,7 +1043,8 @@ export class AutomaticRoleCreationService {
       case 'community_member':
         return {
           ...baseData,
-          community_code: userData.community_code || this.generateCommunityCode(userData.address || ''),
+          // Keep an entered join/link code; do not invent a random orphan code
+          community_code: userData.community_code || '',
           community_name: userData.community_name || '',
           portal_number: userData.portal_number || '',
           apartment_number: userData.apartment_number || ''
