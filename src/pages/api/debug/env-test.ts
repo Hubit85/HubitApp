@@ -1,9 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import supabaseServer from '@/lib/supabaseServer';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
   }
 
   try {
@@ -16,11 +19,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('Environment check:');
     console.log('- SUPABASE_URL:', supabaseUrl ? '✅ Present' : '❌ Missing');
-    console.log('- SERVICE_KEY:', supabaseServiceKey ? `✅ Present (${supabaseServiceKey.substring(0, 20)}...)` : '❌ Missing');
+    console.log('- SERVICE_KEY:', supabaseServiceKey ? '✅ Present' : '❌ Missing');
     console.log('- RESEND_KEY:', resendKey ? '✅ Present' : '❌ Missing');
 
     // Probar conexión a Supabase
     console.log('🔗 Testing Supabase connection...');
+    const { default: supabaseServer } = await import('@/lib/supabaseServer');
     const { data: testData, error: testError } = await supabaseServer
       .from('profiles')
       .select('id')
@@ -51,9 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       environment: {
         supabaseUrl: !!supabaseUrl,
         serviceKey: !!supabaseServiceKey,
-        resendKey: !!resendKey,
-        supabaseUrlValue: supabaseUrl?.substring(0, 30) + '...',
-        serviceKeyPrefix: supabaseServiceKey?.substring(0, 20) + '...'
+        resendKey: !!resendKey
       },
       supabaseTest: {
         success: true,

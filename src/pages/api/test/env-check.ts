@@ -5,6 +5,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
   try {
     console.log('🔧 ENV CHECK: Checking all environment variables...');
     
@@ -22,7 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       hasAnonKey: !!envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       hasResendKey: !!envVars.RESEND_API_KEY,
       supabaseUrlLength: envVars.NEXT_PUBLIC_SUPABASE_URL?.length,
-      serviceKeyLength: envVars.SUPABASE_SERVICE_ROLE_KEY?.length,
       anonKeyLength: envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length,
       resendKeyValid: envVars.RESEND_API_KEY?.startsWith('re_'),
       nodeEnv: envVars.NODE_ENV
@@ -36,8 +39,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         hasAnonKey: !!envVars.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         hasResendKey: !!envVars.RESEND_API_KEY,
         resendKeyValid: envVars.RESEND_API_KEY?.startsWith('re_'),
-        supabaseUrlPreview: envVars.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 50) + '...',
-        serviceKeyPreview: envVars.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) + '...',
         nodeEnv: envVars.NODE_ENV
       }
     });

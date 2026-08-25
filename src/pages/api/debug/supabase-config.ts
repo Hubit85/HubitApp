@@ -6,6 +6,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
   try {
     // Check environment variables
     const config = {
@@ -61,8 +65,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       environment: config,
       connectionTest,
       debug: {
-        url_length: process.env.NEXT_PUBLIC_SUPABASE_URL?.length || 0,
-        service_key_prefix: process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20) || 'No disponible'
+        url_configured: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        service_key_configured: !!process.env.SUPABASE_SERVICE_ROLE_KEY
       }
     });
 
