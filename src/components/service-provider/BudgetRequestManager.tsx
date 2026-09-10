@@ -149,12 +149,13 @@ export function BudgetRequestManager() {
     try {
       console.log("🔍 Loading available budget requests...");
 
-      // Get all published requests with proper joins
+      // budget_requests.user_id has no PostgREST relationship to profiles
+      // (FK targets auth.users). Embedding profiles!budget_requests_user_id_fkey
+      // fails the entire listing with PGRST200.
       const { data: allRequests, error } = await supabase
         .from('budget_requests')
         .select(`
           *,
-          profiles!budget_requests_user_id_fkey ( * ),
           properties!budget_requests_property_id_fkey ( * )
         `)
         .eq('status', 'published')
@@ -163,6 +164,25 @@ export function BudgetRequestManager() {
       if (error) {
         console.error("❌ Error loading budget requests:", error);
         throw error;
+      }
+
+      const userIds = Array.from(
+        new Set((allRequests || []).map((request: { user_id?: string }) => request.user_id).filter((id): id is string => Boolean(id)))
+      );
+      const profilesById: Record<string, { full_name?: string | null; email?: string }> = {};
+      if (userIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', userIds);
+
+        if (profilesError) {
+          console.warn("⚠️ Failed to load requester profiles:", profilesError);
+        } else {
+          (profiles || []).forEach((profile) => {
+            profilesById[profile.id] = profile;
+          });
+        }
       }
 
       console.log("✅ Budget requests loaded successfully:", {
@@ -175,9 +195,7 @@ export function BudgetRequestManager() {
 
       // Transform data to match ExtendedBudgetRequest interface
       const extendedRequests: ExtendedBudgetRequest[] = (allRequests || []).map(request => {
-        // Safe access to profiles data
-        const profileData = request.profiles && typeof request.profiles === 'object' && !Array.isArray(request.profiles) 
-          ? request.profiles as any : null;
+        const profileData = profilesById[request.user_id] || null;
         
         // Safe access to properties data
         const propertyData = request.properties && typeof request.properties === 'object' && !Array.isArray(request.properties)
@@ -219,12 +237,10 @@ export function BudgetRequestManager() {
             description,
             status,
             category,
+            user_id,
             properties (
               name,
               address
-            ),
-            profiles (
-              full_name
             )
           )
         `)
@@ -236,15 +252,52 @@ export function BudgetRequestManager() {
         throw error;
       }
 
+      const quoteUserIds = Array.from(
+        new Set(
+          (data || [])
+            .map((quote: any) => quote.budget_requests?.user_id)
+            .filter((id: unknown): id is string => typeof id === 'string' && id.length > 0)
+        )
+      );
+      const quoteProfilesById: Record<string, { full_name?: string | null }> = {};
+      if (quoteUserIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', quoteUserIds);
+
+        if (profilesError) {
+          console.warn("⚠️ Failed to load quote client profiles:", profilesError);
+        } else {
+          (profiles || []).forEach((profile) => {
+            quoteProfilesById[profile.id] = profile;
+          });
+        }
+      }
+
+      const quotesWithProfiles = (data || []).map((quote: any) => {
+        const requestUserId = quote.budget_requests?.user_id;
+        if (!quote.budget_requests) {
+          return quote;
+        }
+        return {
+          ...quote,
+          budget_requests: {
+            ...quote.budget_requests,
+            profiles: requestUserId ? quoteProfilesById[requestUserId] || null : null
+          }
+        };
+      });
+
       console.log("✅ Quotes loaded successfully:", {
-        total_quotes: data?.length || 0,
-        by_status: data?.reduce((acc: any, quote) => {
+        total_quotes: quotesWithProfiles.length,
+        by_status: quotesWithProfiles.reduce((acc: any, quote) => {
           acc[quote.status || 'unknown'] = (acc[quote.status || 'unknown'] || 0) + 1;
           return acc;
         }, {}) || {}
       });
 
-      return { success: true, data: data || [] };
+      return { success: true, data: quotesWithProfiles };
 
     } catch (error) {
       console.error("❌ Error loading my quotes:", error);
