@@ -217,9 +217,6 @@ export function ContractManager() {
         .from('contracts')
         .select(`
           *,
-          profiles (
-            full_name
-          ),
           quotes (
             description,
             budget_requests (
@@ -238,9 +235,28 @@ export function ContractManager() {
         throw error;
       }
 
+      const clientIds = Array.from(
+        new Set((data || []).map((contract: { user_id?: string }) => contract.user_id).filter((id): id is string => Boolean(id)))
+      );
+      const clientsById: Record<string, { full_name?: string | null }> = {};
+      if (clientIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', clientIds);
+
+        if (profilesError) {
+          console.warn("⚠️ Failed to load contract client profiles:", profilesError);
+        } else {
+          (profiles || []).forEach((profile) => {
+            clientsById[profile.id] = profile;
+          });
+        }
+      }
+
       const enhancedContracts = (data || []).map((contract: any) => ({
         ...contract,
-        client_name: contract.profiles?.full_name || 'Cliente',
+        client_name: clientsById[contract.user_id]?.full_name || 'Cliente',
         quote_title: contract.quotes?.budget_requests?.title || 'Servicio',
         budget_title: contract.quotes?.budget_requests?.title || '',
         property_address: contract.quotes?.budget_requests?.properties?.address || ''
@@ -280,9 +296,6 @@ export function ContractManager() {
             user_id,
             properties (
               address
-            ),
-            profiles (
-              full_name
             )
           )
         `)
@@ -295,18 +308,51 @@ export function ContractManager() {
         return;
       }
 
+      const quoteUserIds = Array.from(
+        new Set(
+          (data || [])
+            .map((quote: any) => quote.budget_requests?.user_id)
+            .filter((id: unknown): id is string => typeof id === 'string' && id.length > 0)
+        )
+      );
+      const quoteProfilesById: Record<string, { full_name?: string | null }> = {};
+      if (quoteUserIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', quoteUserIds);
+
+        if (profilesError) {
+          console.warn("⚠️ Failed to load accepted-quote client profiles:", profilesError);
+        } else {
+          (profiles || []).forEach((profile) => {
+            quoteProfilesById[profile.id] = profile;
+          });
+        }
+      }
+
       const transformedQuotes: ExtendedQuote[] = (data || [])
         .filter((quote: any) => {
           // Filter out quotes that already have contracts
           return !contracts.some(contract => contract.quote_id === quote.id);
         })
-        .map((quote: any) => ({
-          ...quote,
-          user_id: quote.budget_requests?.user_id || quote.user_id,
-          title: quote.budget_requests?.title || 'Servicio sin título',
-          description: quote.description || quote.budget_requests?.description || 'Sin descripción',
-          budget_requests: quote.budget_requests
-        }));
+        .map((quote: any) => {
+          const requestUserId = quote.budget_requests?.user_id;
+          const budgetRequests = quote.budget_requests
+            ? {
+                ...quote.budget_requests,
+                profiles: requestUserId ? quoteProfilesById[requestUserId] || null : null
+              }
+            : quote.budget_requests;
+
+          return {
+            ...quote,
+            user_id: requestUserId || quote.user_id,
+            title: quote.budget_requests?.title || 'Servicio sin título',
+            description: quote.description || quote.budget_requests?.description || 'Sin descripción',
+            budget_requests: budgetRequests
+          };
+        });
 
       setAvailableQuotes(transformedQuotes);
       console.log("✅ Available quotes loaded:", transformedQuotes.length);
