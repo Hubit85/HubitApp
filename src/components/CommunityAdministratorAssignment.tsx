@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import { UserPlus, Building, Mail, Phone, Search, Loader2, MapPin, Star, Clock, CheckCircle, X, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AdministratorRequestService } from "@/services/AdministratorRequestService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
@@ -177,49 +178,26 @@ export function CommunityAdministratorAssignment() {
       setLoading(true);
       console.log("🔍 [ADMIN-SEARCH] Buscando TODOS los administradores de fincas disponibles...");
 
-      // FIXED: Query property administrators directly from user_roles table
-      const baseQuery = supabase
-        .from("user_roles")
-        .select(`
-          id,
-          user_id,
-          role_specific_data,
-          is_verified,
-          is_active,
-          created_at,
-          profiles!user_roles_user_id_fkey (
-            id,
-            full_name,
-            email,
-            phone,
-            city,
-            address
-          )
-        `)
-        .eq("role_type", "property_administrator")
-        .eq("is_verified", true)
-        .order("created_at", { ascending: false });
+      const { success, administrators: propertyAdministrators, message } =
+        await AdministratorRequestService.loadVerifiedPropertyAdministratorsWithProfiles();
 
-      const { data: propertyAdministrators, error: adminError } = await baseQuery;
-      
-      if (adminError) {
-        console.error("❌ [ADMIN-SEARCH] Error fetching property administrators:", adminError);
-        throw adminError;
+      if (!success) {
+        console.error("❌ [ADMIN-SEARCH] Error fetching property administrators:", message);
+        throw new Error(message || "Error al cargar administradores");
       }
 
-      console.log(`📊 [ADMIN-SEARCH] Found ${propertyAdministrators?.length || 0} verified property administrators`);
+      console.log(`📊 [ADMIN-SEARCH] Found ${propertyAdministrators.length} verified property administrators`);
 
-      if (!propertyAdministrators || propertyAdministrators.length === 0) {
+      if (propertyAdministrators.length === 0) {
         console.log("⚠️ [ADMIN-SEARCH] No verified property administrators found");
         setAvailableAdmins([]);
         return;
       }
 
-      // ENHANCED: Transform user_roles data to ServiceProviderWithProfile format for compatibility
+      // Transform user_roles data to ServiceProviderWithProfile format for compatibility
       const transformedAdmins: ServiceProviderWithProfile[] = propertyAdministrators
-        .filter(admin => admin.profiles) // Only include admins with profile data
         .map((admin, index) => {
-          const profileData = admin.profiles as any;
+          const profileData = admin.profiles;
           const roleData = admin.role_specific_data as any || {};
           
           console.log(`👤 [ADMIN-SEARCH] Processing admin ${index + 1}:`, {

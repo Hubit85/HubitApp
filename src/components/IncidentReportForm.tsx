@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import PropertySelector from "@/components/PropertySelector";
 import type { Property } from "@/integrations/supabase/types";
+import { AdministratorRequestService } from "@/services/AdministratorRequestService";
 
 // Service categories matching those in register.tsx
 const SERVICE_CATEGORIES = [
@@ -140,38 +141,30 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       }
 
       if (assignment) {
-        // Find the full administrator details
-        const { data: adminRole, error: adminError } = await supabase
-          .from('user_roles')
-          .select(`
-            user_id,
-            profiles!user_roles_user_id_fkey(full_name, email)
-          `)
-          .eq('role_type', 'property_administrator')
-          .eq('is_verified', true);
+        const { success, administrators, message } =
+          await AdministratorRequestService.loadVerifiedPropertyAdministratorsWithProfiles();
 
-        if (adminError) {
-          console.warn('Error loading administrator details:', adminError);
+        if (!success) {
+          console.warn('Error loading administrator details:', message);
           return;
         }
 
-        // Find matching administrator by company details
-        if (adminRole) {
-          const matchingAdmin = adminRole.find(admin => 
-            admin.profiles && 
-            typeof admin.profiles === 'object' && 
-            !Array.isArray(admin.profiles) &&
-            (admin.profiles as any).email === assignment.contact_email
+        const matchingAdmin = administrators.find((admin) => {
+          const roleData = (admin.role_specific_data as any) || {};
+          const profileEmail = admin.profiles?.email;
+          return (
+            roleData.business_email === assignment.contact_email ||
+            profileEmail === assignment.contact_email
           );
+        });
 
-          if (matchingAdmin) {
-            setAssignedAdministrator({
-              id: assignment.id,
-              user_id: matchingAdmin.user_id,
-              company_name: assignment.company_name,
-              contact_email: profile?.email ?? ''
-            });
-          }
+        if (matchingAdmin) {
+          setAssignedAdministrator({
+            id: assignment.id,
+            user_id: matchingAdmin.user_id,
+            company_name: assignment.company_name,
+            contact_email: profile?.email ?? ''
+          });
         }
       }
     } catch (err) {
@@ -186,41 +179,18 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
       setLoading(true);
       console.log("🔍 [INCIDENT-ADMIN-SEARCH] Searching for ALL available property administrators...");
 
-      // FIXED: Query property administrators directly from user_roles table
-      // This is the EXACT query that works in CommunityAdministratorAssignment.tsx
-      const baseQuery = supabase
-        .from("user_roles")
-        .select(`
-          id,
-          user_id,
-          role_specific_data,
-          is_verified,
-          is_active,
-          created_at,
-          profiles!user_roles_user_id_fkey (
-            id,
-            full_name,
-            email,
-            phone,
-            city,
-            address
-          )
-        `)
-        .eq("role_type", "property_administrator")
-        .eq("is_verified", true)
-        .order("created_at", { ascending: false });
+      const { success, administrators: propertyAdministrators, message } =
+        await AdministratorRequestService.loadVerifiedPropertyAdministratorsWithProfiles();
 
-      const { data: propertyAdministrators, error: adminError } = await baseQuery;
-      
-      if (adminError) {
-        console.error("❌ [INCIDENT-ADMIN-SEARCH] Error fetching property administrators:", adminError);
-        setError(`Error al cargar administradores: ${adminError.message}`);
+      if (!success) {
+        console.error("❌ [INCIDENT-ADMIN-SEARCH] Error fetching property administrators:", message);
+        setError(`Error al cargar administradores: ${message || 'Error desconocido'}`);
         return;
       }
 
-      console.log(`📊 [INCIDENT-ADMIN-SEARCH] Found ${propertyAdministrators?.length || 0} verified property administrators`);
+      console.log(`📊 [INCIDENT-ADMIN-SEARCH] Found ${propertyAdministrators.length} verified property administrators`);
 
-      if (!propertyAdministrators || propertyAdministrators.length === 0) {
+      if (propertyAdministrators.length === 0) {
         console.log("⚠️ [INCIDENT-ADMIN-SEARCH] No verified property administrators found");
         setError("No se encontraron administradores de fincas verificados en la plataforma. Por favor, contacta con soporte.");
         setPropertyAdministrators([]);
@@ -229,9 +199,8 @@ export function IncidentReportForm({ onSuccess, onCancel }: IncidentReportFormPr
 
       // Transform user_roles data to PropertyAdministrator format
       const transformedAdmins: PropertyAdministrator[] = propertyAdministrators
-        .filter(admin => admin.profiles) // Only include admins with profile data
         .map((admin, index) => {
-          const profileData = admin.profiles as any;
+          const profileData = admin.profiles;
           const roleData = admin.role_specific_data as any || {};
           
           console.log(`👤 [INCIDENT-ADMIN-SEARCH] Processing admin ${index + 1}:`, {
