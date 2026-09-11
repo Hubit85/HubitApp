@@ -137,6 +137,90 @@ export class AdministratorRequestService {
     }
   }
 
+  /**
+   * Load verified property administrators without embedding profiles.
+   * user_roles has no FK to profiles (generated Relationships: []), so
+   * `profiles!user_roles_user_id_fkey` is rejected by PostgREST (PGRST200)
+   * and empties the live admin picker / incident assignment list.
+   */
+  static async loadVerifiedPropertyAdministratorsWithProfiles(): Promise<{
+    success: boolean;
+    administrators: Array<{
+      id: string;
+      user_id: string;
+      role_specific_data: any;
+      is_verified: boolean | null;
+      is_active: boolean | null;
+      created_at: string | null;
+      profiles: {
+        id: string;
+        full_name: string | null;
+        email: string;
+        phone: string | null;
+        city: string | null;
+        address: string | null;
+      } | null;
+    }>;
+    message?: string;
+  }> {
+    try {
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('id, user_id, role_specific_data, is_verified, is_active, created_at')
+        .eq('role_type', 'property_administrator')
+        .eq('is_verified', true)
+        .order('created_at', { ascending: false });
+
+      if (rolesError) {
+        console.error('❌ ADMIN LOOKUP: Error loading user_roles:', rolesError);
+        return { success: false, administrators: [], message: rolesError.message };
+      }
+
+      const administratorRoles = roles || [];
+      const userIds = Array.from(new Set(administratorRoles.map((role) => role.user_id).filter(Boolean)));
+
+      const profilesById = new Map<string, {
+        id: string;
+        full_name: string | null;
+        email: string;
+        phone: string | null;
+        city: string | null;
+        address: string | null;
+      }>();
+
+      if (userIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, phone, city, address')
+          .in('id', userIds);
+
+        if (profilesError) {
+          // Do not fail the listing if names cannot be loaded.
+          console.warn('❌ ADMIN LOOKUP: Error loading profiles:', profilesError.message);
+        } else {
+          for (const profile of profiles || []) {
+            profilesById.set(profile.id, profile);
+          }
+        }
+      }
+
+      return {
+        success: true,
+        administrators: administratorRoles.map((role) => ({
+          ...role,
+          profiles: profilesById.get(role.user_id) ?? null,
+        })),
+      };
+    } catch (error) {
+      console.error('❌ ADMIN LOOKUP: Exception loading administrators:', error);
+      return {
+        success: false,
+        administrators: [],
+        message: error instanceof Error ? error.message : 'Error inesperado al cargar administradores',
+      };
+    }
+  }
+
   static async getCommunityById(communityId: string): Promise<{
     id: string;
     name: string;
