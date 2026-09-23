@@ -63,6 +63,7 @@ export default function PropertyManager() {
   const [generatingCode, setGeneratingCode] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [savingProperty, setSavingProperty] = useState(false);
+  const [failedPhotoIds, setFailedPhotoIds] = useState<Record<string, true>>({});
   
   const [showSelectionPopup, setShowSelectionPopup] = useState(false);
   const [popupProperty, setPopupProperty] = useState<ExtendedProperty | null>(null);
@@ -612,7 +613,7 @@ export default function PropertyManager() {
                     className="relative h-80 bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 overflow-hidden group cursor-pointer" 
                     onClick={() => handleSelectProperty(prop)}
                   >
-                    {prop.property_photo_url ? (
+                    {prop.property_photo_url && prop.id && !failedPhotoIds[prop.id] ? (
                       <>
                         {/* Enhanced Professional Main Property Image Display */}
                         <img 
@@ -622,25 +623,12 @@ export default function PropertyManager() {
                           style={{
                             filter: 'contrast(1.05) saturate(1.1)'
                           }}
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent) {
-                              parent.innerHTML = `
-                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200">
-                                  <div class="text-center">
-                                    <div class="w-24 h-24 bg-gradient-to-br from-slate-300 to-slate-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                                      <svg class="h-12 w-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4 4L19 7"></path>
-                                      </svg>
-                                    </div>
-                                    <p class="text-slate-500 text-lg font-bold mb-2">Imagen no disponible</p>
-                                    <p class="text-slate-400 text-sm">No se pudo cargar la fotografía</p>
-                                  </div>
-                                </div>
-                              `;
-                            }
+                          onError={() => {
+                            const photoId = prop.id;
+                            if (!photoId) return;
+                            setFailedPhotoIds((prev) => (
+                              prev[photoId] ? prev : { ...prev, [photoId]: true }
+                            ));
                           }}
                         />
                         
@@ -675,6 +663,13 @@ export default function PropertyManager() {
                         {/* Professional Photo Frame Effect */}
                         <div className="absolute inset-3 border-2 border-white/20 rounded-lg opacity-0 group-hover:opacity-60 transition-all duration-700 pointer-events-none"></div>
                       </>
+                    ) : prop.property_photo_url && prop.id && failedPhotoIds[prop.id] ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200">
+                        <div className="text-center px-6">
+                          <p className="text-slate-500 text-lg font-bold mb-2">Imagen no disponible</p>
+                          <p className="text-slate-400 text-sm">No se pudo cargar la fotografía</p>
+                        </div>
+                      </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-white to-slate-100 group-hover:from-slate-200 group-hover:via-slate-100 group-hover:to-slate-200 transition-all duration-700 relative overflow-hidden">
                         {/* Sophisticated Pattern Background */}
