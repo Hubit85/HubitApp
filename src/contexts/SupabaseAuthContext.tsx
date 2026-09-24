@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Profile, ProfileInsert, UserRoleInsert } from "@/integrations/supabase/types";
 import { SupabaseUserRoleService, UserRole } from "@/services/SupabaseUserRoleService";
 import { PropertyAutoService, UserPropertyData } from "@/services/PropertyAutoService";
+import { buildRegistrationProfileInsert } from "@/lib/registrationProfile";
 
 interface AuthContextType {
   user: User | null;
@@ -212,12 +213,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
           // BULLETPROOF PROFILE AND ROLE CREATION WITH ENHANCED TRANSACTION SAFETY
           console.log("🔄 PHASE 1: Creating profile with enhanced transaction safety...");
           
-          // Create profile first with enhanced error handling
-          const profileData: ProfileInsert = {
-            id: data.user.id,
-            email: email, // Use guaranteed email parameter
-            ...userData,
-          };
+          // Solo columnas de profiles. additionalRoles y community_code no existen
+          // en la tabla y PostgREST rechaza el insert (PGRST204) antes de crear roles.
+          const profileData: ProfileInsert = buildRegistrationProfileInsert(
+            data.user.id,
+            email,
+            userData
+          );
 
           // BULLETPROOF: Try profile creation with retry logic
           let profileCreated = false;
@@ -237,6 +239,23 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
 
               if (profileError) {
                 console.error(`❌ Profile creation attempt ${profileCreationAttempts} failed:`, profileError);
+
+                // El trigger handle_new_user ya insertó la fila al crear auth.users.
+                if (profileError.code === "23505") {
+                  const { id: _existingProfileId, ...profileUpdates } = profileData;
+                  const { error: updateError } = await supabase
+                    .from("profiles")
+                    .update(profileUpdates)
+                    .eq("id", data.user.id);
+
+                  if (!updateError) {
+                    console.log("✅ Profile already existed; registration fields saved");
+                    profileCreated = true;
+                    continue;
+                  }
+
+                  console.error("❌ Profile update after id conflict failed:", updateError);
+                }
                 
                 if (profileCreationAttempts === maxProfileAttempts) {
                   throw new Error(`Profile creation failed after ${maxProfileAttempts} attempts: ${profileError.message}`);
