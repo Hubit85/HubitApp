@@ -60,13 +60,13 @@ export function AdministratorRequestManager({ userRole }: AdministratorRequestMa
   }, [activeRole]);
 
   const loadReceivedRequests = useCallback(async () => {
-    if (!activeRole) return;
+    if (!user) return;
     
-    const result = await AdministratorRequestService.getReceivedRequests(activeRole.id);
+    const result = await AdministratorRequestService.getReceivedRequests(user.id);
     if (result.success) {
       setReceivedRequests(result.requests);
     }
-  }, [activeRole]);
+  }, [user]);
 
   const loadManagedMembers = useCallback(async () => {
     if (!activeRole) return;
