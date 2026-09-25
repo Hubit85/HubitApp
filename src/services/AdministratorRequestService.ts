@@ -1,5 +1,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import {
+  selectAdministratorProfileId,
+  selectAdministratorRoleId,
+} from "@/lib/administratorRequestIds";
 
 export interface CommunityMemberRequest {
   id: string;
@@ -77,6 +81,61 @@ export interface ManagedCommunity {
 }
 
 export class AdministratorRequestService {
+
+  static async resolveAdministratorProfileId(candidateId: string): Promise<string | null> {
+    if (!candidateId) return null;
+
+    const { data: role } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('id', candidateId)
+      .eq('role_type', 'property_administrator')
+      .maybeSingle();
+
+    const { data: administrator } = await supabase
+      .from('property_administrators')
+      .select('user_id')
+      .eq('id', candidateId)
+      .maybeSingle();
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', candidateId)
+      .maybeSingle();
+
+    return selectAdministratorProfileId({
+      roleUserId: role?.user_id ?? null,
+      propertyAdministratorUserId: administrator?.user_id ?? null,
+      profileId: profile?.id ?? null,
+    });
+  }
+
+  static async resolveAdministratorRoleId(candidateId: string): Promise<string | null> {
+    if (!candidateId) return null;
+
+    const { data: roleById } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('id', candidateId)
+      .eq('role_type', 'property_administrator')
+      .maybeSingle();
+
+    const profileId = await this.resolveAdministratorProfileId(candidateId);
+    const { data: roleByUser } = profileId
+      ? await supabase
+          .from('user_roles')
+          .select('id')
+          .eq('user_id', profileId)
+          .eq('role_type', 'property_administrator')
+          .maybeSingle()
+      : { data: null };
+
+    return selectAdministratorRoleId({
+      roleIdByPrimaryKey: roleById?.id ?? null,
+      roleIdByUserId: roleByUser?.id ?? null,
+    });
+  }
   
   // Make these methods public so they can be used from NotificationCenter
   static async getRoleAndProfile(roleId: string): Promise<{
@@ -93,14 +152,29 @@ export class AdministratorRequestService {
     if (!roleId) return null;
     
     try {
-      const { data: role, error: roleError } = await supabase
+      const { data: roleById, error: roleError } = await supabase
         .from('user_roles')
         .select('id, user_id, role_specific_data')
         .eq('id', roleId)
-        .single();
+        .maybeSingle();
 
-      if (roleError || !role) {
-        console.warn(`Could not fetch role for roleId ${roleId}:`, roleError?.message);
+      let role = roleById;
+
+      if (!role) {
+        const { data: adminRole } = await supabase
+          .from('user_roles')
+          .select('id, user_id, role_specific_data')
+          .eq('user_id', roleId)
+          .eq('role_type', 'property_administrator')
+          .maybeSingle();
+        role = adminRole;
+      }
+
+      if (roleError && roleError.code !== 'PGRST116') {
+        console.warn(`Could not fetch role for roleId ${roleId}:`, roleError.message);
+      }
+
+      if (!role) {
         return null;
       }
 
@@ -330,12 +404,23 @@ export class AdministratorRequestService {
         hasMessage: !!options.requestMessage
       });
 
+      const propertyAdministratorProfileId = await this.resolveAdministratorProfileId(
+        options.propertyAdministratorRoleId
+      );
+
+      if (!propertyAdministratorProfileId) {
+        return {
+          success: false,
+          message: 'No se pudo identificar el perfil del administrador. La solicitud no se ha enviado.',
+        };
+      }
+
       // Check if request already exists
       const { data: existingRequest } = await supabase
         .from('administrator_requests')
         .select('id, status')
         .eq('community_member_id', options.communityMemberRoleId)
-        .eq('property_administrator_id', options.propertyAdministratorRoleId)
+        .eq('property_administrator_id', propertyAdministratorProfileId)
         .eq('status', 'pending')
         .maybeSingle();
 
@@ -347,7 +432,7 @@ export class AdministratorRequestService {
       // CRITICAL: Create the request with assignment_type for administrator assignment requests
       const requestData = {
         community_member_id: options.communityMemberRoleId,
-        property_administrator_id: options.propertyAdministratorRoleId,
+        property_administrator_id: propertyAdministratorProfileId,
         community_id: options.communityId || null,
         assignment_type: 'full_management' as const, // CRITICAL: This determines where it appears
         status: 'pending' as const,
@@ -403,9 +488,9 @@ export class AdministratorRequestService {
       const { data: adminRoleData, error: adminRoleError } = await supabase
         .from('user_roles')
         .select('user_id, role_specific_data')
-        .eq('id', options.propertyAdministratorRoleId)
+        .eq('user_id', propertyAdministratorProfileId)
         .eq('role_type', 'property_administrator')
-        .single();
+        .maybeSingle();
 
       if (adminRoleError || !adminRoleData) {
         console.error('❌ NOTIFICATION: Could not find administrator role:', adminRoleError);
@@ -491,7 +576,7 @@ export class AdministratorRequestService {
       const { data: testQuery, error: testError } = await supabase
         .from('administrator_requests')
         .select('id, assignment_type, status')
-        .eq('property_administrator_id', options.propertyAdministratorRoleId)
+        .eq('property_administrator_id', propertyAdministratorProfileId)
         .not('assignment_type', 'is', null); // Same query as NotificationCenter
 
       console.log('🔍 FINAL CHECK: Query result:', testQuery);
@@ -539,6 +624,39 @@ export class AdministratorRequestService {
         return { success: false, message: 'No se pudo encontrar la solicitud' };
       }
 
+      // managed_communities.property_administrator_id references user_roles.id, while
+      // the request stores profiles.id. Create the relationship before accepting so a
+      // failed link does not leave the request accepted.
+      if (options.response === 'accepted') {
+        console.log('🔗 MANAGEMENT: Creating relationship...');
+
+        const propertyAdministratorRoleId = await this.resolveAdministratorRoleId(
+          originalRequest.property_administrator_id
+        );
+
+        if (!propertyAdministratorRoleId) {
+          return {
+            success: false,
+            message: 'No se encontró el rol de administrador. La solicitud sigue pendiente.',
+          };
+        }
+
+        const relationship = await this.createManagementRelationship({
+          propertyAdministratorRoleId,
+          communityMemberRoleId: originalRequest.community_member_id,
+          communityId: originalRequest.community_id ?? undefined,
+          establishedBy: options.respondedBy,
+          notes: `Relación establecida tras aceptar solicitud del ${new Date().toLocaleDateString()}`
+        });
+
+        if (!relationship.success) {
+          return {
+            success: false,
+            message: relationship.message || 'No se pudo crear la relación de gestión. La solicitud sigue pendiente.',
+          };
+        }
+      }
+
       // Update the request status
       const { error: updateError } = await supabase
         .from('administrator_requests')
@@ -557,19 +675,6 @@ export class AdministratorRequestService {
       }
 
       console.log('✅ ADMIN REQUEST: Request updated successfully');
-
-      // If accepted, create management relationship
-      if (options.response === 'accepted') {
-        console.log('🔗 MANAGEMENT: Creating relationship...');
-        
-        await this.createManagementRelationship({
-          propertyAdministratorRoleId: originalRequest.property_administrator_id,
-          communityMemberRoleId: originalRequest.community_member_id,
-          communityId: originalRequest.community_id ?? undefined,
-          establishedBy: options.respondedBy,
-          notes: `Relación establecida tras aceptar solicitud del ${new Date().toLocaleDateString()}`
-        });
-      }
       
       // Send notification to community member
       console.log('📧 NOTIFICATION: Sending response notification to member...');

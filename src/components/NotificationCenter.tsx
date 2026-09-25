@@ -134,7 +134,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
   };
 
   const loadAssignmentRequests = async () => {
-    if (!activeRole || activeRole.role_type !== "property_administrator") return;
+    if (!user || !activeRole || activeRole.role_type !== "property_administrator") return;
 
     try {
       console.log("🔍 NOTIFICATIONS: Loading assignment requests for administrator:", activeRole.id);
@@ -144,7 +144,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       const { data: allRequests, error: allError } = await supabase
         .from('administrator_requests')
         .select('id, assignment_type, status, requested_at, community_member_id')
-        .eq('property_administrator_id', activeRole.id)
+        .eq('property_administrator_id', user.id)
         .order('requested_at', { ascending: false });
 
       if (allError) {
@@ -173,7 +173,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       const { data: assignmentRequests, error } = await supabase
         .from('administrator_requests')
         .select('*')
-        .eq('property_administrator_id', activeRole.id)
+        .eq('property_administrator_id', user.id)
         .not('assignment_type', 'is', null) // Only requests with assignment_type
         .order('requested_at', { ascending: false });
 
@@ -317,7 +317,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
   };
 
   const loadAdministratorRequests = async () => {
-    if (!activeRole || activeRole.role_type !== 'property_administrator') return;
+    if (!user || !activeRole || activeRole.role_type !== 'property_administrator') return;
 
     try {
       console.log('🔍 NOTIFICATIONS: Loading management requests for role:', activeRole.id);
@@ -327,7 +327,7 @@ export function NotificationCenter({ userRole = "particular" }: NotificationCent
       const { data: managementRequests, error } = await supabase
         .from('administrator_requests')
         .select('*')
-        .eq('property_administrator_id', activeRole.id)
+        .eq('property_administrator_id', user.id)
         .is('assignment_type', null) // Only requests without assignment_type
         .order('requested_at', { ascending: false });
 
