@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Building, Trash2, Edit, Upload, Camera, Code, Save, RefreshCw, CheckCircle, X } from "lucide-react";
 import { CommunityCodeService } from "@/services/CommunityCodeService";
 import { Database } from "@/integrations/supabase/database.types";
+import { resolveStoredPropertyAddress } from "@/lib/propertyAddress";
 
 // Define types from database
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -383,12 +384,24 @@ export default function PropertyManager() {
     setError("");
 
     try {
+      const originalProperty = isEditing
+        ? properties.find((property) => property.id === currentProperty.id)
+        : undefined;
+      const address = resolveStoredPropertyAddress({
+        street: currentProperty.street,
+        number: currentProperty.number,
+        existingAddress: originalProperty?.address ?? currentProperty.address,
+        originalStreet: originalProperty?.street,
+        originalNumber: originalProperty?.number,
+      });
+
       if (isEditing && currentProperty.id) {
         // Para actualizar, incluir TODOS los campos nuevos
         const updateData: Partial<Property> = {
           name: currentProperty.name || '',
-          // Mantener tanto address como los campos separados para compatibilidad
-          address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
+          // Mantener tanto address como los campos separados para compatibilidad.
+          // Si la propiedad solo tiene address (alta desde incidencias), no borrarla.
+          address,
           street: currentProperty.street || null,
           number: currentProperty.number || null,
           floor: currentProperty.floor || null,
@@ -416,7 +429,7 @@ export default function PropertyManager() {
         const insertData: PropertyInsert = {
           user_id: user.id,
           name: currentProperty.name || 'Nueva Propiedad',
-          address: `${currentProperty.street || ''} ${currentProperty.number || ''}`.trim(),
+          address,
           street: currentProperty.street || null,
           number: currentProperty.number || null,
           floor: currentProperty.floor || null,
