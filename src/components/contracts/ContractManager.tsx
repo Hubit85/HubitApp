@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
+import { quoteIdsWithoutContract, resolveContractAudience } from "@/lib/contractAccess";
 
 type Contract = Database["public"]["Tables"]["contracts"]["Row"];
 type Quote = Database["public"]["Tables"]["quotes"]["Row"];
@@ -68,7 +69,7 @@ interface ContractFormData {
 }
 
 export function ContractManager() {
-  const { user } = useSupabaseAuth();
+  const { user, activeRole, userRoles, profile, loading: authLoading } = useSupabaseAuth();
   const { toast } = useToast();
   const [contracts, setContracts] = useState<ExtendedContract[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +82,11 @@ export function ContractManager() {
   const [currentTab, setCurrentTab] = useState("my-contracts");
   const [availableQuotes, setAvailableQuotes] = useState<ExtendedQuote[]>([]);
   const [selectedQuote, setSelectedQuote] = useState<ExtendedQuote | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const contractAudience = resolveContractAudience(
+    activeRole?.role_type,
+    userRoles.filter((role) => role.is_verified).map((role) => role.role_type),
+    profile?.user_type
+  );
 
   const [contractForm, setContractForm] = useState<ContractFormData>({
     title: "",
@@ -99,35 +104,35 @@ export function ContractManager() {
   };
 
   useEffect(() => {
-    if (user) {
-      loadUserRole();
-      loadContractsData();
+    if (authLoading || !user?.id || !contractAudience) return;
+    void loadContractsData();
+    // loadContractsData lee contractAudience del render que dispara el efecto.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user?.id, contractAudience]);
+
+  const loadProfileNames = async (userIds: string[]): Promise<Record<string, string>> => {
+    const uniqueIds = Array.from(new Set(userIds.filter(Boolean)));
+    if (uniqueIds.length === 0) return {};
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', uniqueIds);
+
+    if (error) {
+      console.warn("⚠️ Failed to load profile names:", error);
+      return {};
     }
-  }, [user]);
 
-  const loadUserRole = async () => {
-    if (!user?.id) return;
-
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', user.id)
-        .single();
-
-      if (error) {
-        console.error("Error loading user profile:", error);
-        return;
-      }
-
-      setUserRole(profile?.user_type || 'particular');
-    } catch (err) {
-      console.error("Error loading user role:", err);
-    }
+    const names: Record<string, string> = {};
+    (data || []).forEach((row) => {
+      if (row.full_name) names[row.id] = row.full_name;
+    });
+    return names;
   };
 
   const loadContractsData = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !contractAudience) return;
 
     try {
       setLoading(true);
@@ -135,7 +140,7 @@ export function ContractManager() {
 
       console.log("🔍 Loading contracts data for user:", user.id.substring(0, 8) + '...');
 
-      if (userRole === 'service_provider') {
+      if (contractAudience === 'provider') {
         await Promise.all([
           loadProviderContracts(),
           loadAvailableQuotes()
@@ -217,9 +222,6 @@ export function ContractManager() {
         .from('contracts')
         .select(`
           *,
-          profiles (
-            full_name
-          ),
           quotes (
             description,
             budget_requests (
@@ -238,9 +240,12 @@ export function ContractManager() {
         throw error;
       }
 
+      // contracts.user_id apunta a auth.users, no hay relación PostgREST con profiles.
+      const clientNames = await loadProfileNames((data || []).map((contract) => contract.user_id));
+
       const enhancedContracts = (data || []).map((contract: any) => ({
         ...contract,
-        client_name: contract.profiles?.full_name || 'Cliente',
+        client_name: clientNames[contract.user_id] || 'Cliente',
         quote_title: contract.quotes?.budget_requests?.title || 'Servicio',
         budget_title: contract.quotes?.budget_requests?.title || '',
         property_address: contract.quotes?.budget_requests?.properties?.address || ''
@@ -280,9 +285,6 @@ export function ContractManager() {
             user_id,
             properties (
               address
-            ),
-            profiles (
-              full_name
             )
           )
         `)
@@ -295,18 +297,48 @@ export function ContractManager() {
         return;
       }
 
-      const transformedQuotes: ExtendedQuote[] = (data || [])
-        .filter((quote: any) => {
-          // Filter out quotes that already have contracts
-          return !contracts.some(contract => contract.quote_id === quote.id);
-        })
-        .map((quote: any) => ({
-          ...quote,
-          user_id: quote.budget_requests?.user_id || quote.user_id,
-          title: quote.budget_requests?.title || 'Servicio sin título',
-          description: quote.description || quote.budget_requests?.description || 'Sin descripción',
-          budget_requests: quote.budget_requests
-        }));
+      const quoteIds = (data || []).map((quote) => quote.id);
+      let contractedQuoteIds = new Set<string>();
+      if (quoteIds.length > 0) {
+        const { data: existingContracts, error: existingError } = await supabase
+          .from('contracts')
+          .select('quote_id')
+          .in('quote_id', quoteIds);
+
+        if (existingError) {
+          console.error("❌ Error checking existing contracts:", existingError);
+          setAvailableQuotes([]);
+          return;
+        }
+
+        contractedQuoteIds = new Set(
+          (existingContracts || []).map((contract) => contract.quote_id).filter(Boolean) as string[]
+        );
+      }
+
+      const openQuotes = quoteIdsWithoutContract(data || [], contractedQuoteIds);
+      const clientNames = await loadProfileNames(
+        openQuotes
+          .map((quote) => quote.budget_requests?.user_id)
+          .filter((id): id is string => Boolean(id))
+      );
+
+      const transformedQuotes: ExtendedQuote[] = openQuotes
+        .map((quote) => {
+          const requestUserId = quote.budget_requests?.user_id;
+          return {
+            ...quote,
+            user_id: requestUserId,
+            title: quote.budget_requests?.title || 'Servicio sin título',
+            description: quote.description || quote.budget_requests?.description || 'Sin descripción',
+            budget_requests: {
+              ...quote.budget_requests,
+              profiles: requestUserId && clientNames[requestUserId]
+                ? { full_name: clientNames[requestUserId] }
+                : null
+            }
+          } as ExtendedQuote;
+        });
 
       setAvailableQuotes(transformedQuotes);
       console.log("✅ Available quotes loaded:", transformedQuotes.length);
@@ -344,6 +376,20 @@ export function ContractManager() {
       
       if (!requestUserId) {
         throw new Error("No se puede determinar el usuario propietario del contrato");
+      }
+
+      const { data: existingContract, error: existingContractError } = await supabase
+        .from('contracts')
+        .select('id')
+        .eq('quote_id', selectedQuote.id)
+        .maybeSingle();
+
+      if (existingContractError) {
+        throw new Error("No se pudo comprobar si la cotización ya tiene contrato");
+      }
+
+      if (existingContract) {
+        throw new Error("Ya existe un contrato para esta cotización");
       }
 
       const contractData = {
@@ -639,7 +685,7 @@ export function ContractManager() {
               <TabsTrigger value="my-contracts">
                 Mis Contratos ({filteredContracts.length})
               </TabsTrigger>
-              {userRole === 'service_provider' && (
+              {contractAudience === 'provider' && (
                 <TabsTrigger value="create-contracts">
                   Crear Contratos ({filteredQuotes.length})
                 </TabsTrigger>
@@ -736,7 +782,7 @@ export function ContractManager() {
               )}
             </TabsContent>
 
-            {userRole === 'service_provider' && (
+            {contractAudience === 'provider' && (
               <TabsContent value="create-contracts" className="space-y-4 mt-6">
                 {filteredQuotes.length === 0 ? (
                   <Card className="p-8 text-center">
