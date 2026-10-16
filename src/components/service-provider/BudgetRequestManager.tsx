@@ -18,6 +18,7 @@ import {
   Loader2, RefreshCw, FileText, Building
 } from "lucide-react";
 import { BudgetRequest, Quote } from "@/integrations/supabase/types";
+import { buildStoredQuoteFields } from "@/lib/agreementFields";
 
 interface ExtendedBudgetRequest extends BudgetRequest {
   user_name?: string;
@@ -280,6 +281,7 @@ export function BudgetRequestManager() {
         notes: quoteForm.notes || null,
         valid_until: quoteForm.valid_until || null,
         terms_and_conditions: quoteForm.terms_and_conditions || null,
+        warranty_period: buildStoredQuoteFields(quoteForm).warranty_period,
         status: 'pending' as const,
         viewed_by_client: false,
         created_at: new Date().toISOString()
@@ -936,6 +938,12 @@ export function BudgetRequestManager() {
                                 <div className="flex items-center gap-1 text-neutral-600">
                                   <Clock className="h-4 w-4" />
                                   <span>Válida hasta: {new Date(quote.valid_until).toLocaleDateString()}</span>
+                                </div>
+                              )}
+
+                              {quote.warranty_period && (
+                                <div className="flex items-center gap-1 text-neutral-600">
+                                  <span>Garantía: {quote.warranty_period}</span>
                                 </div>
                               )}
 
