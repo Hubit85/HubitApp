@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
+import { buildStoredContractFields } from "@/lib/agreementFields";
 
 type Contract = Database["public"]["Tables"]["contracts"]["Row"];
 type Quote = Database["public"]["Tables"]["quotes"]["Row"];
@@ -346,14 +347,26 @@ export function ContractManager() {
         throw new Error("No se puede determinar el usuario propietario del contrato");
       }
 
+      const storedFields = buildStoredContractFields({
+        title: contractForm.title,
+        work_scope: contractForm.work_scope,
+        fallbackDescription: selectedQuote.description,
+        payment_terms: contractForm.payment_terms,
+        deadline: contractForm.deadline,
+        warranty_period: contractForm.warranty_period,
+        special_terms: contractForm.special_terms,
+      });
+
       const contractData = {
         quote_id: selectedQuote.id,
         user_id: requestUserId,
         service_provider_id: providerData.id,
         contract_number: contractNumber,
-        work_description: contractForm.work_scope || selectedQuote.description || 'Descripción del trabajo',
+        work_description: storedFields.work_description,
         total_amount: selectedQuote.amount,
-        payment_schedule: contractForm.payment_terms,
+        payment_schedule: storedFields.payment_schedule,
+        end_date: storedFields.end_date,
+        terms: storedFields.terms,
         status: 'pending' as const,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -700,6 +713,10 @@ export function ContractManager() {
                               </div>
                             )}
                           </div>
+
+                          {contract.terms && (
+                            <p className="mt-3 text-sm text-neutral-600 line-clamp-2 whitespace-pre-line">{contract.terms}</p>
+                          )}
                         </div>
 
                         <div className="flex flex-col gap-2 ml-4">
